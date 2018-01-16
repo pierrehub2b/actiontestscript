@@ -197,13 +197,13 @@
   <Repository>
     <Id>packagecloud-travis</Id>
     <Url>
-      packagecloud+https://packagecloud.io/capotej/java-test-package
+      packagecloud+https://packagecloud.io/actiontestscript/java-test-package
     </Url>
   </Repository>
   <SnapshotRepository>
     <Id>packagecloud-travis</Id>
     <Url>
-      packagecloud+https://packagecloud.io/capotej/java-test-package
+      packagecloud+https://packagecloud.io/actiontestscript/java-test-package
     </Url>
   </SnapshotRepository>
 </DistributionManagement>
