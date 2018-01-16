@@ -1,0 +1,532 @@
+package com.ats.executor;
+
+import static org.testng.Assert.fail;
+
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.openqa.selenium.Keys;
+import org.testng.ITest;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
+
+import com.ats.element.SearchedElement;
+import com.ats.executor.channels.Channel;
+import com.ats.executor.channels.ChannelManager;
+import com.ats.generator.objects.Cartesian;
+import com.ats.generator.objects.MouseDirectionData;
+import com.ats.generator.objects.mouse.Mouse;
+import com.ats.generator.objects.mouse.MouseKey;
+import com.ats.generator.objects.mouse.MouseScroll;
+import com.ats.generator.objects.mouse.MouseSwipe;
+import com.ats.generator.variables.CalculatedProperty;
+import com.ats.generator.variables.CalculatedValue;
+import com.ats.generator.variables.Variable;
+import com.ats.generator.variables.transform.DateTransformer;
+import com.ats.generator.variables.transform.NumericTransformer;
+import com.ats.generator.variables.transform.RegexpTransformer;
+import com.ats.generator.variables.transform.TimeTransformer;
+import com.ats.generator.variables.transform.Transformer;
+import com.ats.recorder.RecorderThread;
+import com.ats.script.ProjectData;
+import com.ats.script.Script;
+import com.ats.script.ScriptHeader;
+import com.ats.script.actions.Action;
+import com.ats.script.actions.ActionExecute;
+import com.ats.tools.logger.Logger;
+import com.ats.tools.logger.MessageCode;
+import com.ats.tools.logger.NullPrintStream;
+
+public class ActionTestScript extends Script implements ITest{
+
+	protected ActionTestScript topScript;
+	private ChannelManager channelManager;
+
+	private ProjectData projectData;
+
+	private int maxTryDefaultFindObject = 20;
+
+	public ActionTestScript() {}
+
+	public ActionTestScript(Logger logger) {
+		if(logger == null) {
+			setLogger(new Logger(new NullPrintStream()));
+		}else {
+			setLogger(logger);
+		}
+
+		this.topScript = this;
+		this.channelManager = new ChannelManager(this);
+	}
+	
+	//----------------------------------------------------------------------------------------------------------
+	// TestNG management
+	//----------------------------------------------------------------------------------------------------------
+
+	@BeforeTest
+	public void beforeTest() {
+		String logLevel = System.getProperty("log.level");
+
+		if("info".equals(logLevel)) {
+			setLogger(new Logger(System.out));
+		}else {
+			setLogger(new Logger(new NullPrintStream()));
+		}
+
+		this.topScript = this;
+		this.channelManager = new ChannelManager(this);
+	}
+
+	@AfterTest
+	public void testFinished() {
+		tearDown();
+	}
+	
+	@Override
+	public String getTestName() {
+		return this.getClass().getName();
+	}
+		
+	public Channel getCurrentChannel(){
+		return getChannelManager().getCurrentChannel();
+	}
+
+	public Channel getChannel(String name){
+		return getChannelManager().getChannel(name);
+	}
+
+	//----------------------------------------------------------------------------------------------------------
+	// Call script
+	//----------------------------------------------------------------------------------------------------------
+
+	public ActionTestScript getTopScript() {
+		return topScript;
+	}
+	
+	public void initCalledScript(ActionTestScript script, String[] parameters, Variable[] variables) {
+		this.topScript = script;
+		this.channelManager = script.getChannelManager();
+		
+		if(parameters != null) {
+			setParameters(parameters);
+		}
+
+		if(variables != null) {
+			setVariables(variables);
+		}
+	}
+
+	public ChannelManager getChannelManager() {
+		return channelManager;
+	}
+
+	//----------------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------------------------------
+
+	public void setProjectData(ProjectData value) {
+		projectData = value;
+		projectData.synchronize();
+	}
+
+	public void tearDown(){
+		getChannelManager().tearDown();
+		if(recorder != null) {
+			recorder.terminate();
+		}
+	}
+
+	//----------------------------------------------------------------------------------------------------------
+	// Script's test object
+	//----------------------------------------------------------------------------------------------------------
+
+	public TestElement findObject(TestElement parent, String tag, CalculatedProperty...criterias) {
+
+		List<CalculatedProperty> list = new ArrayList<CalculatedProperty>();
+		for (CalculatedProperty criteria : criterias) {
+			list.add(criteria);
+		}
+
+		return new TestElement(
+				getCurrentChannel(), 
+				maxTryDefaultFindObject,
+				parent, 
+				tag, 
+				list);
+	}
+
+	public TestElement findObject() {
+		return new TestElement(getCurrentChannel());
+	}
+
+	public TestElement findObject(int maxTryExecution, SearchedElement searchElement) {
+		return new TestElement(	getCurrentChannel(), maxTryDefaultFindObject + maxTryExecution,	searchElement);
+	}
+
+	//----------------------------------------------------------------------------------------------------------
+	// Generated methods
+	//----------------------------------------------------------------------------------------------------------
+
+	public static final String JAVA_VAR_FUNCTION_NAME = "var";
+	public Variable var(String name, CalculatedValue value){
+		return createVariable(name, value, null);
+	}
+
+	public Variable var(String name){
+		return createVariable(name, new CalculatedValue(""), null);
+	}
+
+	public Variable var(String name, Transformer transformer){
+		return createVariable(name, new CalculatedValue(""), transformer);
+	}
+
+	public Variable var(String name, CalculatedValue value, Transformer transformer){
+		return createVariable(name, value, transformer);
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_VALUE_FUNCTION_NAME = "cal";
+	public CalculatedValue cal(Object ... data) {
+		return new CalculatedValue(this, data);
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_PARAM_FUNCTION_NAME = "pval";
+	public String pval(int index) {
+		return getParameterValue(index, "");
+	}
+
+	public String pval(int index, String defaultValue) {
+		return getParameterValue(index, defaultValue);
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_PARAMS_FUNCTION_NAME = "param";
+	public CalculatedValue[] param(CalculatedValue ... values) {
+		return values;
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_RETURNS_FUNCTION_NAME = "rtn";
+	public void rtn(CalculatedValue ... values) {
+
+		Variable[] variables = getVariables();
+
+		int index = 0;
+		for(CalculatedValue calc : values) {
+			if(variables.length < index + 1) {
+				break;
+			}
+
+			variables[index].updateValue(calc.getCalculated());
+			index++;
+		}
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_ENV_FUNCTION_NAME = "sys";
+	public String sys(String name) {
+		return getSystemValue(name, "");
+	}
+
+	public String sys(String name, String defaultValue) {
+		return getSystemValue(name, defaultValue);
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_PROPERTY_FUNCTION_NAME = "prop";
+	public CalculatedProperty prop(boolean isRegexp, String name, CalculatedValue value){
+		return new CalculatedProperty(isRegexp, name, value);
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_UUID_FUNCTION_NAME = "uid";
+	public String uid() {
+		return getUuidValue();
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_TODAY_FUNCTION_NAME = "tdy";
+	public String tdy() {
+		return getTodayValue();
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_NOW_FUNCTION_NAME = "now";
+	public String now() {
+		return getNowValue();
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_ELEMENT_FUNCTION_NAME = "ele";
+	public SearchedElement ele(SearchedElement parent, int index, String tagName, CalculatedProperty ... properties) {
+		return new SearchedElement(parent, index, tagName, properties);
+	}
+
+	public SearchedElement ele(int index, String tagName, CalculatedProperty ... properties) {
+		return new SearchedElement(null, index, tagName, properties);
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_ROOT_FUNCTION_NAME = "root";
+	public SearchedElement root() {
+		return null;
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_REGEX_FUNCTION_NAME = "rgx";
+	public RegexpTransformer rgx(String patt, int group) {
+		return new RegexpTransformer(patt, group);
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_DATE_FUNCTION_NAME = "dte";
+	public DateTransformer dte(String ... data) {
+		return new DateTransformer(data);
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_TIME_FUNCTION_NAME = "tim";
+	public TimeTransformer tim(String ... data) {
+		return new TimeTransformer(data);
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_NUMERIC_FUNCTION_NAME = "num";
+	public NumericTransformer num(String ... data) {
+		return new NumericTransformer(data);
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_POS_FUNCTION_NAME = "pos";
+	public MouseDirectionData pos(Cartesian cart, int value) {
+		return new MouseDirectionData(cart, value);
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_MOUSE_FUNCTION_NAME = "mouse";
+	public Mouse mouse(String type) {
+		return new Mouse(type);
+	}
+
+	public Mouse mouse(String type, MouseDirectionData hpos, MouseDirectionData vpos) {
+		return new Mouse(type, hpos, vpos);
+	}
+
+	public MouseKey mouse(String type, Keys key, MouseDirectionData hpos, MouseDirectionData vpos) {
+		return new MouseKey(type, key, hpos, vpos);
+	}
+
+	public MouseKey mouse(String type, Keys key) {
+		return new MouseKey(type, key);
+	}
+
+	public MouseScroll mouse(String type, int scroll, MouseDirectionData hpos, MouseDirectionData vpos) {
+		return new MouseScroll(type, scroll, hpos, vpos);
+	}
+
+	public MouseScroll mouse(String type, int scroll) {
+		return new MouseScroll(type, scroll);
+	}
+
+	public MouseSwipe mouse(String type, int hdir, int vdir, MouseDirectionData hpos, MouseDirectionData vpos) {
+		return new MouseSwipe(type, hdir, vdir, hpos, vpos);
+	}
+
+	public MouseSwipe mouse(String type, int hdir, int vdir) {
+		return new MouseSwipe(type, hdir, vdir);
+	}
+	
+	//---------------------------------------------------------------------------------------------
+
+	//----------------------------------------------------------------------------------------------------------
+	// Actions
+	//----------------------------------------------------------------------------------------------------------
+
+	private int atsCodeLine = -1;
+	
+	public static final String JAVA_EXECUTE_FUNCTION_NAME = "exe";
+	public void exe(int line, Action action){
+		atsCodeLine = line;
+		action.execute(this);
+		executionFinished(action.getStatus(), true);
+	}
+
+	public void exe(int line, ActionExecute action){
+		atsCodeLine = line;
+		action.execute(this);
+		executionFinished(action.getStatus(), action.isStop());
+	}
+
+	private void executionFinished(ActionStatus status, boolean stop) {
+		if(!status.isPassed()) {
+			
+			String atsScriptError = "(" + getTestName() + ":" + atsCodeLine + ")";
+			
+			if(status.getCode() == ActionStatus.CHANNEL_NOT_FOUND) {
+				fail("| ATS script error | -> No running channel, please check that 'start channel action' has been added to the script " + atsScriptError);
+			}else {
+				if(stop) {
+					fail("| ATS script error | -> " + status.getMessage() + " after " + status.getDuration() + " ms " + atsScriptError);
+				}else {
+					getTopScript().sendLog(MessageCode.NON_BLOCKING_FAILED, "| ATS script error | -> Not stoppable action failed", status.getMessage() + atsScriptError);
+				}
+			}
+		}
+	}
+
+	//-----------------------------------------------------------------------------------------------------------
+	//  - Channel action
+	//-----------------------------------------------------------------------------------------------------------
+
+	public void startChannel(ActionStatus status, String name, String app){
+		getChannelManager().startChannel(name, app);
+		updateStatus(status);
+	}
+
+	public void switchChannel(ActionStatus status, String name){
+		updateStatus(status, getChannelManager().switchChannel(name));
+	}
+
+	public void closeChannel(ActionStatus status, String name){
+		updateStatus(status, getChannelManager().closeChannel(name));
+	}
+
+	private void updateStatus(ActionStatus status, boolean foundChannel){
+		if(!foundChannel) {
+			status.setCode(ActionStatus.CHANNEL_NOT_FOUND);
+		}
+		updateStatus(status);
+	}
+
+	private void updateStatus(ActionStatus status){
+		status.setData(getChannelManager().getChannelsList());
+	}
+
+	//-----------------------------------------------------------------------------------------------------------
+	//  - Window action
+	//-----------------------------------------------------------------------------------------------------------
+
+	public void resizeWindow(ActionStatus status, int width, int height){
+		if(getCurrentChannel() != null){
+			getCurrentChannel().resizeWindow(width, height);
+		}
+	}
+
+	public void switchWindow(ActionStatus status, int index){
+		if(getCurrentChannel() != null){
+			int winsNum = getCurrentChannel().switchWindow(index);
+			if(winsNum == 1) {
+				status.setPassed(false);
+				status.setCode(ActionStatus.WINDOW_NO_SWITCH);
+				status.setMessage("Only one window open, cannot switch !");
+			}else if(winsNum < index) {
+				status.setPassed(false);
+				status.setCode(ActionStatus.WINDOW_INDEX_OUT);
+				status.setMessage("Window index not found, only " + winsNum + " open window(s)");
+			}else {
+				status.setPassed(true);
+			}
+		}
+	}
+
+	public void closeWindow(ActionStatus status, int index){
+		if(getCurrentChannel() != null){
+			int winsNum = getCurrentChannel().closeWindow(index);
+			if(winsNum == 1) {
+				status.setPassed(false);
+				status.setCode(ActionStatus.WINDOW_NO_SWITCH);
+				status.setMessage("Only one window open ! Cannot close current window, use 'close channel' action to close last opened window.");
+			}else if(winsNum < index) {
+				status.setPassed(false);
+				status.setCode(ActionStatus.WINDOW_INDEX_OUT);
+				status.setMessage("Window index not found, only " + winsNum + " open window(s)");
+			}else {
+				status.setPassed(true);
+			}
+		}
+	}
+
+	//-----------------------------------------------------------------------------------------------------------
+	//  - Goto Url Action
+	//-----------------------------------------------------------------------------------------------------------
+
+	public void goToUrl(ActionStatus status, URL url, boolean newWindow) {
+		if(getCurrentChannel() != null){
+			getCurrentChannel().goToUrl(url, newWindow);
+
+			//TODO check url with browser
+			//if(Utils.checkUrl(status, url)) {
+			//	status.setMessage(getCurrentChannel().goToUrl(url).toString());
+			//}
+		}
+	}
+
+	//-----------------------------------------------------------------------------------------------------------
+	//  - Animation recorder
+	//-----------------------------------------------------------------------------------------------------------
+
+	private RecorderThread recorder;
+	public void startRecorder(ScriptHeader info, boolean visual, boolean pdf, boolean xml) {
+		recorder = new RecorderThread(info, projectData, visual, pdf, xml);
+	}
+
+	public void stopRecorder() {
+		if(recorder != null) {
+			recorder.terminate();
+		}
+	}
+
+	public void pauseRecorder(boolean value) {
+		if(recorder != null) {
+			recorder.setPause(value);
+		}
+	}
+
+	public void updateVisualImage() {
+		if(recorder != null) {
+			recorder.updateVisualImage(getCurrentChannel().getScreenShot());
+		}
+	}
+
+	public void updateVisualElement(TestElement to) {
+		if(recorder != null) {
+			recorder.updateVisualElement(to);
+		}
+	}
+
+	public void updateVisualValue(String value) {
+		if(recorder != null) {
+			recorder.updateVisualValue(value);
+		}
+	}
+
+	public void updateVisualValue(String value, String data) {
+		if(recorder != null) {
+			recorder.updateVisualValue(value, data);
+		}
+	}
+
+	public void newVisual(Action action) {
+		if(recorder != null && getCurrentChannel() != null) {
+			recorder.addVisual(getCurrentChannel(), action);
+		}
+	}
+}

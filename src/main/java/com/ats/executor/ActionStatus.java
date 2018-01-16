@@ -1,0 +1,137 @@
+package com.ats.executor;
+
+import com.ats.executor.channels.Channel;
+
+public class ActionStatus {
+
+	public static final int OBJECT_NOT_FOUND = -1;
+	public static final int OBJECT_NOT_VISIBLE = -2;
+	public static final int OBJECT_NOT_CLICKABLE = -3;
+	public static final int ENTER_TEXT_FAIL = -4;
+	public static final int ATTRIBUTE_NOT_SET = -5;
+	public static final int ATTRIBUTE_CHECK_FAIL = -6;
+	public static final int VALUES_COMPARE_FAIL = -7;
+	public static final int OCCURRENCES_ERROR = -8;
+	public static final int CHANNEL_NOT_FOUND = -9;	
+	public static final int MALFORMED_GOTO_URL = -10;	
+	public static final int UNREACHABLE_GOTO_URL = -11;
+	public static final int UNKNOWN_HOST_GOTO_URL = -12;
+	public static final int JAVASCRIPT_ERROR = -13;
+	public static final int WINDOW_NO_SWITCH = -14;
+	public static final int WINDOW_INDEX_OUT = -15;
+					
+	private Channel channel;
+
+	private long startedAt = 0;
+	private long duration = 0;
+	
+	private long searchDuration = 0;
+	private int occurences = 0;
+	
+	private boolean passed = true;
+	private int code = 0;
+	private String message = "";
+	private TestElement element = null;
+	private Object data = null;
+	
+	public ActionStatus(Channel channel) {
+		this.channel = channel;
+		this.startedAt = System.currentTimeMillis();
+	}
+		
+	public void updateDuration() {
+		duration = System.currentTimeMillis() - startedAt;
+	}
+
+	public void updateDuration(long currentTime) {
+		duration += System.currentTimeMillis() - currentTime;
+	}
+	
+	public void resetDuration() {
+		duration = System.currentTimeMillis();
+	}
+	
+	//----------------------------------------------------------------------------------------------------------------------
+	// Getter and setter for serialization
+	//----------------------------------------------------------------------------------------------------------------------
+
+	public boolean isPassed() {
+		return passed;
+	}
+	
+	public void setPassed(boolean passed) {
+		this.passed = passed;
+	}
+	
+	public int getCode() {
+		return code;
+	}
+	
+	public void setCode(int code) {
+		this.code = code;
+	}
+	
+	public String getMessage() {
+		return message;
+	}
+	
+	public void setMessage(String message) {
+		this.message = message;
+	}
+	
+	public TestElement getElement() {
+		return element;
+	}
+
+	public void setElement(TestElement element) {
+		this.element = element;
+	}
+	
+	public Object getData() {
+		return data;
+	}
+	public void setData(Object data) {
+		this.data = data;
+	}
+	
+	public long getStartedAt() {
+		return startedAt;
+	}
+
+	public void setStartedAt(long startedAt) {
+		this.startedAt = startedAt;
+	}
+
+	public long getDuration() {
+		return duration;
+	}
+
+	public void setDuration(long duration) {
+		this.duration = duration;
+	}
+
+	public long getSearchDuration() {
+		return searchDuration;
+	}
+
+	public void setSearchDuration(long searchDuration) {
+		this.searchDuration = searchDuration;
+	}
+
+	public int getOccurences() {
+		return occurences;
+	}
+
+	public void setOccurences(int value) {
+		this.occurences = value;
+	}
+	
+	public Channel getChannel() {
+		return channel;
+	}
+
+	public void setChannel(Channel channel) {
+		this.channel = channel;
+	}
+
+}
