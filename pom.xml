@@ -8,7 +8,15 @@
 	<packaging>jar</packaging>
 
 	<name>ActionTestScript</name>
-	<url>http://maven.apache.org</url>
+	<url>https://sourceforge.net/p/action-test-script/wiki/Home</url>
+
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
 
 	<repositories>
 		<repository>
