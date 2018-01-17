@@ -14,7 +14,7 @@
 		<repository>
 			<id>maven.atlassian.com</id>
 			<name>atlassian</name>
-			<url>https://maven.atlassian.com/content/repositories/atlassian-public</url>
+			<url>https://maven.atlassian.com/3rdparty</url>
 		</repository>
 	</repositories>
 
