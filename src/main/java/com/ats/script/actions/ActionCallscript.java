@@ -230,7 +230,7 @@ public class ActionCallscript extends Action {
 						ts.getTopScript().sendInfo("Call subscript -> ", name);
 
 						ats.initCalledScript(ts.getTopScript(), param, null);
-						Method testMain = clazz.getDeclaredMethod("testMain", new Class[]{});
+						Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
 						testMain.invoke(ats);
 					}
 
@@ -241,11 +241,13 @@ public class ActionCallscript extends Action {
 
 			}else {
 				ats.initCalledScript(ts.getTopScript(), getCalculatedParameters(), variables);
-				Method testMain = clazz.getDeclaredMethod("testMain", new Class[]{});
+				Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
 				for (int i=0; i<loop; i++) {
 					ts.getTopScript().sendInfo("call subscript -> ", name);
 					testMain.invoke(ats);
 				}
+				
+				status.setData(ats.getReturnValues());
 			}
 
 		} catch (ClassNotFoundException e) {
@@ -344,5 +346,5 @@ public class ActionCallscript extends Action {
 			this.variables = null;
 			this.loop = 1;
 		}
-	}
+	}	
 }

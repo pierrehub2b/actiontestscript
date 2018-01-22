@@ -23,7 +23,7 @@ public class RecorderThread extends Thread {
 
 	public RecorderThread(ScriptHeader header, ProjectData project, boolean visual, boolean pdf, boolean xml) {
 
-		Path videoFolderPath = project.getReportFolder().toPath().resolve(header.getPackagePath());
+		Path videoFolderPath = project.getReportFolder().resolve(header.getPackagePath());
 		videoFolderPath.toFile().mkdirs();
 
 		this.setDaemon(true);

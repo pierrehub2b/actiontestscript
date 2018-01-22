@@ -9,7 +9,6 @@ import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
 import com.ats.tools.Operators;
-import com.ats.tools.logger.MessageCode;
 
 public class ActionAssertValue extends ActionExecute {
 

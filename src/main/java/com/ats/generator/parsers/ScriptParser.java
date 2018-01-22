@@ -85,7 +85,7 @@ public class ScriptParser {
 
 					try {
 						script.setCreatedDate(dateFormat.parse(getDataGroup(m, 1)));
-					}catch (ParseException e) {}
+					}catch (ParseException | NumberFormatException e) {}
 
 				}else if((m = AUTHOR_PATTERN.matcher(data)) != null && m.find()){
 

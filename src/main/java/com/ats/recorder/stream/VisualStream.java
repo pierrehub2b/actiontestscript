@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 import com.ats.recorder.VisualAction;
-import com.ats.script.ScriptLoader;
 import com.ats.script.ScriptHeader;
+import com.ats.script.ScriptLoader;
 import com.exadel.flamingo.flex.messaging.amf.io.AMF3Serializer;
 
 public class VisualStream {

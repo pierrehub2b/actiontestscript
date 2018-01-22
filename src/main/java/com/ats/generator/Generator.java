@@ -2,10 +2,14 @@ package com.ats.generator;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.logging.Logger;
+import java.util.Properties;
+import java.util.logging.Level;
 import java.util.stream.Stream;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.ats.generator.events.ScriptProcessedEvent;
 import com.ats.generator.events.ScriptProcessedNotifier;
@@ -15,8 +19,6 @@ import com.ats.script.ScriptLoader;
 
 public class Generator implements ScriptProcessedEvent{
 
-	private static final Logger log = Logger.getLogger("ATS-Generator");
-
 	private GeneratorReport genReport;
 	private Lexer lexer;
 	private ArrayList<File> filesList;
@@ -25,10 +27,15 @@ public class Generator implements ScriptProcessedEvent{
 
 	private int remainingScripts = 0;
 	
+	private String atsVersion;
+
 	private String charset = ScriptLoader.DEFAULT_CHARSET;
 
 	public static void main(String[] args) {
 
+		log(Level.INFO, "Java version : " + System.getProperty("java.version"));
+		log(Level.INFO, StringUtils.repeat("-", 72));
+		
 		ATS arguments = new ATS(args);
 		arguments.parse();
 
@@ -36,8 +43,20 @@ public class Generator implements ScriptProcessedEvent{
 
 		Generator generator = new Generator(projectData);
 		GeneratorReport report = generator.launch();
-
-		log.info(report.getGeneratedScriptsCount() + " java files generated in " + report.getGenerationEllapsedTime() + " ms");
+		
+		log(Level.INFO, StringUtils.repeat("-", 72));
+		log(Level.INFO, "ATS Generator finished :");
+		log(Level.INFO, "- Java files generated -> " + report.getGeneratedScriptsCount());
+		log(Level.INFO, "- Ellapsed time -> " + report.getGenerationEllapsedTime() + " ms");
+		log(Level.INFO, StringUtils.repeat("-", 72));
+	}
+	
+	public static void log(Level lvl, String mess) {
+		if(lvl.equals(Level.SEVERE)) {
+			System.err.println(mess);
+		}else {
+			System.out.println("[INFO] " + mess);
+		}
 	}
 
 	public Generator(File atsFile){
@@ -51,23 +70,25 @@ public class Generator implements ScriptProcessedEvent{
 		
 		genReport = new GeneratorReport();
 
-		if(projectData.getAtsRootFolder().exists()){
+		File atsSourceFolder = projectData.getAtsSourceFolder().toFile();
+
+		if(atsSourceFolder.exists()){
 
 			filesList = new ArrayList<File>();
 
-			if(projectData.getAtsRootFolder().isDirectory()){
+			if(atsSourceFolder.isDirectory()){
 				try {
-					Files.find(projectData.getAtsRootFolder().toPath(), 99999, (p, bfa) -> bfa.isRegularFile()).forEach(p -> addAtsFile(p.toFile()));
+					Files.find(atsSourceFolder.toPath(), 99999, (p, bfa) -> bfa.isRegularFile()).forEach(p -> addAtsFile(p.toFile()));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 
-			}else if(projectData.getAtsRootFolder().isFile()){
-				addAtsFile(projectData.getAtsRootFolder());
+			}else if(atsSourceFolder.isFile()){
+				addAtsFile(atsSourceFolder);
 			}
 
 			remainingScripts = filesList.size();
-			
+
 			if(remainingScripts > 0){
 
 				projectData.initFolders();
@@ -76,7 +97,7 @@ public class Generator implements ScriptProcessedEvent{
 				lexer = new Lexer(projectData, genReport, charset);
 
 			}else{
-				log.info("Nothing to be done (no ATS files found !)");
+				log(Level.INFO, "Nothing to be done (no ATS files found !)");
 			}
 		}
 	}
@@ -88,6 +109,8 @@ public class Generator implements ScriptProcessedEvent{
 	}
 
 	public GeneratorReport launch(){
+
+		atsVersion = loadVersion();
 		
 		Stream<File> stream = filesList.parallelStream();
 		stream.forEach(f -> loadScript(f));
@@ -97,22 +120,33 @@ public class Generator implements ScriptProcessedEvent{
 
 		filesList.clear();
 		lexer = null;
-		
-		//TODO copy assets and java files ....
 
+		//TODO copy assets and java files ....
+		
 		return genReport;
 	}
 
 	private void loadScript(File f){
 		ScriptLoader sc = lexer.loadScript(f, new ScriptProcessedNotifier(this));
-		sc.generateJavaFile();
+		sc.generateJavaFile(atsVersion);
 	}
 
 	@Override
 	public void scriptProcessed() {
 		remainingScripts--;
-		
+
 		//int percent = (int)(10000-(double)remainingScripts/(double)totalScript*10000)/100;
 		//log.info("Generator in progress : " + percent + " % done");
+	}
+
+	private String loadVersion() {
+		InputStream resourceAsStream = this.getClass().getResourceAsStream("/version.properties");
+		Properties prop = new Properties();
+		try{
+			prop.load( resourceAsStream );
+			return prop.getProperty("version");
+		}catch(Exception e) {}
+		
+		return "";
 	}
 }

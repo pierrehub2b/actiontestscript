@@ -7,16 +7,27 @@ import com.ats.executor.ActionTestScript;
 public class NumericTransformer extends Transformer {
 
 	private int decimal = -1;
-	
+	private String pattern;
+
 	public NumericTransformer() {} // Needed for serialization
-	
+
 	public NumericTransformer(int dp) {
 		setDecimal(dp);
 	}
-	
+
+	public NumericTransformer(int dp, String ... data) {
+		setDecimal(dp);
+		if(data.length > 0){
+			setPattern(data[0]);
+		}
+	}
+
 	public NumericTransformer(String ... data) {
 		if(data.length > 0){
 			setDecimal(getInt(data[0].replace("dp", "").trim()));
+			if(data.length > 1){
+				setPattern(data[1]);
+			}
 		}
 	}
 
@@ -24,20 +35,20 @@ public class NumericTransformer extends Transformer {
 	public String getJavaCode() {
 		return ActionTestScript.JAVA_NUMERIC_FUNCTION_NAME + "(" + decimal + ")";
 	}
-	
+
 	@Override
 	public String format(String data) {
 
 		if(decimal > -1) {
 			data = "round(" + data + "," + decimal + ")";
 		}
-		
+
 		Expression e = new Expression(data);
 		Double result = e.calculate();
-		
+
 		return result.toString();
 	}
-	
+
 	//--------------------------------------------------------
 	// getters and setters for serialization
 	//--------------------------------------------------------
@@ -48,5 +59,13 @@ public class NumericTransformer extends Transformer {
 
 	public void setDecimal(int decimal) {
 		this.decimal = decimal;
+	}
+
+	public String getPattern() {
+		return pattern;
+	}
+
+	public void setPattern(String pattern) {
+		this.pattern = pattern;
 	}
 }

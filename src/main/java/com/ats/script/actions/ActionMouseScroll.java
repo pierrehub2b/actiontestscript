@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import com.ats.element.SearchedElement;
 import com.ats.executor.ActionTestScript;
-import com.ats.generator.objects.mouse.Mouse;
 import com.ats.generator.objects.mouse.MouseScroll;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;

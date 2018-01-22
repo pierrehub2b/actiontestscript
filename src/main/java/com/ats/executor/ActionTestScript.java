@@ -2,9 +2,11 @@ package com.ats.executor;
 
 import static org.testng.Assert.fail;
 
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.openqa.selenium.Keys;
 import org.testng.ITest;
@@ -40,15 +42,19 @@ import com.ats.tools.logger.NullPrintStream;
 
 public class ActionTestScript extends Script implements ITest{
 
+	public static final String MAIN_TEST_FUNCTION = "testMain";
+	
 	protected ActionTestScript topScript;
 	private ChannelManager channelManager;
 
 	private ProjectData projectData;
 
 	private int maxTryDefaultFindObject = 20;
+	
+	private String[] returnValues;
 
 	public ActionTestScript() {}
-
+	
 	public ActionTestScript(Logger logger) {
 		if(logger == null) {
 			setLogger(new Logger(new NullPrintStream()));
@@ -56,14 +62,30 @@ public class ActionTestScript extends Script implements ITest{
 			setLogger(logger);
 		}
 
+		init();
+	}
+	
+	private void init() {
 		this.topScript = this;
 		this.channelManager = new ChannelManager(this);
+		
+		InputStream resourceAsStream = this.getClass().getResourceAsStream("/version.properties");
+		Properties prop = new Properties();
+		try{
+			prop.load( resourceAsStream );
+			System.out.println("[ActionTestScript] launched (version " + prop.getProperty("version") + ")");
+		}catch(Exception e) {}
+	}
+	
+
+	public String[] getReturnValues() {
+		return returnValues;
 	}
 	
 	//----------------------------------------------------------------------------------------------------------
 	// TestNG management
 	//----------------------------------------------------------------------------------------------------------
-
+	
 	@BeforeTest
 	public void beforeTest() {
 		String logLevel = System.getProperty("log.level");
@@ -73,9 +95,8 @@ public class ActionTestScript extends Script implements ITest{
 		}else {
 			setLogger(new Logger(new NullPrintStream()));
 		}
-
-		this.topScript = this;
-		this.channelManager = new ChannelManager(this);
+		
+		init();
 	}
 
 	@AfterTest
@@ -193,12 +214,12 @@ public class ActionTestScript extends Script implements ITest{
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_PARAM_FUNCTION_NAME = "pval";
-	public String pval(int index) {
+	public static final String JAVA_PARAM_FUNCTION_NAME = "param";
+	public String param(int index) {
 		return getParameterValue(index, "");
 	}
 
-	public String pval(int index, String defaultValue) {
+	public String param(int index, String defaultValue) {
 		return getParameterValue(index, defaultValue);
 	}
 
@@ -211,18 +232,43 @@ public class ActionTestScript extends Script implements ITest{
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_RETURNS_FUNCTION_NAME = "rtn";
-	public void rtn(CalculatedValue ... values) {
+	public static final String JAVA_RETURNS_FUNCTION_NAME = "returns";
+	public void returns(CalculatedValue ... values) {
 
-		Variable[] variables = getVariables();
-
-		int index = 0;
+		int i = 0;
+		returnValues = new String[values.length];
+		
 		for(CalculatedValue calc : values) {
+			returnValues[i] = calc.getCalculated();
+			i++;
+		}
+		
+		updateVariables();
+	}
+	
+	public void returns(String ... values) {
+
+		int i = 0;
+		returnValues = new String[values.length];
+		
+		for(String value : values) {
+			returnValues[i] = value;
+			i++;
+		}
+		
+		updateVariables();
+	}
+	
+	private void updateVariables() {
+		Variable[] variables = getVariables();
+		
+		int index = 0;
+		for(String value : returnValues) {
 			if(variables.length < index + 1) {
 				break;
 			}
 
-			variables[index].updateValue(calc.getCalculated());
+			variables[index].updateValue(value);
 			index++;
 		}
 	}
@@ -231,11 +277,11 @@ public class ActionTestScript extends Script implements ITest{
 
 	public static final String JAVA_ENV_FUNCTION_NAME = "sys";
 	public String sys(String name) {
-		return getSystemValue(name, "");
+		return getEnvironmentValue(name, "");
 	}
 
 	public String sys(String name, String defaultValue) {
-		return getSystemValue(name, defaultValue);
+		return getEnvironmentValue(name, defaultValue);
 	}
 
 	//---------------------------------------------------------------------------------------------
@@ -308,8 +354,8 @@ public class ActionTestScript extends Script implements ITest{
 	//---------------------------------------------------------------------------------------------
 
 	public static final String JAVA_NUMERIC_FUNCTION_NAME = "num";
-	public NumericTransformer num(String ... data) {
-		return new NumericTransformer(data);
+	public NumericTransformer num(int dp, String ... data) {
+		return new NumericTransformer(dp, data);
 	}
 
 	//---------------------------------------------------------------------------------------------

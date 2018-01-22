@@ -123,7 +123,7 @@ public class CalculatedValue{
 					codeBuilder.append("\"");
 				}
 
-				String envValue = script.getSystemValue(value, defaultValue);
+				String envValue = script.getEnvironmentValue(value, defaultValue);
 				dataValue = dataValue.replace(replace, envValue);
 
 				codeBuilder.append(")");

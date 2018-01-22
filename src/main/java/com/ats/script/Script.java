@@ -28,7 +28,7 @@ public class Script {
 		return projectAtsFolder;
 	}
 
-	protected void setProjectAtsFolder(File projectAtsFolder) {
+	protected void setAtsFolder(File projectAtsFolder) {
 		this.projectAtsFolder = projectAtsFolder;
 	}
 	
@@ -158,7 +158,7 @@ public class Script {
 		return defaultValue;
 	}
 	
-	public String getSystemValue(String name, String defaultValue) {
+	public String getEnvironmentValue(String name, String defaultValue) {
 		String value = System.getenv(name);
 		if(value != null) {
 			return value;
