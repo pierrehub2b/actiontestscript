@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebDriverException;
 import org.testng.ITest;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
@@ -36,6 +37,7 @@ import com.ats.script.Script;
 import com.ats.script.ScriptHeader;
 import com.ats.script.actions.Action;
 import com.ats.script.actions.ActionExecute;
+import com.ats.script.actions.ActionExecuteElement;
 import com.ats.tools.logger.Logger;
 import com.ats.tools.logger.MessageCode;
 import com.ats.tools.logger.NullPrintStream;
@@ -43,18 +45,18 @@ import com.ats.tools.logger.NullPrintStream;
 public class ActionTestScript extends Script implements ITest{
 
 	public static final String MAIN_TEST_FUNCTION = "testMain";
-	
+
 	protected ActionTestScript topScript;
 	private ChannelManager channelManager;
 
 	private ProjectData projectData;
 
 	private int maxTryDefaultFindObject = 20;
-	
+
 	private String[] returnValues;
 
 	public ActionTestScript() {}
-	
+
 	public ActionTestScript(Logger logger) {
 		if(logger == null) {
 			setLogger(new Logger(new NullPrintStream()));
@@ -64,11 +66,12 @@ public class ActionTestScript extends Script implements ITest{
 
 		init();
 	}
-	
+
 	private void init() {
+
 		this.topScript = this;
 		this.channelManager = new ChannelManager(this);
-		
+
 		InputStream resourceAsStream = this.getClass().getResourceAsStream("/version.properties");
 		Properties prop = new Properties();
 		try{
@@ -76,26 +79,26 @@ public class ActionTestScript extends Script implements ITest{
 			System.out.println("[ActionTestScript] launched (version " + prop.getProperty("version") + ")");
 		}catch(Exception e) {}
 	}
-	
+
 
 	public String[] getReturnValues() {
 		return returnValues;
 	}
-	
+
 	//----------------------------------------------------------------------------------------------------------
 	// TestNG management
 	//----------------------------------------------------------------------------------------------------------
-	
+
 	@BeforeTest
 	public void beforeTest() {
 		String logLevel = System.getProperty("log.level");
 
-		if("info".equals(logLevel)) {
+		//if("info".equals(logLevel)) {
 			setLogger(new Logger(System.out));
-		}else {
-			setLogger(new Logger(new NullPrintStream()));
-		}
-		
+		//}else {
+		//	setLogger(new Logger(new NullPrintStream()));
+		//}
+
 		init();
 	}
 
@@ -103,12 +106,12 @@ public class ActionTestScript extends Script implements ITest{
 	public void testFinished() {
 		tearDown();
 	}
-	
+
 	@Override
 	public String getTestName() {
 		return this.getClass().getName();
 	}
-		
+
 	public Channel getCurrentChannel(){
 		return getChannelManager().getCurrentChannel();
 	}
@@ -124,11 +127,11 @@ public class ActionTestScript extends Script implements ITest{
 	public ActionTestScript getTopScript() {
 		return topScript;
 	}
-	
+
 	public void initCalledScript(ActionTestScript script, String[] parameters, Variable[] variables) {
 		this.topScript = script;
 		this.channelManager = script.getChannelManager();
-		
+
 		if(parameters != null) {
 			setParameters(parameters);
 		}
@@ -237,31 +240,31 @@ public class ActionTestScript extends Script implements ITest{
 
 		int i = 0;
 		returnValues = new String[values.length];
-		
+
 		for(CalculatedValue calc : values) {
 			returnValues[i] = calc.getCalculated();
 			i++;
 		}
-		
+
 		updateVariables();
 	}
-	
+
 	public void returns(String ... values) {
 
 		int i = 0;
 		returnValues = new String[values.length];
-		
+
 		for(String value : values) {
 			returnValues[i] = value;
 			i++;
 		}
-		
+
 		updateVariables();
 	}
-	
+
 	private void updateVariables() {
 		Variable[] variables = getVariables();
-		
+
 		int index = 0;
 		for(String value : returnValues) {
 			if(variables.length < index + 1) {
@@ -399,7 +402,7 @@ public class ActionTestScript extends Script implements ITest{
 	public MouseSwipe mouse(String type, int hdir, int vdir) {
 		return new MouseSwipe(type, hdir, vdir);
 	}
-	
+
 	//---------------------------------------------------------------------------------------------
 
 	//----------------------------------------------------------------------------------------------------------
@@ -407,25 +410,36 @@ public class ActionTestScript extends Script implements ITest{
 	//----------------------------------------------------------------------------------------------------------
 
 	private int atsCodeLine = -1;
-	
-	public static final String JAVA_EXECUTE_FUNCTION_NAME = "exe";
-	public void exe(int line, Action action){
+
+	public static final String JAVA_EXECUTE_FUNCTION_NAME = "exec";
+	public void exec(int line, Action action){
 		atsCodeLine = line;
 		action.execute(this);
-		executionFinished(action.getStatus(), true);
+		execFinished(action.getStatus(), true);
 	}
 
-	public void exe(int line, ActionExecute action){
+	public void exec(int line, ActionExecute action){
 		atsCodeLine = line;
 		action.execute(this);
-		executionFinished(action.getStatus(), action.isStop());
+		execFinished(action.getStatus(), action.isStop());
 	}
 
-	private void executionFinished(ActionStatus status, boolean stop) {
+	public void exec(int line, ActionExecuteElement action){
+		atsCodeLine = line;
+		try {
+			action.execute(this);
+			execFinished(action.getStatus(), action.isStop());
+		}catch (WebDriverException ex) {
+			getCurrentChannel().sleep(150);
+			exec(line, action);
+		}
+	}
+
+	private void execFinished(ActionStatus status, boolean stop) {
 		if(!status.isPassed()) {
-			
+
 			String atsScriptError = "(" + getTestName() + ":" + atsCodeLine + ")";
-			
+
 			if(status.getCode() == ActionStatus.CHANNEL_NOT_FOUND) {
 				fail("| ATS script error | -> No running channel, please check that 'start channel action' has been added to the script " + atsScriptError);
 			}else {

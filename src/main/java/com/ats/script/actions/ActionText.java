@@ -72,6 +72,7 @@ public class ActionText extends ActionExecuteElement {
 
 		ts.updateVisualValue(dataText);
 		enterText(dataText);
+			
 		ts.updateVisualImage();
 	}
 

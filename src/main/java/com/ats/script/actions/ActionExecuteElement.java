@@ -5,8 +5,6 @@ import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.openqa.selenium.StaleElementReferenceException;
-
 import com.ats.element.SearchedElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
@@ -79,63 +77,44 @@ public class ActionExecuteElement extends ActionExecute {
 		super.execute(ts);
 
 		if(ts.getCurrentChannel() == null) {
-			
+
 			status.setPassed(false);
 			status.setCode(ActionStatus.CHANNEL_NOT_FOUND);
 
 		}else {
 
-			try {
+			if(searchElement == null) {
+				testElement = ts.findObject();
+			}else {
+				testElement = ts.findObject(maxTry, searchElement);
+			}
 
-				//ts.getCurrentChannel().switchToDefaultframe();
+			ts.updateVisualElement(testElement);
 
-				if(searchElement == null) {
-					testElement = ts.findObject();
-				}else {
-					testElement = ts.findObject(maxTry, searchElement);
-				}
+			status.setElement(testElement);
+			status.setSearchDuration(testElement.getTotalSearchDuration());
+			status.setData(testElement.getCount());
 
-				ts.updateVisualElement(testElement);
-
-				status.setElement(testElement);
-				status.setSearchDuration(testElement.getTotalSearchDuration());
-				//status.setOccurencesFound(testElement.getCount());
-				status.setData(testElement.getCount());
-
-				if(testElement.isFound()) {
-					status.setPassed(true);
+			if(testElement.isFound()) {
+				status.setPassed(true);
+				asyncExec(ts);
+			}else {
+				if(this instanceof ActionAssertCount) {
 					asyncExec(ts);
 				}else {
-					if(this instanceof ActionAssertCount) {
-						asyncExec(ts);
-					}else {
-						status.setPassed(false);
-						status.setCode(ActionStatus.OBJECT_NOT_FOUND);
-						status.setMessage("Element not found");
-					}
-
-					status.updateDuration();
+					status.setPassed(false);
+					status.setCode(ActionStatus.OBJECT_NOT_FOUND);
+					status.setMessage("Element not found");
 				}
 
-			}catch (StaleElementReferenceException ex) {
-				ts.getCurrentChannel().sleep(200);
-				execute(ts);
+				status.updateDuration();
 			}
 		}
 	}	
 
 	private void asyncExec(ActionTestScript ts) {
 		if(!async) {
-			neverStaleExecution(ts);
-		}
-	}
-
-	public void neverStaleExecution(ActionTestScript ts) {
-		try {
 			terminateExecution(ts);
-		}catch (StaleElementReferenceException ex) {
-			ts.getCurrentChannel().sleep(200);
-			execute(ts);
 		}
 	}
 

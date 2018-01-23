@@ -5,7 +5,7 @@ import com.ats.executor.ActionTestScript;
 import com.ats.recorder.VisualAction;
 import com.ats.script.Script;
 
-public class Action extends AbstractAction {
+public class Action {
 
 	protected Script script;
 	protected int line;

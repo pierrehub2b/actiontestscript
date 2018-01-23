@@ -19,6 +19,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -90,16 +91,12 @@ public class WebBrowserDriverSearchEngine extends DriverSearchEngineAbstract imp
 
 		if (isEdge()){
 
-			waitAfterAction = 50;
-
 			EdgeOptions options = new EdgeOptions();
 			options.setPageLoadStrategy("eager");
 
 			cap.setCapability(EdgeOptions.CAPABILITY, options);
 
 		}else if (isChrome()){
-
-			waitAfterAction = 50;
 
 			List<String> args = new ArrayList<String>();
 
@@ -136,9 +133,13 @@ public class WebBrowserDriverSearchEngine extends DriverSearchEngineAbstract imp
 
 		}else if (isFirefox()){
 
-
+			waitAfterAction = 500;
+			
 			cap = DesiredCapabilities.firefox();
 			cap.setCapability(FirefoxDriver.MARIONETTE, true);
+			
+			//FirefoxOptions options = new FirefoxOptions();
+			//options.setCapability(FirefoxDriver.MARIONETTE, true);
 
 			this.initElementY = 5.0;
 
@@ -266,22 +267,22 @@ public class WebBrowserDriverSearchEngine extends DriverSearchEngineAbstract imp
 
 		FoundElement element = null;//windowsDriver.getElementFromPoint(x, y);
 
-		if(element != null){
+		/*if(element != null){
 			if(element.getWidth() >= channel.getSubDimension().getWidth() + 1 || element.getHeight() >= channel.getSubDimension().getHeight() + 1){
 				element = null;
 			}
-		}
+		}*/
 
-		if(element == null){
+		//if(element == null){
 
-			switchToDefaultframe();
-			//driver.switchTo().defaultContent();
+		switchToDefaultframe();
+		//driver.switchTo().defaultContent();
 
-			x -= channel.getSubDimension().getX();
-			y -= channel.getSubDimension().getY();
+		x -= channel.getSubDimension().getX();
+		y -= channel.getSubDimension().getY();
 
-			element = loadElement(x, y, initElementX, initElementY);
-		}
+		element = loadElement(x, y, initElementX, initElementY);
+		//}
 
 		return element;
 	}
@@ -516,9 +517,13 @@ public class WebBrowserDriverSearchEngine extends DriverSearchEngineAbstract imp
 			}
 
 		} catch(WebDriverException e){
-			status.setPassed(false);
-			status.setCode(ActionStatus.JAVASCRIPT_ERROR);
-			status.setMessage(e.getMessage().replace("javascript error:", ""));
+			if(e instanceof StaleElementReferenceException) {
+				throw e;
+			}else {
+				status.setPassed(false);
+				status.setCode(ActionStatus.JAVASCRIPT_ERROR);
+				status.setMessage(e.getMessage().replace("javascript error:", ""));
+			}
 		}
 
 		return result;
