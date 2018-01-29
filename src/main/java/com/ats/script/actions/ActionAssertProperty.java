@@ -50,6 +50,7 @@ public class ActionAssertProperty extends ActionExecuteElement {
 			status.setPassed(false);
 			status.setCode(ActionStatus.ATTRIBUTE_NOT_SET);
 			status.setData(value.getName());
+			status.setMessage("Attribute '" + value.getName() + "' not found !");
 		}else {
 			if(value.checkProperty(attributeValue)) {
 				status.setPassed(true);
@@ -58,6 +59,7 @@ public class ActionAssertProperty extends ActionExecuteElement {
 				status.setPassed(false);
 				status.setCode(ActionStatus.ATTRIBUTE_CHECK_FAIL);
 				status.setData(attributeValue);
+				status.setMessage("Attribute value '" + attributeValue + "' do not match expected value '" + value.getValue().getCalculated() + "'");
 			}
 		}
 

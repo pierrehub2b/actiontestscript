@@ -1,9 +1,8 @@
 package com.ats.executor.drivers.engines;
 
+import java.awt.Rectangle;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -11,32 +10,31 @@ import java.util.function.Predicate;
 
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Proxy;
-import org.openqa.selenium.Proxy.ProxyType;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.UnexpectedAlertBehaviour;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.edge.EdgeOptions;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.RemoteWebElement;
-import org.openqa.selenium.safari.SafariOptions;
 
+import com.ats.driver.AtsManager;
 import com.ats.element.FoundElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.TestBound;
 import com.ats.executor.TestElement;
 import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.WindowsDesktopDriver;
 import com.ats.executor.scripting.ResourceContent;
+import com.ats.generator.objects.Cartesian;
+import com.ats.generator.objects.MouseDirection;
+import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
 
-public class WebBrowserDriverSearchEngine extends DriverSearchEngineAbstract implements DriverSearchEngineImpl {
+public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngine {
 
 	private static final String resultAsync = ";var callbackResult=arguments[arguments.length-1];callbackResult(result);";
 
@@ -49,25 +47,34 @@ public class WebBrowserDriverSearchEngine extends DriverSearchEngineAbstract imp
 	private String getParentElementJavaScript;
 	private String getElementCssJavaScript;
 	private String checkElementIsVisibleJavaScript;
-	private String scrollElementIfNeeded;
+	private String scrollElementJavaScript;
 
-	private Double initElementX = 0.0;
-	private Double initElementY = 0.0;
+	protected Double initElementX = 0.0;
+	protected Double initElementY = 0.0;
 
-	private int waitAfterAction = 50;
+	private Proxy proxy;
+	
+	private int scriptTimeout;
+	private int loadPageTimeOut;
+	
+	private DriverProcess driverProcess;
 
-	public WebBrowserDriverSearchEngine(
+	public WebDriverEngine(
 			Channel channel, 
 			String browser, 
-			URL driverServerUrl, 
+			DriverProcess driverProcess, 
 			WindowsDesktopDriver windowsDriver,
-			boolean proxySystem) {
+			AtsManager ats) {
 
 		super(channel, browser);
 
+		this.driverProcess = driverProcess;
 		this.windowsDriver = windowsDriver;
+		this.proxy = ats.getProxy();
+		this.loadPageTimeOut = ats.getPageloadTimeOut();
+		this.scriptTimeout = ats.getScriptTimeOut();
 
-		scrollElementIfNeeded = ResourceContent.getScript("scrollElementIfNeeded");
+		scrollElementJavaScript = ResourceContent.getScript("scrollElement");
 		searchElementsJavaScript = ResourceContent.getScript("searchElements");
 		documentSizeJavaScript = ResourceContent.getScript("documentSize");
 		getHoverElementJavaScript = ResourceContent.getScript("getHoverElement");
@@ -75,106 +82,41 @@ public class WebBrowserDriverSearchEngine extends DriverSearchEngineAbstract imp
 		getParentElementJavaScript = ResourceContent.getScript("getParentElement");
 		getElementCssJavaScript = ResourceContent.getScript("getElementCss");
 		checkElementIsVisibleJavaScript = ResourceContent.getScript("checkElementIsVisible");
+	}
+	
+	@Override
+	public boolean isDesktop() {
+		return false;
+	}
 
-		Proxy proxy = new Proxy();
-		if(proxySystem){
-			proxy.setProxyType(ProxyType.SYSTEM);
-		}else{
-			proxy.setProxyType(ProxyType.DIRECT);
-		}
+	protected void launchDriver(DesiredCapabilities cap, boolean isEdge) {
 
-		DesiredCapabilities cap = new DesiredCapabilities();
 		cap.setCapability(CapabilityType.SUPPORTS_FINDING_BY_CSS, false);
-		cap.setCapability(CapabilityType.HAS_NATIVE_EVENTS, true);
 		cap.setCapability(CapabilityType.PROXY, proxy);
 		cap.setCapability(CapabilityType.UNEXPECTED_ALERT_BEHAVIOUR, UnexpectedAlertBehaviour.DISMISS);
+		cap.setCapability(CapabilityType.HAS_NATIVE_EVENTS, false);
 
-		if (isEdge()){
+		driver = new RemoteWebDriver(driverProcess.getDriverServerUrl(), cap);
 
-			EdgeOptions options = new EdgeOptions();
-			options.setPageLoadStrategy("eager");
-
-			cap.setCapability(EdgeOptions.CAPABILITY, options);
-
-		}else if (isChrome()){
-
-			List<String> args = new ArrayList<String>();
-
-			//args.add("--disable-extensions");
-			//args.add("--no-sandbox");
-			args.add("--disable-infobars");
-			args.add("--no-default-browser-check");
-			//args.add("--bwsi");
-			//args.add("--test-type");
-			//args.add("--disable-bundled-ppapi-flash");
-			//args.add("--disable-plugins-discovery");
-			//args.add("--browser-test");
-
-			//args.add("--headless");
-			args.add("--window-position=" + channel.getDimension().getX() + "," + channel.getDimension().getY());
-			args.add("--window-size=" + channel.getDimension().getWidth() + "," + channel.getDimension().getHeight());
-
-			ChromeOptions options = new ChromeOptions();
-			options.addArguments(args);
-
-			//HashMap<String, Object> chromePrefs = new HashMap<String, Object>();
-			//options.setExperimentalOption("prefs", chromePrefs);
-			//chromePrefs.put("plugins.plugins_disabled", new String[] {"Adobe Flash Player", "Chrome PDF Viewer", "Widevine Content Decryption Module", "Native Client"});
-			//chromePrefs.put("profile.default_content_settings.popups", 0);
-			//chromePrefs.put("credentials_enable_service", false);
-			//chromePrefs.put("profile.password_manager_enabled", false);
-
-			cap.setCapability(ChromeOptions.CAPABILITY, options);
-
-		}else if (isSafari()){
-
-			SafariOptions options = new SafariOptions();
-			cap.setCapability(SafariOptions.CAPABILITY, options);
-
-		}else if (isFirefox()){
-
-			waitAfterAction = 500;
-			
-			cap = DesiredCapabilities.firefox();
-			cap.setCapability(FirefoxDriver.MARIONETTE, true);
-			
-			//FirefoxOptions options = new FirefoxOptions();
-			//options.setCapability(FirefoxDriver.MARIONETTE, true);
-
-			this.initElementY = 5.0;
-
-		}else if (isOpera()){
-
-			//OperaOptions options = new OperaOptions();
-			//cap.setCapability(OperaOptions.CAPABILITY, options);
-			//cap.setCapability("opera.guess_binary_path", true);
-
-			cap = DesiredCapabilities.opera();
-			cap.setCapability("opera.guess_binary_path", true);
-			cap.setCapability("opera.log.level", "CONFIG");
-		}
-
-		this.driver = new RemoteWebDriver(driverServerUrl, cap);
-		this.driver.manage().timeouts().setScriptTimeout(60, TimeUnit.SECONDS);
-		this.driver.manage().timeouts().pageLoadTimeout(2, TimeUnit.MINUTES);
+		driver.manage().timeouts().setScriptTimeout(scriptTimeout, TimeUnit.SECONDS);
+		driver.manage().timeouts().pageLoadTimeout(loadPageTimeOut, TimeUnit.SECONDS);
 
 		try{
-			this.driver.manage().window().setSize(channel.getDimension().getSize());
-			this.driver.manage().window().setPosition(channel.getDimension().getPoint());
+			driver.manage().window().setSize(channel.getDimension().getSize());
+			driver.manage().window().setPosition(channel.getDimension().getPoint());
 		}catch(Exception ex){
 			System.err.println(ex.getMessage());
 		}
 
 		Map<String, ?> infos = (this.driver).getCapabilities().asMap();
 
-		for (Map.Entry<String, ?> entry : infos.entrySet())
-		{
+		for (Map.Entry<String, ?> entry : infos.entrySet()){
 			if("browserVersion".equals(entry.getKey()) || "version".equals(entry.getKey())){
 				channel.setApplicationVersion(entry.getValue().toString());
 			}
 		}
 
-		if(isEdge()){
+		if(isEdge){
 			channel.setProcessData(windowsDriver.getProcessDataByWindowTitle("Microsoft Edge"));
 		}else{
 			String uuidHandle = UUID.randomUUID().toString();
@@ -182,32 +124,20 @@ public class WebBrowserDriverSearchEngine extends DriverSearchEngineAbstract imp
 			channel.setProcessData(windowsDriver.getProcessDataByWindowTitle(response.toString()));
 		}
 
-		this.driver.get("about:blank");
+		driver.get("about:blank");
 	}
-
-	private boolean isChrome(){
-		return Channel.CHROME_BROWSER.equals(application);
-	}
-
-	private boolean isOpera(){
-		return Channel.OPERA_BROWSER.equals(application);
-	}
-
-	private boolean isFirefox(){
-		return Channel.FIREFOX_BROWSER.equals(application);
-	}
-
-	private boolean isEdge(){
-		return Channel.EDGE_BROWSER.equals(application);
-	}
-
-	private boolean isSafari(){
-		return Channel.SAFARI_BROWSER.equals(application);
+	
+	protected void closeDriver() {
+		driverProcess.close();
 	}
 
 	@Override
-	public int getWaitAfterAction() {
-		return waitAfterAction;
+	public void waitAfterAction() {
+		int maxWait = 120;
+		while(maxWait > 0 && !((Boolean) driver.executeScript("return document.readyState=='complete';"))){
+			channel.sleep(500);
+			maxWait--;
+		}
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------
@@ -220,7 +150,7 @@ public class WebBrowserDriverSearchEngine extends DriverSearchEngineAbstract imp
 		if(element != null) {
 			String code = null;
 			if(delta == 0) {
-				code = scrollElementIfNeeded;
+				code = scrollElementJavaScript;
 			}else {
 				code = "var e=arguments[0];var d=arguments[1];e.scrollTop += d;var r=e.getBoundingClientRect();var result=[r.left+0.00001, r.top+0.00001]";
 			}
@@ -230,8 +160,7 @@ public class WebBrowserDriverSearchEngine extends DriverSearchEngineAbstract imp
 			if(newPosition.size() > 1) {
 				element.updatePosition(newPosition.get(0), newPosition.get(1), channel, 0.0, 0.0);
 			}
-
-
+			
 		}else {
 			runJavaScript("window.scrollBy(0,arguments[0]);var result=[0.00001, 0.00001]", delta);
 		}
@@ -303,7 +232,7 @@ public class WebBrowserDriverSearchEngine extends DriverSearchEngineAbstract imp
 
 				iframes.add(frm.getId());
 
-				driver.switchTo().frame(frm.getValue());
+				switchToFrame(frm.getValue());
 
 				offsetX += (Double)objectData.get("x");
 				offsetY += (Double)objectData.get("y");
@@ -335,7 +264,6 @@ public class WebBrowserDriverSearchEngine extends DriverSearchEngineAbstract imp
 	private RemoteWebElement getWebElement(FoundElement te) {
 
 		switchToDefaultframe();
-		//driver.switchTo().defaultContent();
 
 		ArrayList<String>iframesData = te.getIframes();
 
@@ -344,7 +272,7 @@ public class WebBrowserDriverSearchEngine extends DriverSearchEngineAbstract imp
 				RemoteWebElement rwe = new RemoteWebElement();
 				rwe.setId(rweId);
 				rwe.setParent(driver);
-				driver.switchTo().frame(rwe);
+				switchToFrame(rwe);
 			}
 		}
 
@@ -417,10 +345,6 @@ public class WebBrowserDriverSearchEngine extends DriverSearchEngineAbstract imp
 				subDimension.get(2),
 				subDimension.get(3));
 
-		if(isFirefox()){
-			testSubDimension.setY(testSubDimension.getY() + 2);
-		}
-
 		return new TestBound[]{testDimension, testSubDimension};
 	}
 
@@ -428,43 +352,60 @@ public class WebBrowserDriverSearchEngine extends DriverSearchEngineAbstract imp
 	public void close() {
 		if(driver != null){
 
-			Iterator<String> listWindows = driver.getWindowHandles().iterator();
-
-			while(listWindows.hasNext()) {
-				driver.switchTo().window(listWindows.next());
-				driver.close();
-			}
-
 			try {
 				driver.quit();
-			}catch (Exception ex) {
-			}
+			}catch (Exception ex) {}
 
-			/*int tryClose = 10;
-			while(tryClose > 0 && driver != null){
-				try{
-					for (String winHandle : driver.getWindowHandles()) {
-						driver.switchTo().window(winHandle);
-						driver.close();
-					}
-					tryClose = 0;
-				}catch(WebDriverException ex){
-					tryClose--;
-				}
-			}*/
-
-			//	if(!isFirefox()){
-			//		driver.quit();
-			//	}
-			//	driver = null;
 		}
 	}
+	
+	//-----------------------------------------------------------------------------------------------------------------------------------
+	// Mouse position by browser name
+	//-----------------------------------------------------------------------------------------------------------------------------------
 
+	private int getCartesianOffset(int value, MouseDirectionData direction, Cartesian cart1, Cartesian cart2) {
+		if(direction != null) {
+			return getDirectionValue(value, direction, cart1, cart2);
+		}else {
+			return getNoDirectionValue(value);
+		}
+	}
+	
+	protected int getOffsetX(Rectangle rect, MouseDirection position) {
+		return getCartesianOffset(rect.width, position.getHorizontalPos(), Cartesian.LEFT, Cartesian.RIGHT);
+	}
+	
+	protected int getOffsetY(Rectangle rect, MouseDirection position) {
+		return getCartesianOffset(rect.height, position.getVerticalPos(), Cartesian.TOP, Cartesian.BOTTOM);
+	}
+			
+	protected int getDirectionValue(int value, MouseDirectionData direction,Cartesian cart1, Cartesian cart2) {
+		if(cart1.equals(direction.getName())) {
+			return direction.getValue();
+		}else if(cart2.equals(direction.getName())) {
+			return value - direction.getValue();
+		}
+		return 0;
+	}
+	
+	protected int getNoDirectionValue(int value) {
+		return value / 2;
+	}
+		
+	public void mouseMoveToElement(WebElement element, Rectangle elemRect, MouseDirection position) {
+		
+		int offsetX = getOffsetX(elemRect, position);
+		int offsetY = getOffsetY(elemRect, position);
+
+		Actions act = new Actions(driver);
+		act.moveToElement(element, offsetX, offsetY).perform();
+	}
+	
 	//-----------------------------------------------------------------------------------------------------------------------------------
 	// Window management
 	//-----------------------------------------------------------------------------------------------------------------------------------
 
-	private void switchToLastWindow() {
+	protected void switchToLastWindow() {
 		int windowsNum = driver.getWindowHandles().size();
 		switchWindow(windowsNum - 1);
 	}	
@@ -529,61 +470,15 @@ public class WebBrowserDriverSearchEngine extends DriverSearchEngineAbstract imp
 		return result;
 	}
 
-	private Object runJavaScript(String javaScript, Object ... params) {
+	protected Object runJavaScript(String javaScript, Object ... params) {
 		Object result = driver.executeAsyncScript(javaScript + resultAsync, params);
 		return result;
 	}
 
 	@Override
 	public void goToUrl(URL url, boolean newWindow) {
-		//driver.get(url);
-		//driver.navigate().to(url);
-
 		if(newWindow) {
 			driver.executeScript("window.open('" + url.toString() + "', '_blank', 'height=" + channel.getSubDimension().getHeight() + ",width=" + channel.getSubDimension().getWidth() + "');");
-
-			if(isEdge()) {
-
-				channel.sleep(100);
-
-				ArrayList<CalculatedProperty> attributes = new ArrayList<CalculatedProperty>(1);
-				attributes.add(new CalculatedProperty("ClassName", "LandmarkTarget"));
-				ArrayList<FoundElement> listElements = channel.findWindowsElement(null, "Group", attributes);
-
-				if(listElements.size() > 0) {
-					FoundElement parent = listElements.get(0);
-					if(parent.isVisible()) {
-
-						attributes = new ArrayList<CalculatedProperty>(1);
-						attributes.add(new CalculatedProperty("ClassName", "NotificationBar"));
-						listElements = channel.findWindowsElement(parent.getValue(), "ToolBar", attributes);
-
-						if(listElements.size() > 0) {
-							parent = listElements.get(0);
-							if(parent.isVisible()) {
-
-								attributes = new ArrayList<CalculatedProperty>(1);
-								attributes.add(new CalculatedProperty("ClassName", "Button"));
-
-								listElements = channel.findWindowsElement(parent.getValue(), "Button", attributes);
-
-								if(listElements.size() > 1) {
-									FoundElement button = listElements.get(1);
-									if(button.isVisible()) {
-
-										TestBound bound = button.getTestBound();
-										Actions action = new Actions(windowsDriver);
-										action.moveToElement(button.getValue(), bound.getWidth().intValue()/2, 40).perform();
-										action.click().perform();
-									}
-								}
-							}
-						}
-					}
-				}
-				switchToLastWindow();
-			}
-
 		}else {
 			driver.executeScript("var result=window.location.assign('" + url.toString() + "')");
 		}
@@ -600,9 +495,8 @@ public class WebBrowserDriverSearchEngine extends DriverSearchEngineAbstract imp
 		if(testObject.getParent() != null){
 			if(testObject.getParent().isIframe()) {
 				try {
-					driver.switchTo().frame(testObject.getParent().getWebElement());
+					switchToFrame(testObject.getParent().getWebElement());
 				}catch(StaleElementReferenceException e) {
-					//driver.switchTo().defaultContent();
 					switchToDefaultframe();
 					return webElementList;
 				}
@@ -611,14 +505,11 @@ public class WebBrowserDriverSearchEngine extends DriverSearchEngineAbstract imp
 			}
 		}
 
-		//try{
 		ArrayList<Map<String, Object>> response = (ArrayList<Map<String, Object>>)runJavaScript(searchElementsJavaScript, startElement, tagName, attributes);
+
 		if(response != null){
-			response.parallelStream().filter(predicate).forEachOrdered(e -> addWebElement(webElementList, (Map<String, Object>) e.get("XelemX")));
+			response.parallelStream().filter(predicate).forEachOrdered(e -> addWebElement(webElementList, (Map<String, Object>) e.get("atsElem")));
 		}
-		//}catch (WebDriverException ex){
-		//	System.err.println(ex.getMessage());
-		//}
 
 		return webElementList;
 	}
@@ -626,6 +517,10 @@ public class WebBrowserDriverSearchEngine extends DriverSearchEngineAbstract imp
 	@Override
 	public void switchToDefaultframe() {
 		driver.switchTo().defaultContent();
+	}
+
+	private void switchToFrame(WebElement we) {
+		driver.switchTo().frame(we);
 	}
 
 	@Override

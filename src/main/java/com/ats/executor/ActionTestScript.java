@@ -7,9 +7,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
 
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.testng.ITest;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
@@ -40,7 +41,6 @@ import com.ats.script.actions.ActionExecute;
 import com.ats.script.actions.ActionExecuteElement;
 import com.ats.tools.logger.Logger;
 import com.ats.tools.logger.MessageCode;
-import com.ats.tools.logger.NullPrintStream;
 
 public class ActionTestScript extends Script implements ITest{
 
@@ -51,35 +51,34 @@ public class ActionTestScript extends Script implements ITest{
 
 	private ProjectData projectData;
 
-	private int maxTryDefaultFindObject = 20;
-
 	private String[] returnValues;
 
 	public ActionTestScript() {}
 
 	public ActionTestScript(Logger logger) {
-		if(logger == null) {
-			setLogger(new Logger(new NullPrintStream()));
-		}else {
-			setLogger(logger);
-		}
-
+		super(logger);
 		init();
 	}
 
 	private void init() {
 
-		this.topScript = this;
-		this.channelManager = new ChannelManager(this);
+		java.util.logging.Logger.getLogger("org.openqa.selenium").setLevel(Level.OFF);
+
+		topScript = this;
+		channelManager = new ChannelManager(this);
+
+		if("true".equals(System.getProperty("ats.log"))) {
+			setLogger(new Logger(System.out));
+		}
 
 		InputStream resourceAsStream = this.getClass().getResourceAsStream("/version.properties");
 		Properties prop = new Properties();
 		try{
 			prop.load( resourceAsStream );
-			System.out.println("[ActionTestScript] launched (version " + prop.getProperty("version") + ")");
+			sendInfo("ATS script started", "(version " + prop.getProperty("version") + ")");
 		}catch(Exception e) {}
-	}
 
+	}
 
 	public String[] getReturnValues() {
 		return returnValues;
@@ -91,14 +90,6 @@ public class ActionTestScript extends Script implements ITest{
 
 	@BeforeTest
 	public void beforeTest() {
-		String logLevel = System.getProperty("log.level");
-
-		//if("info".equals(logLevel)) {
-			setLogger(new Logger(System.out));
-		//}else {
-		//	setLogger(new Logger(new NullPrintStream()));
-		//}
-
 		init();
 	}
 
@@ -173,7 +164,7 @@ public class ActionTestScript extends Script implements ITest{
 
 		return new TestElement(
 				getCurrentChannel(), 
-				maxTryDefaultFindObject,
+				channelManager.getMaxTry(),
 				parent, 
 				tag, 
 				list);
@@ -184,7 +175,7 @@ public class ActionTestScript extends Script implements ITest{
 	}
 
 	public TestElement findObject(int maxTryExecution, SearchedElement searchElement) {
-		return new TestElement(	getCurrentChannel(), maxTryDefaultFindObject + maxTryExecution,	searchElement);
+		return new TestElement(	getCurrentChannel(), channelManager.getMaxTry() + maxTryExecution,	searchElement);
 	}
 
 	//----------------------------------------------------------------------------------------------------------
@@ -278,12 +269,12 @@ public class ActionTestScript extends Script implements ITest{
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_ENV_FUNCTION_NAME = "sys";
-	public String sys(String name) {
+	public static final String JAVA_ENV_FUNCTION_NAME = "env";
+	public String env(String name) {
 		return getEnvironmentValue(name, "");
 	}
 
-	public String sys(String name, String defaultValue) {
+	public String env(String name, String defaultValue) {
 		return getEnvironmentValue(name, defaultValue);
 	}
 
@@ -429,8 +420,8 @@ public class ActionTestScript extends Script implements ITest{
 		try {
 			action.execute(this);
 			execFinished(action.getStatus(), action.isStop());
-		}catch (WebDriverException ex) {
-			getCurrentChannel().sleep(150);
+		}catch (StaleElementReferenceException ex) {
+			sleep(200);
 			exec(line, action);
 		}
 	}
@@ -438,15 +429,15 @@ public class ActionTestScript extends Script implements ITest{
 	private void execFinished(ActionStatus status, boolean stop) {
 		if(!status.isPassed()) {
 
-			String atsScriptError = "(" + getTestName() + ":" + atsCodeLine + ")";
+			String atsScriptError = "(" + getTestName() + "." + ATS_EXTENSION + ":" + atsCodeLine + ")";
 
 			if(status.getCode() == ActionStatus.CHANNEL_NOT_FOUND) {
-				fail("| ATS script error | -> No running channel, please check that 'start channel action' has been added to the script " + atsScriptError);
+				fail("ATS script error -> No running channel, please check that 'start channel action' has been added to the script " + atsScriptError);
 			}else {
 				if(stop) {
-					fail("| ATS script error | -> " + status.getMessage() + " after " + status.getDuration() + " ms " + atsScriptError);
+					fail("ATS script error -> " + status.getMessage() + " after " + status.getDuration() + " ms " + atsScriptError);
 				}else {
-					getTopScript().sendLog(MessageCode.NON_BLOCKING_FAILED, "| ATS script error | -> Not stoppable action failed", status.getMessage() + atsScriptError);
+					getTopScript().sendLog(MessageCode.NON_BLOCKING_FAILED, "ATS script info -> Not stoppable action failed", status.getMessage() + atsScriptError);
 				}
 			}
 		}

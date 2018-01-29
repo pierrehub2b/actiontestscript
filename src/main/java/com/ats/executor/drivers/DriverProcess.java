@@ -11,52 +11,54 @@ import java.nio.file.Path;
 
 public class DriverProcess {
 
-	private int port;
+	private int port = 4444;
 	private Process process;
 	private String fileName;
-	
+
 	public DriverProcess(Path driverFolderPath, String driverFileName) {
 
-		File driverFile = driverFolderPath.resolve(driverFileName).toFile();
+		//if(!driverFileName.contains("geckodriver")) {
+			File driverFile = driverFolderPath.resolve(driverFileName).toFile();
 
-		if(driverFile.exists()){
+			if(driverFile.exists()){
 
-			fileName = driverFile.getName();
-			port = findFreePort();
+				fileName = driverFile.getName();
+				port = findFreePort();
 
-			try{
-				process = Runtime.getRuntime().exec(driverFile.getAbsolutePath() + " --port=" + port);
-			} catch (IOException e) {
-				e.printStackTrace();
+				try{
+					process = Runtime.getRuntime().exec(driverFile.getAbsolutePath() + " --port=" + port);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
+				int maxTry = 50;
+				while(maxTry > 0 && waitServerStarted(port)) {
+					maxTry--;
+					try {
+						Thread.sleep(200);
+					} catch (InterruptedException e) {}
+				}
 			}
-			
-			int maxTry = 50;
-			while(maxTry > 0 && waitServerStarted(port)) {
-				maxTry--;
-				try {
-					Thread.sleep(200);
-				} catch (InterruptedException e) {}
-			}
-		}
+		//}
 	}
-	
+
 	private boolean waitServerStarted(int port) {
 		try (Socket socket = new Socket()) {
-	        socket.connect(new InetSocketAddress("localhost", port), 100);
-	        socket.close();
-	        return true;
-	    } catch (Exception e) {
-	       return false;
-	    }
+			socket.connect(new InetSocketAddress("localhost", port), 100);
+			socket.close();
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
 	}
-	
+
 	//--------------------------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------------------------
-	
+
 	public int getPort() {
 		return port;
 	}
-	
+
 	public URL getDriverServerUrl(){
 		try {
 			return new URL("http://localhost:" + port);
@@ -64,7 +66,7 @@ public class DriverProcess {
 			return null;
 		}
 	}
-	
+
 	//--------------------------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------------------------
 
@@ -75,20 +77,23 @@ public class DriverProcess {
 			return 2106;
 		}
 	}
-		
+
 	//--------------------------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------------------------
-	
+
 	public void close(){
 		if(process != null){
+
+			process.descendants().forEach(p -> p.destroy());
 			process.destroy();
+
 			try {
 				process.waitFor();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 			process = null;
-			
+
 			kill();
 		}
 	}

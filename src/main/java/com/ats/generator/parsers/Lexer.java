@@ -118,7 +118,7 @@ public class Lexer {
 
 				ArrayList<String> options = new ArrayList<String>();
 				boolean stopExec = true;
-				
+
 				matcher = actionPattern.matcher(actionType);
 				if (matcher.find()){
 					actionType = matcher.group(1).trim();
@@ -147,6 +147,14 @@ public class Lexer {
 
 					action = new ActionMouseKey(script, actionType, stopExec, options, dataArray);
 
+				}else if(ActionChannelClose.SCRIPT_CLOSE_LABEL.equals(actionType)){
+
+					if(dataArray.size() > 0) {
+						action = new ActionChannelClose(script, dataArray.remove(0).trim());
+					}else {
+						action = new ActionChannelClose(script);
+					}
+
 				}else if(dataArray.size() > 0){
 
 					String dataOne = dataArray.remove(0).trim();
@@ -154,11 +162,8 @@ public class Lexer {
 					//---------------------------------------------------------------------------
 					// Channel
 					//---------------------------------------------------------------------------
-					if(ActionChannelClose.SCRIPT_CLOSE_LABEL.equals(actionType)){	
-
-						action = new ActionChannelClose(script, dataOne);
-
-					}else if(ActionChannelSwitch.SCRIPT_SWITCH_LABEL.equals(actionType)){	
+					
+					if(ActionChannelSwitch.SCRIPT_SWITCH_LABEL.equals(actionType)){	
 
 						action = new ActionChannelSwitch(script, dataOne);
 

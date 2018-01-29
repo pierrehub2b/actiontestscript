@@ -1,5 +1,6 @@
 package com.ats.executor.drivers.engines;
 
+import java.awt.Rectangle;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Map;
@@ -14,10 +15,12 @@ import com.ats.executor.ActionStatus;
 import com.ats.executor.TestBound;
 import com.ats.executor.TestElement;
 import com.ats.executor.channels.Channel;
+import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 
-public interface DriverSearchEngineImpl{
+public interface IDriverEngine{
 	public void close();
+	public boolean isDesktop();
 	public WebDriver getWebDriver();
 	public String getApplication();
 	public int switchWindow(int index);
@@ -26,7 +29,7 @@ public interface DriverSearchEngineImpl{
 	public Object executeScript(ActionStatus status, String script, Object ... params);
 	public void goToUrl(URL url, boolean newWindow);
 	public ArrayList<FoundElement> findWebElement(Channel channel, TestElement testObject, String tagName, String[] attributes, Predicate<Map<String, Object>> searchPredicate);
-	public int getWaitAfterAction();
+	public void waitAfterAction();
 	public TestBound[] getDimensions();
 	public FoundElement getElementFromPoint(Double x, Double y);
 	public boolean waitElementIsVisible(WebElement element);
@@ -39,4 +42,5 @@ public interface DriverSearchEngineImpl{
 	public void scroll(FoundElement foundElement, int delta);
 	public void middleClick(WebElement element);
 	public WebElement getRootElement();
+	public void mouseMoveToElement(WebElement element, Rectangle elementRectangle, MouseDirection position);
 }

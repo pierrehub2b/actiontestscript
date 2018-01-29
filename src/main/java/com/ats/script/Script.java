@@ -16,13 +16,29 @@ import com.ats.tools.logger.Logger;
 
 public class Script {
 
+	public final static String DEFAULT_CHARSET = "UTF-8";
+
+	public final static String ATS_EXTENSION = "ats";
+	public final static String ATS_FILE_EXTENSION = "." + ATS_EXTENSION;
+	public final static String ATS_VISUAL_EXTENSION = "atsv";
+
+	public final static String ATS_VISUAL_FOLDER = "visual";
+	
 	private ArrayList<String> parameters = new ArrayList<String>();
 	private ArrayList<Variable> variables = new ArrayList<Variable>();
 	private ArrayList<CalculatedValue> returns;
 	
 	private File projectAtsFolder;
 		
-	private Logger logger;
+	private Logger logger = new Logger();
+
+	public Script() {}
+	
+	public Script(Logger logger) {
+		if(logger != null) {
+			setLogger(logger);
+		}
+	}
 
 	public File getProjectAtsFolder() {
 		return projectAtsFolder;
@@ -54,6 +70,12 @@ public class Script {
 	
 	public void setLogger(Logger logger) {
 		this.logger = logger;
+	}
+	
+	public void sleep(int ms) {
+		try {
+			Thread.sleep(ms);
+		} catch (InterruptedException e) {}
 	}
 	
 	//-------------------------------------------------------------------------------------------------

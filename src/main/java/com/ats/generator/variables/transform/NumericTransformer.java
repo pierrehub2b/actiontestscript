@@ -1,11 +1,17 @@
 package com.ats.generator.variables.transform;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+
 import org.mariuszgromada.math.mxparser.Expression;
 
 import com.ats.executor.ActionTestScript;
 
 public class NumericTransformer extends Transformer {
 
+	private static DecimalFormatSymbols decimalSymbols = DecimalFormatSymbols.getInstance();
+	private DecimalFormat formatter = new DecimalFormat();
+	
 	private int decimal = -1;
 	private String pattern;
 
@@ -39,14 +45,20 @@ public class NumericTransformer extends Transformer {
 	@Override
 	public String format(String data) {
 
+	    decimalSymbols.setDecimalSeparator('.');
+		formatter.setDecimalFormatSymbols(decimalSymbols);
+				
 		if(decimal > -1) {
 			data = "round(" + data + "," + decimal + ")";
+			formatter.setMinimumFractionDigits(decimal);
+		}else {
+			formatter.setMaximumFractionDigits( 12 );
 		}
 
 		Expression e = new Expression(data);
 		Double result = e.calculate();
 
-		return result.toString();
+		return formatter.format(result);
 	}
 
 	//--------------------------------------------------------

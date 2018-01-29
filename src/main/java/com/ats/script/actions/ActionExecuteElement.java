@@ -74,6 +74,7 @@ public class ActionExecuteElement extends ActionExecute {
 
 	@Override
 	public void execute(ActionTestScript ts) {
+
 		super.execute(ts);
 
 		if(ts.getCurrentChannel() == null) {

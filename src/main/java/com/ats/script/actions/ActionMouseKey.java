@@ -78,7 +78,7 @@ public class ActionMouseKey extends ActionMouse {
 			}else {
 				getTestElement().click(status, false);
 			}
-
+		
 			status.updateDuration(currentTime);
 		}
 	}

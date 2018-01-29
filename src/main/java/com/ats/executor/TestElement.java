@@ -20,7 +20,6 @@ import org.openqa.selenium.support.ui.Select;
 import com.ats.element.FoundElement;
 import com.ats.element.SearchedElement;
 import com.ats.executor.channels.Channel;
-import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.actions.ActionSelect;
@@ -61,7 +60,7 @@ public class TestElement{
 
 		initSearch(tag, criterias);
 	}
-	
+
 	public TestElement(Channel channel) {
 		this.channel = channel;
 		this.index = 0;
@@ -90,27 +89,27 @@ public class TestElement{
 
 		this.action = new Actions(channel.getWebDriver());
 	}
-	
+
 	public void dispose() {
 		action = null;
 		channel = null;
-		
+
 		if(parent != null) {
 			parent.dispose();
 			parent = null;
 		}
-		
+
 		while(foundElements.size() > 0) {
 			foundElements.remove(0).dispose();
 		}
 	}
-
+		
 	private void initSearch(String tag, List<CalculatedProperty> properties) {
-
+		
 		if(channel != null){
-			
+
 			channel.switchToDefaultframe();
-			
+
 			action = new Actions(channel.getWebDriver());
 
 			criterias = tag;
@@ -124,7 +123,7 @@ public class TestElement{
 					if(parent != null) {
 						parentElement = parent.getWebElement();
 					}
-					
+
 					foundElements = channel.findWindowsElement(parentElement, tag, properties);
 
 				}else{
@@ -190,11 +189,11 @@ public class TestElement{
 			return searchDuration;
 		}
 	}
-	
+
 	public FoundElement getFoundElement() {
 		return foundElements.get(index); 
 	}
-	
+
 	public WebElement getWebElement() {
 		return getFoundElement().getValue();
 	}
@@ -206,7 +205,7 @@ public class TestElement{
 	public boolean isFound() {
 		return count > 0;
 	}
-	
+
 	public boolean isIframe() {
 		if(isFound()){
 			return getFoundElement().isIframe();
@@ -301,11 +300,11 @@ public class TestElement{
 
 		if(status.isPassed()) {
 			for(SendKeyData sequence : textActionList) {
-				action.sendKeys(sequence.getSequence());
+				getWebElement().sendKeys(sequence.getSequence());
+				//action.sendKeys(sequence.getSequence());
 			}
-
-			action.perform();
-			//channel.waitAfterAction();
+			//action.perform();
+			channel.actionTerminated();
 		}
 	}
 
@@ -359,78 +358,20 @@ public class TestElement{
 	// Mouse ...
 	//-------------------------------------------------------------------------------------------------------------------
 
-	private void moveOver(ActionStatus status, MouseDirection position) {
-
-		//int loop = 20;
-
-		//while(loop > 0){
-		//	try {
-
-				int elementWidth = getWebElementRectangle().width;
-				int elementHeight = getWebElementRectangle().height;
-
-				int xOffset = 0;
-				int yOffset = 0;
-
-				if(position.getHorizontalPos() != null) {
-					if(Cartesian.LEFT.equals(position.getHorizontalPos().getName())) {
-						xOffset = position.getHorizontalPos().getValue();
-					}else if(Cartesian.RIGHT.equals(position.getHorizontalPos().getName())) {
-						xOffset = elementWidth - position.getHorizontalPos().getValue();
-					}
-
-					if(channel.isFirefox()) {
-						xOffset -= elementWidth/2;
-					}
-
-				}else {
-					if(!channel.isFirefox()) {
-						xOffset = elementWidth / 2;
-					}
-				}
-
-				if(position.getVerticalPos() != null) {
-					if(Cartesian.TOP.equals(position.getVerticalPos().getName())) {
-						yOffset = position.getVerticalPos().getValue();
-					}else if(Cartesian.BOTTOM.equals(position.getVerticalPos().getName())) {
-						yOffset = elementHeight - position.getVerticalPos().getValue();
-					}
-
-					if(channel.isFirefox()) {
-						yOffset -= elementHeight/2;
-					}
-
-				}else {
-					if(!channel.isFirefox()) {
-						yOffset = elementHeight / 2;
-					}
-				}
-
-				action.moveToElement(getWebElement(), xOffset, yOffset).perform();
-
-				status.setPassed(true);
-				//channel.waitAfterAction();
-
-			//	loop = 0;
-
-			//}catch(WebDriverException e) {	
-			//	if(loop == 1) {
-			//		throw e;
-			//	}
-			//}
-
-			channel.sleep(150);
-			//loop--;
-		//}
+	private void moveOver(MouseDirection position) {
+		channel.mouseMoveToElement(getWebElement(), getWebElementRectangle(), position);
 	}
 
 	public void over(ActionStatus status, MouseDirection position) {
 		if(isFound()){
 
 			channel.scroll(getFoundElement(), 0);
-
 			if(channel.waitElementIsVisible(getWebElement())) {
-				moveOver(status, position);
+				moveOver(position);
+				status.setPassed(true);
+				
+				channel.actionTerminated();
+				
 			}else {	
 				status.setPassed(false);
 				status.setCode(ActionStatus.OBJECT_NOT_VISIBLE);
@@ -460,6 +401,8 @@ public class TestElement{
 				action.perform();
 				status.setPassed(true);
 
+				//channel.actionTerminated();
+				
 				loop = 0;
 
 			}catch(ElementNotVisibleException e0) {	
@@ -557,15 +500,21 @@ public class TestElement{
 	//-------------------------------------------------------------------------------------------------------------------
 
 	public String getAttribute(String name){
-		String result = null;
 		if(isFound()){
-			result = getWebElement().getAttribute(name);
-			//attributeData = getAttributeValueByName(name);
-			if(result == null){
-				result = getCssAttributeValueByName(name);
+			String result = getWebElement().getAttribute(name);
+			if(result != null) {
+				return result;
 			}
+			
+			for (CalculatedProperty calc : getAttributes()) {
+				if(name.equals(calc.getName())) {
+					return calc.getValue().getCalculated();
+				}
+			}
+
+			return getCssAttributeValueByName(name);
 		}
-		return result;
+		return null;
 	}
 
 	private String getCssAttributeValueByName(String name) {

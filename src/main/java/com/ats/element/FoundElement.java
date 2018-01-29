@@ -148,6 +148,10 @@ public class FoundElement{
 	public WebElement getValue(){
 		return value;
 	}
+	
+	public String getElementId() {
+		return id;
+	}
 
 	public void activate(RemoteWebDriver remoteWebDriver) {
 		value = new RemoteWebElement();

@@ -65,9 +65,7 @@ public class ActionAssertCount extends ActionExecuteElement {
 	public void terminateExecution(ActionTestScript ts) {
 		
 		super.terminateExecution(ts);
-		
 		int count = getTestElement().getCount();
-		
 		if(checkAssertion(count)) {
 			status.setPassed(true);
 		}else {
@@ -79,7 +77,6 @@ public class ActionAssertCount extends ActionExecuteElement {
 		
 		status.getElement().setFoundElements(null);
 		status.updateDuration();
-
 		ts.updateVisualValue("occurences", operator + " " + value);
 	}
 	

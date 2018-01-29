@@ -9,6 +9,10 @@ public class ActionChannelClose extends ActionChannel {
 	
 	public ActionChannelClose() {}
 
+	public ActionChannelClose(Script script) {
+		super(script, "");
+	}
+	
 	public ActionChannelClose(Script script, String name) {
 		super(script, name);
 	}
@@ -32,6 +36,9 @@ public class ActionChannelClose extends ActionChannel {
 
 	@Override
 	public String getJavaCode() {
-		return super.getJavaCode() + "\"" + getName() + "\")";
+		if(getName().length() > 0) {
+			return super.getJavaCode() + "\"" + getName() + "\")";
+		}
+		return "new " + this.getClass().getSimpleName() + "(this)";
 	}
 }

@@ -63,7 +63,7 @@ public class ActionText extends ActionExecuteElement {
 
 	@Override
 	public void terminateExecution(ActionTestScript ts) {
-
+		
 		super.terminateExecution(ts);
 		String dataText = "";
 		if(text != null){
@@ -72,13 +72,11 @@ public class ActionText extends ActionExecuteElement {
 
 		ts.updateVisualValue(dataText);
 		enterText(dataText);
-			
 		ts.updateVisualImage();
 	}
 
 	public void enterText(String value) {
 		status.resetDuration();
-
 		getTestElement().over(status, new MouseDirection());
 		if(status.isPassed()) {
 			getTestElement().click(status, false);
@@ -86,7 +84,6 @@ public class ActionText extends ActionExecuteElement {
 				getTestElement().sendText(status, insert == -1, getTextChain(value));
 			}
 		}
-		
 		status.updateDuration();
 	}
 

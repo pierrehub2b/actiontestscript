@@ -2,6 +2,12 @@ var element = arguments[0];
 var scrolled = false;
 var result = [];
 
+function scroll(e){
+	e.scrollIntoView(false);
+	var rect = e.getBoundingClientRect();
+	return [rect.right+0.00001, rect.top+0.00001];
+};
+
 var topOfPage = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
 var heightOfPage = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
 var elY = 0;
@@ -26,22 +32,6 @@ if (document.layers){
 	elW = element.offsetWidth;
 }
 
-if ((topOfPage + heightOfPage) < (elY + elH)) {
-	element.scrollIntoView(false);
-	scrolled = true;
-}else if (elY < topOfPage) {
-	element.scrollIntoView(false);
-	scrolled = true;
-}else if((leftOfPage + widthOfPage) < (elX + elW)){
-	element.scrollIntoView(false);
-	scrolled = true;
-}else if(elX < leftOfPage){
-	element.scrollIntoView(false);
-	scrolled = true;
-}
-
-if(scrolled){
-	element.focus();
-	var rect = element.getBoundingClientRect();
-	result = [rect.right+0.00001, rect.top+0.00001];
+if (((topOfPage + heightOfPage) < (elY + elH)) || (elY < topOfPage) || ((leftOfPage + widthOfPage) < (elX + elW)) || (elX < leftOfPage)) {
+	result = scroll(element);
 }

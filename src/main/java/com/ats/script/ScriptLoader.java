@@ -25,14 +25,6 @@ import com.ats.script.actions.Action;
 
 public class ScriptLoader extends Script {
 
-	public final static String DEFAULT_CHARSET = "UTF-8";
-
-	public final static String ATS_EXTENSION = "ats";
-	public final static String ATS_FILE_EXTENSION = "." + ATS_EXTENSION;
-	public final static String ATS_VISUAL_EXTENSION = "atsv";
-
-	public final static String ATS_VISUAL_FOLDER = "visual";
-
 	private ScriptParser parser;
 
 	private ScriptHeader header;

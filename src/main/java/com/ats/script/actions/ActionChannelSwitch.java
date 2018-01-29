@@ -5,8 +5,7 @@ import com.ats.script.Script;
 
 public class ActionChannelSwitch extends ActionChannel {
 
-	public static final String SCRIPT_SWITCH_LABEL = "switch";
-	private static final String JAVA_FUNCTION_NAME_SWITCH = "switchChannel";
+	public static final String SCRIPT_SWITCH_LABEL = SCRIPT_LABEL + "switch";
 	
 	public ActionChannelSwitch() {}
 
@@ -33,6 +32,6 @@ public class ActionChannelSwitch extends ActionChannel {
 
 	@Override
 	public String getJavaCode() {
-		return super.getJavaCode() + JAVA_FUNCTION_NAME_SWITCH + "(\"" + getName() + "\");";
+		return super.getJavaCode() + "\"" + getName() + "\")";
 	}
 }

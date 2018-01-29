@@ -1,106 +1,102 @@
 package com.ats.executor.drivers;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
+import com.ats.driver.AtsManager;
+import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.engines.IDriverEngine;
+import com.ats.executor.drivers.engines.WindowsDriverEngine;
+import com.ats.executor.drivers.engines.browsers.ChromeDriverEngine;
+import com.ats.executor.drivers.engines.browsers.EdgeDriverEngine;
+import com.ats.executor.drivers.engines.browsers.FirefoxDriverEngine;
+import com.ats.executor.drivers.engines.browsers.OperaDriverEngine;
 import com.ats.tools.Utils;
 
 public class DriverManager {
 
+	public static final String CHROME_BROWSER = "chrome";
+	public static final String FIREFOX_BROWSER = "firefox";
+	public static final String EDGE_BROWSER = "edge";
+	public static final String OPERA_BROWSER = "opera";
+	public static final String SAFARI_BROWSER = "safari";
+	
 	public static final String WINDOWS_DESKTOP_FILE_NAME = "Windows.Desktop.Driver.exe";
 	public static final String CHROME_DRIVER_FILE_NAME = "chromedriver.exe";
 	public static final String MICROSOFT_WEBDRIVER_FILE_NAME = "MicrosoftWebDriver";
 	public static final String OPERA_WEBDRIVER_FILE_NAME = "operadriver.exe";
-	
 	public static final String FIREFOX_DRIVER_FILE_NAME = "geckodriver.exe";
-	
-	public static final String ATS_DRIVERS_DIRECTORY = "/.actiontestscript/drivers";
-		
+
 	private DriverProcess winDesktopDriver;
 	private DriverProcess chromeDriver;
 	private DriverProcess edgeDriver;
 	private DriverProcess operaDriver;
-	
 	private DriverProcess firefoxDriver;
 	
-	private Path driverFolderPath;
+	private AtsManager ats;
 
 	public DriverManager() {
-		driverFolderPath = getDriverFoler(System.getProperty("driver.folder"));
-		if(driverFolderPath == null) {
-			driverFolderPath = getDriverFoler(System.getProperty("user.home"), ATS_DRIVERS_DIRECTORY);
-			if(driverFolderPath == null) {
-				driverFolderPath = getDriverFoler("");
-			}
-		}
-	}
-	
-	private Path getDriverFoler(String folder) {
-		return getDriverFoler(folder, "");
-	}
-	
-	private Path getDriverFoler(String folder, String subFolder) {
-		if(folder != null) {
-			Path path = Paths.get(folder + subFolder);
-			if(Files.exists(path)) {
-				return path;
-			}
-		}
-		return null;
+		this.ats = new AtsManager();
 	}
 	
 	public String getDriverFolderPath() {
-		return driverFolderPath.toFile().getAbsolutePath();
+		return ats.getDriversFolderPath().toFile().getAbsolutePath();
 	}
+	
+	public TestBound getApplicationBound() {
+		return ats.getApplicationBound();
+	}
+	
+	public int getMaxTry() {
+		return ats.getMaxTry();
+	}
+	
+	//--------------------------------------------------------------------------------------------------------------
 	
 	public DriverProcess getWinDesktopDriver() {
 		if(winDesktopDriver == null){
-			winDesktopDriver = new DriverProcess(driverFolderPath, WINDOWS_DESKTOP_FILE_NAME);
+			winDesktopDriver = new DriverProcess(ats.getDriversFolderPath(), WINDOWS_DESKTOP_FILE_NAME);
 		}
 		return winDesktopDriver;
 	}
 	
-	public DriverProcess getBrowserDriver(String browserName){
-		if(Channel.CHROME_BROWSER.equals(browserName)){
-			return getChromeDriver();
-		}else if(Channel.EDGE_BROWSER.equals(browserName)){
-			return getEdgeDriver();
-		}else if(Channel.OPERA_BROWSER.equals(browserName)){
-			return getOperaDriver();
-		}else if(Channel.SAFARI_BROWSER.equals(browserName)){
-			
-		}else if(Channel.FIREFOX_BROWSER.equals(browserName)){
-			return getFirefoxDriver();
+	public IDriverEngine getDriverEngine(Channel channel, String application, WindowsDesktopDriver desktopDriver) {
+		switch(application) {
+		case CHROME_BROWSER :
+			return new ChromeDriverEngine(channel, getChromeDriver(), desktopDriver, ats);
+		case EDGE_BROWSER :
+			return new EdgeDriverEngine(channel, getEdgeDriver(), desktopDriver, ats);
+		case OPERA_BROWSER :
+			return new OperaDriverEngine(channel, getOperaDriver(), desktopDriver, ats);
+		case FIREFOX_BROWSER :
+			return new FirefoxDriverEngine(channel, getFirefoxDriver(), desktopDriver, ats);
+		default :
+			return new WindowsDriverEngine(channel, application, desktopDriver, ats);
 		}
-		return null;
 	}
 	
 	public DriverProcess getFirefoxDriver() {
 		if(firefoxDriver == null){
-			firefoxDriver = new DriverProcess(driverFolderPath, FIREFOX_DRIVER_FILE_NAME);
+			firefoxDriver = new DriverProcess(ats.getDriversFolderPath(), FIREFOX_DRIVER_FILE_NAME);
 		}
 		return firefoxDriver;
 	}
 
 	public DriverProcess getChromeDriver() {
 		if(chromeDriver == null){
-			chromeDriver = new DriverProcess(driverFolderPath, CHROME_DRIVER_FILE_NAME);
+			chromeDriver = new DriverProcess(ats.getDriversFolderPath(), CHROME_DRIVER_FILE_NAME);
 		}
 		return chromeDriver;
 	}
 
 	public DriverProcess getEdgeDriver() {
 		if(edgeDriver == null){
-			edgeDriver = new DriverProcess(driverFolderPath, MICROSOFT_WEBDRIVER_FILE_NAME + "-" + Utils.getWindowsBuildVersion() + ".exe");
+			edgeDriver = new DriverProcess(ats.getDriversFolderPath(), MICROSOFT_WEBDRIVER_FILE_NAME + "-" + Utils.getWindowsBuildVersion() + ".exe");
 		}
 		return edgeDriver;
 	}
 
 	public DriverProcess getOperaDriver() {
 		if(operaDriver == null){
-			operaDriver = new DriverProcess(driverFolderPath, OPERA_WEBDRIVER_FILE_NAME);
+			operaDriver = new DriverProcess(ats.getDriversFolderPath(), OPERA_WEBDRIVER_FILE_NAME);
 		}
 		return operaDriver;
 	}

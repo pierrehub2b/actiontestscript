@@ -51,5 +51,5 @@ for(var i = 0, len = elements.length; i < len; i++){
 
 function addElement(e){
 	var eRect = e.getBoundingClientRect();
-	return result.push({XelemX:{index:i, tag:e.tagName.toLowerCase(), value:e, x:eRect.left+0.00001, y:eRect.top+0.00001, width:eRect.width+0.00001, height:eRect.height+0.00001}});
+	return result.push({atsElem:{index:i, tag:e.tagName.toLowerCase(), value:e, x:eRect.left+0.00001, y:eRect.top+0.00001, width:eRect.width+0.00001, height:eRect.height+0.00001}});
 };

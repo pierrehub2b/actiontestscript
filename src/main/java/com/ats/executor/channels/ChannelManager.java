@@ -3,19 +3,13 @@ package com.ats.executor.channels;
 import java.util.ArrayList;
 
 import com.ats.executor.ActionTestScript;
-import com.ats.executor.TestBound;
 import com.ats.executor.drivers.DriverManager;
-import com.ats.tools.logger.MessageCode;
 
 public class ChannelManager {
 
-	private static final Double APPLICATION_WIDTH = 1280.00;
-	private static final Double APPLICATION_HEIGHT = 960.00;
-
 	private Channel currentChannel;
 	private ArrayList<Channel> channelsList;
-	//private Logger logger;
-	
+
 	private ActionTestScript mainScript;
 
 	private DriverManager driverManager;
@@ -25,8 +19,12 @@ public class ChannelManager {
 		this.mainScript = script;
 		this.channelsList = new ArrayList<Channel>();
 		this.driverManager = new DriverManager();
-		
+
 		script.sendInfo("ATS drivers folder -> ", this.driverManager.getDriverFolderPath());
+	}
+
+	public int getMaxTry() {
+		return driverManager.getMaxTry();
 	}
 
 	public Channel getCurrentChannel(){
@@ -67,9 +65,8 @@ public class ChannelManager {
 
 	public void startChannel(String name, String app){
 		if(getChannel(name) == null){
-			setCurrentChannel(new Channel(mainScript, driverManager, name, app, getFreeLocation()));
+			setCurrentChannel(new Channel(mainScript, driverManager, name, app));
 			channelsList.add(getCurrentChannel());
-			mainScript.sendLog(MessageCode.ACTION_IN_PROGRESS, "start channel");
 		}
 	}
 
@@ -86,20 +83,21 @@ public class ChannelManager {
 					if(cnl.getName().equals(name)){
 						setCurrentChannel(cnl);
 						foundChannel = true;
-					}else{
-						cnl.hide();
+						break;
+					}
+				}
+
+				if(foundChannel) {
+					for(Channel cnl : channelsList){
+						if(!cnl.getName().equals(name)){
+							cnl.hide();
+						}
 					}
 				}
 			}
 		}
-		
-		if(foundChannel) {
-			mainScript.sendLog(MessageCode.ACTION_IN_PROGRESS, "switch channel");
-			return true;
-		}else {
-			mainScript.sendLog(MessageCode.CHANNEL_NOT_FOUND, "channel not found : " + name);
-			return false;
-		}
+
+		return foundChannel;
 
 	}
 
@@ -107,28 +105,29 @@ public class ChannelManager {
 
 		boolean foundChannel = false;
 
-		for(Channel channel : channelsList){
-			if(channel.getName().equals(name)){
-				channel.close();
-				channelsList.remove(channel);
-				foundChannel = true;
-				
-				mainScript.sendLog(MessageCode.ACTION_IN_PROGRESS, "close channel");
-				
-				break;
+		if(name.length() > 0) {
+			for(Channel channel : channelsList){
+				if(channel.getName().equals(name)){
+					channel.close();
+					channelsList.remove(channel);
+					foundChannel = true;
+
+					break;
+				}
 			}
+		}else {
+			getCurrentChannel().close();
+			channelsList.remove(getCurrentChannel());
+			foundChannel = true;
 		}
 
 		if(channelsList.size() > 0){
 			setCurrentChannel(channelsList.get(0));
-			
-			if(foundChannel) {
-				mainScript.sendLog(MessageCode.ACTION_IN_PROGRESS, "switch channel");
-			}else {
-				mainScript.sendLog(MessageCode.CHANNEL_NOT_FOUND, "channel not found -> " + name);
+
+			if(!foundChannel) {
 				return false;
 			}
-			
+
 		}else{
 			setCurrentChannel(null);
 		}
@@ -137,28 +136,10 @@ public class ChannelManager {
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------
-	// logs
 	//----------------------------------------------------------------------------------------------------------------------
-
-	/*public void sendLog(int code, String message) {
-		mainScript.sendLog(code, message, "");
-	}
-	
-	public void sendLog(int code, String message, Object value) {
-		mainScript.sendLog(code, message, value);
-	}*/
-
-	//----------------------------------------------------------------------------------------------------------------------
-	//----------------------------------------------------------------------------------------------------------------------
-
-	private TestBound getFreeLocation(){
-		return new TestBound(10.0, 10.0, APPLICATION_WIDTH, APPLICATION_HEIGHT);
-	}
 
 	public void tearDown() {
 		closeAllChannels();
 		driverManager.tearDown();
 	}
-
-
 }

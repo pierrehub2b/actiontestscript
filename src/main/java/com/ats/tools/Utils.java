@@ -157,4 +157,42 @@ public class Utils {
 
 		return buildNumber;
 	}
+	
+	/*private static final String WEB_ELEMENT_REF = "element-6066-11e4-a52e-4f735466cecf";
+	public static JsonObject getElementAction(RemoteWebElement elem, int offsetX, int offsetY) {
+
+		String elemId = elem.getId();
+
+		JsonObject origin = new JsonObject();
+		origin.addProperty("ELEMENT", elemId);
+		origin.addProperty(WEB_ELEMENT_REF, elemId);
+
+		JsonObject action = new JsonObject();
+		action.addProperty("duration", 300);
+		action.addProperty("x", offsetX);
+		action.addProperty("y", offsetY);
+		action.addProperty("type", "pointerMove");
+		action.add("origin", origin);
+
+		JsonArray actionList = new JsonArray();
+		actionList.add(action);
+
+		JsonObject parameters = new JsonObject();
+		parameters.addProperty("pointerType", "mouse");
+
+		JsonObject actions = new JsonObject();
+		actions.addProperty("id", "default mouse");
+		actions.addProperty("type", "pointer");
+		actions.add("parameters", parameters);
+
+		actions.add("actions", actionList);
+
+		JsonArray chainedAction = new JsonArray();
+		chainedAction.add(actions);
+
+		JsonObject postData = new JsonObject();
+		postData.add("actions", chainedAction);
+
+		return postData;
+	}*/
 }

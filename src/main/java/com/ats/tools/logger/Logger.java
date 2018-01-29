@@ -7,18 +7,17 @@ import com.ats.executor.channels.Channel;
 
 public class Logger {
 
-	private final static String ATS = "ATS";
 	private final static String NO_CHANNEL = "NO_CHANNEL";
 	
 	private PrintStream printOut;
 	private String channelName = NO_CHANNEL;
 
+	public Logger() {
+		this(new NullPrintStream());
+	}
+	
 	public Logger(PrintStream out) {
 		this.printOut = new PrintStream(out);
-	}
-
-	public Logger() {
-
 	}
 	
 	public void setChannel(Channel channel) {
@@ -50,18 +49,18 @@ public class Logger {
 	}
 	
 	public void sendInfo(String message, String value) {
-		print("INFO", "channel[" + channelName + "] | " + message + value);
+		print("INFO", message + value);
 	}
 	
 	public void sendWarning(String message, String value) {
-		print("WARNING", "channel[" + channelName + "] | " + message + value);
+		print("WARNING", message + value);
 	}
 	
 	public void sendError(String message, String value) {
-		print("ERROR", "channel[" + channelName + "] | " + message + value);
+		print("ERROR",  message + value);
 	}
 	
 	private void print(String type, String data) {
-		printOut.println(new Timestamp(System.currentTimeMillis()) + " | " + ATS + "[" + type + "] | " + data);
+		printOut.println("[ATS-" + type + "] | " + "channel(" + channelName + ") | " + data);
 	}
 }

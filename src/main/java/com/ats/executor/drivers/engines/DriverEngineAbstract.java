@@ -9,13 +9,13 @@ import com.ats.element.FoundElement;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.variables.CalculatedProperty;
 
-public abstract class DriverSearchEngineAbstract {
+public abstract class DriverEngineAbstract {
 
 	protected Channel channel;
 	protected RemoteWebDriver driver;
 	protected String application;
 	
-	public DriverSearchEngineAbstract(Channel channel, String application){
+	public DriverEngineAbstract(Channel channel, String application){
 		this.channel = channel;
 		this.application = application;
 	}

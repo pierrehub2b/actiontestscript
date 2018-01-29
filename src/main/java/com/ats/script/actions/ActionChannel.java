@@ -7,7 +7,7 @@ public class ActionChannel extends Action{
 
 	public static final String SCRIPT_LABEL = "channel-";
 
-	private String name;
+	private String name = "";
 
 	public ActionChannel() {}
 

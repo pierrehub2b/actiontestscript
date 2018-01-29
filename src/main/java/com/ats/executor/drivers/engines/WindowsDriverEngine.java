@@ -1,5 +1,6 @@
 package com.ats.executor.drivers.engines;
 
+import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -15,6 +16,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.RemoteWebElement;
 
+import com.ats.driver.AtsManager;
 import com.ats.element.FoundElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.TestBound;
@@ -22,16 +24,17 @@ import com.ats.executor.TestElement;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.channels.ChannelProcessData;
 import com.ats.executor.drivers.WindowsDesktopDriver;
+import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 
-public class WindowsDriverSearchEngine extends DriverSearchEngineAbstract implements DriverSearchEngineImpl {
+public class WindowsDriverEngine extends DriverEngineAbstract implements IDriverEngine {
 
 	public static final String windows = "windows";
 	public static final String desktop = "desktop";
 
 	private Process applicationProcess = null;
 
-	public WindowsDriverSearchEngine(Channel channel, String application, WindowsDesktopDriver windowsDriver) {
+	public WindowsDriverEngine(Channel channel, String application, WindowsDesktopDriver windowsDriver, AtsManager ats) {
 
 		super(channel, application);
 
@@ -80,8 +83,13 @@ public class WindowsDriverSearchEngine extends DriverSearchEngineAbstract implem
 	}
 	
 	@Override
-	public int getWaitAfterAction() {
-		return 200;
+	public boolean isDesktop() {
+		return true;
+	}
+	
+	@Override
+	public void waitAfterAction() {
+
 	}
 
 	private Long getWindowsPid(){
@@ -237,5 +245,11 @@ public class WindowsDriverSearchEngine extends DriverSearchEngineAbstract implem
 	public WebElement getRootElement() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void mouseMoveToElement(WebElement element, Rectangle elementRectangle, MouseDirection position) {
+		// TODO Auto-generated method stub
+		
 	}
 }

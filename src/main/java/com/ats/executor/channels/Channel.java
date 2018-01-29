@@ -1,5 +1,6 @@
 package com.ats.executor.channels;
 
+import java.awt.Rectangle;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,9 +19,8 @@ import com.ats.executor.TestBound;
 import com.ats.executor.TestElement;
 import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.WindowsDesktopDriver;
-import com.ats.executor.drivers.engines.DriverSearchEngineImpl;
-import com.ats.executor.drivers.engines.WebBrowserDriverSearchEngine;
-import com.ats.executor.drivers.engines.WindowsDriverSearchEngine;
+import com.ats.executor.drivers.engines.IDriverEngine;
+import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.User32;
@@ -29,23 +29,14 @@ import com.sun.jna.platform.win32.WinUser;
 
 public class Channel {
 
-	public static final String CHROME_BROWSER = "chrome";
-	public static final String FIREFOX_BROWSER = "firefox";
-	public static final String EDGE_BROWSER = "edge";
-	public static final String OPERA_BROWSER = "opera";
-	public static final String SAFARI_BROWSER = "safari";
-
 	private ChannelProcessData processData;
 
-	private DriverSearchEngineImpl engine;
+	private IDriverEngine engine;
 
 	private String name;
 	private boolean current = false;
 	private boolean desktop = false;
 	
-	private String browser;
-
-	//private ChannelManager manager;
 	private ActionTestScript mainScript;
 	
 	private TestBound dimension;
@@ -65,46 +56,19 @@ public class Channel {
 			ActionTestScript script,
 			DriverManager driverManager, 
 			String name, 
-			String application, 
-			TestBound dimension) {
+			String application) {
 
-		//this.manager = manager;
 		this.mainScript = script;
 		this.name = name;
-		this.dimension = dimension;
+		this.dimension = driverManager.getApplicationBound();
 		this.current = true;
 
 		this.windowsDesktopDriver = new WindowsDesktopDriver(driverManager.getWinDesktopDriver().getDriverServerUrl());
+		this.engine = driverManager.getDriverEngine(this, application.toLowerCase(), this.windowsDesktopDriver);
 
-		if(CHROME_BROWSER.equals(application.toLowerCase()) || 
-				FIREFOX_BROWSER.equals(application.toLowerCase()) || 
-				EDGE_BROWSER.equals(application.toLowerCase()) ||
-				OPERA_BROWSER.equals(application.toLowerCase())){
-
-			engine = new WebBrowserDriverSearchEngine(
-					this, 
-					application,
-					driverManager.getBrowserDriver(application.toLowerCase()).getDriverServerUrl(),
-					this.windowsDesktopDriver,
-					true);
-			
-			this.browser = application.toLowerCase();
-
-		}else{
-			engine = new WindowsDriverSearchEngine(
-					this, 
-					application,
-					this.windowsDesktopDriver);
-
-			this.desktop = true;
-		}
-
+		this.desktop = engine.isDesktop();
 		this.actions = new Actions(engine.getWebDriver());
 		this.refreshLocation();
-	}
-	
-	public boolean isFirefox() {
-		return FIREFOX_BROWSER.equals(browser);
 	}
 
 	public void refreshLocation(){
@@ -136,7 +100,7 @@ public class Channel {
 		showWindow(0);
 	}
 
-	private DriverSearchEngineImpl getEngine(){
+	private IDriverEngine getEngine(){
 		return engine;
 	}
 
@@ -152,7 +116,7 @@ public class Channel {
 	}
 
 	private byte[] screenShot(TestBound dim) {
-		sleep(50);
+		mainScript.sleep(50);
 		return windowsDesktopDriver.getScreenshotByte(dim.getX(), dim.getY(), dim.getWidth(), dim.getHeight());
 		//return engine.getScreenShot(dim); 
 	}
@@ -285,13 +249,11 @@ public class Channel {
 	//----------------------------------------------------------------------------------------------------------
 
 	public void sleep(int ms){
-		try {
-			Thread.sleep(ms);
-		} catch (InterruptedException e) {}
+		mainScript.sleep(ms);
 	}
 
 	public void actionTerminated(){
-		sleep(engine.getWaitAfterAction());
+		engine.waitAfterAction();
 	}
 
 	//----------------------------------------------------------------------------------------------------------
@@ -434,5 +396,9 @@ public class Channel {
 
 	public void middleClick(WebElement element) {
 		engine.middleClick(element);
+	}
+
+	public void mouseMoveToElement(WebElement element, Rectangle elementRectangle, MouseDirection position) {
+		engine.mouseMoveToElement(element, elementRectangle, position);
 	}
 }
