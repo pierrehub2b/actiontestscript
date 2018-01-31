@@ -3,12 +3,13 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.actiontestscript</groupId>
-	<artifactId>automated-testing</artifactId>
+	<artifactId>ats-automated-testing</artifactId>
 
-	<version>1.1.1</version>
+	<version>1.1.2</version>
 	<packaging>jar</packaging>
 
-	<name>ActionTestScript</name>
+	<name>ats-automated-testing</name>
+	<description>Code generator libs to create and execute automated tests</description>
 	<url>https://sourceforge.net/p/action-test-script/wiki/Home</url>
 
 	<licenses>
@@ -19,6 +20,21 @@
 		</license>
 	</licenses>
 
+	<developers>
+		<developer>
+			<name>Pierre Huber</name>
+			<email>pierrehuber@yahoo.fr</email>
+			<organization>ActionTestScript</organization>
+			<organizationUrl>http://www.actiontestscript.com</organizationUrl>
+		</developer>
+	</developers>
+
+	<scm>
+		<connection>scm:git:git://github.com/pierrehub2b/actiontestscript.git</connection>
+		<developerConnection>scm:git:ssh://github.com/pierrehub2b/actiontestscript.git</developerConnection>
+		<url>https://github.com/pierrehub2b/actiontestscript.git</url>
+	</scm>
+
 	<repositories>
 		<repository>
 			<id>maven.atlassian.com</id>
@@ -26,6 +42,17 @@
 			<url>https://maven.atlassian.com/3rdparty</url>
 		</repository>
 	</repositories>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>OSSRH-37505</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>OSSRH-37505</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -170,6 +197,46 @@
 				<artifactId>maven-bundle-plugin</artifactId>
 				<version>${apache.felix.version}</version>
 				<extensions>true</extensions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.2.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.9.1</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.5</version>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 		<pluginManagement>

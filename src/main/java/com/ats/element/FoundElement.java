@@ -36,6 +36,10 @@ public class FoundElement{
 
 	private Double x = 0.0;
 	private Double y = 0.0;
+	
+	private Double screenX = 0.0;
+	private Double screenY = 0.0;
+	
 	private Double width = 0.0;
 	private Double height = 0.0;
 
@@ -98,16 +102,32 @@ public class FoundElement{
 		setHeight(channel.getDimension().getHeight());
 	}
 
-	public FoundElement(WebElement element) {
-		this.desktop = true;
-		this.setRemoteWebElement((RemoteWebElement)element);
-		this.setInfoData(element.getAttribute("InfoData"), 0.0, 0.0);
-	}	
-
 	public FoundElement(RemoteWebElement element, Double channelX, Double channelY) {
 		this.desktop = true;
 		this.setRemoteWebElement(element);
-		this.setInfoData(element.getAttribute("InfoData"), channelX, channelY);
+
+		String info = element.getAttribute("InfoData");
+		if(info != null){
+			String[] infoData = info.split(":");
+			this.tag = infoData[0];
+
+			String[] boundData = infoData[1].split(",");
+			
+			this.screenX = Double.parseDouble(boundData[0]);
+			this.screenY = Double.parseDouble(boundData[1]);
+			
+			this.x = this.screenX - channelX;
+			this.y = this.screenY - channelY;
+			
+			this.width = Double.parseDouble(boundData[2]);
+			this.height = Double.parseDouble(boundData[3]);
+
+			this.visible = !"True".equals(infoData[2]);
+
+		}else{
+			this.tag = "undefined";
+			this.visible = false;
+		}
 	}
 
 	public FoundElement(ArrayList<WebElement> parentsList, Double channelX, Double channelY) {
@@ -120,25 +140,6 @@ public class FoundElement{
 	private void setRemoteWebElement(RemoteWebElement rwe){
 		this.value = rwe;
 		this.id = rwe.getId();
-	}
-
-	private void setInfoData(String info, Double channelX, Double channelY){
-		if(info != null){
-			String[] infoData = info.split(":");
-			this.tag = infoData[0];
-
-			String[] boundData = infoData[1].split(",");
-			this.x = Double.parseDouble(boundData[0]) - channelX;
-			this.y = Double.parseDouble(boundData[1]) - channelY;
-			this.width = Double.parseDouble(boundData[2]);
-			this.height = Double.parseDouble(boundData[3]);
-
-			this.visible = !"True".equals(infoData[2]);
-
-		}else{
-			this.tag = "undefined";
-			this.visible = false;
-		}
 	}
 
 	public boolean isIframe(){
@@ -169,6 +170,14 @@ public class FoundElement{
 		}else {
 			return new ArrayList<String>();
 		}
+	}
+	
+	public Double getScreenX() {
+		return screenX;
+	}
+	
+	public Double getScreenY() {
+		return screenY;
 	}
 	
 	//----------------------------------------------------------------------------------------------------------------------

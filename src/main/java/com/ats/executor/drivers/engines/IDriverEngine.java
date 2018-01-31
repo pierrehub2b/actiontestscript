@@ -1,6 +1,5 @@
 package com.ats.executor.drivers.engines;
 
-import java.awt.Rectangle;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Map;
@@ -32,7 +31,6 @@ public interface IDriverEngine{
 	public void waitAfterAction();
 	public TestBound[] getDimensions();
 	public FoundElement getElementFromPoint(Double x, Double y);
-	public boolean waitElementIsVisible(WebElement element);
 	public CalculatedProperty[] getAttributes(FoundElement element);
 	public CalculatedProperty[] getAttributes(RemoteWebElement element);
 	public CalculatedProperty[] getCssAttributes(FoundElement element);
@@ -42,5 +40,5 @@ public interface IDriverEngine{
 	public void scroll(FoundElement foundElement, int delta);
 	public void middleClick(WebElement element);
 	public WebElement getRootElement();
-	public void mouseMoveToElement(WebElement element, Rectangle elementRectangle, MouseDirection position);
+	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position);
 }

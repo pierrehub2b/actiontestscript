@@ -18,7 +18,7 @@ public class ActionText extends ActionExecuteElement {
 	public static final String SCRIPT_LABEL = "keyboard";
 
 	public static final Pattern INSERT_PATTERN = Pattern.compile("insert\\((\\d+)\\)", Pattern.CASE_INSENSITIVE);
-	public static final Pattern KEY_REGEXP = Pattern.compile("\\$key\\s?\\((\\w+)\\-?([^\\)]*)?\\)");
+	//public static final Pattern KEY_REGEXP = Pattern.compile("\\$key\\s?\\((\\w+)\\-?([^\\)]*)?\\)");
 	
 	private CalculatedValue text;
 
@@ -71,20 +71,18 @@ public class ActionText extends ActionExecuteElement {
 		}
 
 		ts.updateVisualValue(dataText);
-		enterText(dataText);
-		ts.updateVisualImage();
-	}
 
-	public void enterText(String value) {
 		status.resetDuration();
 		getTestElement().over(status, new MouseDirection());
 		if(status.isPassed()) {
 			getTestElement().click(status, false);
 			if(status.isPassed()) {
-				getTestElement().sendText(status, insert == -1, getTextChain(value));
+				getTestElement().sendText(status, insert == -1, text.getCalculatedText());
 			}
 		}
 		status.updateDuration();
+				
+		ts.updateVisualImage();
 	}
 
 	//--------------------------------------------------------
@@ -105,48 +103,5 @@ public class ActionText extends ActionExecuteElement {
 
 	public void setInsert(int insert) {
 		this.insert = insert;
-	}
-
-	//--------------------------------------------------------
-	// Utils
-	//--------------------------------------------------------	
-
-	public static ArrayList<SendKeyData> getTextChain(String s){
-
-		ArrayList<SendKeyData> result = new ArrayList<SendKeyData>();
-		int start = 0;		
-
-		Matcher match = KEY_REGEXP.matcher(s);
-		while(match.find()) {
-
-			int end = match.start();
-			if(end > 0) {
-				SendKeyData sendKey = new SendKeyData(s.substring(start, end));
-				result.add(sendKey);
-			}
-
-			start = match.end();
-
-			String keysName = match.group(1);
-			String spareKey = match.group(2);
-			if(spareKey != null && spareKey.length() > 0) {
-				result.add(new SendKeyData(new String[] {keysName, spareKey}));
-			}else {
-				result.add(new SendKeyData(new String[] {keysName}));
-			}
-		}
-
-		SendKeyData sendKey = null;
-		if(start == 0) {
-			sendKey = new SendKeyData(s);
-		}else if(start != s.length()){
-			sendKey = new SendKeyData(s.substring(start));
-		}
-		
-		if(sendKey != null) {
-			result.add(sendKey);
-		}
-
-		return result;
 	}
 }

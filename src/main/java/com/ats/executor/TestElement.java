@@ -103,9 +103,9 @@ public class TestElement{
 			foundElements.remove(0).dispose();
 		}
 	}
-		
+
 	private void initSearch(String tag, List<CalculatedProperty> properties) {
-		
+
 		if(channel != null){
 
 			channel.switchToDefaultframe();
@@ -358,25 +358,11 @@ public class TestElement{
 	// Mouse ...
 	//-------------------------------------------------------------------------------------------------------------------
 
-	private void moveOver(MouseDirection position) {
-		channel.mouseMoveToElement(getWebElement(), getWebElementRectangle(), position);
-	}
-
 	public void over(ActionStatus status, MouseDirection position) {
 		if(isFound()){
 
-			channel.scroll(getFoundElement(), 0);
-			if(channel.waitElementIsVisible(getWebElement())) {
-				moveOver(position);
-				status.setPassed(true);
-				
-				channel.actionTerminated();
-				
-			}else {	
-				status.setPassed(false);
-				status.setCode(ActionStatus.OBJECT_NOT_VISIBLE);
-				status.setMessage("element not visible");
-			}
+			//channel.scroll(getFoundElement(), 0);
+			channel.mouseMoveToElement(status, getFoundElement(), position);
 
 		}else{
 			status.setPassed(false);
@@ -402,7 +388,7 @@ public class TestElement{
 				status.setPassed(true);
 
 				//channel.actionTerminated();
-				
+
 				loop = 0;
 
 			}catch(ElementNotVisibleException e0) {	
@@ -505,7 +491,7 @@ public class TestElement{
 			if(result != null) {
 				return result;
 			}
-			
+
 			for (CalculatedProperty calc : getAttributes()) {
 				if(name.equals(calc.getName())) {
 					return calc.getValue().getCalculated();

@@ -1,14 +1,15 @@
 package com.ats.generator.variables;
 
+import java.util.ArrayList;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.ats.executor.ActionTestScript;
+import com.ats.executor.SendKeyData;
 import com.ats.generator.variables.transform.DateTransformer;
 import com.ats.generator.variables.transform.TimeTransformer;
 import com.ats.script.Script;
-import com.ats.script.actions.ActionText;
 
 public class CalculatedValue{
 
@@ -19,6 +20,8 @@ public class CalculatedValue{
 	private static final Pattern TODAY_PATTERN = Pattern.compile("^\\$today$", Pattern.CASE_INSENSITIVE);
 	private static final Pattern NOW_PATTERN = Pattern.compile("^\\$now$", Pattern.CASE_INSENSITIVE);
 	private static final Pattern UUID_PATTERN = Pattern.compile("^\\$uuid$", Pattern.CASE_INSENSITIVE);
+	
+	public static final Pattern KEY_REGEXP = Pattern.compile("\\$key\\s?\\((\\w+)\\-?([^\\)]*)?\\)");
 
 	//-----------------------------------------------------------------------------------------------------
 	// special character management
@@ -152,7 +155,7 @@ public class CalculatedValue{
 				javaCode = javaCode.replace(replace, "\", " + ActionTestScript.JAVA_UUID_FUNCTION_NAME + "(), \"");
 			}
 
-			mv = ActionText.KEY_REGEXP.matcher(dataValue);
+			mv = KEY_REGEXP.matcher(dataValue);
 			while (mv.find()) {
 				String replace = mv.group(0);
 				String value = mv.group(1).trim().toUpperCase();
@@ -233,6 +236,68 @@ public class CalculatedValue{
 			}
 		}
 		return calculated;
+	}
+	
+	public ArrayList<SendKeyData> getCalculatedText(){
+
+		ArrayList<SendKeyData> chainKeys = new ArrayList<SendKeyData>();
+		
+		if(calculated != null){
+			
+			addTextChain(chainKeys, calculated);
+			
+		}else {	
+			
+			if(dataList != null) {
+				for(Object obj : dataList) {
+					if (obj instanceof Variable) {
+						chainKeys.add(new SendKeyData(new String[] {((Variable) obj).getCalculatedValue()}));
+					}else {
+						chainKeys.add(new SendKeyData(new String[] {obj.toString()}));
+					}
+				}
+			}else {
+				chainKeys.add(new SendKeyData(new String[] {data}));
+			}
+		}
+		
+		return chainKeys;
+	}
+	
+	private void addTextChain(ArrayList<SendKeyData> chain, String s){
+
+		int start = 0;		
+
+		Matcher match = KEY_REGEXP.matcher(s);
+		while(match.find()) {
+
+			int end = match.start();
+			if(end > 0) {
+				SendKeyData sendKey = new SendKeyData(s.substring(start, end));
+				chain.add(sendKey);
+			}
+
+			start = match.end();
+
+			String keysName = match.group(1);
+			String spareKey = match.group(2);
+			if(spareKey != null && spareKey.length() > 0) {
+				chain.add(new SendKeyData(new String[] {keysName, spareKey}));
+			}else {
+				chain.add(new SendKeyData(new String[] {keysName}));
+			}
+		}
+
+		SendKeyData sendKey = null;
+		if(start == 0) {
+			sendKey = new SendKeyData(s);
+		}else if(start != s.length()){
+			sendKey = new SendKeyData(s.substring(start));
+		}
+		
+		if(sendKey != null) {
+			chain.add(sendKey);
+		}
 	}
 
 	public void setCalculated(String value) {

@@ -22,6 +22,7 @@ import org.openqa.selenium.winium.WiniumDriverService;
 import org.openqa.selenium.winium.WiniumOptions;
 
 import com.ats.element.FoundElement;
+import com.ats.executor.TestBound;
 import com.ats.executor.TestElement;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.channels.ChannelProcessData;
@@ -120,26 +121,16 @@ public class WindowsDesktopDriver extends WiniumDriver {
 		if(parentsList != null && parentsList.size() > 0) {
 			return new FoundElement(parentsList, channel.getDimension().getX(), channel.getDimension().getY());
 		}
+		
 		return null;
-		
-		/*TestElementData elementData = null;
-		
-		try{
-			WebElement we = element.findElement(By.xpath(".."));
-			elementData = new TestElementData((RemoteWebElement)we, channel.getDimension().getX(), channel.getDimension().getY());
-			elementData.loadParents(this, channel);
-
-		}catch(NoSuchElementException ex){}
-
-		return elementData;*/
 	}
 
 	public List<WebElement> getChildrenByPid(Long pid) {
-		return findElements(By.xpath((String)("./child::*[@ProcessId='" + pid + "']")));
+		return findElements(By.xpath("./child::*[@ProcessId='" + pid + "']"));
 	}
 
 	private List<WebElement> getDescendant(WebElement element) {
-		return element.findElements(By.xpath((String)"./descendant::*"));
+		return element.findElements(By.xpath("./descendant::*"));
 	}
 
 	private List<WebElement> getDescendantByTag(WebElement element, String tag, List<CalculatedProperty> attributes) {
@@ -152,7 +143,7 @@ public class WindowsDesktopDriver extends WiniumDriver {
 			}
 		}
 
-		return element.findElements(By.xpath((String)"./descendant::*[" + xpath + "]"));
+		return element.findElements(By.xpath("./descendant::*[" + xpath + "]"));
 	}
 
 	public List<FoundElement> getWebElementsListByPid(Long pid, Double channelX, Double channelY) {
@@ -168,8 +159,11 @@ public class WindowsDesktopDriver extends WiniumDriver {
 		return listElements;
 	}
 
-	public ArrayList<FoundElement> findElementByTag(Long pid, WebElement parent, String tag, List<CalculatedProperty> attributes, Double x, Double y) {
+	public ArrayList<FoundElement> findElementByTag(Long pid, WebElement parent, String tag, List<CalculatedProperty> attributes, Channel channel) {
 
+		//channel.refreshLocation();
+		TestBound channelDimension = channel.getDimension();
+		
 		ArrayList<FoundElement> foundElements = new ArrayList<FoundElement>();
 		
 		Predicate<WebElement> fullPredicate = Objects::nonNull;
@@ -183,12 +177,12 @@ public class WindowsDesktopDriver extends WiniumDriver {
 
 		if(parent != null){
 			List<WebElement> temp = getDescendantByTag(parent, tag, attributes);
-			temp.parallelStream().filter(fullPredicate).forEach(e -> foundElements.add(new FoundElement(e)));
+			temp.parallelStream().filter(fullPredicate).forEach(e -> foundElements.add(new FoundElement((RemoteWebElement)e, channelDimension.getX(), channelDimension.getY())));
 		}else{
 			List<WebElement> temp = new ArrayList<WebElement>();
 			getChildrenByPid(pid).parallelStream().forEach(e -> temp.addAll(getDescendantByTag(e, tag, attributes)));
 			
-			temp.parallelStream().filter(fullPredicate).forEach(e -> foundElements.add(new FoundElement(e)));
+			temp.parallelStream().filter(fullPredicate).forEach(e -> foundElements.add(new FoundElement((RemoteWebElement)e, channelDimension.getX(), channelDimension.getY())));
 		}
 
 		return foundElements;

@@ -7,12 +7,10 @@ public class ChannelProcessData {
 	private ArrayList<String> windowHandle = new ArrayList<String>();
 	private Long processId = -1L;
 	
+	public ChannelProcessData() {}
+	
 	public ChannelProcessData(Long pid) {
 		this.setPid(pid);
-	}
-
-	public ChannelProcessData() {
-
 	}
 
 	public void setPid(Long value) {

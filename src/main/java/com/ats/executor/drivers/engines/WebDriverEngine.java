@@ -29,10 +29,9 @@ import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.WindowsDesktopDriver;
 import com.ats.executor.scripting.ResourceContent;
-import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.MouseDirection;
-import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
+import com.itextpdf.kernel.log.SystemOutCounter;
 
 public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngine {
 
@@ -166,7 +165,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		}
 	}
 
-	public boolean waitElementIsVisible(WebElement element) {
+	private boolean waitElementIsVisible(WebElement element) {
 
 		int tryLoop = 20;
 		while(tryLoop > 0 && !(Boolean) runJavaScript(checkElementIsVisibleJavaScript, element)){
@@ -360,43 +359,31 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 	
 	//-----------------------------------------------------------------------------------------------------------------------------------
-	// Mouse position by browser name
+	// Mouse position by browser
 	//-----------------------------------------------------------------------------------------------------------------------------------
-
-	private int getCartesianOffset(int value, MouseDirectionData direction, Cartesian cart1, Cartesian cart2) {
-		if(direction != null) {
-			return getDirectionValue(value, direction, cart1, cart2);
-		}else {
-			return getNoDirectionValue(value);
-		}
-	}
 	
-	protected int getOffsetX(Rectangle rect, MouseDirection position) {
-		return getCartesianOffset(rect.width, position.getHorizontalPos(), Cartesian.LEFT, Cartesian.RIGHT);
-	}
-	
-	protected int getOffsetY(Rectangle rect, MouseDirection position) {
-		return getCartesianOffset(rect.height, position.getVerticalPos(), Cartesian.TOP, Cartesian.BOTTOM);
-	}
+	@Override
+	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position) {
+		
+		scroll(foundElement, 0);
+		
+		if(waitElementIsVisible(foundElement.getValue())) {
 			
-	protected int getDirectionValue(int value, MouseDirectionData direction,Cartesian cart1, Cartesian cart2) {
-		if(cart1.equals(direction.getName())) {
-			return direction.getValue();
-		}else if(cart2.equals(direction.getName())) {
-			return value - direction.getValue();
+			Rectangle rect = foundElement.getRectangle();
+			
+			int offsetX = getOffsetX(rect, position);
+			int offsetY = getOffsetY(rect, position);
+
+			move(foundElement.getValue(), offsetX, offsetY);
+			
+		}else {
+			status.setPassed(false);
+			status.setCode(ActionStatus.OBJECT_NOT_VISIBLE);
+			status.setMessage("element not visible");
 		}
-		return 0;
 	}
 	
-	protected int getNoDirectionValue(int value) {
-		return value / 2;
-	}
-		
-	public void mouseMoveToElement(WebElement element, Rectangle elemRect, MouseDirection position) {
-		
-		int offsetX = getOffsetX(elemRect, position);
-		int offsetY = getOffsetY(elemRect, position);
-
+	protected void move(WebElement element, int offsetX, int offsetY) {
 		Actions act = new Actions(driver);
 		act.moveToElement(element, offsetX, offsetY).perform();
 	}

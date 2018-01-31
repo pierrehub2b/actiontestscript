@@ -288,10 +288,6 @@ public class Channel {
 		return engine.executeScript(status, script, params);
 	}	
 
-	public boolean waitElementIsVisible(WebElement element) {
-		return engine.waitElementIsVisible(element);
-	}
-
 	public void goToUrl(URL url, boolean newWindow) {
 		engine.goToUrl(url, newWindow);
 	}
@@ -309,7 +305,7 @@ public class Channel {
 	}
 
 	public ArrayList<FoundElement> findWindowsElement(WebElement parent, String tag, List<CalculatedProperty> attributes) {
-		return windowsDesktopDriver.findElementByTag(processData.getPid(), parent, tag, attributes, dimension.getX(), dimension.getY());
+		return windowsDesktopDriver.findElementByTag(processData.getPid(), parent, tag, attributes, this);
 	}
 		
 	//----------------------------------------------------------------------------------------------------------
@@ -398,7 +394,8 @@ public class Channel {
 		engine.middleClick(element);
 	}
 
-	public void mouseMoveToElement(WebElement element, Rectangle elementRectangle, MouseDirection position) {
-		engine.mouseMoveToElement(element, elementRectangle, position);
+	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position) {
+		engine.mouseMoveToElement(status, foundElement, position);
+		actionTerminated();
 	}
 }

@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.RemoteWebElement;
 
@@ -38,7 +39,7 @@ public class WindowsDriverEngine extends DriverEngineAbstract implements IDriver
 
 		super(channel, application);
 
-		this.driver = windowsDriver;
+		driver = windowsDriver;
 
 		int firstSpace = application.indexOf(" ");
 		String applicationArguments = "";
@@ -58,18 +59,18 @@ public class WindowsDriverEngine extends DriverEngineAbstract implements IDriver
 		if(exeFile != null && exeFile.exists()){
 			Runtime runtime = Runtime.getRuntime();
 			try{
-				this.applicationProcess = runtime.exec(exeFile.getAbsolutePath() + applicationArguments);
+				applicationProcess = runtime.exec(exeFile.getAbsolutePath() + applicationArguments);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 
-			ChannelProcessData data = new ChannelProcessData(getWindowsPid());
+			ChannelProcessData data = new ChannelProcessData(applicationProcess.pid());
 
 			List<WebElement> childs = new ArrayList<WebElement>();
 			int maxTry = 30;
 
 			while(childs.isEmpty() && maxTry > 0){
-				childs = ((WindowsDesktopDriver)this.driver).getChildrenByPid(data.getPid());
+				childs = ((WindowsDesktopDriver)driver).getChildrenByPid(data.getPid());
 				maxTry--;
 				channel.sleep(200);
 			}
@@ -90,24 +91,6 @@ public class WindowsDriverEngine extends DriverEngineAbstract implements IDriver
 	@Override
 	public void waitAfterAction() {
 
-	}
-
-	private Long getWindowsPid(){
-		
-		return applicationProcess.pid();
-		
-		/*try {
-			Field f = applicationProcess.getClass().getDeclaredField("handle");
-			//f.setAccessible(true);		
-			long handl = f.getLong(applicationProcess);
-
-			W32API.HANDLE handle = new W32API.HANDLE();
-			handle.setPointer(Pointer.createConstant(handl));
-
-			return Kernel32.INSTANCE.GetProcessId(handle);
-
-		} catch (Throwable e) {}
-		return -1;*/
 	}
 
 	public void loadParents(FoundElement hoverElement){
@@ -142,10 +125,6 @@ public class WindowsDriverEngine extends DriverEngineAbstract implements IDriver
 	//---------------------------------------------------------------------------------------------------------------------
 	// 
 	//---------------------------------------------------------------------------------------------------------------------
-
-	public boolean waitElementIsVisible(WebElement element) {
-		return true;
-	}
 
 	public FoundElement getElementFromPoint(Double x, Double y){
 		return ((WindowsDesktopDriver)driver).getElementFromPoint(x, y);
@@ -248,8 +227,16 @@ public class WindowsDriverEngine extends DriverEngineAbstract implements IDriver
 	}
 
 	@Override
-	public void mouseMoveToElement(WebElement element, Rectangle elementRectangle, MouseDirection position) {
-		// TODO Auto-generated method stub
+	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position) {
+		
+		Rectangle rect = foundElement.getRectangle();
+		
+		int offsetX = (int) (foundElement.getScreenX() + getOffsetX(rect, position) + channel.getDimension().getX());
+		int offsetY = (int) (foundElement.getScreenY() + getOffsetY(rect, position) + channel.getDimension().getY());;
+		
+		Actions act = new Actions(driver);
+		act.moveToElement(foundElement.getValue(), 12, 44).perform();
+		//act.moveToElement(foundElement.getValue(), offsetX, offsetY).perform();
 		
 	}
 }

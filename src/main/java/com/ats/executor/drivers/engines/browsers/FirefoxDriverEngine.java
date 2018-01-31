@@ -23,6 +23,8 @@ import org.openqa.selenium.remote.RemoteWebElement;
 
 import com.ats.driver.AtsManager;
 import com.ats.driver.BrowserProperties;
+import com.ats.element.FoundElement;
+import com.ats.executor.ActionStatus;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
@@ -112,14 +114,8 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	}
 
 	@Override
-	public void mouseMoveToElement(WebElement element, Rectangle elemRect, MouseDirection position) {
-		int offsetX = getOffsetX(elemRect, position);
-		int offsetY = getOffsetY(elemRect, position);
-
-		//Actions act = new Actions(driver);
-		//act.moveToElement(element).moveByOffset(offsetX, offsetY).build().perform();
-		//act.moveToElement(element, offsetX, offsetY).perform();
-
+	protected void move(WebElement element, int offsetX, int offsetY) {
+		
 		JsonObject postData = getElementAction((RemoteWebElement)element,offsetX, offsetY);
 		StringEntity postDataEntity = null;
 		try {
