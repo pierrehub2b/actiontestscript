@@ -1,6 +1,5 @@
 package com.ats.executor.drivers.engines.browsers;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 

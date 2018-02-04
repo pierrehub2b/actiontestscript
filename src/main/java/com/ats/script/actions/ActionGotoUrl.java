@@ -13,10 +13,14 @@ public class ActionGotoUrl extends ActionExecute {
 
 	public static final String SCRIPT_LABEL = "goto-url";
 
+	public static final String NEXT = "next";
+	public static final String REFRESH = "refresh";
+	public static final String BACK = "back";
+
 	private CalculatedValue url;
 
 	public ActionGotoUrl() {}
-	
+
 	public ActionGotoUrl(Script script, boolean stop, CalculatedValue url) {
 		super(script, stop);
 		setUrl(url);
@@ -38,28 +42,28 @@ public class ActionGotoUrl extends ActionExecute {
 	public void execute(ActionTestScript ts) {
 		super.execute(ts);
 
-		String urlString = url.getCalculated();
-		if(!urlString.startsWith("https://") && !urlString.startsWith("http://") && !urlString.startsWith("file://") ) {
-			urlString = "http://" + urlString;
-		}
-
-		try {
-			URL remote = new URL(urlString);
-			
-			status.setMessage(remote.toURI().toString());
-			status.setPassed(true);
-			
-			ts.goToUrl(status, remote, false);
-			status.updateDuration();
-
-			ts.updateVisualValue(urlString);
+		if(NEXT.equals(url.getCalculated()) || REFRESH.equals(url.getCalculated()) || BACK.equals(url.getCalculated())) {
+			ts.navigate(status, url.getCalculated());
 			ts.updateVisualImage();
+		}else {
 			
-		} catch (MalformedURLException | URISyntaxException e) {
-			status.setPassed(false);
-			status.setData(urlString);
-			status.setCode(ActionStatus.MALFORMED_GOTO_URL);
-		} 
+			String urlString = url.getCalculated();
+			if(!urlString.startsWith("https://") && !urlString.startsWith("http://") && !urlString.startsWith("file://") ) {
+				urlString = "http://" + urlString;
+			}
+
+			try {
+
+				ts.navigate(status, new URL(urlString), false);
+				ts.updateVisualValue(urlString);
+				ts.updateVisualImage();
+
+			} catch (MalformedURLException e) {
+				status.setPassed(false);
+				status.setData(urlString);
+				status.setCode(ActionStatus.MALFORMED_GOTO_URL);
+			} 
+		}
 	}
 
 	//--------------------------------------------------------

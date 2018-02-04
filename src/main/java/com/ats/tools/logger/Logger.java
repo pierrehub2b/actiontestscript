@@ -1,7 +1,6 @@
 package com.ats.tools.logger;
 
 import java.io.PrintStream;
-import java.sql.Timestamp;
 
 import com.ats.executor.channels.Channel;
 

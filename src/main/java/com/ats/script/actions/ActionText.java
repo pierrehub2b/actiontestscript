@@ -7,7 +7,6 @@ import java.util.regex.Pattern;
 
 import com.ats.element.SearchedElement;
 import com.ats.executor.ActionTestScript;
-import com.ats.executor.SendKeyData;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
@@ -77,7 +76,7 @@ public class ActionText extends ActionExecuteElement {
 		if(status.isPassed()) {
 			getTestElement().click(status, false);
 			if(status.isPassed()) {
-				getTestElement().sendText(status, insert == -1, text.getCalculatedText());
+				getTestElement().sendText(status, insert == -1, text);
 			}
 		}
 		status.updateDuration();

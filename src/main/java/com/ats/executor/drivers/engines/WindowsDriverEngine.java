@@ -190,7 +190,7 @@ public class WindowsDriverEngine extends DriverEngineAbstract implements IDriver
 
 		ArrayList<FoundElement> result = new ArrayList<FoundElement>();
 
-		return null;
+		return result;
 	}
 
 	//@Override
@@ -231,12 +231,16 @@ public class WindowsDriverEngine extends DriverEngineAbstract implements IDriver
 		
 		Rectangle rect = foundElement.getRectangle();
 		
-		int offsetX = (int) (foundElement.getScreenX() + getOffsetX(rect, position) + channel.getDimension().getX());
-		int offsetY = (int) (foundElement.getScreenY() + getOffsetY(rect, position) + channel.getDimension().getY());;
+//		int offsetX = (int) (foundElement.getScreenX() + getOffsetX(rect, position) + channel.getDimension().getX());
+//		int offsetY = (int) (foundElement.getScreenY() + getOffsetY(rect, position) + channel.getDimension().getY());;
 		
 		Actions act = new Actions(driver);
 		act.moveToElement(foundElement.getValue(), 12, 44).perform();
 		//act.moveToElement(foundElement.getValue(), offsetX, offsetY).perform();
-		
+	}
+
+	@Override
+	public boolean waitElementVisible(WebElement webElement) {
+		return true;
 	}
 }

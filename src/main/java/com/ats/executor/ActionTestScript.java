@@ -474,7 +474,7 @@ public class ActionTestScript extends Script implements ITest{
 	//-----------------------------------------------------------------------------------------------------------
 	//  - Window action
 	//-----------------------------------------------------------------------------------------------------------
-
+	
 	public void resizeWindow(ActionStatus status, int width, int height){
 		if(getCurrentChannel() != null){
 			getCurrentChannel().resizeWindow(width, height);
@@ -519,15 +519,27 @@ public class ActionTestScript extends Script implements ITest{
 	//  - Goto Url Action
 	//-----------------------------------------------------------------------------------------------------------
 
-	public void goToUrl(ActionStatus status, URL url, boolean newWindow) {
+	public void navigate(ActionStatus status, URL url, boolean newWindow) {
 		if(getCurrentChannel() != null){
-			getCurrentChannel().goToUrl(url, newWindow);
+			getCurrentChannel().navigate(url, newWindow);
 
 			//TODO check url with browser
 			//if(Utils.checkUrl(status, url)) {
 			//	status.setMessage(getCurrentChannel().goToUrl(url).toString());
 			//}
 		}
+		status.setMessage(getCurrentChannel().getWebDriver().getCurrentUrl());
+		status.setPassed(true);
+		status.updateDuration();
+	}
+	
+	public void navigate(ActionStatus status, String type){
+		if(getCurrentChannel() != null){
+			getCurrentChannel().navigate(type);
+		}
+		status.setMessage(getCurrentChannel().getWebDriver().getCurrentUrl());
+		status.setPassed(true);
+		status.updateDuration();
 	}
 
 	//-----------------------------------------------------------------------------------------------------------
@@ -574,6 +586,12 @@ public class ActionTestScript extends Script implements ITest{
 			recorder.updateVisualValue(value, data);
 		}
 	}
+	
+	public void updateVisualStatus(boolean value) {
+		if(recorder != null) {
+			recorder.updateVisualStatus(value);
+		}
+	}	
 
 	public void newVisual(Action action) {
 		if(recorder != null && getCurrentChannel() != null) {

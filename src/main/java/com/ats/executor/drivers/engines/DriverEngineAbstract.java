@@ -7,6 +7,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import com.ats.element.FoundElement;
+import com.ats.executor.SendKeyData;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.MouseDirection;
@@ -76,5 +77,11 @@ public abstract class DriverEngineAbstract {
 
 	protected int getOffsetY(Rectangle rect, MouseDirection position) {
 		return getCartesianOffset(rect.height, position.getVerticalPos(), Cartesian.TOP, Cartesian.BOTTOM);
+	}
+	
+	public void sendTextData(WebElement webElement, ArrayList<SendKeyData> textActionList) {
+		for(SendKeyData sequence : textActionList) {
+			webElement.sendKeys(sequence.getSequence());
+		}
 	}
 }

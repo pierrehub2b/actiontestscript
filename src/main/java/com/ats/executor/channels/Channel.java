@@ -1,6 +1,5 @@
 package com.ats.executor.channels;
 
-import java.awt.Rectangle;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +14,7 @@ import org.openqa.selenium.remote.RemoteWebElement;
 import com.ats.element.FoundElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
+import com.ats.executor.SendKeyData;
 import com.ats.executor.TestBound;
 import com.ats.executor.TestElement;
 import com.ats.executor.drivers.DriverManager;
@@ -22,6 +22,7 @@ import com.ats.executor.drivers.WindowsDesktopDriver;
 import com.ats.executor.drivers.engines.IDriverEngine;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
+import com.ats.script.actions.ActionGotoUrl;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef.HWND;
@@ -41,6 +42,8 @@ public class Channel {
 	
 	private TestBound dimension;
 	private TestBound subDimension;
+	
+	private int maxTry = 0;
 
 	private String applicationVersion;
 
@@ -68,6 +71,9 @@ public class Channel {
 
 		this.desktop = engine.isDesktop();
 		this.actions = new Actions(engine.getWebDriver());
+		
+		this.maxTry = driverManager.getMaxTry();
+		
 		this.refreshLocation();
 	}
 
@@ -288,8 +294,18 @@ public class Channel {
 		return engine.executeScript(status, script, params);
 	}	
 
-	public void goToUrl(URL url, boolean newWindow) {
+	public void navigate(URL url, boolean newWindow) {
 		engine.goToUrl(url, newWindow);
+	}
+	
+	public void navigate(String type) {
+		if(ActionGotoUrl.REFRESH.equals(type)) {
+			engine.getWebDriver().navigate().refresh();
+		}else if(ActionGotoUrl.NEXT.equals(type)) {
+			engine.getWebDriver().navigate().forward();
+		}else if(ActionGotoUrl.BACK.equals(type)) {
+			engine.getWebDriver().navigate().back();
+		}
 	}
 	
 	public CalculatedProperty[] getAttributes(RemoteWebElement webElement) {
@@ -397,5 +413,18 @@ public class Channel {
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position) {
 		engine.mouseMoveToElement(status, foundElement, position);
 		actionTerminated();
+	}
+
+	public void sendTextData(WebElement webElement, ArrayList<SendKeyData> textActionList) {
+		engine.sendTextData(webElement, textActionList);
+		actionTerminated();
+	}
+
+	public void waitElementVisible(WebElement webElement) {
+		engine.waitElementVisible(webElement);
+	}
+
+	public int getMaxTry() {
+		return maxTry;
 	}
 }

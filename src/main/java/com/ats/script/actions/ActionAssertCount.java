@@ -68,6 +68,7 @@ public class ActionAssertCount extends ActionExecuteElement {
 		int count = getTestElement().getCount();
 		if(checkAssertion(count)) {
 			status.setPassed(true);
+			ts.updateVisualStatus(true);
 		}else {
 			status.setPassed(false);
 			status.setCode(ActionStatus.OCCURRENCES_ERROR);

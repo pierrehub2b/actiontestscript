@@ -1,11 +1,11 @@
 package com.ats.executor.drivers.engines.browsers;
 
-import java.awt.Rectangle;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
@@ -23,8 +23,7 @@ import org.openqa.selenium.remote.RemoteWebElement;
 
 import com.ats.driver.AtsManager;
 import com.ats.driver.BrowserProperties;
-import com.ats.element.FoundElement;
-import com.ats.executor.ActionStatus;
+import com.ats.executor.SendKeyData;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
@@ -32,7 +31,6 @@ import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.WindowsDesktopDriver;
 import com.ats.executor.drivers.engines.WebDriverEngine;
 import com.ats.generator.objects.Cartesian;
-import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.MouseDirectionData;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -111,6 +109,13 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		Object result = super.runJavaScript(javaScript, params);
 		channel.sleep(waitAfterAction);
 		return result;
+	}
+
+	@Override
+	public void sendTextData(WebElement webElement, ArrayList<SendKeyData> textActionList) {
+		for(SendKeyData sequence : textActionList) {
+			webElement.sendKeys(sequence.getSequenceFirefox());
+		}
 	}
 
 	@Override

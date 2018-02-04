@@ -85,6 +85,10 @@ public class RecorderThread extends Thread {
 		currentVisual.setValue(value);
 		currentVisual.setData(data);
 	}
+	
+	public void updateVisualStatus(boolean value) {
+		currentVisual.setPassed(value);
+	}
 
 	public void updateVisualElement(TestElement element) {
 		if(element.getFoundElements().size() > 0) {

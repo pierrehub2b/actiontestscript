@@ -11,6 +11,7 @@ import org.openqa.selenium.remote.RemoteWebElement;
 
 import com.ats.element.FoundElement;
 import com.ats.executor.ActionStatus;
+import com.ats.executor.SendKeyData;
 import com.ats.executor.TestBound;
 import com.ats.executor.TestElement;
 import com.ats.executor.channels.Channel;
@@ -41,4 +42,6 @@ public interface IDriverEngine{
 	public void middleClick(WebElement element);
 	public WebElement getRootElement();
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position);
+	public void sendTextData(WebElement webElement, ArrayList<SendKeyData> textActionList);
+	public boolean waitElementVisible(WebElement webElement);
 }

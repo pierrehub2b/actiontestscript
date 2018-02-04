@@ -22,6 +22,7 @@ import com.ats.element.SearchedElement;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
+import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.actions.ActionSelect;
 import com.ats.tools.logger.MessageCode;
 
@@ -292,19 +293,17 @@ public class TestElement{
 		}
 	}
 
-	public void sendText(ActionStatus status, boolean clear, ArrayList<SendKeyData> textActionList) {
+	public void sendText(ActionStatus status, boolean clear, CalculatedValue text) {
 
+		ArrayList<SendKeyData> textActionList = text.getCalculatedText();
+		
 		if(clear) {
 			clearText(status);
+			channel.sleep(50);
 		}
 
 		if(status.isPassed()) {
-			for(SendKeyData sequence : textActionList) {
-				getWebElement().sendKeys(sequence.getSequence());
-				//action.sendKeys(sequence.getSequence());
-			}
-			//action.perform();
-			channel.actionTerminated();
+			channel.sendTextData(getWebElement(), textActionList);
 		}
 	}
 
@@ -360,10 +359,7 @@ public class TestElement{
 
 	public void over(ActionStatus status, MouseDirection position) {
 		if(isFound()){
-
-			//channel.scroll(getFoundElement(), 0);
 			channel.mouseMoveToElement(status, getFoundElement(), position);
-
 		}else{
 			status.setPassed(false);
 			status.setCode(ActionStatus.OBJECT_NOT_FOUND);
@@ -410,7 +406,7 @@ public class TestElement{
 				}
 			}
 
-			channel.sleep(200);
+			//channel.sleep(200);
 			loop--;
 		}
 	}
@@ -486,21 +482,35 @@ public class TestElement{
 	//-------------------------------------------------------------------------------------------------------------------
 
 	public String getAttribute(String name){
+		
+		String result = null;
+		
 		if(isFound()){
-			String result = getWebElement().getAttribute(name);
-			if(result != null) {
-				return result;
-			}
-
-			for (CalculatedProperty calc : getAttributes()) {
-				if(name.equals(calc.getName())) {
-					return calc.getValue().getCalculated();
+			
+			channel.waitElementVisible(getWebElement());
+			
+			int tryLoop = maxTry + channel.getMaxTry();
+						
+			while ((result == null || result.length() == 0) && tryLoop > 0){
+				tryLoop--;
+				
+				result = getWebElement().getAttribute(name);
+				if(result == null || result.length() == 0) {
+					
+					for (CalculatedProperty calc : getAttributes()) {
+						if(name.equals(calc.getName())) {
+							result = calc.getValue().getCalculated();
+						}
+					}
+					
+					if(result == null || result.length() == 0) {
+						result = getCssAttributeValueByName(name);
+					}
 				}
 			}
-
-			return getCssAttributeValueByName(name);
 		}
-		return null;
+		
+		return result;
 	}
 
 	private String getCssAttributeValueByName(String name) {

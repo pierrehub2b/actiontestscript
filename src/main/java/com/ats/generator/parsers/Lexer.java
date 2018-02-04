@@ -194,9 +194,8 @@ public class Lexer {
 					}else if(actionType.startsWith(ActionWindow.SCRIPT_LABEL)){
 
 						if(ActionWindowResize.SCRIPT_RESIZE_LABEL.equals(actionType)){
-							action = new ActionWindowResize(script, dataOne);
+							action = new ActionWindowResize(script, dataOne);													
 						}else {
-
 							int num = 0;
 							try {
 								num = Integer.parseInt(dataOne);

@@ -251,13 +251,13 @@ public class CalculatedValue{
 			if(dataList != null) {
 				for(Object obj : dataList) {
 					if (obj instanceof Variable) {
-						chainKeys.add(new SendKeyData(new String[] {((Variable) obj).getCalculatedValue()}));
+						chainKeys.add(new SendKeyData(((Variable)obj).getCalculatedValue()));
 					}else {
-						chainKeys.add(new SendKeyData(new String[] {obj.toString()}));
+						chainKeys.add(new SendKeyData(obj.toString()));
 					}
 				}
 			}else {
-				chainKeys.add(new SendKeyData(new String[] {data}));
+				chainKeys.add(new SendKeyData(data));
 			}
 		}
 		
@@ -278,14 +278,7 @@ public class CalculatedValue{
 			}
 
 			start = match.end();
-
-			String keysName = match.group(1);
-			String spareKey = match.group(2);
-			if(spareKey != null && spareKey.length() > 0) {
-				chain.add(new SendKeyData(new String[] {keysName, spareKey}));
-			}else {
-				chain.add(new SendKeyData(new String[] {keysName}));
-			}
+			chain.add(new SendKeyData(match.group(1), match.group(2)));
 		}
 
 		SendKeyData sendKey = null;

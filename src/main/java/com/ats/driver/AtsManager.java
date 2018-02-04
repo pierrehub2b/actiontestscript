@@ -29,28 +29,34 @@ public class AtsManager {
 
 	private static final String DRIVERS_FOLDER = "drivers";
 	private static final String ATS_PROPERTIES_FILE = ".atsProperties";
-	
+
 	private static final Double APPLICATION_WIDTH = 1280.00;
 	private static final Double APPLICATION_HEIGHT = 960.00;
-	
+
+	private static final Double APPLICATION_X = 10.00;
+	private static final Double APPLICATION_Y = 10.00;
+
 	private static final int SCRIPT_TIMEOUT = 60;
 	private static final int PAGELOAD_TIMEOUT = 120;
-	
+
 	private static final int MAX_TRY = 20;
 
 	private Path driversFolderPath;
 	private Properties properties;
-	
+
 	private double applicationWidth = APPLICATION_WIDTH;
 	private double applicationHeight = APPLICATION_HEIGHT;
-	
+
+	private double applicationX = APPLICATION_X;
+	private double applicationY = APPLICATION_Y;
+
 	private int scriptTimeOut = SCRIPT_TIMEOUT;
 	private int pageloadTimeOut = PAGELOAD_TIMEOUT;
-	
+
 	private int maxTry = MAX_TRY;
-	
+
 	private Proxy proxy = new Proxy();
-	
+
 	private List<BrowserProperties> browsersList = new ArrayList<BrowserProperties>();
 
 	public AtsManager() {
@@ -70,7 +76,7 @@ public class AtsManager {
 		proxy.setProxyType(ProxyType.SYSTEM);
 
 		if(!Files.exists(driversFolderPath)) {
-
+			//TODO download ATS ? quit process ?
 		}
 	}
 
@@ -93,51 +99,69 @@ public class AtsManager {
 						for (int temp = 0; temp < browsers.getLength(); temp++) {
 							Node browser = browsers.item(temp);
 							if (browser.getNodeType() == Node.ELEMENT_NODE) {
-
 								Element browserElement = (Element) browser;
 								if(browserElement.hasChildNodes() && browserElement.getChildNodes().getLength() > 1) {
-
 									NodeList nodeList = browserElement.getElementsByTagName("name");
 									if(nodeList != null && nodeList.getLength() > 0) {
-										String name = nodeList.item(0).getChildNodes().item(0).getNodeValue();
-										String path = null;
-										String wait = null;
+										if(nodeList.item(0).getChildNodes().getLength() > 0) {
+											String name = nodeList.item(0).getChildNodes().item(0).getNodeValue();
+											String path = null;
+											String wait = null;
 
-										nodeList = browserElement.getElementsByTagName("path");
-										if(nodeList != null && nodeList.getLength() > 0) {
-											path = nodeList.item(0).getChildNodes().item(0).getNodeValue();
-											
-											File checkFile = new File(path);
-											if(!checkFile.exists() || !checkFile.isFile()) {
-												path = null;
+											nodeList = browserElement.getElementsByTagName("path");
+											if(nodeList != null && nodeList.getLength() > 0) {
+												if(nodeList.item(0).getChildNodes().getLength() > 0) {
+													path = nodeList.item(0).getChildNodes().item(0).getNodeValue();
+
+													File checkFile = new File(path);
+													if(!checkFile.exists() || !checkFile.isFile()) {
+														path = null;
+													}
+												}
 											}
-										}
 
-										nodeList = browserElement.getElementsByTagName("actionWait");
-										if(nodeList != null && nodeList.getLength() > 0) {
-											wait = nodeList.item(0).getChildNodes().item(0).getNodeValue();
-										}
+											nodeList = browserElement.getElementsByTagName("actionWait");
+											if(nodeList != null && nodeList.getLength() > 0) {
+												if(nodeList.item(0).getChildNodes().getLength() > 0) {
+													wait = nodeList.item(0).getChildNodes().item(0).getNodeValue();
+												}
+											}
 
-										addBrowserProperties(name, path, wait);
+											addBrowserProperties(name, path, wait);
+										}
 									}
 								}
 							}
 						}
 					}
 
-					NodeList sizeNode = doc.getElementsByTagName("defaultSize");
-					if(sizeNode != null && sizeNode.getLength() > 0) {
-						NodeList size = ((Element)sizeNode.item(0)).getElementsByTagName("width");
-						if(size != null && size.getLength() > 0) {
+					NodeList boundNode = doc.getElementsByTagName("appBounding");
+					if(boundNode != null && boundNode.getLength() > 0) {
+						NodeList bound = ((Element)boundNode.item(0)).getElementsByTagName("width");
+						if(bound != null && bound.getLength() > 0) {
 							try {
-								applicationWidth = Double.parseDouble(size.item(0).getChildNodes().item(0).getNodeValue());
+								applicationWidth = Double.parseDouble(bound.item(0).getChildNodes().item(0).getNodeValue());
 							}catch(NumberFormatException e){}
 						}
-						
-						size = ((Element)sizeNode.item(0)).getElementsByTagName("height");
-						if(size != null && size.getLength() > 0) {
+
+						bound = ((Element)boundNode.item(0)).getElementsByTagName("height");
+						if(bound != null && bound.getLength() > 0) {
 							try {
-								applicationHeight = Double.parseDouble(size.item(0).getChildNodes().item(0).getNodeValue());
+								applicationHeight = Double.parseDouble(bound.item(0).getChildNodes().item(0).getNodeValue());
+							}catch(NumberFormatException e){}
+						}
+
+						bound = ((Element)boundNode.item(0)).getElementsByTagName("x");
+						if(bound != null && bound.getLength() > 0) {
+							try {
+								applicationX = Double.parseDouble(bound.item(0).getChildNodes().item(0).getNodeValue());
+							}catch(NumberFormatException e){}
+						}
+
+						bound = ((Element)boundNode.item(0)).getElementsByTagName("y");
+						if(bound != null && bound.getLength() > 0) {
+							try {
+								applicationY = Double.parseDouble(bound.item(0).getChildNodes().item(0).getNodeValue());
 							}catch(NumberFormatException e){}
 						}
 					}
@@ -150,7 +174,7 @@ public class AtsManager {
 								scriptTimeOut = Integer.parseInt(timeOut.item(0).getChildNodes().item(0).getNodeValue());
 							}catch(NumberFormatException e){}
 						}
-						
+
 						timeOut = ((Element)timeOutNode.item(0)).getElementsByTagName("pageLoad");
 						if(timeOut != null && timeOut.getLength() > 0) {
 							try {
@@ -165,29 +189,29 @@ public class AtsManager {
 							maxTry = Integer.parseInt(maxTryNode.item(0).getChildNodes().item(0).getNodeValue());
 						}catch(NumberFormatException e){}
 					}
-					
+
 					NodeList proxyNode = doc.getElementsByTagName("proxy");
 					if(proxyNode != null && proxyNode.getLength() > 0) {
 						String proxyValue = maxTryNode.item(0).getChildNodes().item(0).getNodeValue();
-						
+
 						switch (proxyValue){
-						
+
 						case "auto" :
 							proxy.setProxyType(ProxyType.AUTODETECT);
 							break;
-							
+
 						case "direct" :
 							proxy.setProxyType(ProxyType.DIRECT);
 							break;
-							
-						/*case "manual" :
+
+							/*case "manual" :
 							proxy.setProxyType(ProxyType.MANUAL);
 							proxy.setHttpProxy(PROXY_ADDRESS); 
 							break;*/
 						}
 					}
-										
-					
+
+
 				} catch (ParserConfigurationException e) {
 
 				} catch (SAXException e) {
@@ -207,36 +231,36 @@ public class AtsManager {
 		try {
 			waitValue = Integer.parseInt(wait);
 		}catch(NumberFormatException e){}
-		
+
 		if(waitValue < 50) {
 			waitValue = 50;
 		}
-		
+
 		browsersList.add(new BrowserProperties(name, path, waitValue));
 	}
-	
+
 	//------------------------------------------------------------------------------------------------------------------
 	// Getters
 	//------------------------------------------------------------------------------------------------------------------
-	
+
 	public BrowserProperties getBrowserProperties(String name) {
-		 for (int i=0; i < this.browsersList.size(); i++) {
-			 BrowserProperties properties = this.browsersList.get(i);
-		        if (name.equals(properties.getName())){
-		             return properties;
-		        }
-		    }
-		    return null;
+		for (int i=0; i < this.browsersList.size(); i++) {
+			BrowserProperties properties = this.browsersList.get(i);
+			if (name.equals(properties.getName())){
+				return properties;
+			}
+		}
+		return null;
 	}
-		
+
 	public Proxy getProxy() {
 		return proxy;
 	}
-	
+
 	public int getMaxTry() {
 		return maxTry;
 	}
-	
+
 	public int getScriptTimeOut() {
 		return scriptTimeOut;
 	}
@@ -244,11 +268,11 @@ public class AtsManager {
 	public int getPageloadTimeOut() {
 		return pageloadTimeOut;
 	}
-	
+
 	public TestBound getApplicationBound() {
-		return new TestBound(10.0, 10.0, applicationWidth, applicationHeight);
+		return new TestBound(applicationX, applicationY, applicationWidth, applicationHeight);
 	}
-	
+
 	public String getPropertyString(String key) {
 		return properties.getProperty(key);
 	}

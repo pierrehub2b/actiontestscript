@@ -31,7 +31,6 @@ import com.ats.executor.drivers.WindowsDesktopDriver;
 import com.ats.executor.scripting.ResourceContent;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
-import com.itextpdf.kernel.log.SystemOutCounter;
 
 public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngine {
 
@@ -165,7 +164,8 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		}
 	}
 
-	private boolean waitElementIsVisible(WebElement element) {
+	@Override
+	public boolean waitElementVisible(WebElement element) {
 
 		int tryLoop = 20;
 		while(tryLoop > 0 && !(Boolean) runJavaScript(checkElementIsVisibleJavaScript, element)){
@@ -367,7 +367,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		
 		scroll(foundElement, 0);
 		
-		if(waitElementIsVisible(foundElement.getValue())) {
+		if(waitElementVisible(foundElement.getValue())) {
 			
 			Rectangle rect = foundElement.getRectangle();
 			

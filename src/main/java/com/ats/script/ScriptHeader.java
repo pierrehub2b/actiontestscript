@@ -15,27 +15,7 @@ import com.ats.executor.ActionTestScript;
 import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.mouse.Mouse;
 import com.ats.generator.variables.Variable;
-import com.ats.script.actions.ActionAssertCount;
-import com.ats.script.actions.ActionAssertProperty;
-import com.ats.script.actions.ActionAssertValue;
-import com.ats.script.actions.ActionCallscript;
-import com.ats.script.actions.ActionChannelClose;
-import com.ats.script.actions.ActionChannelStart;
-import com.ats.script.actions.ActionChannelSwitch;
-import com.ats.script.actions.ActionComment;
-import com.ats.script.actions.ActionGotoUrl;
-import com.ats.script.actions.ActionJavascript;
-import com.ats.script.actions.ActionMouse;
-import com.ats.script.actions.ActionMouseDragDrop;
-import com.ats.script.actions.ActionMouseKey;
-import com.ats.script.actions.ActionMouseScroll;
-import com.ats.script.actions.ActionMouseSwipe;
-import com.ats.script.actions.ActionProperty;
-import com.ats.script.actions.ActionSelect;
-import com.ats.script.actions.ActionText;
-import com.ats.script.actions.ActionWindowClose;
-import com.ats.script.actions.ActionWindowResize;
-import com.ats.script.actions.ActionWindowSwitch;
+import com.ats.script.actions.Action;
 import com.ats.tools.Operators;
 
 public class ScriptHeader {
@@ -129,28 +109,7 @@ public class ScriptHeader {
 			, "import " + Keys.class.getName() + ";"
 			, ""
 			, "import " + ActionTestScript.class.getName() + ";"
-			, ""
-			, "import " + ActionAssertCount.class.getName() + ";"
-			, "import " + ActionAssertProperty.class.getName() + ";"
-			, "import " + ActionAssertValue.class.getName() + ";"
-			, "import " + ActionCallscript.class.getName() + ";"
-			, "import " + ActionChannelClose.class.getName() + ";"
-			, "import " + ActionChannelStart.class.getName() + ";"
-			, "import " + ActionChannelSwitch.class.getName() + ";"
-			, "import " + ActionComment.class.getName() + ";"
-			, "import " + ActionGotoUrl.class.getName() + ";"
-			, "import " + ActionJavascript.class.getName() + ";"
-			, "import " + ActionMouse.class.getName() + ";"
-			, "import " + ActionMouseDragDrop.class.getName() + ";"
-			, "import " + ActionMouseKey.class.getName() + ";"
-			, "import " + ActionMouseScroll.class.getName() + ";"
-			, "import " + ActionMouseSwipe.class.getName() + ";"
-			, "import " + ActionProperty.class.getName() + ";"
-			, "import " + ActionSelect.class.getName() + ";"
-			, "import " + ActionText.class.getName() + ";"
-			, "import " + ActionWindowClose.class.getName() + ";"
-			, "import " + ActionWindowResize.class.getName() + ";"
-			, "import " + ActionWindowSwitch.class.getName() + ";"
+			, "import " + Action.class.getPackageName() + ".*;"
 			, ""
 			, "import " + Cartesian.class.getName() + ";"
 			, "import " + Mouse.class.getName() + ";"
