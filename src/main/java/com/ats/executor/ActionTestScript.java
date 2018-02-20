@@ -18,6 +18,7 @@ import org.testng.annotations.BeforeTest;
 import com.ats.element.SearchedElement;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.channels.ChannelManager;
+import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.objects.mouse.Mouse;
@@ -155,27 +156,39 @@ public class ActionTestScript extends Script implements ITest{
 	// Script's test object
 	//----------------------------------------------------------------------------------------------------------
 
-	public TestElement findObject(TestElement parent, String tag, CalculatedProperty...criterias) {
+	public TestElement findObject(TestElement parent, String tag, int expectedCount, CalculatedProperty...criterias) {
 
 		List<CalculatedProperty> list = new ArrayList<CalculatedProperty>();
 		for (CalculatedProperty criteria : criterias) {
 			list.add(criteria);
 		}
 
-		return new TestElement(
-				getCurrentChannel(), 
-				channelManager.getMaxTry(),
-				parent, 
-				tag, 
-				list);
+		if(TestElementDialog.DIALOG_TAG.equals(tag)) {
+			return new TestElementDialog(
+					getCurrentChannel(), 
+					channelManager.getMaxTry(),
+					list);
+		}else {
+			return new TestElement(
+					getCurrentChannel(), 
+					channelManager.getMaxTry(),
+					expectedCount,
+					parent, 
+					tag,
+					list);
+		}
 	}
 
 	public TestElement findObject() {
 		return new TestElement(getCurrentChannel());
 	}
 
-	public TestElement findObject(int maxTryExecution, SearchedElement searchElement) {
-		return new TestElement(	getCurrentChannel(), channelManager.getMaxTry() + maxTryExecution,	searchElement);
+	public TestElement findObject(int maxTryExecution, SearchedElement searchElement, int expectedCount) {
+		if(TestElementDialog.DIALOG_TAG.equals(searchElement.getTag().toLowerCase())) {
+			return new TestElementDialog(	getCurrentChannel(), channelManager.getMaxTry() + maxTryExecution,	searchElement);
+		}else {
+			return new TestElement(	getCurrentChannel(), channelManager.getMaxTry() + maxTryExecution, expectedCount,	searchElement);
+		}
 	}
 
 	//----------------------------------------------------------------------------------------------------------
@@ -378,20 +391,20 @@ public class ActionTestScript extends Script implements ITest{
 		return new MouseKey(type, key);
 	}
 
-	public MouseScroll mouse(String type, int scroll, MouseDirectionData hpos, MouseDirectionData vpos) {
-		return new MouseScroll(type, scroll, hpos, vpos);
+	public MouseScroll mouse(int scroll, MouseDirectionData hpos, MouseDirectionData vpos) {
+		return new MouseScroll(scroll, hpos, vpos);
 	}
 
-	public MouseScroll mouse(String type, int scroll) {
-		return new MouseScroll(type, scroll);
+	public MouseScroll mouse(int scroll) {
+		return new MouseScroll(scroll);
 	}
 
-	public MouseSwipe mouse(String type, int hdir, int vdir, MouseDirectionData hpos, MouseDirectionData vpos) {
-		return new MouseSwipe(type, hdir, vdir, hpos, vpos);
+	public MouseSwipe mouse(int hdir, int vdir, MouseDirectionData hpos, MouseDirectionData vpos) {
+		return new MouseSwipe(hdir, vdir, hpos, vpos);
 	}
 
-	public MouseSwipe mouse(String type, int hdir, int vdir) {
-		return new MouseSwipe(type, hdir, vdir);
+	public MouseSwipe mouse(int hdir, int vdir) {
+		return new MouseSwipe(hdir, vdir);
 	}
 
 	//---------------------------------------------------------------------------------------------
@@ -423,6 +436,8 @@ public class ActionTestScript extends Script implements ITest{
 		}catch (StaleElementReferenceException ex) {
 			sleep(200);
 			exec(line, action);
+		}catch (Exception ex) {
+			sleep(200);
 		}
 	}
 
@@ -474,44 +489,24 @@ public class ActionTestScript extends Script implements ITest{
 	//-----------------------------------------------------------------------------------------------------------
 	//  - Window action
 	//-----------------------------------------------------------------------------------------------------------
-	
-	public void resizeWindow(ActionStatus status, int width, int height){
+
+	public void setWindowBound(ActionStatus status, BoundData x, BoundData y, BoundData width, BoundData height){
 		if(getCurrentChannel() != null){
-			getCurrentChannel().resizeWindow(width, height);
+			getCurrentChannel().setWindowBound(x, y, width, height);
 		}
 	}
 
 	public void switchWindow(ActionStatus status, int index){
 		if(getCurrentChannel() != null){
-			int winsNum = getCurrentChannel().switchWindow(index);
-			if(winsNum == 1) {
-				status.setPassed(false);
-				status.setCode(ActionStatus.WINDOW_NO_SWITCH);
-				status.setMessage("Only one window open, cannot switch !");
-			}else if(winsNum < index) {
-				status.setPassed(false);
-				status.setCode(ActionStatus.WINDOW_INDEX_OUT);
-				status.setMessage("Window index not found, only " + winsNum + " open window(s)");
-			}else {
-				status.setPassed(true);
-			}
+			getCurrentChannel().switchWindow(index);
+			status.setPassed(true);
 		}
 	}
 
 	public void closeWindow(ActionStatus status, int index){
 		if(getCurrentChannel() != null){
-			int winsNum = getCurrentChannel().closeWindow(index);
-			if(winsNum == 1) {
-				status.setPassed(false);
-				status.setCode(ActionStatus.WINDOW_NO_SWITCH);
-				status.setMessage("Only one window open ! Cannot close current window, use 'close channel' action to close last opened window.");
-			}else if(winsNum < index) {
-				status.setPassed(false);
-				status.setCode(ActionStatus.WINDOW_INDEX_OUT);
-				status.setMessage("Window index not found, only " + winsNum + " open window(s)");
-			}else {
-				status.setPassed(true);
-			}
+			getCurrentChannel().closeWindow(status, index);
+			status.setPassed(true);
 		}
 	}
 
@@ -532,7 +527,7 @@ public class ActionTestScript extends Script implements ITest{
 		status.setPassed(true);
 		status.updateDuration();
 	}
-	
+
 	public void navigate(ActionStatus status, String type){
 		if(getCurrentChannel() != null){
 			getCurrentChannel().navigate(type);
@@ -586,7 +581,7 @@ public class ActionTestScript extends Script implements ITest{
 			recorder.updateVisualValue(value, data);
 		}
 	}
-	
+
 	public void updateVisualStatus(boolean value) {
 		if(recorder != null) {
 			recorder.updateVisualStatus(value);

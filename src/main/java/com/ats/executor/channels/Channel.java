@@ -4,11 +4,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.RemoteWebElement;
 
 import com.ats.element.FoundElement;
@@ -20,6 +20,7 @@ import com.ats.executor.TestElement;
 import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.WindowsDesktopDriver;
 import com.ats.executor.drivers.engines.IDriverEngine;
+import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.actions.ActionGotoUrl;
@@ -30,24 +31,25 @@ import com.sun.jna.platform.win32.WinUser;
 
 public class Channel {
 
-	private ChannelProcessData processData;
+	//private ChannelProcessData processData;
 
 	private IDriverEngine engine;
 
 	private String name;
 	private boolean current = false;
 	private boolean desktop = false;
-	
+
 	private ActionTestScript mainScript;
-	
+
 	private TestBound dimension;
 	private TestBound subDimension;
-	
+
 	private int maxTry = 0;
 
 	private String applicationVersion;
 
-	private Actions actions;
+	private ProcessHandle process = null;
+	private ArrayList<String> processWindows = new ArrayList<String>();
 
 	private WindowsDesktopDriver windowsDesktopDriver;
 
@@ -70,11 +72,15 @@ public class Channel {
 		this.engine = driverManager.getDriverEngine(this, application.toLowerCase(), this.windowsDesktopDriver);
 
 		this.desktop = engine.isDesktop();
-		this.actions = new Actions(engine.getWebDriver());
-		
+
 		this.maxTry = driverManager.getMaxTry();
-		
+
 		this.refreshLocation();
+	}
+
+	public boolean isNetworkActivity() {
+
+		return false;
 	}
 
 	public void refreshLocation(){
@@ -91,12 +97,12 @@ public class Channel {
 	public void toFront(){
 		windowsDesktopDriver.setWindowToFront(getProcessId());
 		switchToDefaultframe();
-		
+
 		showWindow(5);
 	}
 
 	public void clickWindow(){
-		List<WebElement> childs = windowsDesktopDriver.getChildrenByPid(processData.getPid());
+		List<WebElement> childs = windowsDesktopDriver.getChildrenByPid(getProcessId());
 		if(childs != null && childs.size() > 0){
 			childs.get(0).click();
 		}
@@ -127,12 +133,14 @@ public class Channel {
 		//return engine.getScreenShot(dim); 
 	}
 
-	public Actions getActions(){
-		return actions;
-	}
-
-	public void setProcessData(ChannelProcessData processData) {
-		this.processData = processData;
+	public void setProcessData(long pid, ArrayList<String> processWindows) {
+		
+		Optional<ProcessHandle> procs = ProcessHandle.of(pid);
+		if(procs.isPresent()) {
+			this.process = procs.get();
+			this.processWindows = processWindows;
+		}
+		
 		moveWindowByHandle();
 	}
 
@@ -149,11 +157,11 @@ public class Channel {
 			engine.loadParents(hoverElement);
 		}
 	}
-	
+
 	public CalculatedProperty[] getCssAttributes(FoundElement element){
 		return getEngine().getCssAttributes(element);
 	}
-	
+
 	public CalculatedProperty[] getAttributes(FoundElement element){
 		return getEngine().getAttributes(element);
 	}
@@ -225,12 +233,13 @@ public class Channel {
 		this.dimension = dimension;
 	}
 
-	public void setProcessId(Long value) {}
+	public void setProcessId(Long value) {
+	}
 
 	public Long getProcessId() {
-		if(processData != null){
-			return processData.getPid();
-		}else{
+		if(process != null) {
+			return process.pid();
+		}else {
 			return -1L;
 		}
 	}
@@ -248,6 +257,13 @@ public class Channel {
 
 	public void close(){
 		engine.close();
+
+		process.descendants().forEach(p -> p.destroy());
+		process.destroy();
+	}
+
+	public void lastWindowClosed(ActionStatus status) {
+		mainScript.closeChannel(status, name);
 	}
 
 	//----------------------------------------------------------------------------------------------------------
@@ -269,25 +285,25 @@ public class Channel {
 	public WebElement getRootElement() {
 		return engine.getRootElement();
 	}
-	
+
 	public WebDriver getWebDriver() {
 		return engine.getWebDriver();
 	}
-	
+
 	public void switchToDefaultframe() {
 		engine.switchToDefaultframe();
 	}
 
-	public int switchWindow(int index){
-		return engine.switchWindow(index);
-	}
-	
-	public void resizeWindow(int width, int height){
-		engine.resizeWindow(width, height);
+	public void switchWindow(int index){
+		engine.switchWindow(index);
 	}
 
-	public int closeWindow(int index){
-		return engine.closeWindow(index);
+	public void setWindowBound(BoundData x, BoundData y, BoundData width, BoundData height) {
+		engine.setWindowBound(x, y, width, height);
+	}
+
+	public void closeWindow(ActionStatus status, int index){
+		engine.closeWindow(status, index);
 	}
 
 	public Object executeScript(ActionStatus status, String script, Object ... params){
@@ -297,7 +313,7 @@ public class Channel {
 	public void navigate(URL url, boolean newWindow) {
 		engine.goToUrl(url, newWindow);
 	}
-	
+
 	public void navigate(String type) {
 		if(ActionGotoUrl.REFRESH.equals(type)) {
 			engine.getWebDriver().navigate().refresh();
@@ -307,29 +323,29 @@ public class Channel {
 			engine.getWebDriver().navigate().back();
 		}
 	}
-	
+
 	public CalculatedProperty[] getAttributes(RemoteWebElement webElement) {
 		return engine.getAttributes(webElement);
 	}
-	
+
 	public CalculatedProperty[] getCssAttributes(RemoteWebElement webElement) {
 		return engine.getCssAttributes(webElement);
 	}
 
-	public ArrayList<FoundElement> findWebElement(TestElement testObject, String tagName, String[] attributes, Predicate<Map<String, Object>> searchPredicate, boolean b) {
+	public ArrayList<FoundElement> findWebElement(TestElement testObject, String tagName, String[] attributes, Predicate<Map<String, Object>> searchPredicate) {
 		return engine.findWebElement(this, testObject, tagName, attributes, searchPredicate);
 	}
 
 	public ArrayList<FoundElement> findWindowsElement(WebElement parent, String tag, List<CalculatedProperty> attributes) {
-		return windowsDesktopDriver.findElementByTag(processData.getPid(), parent, tag, attributes, this);
+		return windowsDesktopDriver.findElementByTag(getProcessId(), parent, tag, attributes, this);
 	}
-		
+
 	//----------------------------------------------------------------------------------------------------------
 	//----------------------------------------------------------------------------------------------------------
 
 	public void showWindow(int winCommand) {
 
-		String windowHandle = processData.getWindowHandle().get(0);//TODO loop in list
+		String windowHandle = processWindows.get(0);//TODO loop in list
 
 		if(windowHandle != null){
 			User32 user32 = User32.INSTANCE;
@@ -359,7 +375,7 @@ public class Channel {
 
 	public void closeWindow() {
 
-		String windowHandle = processData.getWindowHandle().get(0);
+		String windowHandle = processWindows.get(0);
 
 		if(windowHandle != null){
 			User32 user32 = User32.INSTANCE;
@@ -381,7 +397,7 @@ public class Channel {
 
 	private void moveWindowByHandle() {
 
-		String handle = processData.getWindowHandle().get(0);
+		String handle = processWindows.get(0);
 
 		if(handle != null){
 
@@ -420,11 +436,12 @@ public class Channel {
 		actionTerminated();
 	}
 
-	public void waitElementVisible(WebElement webElement) {
-		engine.waitElementVisible(webElement);
-	}
-
 	public int getMaxTry() {
 		return maxTry;
 	}
+
+	public void forceScrollElement(FoundElement foundElement) {
+		engine.forceScrollElement(foundElement);
+	}
+
 }

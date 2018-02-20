@@ -19,6 +19,8 @@ public class ActionExecuteElement extends ActionExecute {
 	private SearchedElement searchElement;
 	private TestElement testElement;
 
+	private int expectedCount = 1;
+
 	private boolean async;
 
 	public ActionExecuteElement() {}
@@ -48,6 +50,10 @@ public class ActionExecuteElement extends ActionExecute {
 		super(script, stop);
 		setMaxTry(maxTry);
 		setSearchElement(element);
+	}
+
+	protected void setExpectedCount(int value) {
+		this.expectedCount = value;
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -84,32 +90,33 @@ public class ActionExecuteElement extends ActionExecute {
 
 		}else {
 
-			if(searchElement == null) {
-				testElement = ts.findObject();
-			}else {
-				testElement = ts.findObject(maxTry, searchElement);
-			}
+			if(testElement == null) {
+				if(searchElement == null) {
+					testElement = ts.findObject();
+				}else {
+					testElement = ts.findObject(maxTry, searchElement, expectedCount);
+				}
 
-			ts.updateVisualElement(testElement);
+				ts.updateVisualElement(testElement);
 
-			status.setElement(testElement);
-			status.setSearchDuration(testElement.getTotalSearchDuration());
-			status.setData(testElement.getCount());
+				status.setElement(testElement);
+				status.setSearchDuration(testElement.getTotalSearchDuration());
+				status.setData(testElement.getCount());
 
-			if(testElement.isFound()) {
-				status.setPassed(true);
-				asyncExec(ts);
-			}else {
-				if(this instanceof ActionAssertCount) {
+				if(testElement.isValidated()) {
+					status.setPassed(true);
 					asyncExec(ts);
 				}else {
 					status.setPassed(false);
 					status.setCode(ActionStatus.OBJECT_NOT_FOUND);
 					status.setMessage("Element not found");
 				}
-
-				status.updateDuration();
+				
+			}else {
+				terminateExecution(ts);
 			}
+			
+			status.updateDuration();
 		}
 	}	
 
@@ -120,7 +127,7 @@ public class ActionExecuteElement extends ActionExecute {
 	}
 
 	public void terminateExecution(ActionTestScript ts) {
-		ts.getCurrentChannel().actionTerminated();
+		getTestElement().terminateExecution();
 	}
 
 	public TestElement getTestElement() {

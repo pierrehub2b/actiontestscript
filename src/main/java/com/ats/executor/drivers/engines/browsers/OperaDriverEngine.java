@@ -1,7 +1,5 @@
 package com.ats.executor.drivers.engines.browsers;
 
-import java.util.Iterator;
-
 import org.openqa.selenium.opera.OperaOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
@@ -15,7 +13,7 @@ import com.ats.executor.drivers.engines.WebDriverEngine;
 
 public class OperaDriverEngine extends WebDriverEngine {
 
-	private int waitAfterAction = 50;
+	private int waitAfterAction = 150;
 	
 	public OperaDriverEngine(Channel channel, DriverProcess driverProcess, WindowsDesktopDriver windowsDriver, AtsManager ats) {
 		super(channel, DriverManager.OPERA_BROWSER, driverProcess, windowsDriver, ats);
@@ -36,21 +34,10 @@ public class OperaDriverEngine extends WebDriverEngine {
 		
 		launchDriver(cap, false);
 	}
-
-	@Override
-	public void close() {
-
-		Iterator<String> listWindows = driver.getWindowHandles().iterator();
-		while(listWindows.hasNext()) {
-			driver.switchTo().window(listWindows.next());
-			driver.close();
-		}
-
-		super.close();
-	}
 	
 	@Override
 	public void waitAfterAction() {
 		channel.sleep(waitAfterAction);
+		super.waitAfterAction();
 	}
 }

@@ -38,8 +38,9 @@ public class AtsManager {
 
 	private static final int SCRIPT_TIMEOUT = 60;
 	private static final int PAGELOAD_TIMEOUT = 120;
-
-	private static final int MAX_TRY = 20;
+	
+	private static final int MAX_TRY_INTERACTABLE = 15;
+	private static final int MAX_TRY_SEARCH = 15;
 
 	private Path driversFolderPath;
 	private Properties properties;
@@ -52,8 +53,9 @@ public class AtsManager {
 
 	private int scriptTimeOut = SCRIPT_TIMEOUT;
 	private int pageloadTimeOut = PAGELOAD_TIMEOUT;
-
-	private int maxTry = MAX_TRY;
+	
+	private int maxTryInteractable = MAX_TRY_INTERACTABLE;
+	private int maxTrySearch = MAX_TRY_SEARCH;
 
 	private Proxy proxy = new Proxy();
 
@@ -120,7 +122,7 @@ public class AtsManager {
 												}
 											}
 
-											nodeList = browserElement.getElementsByTagName("actionWait");
+											nodeList = browserElement.getElementsByTagName("waitAction");
 											if(nodeList != null && nodeList.getLength() > 0) {
 												if(nodeList.item(0).getChildNodes().getLength() > 0) {
 													wait = nodeList.item(0).getChildNodes().item(0).getNodeValue();
@@ -182,17 +184,27 @@ public class AtsManager {
 							}catch(NumberFormatException e){}
 						}
 					}
+										
+					NodeList maxTryNodeList = doc.getElementsByTagName("maxTry");
+					if(maxTryNodeList != null && maxTryNodeList.getLength() > 0) {
+						NodeList maxTryNode = ((Element)maxTryNodeList.item(0)).getElementsByTagName("searchElement");
+						if(maxTryNode != null && maxTryNode.getLength() > 0) {
+							try {
+								maxTrySearch = Integer.parseInt(maxTryNode.item(0).getChildNodes().item(0).getNodeValue());
+							}catch(NumberFormatException e){}
+						}
 
-					NodeList maxTryNode = doc.getElementsByTagName("maxTry");
-					if(maxTryNode != null && maxTryNode.getLength() > 0) {
-						try {
-							maxTry = Integer.parseInt(maxTryNode.item(0).getChildNodes().item(0).getNodeValue());
-						}catch(NumberFormatException e){}
+						maxTryNode = ((Element)maxTryNodeList.item(0)).getElementsByTagName("interactable");
+						if(maxTryNode != null && maxTryNode.getLength() > 0) {
+							try {
+								maxTryInteractable = Integer.parseInt(maxTryNode.item(0).getChildNodes().item(0).getNodeValue());
+							}catch(NumberFormatException e){}
+						}
 					}
 
 					NodeList proxyNode = doc.getElementsByTagName("proxy");
 					if(proxyNode != null && proxyNode.getLength() > 0) {
-						String proxyValue = maxTryNode.item(0).getChildNodes().item(0).getNodeValue();
+						String proxyValue = proxyNode.item(0).getChildNodes().item(0).getNodeValue();
 
 						switch (proxyValue){
 
@@ -257,10 +269,6 @@ public class AtsManager {
 		return proxy;
 	}
 
-	public int getMaxTry() {
-		return maxTry;
-	}
-
 	public int getScriptTimeOut() {
 		return scriptTimeOut;
 	}
@@ -279,5 +287,13 @@ public class AtsManager {
 
 	public Path getDriversFolderPath() {
 		return driversFolderPath;
+	}
+
+	public int getMaxTryInteractable() {
+		return maxTryInteractable;
+	}
+
+	public int getMaxTrySearch() {
+		return maxTrySearch;
 	}
 }

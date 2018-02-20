@@ -18,8 +18,8 @@ public class ActionMouseScroll extends ActionMouse {
 
 	public ActionMouseScroll(){}
 
-	public ActionMouseScroll(ScriptLoader script, String type, int value, boolean stop, ArrayList<String> options, ArrayList<String> objectArray) {
-		super(script, type, stop, options, objectArray);
+	public ActionMouseScroll(ScriptLoader script, int value, boolean stop, ArrayList<String> options, ArrayList<String> elementArray) {
+		super(script, stop, options, elementArray);
 		setValue(value);
 	}
 
@@ -34,7 +34,7 @@ public class ActionMouseScroll extends ActionMouse {
 
 	@Override
 	public String getJavaCode() {
-		setSpareCode(", " + value);
+		setSpareCode(value + "");
 		return super.getJavaCode();
 	}
 

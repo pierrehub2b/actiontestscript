@@ -37,7 +37,7 @@ import com.google.gson.JsonObject;
 
 public class FirefoxDriverEngine extends WebDriverEngine {
 
-	private int waitAfterAction = 200;
+	private int waitAfterAction = 300;
 
 	private final String WEB_ELEMENT_REF = "element-6066-11e4-a52e-4f735466cecf";
 	private java.net.URI driverSessionUri;
@@ -52,7 +52,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 
 		FirefoxOptions options = new FirefoxOptions();
 		options.setCapability(FirefoxDriver.MARIONETTE, false);
-		options.setPageLoadStrategy(PageLoadStrategy.EAGER);
+		options.setPageLoadStrategy(PageLoadStrategy.NORMAL);
 
 		BrowserProperties props = ats.getBrowserProperties(DriverManager.FIREFOX_BROWSER);
 		if(props != null) {
@@ -63,7 +63,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		}
 
 		cap.setCapability(FirefoxOptions.FIREFOX_OPTIONS, options);
-
+		
 		launchDriver(cap, false);
 
 		requestConfig = RequestConfig.custom()
@@ -75,7 +75,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		} catch (URISyntaxException e) {}
 
 	}
-
+	
 	@Override
 	public TestBound[] getDimensions() {
 
@@ -88,7 +88,9 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	@Override
 	public void waitAfterAction() {
 		channel.sleep(waitAfterAction);
-		super.waitAfterAction();
+		try {
+			super.waitAfterAction();
+		}catch(WebDriverException e) {}
 	}
 
 	@Override
@@ -120,7 +122,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 
 	@Override
 	protected void move(WebElement element, int offsetX, int offsetY) {
-		
+
 		JsonObject postData = getElementAction((RemoteWebElement)element,offsetX, offsetY);
 		StringEntity postDataEntity = null;
 		try {
@@ -132,12 +134,12 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		CloseableHttpClient httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
 		HttpPost request = new HttpPost(driverSessionUri);
 		request.addHeader("content-type", "application/json");
-		
+
 		try {
-			
+
 			request.setEntity(postDataEntity);
 			httpClient.execute(request);
-			
+
 		} catch (SocketTimeoutException ex) {
 
 			closeDriver();

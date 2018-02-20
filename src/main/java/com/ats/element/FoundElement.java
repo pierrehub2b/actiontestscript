@@ -76,19 +76,6 @@ public class FoundElement{
 		this.updatePosition((Double)data.get("x"), (Double)data.get("y"), channel, offsetX, offsetY);
 	}
 	
-	public void dispose() {
-		if(parent != null) {
-			parent.dispose();
-			parent = null;
-		}
-		value = null;
-	}
-	
-	public void updatePosition(Double x, Double y, Channel channel, Double offsetX, Double offsetY) {
-		this.setX(x + channel.getSubDimension().getX() + offsetX);
-		this.setY(y + channel.getSubDimension().getY() + offsetY);
-	}
-
 	public FoundElement(ArrayList<Map<String, Object>> listElements, Channel channel, Double initElementX, Double initElementY, ArrayList<String> frm) {
 		this(listElements.remove(0), channel, initElementX, initElementY, frm);
 		if(listElements.size() > 0) {
@@ -135,6 +122,19 @@ public class FoundElement{
 		if(parentsList.size() > 0) {
 			setParent(new FoundElement(parentsList, channelX, channelY));
 		}
+	}
+	
+	public void dispose() {
+		if(parent != null) {
+			parent.dispose();
+			parent = null;
+		}
+		value = null;
+	}
+	
+	public void updatePosition(Double x, Double y, Channel channel, Double offsetX, Double offsetY) {
+		this.setX(x + channel.getSubDimension().getX() + offsetX);
+		this.setY(y + channel.getSubDimension().getY() + offsetY);
 	}
 
 	private void setRemoteWebElement(RemoteWebElement rwe){

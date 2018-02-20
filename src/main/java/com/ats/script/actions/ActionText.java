@@ -18,7 +18,7 @@ public class ActionText extends ActionExecuteElement {
 
 	public static final Pattern INSERT_PATTERN = Pattern.compile("insert\\((\\d+)\\)", Pattern.CASE_INSENSITIVE);
 	//public static final Pattern KEY_REGEXP = Pattern.compile("\\$key\\s?\\((\\w+)\\-?([^\\)]*)?\\)");
-	
+
 	private CalculatedValue text;
 
 	private int insert = -1;
@@ -42,7 +42,7 @@ public class ActionText extends ActionExecuteElement {
 			}
 		}
 	}
-	
+
 	public ActionText(Script script, boolean stop, int maxTry, SearchedElement element, CalculatedValue text) {
 		super(script, stop, maxTry, element);
 		setText(text);
@@ -62,8 +62,9 @@ public class ActionText extends ActionExecuteElement {
 
 	@Override
 	public void terminateExecution(ActionTestScript ts) {
-		
+
 		super.terminateExecution(ts);
+
 		String dataText = "";
 		if(text != null){
 			dataText = text.getCalculated();
@@ -72,6 +73,7 @@ public class ActionText extends ActionExecuteElement {
 		ts.updateVisualValue(dataText);
 
 		status.resetDuration();
+
 		getTestElement().over(status, new MouseDirection());
 		if(status.isPassed()) {
 			getTestElement().click(status, false);
@@ -79,8 +81,9 @@ public class ActionText extends ActionExecuteElement {
 				getTestElement().sendText(status, insert == -1, text);
 			}
 		}
+
 		status.updateDuration();
-				
+
 		ts.updateVisualImage();
 	}
 

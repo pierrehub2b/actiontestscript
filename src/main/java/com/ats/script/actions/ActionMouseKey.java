@@ -3,6 +3,8 @@ package com.ats.script.actions;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.openqa.selenium.Keys;
+
 import com.ats.element.SearchedElement;
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.objects.mouse.Mouse;
@@ -15,9 +17,9 @@ public class ActionMouseKey extends ActionMouse {
 	public static final String CTRL_KEY = "ctrl";
 	public static final String SHIFT_KEY = "shift";
 	public static final String ALT_KEY = "alt";
-	
-	private String key = "";
-	
+
+	private Keys key = null;
+
 	public ActionMouseKey(){}
 
 	public ActionMouseKey(ScriptLoader script, String type, boolean stop, ArrayList<String> options, ArrayList<String> objectArray) {
@@ -26,38 +28,36 @@ public class ActionMouseKey extends ActionMouse {
 		Iterator<String> itr = options.iterator();
 		while (itr.hasNext()){
 			String key = itr.next().trim();
-			if(CTRL_KEY.equals(key) || SHIFT_KEY.equals(key) || ALT_KEY.equals(key)){
-				setKey(key);
-			}
+			setKey(key);
 		}
 	}	
 
 	public ActionMouseKey(Script script, boolean stop, int maxTry, SearchedElement element, MouseKey mouse) {
 		super(script, stop, maxTry, element, mouse);
-		setKey(mouse.getKey().toString());
+		key = mouse.getKey();
 	}
-	
+
 	public ActionMouseKey(Script script, boolean stop, int maxTry, SearchedElement element, Mouse mouse) {
 		super(script, stop, maxTry, element, mouse);
 	}
-	
+
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
 	public String getJavaCode() {
-		
+
 		String keyCode = "";
-		if(CTRL_KEY.equals(getKey())){
+		if(Keys.CONTROL.equals(key)){
 			keyCode = ", Keys.CONTROL";
-		}else if(SHIFT_KEY.equals(getKey())){
+		}else if(Keys.SHIFT.equals(key)){
 			keyCode = ", Keys.SHIFT";
-		}else if(ALT_KEY.equals(getKey())){
+		}else if(Keys.ALT.equals(key)){
 			keyCode = ", Keys.ALT";
 		}
 
 		setSpareCode(keyCode);
-		
+
 		return super.getJavaCode();
 	}
 
@@ -76,9 +76,13 @@ public class ActionMouseKey extends ActionMouse {
 			}else if(Mouse.DOUBLE_CLICK.equals(getType())) {
 				getTestElement().doubleClick(status);
 			}else {
-				getTestElement().click(status, false);
+				if(key != null) {
+					getTestElement().click(status, key);
+				}else {
+					getTestElement().click(status, false);
+				}
 			}
-		
+
 			status.updateDuration(currentTime);
 		}
 	}
@@ -88,10 +92,25 @@ public class ActionMouseKey extends ActionMouse {
 	//--------------------------------------------------------
 
 	public String getKey() {
-		return key;
+		if(Keys.CONTROL.equals(key)) {
+			return CTRL_KEY;
+		}else if(Keys.SHIFT.equals(key)) {
+			return SHIFT_KEY;
+		}else if(Keys.ALT.equals(key)) {
+			return ALT_KEY;
+		}
+		return "";
 	}
 
 	public void setKey(String value) {
-		this.key = value;
+		if(CTRL_KEY.equals(value)) {
+			this.key = Keys.CONTROL;
+		}else if(SHIFT_KEY.equals(value)) {
+			this.key = Keys.SHIFT;
+		}else if(ALT_KEY.equals(value)) {
+			this.key = Keys.ALT;
+		}else {
+			this.key = null;
+		}
 	}
 }

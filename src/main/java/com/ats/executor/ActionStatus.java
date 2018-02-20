@@ -19,26 +19,27 @@ public class ActionStatus {
 	public static final int JAVASCRIPT_ERROR = -13;
 	public static final int WINDOW_NO_SWITCH = -14;
 	public static final int WINDOW_INDEX_OUT = -15;
-					
+
 	private Channel channel;
 
 	private long startedAt = 0;
 	private long duration = 0;
-	
+	private long cpuUsage = 0;
+
 	private long searchDuration = 0;
 	private int occurences = 0;
-	
+
 	private boolean passed = true;
 	private int code = 0;
 	private String message = "";
 	private TestElement element = null;
 	private Object data = null;
-	
+
 	public ActionStatus(Channel channel) {
 		this.channel = channel;
 		this.startedAt = System.currentTimeMillis();
 	}
-		
+
 	public void updateDuration() {
 		duration = System.currentTimeMillis() - startedAt;
 	}
@@ -46,11 +47,11 @@ public class ActionStatus {
 	public void updateDuration(long currentTime) {
 		duration += System.currentTimeMillis() - currentTime;
 	}
-	
+
 	public void resetDuration() {
 		duration = System.currentTimeMillis();
 	}
-	
+
 	//----------------------------------------------------------------------------------------------------------------------
 	// Getter and setter for serialization
 	//----------------------------------------------------------------------------------------------------------------------
@@ -58,27 +59,27 @@ public class ActionStatus {
 	public boolean isPassed() {
 		return passed;
 	}
-	
+
 	public void setPassed(boolean passed) {
 		this.passed = passed;
 	}
-	
+
 	public int getCode() {
 		return code;
 	}
-	
+
 	public void setCode(int code) {
 		this.code = code;
 	}
-	
+
 	public String getMessage() {
 		return message;
 	}
-	
+
 	public void setMessage(String message) {
 		this.message = message;
 	}
-	
+
 	public TestElement getElement() {
 		return element;
 	}
@@ -86,14 +87,14 @@ public class ActionStatus {
 	public void setElement(TestElement element) {
 		this.element = element;
 	}
-	
+
 	public Object getData() {
 		return data;
 	}
 	public void setData(Object data) {
 		this.data = data;
 	}
-	
+
 	public long getStartedAt() {
 		return startedAt;
 	}
@@ -125,7 +126,7 @@ public class ActionStatus {
 	public void setOccurences(int value) {
 		this.occurences = value;
 	}
-	
+
 	public Channel getChannel() {
 		return channel;
 	}
@@ -134,4 +135,11 @@ public class ActionStatus {
 		this.channel = channel;
 	}
 
+	public long getCpuUsage() {
+		return cpuUsage;
+	}
+
+	public void setCpuUsage(long cpuUsage) {
+		this.cpuUsage = cpuUsage;
+	}
 }

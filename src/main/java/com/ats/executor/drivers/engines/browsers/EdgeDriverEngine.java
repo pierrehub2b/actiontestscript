@@ -2,7 +2,6 @@ package com.ats.executor.drivers.engines.browsers;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.interactions.Actions;
@@ -11,6 +10,7 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import com.ats.driver.AtsManager;
 import com.ats.driver.BrowserProperties;
 import com.ats.element.FoundElement;
+import com.ats.executor.ActionStatus;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
@@ -21,7 +21,7 @@ import com.ats.generator.variables.CalculatedProperty;
 
 public class EdgeDriverEngine extends WebDriverEngine {
 
-	private int waitAfterAction = 100;
+	private int waitAfterAction = 200;
 
 	public EdgeDriverEngine(Channel channel, DriverProcess driverProcess, WindowsDesktopDriver windowsDriver, AtsManager ats) {
 		super(channel, DriverManager.EDGE_BROWSER, driverProcess, windowsDriver, ats);
@@ -29,7 +29,7 @@ public class EdgeDriverEngine extends WebDriverEngine {
 		DesiredCapabilities cap = new DesiredCapabilities();
 
 		EdgeOptions options = new EdgeOptions();
-		options.setPageLoadStrategy("eager");
+		options.setPageLoadStrategy("normal");
 
 		BrowserProperties props = ats.getBrowserProperties(DriverManager.EDGE_BROWSER);
 		if(props != null) {
@@ -48,20 +48,16 @@ public class EdgeDriverEngine extends WebDriverEngine {
 	}
 
 	@Override
-	public void close() {
-		Iterator<String> listWindows = driver.getWindowHandles().iterator();
-		while(listWindows.hasNext()) {
-			driver.switchTo().window(listWindows.next());
-			driver.close();
-		}
-		super.close();
+	public void closeWindow(ActionStatus status, int index) {
+		channel.sleep(500);
+		super.closeWindow(status, index);
 	}
 
 	@Override
 	public void goToUrl(URL url, boolean newWindow) {
 		super.goToUrl(url, newWindow);
 		waitAfterAction();
-		
+
 		if(newWindow) {
 			channel.sleep(100);
 

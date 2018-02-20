@@ -25,7 +25,6 @@ import com.ats.element.FoundElement;
 import com.ats.executor.TestBound;
 import com.ats.executor.TestElement;
 import com.ats.executor.channels.Channel;
-import com.ats.executor.channels.ChannelProcessData;
 import com.ats.generator.variables.CalculatedProperty;
 import com.google.common.collect.ImmutableMap;
 
@@ -54,28 +53,34 @@ public class WindowsDesktopDriver extends WiniumDriver {
 		options.setApplicationPath("NO_APPLICATION");
 		return options;
 	}
-	
-	public ChannelProcessData getProcessDataByWindowTitle(String windowTitle) {
 
-		ChannelProcessData data = new ChannelProcessData();
+	public long getProcessDataByWindowTitle(String windowTitle, ArrayList<String> windows) {
+
+		long pid = -1L;
 
 		List<WebElement> childs = this.findElementsByXPath("./child::*");
 		for (WebElement we : childs) {
 			String attribute = we.getAttribute("Name");
 
-			if (attribute == null || !attribute.contains(windowTitle)) continue;
+			if (attribute != null && attribute.contains(windowTitle)) { 
+				try {
+					pid = Long.parseLong(we.getAttribute("ProcessId"));
+				}catch (NumberFormatException ex) {}
 
-			try {
-				data.setPid(Long.parseLong(we.getAttribute("ProcessId")));
+				windows.add(getWindowHandle(we.getAttribute("NativeWindowHandle")));
 			}
-			catch (NumberFormatException ex) {
-				continue;
-			}
-
-			data.addWindowHandle(Integer.parseInt(we.getAttribute("NativeWindowHandle")));
 		}
 
-		return data;
+		return pid;
+	}
+
+	public String getWindowHandle(String handle) {
+		try {
+			int handleId = Integer.parseInt(handle);
+			return "native@0x" + Integer.toHexString(handleId);
+		}catch(NumberFormatException ex) {
+			return null;
+		}
 	}
 
 	public void refreshElementMapLocation(Channel channel) {
@@ -121,12 +126,16 @@ public class WindowsDesktopDriver extends WiniumDriver {
 		if(parentsList != null && parentsList.size() > 0) {
 			return new FoundElement(parentsList, channel.getDimension().getX(), channel.getDimension().getY());
 		}
-		
+
 		return null;
 	}
 
 	public List<WebElement> getChildrenByPid(Long pid) {
 		return findElements(By.xpath("./child::*[@ProcessId='" + pid + "']"));
+	}
+
+	public List<WebElement> getDescendantByPid(Long pid) {
+		return findElements(By.xpath("./descendant::*[@ProcessId='" + pid + "']"));
 	}
 
 	private List<WebElement> getDescendant(WebElement element) {
@@ -163,9 +172,9 @@ public class WindowsDesktopDriver extends WiniumDriver {
 
 		//channel.refreshLocation();
 		TestBound channelDimension = channel.getDimension();
-		
+
 		ArrayList<FoundElement> foundElements = new ArrayList<FoundElement>();
-		
+
 		Predicate<WebElement> fullPredicate = Objects::nonNull;
 		for(CalculatedProperty calc : attributes){
 			if(calc.isRegexp()){
@@ -181,7 +190,7 @@ public class WindowsDesktopDriver extends WiniumDriver {
 		}else{
 			List<WebElement> temp = new ArrayList<WebElement>();
 			getChildrenByPid(pid).parallelStream().forEach(e -> temp.addAll(getDescendantByTag(e, tag, attributes)));
-			
+
 			temp.parallelStream().filter(fullPredicate).forEach(e -> foundElements.add(new FoundElement((RemoteWebElement)e, channelDimension.getX(), channelDimension.getY())));
 		}
 

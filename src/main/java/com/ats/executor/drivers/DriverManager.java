@@ -1,5 +1,7 @@
 package com.ats.executor.drivers;
 
+import java.util.function.Predicate;
+
 import com.ats.driver.AtsManager;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
@@ -46,16 +48,49 @@ public class DriverManager {
 	}
 	
 	public int getMaxTry() {
-		return ats.getMaxTry();
+		return ats.getMaxTrySearch();
+	}
+	
+	//--------------------------------------------------------------------------------------------------------------
+	
+	public static void killAllDrivers() {
+		Predicate<ProcessHandle> fullPredicate = p -> p.info().command().isPresent();
+		Predicate<ProcessHandle> chrome  = p -> p.info().command().get().contains(CHROME_DRIVER_FILE_NAME);
+		Predicate<ProcessHandle> opera  =  p -> p.info().command().get().contains(OPERA_WEBDRIVER_FILE_NAME);
+		Predicate<ProcessHandle> desktop  =  p -> p.info().command().get().contains(WINDOWS_DESKTOP_FILE_NAME);
+		Predicate<ProcessHandle> edge  =  p -> p.info().command().get().contains(MICROSOFT_WEBDRIVER_FILE_NAME);
+		Predicate<ProcessHandle> firefox  =  p -> p.info().command().get().contains(FIREFOX_DRIVER_FILE_NAME);
+		
+		ProcessHandle
+		.allProcesses()
+		.parallel()
+		.filter(fullPredicate)
+		.filter(chrome.or(edge).or(firefox).or(opera).or(desktop))
+		.forEach(p2 -> {
+			p2.children().parallel().forEach(p3 -> p3.destroy());
+			p2.destroy();
+		});
 	}
 	
 	//--------------------------------------------------------------------------------------------------------------
 	
 	public DriverProcess getWinDesktopDriver() {
 		if(winDesktopDriver == null){
-			winDesktopDriver = new DriverProcess(ats.getDriversFolderPath(), WINDOWS_DESKTOP_FILE_NAME);
+			winDesktopDriver = new DriverProcess(this, ats.getDriversFolderPath(), WINDOWS_DESKTOP_FILE_NAME);
 		}
 		return winDesktopDriver;
+	}
+	
+	public void processTerminated(DriverProcess dp) {
+		if(dp.equals(operaDriver)) {
+			operaDriver = null;
+		}else if(dp.equals(firefoxDriver)) {
+			firefoxDriver = null;
+		}else if(dp.equals(edgeDriver)) {
+			edgeDriver = null;
+		}else if(dp.equals(chromeDriver)) {
+			chromeDriver = null;
+		}
 	}
 	
 	public IDriverEngine getDriverEngine(Channel channel, String application, WindowsDesktopDriver desktopDriver) {
@@ -75,28 +110,28 @@ public class DriverManager {
 	
 	public DriverProcess getFirefoxDriver() {
 		if(firefoxDriver == null){
-			firefoxDriver = new DriverProcess(ats.getDriversFolderPath(), FIREFOX_DRIVER_FILE_NAME);
+			firefoxDriver = new DriverProcess(this, ats.getDriversFolderPath(), FIREFOX_DRIVER_FILE_NAME);
 		}
 		return firefoxDriver;
 	}
 
 	public DriverProcess getChromeDriver() {
 		if(chromeDriver == null){
-			chromeDriver = new DriverProcess(ats.getDriversFolderPath(), CHROME_DRIVER_FILE_NAME);
+			chromeDriver = new DriverProcess(this, ats.getDriversFolderPath(), CHROME_DRIVER_FILE_NAME);
 		}
 		return chromeDriver;
 	}
 
 	public DriverProcess getEdgeDriver() {
 		if(edgeDriver == null){
-			edgeDriver = new DriverProcess(ats.getDriversFolderPath(), MICROSOFT_WEBDRIVER_FILE_NAME + "-" + Utils.getWindowsBuildVersion() + ".exe");
+			edgeDriver = new DriverProcess(this, ats.getDriversFolderPath(), MICROSOFT_WEBDRIVER_FILE_NAME + "-" + Utils.getWindowsBuildVersion() + ".exe");
 		}
 		return edgeDriver;
 	}
 
 	public DriverProcess getOperaDriver() {
 		if(operaDriver == null){
-			operaDriver = new DriverProcess(ats.getDriversFolderPath(), OPERA_WEBDRIVER_FILE_NAME);
+			operaDriver = new DriverProcess(this, ats.getDriversFolderPath(), OPERA_WEBDRIVER_FILE_NAME);
 		}
 		return operaDriver;
 	}

@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import com.ats.executor.ActionTestScript;
 import com.ats.script.Script;
@@ -46,13 +47,13 @@ public class CalculatedProperty implements Comparable<CalculatedProperty>{
 		setName(name);
 		setValue(new CalculatedValue(data));
 	}
-	
+
 	public CalculatedProperty(boolean isRegexp, String name, CalculatedValue value) {
 		setRegexp(isRegexp);
 		setName(name);
 		setValue(value);
 	}
-	
+
 	public void dispose() {
 		value.dispose();
 		value = null;
@@ -96,7 +97,11 @@ public class CalculatedProperty implements Comparable<CalculatedProperty>{
 
 	private Pattern getRegexpPattern(){
 		if(regexpPattern == null){
-			regexpPattern = Pattern.compile(value.getCalculated());
+			try {
+				regexpPattern = Pattern.compile(value.getCalculated());
+			}catch(PatternSyntaxException e) {
+				regexpPattern = Pattern.compile("");
+			}
 		}
 		return regexpPattern;
 	}

@@ -5,6 +5,8 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.text.StringEscapeUtils;
+
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.SendKeyData;
 import com.ats.generator.variables.transform.DateTransformer;
@@ -69,7 +71,7 @@ public class CalculatedValue{
 		this.setScript(script);
 		this.setData(dataValue);
 
-		this.javaCode = dataValue;
+		this.javaCode = StringEscapeUtils.escapeJava(dataValue);
 
 		if(dataValue.length() > 0){
 
@@ -192,7 +194,7 @@ public class CalculatedValue{
 		value = unnecessaryStartQuotes.matcher(value).replaceFirst("");
 		value = unnecessaryEndQuotes.matcher(value).replaceFirst("");
 		value = unnecessaryMiddleQuotes.matcher(value).replaceAll("");
-
+		
 		return ActionTestScript.JAVA_VALUE_FUNCTION_NAME + "(" + value + ")";
 	}
 

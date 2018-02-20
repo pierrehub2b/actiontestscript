@@ -5,7 +5,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.ats.element.SearchedElement;
-import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
@@ -65,48 +64,19 @@ public class ActionAssertCount extends ActionExecuteElement {
 	public void terminateExecution(ActionTestScript ts) {
 		
 		super.terminateExecution(ts);
-		int count = getTestElement().getCount();
-		if(checkAssertion(count)) {
-			status.setPassed(true);
-			ts.updateVisualStatus(true);
-		}else {
-			status.setPassed(false);
-			status.setCode(ActionStatus.OCCURRENCES_ERROR);
-			status.setData(count);
-			status.setMessage("occurences found : " + count);
-		}
+	
+		getTestElement().checkOccurrences(status, operator, value);
 		
+		if(status.isPassed()) {
+			ts.updateVisualStatus(true);
+		}
+				
 		status.getElement().setFoundElements(null);
 		status.updateDuration();
+		
 		ts.updateVisualValue("occurences", operator + " " + value);
 	}
 	
-	private boolean checkAssertion(int count) {
-		switch(operator){
-
-		case Operators.EQUAL :
-			return count == value;
-
-		case Operators.GREATER :
-			return count > value;
-
-		case Operators.GREATER_EQUALS :
-			return count >= value;
-
-		case Operators.LOWER :
-			return count < value;
-
-		case Operators.LOWER_EQUALS :
-			return count <= value;
-
-		case Operators.DIFFERENT :
-			return count != value;
-
-		default :
-			return false;
-		}
-	}
-
 	//--------------------------------------------------------
 	// getters and setters for serialization
 	//--------------------------------------------------------
@@ -117,8 +87,9 @@ public class ActionAssertCount extends ActionExecuteElement {
 
 	public void setValue(int value) {
 		this.value = value;
+		setExpectedCount(value);
 	}
-	
+
 	public String getOperator() {
 		return operator;
 	}

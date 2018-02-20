@@ -13,33 +13,41 @@ public class DriverProcess {
 
 	private int port = 4444;
 	private Process process;
-	private String fileName;
+	private DriverManager manager;
 
-	public DriverProcess(Path driverFolderPath, String driverFileName) {
+	public DriverProcess(DriverManager manager, Path driverFolderPath, String driverFileName) {
 
-		//if(!driverFileName.contains("geckodriver")) {
-			File driverFile = driverFolderPath.resolve(driverFileName).toFile();
+		this.manager = manager;
+		
+		File driverFile = driverFolderPath.resolve(driverFileName).toFile();
 
-			if(driverFile.exists()){
+		if(driverFile.exists()){
 
-				fileName = driverFile.getName();
-				port = findFreePort();
+			port = findFreePort();
 
-				try{
-					process = Runtime.getRuntime().exec(driverFile.getAbsolutePath() + " --port=" + port);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-
-				int maxTry = 50;
-				while(maxTry > 0 && waitServerStarted(port)) {
-					maxTry--;
-					try {
-						Thread.sleep(200);
-					} catch (InterruptedException e) {}
-				}
+			ProcessBuilder builder = new ProcessBuilder(driverFile.getAbsolutePath(), "--port=" + port);
+            builder.redirectErrorStream(true);
+            
+            try {
+				process = builder.start();
+			} catch (IOException e1) {
+				e1.printStackTrace();
 			}
-		//}
+            			
+			/*try{
+				process = Runtime.getRuntime().exec(driverFile.getAbsolutePath() + " --port=" + port);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}*/
+
+			int maxTry = 50;
+			while(maxTry > 0 && waitServerStarted(port)) {
+				maxTry--;
+				try {
+					Thread.sleep(200);
+				} catch (InterruptedException e) {}
+			}
+		}
 	}
 
 	private boolean waitServerStarted(int port) {
@@ -93,17 +101,8 @@ public class DriverProcess {
 				e.printStackTrace();
 			}
 			process = null;
-
-			kill();
 		}
-	}
-
-	public void kill(){
-		try {
-			Process killProc = Runtime.getRuntime().exec("taskkill /F /T /IM " + fileName);
-			killProc.waitFor();
-		} catch (IOException e) {
-		} catch (InterruptedException e) {
-		}
+		
+		manager.processTerminated(this);
 	}
 }

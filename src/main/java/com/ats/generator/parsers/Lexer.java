@@ -285,7 +285,7 @@ public class Lexer {
 							scrollValue = Integer.parseInt(dataOne);
 						}catch (NumberFormatException e) {}
 
-						action = new ActionMouseScroll(script, actionType, scrollValue, stopExec, options, dataArray);
+						action = new ActionMouseScroll(script, scrollValue, stopExec, options, dataArray);
 
 					}else if(ActionMouseSwipe.SCRIPT_LABEL.equals(actionType)){
 

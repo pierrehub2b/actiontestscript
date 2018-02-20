@@ -23,8 +23,8 @@ import com.ats.executor.ActionStatus;
 import com.ats.executor.TestBound;
 import com.ats.executor.TestElement;
 import com.ats.executor.channels.Channel;
-import com.ats.executor.channels.ChannelProcessData;
 import com.ats.executor.drivers.WindowsDesktopDriver;
+import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 
@@ -64,22 +64,21 @@ public class WindowsDriverEngine extends DriverEngineAbstract implements IDriver
 				e.printStackTrace();
 			}
 
-			ChannelProcessData data = new ChannelProcessData(applicationProcess.pid());
-
 			List<WebElement> childs = new ArrayList<WebElement>();
 			int maxTry = 30;
 
 			while(childs.isEmpty() && maxTry > 0){
-				childs = ((WindowsDesktopDriver)driver).getChildrenByPid(data.getPid());
+				childs = ((WindowsDesktopDriver)driver).getChildrenByPid(applicationProcess.pid());
 				maxTry--;
 				channel.sleep(200);
 			}
 
+			ArrayList<String> windows = new ArrayList<String>();
 			for(WebElement elem : childs){
-				data.addWindowHandle(Integer.parseInt(elem.getAttribute("NativeWindowHandle")));
+				windows.add(windowsDriver.getWindowHandle(elem.getAttribute("NativeWindowHandle")));
 			}
-
-			channel.setProcessData(data);
+			
+			channel.setProcessData(applicationProcess.pid(), windows);
 		}
 	}
 	
@@ -159,18 +158,13 @@ public class WindowsDriverEngine extends DriverEngineAbstract implements IDriver
 	}
 
 	@Override
-	public int switchWindow(int index) {
-		return 1;
-	}
-	
-	@Override
-	public void resizeWindow(int width, int height) {
-		// Do nothing
+	public void switchWindow(int index) {
+		
 	}
 
 	@Override
-	public int closeWindow(int index) {
-		return 1;
+	public void closeWindow(ActionStatus status, int index) {
+
 	}
 
 	@Override
@@ -240,7 +234,14 @@ public class WindowsDriverEngine extends DriverEngineAbstract implements IDriver
 	}
 
 	@Override
-	public boolean waitElementVisible(WebElement webElement) {
-		return true;
+	public void setWindowBound(BoundData x, BoundData y, BoundData width, BoundData height) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void forceScrollElement(FoundElement value) {
+		// TODO Auto-generated method stub
+		
 	}
 }

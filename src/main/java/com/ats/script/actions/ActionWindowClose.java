@@ -11,9 +11,6 @@ public class ActionWindowClose extends ActionWindow {
 
 	public ActionWindowClose(Script script, int num) {
 		super(script, num);
-		if(getNum() == 0) {
-			setNum(1);
-		}
 	}
 
 	@Override

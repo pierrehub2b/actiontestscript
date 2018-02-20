@@ -7,15 +7,13 @@ public class MouseSwipe extends Mouse {
 	private int hdir;
 	private int vdir;
 	
-
-	public MouseSwipe(String type, int hdir, int vdir) {
-		super(type);
+	public MouseSwipe(int hdir, int vdir) {
 		setHdir(hdir);
 		setVdir(vdir);
 	}
 
-	public MouseSwipe(String type, int hdir, int vdir, MouseDirectionData hpos, MouseDirectionData vpos) {
-		super(type, hpos, vpos);
+	public MouseSwipe(int hdir, int vdir, MouseDirectionData hpos, MouseDirectionData vpos) {
+		super(hpos, vpos);
 		setHdir(hdir);
 		setVdir(vdir);
 	}

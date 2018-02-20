@@ -6,13 +6,13 @@ public class MouseScroll extends Mouse {
 
 	private int value;
 	
-	public MouseScroll(String type, int value) {
-		super(type);
+	public MouseScroll(int value) {
+		super();
 		setValue(value);
 	}
 	
-	public MouseScroll(String type, int value, MouseDirectionData hpos, MouseDirectionData vpos) {
-		super(type, hpos, vpos);
+	public MouseScroll(int value, MouseDirectionData hpos, MouseDirectionData vpos) {
+		super(hpos, vpos);
 		setValue(value);
 	}
 

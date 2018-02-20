@@ -7,9 +7,9 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 
 import com.ats.executor.TestBound;
-import com.ats.executor.scripting.ResourceContent;
 import com.ats.recorder.VisualAction;
 import com.ats.script.ScriptHeader;
+import com.ats.tools.ResourceContent;
 import com.itextpdf.io.font.FontConstants;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.color.Color;
@@ -232,7 +232,7 @@ public class PdfStream {
 		p4.addStyle(statusStyle);
 		p4.setTextAlignment(TextAlignment.RIGHT);
 
-		Image icon = new Image(ImageDataFactory.create(ResourceContent.getIcon("tick", 24)));
+		Image icon = new Image(ImageDataFactory.create(ResourceContent.getTick24Icon()));
 		p4.add(icon);
 		p4.add("(passed)");
 		p4.setVerticalAlignment(VerticalAlignment.MIDDLE);

@@ -15,6 +15,7 @@ import com.ats.executor.SendKeyData;
 import com.ats.executor.TestBound;
 import com.ats.executor.TestElement;
 import com.ats.executor.channels.Channel;
+import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 
@@ -23,9 +24,8 @@ public interface IDriverEngine{
 	public boolean isDesktop();
 	public WebDriver getWebDriver();
 	public String getApplication();
-	public int switchWindow(int index);
-	public void resizeWindow(int width, int height);
-	public int closeWindow(int index);
+	public void switchWindow(int index);
+	public void closeWindow(ActionStatus status, int index);
 	public Object executeScript(ActionStatus status, String script, Object ... params);
 	public void goToUrl(URL url, boolean newWindow);
 	public ArrayList<FoundElement> findWebElement(Channel channel, TestElement testObject, String tagName, String[] attributes, Predicate<Map<String, Object>> searchPredicate);
@@ -43,5 +43,6 @@ public interface IDriverEngine{
 	public WebElement getRootElement();
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position);
 	public void sendTextData(WebElement webElement, ArrayList<SendKeyData> textActionList);
-	public boolean waitElementVisible(WebElement webElement);
+	public void setWindowBound(BoundData x, BoundData y, BoundData width, BoundData height);
+	public void forceScrollElement(FoundElement value);
 }

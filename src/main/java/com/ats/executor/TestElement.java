@@ -11,6 +11,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.openqa.selenium.ElementNotVisibleException;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -24,6 +25,7 @@ import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.actions.ActionSelect;
+import com.ats.tools.Operators;
 import com.ats.tools.logger.MessageCode;
 
 public class TestElement{
@@ -32,10 +34,12 @@ public class TestElement{
 
 	private Actions action;
 	private Channel channel;
-
+	
+	private int expectedCount = 1;
+	private int count = 0;
+	
 	private long searchDuration = 0;
 	private long totalSearchDuration = 0;
-	private int count = 0;
 
 	private TestElement parent;
 	private ArrayList<FoundElement> foundElements = new ArrayList<FoundElement>();
@@ -45,17 +49,22 @@ public class TestElement{
 
 	private String criterias;
 
-	private boolean isDesktop = false;
+	private boolean desktop = false;
 
-	public TestElement(Channel channel, int maxTry, TestElement parent, String tag, List<CalculatedProperty> criterias) {
-
+	public TestElement(Channel channel, int maxTry, int expectedCount) {
 		this.channel = channel;
+		this.expectedCount = expectedCount;
 		this.maxTry = maxTry;
-		this.parent = parent;
+	}
 
-		this.isDesktop = channel.isDesktop();
+	public TestElement(Channel channel, int maxTry, int expectedCount, TestElement parent, String tag, List<CalculatedProperty> criterias) {
+
+		this(channel, maxTry, expectedCount);
+		this.parent = parent;
+		this.desktop = channel.isDesktop();
+
 		if(tag.startsWith(DESKTOP_PREFIX)){
-			this.isDesktop = true;
+			this.desktop = true;
 			tag = tag.substring(DESKTOP_PREFIX.length());
 		}
 
@@ -63,32 +72,41 @@ public class TestElement{
 	}
 
 	public TestElement(Channel channel) {
-		this.channel = channel;
+		this(channel, 20, 1);
 		this.index = 0;
 		this.foundElements = new ArrayList<FoundElement>();
 		this.foundElements.add(new FoundElement(channel));
+		this.count = 1;
+		this.action = new Actions(channel.getWebDriver());
 	}
 
-	public TestElement(Channel channel, int maxTry, SearchedElement searchElement) {
+	public TestElement(Channel channel, int maxTry, int expectedCount, SearchedElement searchElement) {
 
-		this.channel = channel;
-		this.maxTry = maxTry;
+		this(channel, maxTry, expectedCount);
 		this.index = searchElement.getIndex();
+
 		if(searchElement.getParent() != null){
-			this.parent = new TestElement(channel, maxTry, searchElement.getParent());
+			this.parent = new TestElement(channel, maxTry, expectedCount, searchElement.getParent());
 		}
 
-		this.isDesktop = searchElement.getTag().startsWith(DESKTOP_PREFIX) || channel.isDesktop();
+		this.desktop = searchElement.getTag().startsWith(DESKTOP_PREFIX) || channel.isDesktop();
 
 		initSearch(searchElement.getTag(), searchElement.getCriterias());
 	}
 
 	public TestElement(FoundElement element, Channel currentChannel) {
+		this(currentChannel, 20, 1);
 		this.foundElements.add(element);
-		this.channel = currentChannel;
 		this.count = getElementsCount();
-
 		this.action = new Actions(channel.getWebDriver());
+	}
+
+	protected int getMaxTry() {
+		return maxTry;
+	}
+
+	protected Channel getChannel() {
+		return channel;
 	}
 
 	public void dispose() {
@@ -105,20 +123,25 @@ public class TestElement{
 		}
 	}
 
+	private List<CalculatedProperty> elementProperties;
+	private String elementTag;
 	private void initSearch(String tag, List<CalculatedProperty> properties) {
 
 		if(channel != null){
 
-			channel.switchToDefaultframe();
-
-			action = new Actions(channel.getWebDriver());
+			elementProperties = properties;
+			elementTag = tag;
 
 			criterias = tag;
 			searchDuration = System.currentTimeMillis();
 
-			if(parent == null || (parent != null && parent.isFound())){
+			if(parent == null || (parent != null && parent.isValidated())){
 
-				if(isDesktop){
+				/*if(parent == null) {
+					channel.switchToDefaultframe();
+				}*/
+
+				if(desktop){
 
 					WebElement parentElement = null;
 					if(parent != null) {
@@ -128,6 +151,8 @@ public class TestElement{
 					foundElements = channel.findWindowsElement(parentElement, tag, properties);
 
 				}else{
+					
+					action = new Actions(channel.getWebDriver());
 
 					ArrayList<String> attributeList = new ArrayList<String>();
 
@@ -135,9 +160,7 @@ public class TestElement{
 
 					if(properties != null){
 						for (CalculatedProperty property : properties){
-
 							criterias += "," + property.getName() + ":" + property.getValue().getCalculated();
-
 							attributeList.add(property.getName());
 							fullPredicate = property.getPredicate(fullPredicate);
 						}
@@ -145,16 +168,31 @@ public class TestElement{
 
 					String[] attributes = attributeList.toArray(new String[attributeList.size()]);
 
-					foundElements = channel.findWebElement(this, tag, attributes, fullPredicate, false);
-
+					foundElements = channel.findWebElement(this, tag, attributes, fullPredicate);
+					
 					int trySearch = 0;
-					while(getElementsCount() == 0 && trySearch < maxTry){
+					
+					if(expectedCount == 0) {
+						
+						while(getElementsCount() > 0 && trySearch < maxTry){
 
-						channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "searching element", maxTry - trySearch);
-						foundElements = channel.findWebElement(this, tag, attributes, fullPredicate, false);
+							channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "searching element", maxTry - trySearch);
+							foundElements = channel.findWebElement(this, tag, attributes, fullPredicate);
 
-						channel.sleep(100 + trySearch*30);
-						trySearch++;
+							progressiveWait(trySearch);
+							trySearch++;
+						}
+						
+					}else {
+						
+						while(getElementsCount() == 0 && trySearch < maxTry){
+
+							channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "searching element", maxTry - trySearch);
+							foundElements = channel.findWebElement(this, tag, attributes, fullPredicate);
+
+							progressiveWait(trySearch);
+							trySearch++;
+						}
 					}
 				}
 			}
@@ -166,11 +204,15 @@ public class TestElement{
 			if(index > 0) {
 				index--;
 			}
-
-			//if(count > 0) {
-			//	channel.scroll(getFoundElements().get(index), 0);
-			//}
 		}
+	}
+
+	private void progressiveWait(int current) {
+		channel.sleep(200 + current*50);
+	}
+
+	public void searchAgain() {
+		initSearch(elementTag, elementProperties);
 	}
 
 	private int getElementsCount() {
@@ -203,17 +245,21 @@ public class TestElement{
 		return getFoundElement().getRectangle();
 	}
 
-	public boolean isFound() {
-		return count > 0;
+	public boolean isValidated() {
+		return (count == 0 && expectedCount == 0) || (count > 0 && expectedCount > 0);
 	}
 
 	public boolean isIframe() {
-		if(isFound()){
+		if(isValidated()){
 			return getFoundElement().isIframe();
 		}else{
 			return false;
 		}
 	}
+
+	//public boolean isDialog() {
+	//	return dialog;
+	//}
 
 	//----------------------------------------------------------------------------------------------------------------------
 	// Getter and setter for serialization
@@ -276,18 +322,61 @@ public class TestElement{
 	}
 
 	//-------------------------------------------------------------------------------------------------------------------
-	// Actions ...
+	// Assertion ...
 	//-------------------------------------------------------------------------------------------------------------------
 
+	public void checkOccurrences(ActionStatus status, String operator, int expected) {
+
+		boolean result = false;
+		if(expected == 0) {
+			int loop = maxTry;
+			while(count > 0 && loop > 0) {
+				searchAgain();
+				channel.sleep(200);
+				loop--;
+			}
+			result = loop > 0;
+		}else {
+			result = checkAssertion(operator, expected, count);
+		}
+
+		if(result) {
+			status.setPassed(true);
+		}else {
+			status.setPassed(false);
+			status.setCode(ActionStatus.OCCURRENCES_ERROR);
+			status.setData(count);
+			status.setMessage("expected : " + expected + " -> occurences found : " + count);
+		}
+	}
+
+	private boolean checkAssertion(String operator, int expected, int found) {
+		switch(operator){
+		case Operators.EQUAL :
+			return found == expected;
+		case Operators.GREATER :
+			return found > expected;
+		case Operators.GREATER_EQUALS :
+			return found >= expected;
+		case Operators.LOWER :
+			return found < expected;
+		case Operators.LOWER_EQUALS :
+			return found <= expected;
+		case Operators.DIFFERENT :
+			return found != expected;
+		default :
+			return false;
+		}
+	}
 
 	//-------------------------------------------------------------------------------------------------------------------
 	// Text ...
 	//-------------------------------------------------------------------------------------------------------------------
 
 	private void clearText(ActionStatus status) {
-		if(isDesktop) {
+		if(desktop) {
 			click(status, false);
-			getWebElement().sendKeys("");//TODO ctrl+a and backspace
+			getWebElement().sendKeys("");
 		}else {
 			channel.executeScript(status, "arguments[0].value=''", getWebElement());
 		}
@@ -296,7 +385,7 @@ public class TestElement{
 	public void sendText(ActionStatus status, boolean clear, CalculatedValue text) {
 
 		ArrayList<SendKeyData> textActionList = text.getCalculatedText();
-		
+
 		if(clear) {
 			clearText(status);
 			channel.sleep(50);
@@ -312,7 +401,7 @@ public class TestElement{
 	//-------------------------------------------------------------------------------------------------------------------
 
 	public void select(ActionStatus status, CalculatedProperty selectProperty, boolean select, boolean ctrl) {
-		if(isFound()){
+		if(isValidated()){
 
 			Select selectElement = new Select(getWebElement());
 
@@ -358,7 +447,7 @@ public class TestElement{
 	//-------------------------------------------------------------------------------------------------------------------
 
 	public void over(ActionStatus status, MouseDirection position) {
-		if(isFound()){
+		if(isValidated()){
 			channel.mouseMoveToElement(status, getFoundElement(), position);
 		}else{
 			status.setPassed(false);
@@ -367,47 +456,51 @@ public class TestElement{
 		}
 	}
 
+	public void click(ActionStatus status, Keys key) {
+		action.keyDown(key).perform();
+		click(status, false);
+		action.keyUp(key).perform();
+	}	
+
 	public void click(ActionStatus status, boolean hold) {
 
-		int loop = 20;
+		int tryLoop = maxTry;
+		mouseClick(status, hold);
 
-		while(loop > 0){
-			try {
+		while(tryLoop > 0 && !status.isPassed()) {
+			progressiveWait(tryLoop);
+			mouseClick(status, hold);
+		}
+	}
 
-				if(hold) {
-					action.clickAndHold();
-				}else {
-					action.click();
-				}
+	private void mouseClick(ActionStatus status, boolean hold) {
 
-				action.perform();
-				status.setPassed(true);
+		status.setPassed(false);
 
-				//channel.actionTerminated();
+		try {
 
-				loop = 0;
-
-			}catch(ElementNotVisibleException e0) {	
-
-				if(loop == 1) {
-					status.setPassed(false);
-					status.setCode(ActionStatus.OBJECT_NOT_VISIBLE);
-				}
-
-			}catch(WebDriverException e0) {	
-
-				if(loop == 1) {
-					status.setPassed(false);
-					if(e0.getMessage().contains("is not clickable") || e0.getMessage().contains("Element is obscured")) {
-						status.setCode(ActionStatus.OBJECT_NOT_CLICKABLE);
-					}else {
-						throw e0;
-					}
-				}
+			if(hold) {
+				action.clickAndHold();
+			}else {
+				action.click();
 			}
 
-			//channel.sleep(200);
-			loop--;
+			action.perform();
+			status.setPassed(true);
+
+			return;
+
+		}catch(ElementNotVisibleException e0) {	
+
+			status.setCode(ActionStatus.OBJECT_NOT_VISIBLE);
+			mouseWheel(status, 0);
+
+		}catch(WebDriverException e0) {	
+			if(e0.getMessage().contains("is not clickable") || e0.getMessage().contains("Element is obscured")) {
+				status.setCode(ActionStatus.OBJECT_NOT_CLICKABLE);
+			}
+		}catch (Exception e) {
+			status.setMessage(e.getMessage());
 		}
 	}
 
@@ -418,7 +511,6 @@ public class TestElement{
 	public void drop(ActionStatus status) {
 		action.release().perform();
 		status.setPassed(true);
-		//channel.waitAfterAction();
 	}
 
 	public void swipe(ActionStatus status, int hDirection, int vDirection) {
@@ -428,8 +520,14 @@ public class TestElement{
 	}
 
 	public void mouseWheel(ActionStatus status, int delta) {
-		if(isFound()){
-			channel.scroll(getFoundElement(), delta);
+		if(isValidated()){
+
+			if(delta == 0) {
+				channel.forceScrollElement(getFoundElement());
+			}else {
+				channel.scroll(getFoundElement(), delta);
+			}
+
 		}else{
 			status.setPassed(false);
 			status.setCode(ActionStatus.OBJECT_NOT_FOUND);
@@ -438,7 +536,7 @@ public class TestElement{
 	}
 
 	public ActionStatus wheelClick(ActionStatus status) {
-		if(isFound()){
+		if(isValidated()){
 			channel.middleClick(getWebElement());
 		}else{
 			status.setPassed(false);
@@ -449,7 +547,7 @@ public class TestElement{
 	}
 
 	public ActionStatus doubleClick(ActionStatus status) {
-		if(isFound()){
+		if(isValidated()){
 			action.doubleClick().perform();
 		}else{
 			status.setPassed(false);
@@ -461,7 +559,7 @@ public class TestElement{
 	}
 
 	public ActionStatus rightClick(ActionStatus status) {
-		if(isFound()){
+		if(isValidated()){
 			action.contextClick().perform();
 		}else{
 			status.setPassed(false);
@@ -472,54 +570,48 @@ public class TestElement{
 		return status;
 	}
 
-	public boolean dropTo() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	//public boolean dropTo() {
+	// TODO Auto-generated method stub
+	//	return false;
+	//}
 
 	//-------------------------------------------------------------------------------------------------------------------
 	// Attributes
 	//-------------------------------------------------------------------------------------------------------------------
 
 	public String getAttribute(String name){
-		
+
 		String result = null;
-		
-		if(isFound()){
-			
-			channel.waitElementVisible(getWebElement());
-			
+
+		if(isValidated()){
+
 			int tryLoop = maxTry + channel.getMaxTry();
-						
+
 			while ((result == null || result.length() == 0) && tryLoop > 0){
 				tryLoop--;
-				
+
 				result = getWebElement().getAttribute(name);
 				if(result == null || result.length() == 0) {
-					
+
 					for (CalculatedProperty calc : getAttributes()) {
 						if(name.equals(calc.getName())) {
 							result = calc.getValue().getCalculated();
 						}
 					}
-					
+
 					if(result == null || result.length() == 0) {
 						result = getCssAttributeValueByName(name);
 					}
 				}
 			}
 		}
-		
+
 		return result;
 	}
 
 	private String getCssAttributeValueByName(String name) {
 		return foundAttributeValue(name, getCssAttributes());
 	}
-
-	/*private String getAttributeValueByName(String name) {
-		return foundAttributeValue(name, getAttributes());
-	}*/
 
 	private String foundAttributeValue(String name, CalculatedProperty[] properties) {
 		Stream<CalculatedProperty> stream = Arrays.stream(properties);
@@ -539,7 +631,7 @@ public class TestElement{
 	}
 
 	public Object executeScript(ActionStatus status, String script) {
-		if(isFound()){
+		if(isValidated()){
 			return channel.executeScript(status, "arguments[0]." + script, getWebElement());
 		}else{
 			status.setPassed(false);
@@ -547,5 +639,9 @@ public class TestElement{
 			status.setMessage("Object not found, cannot execute script action !");
 		}
 		return null;
+	}
+
+	public void terminateExecution() {
+		channel.actionTerminated();
 	}
 }

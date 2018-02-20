@@ -14,38 +14,45 @@ public class ActionMouse extends ActionExecuteElement {
 	private String type = Mouse.OVER;
 
 	private MouseDirection position;
-	
+
 	public ActionMouse(){}
 
-	public ActionMouse(ScriptLoader script, String type, boolean stop, ArrayList<String> options, ArrayList<String> objectArray) {
+	public ActionMouse(ScriptLoader script, boolean stop, ArrayList<String> options, ArrayList<String> objectArray) {
 		super(script, stop, options, objectArray);
 		setPosition(new MouseDirection(options));
-		setType(type);
+		setType("undefined");
 	}
-
+	
 	public ActionMouse(Script script, boolean stop, int maxTry, SearchedElement element, Mouse mouse) {
 		super(script, stop, maxTry, element);
 		setPosition(mouse.getPosition());
 		setType(mouse.getType());
 	}
 	
+	public ActionMouse(ScriptLoader script, String type, boolean stop, ArrayList<String> options, ArrayList<String> objectArray) {
+		this(script, stop, options, objectArray);
+		setType(type);
+	}
+
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
-	
+
 	@Override
 	public void terminateExecution(ActionTestScript ts) {
 
 		super.terminateExecution(ts);
-		
+
 		ts.updateVisualValue(getType());
 
 		status.resetDuration();
+
 		getTestElement().over(status, position);
+
 		status.updateDuration();
 
 		ts.updateVisualImage();
 	}
-	
+
 	//---------------------------------------------------------------------------------------------------------------------------------
 	// Code Generator
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -54,12 +61,12 @@ public class ActionMouse extends ActionExecuteElement {
 	public void setSpareCode(String spare) {
 		this.spareCode = spare;
 	}
-		
+
 	@Override
 	public String getJavaCode() {
 		return super.getJavaCode() + ", " + ActionTestScript.JAVA_MOUSE_FUNCTION_NAME + "(" + getMouseType() + "" + spareCode + position.getJavaCode() + "))";
 	}
-	
+
 	private static final String MOUSE_CLASS = Mouse.class.getSimpleName() + ".";
 	private String getMouseType() {
 		switch (type){
@@ -75,8 +82,10 @@ public class ActionMouse extends ActionExecuteElement {
 			return MOUSE_CLASS + "DRAG";
 		case Mouse.DROP :
 			return MOUSE_CLASS + "DROP";
+		case Mouse.CLICK :
+			return MOUSE_CLASS + "CLICK";
 		}
-		return MOUSE_CLASS + "CLICK";
+		return "";
 	}
 
 	//--------------------------------------------------------

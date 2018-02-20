@@ -13,15 +13,25 @@ public class Mouse {
 
 	public static final String DRAG = "drag";
 	public static final String DROP = "drop";
+	
+	//public static final String SCROLL = "scroll";
 
-	private String type;
+	private String type = "undefined";
 	private MouseDirection position;
 
+	public Mouse() {
+		setPosition(new MouseDirection());
+	}
+	
 	public Mouse(String type) {
 		setType(type);
 		setPosition(new MouseDirection());
 	}
 
+	public Mouse(MouseDirectionData hpos, MouseDirectionData vpos) {
+		setPosition(new MouseDirection(hpos, vpos));
+	}
+	
 	public Mouse(String type, MouseDirectionData hpos, MouseDirectionData vpos) {
 		setType(type);
 		setPosition(new MouseDirection(hpos, vpos));
