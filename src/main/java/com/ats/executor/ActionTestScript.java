@@ -543,12 +543,15 @@ public class ActionTestScript extends Script implements ITest{
 
 	private RecorderThread recorder;
 	public void startRecorder(ScriptHeader info, boolean visual, boolean pdf, boolean xml) {
-		recorder = new RecorderThread(info, projectData, visual, pdf, xml);
+		if(recorder == null) {
+			recorder = new RecorderThread(info, projectData, visual, pdf, xml);
+		}
 	}
 
 	public void stopRecorder() {
 		if(recorder != null) {
 			recorder.terminate();
+			recorder = null;
 		}
 	}
 

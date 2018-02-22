@@ -62,6 +62,10 @@ public class ActionAssertProperty extends ActionExecuteElement {
 				status.setMessage("Attribute value '" + attributeValue + "' do not match expected value '" + value.getValue().getCalculated() + "'");
 			}
 		}
+		
+		if(status.isPassed()) {
+			ts.updateVisualStatus(true);
+		}
 
 		status.updateDuration();
 	}
