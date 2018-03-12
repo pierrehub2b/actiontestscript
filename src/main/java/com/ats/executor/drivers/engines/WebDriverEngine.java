@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.NoSuchWindowException;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.Proxy;
@@ -83,7 +84,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		return driverProcess;
 	}
 
-	protected void launchDriver(DesiredCapabilities cap, boolean isEdge) {
+	protected void launchDriver(MutableCapabilities cap, boolean isEdge) {
 
 		cap.setCapability(CapabilityType.SUPPORTS_FINDING_BY_CSS, false);
 		cap.setCapability(CapabilityType.PROXY, proxy);
@@ -322,18 +323,18 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	public TestBound[] getDimensions() {
 
 		switchToDefaultframe();
-		
+
 		Map<String, ArrayList<Double>> response = (Map<String, ArrayList<Double>>) runJavaScript(ResourceContent.getDocumentSizeJavaScript());
 		int maxTry = 10;
-		
+
 		while (response == null && maxTry > 0) {
 			response = (Map<String, ArrayList<Double>>) runJavaScript(ResourceContent.getDocumentSizeJavaScript());
 			maxTry--;
 		}
-		
+
 		TestBound testDimension = null;
 		TestBound testSubDimension = null;
-		
+
 		if(response != null) {
 			ArrayList<Double> dimension = response.get("main");
 			ArrayList<Double> subDimension = response.get("sub");
@@ -350,12 +351,12 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 					subDimension.get(2),
 					subDimension.get(3));
 
-			
+
 		}else {
 			testDimension = new TestBound(0.0, 0.0, 500.0, 500.0);
 			testSubDimension = new TestBound(0.0, 0.0, 500.0, 500.0);
 		}
-		
+
 		return new TestBound[]{testDimension, testSubDimension};
 	}
 
@@ -428,6 +429,12 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			int offsetY = getOffsetY(rect, position);
 
 			move(foundElement.getValue(), offsetX, offsetY);
+
+			ArrayList<Double> newPosition =  (ArrayList<Double>) runJavaScript("var rect=arguments[0].getBoundingClientRect();var result=[rect.left+0.00001, rect.top+0.00001]", foundElement.getValue());
+
+			if(newPosition.size() > 1) {
+				foundElement.updatePosition(newPosition.get(0), newPosition.get(1), channel, 0.0, 0.0);
+			}
 
 		}else {
 			status.setPassed(false);

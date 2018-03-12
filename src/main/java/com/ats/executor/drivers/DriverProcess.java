@@ -33,13 +33,7 @@ public class DriverProcess {
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-            			
-			/*try{
-				process = Runtime.getRuntime().exec(driverFile.getAbsolutePath() + " --port=" + port);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}*/
-
+            
 			int maxTry = 50;
 			while(maxTry > 0 && waitServerStarted(port)) {
 				maxTry--;

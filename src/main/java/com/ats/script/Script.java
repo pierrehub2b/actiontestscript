@@ -3,6 +3,7 @@ package com.ats.script;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,6 +28,8 @@ public class Script {
 	private ArrayList<String> parameters = new ArrayList<String>();
 	private ArrayList<Variable> variables = new ArrayList<Variable>();
 	private ArrayList<CalculatedValue> returns;
+	
+	private Map<String, String> testParameters;
 	
 	private File projectAtsFolder;
 		
@@ -76,6 +79,10 @@ public class Script {
 		try {
 			Thread.sleep(ms);
 		} catch (InterruptedException e) {}
+	}
+	
+	protected void setTestParameters(Map<String, String> params) {
+		this.testParameters = params;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -181,7 +188,16 @@ public class Script {
 	}
 	
 	public String getEnvironmentValue(String name, String defaultValue) {
-		String value = System.getenv(name);
+	
+		String value = null;
+		if(testParameters != null) {
+			value = testParameters.get(name);
+		}
+
+		if(value == null) {
+			value = System.getenv(name);
+		}
+		
 		if(value != null) {
 			return value;
 		}

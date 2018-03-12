@@ -2,6 +2,7 @@ package com.ats.executor;
 
 import static org.testng.Assert.fail;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
@@ -12,8 +13,13 @@ import java.util.logging.Level;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.testng.ITest;
+import org.testng.ITestContext;
+import org.testng.TestRunner;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeSuite;
 
 import com.ats.element.SearchedElement;
 import com.ats.executor.channels.Channel;
@@ -54,7 +60,11 @@ public class ActionTestScript extends Script implements ITest{
 
 	private String[] returnValues;
 
-	public ActionTestScript() {}
+	private String testName;
+
+	public ActionTestScript() {
+		init();
+	}
 
 	public ActionTestScript(Logger logger) {
 		super(logger);
@@ -67,35 +77,76 @@ public class ActionTestScript extends Script implements ITest{
 
 		topScript = this;
 		channelManager = new ChannelManager(this);
-
-		if("true".equals(System.getProperty("ats.log"))) {
-			setLogger(new Logger(System.out));
-		}
-
-		InputStream resourceAsStream = this.getClass().getResourceAsStream("/version.properties");
-		Properties prop = new Properties();
-		try{
-			prop.load( resourceAsStream );
-			sendInfo("ATS script started", "(version " + prop.getProperty("version") + ")");
-		}catch(Exception e) {}
-
 	}
 
 	public String[] getReturnValues() {
 		return returnValues;
 	}
 
+	private void setTestName(String name) {
+		this.testName = name;
+	}
+
 	//----------------------------------------------------------------------------------------------------------
 	// TestNG management
 	//----------------------------------------------------------------------------------------------------------
 
-	@BeforeTest
-	public void beforeTest() {
-		init();
+	@BeforeSuite(alwaysRun=true)
+	public void beforeSuite() {
+		InputStream resourceAsStream = this.getClass().getResourceAsStream("/version.properties");
+		Properties prop = new Properties();
+		try{
+			prop.load( resourceAsStream );
+			System.out.println("ATS script started (version " + prop.getProperty("version") + ")");
+		}catch(Exception e) {}
 	}
 
-	@AfterTest
+	@BeforeClass(alwaysRun=true)
+	public void beforeTest(ITestContext ctx) {
+
+		TestRunner runner = (TestRunner) ctx;
+
+		setTestName(this.getClass().getName());
+		setTestParameters(runner.getTest().getAllParameters());
+
+		String visualReport = getEnvironmentValue("visual.report", "");
+
+		if("true".equals(visualReport.trim().toLowerCase())) {
+
+			String outputDirectory = runner.getOutputDirectory();
+
+			File output = new File(outputDirectory);
+			if(!output.exists()) {
+				output.mkdirs();
+			}
+			setRecorder(new RecorderThread(output, testName, true, false, false));
+		}
+
+		setLogger(new Logger(ctx.getSuite().getXmlSuite().getVerbose()));
+		sendInfo("starting script", " '" + testName + "'");
+
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			public void run() {
+				tearDown();
+			}
+		});
+
+		new StopExecutionThread(System.in).start();
+
+	}
+
+	@AfterClass(alwaysRun=true)
+	public void afterClass() {
+		sendInfo("script terminated", " '" + testName + "'");
+	}
+
+	@AfterTest(alwaysRun=true)
 	public void testFinished() {
+		tearDown();
+	}
+
+	@AfterMethod(alwaysRun=true)
+	public void cleanup(){
 		tearDown();
 	}
 
@@ -103,6 +154,10 @@ public class ActionTestScript extends Script implements ITest{
 	public String getTestName() {
 		return this.getClass().getName();
 	}
+
+	//----------------------------------------------------------------------------------------------------------
+	// Channels management
+	//----------------------------------------------------------------------------------------------------------
 
 	public Channel getCurrentChannel(){
 		return getChannelManager().getCurrentChannel();
@@ -146,9 +201,11 @@ public class ActionTestScript extends Script implements ITest{
 	}
 
 	public void tearDown(){
+		sendInfo("script's execution terminated", ", closing drivers ...");
 		getChannelManager().tearDown();
-		if(recorder != null) {
-			recorder.terminate();
+		if(getRecorder() != null) {
+			getRecorder().terminate();
+			setRecorder(null);
 		}
 	}
 
@@ -214,33 +271,30 @@ public class ActionTestScript extends Script implements ITest{
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_VALUE_FUNCTION_NAME = "cal";
-	public CalculatedValue cal(Object ... data) {
+	public static final String JAVA_VALUE_FUNCTION_NAME = "cvl";
+	public CalculatedValue cvl(Object ... data) {
 		return new CalculatedValue(this, data);
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_PARAM_FUNCTION_NAME = "param";
-	public String param(int index) {
+	public static final String JAVA_PARAM_FUNCTION_NAME = "pmr";
+	public String pmr(int index) {
 		return getParameterValue(index, "");
 	}
 
-	public String param(int index, String defaultValue) {
+	public String pmr(int index, String defaultValue) {
 		return getParameterValue(index, defaultValue);
 	}
 
-	//---------------------------------------------------------------------------------------------
-
-	public static final String JAVA_PARAMS_FUNCTION_NAME = "param";
-	public CalculatedValue[] param(CalculatedValue ... values) {
+	public CalculatedValue[] pmr(CalculatedValue ... values) {
 		return values;
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_RETURNS_FUNCTION_NAME = "returns";
-	public void returns(CalculatedValue ... values) {
+	public static final String JAVA_RETURNS_FUNCTION_NAME = "rtn";
+	public void rtn(CalculatedValue ... values) {
 
 		int i = 0;
 		returnValues = new String[values.length];
@@ -253,7 +307,7 @@ public class ActionTestScript extends Script implements ITest{
 		updateVariables();
 	}
 
-	public void returns(String ... values) {
+	public void rtn(String ... values) {
 
 		int i = 0;
 		returnValues = new String[values.length];
@@ -293,8 +347,8 @@ public class ActionTestScript extends Script implements ITest{
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_PROPERTY_FUNCTION_NAME = "prop";
-	public CalculatedProperty prop(boolean isRegexp, String name, CalculatedValue value){
+	public static final String JAVA_PROPERTY_FUNCTION_NAME = "ppy";
+	public CalculatedProperty ppy(boolean isRegexp, String name, CalculatedValue value){
 		return new CalculatedProperty(isRegexp, name, value);
 	}
 
@@ -321,12 +375,12 @@ public class ActionTestScript extends Script implements ITest{
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_ELEMENT_FUNCTION_NAME = "ele";
-	public SearchedElement ele(SearchedElement parent, int index, String tagName, CalculatedProperty ... properties) {
+	public static final String JAVA_ELEMENT_FUNCTION_NAME = "elt";
+	public SearchedElement elt(SearchedElement parent, int index, String tagName, CalculatedProperty ... properties) {
 		return new SearchedElement(parent, index, tagName, properties);
 	}
 
-	public SearchedElement ele(int index, String tagName, CalculatedProperty ... properties) {
+	public SearchedElement elt(int index, String tagName, CalculatedProperty ... properties) {
 		return new SearchedElement(null, index, tagName, properties);
 	}
 
@@ -339,8 +393,8 @@ public class ActionTestScript extends Script implements ITest{
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_REGEX_FUNCTION_NAME = "rgx";
-	public RegexpTransformer rgx(String patt, int group) {
+	public static final String JAVA_REGEX_FUNCTION_NAME = "rxp";
+	public RegexpTransformer rxp(String patt, int group) {
 		return new RegexpTransformer(patt, group);
 	}
 
@@ -353,8 +407,8 @@ public class ActionTestScript extends Script implements ITest{
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_TIME_FUNCTION_NAME = "tim";
-	public TimeTransformer tim(String ... data) {
+	public static final String JAVA_TIME_FUNCTION_NAME = "tme";
+	public TimeTransformer tme(String ... data) {
 		return new TimeTransformer(data);
 	}
 
@@ -374,36 +428,36 @@ public class ActionTestScript extends Script implements ITest{
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_MOUSE_FUNCTION_NAME = "mouse";
-	public Mouse mouse(String type) {
+	public static final String JAVA_MOUSE_FUNCTION_NAME = "mse";
+	public Mouse mse(String type) {
 		return new Mouse(type);
 	}
 
-	public Mouse mouse(String type, MouseDirectionData hpos, MouseDirectionData vpos) {
+	public Mouse mse(String type, MouseDirectionData hpos, MouseDirectionData vpos) {
 		return new Mouse(type, hpos, vpos);
 	}
 
-	public MouseKey mouse(String type, Keys key, MouseDirectionData hpos, MouseDirectionData vpos) {
+	public MouseKey mse(String type, Keys key, MouseDirectionData hpos, MouseDirectionData vpos) {
 		return new MouseKey(type, key, hpos, vpos);
 	}
 
-	public MouseKey mouse(String type, Keys key) {
+	public MouseKey mse(String type, Keys key) {
 		return new MouseKey(type, key);
 	}
 
-	public MouseScroll mouse(int scroll, MouseDirectionData hpos, MouseDirectionData vpos) {
+	public MouseScroll mse(int scroll, MouseDirectionData hpos, MouseDirectionData vpos) {
 		return new MouseScroll(scroll, hpos, vpos);
 	}
 
-	public MouseScroll mouse(int scroll) {
+	public MouseScroll mse(int scroll) {
 		return new MouseScroll(scroll);
 	}
 
-	public MouseSwipe mouse(int hdir, int vdir, MouseDirectionData hpos, MouseDirectionData vpos) {
+	public MouseSwipe mse(int hdir, int vdir, MouseDirectionData hpos, MouseDirectionData vpos) {
 		return new MouseSwipe(hdir, vdir, hpos, vpos);
 	}
 
-	public MouseSwipe mouse(int hdir, int vdir) {
+	public MouseSwipe mse(int hdir, int vdir) {
 		return new MouseSwipe(hdir, vdir);
 	}
 
@@ -463,15 +517,18 @@ public class ActionTestScript extends Script implements ITest{
 	//-----------------------------------------------------------------------------------------------------------
 
 	public void startChannel(ActionStatus status, String name, String app){
+		sendInfo("start channel", " '" + name + "' -> " + app);
 		getChannelManager().startChannel(name, app);
 		updateStatus(status);
 	}
 
 	public void switchChannel(ActionStatus status, String name){
+		sendInfo("switch channel", " '" + name + "'");
 		updateStatus(status, getChannelManager().switchChannel(name));
 	}
 
 	public void closeChannel(ActionStatus status, String name){
+		sendInfo("close channel", " '" + name + "'");
 		updateStatus(status, getChannelManager().closeChannel(name));
 	}
 
@@ -516,6 +573,9 @@ public class ActionTestScript extends Script implements ITest{
 
 	public void navigate(ActionStatus status, URL url, boolean newWindow) {
 		if(getCurrentChannel() != null){
+
+			sendInfo("goto url", " '" + url.toString() + "'");
+
 			getCurrentChannel().navigate(url, newWindow);
 
 			//TODO check url with browser
@@ -542,58 +602,66 @@ public class ActionTestScript extends Script implements ITest{
 	//-----------------------------------------------------------------------------------------------------------
 
 	private RecorderThread recorder;
+	public RecorderThread getRecorder() {
+		return topScript.recorder;
+	}
+
+	public void setRecorder(RecorderThread value) {
+		this.recorder = value;
+	}
+
 	public void startRecorder(ScriptHeader info, boolean visual, boolean pdf, boolean xml) {
-		if(recorder == null) {
-			recorder = new RecorderThread(info, projectData, visual, pdf, xml);
+		if(getRecorder() == null) {
+			topScript.setRecorder(new RecorderThread(info, projectData, visual, pdf, xml));
 		}
 	}
 
 	public void stopRecorder() {
-		if(recorder != null) {
-			recorder.terminate();
-			recorder = null;
+		if(getRecorder() != null) {
+			getRecorder().terminate();
+			topScript.setRecorder(null);
 		}
 	}
 
 	public void pauseRecorder(boolean value) {
-		if(recorder != null) {
-			recorder.setPause(value);
+		if(getRecorder() != null) {
+			getRecorder().setPause(value);
 		}
 	}
 
 	public void updateVisualImage() {
-		if(recorder != null) {
-			recorder.updateVisualImage(getCurrentChannel().getScreenShot());
+		if(getRecorder() != null) {
+			getRecorder().updateVisualImage(getCurrentChannel().getScreenShot());
 		}
 	}
 
 	public void updateVisualElement(TestElement to) {
-		if(recorder != null) {
-			recorder.updateVisualElement(to);
+		if(getRecorder() != null) {
+			getRecorder().updateVisualElement(to);
 		}
 	}
 
 	public void updateVisualValue(String value) {
-		if(recorder != null) {
-			recorder.updateVisualValue(value);
+		if(getRecorder() != null) {
+			getRecorder().updateVisualValue(value);
 		}
 	}
 
 	public void updateVisualValue(String value, String data) {
-		if(recorder != null) {
-			recorder.updateVisualValue(value, data);
+		if(getRecorder() != null) {
+			getRecorder().updateVisualValue(value, data);
 		}
 	}
 
 	public void updateVisualStatus(boolean value) {
-		if(recorder != null) {
-			recorder.updateVisualStatus(value);
+		if(getRecorder() != null) {
+			getRecorder().updateVisualStatus(value);
 		}
 	}	
 
 	public void newVisual(Action action) {
-		if(recorder != null && getCurrentChannel() != null) {
-			recorder.addVisual(getCurrentChannel(), action);
+		if(getRecorder() != null && getCurrentChannel() != null) {
+			getRecorder().addVisual(getCurrentChannel(), action);
 		}
 	}
 }

@@ -24,6 +24,8 @@ public class ActionChannelSwitch extends ActionChannel {
 		status.resetDuration();
 		ts.switchChannel(status, getName());
 		status.updateDuration();
+		
+		ts.updateVisualImage();
 	}
 	
 	//---------------------------------------------------------------------------------------------------------------------------------

@@ -153,7 +153,7 @@ public class ActionCallscript extends Action {
 					joiner.add(value.getJavaCode());
 				}
 				codeBuilder.append(", ");
-				codeBuilder.append(ActionTestScript.JAVA_PARAMS_FUNCTION_NAME);
+				codeBuilder.append(ActionTestScript.JAVA_PARAM_FUNCTION_NAME);
 				codeBuilder.append("(");
 				codeBuilder.append(joiner.toString());
 				codeBuilder.append(")");

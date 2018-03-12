@@ -51,20 +51,26 @@ public class ActionAssertProperty extends ActionExecuteElement {
 			status.setCode(ActionStatus.ATTRIBUTE_NOT_SET);
 			status.setData(value.getName());
 			status.setMessage("Attribute '" + value.getName() + "' not found !");
+			
+			ts.updateVisualStatus(false);
+			ts.updateVisualValue(value.getName(), "Attribute not found");
 		}else {
 			if(value.checkProperty(attributeValue)) {
 				status.setPassed(true);
 				status.setMessage(attributeValue);
+				
+				ts.updateVisualStatus(true);
+				ts.updateVisualValue(value.getName() + " = " + value.getValue().getCalculated(), attributeValue);
+				
 			}else {
 				status.setPassed(false);
 				status.setCode(ActionStatus.ATTRIBUTE_CHECK_FAIL);
 				status.setData(attributeValue);
 				status.setMessage("Attribute value '" + attributeValue + "' do not match expected value '" + value.getValue().getCalculated() + "'");
+				
+				ts.updateVisualStatus(false);
+				ts.updateVisualValue(value.getName() + " = " + value.getValue().getCalculated(), attributeValue);
 			}
-		}
-		
-		if(status.isPassed()) {
-			ts.updateVisualStatus(true);
 		}
 
 		status.updateDuration();

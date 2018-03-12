@@ -1,10 +1,12 @@
 package com.ats.script;
 
 import java.io.File;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.Properties;
 import java.util.StringJoiner;
 
 import org.apache.commons.io.FilenameUtils;
@@ -27,24 +29,36 @@ public class ScriptHeader {
 	private String packageName = "";
 	private String name = "";
 
-	private ArrayList<String> groups = null;
+	private List<String> groups = null;
 	private String description = "";
 	private String author = "";
 	private String prerequisite = "";
 	private Date createdAt = new Date();
 
-	private String atsVersion;
+	private String atsVersion = "N/A";
 
 	public ScriptHeader(){} // needed for serialization
 
 	public ScriptHeader(ProjectData projectData, File file){
 
 		this.projectData = projectData;
+		this.atsVersion = loadAtsVersion();
 
 		this.setProjectPath(projectData.getFolderPath());
 		this.setPath(file.getAbsolutePath());
 		this.setName(FilenameUtils.removeExtension(file.getName()));
 		this.setPackageName(file.getParent().substring(projectData.getAtsSourceFolder().toFile().getAbsolutePath().length()).replace(File.separator, "."));
+	}
+	
+	private String loadAtsVersion() {
+		InputStream resourceAsStream = this.getClass().getResourceAsStream("/version.properties");
+		Properties prop = new Properties();
+		try{
+			prop.load( resourceAsStream );
+			return prop.getProperty("version");
+		}catch(Exception e) {}
+		
+		return "";
 	}
 
 	public File getReportFolder() {
@@ -68,7 +82,11 @@ public class ScriptHeader {
 	}
 
 	public void parseGroups(String data) {
-		groups = new ArrayList<String>(Arrays.asList(data.split("\\s*,\\s*")));
+		groups = new ArrayList<String>();
+		String[] list = data.split(",");
+		for(String grp : list) {
+			groups.add(grp.trim());
+		}
 	}
 
 	private String groupCode() {
@@ -82,7 +100,7 @@ public class ScriptHeader {
 				}
 			}
 			if(joiner.length() > 0) {
-				code.append("(groups = {" + joiner.toString() + "})");
+				code.append("(groups={" + joiner.toString() + "})");
 			}
 		}
 
@@ -139,7 +157,7 @@ public class ScriptHeader {
 			, "\t* Generated at : <b>" + DateFormat.getDateTimeInstance().format(new Date()) + "</b>"
 			, "\t*/"
 			, ""
-			, "\t@Test #GROUP_DATA#"
+			, "\t@Test#GROUP_DATA#"
 			, "\tpublic void " + ActionTestScript.MAIN_TEST_FUNCTION + "(){"
 			);
 
@@ -164,10 +182,10 @@ public class ScriptHeader {
 	//  getters and setters for serialization
 	//-------------------------------------------------------------------------------------------------
 
-	public ArrayList<String> getGroups() {
+	public List<String> getGroups() {
 		return groups;
 	}
-	public void setGroups(ArrayList<String> value) {
+	public void setGroups(List<String> value) {
 		this.groups = value;
 	}
 	public String getDescription() {

@@ -27,6 +27,7 @@ import com.ats.script.actions.ActionGotoUrl;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef.HWND;
+import com.sun.jna.platform.win32.WinDef.RECT;
 import com.sun.jna.platform.win32.WinUser;
 
 public class Channel {
@@ -84,8 +85,16 @@ public class Channel {
 	}
 
 	public void refreshLocation(){
+		
+		int[] winRect = getWindowRect();
+		
 		TestBound[] dimensions = engine.getDimensions();
-		setDimension(dimensions[0]);
+		TestBound mainDimension = dimensions[0];
+		
+		mainDimension.setX((double)winRect[0] + 7);
+		mainDimension.setY((double)winRect[1]);
+		
+		setDimension(mainDimension);
 		setSubDimension(dimensions[1]);
 	}
 
@@ -134,13 +143,13 @@ public class Channel {
 	}
 
 	public void setProcessData(long pid, ArrayList<String> processWindows) {
-		
+
 		Optional<ProcessHandle> procs = ProcessHandle.of(pid);
 		if(procs.isPresent()) {
 			this.process = procs.get();
 			this.processWindows = processWindows;
 		}
-		
+
 		moveWindowByHandle();
 	}
 
@@ -171,7 +180,6 @@ public class Channel {
 	//----------------------------------------------------------------------------------------------------------------------
 
 	public void sendLog(int code, String message, Object value) {
-		//manager.sendLog(code, message, value);
 		mainScript.sendLog(code, message, value);
 	}
 
@@ -416,6 +424,40 @@ public class Channel {
 				} 
 			}, null); 
 		}
+	}
+	
+	private int[] getWindowRect() {
+		
+		String handle = processWindows.get(0);
+		int[] result = {0, 0, 0, 0};
+
+		if(handle != null){
+
+			User32 user32 = User32.INSTANCE;
+
+			user32.EnumWindows(new User32.WNDENUMPROC() { 
+				@Override 
+				public boolean callback(HWND hWnd, Pointer arg) { 
+					if(hWnd != null){
+						if (handle.equals(hWnd.toNative().toString())) {
+							
+							RECT rect = new RECT();
+							user32.GetWindowRect(hWnd, rect);
+							
+							result[0] = rect.left;
+							result[1] = rect.top;
+							result[2] = rect.right;
+							result[3] = rect.bottom;
+							
+							return false;
+						}
+					}
+					return true;
+				} 
+			}, null); 
+		}
+		
+		return result;
 	}
 
 	public void scroll(FoundElement foundElement, int delta) {

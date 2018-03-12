@@ -2,6 +2,7 @@ package com.ats.tools.logger;
 
 public final class MessageCode {
 
+	public static final int TECHNICAL_ERROR = 1;
 	public static final int OBJECT_TRY_SEARCH = 50;
 	public static final int ACTION_IN_PROGRESS = 51;
 	public static final int OBJECT_INTERACTABLE = 52;

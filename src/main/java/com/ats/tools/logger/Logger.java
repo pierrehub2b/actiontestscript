@@ -7,18 +7,22 @@ import com.ats.executor.channels.Channel;
 public class Logger {
 
 	private final static String NO_CHANNEL = "NO_CHANNEL";
-	
+
 	private PrintStream printOut;
 	private String channelName = NO_CHANNEL;
 
 	public Logger() {
-		this(new NullPrintStream());
+		this(0);
 	}
 	
-	public Logger(PrintStream out) {
-		this.printOut = new PrintStream(out);
+	public Logger(int level) {
+		if(level > 1) {
+			this.printOut = new PrintStream(System.out);
+		}else {
+			this.printOut = new NullPrintStream();
+		}
 	}
-	
+
 	public void setChannel(Channel channel) {
 		if(channel == null) {
 			this.channelName = NO_CHANNEL;
@@ -26,18 +30,18 @@ public class Logger {
 			this.channelName = channel.getName();
 		}
 	}
-	
+
 	public void setChannelName(String name) {
 		this.channelName = name;
 	}
-	
+
 	public void sendLog(int code, String message, Object value) {
-		
+
 		String data = value.toString();
 		if(data.length() > 0) {
 			data = " -> " + data;
 		}
-		
+
 		if(code < 100 ) {
 			sendInfo(message, data);
 		}else if (code < 399){
@@ -46,20 +50,20 @@ public class Logger {
 			sendError(message, data);
 		}
 	}
-	
+
 	public void sendInfo(String message, String value) {
 		print("INFO", message + value);
 	}
-	
+
 	public void sendWarning(String message, String value) {
 		print("WARNING", message + value);
 	}
-	
+
 	public void sendError(String message, String value) {
 		print("ERROR",  message + value);
 	}
-	
+
 	private void print(String type, String data) {
-		printOut.println("[ATS-" + type + "] | " + "channel(" + channelName + ") | " + data);
+		printOut.println("[ATS-" + type + "] | " + "channel '" + channelName + "' | " + data);
 	}
 }

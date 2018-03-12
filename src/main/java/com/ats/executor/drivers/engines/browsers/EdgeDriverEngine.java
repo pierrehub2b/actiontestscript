@@ -5,7 +5,6 @@ import java.util.ArrayList;
 
 import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.ats.driver.AtsManager;
 import com.ats.driver.BrowserProperties;
@@ -26,7 +25,7 @@ public class EdgeDriverEngine extends WebDriverEngine {
 	public EdgeDriverEngine(Channel channel, DriverProcess driverProcess, WindowsDesktopDriver windowsDriver, AtsManager ats) {
 		super(channel, DriverManager.EDGE_BROWSER, driverProcess, windowsDriver, ats);
 
-		DesiredCapabilities cap = new DesiredCapabilities();
+		//DesiredCapabilities cap = new DesiredCapabilities();
 
 		EdgeOptions options = new EdgeOptions();
 		options.setPageLoadStrategy("normal");
@@ -36,9 +35,9 @@ public class EdgeDriverEngine extends WebDriverEngine {
 			waitAfterAction = props.getWait();
 		}
 
-		cap.setCapability(EdgeOptions.CAPABILITY, options);
+		//cap.setCapability(EdgeOptions.CAPABILITY, options);
 
-		launchDriver(cap, true);
+		launchDriver(options, true);
 	}
 
 	@Override

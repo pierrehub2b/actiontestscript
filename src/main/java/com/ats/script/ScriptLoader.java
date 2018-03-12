@@ -1,19 +1,16 @@
 package com.ats.script;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.stream.Stream;
 
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.GeneratorReport;
@@ -53,47 +50,20 @@ public class ScriptLoader extends Script {
 			this.setVariables(new Variable[0]);
 
 			this.actions = new ArrayList<Action>();
-
 			this.parser = new ScriptParser(lexer);
-
 			this.parser.addScript();
 
-			FileInputStream fis = null;
 			try {
-				fis = new FileInputStream(file);
-			}catch(FileNotFoundException e) {
-				return;
-			}
-
-			String line = null;
-
-			try {
-				//final BufferedReader reader = com.google.common.io.Files.newReader(file, this.charset);
-				final BufferedReader reader = new BufferedReader(new InputStreamReader(fis, this.charset));
-				while((line = reader.readLine()) != null){
-					processLine(line);
-				}
-				reader.close();
-
-			} catch (FileNotFoundException e1) {
-				e1.printStackTrace();
+				Stream <String> lines = Files.lines(file.toPath(), this.charset);
+				lines
+				.map(String::trim)
+				.filter(a -> !a.isEmpty())
+				.filter(a -> !a.startsWith("["))
+				.forEach(a -> parser.parse(this, a));
+				lines.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-
-
-
-
-			/*try {
-				while((line = reader.readLine()) != null){
-					processLine(line);
-				}
-				reader.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}*/
-
-			//simpleName = simpleName.substring(0, simpleName.length() - ATS_EXTENSION.length()) + "java";
 
 		}else if("java".equals(type)) {
 			try {
@@ -108,10 +78,6 @@ public class ScriptLoader extends Script {
 		} catch (Exception e) {
 			this.charset = Charset.forName(DEFAULT_CHARSET);
 		}
-	}
-
-	private void processLine(String line){
-		parser.parse(this, line);
 	}
 
 	public void addAction(Action data){
@@ -213,24 +179,12 @@ public class ScriptLoader extends Script {
 
 	public final static byte[] UTF8_BOM = {(byte)0xEF, (byte)0xBB, (byte)0xBF};
 
-	public void generateJavaFile(String version){
+	public void generateJavaFile(){
 		if(header.getJavaDestinationFolder() != null){
-
-			header.setAtsVersion(version);
 
 			File javaFile = header.getJavaFile();
 			try {
 				javaFile.getParentFile().mkdirs();
-
-				/*OutputStream  os = new FileOutputStream(javaFile, false);
-				os.write(UTF8_BOM);
-				os.flush();
-
-				OutputStreamWriter out = new OutputStreamWriter(os, charset);
-				out.write(getJavaCode());
-				out.flush();
-				
-				out.close();*/
 
 				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter( new FileOutputStream(javaFile, false), charset));
 				writer.write(getJavaCode());

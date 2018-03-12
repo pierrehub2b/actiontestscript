@@ -17,7 +17,7 @@ public class CalculatedValue{
 
 
 	private static final Pattern PARAMETER_PATTERN = Pattern.compile("\\$param\\s*?\\((\\d+),?(\\s*?[^\\)]*)?\\)", Pattern.CASE_INSENSITIVE);
-	private static final Pattern ENV_PATTERN = Pattern.compile("\\$env\\s*?\\(\\s*?(\\w+),?(\\s*?[^\\)]*)?\\)", Pattern.CASE_INSENSITIVE);
+	private static final Pattern ENV_PATTERN = Pattern.compile("\\$env\\(([^\\)]*)\\)", Pattern.CASE_INSENSITIVE);
 
 	private static final Pattern TODAY_PATTERN = Pattern.compile("^\\$today$", Pattern.CASE_INSENSITIVE);
 	private static final Pattern NOW_PATTERN = Pattern.compile("^\\$now$", Pattern.CASE_INSENSITIVE);
@@ -114,8 +114,14 @@ public class CalculatedValue{
 			while (mv.find()) {
 
 				String replace = mv.group(0);
-				String value = mv.group(1).trim();
-				String defaultValue = mv.group(2).trim();
+				String[] envData = mv.group(1).split(",");
+
+				String value = envData[0].trim();
+				String defaultValue = "";
+				
+				if(envData.length > 1) {
+					defaultValue = envData[1].trim();
+				}
 
 				StringBuilder codeBuilder = new StringBuilder("(\"");
 				codeBuilder.append(value);

@@ -1,5 +1,6 @@
 package com.ats.recorder;
 
+import java.io.File;
 import java.nio.file.Path;
 
 import com.ats.executor.TestElement;
@@ -26,6 +27,24 @@ public class RecorderThread extends Thread {
 		Path videoFolderPath = project.getReportFolder().resolve(header.getPackagePath());
 		videoFolderPath.toFile().mkdirs();
 
+		this.setDaemon(true);
+		if(visual) {
+			this.visualStream = new VisualStream(videoFolderPath, header);
+		}
+
+		if(pdf) {
+			this.pdfStream = new PdfStream(videoFolderPath, header);
+		}
+
+		start();
+	}
+	
+	public RecorderThread(File outputFolder, String testName, boolean visual, boolean pdf, boolean xml) {
+
+		Path videoFolderPath = outputFolder.toPath();
+		ScriptHeader header = new ScriptHeader();
+		header.setName(testName);
+		
 		this.setDaemon(true);
 		if(visual) {
 			this.visualStream = new VisualStream(videoFolderPath, header);

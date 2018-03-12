@@ -49,8 +49,7 @@ public class ChannelManager {
 
 	public void closeAllChannels(){
 		while(channelsList.size() > 0){
-			channelsList.get(0).close();
-			channelsList.remove(0);
+			channelsList.remove(0).close();
 		}
 	}
 

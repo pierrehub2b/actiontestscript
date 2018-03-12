@@ -35,7 +35,6 @@ public class ScriptParser {
 	private static final Pattern PREREQUISITE_PATTERN = Pattern.compile("^" + SCRIPT_PREREQUISITE_LABEL + " *?\\" + ATS_SEPARATOR + "(.*)", Pattern.CASE_INSENSITIVE);
 
 	private static final Pattern VARIABLE_PATTERN = Pattern.compile("^" + Variable.SCRIPT_LABEL + " *?\\" + ATS_SEPARATOR + "(.*)", Pattern.CASE_INSENSITIVE);
-	//private static final Pattern TRANSFORM_PATTERN = Pattern.compile("\\[(.*)\\]");
 
 	private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss");
 
@@ -66,85 +65,78 @@ public class ScriptParser {
 
 	public void parse(ScriptLoader script, String data){
 
-		if(data != null) {
-			data = data.trim();
+		Matcher m = null;
 
-			if(data.length() > 0){
+		if((m = GROUP_PATTERN.matcher(data)) != null && m.find()){
 
-				Matcher m = null;
+			script.parseGroups(getDataGroup(m, 1));
 
-				if((m = GROUP_PATTERN.matcher(data)) != null && m.find()){
+		}else if((m = DESCRIPTION_PATTERN.matcher(data)) != null && m.find()){
 
-					script.parseGroups(getDataGroup(m, 1));
+			script.setDescription(getDataGroup(m, 1));
 
-				}else if((m = DESCRIPTION_PATTERN.matcher(data)) != null && m.find()){
+		}else if((m = CREATED_DATE_PATTERN.matcher(data)) != null && m.find()){
 
-					script.setDescription(getDataGroup(m, 1));
+			try {
+				script.setCreatedDate(dateFormat.parse(getDataGroup(m, 1)));
+			}catch (ParseException | NumberFormatException e) {}
 
-				}else if((m = CREATED_DATE_PATTERN.matcher(data)) != null && m.find()){
+		}else if((m = AUTHOR_PATTERN.matcher(data)) != null && m.find()){
 
-					try {
-						script.setCreatedDate(dateFormat.parse(getDataGroup(m, 1)));
-					}catch (ParseException | NumberFormatException e) {}
+			script.setAuthor(getDataGroup(m, 1));
 
-				}else if((m = AUTHOR_PATTERN.matcher(data)) != null && m.find()){
+		}else if((m = PREREQUISITE_PATTERN.matcher(data)) != null && m.find()){
 
-					script.setAuthor(getDataGroup(m, 1));
+			script.setPrerequisite(getDataGroup(m, 1));
 
-				}else if((m = PREREQUISITE_PATTERN.matcher(data)) != null && m.find()){
+		}else if((m = VARIABLE_PATTERN.matcher(data)) != null && m.find()){
 
-					script.setPrerequisite(getDataGroup(m, 1));
+			ArrayList<String> dataArray = new ArrayList<String>(Arrays.asList(getDataGroup(m, 1).split(ScriptParser.ATS_SEPARATOR)));
 
-				}else if((m = VARIABLE_PATTERN.matcher(data)) != null && m.find()){
+			if(dataArray.size() > 0){
 
-					ArrayList<String> dataArray = new ArrayList<String>(Arrays.asList(getDataGroup(m, 1).split(ScriptParser.ATS_SEPARATOR)));
+				String name = dataArray.remove(0).trim();
+				String value = "";
+				Transformer transformer = null;
 
-					if(dataArray.size() > 0){
+				if(dataArray.size() > 0) {
 
-						String name = dataArray.remove(0).trim();
-						String value = "";
-						Transformer transformer = null;
+					String nextData = dataArray.remove(0).trim();
+					if((m = Transformer.TRANSFORM_PATTERN.matcher(nextData)) != null && m.find()){
 
-						if(dataArray.size() > 0) {
+						transformer = Transformer.createTransformer(getDataGroup(m, 1), getDataGroup(m, 2).split(","));
 
-							String nextData = dataArray.remove(0).trim();
-							if((m = Transformer.TRANSFORM_PATTERN.matcher(nextData)) != null && m.find()){
-
-								transformer = Transformer.createTransformer(getDataGroup(m, 1), getDataGroup(m, 2).split(","));
-
-								if(dataArray.size() > 0){
-									value = dataArray.remove(0).trim();
-								}
-
-							}else {
-								value = nextData;
-							}
+						if(dataArray.size() > 0){
+							value = dataArray.remove(0).trim();
 						}
 
-						script.addVariable(name, new CalculatedValue(script, value), transformer);
+					}else {
+						value = nextData;
 					}
-
-				}else if((m = RETURN_PATTERN.matcher(data)) != null && m.find()){
-
-					String[] returnsData = getDataGroup(m, 1).split(ATS_SEPARATOR);
-					CalculatedValue[] returns = new CalculatedValue[returnsData.length];
-
-					for(int i=0; i < returnsData.length; i++){
-						returns[i] = new CalculatedValue(script, returnsData[i].trim());
-					}
-
-					script.setReturns(returns);
-
-				}else{
-
-					boolean actionDisabled = false;
-					if(data.startsWith("//")){
-						data = data.substring(2);
-						actionDisabled = true;
-					}
-					script.addAction(lexer.createAction(script, data, actionDisabled));
 				}
+
+				script.addVariable(name, new CalculatedValue(script, value), transformer);
 			}
+
+		}else if((m = RETURN_PATTERN.matcher(data)) != null && m.find()){
+
+			String[] returnsData = getDataGroup(m, 1).split(ATS_SEPARATOR);
+			CalculatedValue[] returns = new CalculatedValue[returnsData.length];
+
+			for(int i=0; i < returnsData.length; i++){
+				returns[i] = new CalculatedValue(script, returnsData[i].trim());
+			}
+
+			script.setReturns(returns);
+
+		}else{
+
+			boolean actionDisabled = false;
+			if(data.startsWith("//")){
+				data = data.substring(2);
+				actionDisabled = true;
+			}
+			script.addAction(lexer.createAction(script, data, actionDisabled));
 		}
 	}
 }

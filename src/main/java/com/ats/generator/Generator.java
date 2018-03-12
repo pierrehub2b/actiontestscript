@@ -2,10 +2,8 @@ package com.ats.generator;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Properties;
 import java.util.logging.Level;
 import java.util.stream.Stream;
 
@@ -27,8 +25,6 @@ public class Generator implements ScriptProcessedEvent{
 
 	private int remainingScripts = 0;
 	
-	private String atsVersion;
-
 	private String charset = ScriptLoader.DEFAULT_CHARSET;
 
 	public static void main(String[] args) {
@@ -109,8 +105,6 @@ public class Generator implements ScriptProcessedEvent{
 	}
 
 	public GeneratorReport launch(){
-
-		atsVersion = loadVersion();
 		
 		Stream<File> stream = filesList.parallelStream();
 		stream.forEach(f -> loadScript(f));
@@ -128,7 +122,7 @@ public class Generator implements ScriptProcessedEvent{
 
 	private void loadScript(File f){
 		ScriptLoader sc = lexer.loadScript(f, new ScriptProcessedNotifier(this));
-		sc.generateJavaFile(atsVersion);
+		sc.generateJavaFile();
 	}
 
 	@Override
@@ -137,16 +131,5 @@ public class Generator implements ScriptProcessedEvent{
 
 		//int percent = (int)(10000-(double)remainingScripts/(double)totalScript*10000)/100;
 		//log.info("Generator in progress : " + percent + " % done");
-	}
-
-	private String loadVersion() {
-		InputStream resourceAsStream = this.getClass().getResourceAsStream("/version.properties");
-		Properties prop = new Properties();
-		try{
-			prop.load( resourceAsStream );
-			return prop.getProperty("version");
-		}catch(Exception e) {}
-		
-		return "";
 	}
 }
