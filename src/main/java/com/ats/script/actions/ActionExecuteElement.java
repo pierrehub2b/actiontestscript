@@ -90,12 +90,18 @@ public class ActionExecuteElement extends ActionExecute {
 
 		}else {
 
+			if(searchElement == null) {
+				testElement = ts.findObject();
+			}else {
+				testElement = ts.findObject(maxTry, searchElement, expectedCount);
+			}
+			
 			if(testElement == null) {
-				if(searchElement == null) {
-					testElement = ts.findObject();
-				}else {
-					testElement = ts.findObject(maxTry, searchElement, expectedCount);
-				}
+				//if(searchElement == null) {
+				//	testElement = ts.findObject();
+				//}else {
+				//	testElement = ts.findObject(maxTry, searchElement, expectedCount);
+				//}
 
 				ts.updateVisualElement(testElement);
 
