@@ -24,14 +24,12 @@ public class ChromeDriverEngine extends WebDriverEngine {
 
 		List<String> args = new ArrayList<String>();
 
-		args.add("--disable-notifications");
 		args.add("--disable-infobars");
+		args.add("--disable-notifications");
 		args.add("--no-default-browser-check");
-		args.add("--window-position=" + channel.getDimension().getX() + "," + channel.getDimension().getY());
-		args.add("--window-size=" + channel.getDimension().getWidth() + "," + channel.getDimension().getHeight());
-		args.add("test-type");
 		args.add("--disable-web-security");
 		args.add("--allow-running-insecure-content");
+		args.add("test-type");
 
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments(args);
@@ -44,10 +42,10 @@ public class ChromeDriverEngine extends WebDriverEngine {
 			}
 		}
 
-		DesiredCapabilities cap = new DesiredCapabilities();
-		cap.setCapability(ChromeOptions.CAPABILITY, options);
+		DesiredCapabilities caps = DesiredCapabilities.chrome(); 
+		caps.setCapability(ChromeOptions.CAPABILITY, options); 
 		
-		launchDriver(cap, false);
+		launchDriver(caps, false);
 	}
 	
 	@Override

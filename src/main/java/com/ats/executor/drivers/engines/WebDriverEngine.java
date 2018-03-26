@@ -1,10 +1,12 @@
 package com.ats.executor.drivers.engines;
 
 import java.awt.Rectangle;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
@@ -20,7 +22,6 @@ import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.RemoteWebElement;
 
@@ -36,11 +37,12 @@ import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.tools.ResourceContent;
+import com.ats.tools.StartHtmlPage;
 import com.ats.tools.logger.MessageCode;
 
 public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngine {
 
-	private static final String resultAsync = ";var callbackResult=arguments[arguments.length-1];callbackResult(result);";
+   private static final String resultAsync = ";var callbackResult=arguments[arguments.length-1];callbackResult(result);";
 
 	protected WindowsDesktopDriver windowsDriver;
 
@@ -103,27 +105,28 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			System.err.println(ex.getMessage());
 		}
 
+		String applicationVersion = "N/A";
 		Map<String, ?> infos = (this.driver).getCapabilities().asMap();
-
 		for (Map.Entry<String, ?> entry : infos.entrySet()){
 			if("browserVersion".equals(entry.getKey()) || "version".equals(entry.getKey())){
-				channel.setApplicationVersion(entry.getValue().toString());
+				applicationVersion = entry.getValue().toString();
+				break;
 			}
 		}
+				
+        driver.get("about:blank");
+        try {
+               File tempHtml = File.createTempFile("ats_", ".html");
+               Files.write(tempHtml.toPath(), StartHtmlPage.getAtsBrowserContent());
+               driver.get(tempHtml.toURI().toString());
+        } catch (IOException e) {}
 
-		long pid = -1L;
-		ArrayList<String> windows = new ArrayList<String>();
-
-		if(isEdge){
-			pid = windowsDriver.getProcessDataByWindowTitle("Microsoft Edge", windows);
-		}else{
-			String uuidHandle = UUID.randomUUID().toString();
-			Object response = runJavaScript("top.document.title=arguments[0];result=document.title", uuidHandle);
-			pid = windowsDriver.getProcessDataByWindowTitle(response.toString(), windows);
-		}
-		channel.setProcessData(pid, windows);
-
-		driver.get("about:blank");
+        ArrayList<String> windows = new ArrayList<String>();
+        channel.setApplicationData(
+        		applicationVersion,
+        		windowsDriver.getProcessDataByWindowTitle(StartHtmlPage.getAtsBrowserTitle(), windows),
+        		windows);
+				
 		firstWindow = driver.getWindowHandle();
 	}
 
@@ -188,26 +191,19 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	public FoundElement getElementFromPoint(Double x, Double y){
 
-		FoundElement element = null;//windowsDriver.getElementFromPoint(x, y);
+		if(x < channel.getSubDimension().getX() || y < channel.getSubDimension().getY()) {
 
-		/*if(element != null){
-			if(element.getWidth() >= channel.getSubDimension().getWidth() + 1 || element.getHeight() >= channel.getSubDimension().getHeight() + 1){
-				element = null;
-			}
-		}*/
+			return windowsDriver.getElementFromPoint(x, y);
+			
+		}else {
+			
+			switchToDefaultframe();
 
-		//if(element == null){
+			x -= channel.getSubDimension().getX();
+			y -= channel.getSubDimension().getY();
 
-		switchToDefaultframe();
-		//driver.switchTo().defaultContent();
-
-		x -= channel.getSubDimension().getX();
-		y -= channel.getSubDimension().getY();
-
-		element = loadElement(x, y, initElementX, initElementY);
-		//}
-
-		return element;
+			return loadElement(x, y, initElementX, initElementY);
+		}
 	}
 
 	private FoundElement loadElement(Double x, Double y, Double offsetX, Double offsetY) {
@@ -420,7 +416,6 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	@Override
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position) {
-
 		if(waitElementInteractable(foundElement)) {
 
 			Rectangle rect = foundElement.getRectangle();

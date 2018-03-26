@@ -26,12 +26,12 @@ public class TestElementDialog extends TestElement {
 	}
 
 	public TestElementDialog(Channel channel, int maxTry, SearchedElement searchElement) {
-		super(channel, maxTry, 1);
+		super(channel, maxTry);
 		initSearch(searchElement.getCriterias());
 	}
 
 	public TestElementDialog(Channel channel, int maxTry, List<CalculatedProperty> criterias) {
-		super(channel, maxTry, 1);
+		super(channel, maxTry);
 		initSearch(criterias);
 	}
 

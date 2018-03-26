@@ -14,6 +14,7 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.testng.ITest;
 import org.testng.ITestContext;
+import org.testng.SkipException;
 import org.testng.TestRunner;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
@@ -102,36 +103,44 @@ public class ActionTestScript extends Script implements ITest{
 	}
 
 	@BeforeClass(alwaysRun=true)
-	public void beforeTest(ITestContext ctx) {
+	public void beforeAtsTest(ITestContext ctx) {
 
 		TestRunner runner = (TestRunner) ctx;
-
 		setTestName(this.getClass().getName());
-		setTestParameters(runner.getTest().getAllParameters());
+		
+		String checkMode = runner.getTest().getParameter("check.mode");
+		if("true".equals(checkMode)) {
+			
+			throw new SkipException("check mode : " + testName);
 
-		String visualReport = getEnvironmentValue("visual.report", "");
+		}else {
+			
+			setTestParameters(runner.getTest().getAllParameters());
 
-		if("true".equals(visualReport.trim().toLowerCase())) {
+			String visualReport = getEnvironmentValue("visual.report", "");
 
-			String outputDirectory = runner.getOutputDirectory();
+			if("true".equals(visualReport.trim().toLowerCase())) {
 
-			File output = new File(outputDirectory);
-			if(!output.exists()) {
-				output.mkdirs();
+				String outputDirectory = runner.getOutputDirectory();
+
+				File output = new File(outputDirectory);
+				if(!output.exists()) {
+					output.mkdirs();
+				}
+				setRecorder(new RecorderThread(output, testName, true, false, false));
 			}
-			setRecorder(new RecorderThread(output, testName, true, false, false));
+
+			setLogger(new Logger(ctx.getSuite().getXmlSuite().getVerbose()));
+			sendInfo("starting script", " '" + testName + "'");
+
+			Runtime.getRuntime().addShutdownHook(new Thread() {
+				public void run() {
+					tearDown();
+				}
+			});
+
+			new StopExecutionThread(System.in).start();
 		}
-
-		setLogger(new Logger(ctx.getSuite().getXmlSuite().getVerbose()));
-		sendInfo("starting script", " '" + testName + "'");
-
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			public void run() {
-				tearDown();
-			}
-		});
-
-		new StopExecutionThread(System.in).start();
 
 	}
 
@@ -213,7 +222,7 @@ public class ActionTestScript extends Script implements ITest{
 	// Script's test object
 	//----------------------------------------------------------------------------------------------------------
 
-	public TestElement findObject(TestElement parent, String tag, int expectedCount, CalculatedProperty...criterias) {
+	public TestElement findObject(TestElement parent, String tag, String operator, int expectedCount, CalculatedProperty...criterias) {
 
 		List<CalculatedProperty> list = new ArrayList<CalculatedProperty>();
 		for (CalculatedProperty criteria : criterias) {
@@ -229,6 +238,7 @@ public class ActionTestScript extends Script implements ITest{
 			return new TestElement(
 					getCurrentChannel(), 
 					channelManager.getMaxTry(),
+					operator,
 					expectedCount,
 					parent, 
 					tag,
@@ -240,11 +250,11 @@ public class ActionTestScript extends Script implements ITest{
 		return new TestElement(getCurrentChannel());
 	}
 
-	public TestElement findObject(int maxTryExecution, SearchedElement searchElement, int expectedCount) {
+	public TestElement findObject(int maxTryExecution, SearchedElement searchElement, String operator, int expectedCount) {
 		if(TestElementDialog.DIALOG_TAG.equals(searchElement.getTag().toLowerCase())) {
 			return new TestElementDialog(	getCurrentChannel(), channelManager.getMaxTry() + maxTryExecution,	searchElement);
 		}else {
-			return new TestElement(	getCurrentChannel(), channelManager.getMaxTry() + maxTryExecution, expectedCount,	searchElement);
+			return new TestElement(	getCurrentChannel(), channelManager.getMaxTry() + maxTryExecution, operator, expectedCount,	searchElement);
 		}
 	}
 
@@ -252,49 +262,49 @@ public class ActionTestScript extends Script implements ITest{
 	// Generated methods
 	//----------------------------------------------------------------------------------------------------------
 
-	public static final String JAVA_VAR_FUNCTION_NAME = "var";
-	public Variable var(String name, CalculatedValue value){
+	public static final String JAVA_VAR_FUNCTION_NAME = "va";
+	public Variable va(String name, CalculatedValue value){
 		return createVariable(name, value, null);
 	}
 
-	public Variable var(String name){
+	public Variable va(String name){
 		return createVariable(name, new CalculatedValue(""), null);
 	}
 
-	public Variable var(String name, Transformer transformer){
+	public Variable va(String name, Transformer transformer){
 		return createVariable(name, new CalculatedValue(""), transformer);
 	}
 
-	public Variable var(String name, CalculatedValue value, Transformer transformer){
+	public Variable va(String name, CalculatedValue value, Transformer transformer){
 		return createVariable(name, value, transformer);
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_VALUE_FUNCTION_NAME = "cvl";
-	public CalculatedValue cvl(Object ... data) {
+	public static final String JAVA_VALUE_FUNCTION_NAME = "cv";
+	public CalculatedValue cv(Object ... data) {
 		return new CalculatedValue(this, data);
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_PARAM_FUNCTION_NAME = "pmr";
-	public String pmr(int index) {
+	public static final String JAVA_PARAM_FUNCTION_NAME = "pm";
+	public String pm(int index) {
 		return getParameterValue(index, "");
 	}
 
-	public String pmr(int index, String defaultValue) {
+	public String pm(int index, String defaultValue) {
 		return getParameterValue(index, defaultValue);
 	}
 
-	public CalculatedValue[] pmr(CalculatedValue ... values) {
+	public CalculatedValue[] pm(CalculatedValue ... values) {
 		return values;
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_RETURNS_FUNCTION_NAME = "rtn";
-	public void rtn(CalculatedValue ... values) {
+	public static final String JAVA_RETURNS_FUNCTION_NAME = "rt";
+	public void rt(CalculatedValue ... values) {
 
 		int i = 0;
 		returnValues = new String[values.length];
@@ -307,7 +317,7 @@ public class ActionTestScript extends Script implements ITest{
 		updateVariables();
 	}
 
-	public void rtn(String ... values) {
+	public void rt(String ... values) {
 
 		int i = 0;
 		returnValues = new String[values.length];
@@ -336,19 +346,19 @@ public class ActionTestScript extends Script implements ITest{
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_ENV_FUNCTION_NAME = "env";
-	public String env(String name) {
+	public static final String JAVA_ENV_FUNCTION_NAME = "sv";
+	public String sv(String name) {
 		return getEnvironmentValue(name, "");
 	}
 
-	public String env(String name, String defaultValue) {
+	public String sv(String name, String defaultValue) {
 		return getEnvironmentValue(name, defaultValue);
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_PROPERTY_FUNCTION_NAME = "ppy";
-	public CalculatedProperty ppy(boolean isRegexp, String name, CalculatedValue value){
+	public static final String JAVA_PROPERTY_FUNCTION_NAME = "pp";
+	public CalculatedProperty pp(boolean isRegexp, String name, CalculatedValue value){
 		return new CalculatedProperty(isRegexp, name, value);
 	}
 
@@ -361,54 +371,54 @@ public class ActionTestScript extends Script implements ITest{
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_TODAY_FUNCTION_NAME = "tdy";
-	public String tdy() {
+	public static final String JAVA_TODAY_FUNCTION_NAME = "td";
+	public String td() {
 		return getTodayValue();
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_NOW_FUNCTION_NAME = "now";
-	public String now() {
+	public static final String JAVA_NOW_FUNCTION_NAME = "nw";
+	public String nw() {
 		return getNowValue();
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_ELEMENT_FUNCTION_NAME = "elt";
-	public SearchedElement elt(SearchedElement parent, int index, String tagName, CalculatedProperty ... properties) {
+	public static final String JAVA_ELEMENT_FUNCTION_NAME = "el";
+	public SearchedElement el(SearchedElement parent, int index, String tagName, CalculatedProperty ... properties) {
 		return new SearchedElement(parent, index, tagName, properties);
 	}
 
-	public SearchedElement elt(int index, String tagName, CalculatedProperty ... properties) {
+	public SearchedElement el(int index, String tagName, CalculatedProperty ... properties) {
 		return new SearchedElement(null, index, tagName, properties);
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_ROOT_FUNCTION_NAME = "root";
-	public SearchedElement root() {
+	public static final String JAVA_ROOT_FUNCTION_NAME = "ro";
+	public SearchedElement ro() {
 		return null;
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_REGEX_FUNCTION_NAME = "rxp";
-	public RegexpTransformer rxp(String patt, int group) {
+	public static final String JAVA_REGEX_FUNCTION_NAME = "rx";
+	public RegexpTransformer rx(String patt, int group) {
 		return new RegexpTransformer(patt, group);
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_DATE_FUNCTION_NAME = "dte";
-	public DateTransformer dte(String ... data) {
+	public static final String JAVA_DATE_FUNCTION_NAME = "dt";
+	public DateTransformer dt(String ... data) {
 		return new DateTransformer(data);
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_TIME_FUNCTION_NAME = "tme";
-	public TimeTransformer tme(String ... data) {
+	public static final String JAVA_TIME_FUNCTION_NAME = "tm";
+	public TimeTransformer tm(String ... data) {
 		return new TimeTransformer(data);
 	}
 
@@ -421,43 +431,43 @@ public class ActionTestScript extends Script implements ITest{
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_POS_FUNCTION_NAME = "pos";
-	public MouseDirectionData pos(Cartesian cart, int value) {
+	public static final String JAVA_POS_FUNCTION_NAME = "ps";
+	public MouseDirectionData ps(Cartesian cart, int value) {
 		return new MouseDirectionData(cart, value);
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_MOUSE_FUNCTION_NAME = "mse";
-	public Mouse mse(String type) {
+	public static final String JAVA_MOUSE_FUNCTION_NAME = "ms";
+	public Mouse ms(String type) {
 		return new Mouse(type);
 	}
 
-	public Mouse mse(String type, MouseDirectionData hpos, MouseDirectionData vpos) {
+	public Mouse ms(String type, MouseDirectionData hpos, MouseDirectionData vpos) {
 		return new Mouse(type, hpos, vpos);
 	}
 
-	public MouseKey mse(String type, Keys key, MouseDirectionData hpos, MouseDirectionData vpos) {
+	public MouseKey ms(String type, Keys key, MouseDirectionData hpos, MouseDirectionData vpos) {
 		return new MouseKey(type, key, hpos, vpos);
 	}
 
-	public MouseKey mse(String type, Keys key) {
+	public MouseKey ms(String type, Keys key) {
 		return new MouseKey(type, key);
 	}
 
-	public MouseScroll mse(int scroll, MouseDirectionData hpos, MouseDirectionData vpos) {
+	public MouseScroll ms(int scroll, MouseDirectionData hpos, MouseDirectionData vpos) {
 		return new MouseScroll(scroll, hpos, vpos);
 	}
 
-	public MouseScroll mse(int scroll) {
+	public MouseScroll ms(int scroll) {
 		return new MouseScroll(scroll);
 	}
 
-	public MouseSwipe mse(int hdir, int vdir, MouseDirectionData hpos, MouseDirectionData vpos) {
+	public MouseSwipe ms(int hdir, int vdir, MouseDirectionData hpos, MouseDirectionData vpos) {
 		return new MouseSwipe(hdir, vdir, hpos, vpos);
 	}
 
-	public MouseSwipe mse(int hdir, int vdir) {
+	public MouseSwipe ms(int hdir, int vdir) {
 		return new MouseSwipe(hdir, vdir);
 	}
 
@@ -489,6 +499,7 @@ public class ActionTestScript extends Script implements ITest{
 			execFinished(action.getStatus(), action.isStop());
 		}catch (StaleElementReferenceException ex) {
 			sleep(200);
+			action.reinit();
 			exec(line, action);
 		}catch (Exception ex) {
 			sleep(200);

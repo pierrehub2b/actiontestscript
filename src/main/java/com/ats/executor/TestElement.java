@@ -32,34 +32,67 @@ public class TestElement{
 
 	public static final String DESKTOP_PREFIX = "desk:";
 
+	public static Predicate<Integer> isOccurrencesMoreThan(Integer value) {return p -> p > value;}
+	public static Predicate<Integer> isOccurrencesLessThan(Integer value) {return p -> p < value;}
+	public static Predicate<Integer> isOccurrencesLessOrEqualThan(Integer value) {return p -> p <= value;}
+	public static Predicate<Integer> isOccurrencesMoreOrEqualThan(Integer value) {return p -> p >= value;}
+	public static Predicate<Integer> isOccurrencesDifferent(Integer value) {return p -> p != value;}
+	public static Predicate<Integer> isOccurrencesEqual(Integer value) {return p -> p == value;}
+
 	private Actions action;
 	private Channel channel;
+
+	private Predicate<Integer> occurrences;
 	
-	private int expectedCount = 1;
 	private int count = 0;
-	
+
 	private long searchDuration = 0;
 	private long totalSearchDuration = 0;
 
 	private TestElement parent;
 	private ArrayList<FoundElement> foundElements = new ArrayList<FoundElement>();
 
-	private int maxTry;
+	private int maxTry = 20;
 	private int index;
 
 	private String criterias;
 
 	private boolean desktop = false;
 
-	public TestElement(Channel channel, int maxTry, int expectedCount) {
+	public TestElement(Channel channel, int maxTry) {
 		this.channel = channel;
-		this.expectedCount = expectedCount;
 		this.maxTry = maxTry;
 	}
 
-	public TestElement(Channel channel, int maxTry, int expectedCount, TestElement parent, String tag, List<CalculatedProperty> criterias) {
+	public TestElement(Channel channel, int maxTry, String operator, int expectedCount) {
+		this.channel = channel;
+		this.maxTry = maxTry;
 
-		this(channel, maxTry, expectedCount);
+		switch (operator) {
+		case Operators.DIFFERENT :
+			this.occurrences = isOccurrencesDifferent(expectedCount);
+			break;
+		case Operators.GREATER :
+			this.occurrences = isOccurrencesMoreThan(expectedCount);
+			break;
+		case Operators.GREATER_EQUALS :
+			this.occurrences = isOccurrencesMoreOrEqualThan(expectedCount);
+			break;
+		case Operators.LOWER :
+			this.occurrences = isOccurrencesLessThan(expectedCount);
+			break;
+		case Operators.LOWER_EQUALS :
+			this.occurrences = isOccurrencesLessOrEqualThan(expectedCount);
+			break;
+		default :
+			this.occurrences = isOccurrencesEqual(expectedCount);
+			break;
+		}
+	}
+
+	public TestElement(Channel channel, int maxTry, String operator, int expectedCount, TestElement parent, String tag, List<CalculatedProperty> criterias) {
+
+		this(channel, maxTry, operator, expectedCount);
 		this.parent = parent;
 		this.desktop = channel.isDesktop();
 
@@ -72,7 +105,7 @@ public class TestElement{
 	}
 
 	public TestElement(Channel channel) {
-		this(channel, 20, 1);
+		this.channel = channel;
 		this.index = 0;
 		this.foundElements = new ArrayList<FoundElement>();
 		this.foundElements.add(new FoundElement(channel));
@@ -80,13 +113,13 @@ public class TestElement{
 		this.action = new Actions(channel.getWebDriver());
 	}
 
-	public TestElement(Channel channel, int maxTry, int expectedCount, SearchedElement searchElement) {
+	public TestElement(Channel channel, int maxTry, String operator, int expectedCount, SearchedElement searchElement) {
 
-		this(channel, maxTry, expectedCount);
+		this(channel, maxTry, operator, expectedCount);
 		this.index = searchElement.getIndex();
 
 		if(searchElement.getParent() != null){
-			this.parent = new TestElement(channel, maxTry, expectedCount, searchElement.getParent());
+			this.parent = new TestElement(channel, maxTry, operator, expectedCount, searchElement.getParent());
 		}
 
 		this.desktop = searchElement.getTag().startsWith(DESKTOP_PREFIX) || channel.isDesktop();
@@ -95,7 +128,7 @@ public class TestElement{
 	}
 
 	public TestElement(FoundElement element, Channel currentChannel) {
-		this(currentChannel, 20, 1);
+		this(currentChannel);
 		this.foundElements.add(element);
 		this.count = getElementsCount();
 		this.action = new Actions(channel.getWebDriver());
@@ -125,21 +158,18 @@ public class TestElement{
 
 	private List<CalculatedProperty> elementProperties;
 	private String elementTag;
+	
 	private void initSearch(String tag, List<CalculatedProperty> properties) {
 
 		if(channel != null){
-
+		
 			elementProperties = properties;
 			elementTag = tag;
 
 			criterias = tag;
 			searchDuration = System.currentTimeMillis();
 
-			if(parent == null || (parent != null && parent.isValidated())){
-
-				/*if(parent == null) {
-					channel.switchToDefaultframe();
-				}*/
+			if(parent == null || (parent != null && parent.getCount() > 0)){
 
 				if(desktop){
 
@@ -151,6 +181,8 @@ public class TestElement{
 					foundElements = channel.findWindowsElement(parentElement, tag, properties);
 
 				}else{
+
+					int trySearch = 0;
 					
 					action = new Actions(channel.getWebDriver());
 
@@ -169,11 +201,18 @@ public class TestElement{
 					String[] attributes = attributeList.toArray(new String[attributeList.size()]);
 
 					foundElements = channel.findWebElement(this, tag, attributes, fullPredicate);
-					
-					int trySearch = 0;
-					
-					if(expectedCount == 0) {
-						
+					while (!isValidated() && trySearch < maxTry) {
+
+						channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "searching element", maxTry - trySearch);
+
+						progressiveWait(trySearch);
+						trySearch++;
+
+						foundElements = channel.findWebElement(this, tag, attributes, fullPredicate);
+					}
+
+					/*if(expectedCount == 0) {
+
 						while(getElementsCount() > 0 && trySearch < maxTry){
 
 							channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "searching element", maxTry - trySearch);
@@ -182,9 +221,9 @@ public class TestElement{
 							progressiveWait(trySearch);
 							trySearch++;
 						}
-						
+
 					}else {
-						
+
 						while(getElementsCount() == 0 && trySearch < maxTry){
 
 							channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "searching element", maxTry - trySearch);
@@ -193,7 +232,8 @@ public class TestElement{
 							progressiveWait(trySearch);
 							trySearch++;
 						}
-					}
+					}*/
+
 				}
 			}
 
@@ -246,20 +286,16 @@ public class TestElement{
 	}
 
 	public boolean isValidated() {
-		return (count == 0 && expectedCount == 0) || (count > 0 && expectedCount > 0);
+		return occurrences.test(getElementsCount());
 	}
 
 	public boolean isIframe() {
-		if(isValidated()){
+		if(isValidated() && foundElements.size() > 0){
 			return getFoundElement().isIframe();
 		}else{
 			return false;
 		}
 	}
-
-	//public boolean isDialog() {
-	//	return dialog;
-	//}
 
 	//----------------------------------------------------------------------------------------------------------------------
 	// Getter and setter for serialization
@@ -327,45 +363,15 @@ public class TestElement{
 
 	public void checkOccurrences(ActionStatus status, String operator, int expected) {
 
-		boolean result = false;
-		if(expected == 0) {
-			int loop = maxTry;
-			while(count > 0 && loop > 0) {
-				searchAgain();
-				channel.sleep(200);
-				loop--;
-			}
-			result = loop > 0;
-		}else {
-			result = checkAssertion(operator, expected, count);
-		}
+		terminateExecution();
 
-		if(result) {
+		if(isValidated()) {
 			status.setPassed(true);
 		}else {
 			status.setPassed(false);
 			status.setCode(ActionStatus.OCCURRENCES_ERROR);
 			status.setData(count);
-			status.setMessage("expected : " + expected + " -> occurences found : " + count);
-		}
-	}
-
-	private boolean checkAssertion(String operator, int expected, int found) {
-		switch(operator){
-		case Operators.EQUAL :
-			return found == expected;
-		case Operators.GREATER :
-			return found > expected;
-		case Operators.GREATER_EQUALS :
-			return found >= expected;
-		case Operators.LOWER :
-			return found < expected;
-		case Operators.LOWER_EQUALS :
-			return found <= expected;
-		case Operators.DIFFERENT :
-			return found != expected;
-		default :
-			return false;
+			status.setMessage("occurences error : [" + expected + "] expected occurence(s) but [" + count + "] occurence(s) found");
 		}
 	}
 

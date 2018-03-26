@@ -189,7 +189,8 @@ public class WindowsDesktopDriver extends WiniumDriver {
 			temp.parallelStream().filter(fullPredicate).forEach(e -> foundElements.add(new FoundElement((RemoteWebElement)e, channelDimension.getX(), channelDimension.getY())));
 		}else{
 			List<WebElement> temp = new ArrayList<WebElement>();
-			getChildrenByPid(pid).parallelStream().forEach(e -> temp.addAll(getDescendantByTag(e, tag, attributes)));
+			List<WebElement> children = getChildrenByPid(pid);
+			children.parallelStream().forEach(e -> temp.addAll(getDescendantByTag(e, tag, attributes)));
 
 			temp.parallelStream().filter(fullPredicate).forEach(e -> foundElements.add(new FoundElement((RemoteWebElement)e, channelDimension.getX(), channelDimension.getY())));
 		}

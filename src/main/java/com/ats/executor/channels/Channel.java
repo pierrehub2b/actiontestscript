@@ -105,8 +105,7 @@ public class Channel {
 
 	public void toFront(){
 		windowsDesktopDriver.setWindowToFront(getProcessId());
-		switchToDefaultframe();
-
+		//switchToDefaultframe();
 		showWindow(5);
 	}
 
@@ -142,8 +141,9 @@ public class Channel {
 		//return engine.getScreenShot(dim); 
 	}
 
-	public void setProcessData(long pid, ArrayList<String> processWindows) {
-
+	public void setApplicationData(String version, long pid, ArrayList<String> processWindows) {
+		
+		this.applicationVersion = version;
 		Optional<ProcessHandle> procs = ProcessHandle.of(pid);
 		if(procs.isPresent()) {
 			this.process = procs.get();

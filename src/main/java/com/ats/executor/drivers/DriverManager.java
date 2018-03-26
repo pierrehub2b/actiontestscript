@@ -76,7 +76,7 @@ public class DriverManager {
 	
 	public DriverProcess getWinDesktopDriver() {
 		if(winDesktopDriver == null){
-			winDesktopDriver = new DriverProcess(this, ats.getDriversFolderPath(), WINDOWS_DESKTOP_FILE_NAME);
+			winDesktopDriver = new DriverProcess(this, ats.getDriversFolderPath(), WINDOWS_DESKTOP_FILE_NAME, null);
 		}
 		return winDesktopDriver;
 	}
@@ -110,28 +110,28 @@ public class DriverManager {
 	
 	public DriverProcess getFirefoxDriver() {
 		if(firefoxDriver == null){
-			firefoxDriver = new DriverProcess(this, ats.getDriversFolderPath(), FIREFOX_DRIVER_FILE_NAME);
+			firefoxDriver = new DriverProcess(this, ats.getDriversFolderPath(), FIREFOX_DRIVER_FILE_NAME, null);
 		}
 		return firefoxDriver;
 	}
 
 	public DriverProcess getChromeDriver() {
 		if(chromeDriver == null){
-			chromeDriver = new DriverProcess(this, ats.getDriversFolderPath(), CHROME_DRIVER_FILE_NAME);
+			chromeDriver = new DriverProcess(this, ats.getDriversFolderPath(), CHROME_DRIVER_FILE_NAME, null);
 		}
 		return chromeDriver;
 	}
 
 	public DriverProcess getEdgeDriver() {
 		if(edgeDriver == null){
-			edgeDriver = new DriverProcess(this, ats.getDriversFolderPath(), MICROSOFT_WEBDRIVER_FILE_NAME + "-" + Utils.getWindowsBuildVersion() + ".exe");
+			edgeDriver = new DriverProcess(this, ats.getDriversFolderPath(), MICROSOFT_WEBDRIVER_FILE_NAME + "-" + Utils.getWindowsBuildVersion() + ".exe", null);
 		}
 		return edgeDriver;
 	}
 
 	public DriverProcess getOperaDriver() {
 		if(operaDriver == null){
-			operaDriver = new DriverProcess(this, ats.getDriversFolderPath(), OPERA_WEBDRIVER_FILE_NAME);
+			operaDriver = new DriverProcess(this, ats.getDriversFolderPath(), OPERA_WEBDRIVER_FILE_NAME, null);
 		}
 		return operaDriver;
 	}

@@ -51,7 +51,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		DesiredCapabilities cap = new DesiredCapabilities();
 
 		FirefoxOptions options = new FirefoxOptions();
-		options.setCapability(FirefoxDriver.MARIONETTE, false);
+		options.setCapability(FirefoxDriver.MARIONETTE, true);
 		options.setPageLoadStrategy(PageLoadStrategy.NORMAL);
 
 		BrowserProperties props = ats.getBrowserProperties(DriverManager.FIREFOX_BROWSER);
@@ -74,6 +74,12 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 			driverSessionUri = new URI(driverProcess.getDriverServerUrl() + "/session/" + driver.getSessionId().toString() + "/actions");
 		} catch (URISyntaxException e) {}
 
+	}
+	
+	@Override
+	public void switchToDefaultframe() {
+		String mainWindow = (String) driver.getWindowHandles().toArray()[0];
+		driver.switchTo().window(mainWindow);
 	}
 	
 	@Override

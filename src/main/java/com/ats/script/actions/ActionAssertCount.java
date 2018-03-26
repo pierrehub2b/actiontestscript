@@ -61,9 +61,12 @@ public class ActionAssertCount extends ActionExecuteElement {
 	//---------------------------------------------------------------------------------------------------------------------------------
 	
 	@Override
+	public void execute(ActionTestScript ts) {
+		super.execute(ts, operator, value);
+	}
+	
+	@Override
 	public void terminateExecution(ActionTestScript ts) {
-		
-		super.terminateExecution(ts);
 	
 		getTestElement().checkOccurrences(status, operator, value);
 		
@@ -87,7 +90,6 @@ public class ActionAssertCount extends ActionExecuteElement {
 
 	public void setValue(int value) {
 		this.value = value;
-		setExpectedCount(value);
 	}
 
 	public String getOperator() {

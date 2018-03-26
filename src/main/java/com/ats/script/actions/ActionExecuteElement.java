@@ -10,6 +10,7 @@ import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.TestElement;
 import com.ats.script.Script;
+import com.ats.tools.Operators;
 
 public class ActionExecuteElement extends ActionExecute {
 
@@ -18,8 +19,6 @@ public class ActionExecuteElement extends ActionExecute {
 	private int maxTry = 0;
 	private SearchedElement searchElement;
 	private TestElement testElement;
-
-	private int expectedCount = 1;
 
 	private boolean async;
 
@@ -52,10 +51,6 @@ public class ActionExecuteElement extends ActionExecute {
 		setSearchElement(element);
 	}
 
-	protected void setExpectedCount(int value) {
-		this.expectedCount = value;
-	}
-
 	//---------------------------------------------------------------------------------------------------------------------------------
 	// Code Generator
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -78,8 +73,7 @@ public class ActionExecuteElement extends ActionExecute {
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
 
-	@Override
-	public void execute(ActionTestScript ts) {
+	public void execute(ActionTestScript ts, String operator, int value) {
 
 		super.execute(ts);
 
@@ -90,18 +84,12 @@ public class ActionExecuteElement extends ActionExecute {
 
 		}else {
 
-			if(searchElement == null) {
-				testElement = ts.findObject();
-			}else {
-				testElement = ts.findObject(maxTry, searchElement, expectedCount);
-			}
-			
 			if(testElement == null) {
-				//if(searchElement == null) {
-				//	testElement = ts.findObject();
-				//}else {
-				//	testElement = ts.findObject(maxTry, searchElement, expectedCount);
-				//}
+				if(searchElement == null) {
+					testElement = ts.findObject();
+				}else {
+					testElement = ts.findObject(maxTry, searchElement, operator, value);
+				}
 
 				ts.updateVisualElement(testElement);
 
@@ -109,21 +97,19 @@ public class ActionExecuteElement extends ActionExecute {
 				status.setSearchDuration(testElement.getTotalSearchDuration());
 				status.setData(testElement.getCount());
 
-				if(testElement.isValidated()) {
-					status.setPassed(true);
-					asyncExec(ts);
-				}else {
-					status.setPassed(false);
-					status.setCode(ActionStatus.OBJECT_NOT_FOUND);
-					status.setMessage("Element not found");
-				}
-				
+				asyncExec(ts);
+
 			}else {
 				terminateExecution(ts);
 			}
-			
+
 			status.updateDuration();
 		}
+	}
+
+	@Override
+	public void execute(ActionTestScript ts) {
+		execute(ts, Operators.GREATER, 0);
 	}	
 
 	private void asyncExec(ActionTestScript ts) {
@@ -133,11 +119,27 @@ public class ActionExecuteElement extends ActionExecute {
 	}
 
 	public void terminateExecution(ActionTestScript ts) {
-		getTestElement().terminateExecution();
+
+		if(testElement.isValidated()) {
+			status.setPassed(true);
+		}else {
+			status.setPassed(false);
+			status.setCode(ActionStatus.OBJECT_NOT_FOUND);
+			status.setMessage("Element not found");
+		}
+
+		testElement.terminateExecution();
 	}
 
 	public TestElement getTestElement() {
 		return testElement;
+	}
+
+	public void reinit() {
+		if(testElement != null) {
+			testElement.dispose();
+			testElement = null;
+		}
 	}
 
 	//--------------------------------------------------------

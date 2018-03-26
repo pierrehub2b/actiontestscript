@@ -10,6 +10,7 @@ public class StopExecutionThread extends Thread{
 
 	public StopExecutionThread(InputStream in) {
 		super("ats-stop-execution");
+		this.setDaemon(true);
 		this.inputStream = in;
 	}
 

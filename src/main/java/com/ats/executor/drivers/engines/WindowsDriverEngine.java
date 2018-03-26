@@ -78,7 +78,7 @@ public class WindowsDriverEngine extends DriverEngineAbstract implements IDriver
 				windows.add(windowsDriver.getWindowHandle(elem.getAttribute("NativeWindowHandle")));
 			}
 			
-			channel.setProcessData(applicationProcess.pid(), windows);
+			channel.setApplicationData("N/A", applicationProcess.pid(), windows);
 		}
 	}
 	

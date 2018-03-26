@@ -8,6 +8,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.stream.Stream;
 
 public class DriverProcess {
 
@@ -15,25 +16,31 @@ public class DriverProcess {
 	private Process process;
 	private DriverManager manager;
 
-	public DriverProcess(DriverManager manager, Path driverFolderPath, String driverFileName) {
+	public DriverProcess(DriverManager manager, Path driverFolderPath, String driverFileName, String[] args) {
 
 		this.manager = manager;
-		
+
 		File driverFile = driverFolderPath.resolve(driverFileName).toFile();
 
 		if(driverFile.exists()){
 
 			port = findFreePort();
 
-			ProcessBuilder builder = new ProcessBuilder(driverFile.getAbsolutePath(), "--port=" + port);
-            builder.redirectErrorStream(true);
-            
-            try {
+			String[] arguments = {driverFile.getAbsolutePath(), "--port=" + port};
+
+			if(args != null) {
+				arguments = Stream.of(arguments, args).flatMap(Stream::of).toArray(String[]::new);
+			}
+
+			ProcessBuilder builder = new ProcessBuilder(arguments);
+			builder.redirectErrorStream(true);
+
+			try {
 				process = builder.start();
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-            
+
 			int maxTry = 50;
 			while(maxTry > 0 && waitServerStarted(port)) {
 				maxTry--;
@@ -96,7 +103,7 @@ public class DriverProcess {
 			}
 			process = null;
 		}
-		
+
 		manager.processTerminated(this);
 	}
 }
