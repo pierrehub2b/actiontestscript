@@ -19,6 +19,7 @@ public abstract class DriverEngineAbstract {
 	protected Channel channel;
 	protected RemoteWebDriver driver;
 	protected String application;
+	protected String applicationPath;
 
 	public DriverEngineAbstract(Channel channel, String application){
 		this.channel = channel;
@@ -27,6 +28,10 @@ public abstract class DriverEngineAbstract {
 
 	public String getApplication() {
 		return application;
+	}
+	
+	public String getApplicationPath() {
+		return applicationPath;
 	}
 
 	public RemoteWebDriver getWebDriver(){
@@ -47,8 +52,6 @@ public abstract class DriverEngineAbstract {
 
 		return listAttributes.toArray(new CalculatedProperty[listAttributes.size()]);
 	}
-
-
 
 	protected int getDirectionValue(int value, MouseDirectionData direction,Cartesian cart1, Cartesian cart2) {
 		if(cart1.equals(direction.getName())) {

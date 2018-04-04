@@ -9,7 +9,7 @@
 	<packaging>jar</packaging>
 
 	<name>ats-automated-testing</name>
-	<description>Code generator library to create and execute automated tests</description>
+	<description>Code generator library to create and execute GUI automated tests</description>
 	<url>https://github.com/pierrehub2b/actiontestscript</url>
 
 	<licenses>

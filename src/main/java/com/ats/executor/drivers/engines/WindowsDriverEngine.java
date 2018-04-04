@@ -1,12 +1,10 @@
 package com.ats.executor.drivers.engines;
 
-import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +15,7 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.RemoteWebElement;
 
+import com.ats.driver.ApplicationProperties;
 import com.ats.driver.AtsManager;
 import com.ats.element.FoundElement;
 import com.ats.executor.ActionStatus;
@@ -27,6 +26,8 @@ import com.ats.executor.drivers.WindowsDesktopDriver;
 import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
+import com.sun.jna.platform.win32.VerRsrc.VS_FIXEDFILEINFO;
+import com.sun.jna.platform.win32.VersionUtil;
 
 public class WindowsDriverEngine extends DriverEngineAbstract implements IDriverEngine {
 
@@ -49,14 +50,32 @@ public class WindowsDriverEngine extends DriverEngineAbstract implements IDriver
 			application = application.substring(0, firstSpace);
 		}
 
-		URL fileUrl = null;
+		URI fileUri = null;
 		File exeFile = null;
-		try {
-			fileUrl = new URL(application);
-			exeFile = Paths.get(fileUrl.toURI()).toFile();
-		} catch (MalformedURLException e1) {} catch (URISyntaxException e) {}
 
-		if(exeFile != null && exeFile.exists()){
+		ApplicationProperties properties = ats.getApplicationProperties(application);
+		if(properties != null) {
+			exeFile = new File(properties.getPath());
+			if(exeFile.exists()) {
+				fileUri = exeFile.toURI();
+			}
+		}
+
+		if(fileUri == null) {
+			try {
+				fileUri = new URI(application);
+				exeFile = new File(fileUri);
+			} catch (URISyntaxException e) {}
+		}
+
+		if(exeFile == null) {//last chance
+			exeFile = new File(application);
+		}
+
+		if(exeFile != null && exeFile.exists() && exeFile.isFile()){
+
+			applicationPath = exeFile.getAbsolutePath();
+
 			Runtime runtime = Runtime.getRuntime();
 			try{
 				applicationProcess = runtime.exec(exeFile.getAbsolutePath() + applicationArguments);
@@ -77,16 +96,28 @@ public class WindowsDriverEngine extends DriverEngineAbstract implements IDriver
 			for(WebElement elem : childs){
 				windows.add(windowsDriver.getWindowHandle(elem.getAttribute("NativeWindowHandle")));
 			}
-			
-			channel.setApplicationData("N/A", applicationProcess.pid(), windows);
+
+			String version = "N/A";
+			try {
+				VS_FIXEDFILEINFO info = VersionUtil.getFileVersionInfo(exeFile.getAbsolutePath());
+				version = info.getFileVersionMajor() + "." + info.getFileVersionMinor() + "." + info.getFileVersionRevision() + "." + info.getFileVersionBuild();
+			}catch(Exception e) {}
+
+			String driverVersion = null;
+			try {
+				Map<String, String> infos = (Map<String, String>) driver.getCapabilities().asMap();
+				driverVersion = infos.get("driverVersion");
+			}catch(Exception e) {}
+
+			channel.setApplicationData(version, driverVersion, applicationProcess.pid(), windows);
 		}
 	}
-	
+
 	@Override
 	public boolean isDesktop() {
 		return true;
 	}
-	
+
 	@Override
 	public void waitAfterAction() {
 
@@ -96,7 +127,7 @@ public class WindowsDriverEngine extends DriverEngineAbstract implements IDriver
 		//hoverElement.loadParents((WindowsDesktopDriver)driver, channel);
 		hoverElement.setParent(((WindowsDesktopDriver)driver).getTestElementParent(hoverElement.getValue(), channel));
 	}
-	
+
 	public CalculatedProperty[] getAttributes(FoundElement te){
 		RemoteWebElement element = new RemoteWebElement();
 		element.setParent((RemoteWebDriver) driver);
@@ -108,15 +139,15 @@ public class WindowsDriverEngine extends DriverEngineAbstract implements IDriver
 	public CalculatedProperty[] getAttributes(boolean windowsDomain, RemoteWebElement element){
 		return getWindowsAttributes(element);
 	}
-	
+
 	public CalculatedProperty[] getAttributes(RemoteWebElement element){
 		return getWindowsAttributes(element);
 	}
-	
+
 	public CalculatedProperty[] getCssAttributes(FoundElement te){
 		return getAttributes(te);
 	}
-	
+
 	public CalculatedProperty[] getCssAttributes(RemoteWebElement element){
 		return getWindowsAttributes(element);
 	}
@@ -138,13 +169,13 @@ public class WindowsDriverEngine extends DriverEngineAbstract implements IDriver
 			if(data != null){
 				String[] infoData = data.split(":");
 				String[] boundData = infoData[1].split(",");
-				
+
 				return new TestBound[]{new TestBound(
 						Double.parseDouble(boundData[0]),
 						Double.parseDouble(boundData[1]),
 						Double.parseDouble(boundData[2]),
 						Double.parseDouble(boundData[3])), 
-					channel.getSubDimension()};
+						channel.getSubDimension()};
 			}
 		}
 		return new TestBound[]{channel.getDimension(), channel.getSubDimension()};
@@ -159,7 +190,7 @@ public class WindowsDriverEngine extends DriverEngineAbstract implements IDriver
 
 	@Override
 	public void switchWindow(int index) {
-		
+
 	}
 
 	@Override
@@ -211,7 +242,7 @@ public class WindowsDriverEngine extends DriverEngineAbstract implements IDriver
 	@Override
 	public void middleClick(WebElement element) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -222,26 +253,29 @@ public class WindowsDriverEngine extends DriverEngineAbstract implements IDriver
 
 	@Override
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position) {
-		
-		Rectangle rect = foundElement.getRectangle();
-		
-//		int offsetX = (int) (foundElement.getScreenX() + getOffsetX(rect, position) + channel.getDimension().getX());
-//		int offsetY = (int) (foundElement.getScreenY() + getOffsetY(rect, position) + channel.getDimension().getY());;
-		
+
+		/*Rectangle rect = foundElement.getRectangle();
+
+		//		int offsetX = (int) (foundElement.getScreenX() + getOffsetX(rect, position) + channel.getDimension().getX());
+		//		int offsetY = (int) (foundElement.getScreenY() + getOffsetY(rect, position) + channel.getDimension().getY());;
+
 		Actions act = new Actions(driver);
 		act.moveToElement(foundElement.getValue(), 12, 44).perform();
-		//act.moveToElement(foundElement.getValue(), offsetX, offsetY).perform();
+		//act.moveToElement(foundElement.getValue(), offsetX, offsetY).perform();*/
+
+		Actions act = new Actions(driver);
+		act.moveToElement(foundElement.getValue()).perform();
 	}
 
 	@Override
 	public void setWindowBound(BoundData x, BoundData y, BoundData width, BoundData height) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void forceScrollElement(FoundElement value) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

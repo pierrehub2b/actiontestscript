@@ -73,7 +73,6 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		this.proxy = ats.getProxy();
 		this.loadPageTimeOut = ats.getPageloadTimeOut();
 		this.scriptTimeout = ats.getScriptTimeOut();
-
 		this.maxTryInteractable = ats.getMaxTryInteractable();
 	}
 
@@ -106,17 +105,24 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		}
 
 		String applicationVersion = "N/A";
+		String driverVersion = null;
 		Map<String, ?> infos = (this.driver).getCapabilities().asMap();
 		for (Map.Entry<String, ?> entry : infos.entrySet()){
 			if("browserVersion".equals(entry.getKey()) || "version".equals(entry.getKey())){
 				applicationVersion = entry.getValue().toString();
-				break;
+			}else if("chrome".equals(entry.getKey())) {
+				Map<String, String> chromeData = (Map<String, String>) entry.getValue();
+				driverVersion = chromeData.get("chromedriverVersion");
+				if(driverVersion != null) {
+					driverVersion = driverVersion.replaceFirst("\\(.*\\)", "").trim();
+				}
 			}
 		}
 				
-        driver.get("about:blank");
         try {
                File tempHtml = File.createTempFile("ats_", ".html");
+               tempHtml.deleteOnExit();
+               
                Files.write(tempHtml.toPath(), StartHtmlPage.getAtsBrowserContent());
                driver.get(tempHtml.toURI().toString());
         } catch (IOException e) {}
@@ -124,6 +130,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
         ArrayList<String> windows = new ArrayList<String>();
         channel.setApplicationData(
         		applicationVersion,
+        		driverVersion,
         		windowsDriver.getProcessDataByWindowTitle(StartHtmlPage.getAtsBrowserTitle(), windows),
         		windows);
 				

@@ -24,8 +24,9 @@ public class OperaDriverEngine extends WebDriverEngine {
 		BrowserProperties props = ats.getBrowserProperties(DriverManager.OPERA_BROWSER);
 		if(props != null) {
 			waitAfterAction = props.getWait();
-			if(props.getPath() != null) {
-				options.setBinary(props.getPath());
+			applicationPath = props.getPath();
+			if(applicationPath != null) {
+				options.setBinary(applicationPath);
 			}
 		}
 				

@@ -18,7 +18,7 @@ public final class StartHtmlPage {
     	StringBuilder htmlContent = new StringBuilder();
     	htmlContent.append("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><title>");
     	htmlContent.append(atsBrowserTitle);
-    	htmlContent.append("</title></head><body><img src=\"data:image/png;base64, ");
+    	htmlContent.append("</title></head><body bgcolor=\"#f2f2f2\"><img src=\"data:image/png;base64, ");
     	
     	try {
     		htmlContent.append(Base64.getEncoder().encodeToString(Resources.toByteArray(ResourceContent.class.getResource("/icon/ats_power.png"))));

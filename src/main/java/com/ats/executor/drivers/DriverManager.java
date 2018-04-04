@@ -94,7 +94,7 @@ public class DriverManager {
 	}
 	
 	public IDriverEngine getDriverEngine(Channel channel, String application, WindowsDesktopDriver desktopDriver) {
-		switch(application) {
+		switch(application.toLowerCase()) {
 		case CHROME_BROWSER :
 			return new ChromeDriverEngine(channel, getChromeDriver(), desktopDriver, ats);
 		case EDGE_BROWSER :

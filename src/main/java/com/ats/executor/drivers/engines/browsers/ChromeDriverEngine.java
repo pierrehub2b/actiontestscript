@@ -37,8 +37,9 @@ public class ChromeDriverEngine extends WebDriverEngine {
 		BrowserProperties props = ats.getBrowserProperties(DriverManager.CHROME_BROWSER);
 		if(props != null) {
 			waitAfterAction = props.getWait();
-			if(props.getPath() != null) {
-				options.setBinary(props.getPath());
+			applicationPath = props.getPath();
+			if(applicationPath != null) {
+				options.setBinary(applicationPath);
 			}
 		}
 

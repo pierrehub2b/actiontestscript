@@ -51,6 +51,8 @@ public class ActionProperty extends ActionExecuteElement {
 		if(attributeValue == null) {
 			status.setPassed(false);
 			status.setCode(ActionStatus.ATTRIBUTE_NOT_SET);
+			status.setData(name);
+			status.setMessage("Attribute '" + name + "' not found !");
 		}else {
 			status.setMessage(attributeValue);
 			variable.updateValue(attributeValue);

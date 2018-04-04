@@ -25,8 +25,6 @@ public class EdgeDriverEngine extends WebDriverEngine {
 	public EdgeDriverEngine(Channel channel, DriverProcess driverProcess, WindowsDesktopDriver windowsDriver, AtsManager ats) {
 		super(channel, DriverManager.EDGE_BROWSER, driverProcess, windowsDriver, ats);
 
-		//DesiredCapabilities cap = new DesiredCapabilities();
-
 		EdgeOptions options = new EdgeOptions();
 		options.setPageLoadStrategy("normal");
 
@@ -34,8 +32,6 @@ public class EdgeDriverEngine extends WebDriverEngine {
 		if(props != null) {
 			waitAfterAction = props.getWait();
 		}
-
-		//cap.setCapability(EdgeOptions.CAPABILITY, options);
 
 		launchDriver(options, true);
 	}

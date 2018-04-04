@@ -1,23 +1,12 @@
 package com.ats.driver;
 
-public class BrowserProperties {
+public class BrowserProperties extends ApplicationProperties {
 
-	private String name;
-	private String path;
 	private int wait;
 
 	public BrowserProperties(String name, String path, int wait) {
-		this.name = name;
-		this.path = path;
+		super(name, path);
 		this.wait = wait;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public String getPath() {
-		return path;
 	}
 
 	public int getWait() {

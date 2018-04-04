@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.RemoteWebElement;
 
 import com.ats.element.FoundElement;
@@ -35,6 +36,7 @@ public class Channel {
 	//private ChannelProcessData processData;
 
 	private IDriverEngine engine;
+	private Actions actions;
 
 	private String name;
 	private boolean current = false;
@@ -48,6 +50,7 @@ public class Channel {
 	private int maxTry = 0;
 
 	private String applicationVersion;
+	private String driverVersion;
 
 	private ProcessHandle process = null;
 	private ArrayList<String> processWindows = new ArrayList<String>();
@@ -70,7 +73,8 @@ public class Channel {
 		this.current = true;
 
 		this.windowsDesktopDriver = new WindowsDesktopDriver(driverManager.getWinDesktopDriver().getDriverServerUrl());
-		this.engine = driverManager.getDriverEngine(this, application.toLowerCase(), this.windowsDesktopDriver);
+		this.engine = driverManager.getDriverEngine(this, application, this.windowsDesktopDriver);
+		this.actions = new Actions(this.engine.getWebDriver());
 
 		this.desktop = engine.isDesktop();
 
@@ -141,9 +145,10 @@ public class Channel {
 		//return engine.getScreenShot(dim); 
 	}
 
-	public void setApplicationData(String version, long pid, ArrayList<String> processWindows) {
+	public void setApplicationData(String version, String dVersion, long pid, ArrayList<String> processWindows) {
 		
 		this.applicationVersion = version;
+		this.driverVersion = dVersion;
 		Optional<ProcessHandle> procs = ProcessHandle.of(pid);
 		if(procs.isPresent()) {
 			this.process = procs.get();
@@ -198,8 +203,17 @@ public class Channel {
 	public String getApplication() {
 		return engine.getApplication();
 	}
-
 	public void setApplication(String url) {} // read only	
+	
+	public String getApplicationPath() {
+		return engine.getApplicationPath();
+	}
+	public void setApplicationPath(String url) {} // read only	
+	
+	public String getDriverVersion() {
+		return driverVersion;
+	}
+	public void setDriverVersion(String url) {} // read only	
 
 	public boolean isCurrent() {
 		return current;
@@ -290,6 +304,10 @@ public class Channel {
 	// driver actions
 	//----------------------------------------------------------------------------------------------------------
 
+	public Actions getActions() {
+		return actions;
+	}
+	
 	public WebElement getRootElement() {
 		return engine.getRootElement();
 	}

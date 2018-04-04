@@ -60,6 +60,7 @@ public class AtsManager {
 	private Proxy proxy = new Proxy();
 
 	private List<BrowserProperties> browsersList = new ArrayList<BrowserProperties>();
+	private List<ApplicationProperties> applicationsList = new ArrayList<ApplicationProperties>();
 
 	public AtsManager() {
 
@@ -222,6 +223,38 @@ public class AtsManager {
 							break;*/
 						}
 					}
+					
+					NodeList applications = doc.getElementsByTagName("application");
+					if(applications != null && applications.getLength() > 0) {
+						for (int temp = 0; temp < applications.getLength(); temp++) {
+							Node application = applications.item(temp);
+							if (application.getNodeType() == Node.ELEMENT_NODE) {
+								Element applicationElement = (Element) application;
+								if(applicationElement.hasChildNodes() && applicationElement.getChildNodes().getLength() > 1) {
+									NodeList nodeList = applicationElement.getElementsByTagName("name");
+									if(nodeList != null && nodeList.getLength() > 0) {
+										if(nodeList.item(0).getChildNodes().getLength() > 0) {
+											String name = nodeList.item(0).getChildNodes().item(0).getNodeValue();
+											String path = null;
+
+											nodeList = applicationElement.getElementsByTagName("path");
+											if(nodeList != null && nodeList.getLength() > 0) {
+												if(nodeList.item(0).getChildNodes().getLength() > 0) {
+													path = nodeList.item(0).getChildNodes().item(0).getNodeValue();
+
+													File checkFile = new File(path);
+													if(!checkFile.exists() || !checkFile.isFile()) {
+														path = null;
+													}
+												}
+											}
+											applicationsList.add(new ApplicationProperties(name, path));
+										}
+									}
+								}
+							}
+						}
+					}
 
 
 				} catch (ParserConfigurationException e) {
@@ -255,6 +288,16 @@ public class AtsManager {
 	// Getters
 	//------------------------------------------------------------------------------------------------------------------
 
+	public ApplicationProperties getApplicationProperties(String name) {
+		for (int i=0; i < this.applicationsList.size(); i++) {
+			ApplicationProperties properties = this.applicationsList.get(i);
+			if (name.equals(properties.getName())){
+				return properties;
+			}
+		}
+		return null;
+	}
+	
 	public BrowserProperties getBrowserProperties(String name) {
 		for (int i=0; i < this.browsersList.size(); i++) {
 			BrowserProperties properties = this.browsersList.get(i);

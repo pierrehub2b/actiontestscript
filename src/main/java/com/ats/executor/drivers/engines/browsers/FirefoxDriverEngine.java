@@ -7,7 +7,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -57,8 +56,9 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		BrowserProperties props = ats.getBrowserProperties(DriverManager.FIREFOX_BROWSER);
 		if(props != null) {
 			waitAfterAction = props.getWait();
-			if(props.getPath() != null) {
-				options.setBinary(props.getPath());
+			applicationPath = props.getPath();
+			if(applicationPath != null) {
+				options.setBinary(applicationPath);
 			}
 		}
 
@@ -84,10 +84,8 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	
 	@Override
 	public TestBound[] getDimensions() {
-
 		TestBound[] dimension = super.getDimensions();
 		dimension[1].setY(dimension[1].getY() + 2);
-
 		return dimension;
 	}
 
@@ -103,7 +101,6 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	protected int getDirectionValue(int value, MouseDirectionData direction, Cartesian cart1, Cartesian cart2) {
 		int offset = super.getDirectionValue(value, direction, cart1, cart2);
 		offset -= value/2;
-
 		return offset;
 	}
 
@@ -133,7 +130,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		StringEntity postDataEntity = null;
 		try {
 			postDataEntity = new StringEntity(postData.toString());
-		} catch (UnsupportedEncodingException e1) {
+		} catch (UnsupportedEncodingException e) {
 			return;
 		}
 
@@ -146,15 +143,13 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 			request.setEntity(postDataEntity);
 			httpClient.execute(request);
 
-		} catch (SocketTimeoutException ex) {
+		} catch (SocketTimeoutException e) {
 
 			closeDriver();
 			throw new WebDriverException("Geckodriver hangup issue after mouse move action (try to raise up 'actionWait' value in ATS properties for firefox)");
 
-		} catch (ClientProtocolException e) {
-			//e.printStackTrace();
 		} catch (IOException e) {
-			//e.printStackTrace();
+
 		} finally {
 			try {
 				httpClient.close();

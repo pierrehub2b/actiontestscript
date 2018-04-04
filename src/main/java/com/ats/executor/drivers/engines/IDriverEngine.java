@@ -24,6 +24,7 @@ public interface IDriverEngine{
 	public boolean isDesktop();
 	public WebDriver getWebDriver();
 	public String getApplication();
+	public String getApplicationPath();
 	public void switchWindow(int index);
 	public void closeWindow(ActionStatus status, int index);
 	public Object executeScript(ActionStatus status, String script, Object ... params);

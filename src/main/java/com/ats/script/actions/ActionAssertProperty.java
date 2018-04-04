@@ -65,7 +65,7 @@ public class ActionAssertProperty extends ActionExecuteElement {
 			}else {
 				status.setPassed(false);
 				status.setCode(ActionStatus.ATTRIBUTE_CHECK_FAIL);
-				status.setData(attributeValue);
+				status.setData(new String[]{attributeValue, value.getValue().getCalculated()});
 				status.setMessage("Attribute value '" + attributeValue + "' do not match expected value '" + value.getValue().getCalculated() + "'");
 				
 				ts.updateVisualStatus(false);

@@ -14,7 +14,6 @@ import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.support.ui.Select;
 
@@ -39,7 +38,7 @@ public class TestElement{
 	public static Predicate<Integer> isOccurrencesDifferent(Integer value) {return p -> p != value;}
 	public static Predicate<Integer> isOccurrencesEqual(Integer value) {return p -> p == value;}
 
-	private Actions action;
+	//private Actions action;
 	private Channel channel;
 
 	private Predicate<Integer> occurrences;
@@ -110,7 +109,7 @@ public class TestElement{
 		this.foundElements = new ArrayList<FoundElement>();
 		this.foundElements.add(new FoundElement(channel));
 		this.count = 1;
-		this.action = new Actions(channel.getWebDriver());
+		//this.action = new Actions(channel.getWebDriver());
 	}
 
 	public TestElement(Channel channel, int maxTry, String operator, int expectedCount, SearchedElement searchElement) {
@@ -131,7 +130,7 @@ public class TestElement{
 		this(currentChannel);
 		this.foundElements.add(element);
 		this.count = getElementsCount();
-		this.action = new Actions(channel.getWebDriver());
+		//this.action = new Actions(channel.getWebDriver());
 	}
 
 	protected int getMaxTry() {
@@ -143,7 +142,7 @@ public class TestElement{
 	}
 
 	public void dispose() {
-		action = null;
+		//action = null;
 		channel = null;
 
 		if(parent != null) {
@@ -173,18 +172,20 @@ public class TestElement{
 
 				if(desktop){
 
+					//action = new Actions(channel.getDesktopDriver());
+					
 					WebElement parentElement = null;
 					if(parent != null) {
 						parentElement = parent.getWebElement();
 					}
 
 					foundElements = channel.findWindowsElement(parentElement, tag, properties);
-
+					
 				}else{
 
 					int trySearch = 0;
 					
-					action = new Actions(channel.getWebDriver());
+					//action = new Actions(channel.getWebDriver());
 
 					ArrayList<String> attributeList = new ArrayList<String>();
 
@@ -463,9 +464,11 @@ public class TestElement{
 	}
 
 	public void click(ActionStatus status, Keys key) {
-		action.keyDown(key).perform();
+		channel.getActions().keyDown(key).perform();
+		//action.keyDown(key).perform();
 		click(status, false);
-		action.keyUp(key).perform();
+		channel.getActions().keyUp(key).perform();
+		//action.keyUp(key).perform();
 	}	
 
 	public void click(ActionStatus status, boolean hold) {
@@ -486,12 +489,15 @@ public class TestElement{
 		try {
 
 			if(hold) {
-				action.clickAndHold();
+				channel.getActions().clickAndHold();
+				//action.clickAndHold();
 			}else {
-				action.click();
+				channel.getActions().click();
+				//action.click();
 			}
 
-			action.perform();
+			channel.getActions().perform();
+			//action.perform();
 			status.setPassed(true);
 
 			return;
@@ -515,13 +521,15 @@ public class TestElement{
 	}
 
 	public void drop(ActionStatus status) {
-		action.release().perform();
+		channel.getActions().release().perform();
+		//action.release().perform();
 		status.setPassed(true);
 	}
 
 	public void swipe(ActionStatus status, int hDirection, int vDirection) {
 		click(status, true);
-		action.moveByOffset(hDirection, vDirection);
+		channel.getActions().moveByOffset(hDirection, vDirection);
+		//action.moveByOffset(hDirection, vDirection);
 		drop(status);
 	}
 
@@ -554,7 +562,8 @@ public class TestElement{
 
 	public ActionStatus doubleClick(ActionStatus status) {
 		if(isValidated()){
-			action.doubleClick().perform();
+			channel.getActions().doubleClick().perform();
+			//action.doubleClick().perform();
 		}else{
 			status.setPassed(false);
 			status.setCode(ActionStatus.OBJECT_NOT_FOUND);
@@ -566,7 +575,8 @@ public class TestElement{
 
 	public ActionStatus rightClick(ActionStatus status) {
 		if(isValidated()){
-			action.contextClick().perform();
+			channel.getActions().contextClick().perform();
+			//action.contextClick().perform();
 		}else{
 			status.setPassed(false);
 			status.setCode(ActionStatus.OBJECT_NOT_FOUND);
