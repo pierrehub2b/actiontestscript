@@ -4,6 +4,8 @@ ActionTestScript is a structured testing language used to create reliable and pe
 Tests scripts are defined by a sequence of 'actions' executed on web or desktop application.
 Scripts written in ATS are converted into java classes and then executed using Selenium and TestNG frameworks.
 
+Only following browsers are available for the moment with ATS : *Chrome, Edge, Firefox and Opera*.
+
 ## Getting Started
 
 Here is a simple example of ATS script :
@@ -72,6 +74,69 @@ mvn compile
 ```
 
 You can now use TestNG suite files to define your testing campaigns, please visit [TestNG](http://testng.org/doc/) to see how use TestNG with your favorite Java IDE or to create test suite executions.
+
+## Customize ATS on host machine
+
+Each machine running ATS scripts has it's own performance or available resources to execute automated tests.
+You can change configuration on the installed ATS distribution like wait action by browsers or tested application install path.
+
+Here is an example of global ATS configuration file (*.atsProperties* file in ATS root install folder)
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<execute>
+	<proxy>system</proxy>
+	<appBounding>
+		<x>20</x>
+		<y>20</y>
+		<width>1300</width>
+		<height>960</height>
+	</appBounding>
+	<maxTry>
+		<searchElement>15</searchElement>
+		<interactable>15</interactable>
+	</maxTry>
+	<timeOut>
+		<script>60</script>
+		<pageLoad>120</pageLoad>
+	</timeOut>
+	<browsers>
+		<browser>
+			<name>chrome</name>
+			<options>
+				<option>--disable-infobars</option>
+				<option>--disable-web-security</option>
+			</options>
+		</browser>
+		<browser>
+			<name>opera</name>
+			<path>C:\Program Files\Opera\52.0.2871.40\opera.exe</path>
+			<waitAction>150</waitAction>
+		</browser>
+		<browser>
+			<name>firefox</name>
+			<waitAction>200</waitAction>
+		</browser>
+	</browsers>
+	<applications>
+		<application>
+			<name>notepad++</name>
+			<path>C:\Program Files (x86)\Notepad++\notepad++.exe</path>
+		</application>
+		<application>
+			<name>filezilla</name>
+			<path>C:\Program Files\FileZilla FTP Client\filezilla.exe</path>
+		</application>
+	</applications>
+</execute>
+```
+* You can define the proxy used by browsers during execution of the test.
+* You can define initial window size of a tested application and it's initial position (appBounding).
+* You can define default maxTry action in order to wait that an element exists or wait element is interactable before execution action on it.
+* You can define default timeout (in sec.) for executing javascript or wait page loaded (web application).
+* For each browser used you can define the time to wait after each actions in miliseconds and the path of the binaries of the browser if needed.
+** You can add options to browsers driver
+* You can define application name and path of installed applications on the host machine.
 
 ## Thirdparty components
 
