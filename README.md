@@ -23,6 +23,12 @@ over -> IMG [src =~ .*Test_Automation_Interface.png]
 channel-close -> myFirstChannel
 ```
 
+This script start Chrome browser, navigate to url 'google.com', enter 'automated test' string into input text field and hit 'enter' key.
+The script click on the wikipedia link to open the page and do some mouse over and scroll actions.
+At the end of the script the started channel called 'myFirstChannel' is closed and terminate the browser process.
+
+Pretty simple no ?
+
 ### Prerequisites
 
 You have to install a standard Java 9 JDK into the folder of your choice (JRE 9 server distribution is working too).
