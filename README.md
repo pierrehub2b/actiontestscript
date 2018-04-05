@@ -1,10 +1,12 @@
 # ActionTestScript
 
-ActionTestScript is a structured testing language used to create reliable and performant GUI automated tests campaigns.
+ActionTestScript is a structured and readable testing language used to create reliable and performant GUI automated tests campaigns.
 Tests scripts are defined by a sequence of 'actions' executed on web or desktop application.
 Scripts written in ATS are converted into java classes and then executed using Selenium and TestNG frameworks.
 
 Only following browsers are available for the moment with ATS : *Chrome, Edge, Firefox and Opera*.
+
+With ATS, tests designers are only focused on the functional actions to do and don't have to worried about technical considerations.
 
 ## Getting Started
 
