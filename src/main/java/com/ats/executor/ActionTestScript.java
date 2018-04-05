@@ -3,11 +3,9 @@ package com.ats.executor;
 import static org.testng.Assert.fail;
 
 import java.io.File;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.logging.Level;
 
 import org.openqa.selenium.Keys;
@@ -95,13 +93,6 @@ public class ActionTestScript extends Script implements ITest{
 
 	@BeforeSuite(alwaysRun=true)
 	public void beforeSuite() {
-		/*InputStream resourceAsStream = this.getClass().getResourceAsStream("/version.properties");
-		Properties prop = new Properties();
-		try{
-			prop.load( resourceAsStream );
-			System.out.println("ATS script started (version " + prop.getProperty("version") + ")");
-		}catch(Exception e) {}*/
-		
 		System.out.println("ATS script started (version " + AtsManager.getVersion() + ")");
 	}
 
@@ -144,7 +135,6 @@ public class ActionTestScript extends Script implements ITest{
 
 			new StopExecutionThread(System.in).start();
 		}
-
 	}
 
 	@AfterClass(alwaysRun=true)
@@ -360,15 +350,15 @@ public class ActionTestScript extends Script implements ITest{
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_PROPERTY_FUNCTION_NAME = "pp";
-	public CalculatedProperty pp(boolean isRegexp, String name, CalculatedValue value){
+	public static final String JAVA_PROPERTY_FUNCTION_NAME = "pf";
+	public CalculatedProperty pf(boolean isRegexp, String name, CalculatedValue value){
 		return new CalculatedProperty(isRegexp, name, value);
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_UUID_FUNCTION_NAME = "uid";
-	public String uid() {
+	public static final String JAVA_UUID_FUNCTION_NAME = "ui";
+	public String ui() {
 		return getUuidValue();
 	}
 
@@ -399,8 +389,8 @@ public class ActionTestScript extends Script implements ITest{
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_ROOT_FUNCTION_NAME = "ro";
-	public SearchedElement ro() {
+	public static final String JAVA_ROOT_FUNCTION_NAME = "rt";
+	public SearchedElement rt() {
 		return null;
 	}
 
@@ -427,15 +417,15 @@ public class ActionTestScript extends Script implements ITest{
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_NUMERIC_FUNCTION_NAME = "num";
-	public NumericTransformer num(int dp, String ... data) {
+	public static final String JAVA_NUMERIC_FUNCTION_NAME = "nm";
+	public NumericTransformer nm(int dp, String ... data) {
 		return new NumericTransformer(dp, data);
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_POS_FUNCTION_NAME = "ps";
-	public MouseDirectionData ps(Cartesian cart, int value) {
+	public static final String JAVA_POS_FUNCTION_NAME = "md";
+	public MouseDirectionData md(Cartesian cart, int value) {
 		return new MouseDirectionData(cart, value);
 	}
 

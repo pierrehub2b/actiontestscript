@@ -31,8 +31,11 @@ Pretty simple no ?
 
 ### Prerequisites
 
-You have to install a standard Java 9 JDK into the folder of your choice (JRE 9 server distribution is working too).
-If you want to execute and compile ATS project wit Apache Maven, you have to install it too.
+* You have to install a standard Java 9 JDK into the folder of your choice (JRE 9 server distribution is working too).
+* Apache Maven or Ant to generate and compile ATS project.
+* Install TestNG plugin on your favorite java IDE (for Eclipse : http://testng.org/doc/eclipse.html).
+* Read TestNG documentation about suite management.
+
 
 ### Installing
 
