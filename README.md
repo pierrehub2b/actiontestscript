@@ -8,21 +8,21 @@ Scripts written in ATS can be generated in java classes and then be executed usi
 
 After installation of ATS components, you can create a new ATS project, in the **src/main/ats** folder you can create ATS scripts, using notepad, with - *.ats* - extension.
 
-Here is a simple example of ATS script and actions you can write :
+Here is a simple example of ATS script :
 
 ```
 channel-start -> myFirstChannel -> chrome
 goto-url -> google.com
-keyboard -> tesla car$key(ENTER) -> INPUT [id = lst-ib]
-click -> A [index(1), href =~ https://www.tesla.com.*models]
-click -> A [text = USA]
-property -> text => textData -> DIV [class = text-content] -> ARTICLE [class = feature&sp;sc-hero&sp;ml-overlay&sp;hero]
+keyboard -> automated testing$key(ENTER) -> INPUT [id = lst-ib]
+click -> A [id = , text = Test&sp;automation&sp;-&sp;Wikipedia]
+scroll -> 300
 channel-close -> myFirstChannel
 ```
 
 ### Prerequisites
 
 You have to install a standard Java 9 JDK into the folder of your choice (JRE 9 server distribution is working too).
+If you want to execute and compile ATS project wit Maven, you have to install it too.
 
 ### Installing
 
@@ -30,11 +30,27 @@ Download ATS components here : http://www.actiontestscript.com/ats.zip .
 
 You can unzip archive into the folder of your choice, but if you do not install ATS on *[User-Home-Directory]/.actiontestscript* folder, you have to create an environment variable named **ATS_HOME** and set it's value to your ATS installation folder.
 
+## Create ATS project
+
+Download ATS simple project here : http://www.actiontestscript.com/ats-project.zip
+
+Unzip this folder and now you can edit *.atsProjectProperties* and *pom.xml* files according to your needs. 
+
+There is a simple ATS file in the zipped folder, you can edit this script with notpad or any ATS Editor application ...
+
 
 ## Execute project
 
-You can generate and compile ATS project using Maven and execute - *compile* - goal, it will generate java files from ats files into the *target/generated* folder of the project, after that it will compile generated classes into the 'classes' folder.
-After generate and compile the project you can use TestNG suite xml files to define your testing campaigns.
+Generate and compile ATS project using Maven and execute - *compile* - goal.
+* Java files generated from ats files will be created into the *target/generated* folder of the project.
+* Compiled classes will be created classes into the *target/classes* folder of the project.
+
+```
+cd [path-to-your-ats-project]
+mvn compile
+```
+
+You can now use TestNG suite xml files to define your testing campaigns, please visit [TestNG](http://testng.org/doc/) to see how use TestNG with your favorite Java IDE or to create test suite executions.
 
 ## Thirdparty components
 

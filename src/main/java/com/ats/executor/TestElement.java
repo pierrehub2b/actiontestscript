@@ -287,6 +287,9 @@ public class TestElement{
 	}
 
 	public boolean isValidated() {
+		if(occurrences == null) {
+			return true;
+		}
 		return occurrences.test(getElementsCount());
 	}
 
