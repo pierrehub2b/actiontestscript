@@ -22,6 +22,7 @@ import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeSuite;
 
+import com.ats.driver.AtsManager;
 import com.ats.element.SearchedElement;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.channels.ChannelManager;
@@ -94,12 +95,14 @@ public class ActionTestScript extends Script implements ITest{
 
 	@BeforeSuite(alwaysRun=true)
 	public void beforeSuite() {
-		InputStream resourceAsStream = this.getClass().getResourceAsStream("/version.properties");
+		/*InputStream resourceAsStream = this.getClass().getResourceAsStream("/version.properties");
 		Properties prop = new Properties();
 		try{
 			prop.load( resourceAsStream );
 			System.out.println("ATS script started (version " + prop.getProperty("version") + ")");
-		}catch(Exception e) {}
+		}catch(Exception e) {}*/
+		
+		System.out.println("ATS script started (version " + AtsManager.getVersion() + ")");
 	}
 
 	@BeforeClass(alwaysRun=true)

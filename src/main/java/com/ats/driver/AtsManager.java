@@ -2,6 +2,7 @@ package com.ats.driver;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -61,6 +62,18 @@ public class AtsManager {
 
 	private List<BrowserProperties> browsersList = new ArrayList<BrowserProperties>();
 	private List<ApplicationProperties> applicationsList = new ArrayList<ApplicationProperties>();
+	
+	public static String getVersion() {
+		
+		InputStream resourceAsStream = AtsManager.class.getResourceAsStream("/version.properties");
+		Properties prop = new Properties();
+		try{
+			prop.load( resourceAsStream );
+			return prop.getProperty("version");
+		}catch(Exception e) {}
+		
+		return null;
+	}
 
 	public AtsManager() {
 
