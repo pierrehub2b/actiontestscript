@@ -32,7 +32,7 @@ You can unzip archive into the folder of your choice, but if you do not install 
 
 ## Execute project
 
-You can generate and compile ATS project using Maven and execute 'compile' goal, it will generate java files from ats files, into the 'target/generated' folder of the project, it will compile generated classes into the 'classes' folder.
+You can generate and compile ATS project using Maven and execute 'compile' goal, it will generate java files from ats files into the 'target/generated' folder of the project, after that it will compile generated classes into the 'classes' folder.
 After generate and compile the project you can use TestNG suite xml files to define your testing campaigns.
 
 ## Thirdparty components
