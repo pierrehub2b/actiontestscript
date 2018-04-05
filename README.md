@@ -146,6 +146,10 @@ Here is an example of global ATS configuration file (*.atsProperties* file in AT
 * You can add options to the browsers driver
 * You can define application name and path of installed applications on the host machine.
 
+## List of available ATS actions
+
+- *This part of the readme is under progress, please comme back in a few days to see final version of this document ...* -
+
 ## Thirdparty components
 
 * [Selenium](https://www.seleniumhq.org/) - The testing framework used
