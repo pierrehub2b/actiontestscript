@@ -6,7 +6,7 @@ Scripts written in ATS are converted into java classes and then executed using S
 
 Only following browsers are available for the moment with ATS : *Chrome, Edge, Firefox and Opera*.
 
-With ATS, tests designers are only focused on the functional actions to do and don't have to worried about technical considerations.
+With ATS, tests designers are only focused on the functional actions to do and don't have to worry about technical considerations.
 
 ## Getting Started
 
@@ -148,7 +148,7 @@ Here is an example of global ATS configuration file (*.atsProperties* file in AT
 
 ## List of available ATS actions
 
-  - *This part of the readme is under progress, please comme back in a few days to see final version of this document ...* -
+*This part of the readme is under progress, please comme back in a few days to see final version of this document ...* -
 
 ## Thirdparty components
 
