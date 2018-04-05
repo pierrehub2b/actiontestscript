@@ -78,7 +78,7 @@ You can now use TestNG suite files to define your testing campaigns, please visi
 ## Customize ATS on host machine
 
 Each machine running ATS scripts has it's own performance or available resources to execute automated tests.
-You can change configuration on the installed ATS distribution like wait action by browsers or tested application install path.
+You can change configuration on the installed ATS distribution like wait action by browsers or tested application installation path.
 
 Here is an example of global ATS configuration file (*.atsProperties* file in ATS root install folder)
 
@@ -135,7 +135,7 @@ Here is an example of global ATS configuration file (*.atsProperties* file in AT
 * You can define default maxTry action in order to wait that an element exists or wait element is interactable before execution action on it.
 * You can define default timeout (in sec.) for executing javascript or wait page loaded (web application).
 * For each browser used you can define the time to wait after each actions in miliseconds and the path of the binaries of the browser if needed.
-** You can add options to browsers driver
+* You can add options to the browsers driver
 * You can define application name and path of installed applications on the host machine.
 
 ## Thirdparty components
