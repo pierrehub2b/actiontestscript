@@ -529,7 +529,7 @@ public class ActionTestScript extends Script implements ITest{
 
 	public void startChannel(ActionStatus status, String name, String app){
 		sendInfo("start channel", " '" + name + "' -> " + app);
-		getChannelManager().startChannel(name, app);
+		getChannelManager().startChannel(status, name, app);
 		updateStatus(status);
 	}
 

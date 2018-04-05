@@ -80,7 +80,8 @@ public class WindowsDriverEngine extends DriverEngineAbstract implements IDriver
 			try{
 				applicationProcess = runtime.exec(exeFile.getAbsolutePath() + applicationArguments);
 			} catch (IOException e) {
-				e.printStackTrace();
+				channel.setStartError(e.getMessage());
+				return;
 			}
 
 			List<WebElement> childs = new ArrayList<WebElement>();
@@ -185,7 +186,9 @@ public class WindowsDriverEngine extends DriverEngineAbstract implements IDriver
 	public void close() {
 		driver.close();
 		driver.quit();
-		applicationProcess.destroyForcibly();
+		if(applicationProcess != null) {
+			applicationProcess.destroyForcibly();
+		}
 	}
 
 	@Override

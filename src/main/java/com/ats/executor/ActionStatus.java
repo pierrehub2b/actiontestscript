@@ -22,6 +22,7 @@ public class ActionStatus {
 	public static final int WEB_DRIVER_ERROR = -16;
 	public static final int DRIVER_NOT_REACHABLE = -17;
 	public static final int JAVA_EXCEPTION = -18;
+	public static final int CHANNEL_START_ERROR = -19;
 
 	private Channel channel;
 

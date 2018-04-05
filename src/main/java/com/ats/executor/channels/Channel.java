@@ -33,8 +33,6 @@ import com.sun.jna.platform.win32.WinUser;
 
 public class Channel {
 
-	//private ChannelProcessData processData;
-
 	private IDriverEngine engine;
 	private Actions actions;
 
@@ -46,6 +44,8 @@ public class Channel {
 
 	private TestBound dimension;
 	private TestBound subDimension;
+
+	private String startError;
 
 	private int maxTry = 0;
 
@@ -89,15 +89,15 @@ public class Channel {
 	}
 
 	public void refreshLocation(){
-		
+
 		int[] winRect = getWindowRect();
-		
+
 		TestBound[] dimensions = engine.getDimensions();
 		TestBound mainDimension = dimensions[0];
-		
+
 		mainDimension.setX((double)winRect[0] + 7);
 		mainDimension.setY((double)winRect[1]);
-		
+
 		setDimension(mainDimension);
 		setSubDimension(dimensions[1]);
 	}
@@ -146,7 +146,6 @@ public class Channel {
 	}
 
 	public void setApplicationData(String version, String dVersion, long pid, ArrayList<String> processWindows) {
-		
 		this.applicationVersion = version;
 		this.driverVersion = dVersion;
 		Optional<ProcessHandle> procs = ProcessHandle.of(pid);
@@ -156,7 +155,7 @@ public class Channel {
 		}
 
 		moveWindowByHandle();
-	}
+	}	
 
 	//----------------------------------------------------------------------------------------------------------------------
 	// Elements
@@ -204,12 +203,12 @@ public class Channel {
 		return engine.getApplication();
 	}
 	public void setApplication(String url) {} // read only	
-	
+
 	public String getApplicationPath() {
 		return engine.getApplicationPath();
 	}
 	public void setApplicationPath(String url) {} // read only	
-	
+
 	public String getDriverVersion() {
 		return driverVersion;
 	}
@@ -242,6 +241,14 @@ public class Channel {
 
 	public void setApplicationVersion(String applicationVersion) {
 		this.applicationVersion = applicationVersion;
+	}
+
+	public void setStartError(String error) {
+		this.startError = error;
+	}
+
+	public String getStartError() {
+		return startError;
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------
@@ -279,9 +286,10 @@ public class Channel {
 
 	public void close(){
 		engine.close();
-
-		process.descendants().forEach(p -> p.destroy());
-		process.destroy();
+		if(process != null) {
+			process.descendants().forEach(p -> p.destroy());
+			process.destroy();
+		}
 	}
 
 	public void lastWindowClosed(ActionStatus status) {
@@ -307,7 +315,7 @@ public class Channel {
 	public Actions getActions() {
 		return actions;
 	}
-	
+
 	public WebElement getRootElement() {
 		return engine.getRootElement();
 	}
@@ -371,31 +379,33 @@ public class Channel {
 
 	public void showWindow(int winCommand) {
 
-		String windowHandle = processWindows.get(0);//TODO loop in list
+		if(processWindows.size() > 0) {
+			String windowHandle = processWindows.get(0);//TODO loop in list
 
-		if(windowHandle != null){
-			User32 user32 = User32.INSTANCE;
-			HWND foreground = user32.GetForegroundWindow();
+			if(windowHandle != null){
+				User32 user32 = User32.INSTANCE;
+				HWND foreground = user32.GetForegroundWindow();
 
-			user32.EnumWindows(new User32.WNDENUMPROC() { 
-				@Override 
-				public boolean callback(HWND hWnd, Pointer arg) { 
+				user32.EnumWindows(new User32.WNDENUMPROC() { 
+					@Override 
+					public boolean callback(HWND hWnd, Pointer arg) { 
 
-					if(hWnd != null && hWnd.toNative() != null){
-						if (windowHandle.equals(hWnd.toNative().toString())) {
-							if(winCommand != 0){
-								//user32.SetWindowPos(hWnd, user32.GetForegroundWindow(), 0, 0, 0, 0, 0x0040 | 0x0001 | 0x0002);
-								user32.SetWindowPos(hWnd, foreground, 0, 0, 0, 0, 0x0040 | 0x0001 | 0x0002);
-								user32.SetForegroundWindow(hWnd);
-								//user32.SetFocus(hWnd);
+						if(hWnd != null && hWnd.toNative() != null){
+							if (windowHandle.equals(hWnd.toNative().toString())) {
+								if(winCommand != 0){
+									//user32.SetWindowPos(hWnd, user32.GetForegroundWindow(), 0, 0, 0, 0, 0x0040 | 0x0001 | 0x0002);
+									user32.SetWindowPos(hWnd, foreground, 0, 0, 0, 0, 0x0040 | 0x0001 | 0x0002);
+									user32.SetForegroundWindow(hWnd);
+									//user32.SetFocus(hWnd);
+								}
+								user32.ShowWindow(hWnd, winCommand);
+								return false;
 							}
-							user32.ShowWindow(hWnd, winCommand);
-							return false;
 						}
-					}
-					return true; 
-				} 
-			}, null); 
+						return true; 
+					} 
+				}, null); 
+			}
 		}
 	}
 
@@ -443,38 +453,40 @@ public class Channel {
 			}, null); 
 		}
 	}
-	
+
 	private int[] getWindowRect() {
-		
-		String handle = processWindows.get(0);
+
 		int[] result = {0, 0, 0, 0};
+		if(processWindows.size() > 0) {
 
-		if(handle != null){
+			String handle = processWindows.get(0);
 
-			User32 user32 = User32.INSTANCE;
+			if(handle != null){
 
-			user32.EnumWindows(new User32.WNDENUMPROC() { 
-				@Override 
-				public boolean callback(HWND hWnd, Pointer arg) { 
-					if(hWnd != null){
-						if (handle.equals(hWnd.toNative().toString())) {
-							
-							RECT rect = new RECT();
-							user32.GetWindowRect(hWnd, rect);
-							
-							result[0] = rect.left;
-							result[1] = rect.top;
-							result[2] = rect.right;
-							result[3] = rect.bottom;
-							
-							return false;
+				User32 user32 = User32.INSTANCE;
+
+				user32.EnumWindows(new User32.WNDENUMPROC() { 
+					@Override 
+					public boolean callback(HWND hWnd, Pointer arg) { 
+						if(hWnd != null){
+							if (handle.equals(hWnd.toNative().toString())) {
+
+								RECT rect = new RECT();
+								user32.GetWindowRect(hWnd, rect);
+
+								result[0] = rect.left;
+								result[1] = rect.top;
+								result[2] = rect.right;
+								result[3] = rect.bottom;
+
+								return false;
+							}
 						}
-					}
-					return true;
-				} 
-			}, null); 
+						return true;
+					} 
+				}, null); 
+			}
 		}
-		
 		return result;
 	}
 
@@ -503,5 +515,4 @@ public class Channel {
 	public void forceScrollElement(FoundElement foundElement) {
 		engine.forceScrollElement(foundElement);
 	}
-
 }

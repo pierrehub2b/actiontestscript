@@ -2,6 +2,7 @@ package com.ats.executor.channels;
 
 import java.util.ArrayList;
 
+import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.drivers.DriverManager;
 
@@ -62,10 +63,16 @@ public class ChannelManager {
 		return null;// Channel with name : does not exists or has been closed
 	}
 
-	public void startChannel(String name, String app){
+	public void startChannel(ActionStatus status, String name, String app){
 		if(getChannel(name) == null){
-			setCurrentChannel(new Channel(mainScript, driverManager, name, app));
-			channelsList.add(getCurrentChannel());
+			Channel newChannel = new Channel(mainScript, driverManager, name, app);
+			if(newChannel.getStartError() == null) {
+				channelsList.add(newChannel);
+				setCurrentChannel(newChannel);
+			}else {
+				status.setCode(ActionStatus.CHANNEL_START_ERROR);
+				status.setMessage(newChannel.getStartError());
+			}
 		}
 	}
 

@@ -148,7 +148,7 @@ public class WindowsDesktopDriver extends WiniumDriver {
 		String xpath = "contains(@ControlType, \"ControlType." + tag + "\")";
 		for (CalculatedProperty calc : attributes){
 			if(!calc.isRegexp()){
-				xpath += " and @" + calc.getName() + "=\"" + calc.getValue().getData() + "\"";
+				xpath += " and @" + calc.getName() + "=\"" + calc.getValue().getCalculated() + "\"";
 			}
 		}
 
@@ -178,9 +178,9 @@ public class WindowsDesktopDriver extends WiniumDriver {
 		Predicate<WebElement> fullPredicate = Objects::nonNull;
 		for(CalculatedProperty calc : attributes){
 			if(calc.isRegexp()){
-				fullPredicate = fullPredicate.and(e -> e.getAttribute(calc.getName()).matches(calc.getValue().getData()));
+				fullPredicate = fullPredicate.and(e -> e.getAttribute(calc.getName()).matches(calc.getValue().getCalculated()));
 			}else{
-				fullPredicate = fullPredicate.and(e -> e.getAttribute(calc.getName()).equals(calc.getValue().getData()));
+				fullPredicate = fullPredicate.and(e -> e.getAttribute(calc.getName()).equals(calc.getValue().getCalculated()));
 			}
 		}
 
