@@ -96,8 +96,8 @@ You can generate and compile project using command line with java (see 'Installi
 cd [path-to-your-ats-project]
 java -cp [ats-distribution-path]\libs/*;libs/* com.ats.generator.Generator
 ```
-###Java files will be generated into project folder *target/generated* from scripts found in *src/main/ats* folder. 
-###Java files in *src/main/java* folder will be copied into the *target/generated* folder.
+**Java files will be generated into project folder *target/generated* from scripts found in *src/main/ats* folder. 
+**Java files in *src/main/java* folder will be copied into the *target/generated* folder.
 
 * Generate and compile project (for this command using JRE is not enough, you need to use a JDK to compile classes)
 
