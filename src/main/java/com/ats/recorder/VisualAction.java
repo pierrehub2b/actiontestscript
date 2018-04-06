@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
+import com.ats.generator.objects.MouseDirection;
 import com.ats.script.actions.Action;
 import com.ats.script.actions.ActionComment;
 
@@ -25,6 +26,7 @@ public class VisualAction {
 	private String scriptName;
 	private String value;
 	private String data;
+	private MouseDirection position;
 
 	private TestBound elementBound;
 	private long totalSearchDuration;
@@ -53,7 +55,9 @@ public class VisualAction {
 		}
 	}
 
-
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------
 
 	public int getIndex() {
 		return index;
@@ -173,5 +177,13 @@ public class VisualAction {
 
 	public void setCriterias(String value) {
 		this.criterias = value;
+	}
+
+	public MouseDirection getPosition() {
+		return position;
+	}
+
+	public void setPosition(MouseDirection position) {
+		this.position = position;
 	}
 }

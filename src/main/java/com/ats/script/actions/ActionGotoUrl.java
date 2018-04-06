@@ -1,7 +1,6 @@
 package com.ats.script.actions;
 
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 
 import com.ats.executor.ActionStatus;

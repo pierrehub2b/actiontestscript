@@ -42,7 +42,7 @@ public class ActionMouse extends ActionExecuteElement {
 
 		super.terminateExecution(ts);
 
-		ts.updateVisualValue(getType());
+		ts.updateVisualValue(getType(), position);
 
 		status.resetDuration();
 

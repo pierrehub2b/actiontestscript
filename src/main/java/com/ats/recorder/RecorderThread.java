@@ -5,6 +5,7 @@ import java.nio.file.Path;
 
 import com.ats.executor.TestElement;
 import com.ats.executor.channels.Channel;
+import com.ats.generator.objects.MouseDirection;
 import com.ats.recorder.stream.PdfStream;
 import com.ats.recorder.stream.VisualStream;
 import com.ats.script.ProjectData;
@@ -103,6 +104,11 @@ public class RecorderThread extends Thread {
 	public void updateVisualValue(String value, String data) {
 		currentVisual.setValue(value);
 		currentVisual.setData(data);
+	}
+	
+	public void updateVisualValue(String type, MouseDirection position) {
+		currentVisual.setValue(type);
+		currentVisual.setPosition(position);
 	}
 	
 	public void updateVisualStatus(boolean value) {

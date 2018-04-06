@@ -96,8 +96,8 @@ You can generate and compile project using command line with java (see 'Installi
 cd [path-to-your-ats-project]
 java -cp [ats-distribution-path]\libs/*;libs/* com.ats.generator.Generator
 ```
--Java files will be generated into project folder *target/generated* from scripts found in *src/main/ats* folder. 
--Java files in *src/main/java* folder will be copied into the *target/generated* folder.
+Java files will be generated into project folder *target/generated* from scripts found in *src/main/ats* folder. 
+Java files in *src/main/java* folder will be copied into the *target/generated* folder.
 
 * Generate and compile project (for this command using JRE is not enough, you need to use a JDK to compile classes)
 
@@ -105,7 +105,8 @@ java -cp [ats-distribution-path]\libs/*;libs/* com.ats.generator.Generator
 cd [path-to-your-ats-project]
 java -cp [ats-distribution-path]\libs/*;libs/* com.ats.generator.Generator -comp
 ```
-Generated and copied classes from *target/generated* folder will be compiled into *target/classes* folder and all files and folder in *src/assets/* folder will be copied into the *target/classes* folder.
+Generated and copied classes from *target/generated* folder will be compiled into *target/classes* folder and all files.
+Contents of folder *src/assets/* will be copied into the *target/classes* folder.
 
 Tests are ready to be launched with TestNG.
 

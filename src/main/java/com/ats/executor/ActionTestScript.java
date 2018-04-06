@@ -26,6 +26,7 @@ import com.ats.executor.channels.Channel;
 import com.ats.executor.channels.ChannelManager;
 import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.Cartesian;
+import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.objects.mouse.Mouse;
 import com.ats.generator.objects.mouse.MouseKey;
@@ -654,6 +655,12 @@ public class ActionTestScript extends Script implements ITest{
 	public void updateVisualValue(String value, String data) {
 		if(getRecorder() != null) {
 			getRecorder().updateVisualValue(value, data);
+		}
+	}
+	
+	public void updateVisualValue(String type, MouseDirection position) {
+		if(getRecorder() != null) {
+			getRecorder().updateVisualValue(type, position);
 		}
 	}
 

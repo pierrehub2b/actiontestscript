@@ -2,7 +2,6 @@ package com.ats.script.actions;
 
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
-import com.ats.recorder.VisualAction;
 import com.ats.script.Script;
 
 public class Action {
@@ -11,8 +10,6 @@ public class Action {
 	protected int line;
 	protected boolean disabled = false;
 	protected ActionStatus status;
-	
-	protected VisualAction visual;
 
 	public Action(){}
 
