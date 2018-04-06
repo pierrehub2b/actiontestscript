@@ -14,6 +14,7 @@ import com.ats.generator.events.ScriptProcessedNotifier;
 import com.ats.generator.parsers.Lexer;
 import com.ats.script.ProjectData;
 import com.ats.script.ScriptLoader;
+import com.ats.tools.Utils;
 
 public class Generator implements ScriptProcessedEvent{
 
@@ -24,29 +25,54 @@ public class Generator implements ScriptProcessedEvent{
 	private ProjectData projectData;
 
 	private int remainingScripts = 0;
-	
+
 	private String charset = ScriptLoader.DEFAULT_CHARSET;
 
 	public static void main(String[] args) {
 
 		log(Level.INFO, "Java version : " + System.getProperty("java.version"));
 		log(Level.INFO, StringUtils.repeat("-", 72));
-		
+
 		ATS arguments = new ATS(args);
 		arguments.parse();
 
-		ProjectData projectData = ProjectData.getProjectData(arguments.getSourceFolder(), arguments.getDestinationFolder(), arguments.getReportFolder());
+		ProjectData projectData = ProjectData.getProjectData(arguments.getProjectFolder(), arguments.getDestinationFolder(), arguments.getReportFolder());
 
 		Generator generator = new Generator(projectData);
 		GeneratorReport report = generator.launch();
-		
+
 		log(Level.INFO, StringUtils.repeat("-", 72));
 		log(Level.INFO, "ATS Generator finished :");
 		log(Level.INFO, "- Java files generated -> " + report.getGeneratedScriptsCount());
 		log(Level.INFO, "- Ellapsed time -> " + report.getGenerationEllapsedTime() + " ms");
 		log(Level.INFO, StringUtils.repeat("-", 72));
+
+		if(arguments.isCompile()) {
+
+			String targetFolderPath = projectData.getTargetFolderPath().toFile().getAbsolutePath();
+			
+			log(Level.INFO, "Compile generated java files into folder -> " + targetFolderPath + "/classes");
+			
+			StringBuilder xmlBuilder = new StringBuilder();
+			xmlBuilder.append("<project basedir=\"");
+			xmlBuilder.append(targetFolderPath);
+			xmlBuilder.append("\" default=\"compile\">");
+			xmlBuilder.append("<copy todir=\"classes\"><fileset dir=\"../src/assets\" includes=\"**\"/></copy>");
+			xmlBuilder.append("<property name=\"lib.dir\" value=\"lib\"/>");
+			xmlBuilder.append("<target name=\"compile\"><mkdir dir=\"classes\"/><javac includeantruntime=\"true\" srcdir=\"generated\" destdir=\"classes\"/></target></project>");
+
+			try {
+				File tempXml = File.createTempFile("ant_", ".xml");
+				tempXml.deleteOnExit();
+
+				Files.write(tempXml.toPath(), xmlBuilder.toString().getBytes());
+
+				new AntCompiler(tempXml);
+
+			} catch (IOException e) {}
+		}
 	}
-	
+
 	public static void log(Level lvl, String mess) {
 		if(lvl.equals(Level.SEVERE)) {
 			System.err.println(mess);
@@ -63,7 +89,7 @@ public class Generator implements ScriptProcessedEvent{
 
 		projectData = project;
 		projectData.initFolders();
-		
+
 		genReport = new GeneratorReport();
 
 		File atsSourceFolder = projectData.getAtsSourceFolder().toFile();
@@ -105,7 +131,9 @@ public class Generator implements ScriptProcessedEvent{
 	}
 
 	public GeneratorReport launch(){
-		
+
+		Utils.copyDir(projectData.getJavaSourceFolder().toString(), projectData.getJavaDestinationFolder().toString(), true);
+
 		Stream<File> stream = filesList.parallelStream();
 		stream.forEach(f -> loadScript(f));
 		stream.close();
@@ -115,8 +143,6 @@ public class Generator implements ScriptProcessedEvent{
 		filesList.clear();
 		lexer = null;
 
-		//TODO copy assets and java files ....
-		
 		return genReport;
 	}
 

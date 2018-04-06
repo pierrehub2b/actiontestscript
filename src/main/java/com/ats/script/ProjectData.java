@@ -150,7 +150,7 @@ public class ProjectData {
 		}
 	}
 		
-	private Path getTargetFolderPath() {
+	public Path getTargetFolderPath() {
 		return folder.toPath().resolve(TARGET_FOLDER);
 	}
 	

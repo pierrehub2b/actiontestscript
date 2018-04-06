@@ -11,6 +11,11 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageOutputStream;
@@ -158,41 +163,19 @@ public class Utils {
 		return buildNumber;
 	}
 	
-	/*private static final String WEB_ELEMENT_REF = "element-6066-11e4-a52e-4f735466cecf";
-	public static JsonObject getElementAction(RemoteWebElement elem, int offsetX, int offsetY) {
-
-		String elemId = elem.getId();
-
-		JsonObject origin = new JsonObject();
-		origin.addProperty("ELEMENT", elemId);
-		origin.addProperty(WEB_ELEMENT_REF, elemId);
-
-		JsonObject action = new JsonObject();
-		action.addProperty("duration", 300);
-		action.addProperty("x", offsetX);
-		action.addProperty("y", offsetY);
-		action.addProperty("type", "pointerMove");
-		action.add("origin", origin);
-
-		JsonArray actionList = new JsonArray();
-		actionList.add(action);
-
-		JsonObject parameters = new JsonObject();
-		parameters.addProperty("pointerType", "mouse");
-
-		JsonObject actions = new JsonObject();
-		actions.addProperty("id", "default mouse");
-		actions.addProperty("type", "pointer");
-		actions.add("parameters", parameters);
-
-		actions.add("actions", actionList);
-
-		JsonArray chainedAction = new JsonArray();
-		chainedAction.add(actions);
-
-		JsonObject postData = new JsonObject();
-		postData.add("actions", chainedAction);
-
-		return postData;
-	}*/
+	public static void copyDir(String src, String dest, boolean overwrite) {
+	    try {
+	        Files.walk(Paths.get(src)).forEach(a -> {
+	            Path b = Paths.get(dest, a.toString().substring(src.length()));
+	            try {
+	                if (!a.toString().equals(src))
+	                    Files.copy(a, b, overwrite ? new CopyOption[]{StandardCopyOption.REPLACE_EXISTING} : new CopyOption[]{});
+	            } catch (IOException e) {
+	                e.printStackTrace();
+	            }
+	        });
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	}
 }

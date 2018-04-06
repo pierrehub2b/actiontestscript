@@ -1,6 +1,8 @@
 package com.ats.generator;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.logging.Level;
 
 import org.apache.commons.cli.CommandLine;
@@ -14,10 +16,12 @@ public class ATS {
 	private String[] args = null;
 	private Options options = new Options();
 
-	private File sourceFolder = null;
+	private File projectFolder = null;
 	private File destinationFolder = null;
 	private File reportFolder = null;
 	private File outputFolder = null;
+	
+	private boolean compile = false;
 
 	public ATS(String[] args) {
 
@@ -25,7 +29,8 @@ public class ATS {
 
 		options.addOption("h", "help", false, "Show help");
 		options.addOption("f", "force", false, "Force Java files generation if files or folder exists");
-		options.addOption("src", "source", true, "ATS source folder");
+		options.addOption("comp", "compile", false, "Compile generated java files");
+		options.addOption("prj", "project", true, "ATS project folder");
 		options.addOption("dest", "destination", true, "Generated Java files destination folder");
 		options.addOption("rep", "report", true, "Execution report Java files destination folder");
 	}
@@ -46,27 +51,30 @@ public class ATS {
 		}else {
 
 			boolean force = cmd.hasOption("f");
+			compile = cmd.hasOption("comp");
+			
+			File file;
 
-			if (cmd.hasOption("src")) {
-
-				sourceFolder = new File(cmd.getOptionValue("src"));
-				if(sourceFolder.exists()) {
-										
-					if(sourceFolder.isDirectory()) {
-						Generator.log(Level.INFO, "Using ATS source folder : " + sourceFolder.getAbsolutePath());
-					}else if(sourceFolder.isFile()) {
-						Generator.log(Level.INFO, "Using ATS file : " + sourceFolder.getAbsolutePath());
-					}
-
-				}else {
-					Generator.log(Level.SEVERE, "Source folder does not exists !");
-				}
-
-			} else {
-				Generator.log(Level.SEVERE, "Source folder is mandatory !");
-				help();
+			String prjFolder = ".";
+			if (cmd.hasOption("prj")) {
+				prjFolder = cmd.getOptionValue("prj");
 			}
-
+			
+			file = new File(prjFolder);
+			
+			if(file.exists()) {
+				projectFolder = new File(file.getAbsolutePath());
+			}else {
+				Path projectPath = Paths.get(prjFolder);
+				projectFolder = projectPath.toFile();
+			}
+			
+			if(projectFolder.exists()) {
+				Generator.log(Level.INFO, "Using ATS project folder -> " + projectFolder.getAbsolutePath());
+			}else {
+				Generator.log(Level.SEVERE, "Project folder does not exists -> " + projectFolder.getAbsolutePath());
+			}
+			
 			if (cmd.hasOption("dest")) {
 				destinationFolder = new File(cmd.getOptionValue("dest"));
 				if(destinationFolder.exists()) {
@@ -100,8 +108,12 @@ public class ATS {
 
 	//--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-	public File getSourceFolder() {
-		return sourceFolder;
+	public boolean isCompile() {
+		return compile;
+	}
+	
+	public File getProjectFolder() {
+		return projectFolder;
 	}
 
 	public File getDestinationFolder() {

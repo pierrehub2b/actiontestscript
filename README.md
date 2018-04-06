@@ -86,6 +86,25 @@ mvn compile
 
 You can now use TestNG suite files to define your testing campaigns, please visit [TestNG](http://testng.org/doc/) to see how use TestNG with your favorite Java IDE or to create test suite executions.
 
+Or
+
+You can generate and compile project using command line with java (see 'Installing' chapter for ATS distribution path)
+
+* Generate java files
+
+```
+cd [path-to-your-ats-project]
+java -cp [ats-distribution-path]\libs/*;libs/* com.ats.generator.Generator
+```
+Java files will be generated into folder [path-to-your-ats-project]/target/generated
+
+* Generate and compile project (for this command using JRE is not enough, you need to use a JDK to compile classes)
+
+```
+cd [path-to-your-ats-project]
+java -cp [ats-distribution-path]\libs/*;libs/* com.ats.generator.Generator -comp
+```
+
 ## Customize ATS on host machine
 
 Each machine running ATS scripts has it's own performance or available resources to execute automated tests.
