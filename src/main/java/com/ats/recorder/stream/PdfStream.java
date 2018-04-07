@@ -11,6 +11,7 @@ import com.ats.recorder.VisualAction;
 import com.ats.script.ScriptHeader;
 import com.ats.tools.ResourceContent;
 import com.itextpdf.io.font.FontConstants;
+import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.color.Color;
 import com.itextpdf.kernel.color.DeviceRgb;
@@ -47,7 +48,7 @@ public class PdfStream {
 	private PdfFont helveticaBoldItalic;
 
 	public PdfStream(Path videoFolderPath, ScriptHeader header) {
-		
+
 		File pdfFile = videoFolderPath.resolve(header.getQualifiedName() + ".pdf").toFile();
 
 		PdfDocument pdfDocFile = null;
@@ -84,59 +85,59 @@ public class PdfStream {
 
 		pdfDoc.add(paragraphTitle);
 		//pdfDoc.add(paragraphElement);
-		
-		
+
+
 		Table table = new Table(4);
 		table.setWidthPercent(100);
 		Cell cell;
-		
+
 		cell = new Cell(1, 4).add("Test case : " + header.getQualifiedName());
 		cell.setFont(helveticaBold).setFontSize(18);
 		cell.setTextAlignment(TextAlignment.CENTER);
 		cell.setBackgroundColor(Color.convertRgbToCmyk(new DeviceRgb(175, 183, 188)));
 		table.addCell(cell);
-		
+
 		cell = new Cell(1, 1).add("Author");
 		cell.setFont(helveticaBoldItalic).setFontSize(11);
 		table.addCell(cell);
-		
+
 		cell = new Cell(1, 3).add(header.getAuthor());
 		cell.setFont(helvetica).setFontSize(14);
 		table.addCell(cell);
-		
+
 		cell = new Cell(1, 1).add("Execution date");
 		cell.setFont(helveticaBoldItalic).setFontSize(11);
 		table.addCell(cell);
-		
+
 		cell = new Cell(1, 3).add("21/12/1862 at 10:56:00");
 		cell.setFont(helvetica).setFontSize(14);
 		table.addCell(cell);
-				
+
 		cell = new Cell(1, 1).add("Description");
 		cell.setFont(helveticaBoldItalic).setFontSize(11);
 		table.addCell(cell);
-		
+
 		cell = new Cell(1, 3).add(header.getDescription());
 		cell.setFont(helvetica).setFontSize(14);
 		table.addCell(cell);
-		
+
 		cell = new Cell(1, 1).add("Prerequisite");
 		cell.setFont(helveticaBoldItalic).setFontSize(11);
 		table.addCell(cell);
-		
+
 		cell = new Cell(1, 3).add(header.getPrerequisite());
 		cell.setFont(helvetica).setFontSize(14);
 		table.addCell(cell);
-		
+
 		cell = new Cell(1, 1).add("Groups");
 		cell.setFont(helveticaBoldItalic).setFontSize(11);
 		table.addCell(cell);
-		
+
 		cell = new Cell(1, 3).add(header.getGroups().toString());
 		cell.setFont(helvetica).setFontSize(14);
 		table.addCell(cell);
 
-		
+
 		pdfDoc.add(table);
 		pdfDoc.add(new AreaBreak());
 
@@ -164,7 +165,7 @@ public class PdfStream {
 	public void terminate() {
 		pdfDoc.close();
 		pdfDoc = null;
-		
+
 		titleStyle = null;
 		statusStyle = null;
 		warningStyle = null;
@@ -175,6 +176,10 @@ public class PdfStream {
 		helveticaBoldItalic = null;
 	}
 
+	private byte[] imgBytes;
+	private ImageData imgData;
+	private Image img;
+
 	public void flush(VisualAction currentVisual) {
 
 		Table table = new Table(new float[]{1, 2});
@@ -184,32 +189,37 @@ public class PdfStream {
 		paragraphElement.setHeight(100);
 		paragraphElement.setTextAlignment(TextAlignment.RIGHT);
 
-		if(currentVisual.getImages() != null) {
-			ArrayList<byte[]> images = currentVisual.getImages();
+		try {
+			if(currentVisual.getImages() != null) {
+				ArrayList<byte[]> images = currentVisual.getImages();
 
-			Image img = new Image(ImageDataFactory.create(images.get(images.size()-1)));
+				imgBytes = images.get(images.size()-1);
+				imgData = ImageDataFactory.create(imgBytes);
+				img = new Image(imgData);
 
-			if(currentVisual.getNumElements() > -1) {
+				if(currentVisual.getNumElements() > -1) {
 
-				if(currentVisual.getNumElements() > 0) {
-					img = getWatermarkedImage(pdfDoc.getPdfDocument(), img, currentVisual.getElementBound());
-					paragraphElement.add("Element found in " + currentVisual.getTotalSearchDuration() + " ms");
+					if(currentVisual.getNumElements() > 0) {
+						img = getWatermarkedImage(pdfDoc.getPdfDocument(), img, currentVisual.getElementBound());
+						paragraphElement.add("Element found in " + currentVisual.getTotalSearchDuration() + " ms");
 
-					paragraphElement.setFont(helveticaItalic).setFontSize(12).setFontColor(Color.GRAY);
+						paragraphElement.setFont(helveticaItalic).setFontSize(12).setFontColor(Color.GRAY);
 
+					}else {
+						paragraphElement.addStyle(warningStyle);
+						paragraphElement.add("Element not found after " + currentVisual.getTotalSearchDuration() + " ms !");
+					}
 				}else {
-					paragraphElement.addStyle(warningStyle);
-					paragraphElement.add("Element not found after " + currentVisual.getTotalSearchDuration() + " ms !");
+
 				}
-			}else {
 
+				Cell cellImage = new Cell().add(img.scaleToFit(320, 240));
+				cellImage.setMarginTop(40);
+
+				table.addCell(cellImage);
 			}
-
-			Cell cellImage = new Cell().add(img.scaleToFit(320, 240));
-			//cellImage.setBorder(null);
-			cellImage.setMarginTop(40);
-			
-			table.addCell(cellImage);
+		}catch(OutOfMemoryError err) {
+			System.err.println("out of memory");
 		}
 
 		Cell cellStatus = new Cell();
@@ -218,8 +228,13 @@ public class PdfStream {
 		p1.setTextAlignment(TextAlignment.RIGHT);
 		cellStatus.add(p1);
 
-		
-		Paragraph p2 = new Paragraph(currentVisual.getValue() + " " + currentVisual.getData());
+
+		String data = currentVisual.getValue() + currentVisual.getData();
+		if(data.length() > 50) {
+			data = data.substring(0, 50);
+		}
+
+		Paragraph p2 = new Paragraph(data);
 		p2.setTextAlignment(TextAlignment.RIGHT);
 		cellStatus.add(p2);
 
@@ -244,9 +259,10 @@ public class PdfStream {
 		//cellStatus.setBorder(Border.NO_BORDER);
 
 		//table.addCell(img.setAutoScale(true));
-		
+
 		table.addCell(cellStatus);
 
 		pdfDoc.add(table);
+
 	}
 }

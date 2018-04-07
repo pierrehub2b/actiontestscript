@@ -24,37 +24,35 @@ public class RecorderThread extends Thread {
 	private PdfStream pdfStream;
 
 	public RecorderThread(ScriptHeader header, ProjectData project, boolean visual, boolean pdf, boolean xml) {
+		
+		Path output = project.getReportFolder().resolve(header.getPackagePath());
+		output.toFile().mkdirs();
 
-		Path videoFolderPath = project.getReportFolder().resolve(header.getPackagePath());
-		videoFolderPath.toFile().mkdirs();
-
-		this.setDaemon(true);
-		if(visual) {
-			this.visualStream = new VisualStream(videoFolderPath, header);
-		}
-
-		if(pdf) {
-			this.pdfStream = new PdfStream(videoFolderPath, header);
-		}
-
-		start();
+		initAndStart(output, header, visual, pdf, xml);
 	}
 	
 	public RecorderThread(File outputFolder, String testName, boolean visual, boolean pdf, boolean xml) {
-
-		Path videoFolderPath = outputFolder.toPath();
+		
+		Path output = outputFolder.toPath();
+		
 		ScriptHeader header = new ScriptHeader();
 		header.setName(testName);
 		
+		initAndStart(output, header, visual, pdf, xml);
+	}
+	
+	private void initAndStart(Path output, ScriptHeader header, boolean visual, boolean pdf, boolean xml) {
+		
 		this.setDaemon(true);
+		
 		if(visual) {
-			this.visualStream = new VisualStream(videoFolderPath, header);
+			this.visualStream = new VisualStream(output, header);
 		}
 
 		if(pdf) {
-			this.pdfStream = new PdfStream(videoFolderPath, header);
+			this.pdfStream = new PdfStream(output, header);
 		}
-
+		
 		start();
 	}
 

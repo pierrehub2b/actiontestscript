@@ -63,6 +63,7 @@
 		<lib.jna.version>4.3.0</lib.jna.version>
 		<lib.amf.serializer.version>2.2.0</lib.amf.serializer.version>
 		<lib.itext.version>7.0.4</lib.itext.version>
+		<lib.slf4j.version>1.7.25</lib.slf4j.version>
 		<lib.mxparser.version>4.1.1</lib.mxparser.version>
 		<lib.selenium.version>3.11.0</lib.selenium.version>
 		<lib.testng.version>6.14.2</lib.testng.version>
@@ -142,6 +143,17 @@
 			<groupId>com.itextpdf</groupId>
 			<artifactId>layout</artifactId>
 			<version>${lib.itext.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${lib.slf4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>${lib.slf4j.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mariuszgromada.math</groupId>

@@ -123,7 +123,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
                File tempHtml = File.createTempFile("ats_", ".html");
                tempHtml.deleteOnExit();
                
-               Files.write(tempHtml.toPath(), StartHtmlPage.getAtsBrowserContent(applicationVersion, driverVersion));
+               Files.write(tempHtml.toPath(), StartHtmlPage.getAtsBrowserContent(applicationVersion, driverVersion, channel.getDimension()));
                driver.get(tempHtml.toURI().toString());
         } catch (IOException e) {}
 

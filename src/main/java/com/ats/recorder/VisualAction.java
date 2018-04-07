@@ -24,8 +24,8 @@ public class VisualAction {
 	private String type;
 	private int line;
 	private String scriptName;
-	private String value;
-	private String data;
+	private String value = "";
+	private String data = "";
 	private MouseDirection position;
 
 	private TestBound elementBound;
@@ -136,15 +136,19 @@ public class VisualAction {
 	}
 
 	public void setValue(String value) {
-		this.value = value;
+		if(value != null) {
+			this.value = value;
+		}
 	}
 
 	public String getData() {
 		return data;
 	}
 
-	public void setData(String data) {
-		this.data = data;
+	public void setData(String value) {
+		if(value != null) {
+			this.data = value;
+		}
 	}
 
 	public TestBound getElementBound() {
