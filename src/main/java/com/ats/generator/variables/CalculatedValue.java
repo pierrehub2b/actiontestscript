@@ -12,6 +12,7 @@ import com.ats.executor.SendKeyData;
 import com.ats.generator.variables.transform.DateTransformer;
 import com.ats.generator.variables.transform.TimeTransformer;
 import com.ats.script.Script;
+import com.ats.tools.Utils;
 
 public class CalculatedValue{
 
@@ -24,18 +25,6 @@ public class CalculatedValue{
 	private static final Pattern UUID_PATTERN = Pattern.compile("^\\$uuid$", Pattern.CASE_INSENSITIVE);
 	
 	public static final Pattern KEY_REGEXP = Pattern.compile("\\$key\\s?\\((\\w+)\\-?([^\\)]*)?\\)");
-
-	//-----------------------------------------------------------------------------------------------------
-	// special character management
-	//-----------------------------------------------------------------------------------------------------
-
-	//private static final String BACKSLASH_PATTERN = "\\\\";
-	//private static final String DOUBLE_QUOTE_PATTERN = "\"";
-	private static final String SPACE_PATTERN = "&space;";
-	private static final String TAB_PATTERN = "&tab;";
-	private static final String EQUAL_PATTERN = "&equal;";
-	private static final String COMMA_PATTERN = "&comma;";
-	private static final String BREAK_PATTERN = "&br;";
 
 	//-----------------------------------------------------------------------------------------------------
 	// variable and parameter management
@@ -187,13 +176,13 @@ public class CalculatedValue{
 
 	public String getJavaCode(){
 
-		String value =	javaCode;
+		String value = Utils.atsStringValue(javaCode);
 
-		value = value.replaceAll(SPACE_PATTERN, " ");
+		/*value = value.replaceAll(SPACE_PATTERN, " ");
 		value = value.replaceAll(TAB_PATTERN, "\t");
 		value = value.replaceAll(EQUAL_PATTERN, "=");
 		value = value.replaceAll(COMMA_PATTERN, ",");
-		value = value.replaceAll(BREAK_PATTERN, " ");
+		value = value.replaceAll(BREAK_PATTERN, " ");*/
 
 		value = "\"" + value + "\"";
 
