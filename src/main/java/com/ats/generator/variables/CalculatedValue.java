@@ -57,6 +57,8 @@ public class CalculatedValue{
 
 	public CalculatedValue(Script script, String dataValue) {
 
+		dataValue = Utils.escapeAts(dataValue);
+		
 		this.setScript(script);
 		this.setData(dataValue);
 
@@ -176,7 +178,8 @@ public class CalculatedValue{
 
 	public String getJavaCode(){
 
-		String value = Utils.atsStringValue(javaCode);
+		String value = javaCode;
+		//String value = Utils.atsStringValue(javaCode);
 
 		/*value = value.replaceAll(SPACE_PATTERN, " ");
 		value = value.replaceAll(TAB_PATTERN, "\t");

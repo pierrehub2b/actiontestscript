@@ -7,6 +7,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
@@ -42,7 +43,7 @@ import com.ats.tools.logger.MessageCode;
 
 public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngine {
 
-   private static final String resultAsync = ";var callbackResult=arguments[arguments.length-1];callbackResult(result);";
+	private static final String resultAsync = ";var callbackResult=arguments[arguments.length-1];callbackResult(result);";
 
 	protected WindowsDesktopDriver windowsDriver;
 
@@ -118,22 +119,23 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 				}
 			}
 		}
-			
-        try {
-               File tempHtml = File.createTempFile("ats_", ".html");
-               tempHtml.deleteOnExit();
-               
-               Files.write(tempHtml.toPath(), StartHtmlPage.getAtsBrowserContent(applicationVersion, driverVersion, channel.getDimension()));
-               driver.get(tempHtml.toURI().toString());
-        } catch (IOException e) {}
 
-        ArrayList<String> windows = new ArrayList<String>();
-        channel.setApplicationData(
-        		applicationVersion,
-        		driverVersion,
-        		windowsDriver.getProcessDataByWindowTitle(StartHtmlPage.getAtsBrowserTitle(), windows),
-        		windows);
-				
+		String titleUid = UUID.randomUUID().toString();
+		try {
+			File tempHtml = File.createTempFile("ats_", ".html");
+			tempHtml.deleteOnExit();
+
+			Files.write(tempHtml.toPath(), StartHtmlPage.getAtsBrowserContent(titleUid, applicationVersion, driverVersion, channel.getDimension()));
+			driver.get(tempHtml.toURI().toString());
+		} catch (IOException e) {}
+
+		ArrayList<String> windows = new ArrayList<String>();
+		channel.setApplicationData(
+				applicationVersion,
+				driverVersion,
+				windowsDriver.getProcessDataByWindowTitle(titleUid, windows),
+				windows);
+
 		firstWindow = driver.getWindowHandle();
 	}
 
@@ -201,9 +203,9 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		if(x < channel.getSubDimension().getX() || y < channel.getSubDimension().getY()) {
 
 			return windowsDriver.getElementFromPoint(x, y);
-			
+
 		}else {
-			
+
 			switchToDefaultframe();
 
 			x -= channel.getSubDimension().getX();
@@ -413,6 +415,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	private boolean isInteractable(RemoteWebElement rwe) {
+
 		if((Boolean) runJavaScript(ResourceContent.getVisibilityJavaScript(), rwe)) {
 			if(rwe.isEnabled()) {
 				return true;
@@ -423,6 +426,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	@Override
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position) {
+
 		if(waitElementInteractable(foundElement)) {
 
 			Rectangle rect = foundElement.getRectangle();
@@ -433,7 +437,6 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			move(foundElement.getValue(), offsetX, offsetY);
 
 			ArrayList<Double> newPosition =  (ArrayList<Double>) runJavaScript("var rect=arguments[0].getBoundingClientRect();var result=[rect.left+0.00001, rect.top+0.00001]", foundElement.getValue());
-
 			if(newPosition.size() > 1) {
 				foundElement.updatePosition(newPosition.get(0), newPosition.get(1), channel, 0.0, 0.0);
 			}
@@ -649,7 +652,6 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		}
 
 		ArrayList<Map<String, Object>> response = (ArrayList<Map<String, Object>>)runJavaScript(ResourceContent.getSearchElementsJavaScript(), startElement, tagName, attributes);
-
 		if(response != null){
 			response.parallelStream().filter(predicate).forEachOrdered(e -> addWebElement(webElementList, (Map<String, Object>) e.get("atsElem")));
 		}

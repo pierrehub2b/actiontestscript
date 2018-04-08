@@ -28,7 +28,7 @@ import com.google.gson.JsonPrimitive;
 
 public class Utils {
 
-	public static String atsStringValue(String data) {
+	public static String escapeAts(String data) {
 		return data.replaceAll("&sp;", " ").replaceAll("&co;", ",").replaceAll("&eq;", "=").replaceAll("&rb;", "]").replaceAll("&lb;", "[");
 	}
 

@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 
 import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebElement;
@@ -171,8 +172,6 @@ public class TestElement{
 			if(parent == null || (parent != null && parent.getCount() > 0)){
 
 				if(desktop){
-
-					//action = new Actions(channel.getDesktopDriver());
 					
 					WebElement parentElement = null;
 					if(parent != null) {
@@ -184,8 +183,6 @@ public class TestElement{
 				}else{
 
 					int trySearch = 0;
-					
-					//action = new Actions(channel.getWebDriver());
 
 					ArrayList<String> attributeList = new ArrayList<String>();
 
@@ -211,30 +208,6 @@ public class TestElement{
 
 						foundElements = channel.findWebElement(this, tag, attributes, fullPredicate);
 					}
-
-					/*if(expectedCount == 0) {
-
-						while(getElementsCount() > 0 && trySearch < maxTry){
-
-							channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "searching element", maxTry - trySearch);
-							foundElements = channel.findWebElement(this, tag, attributes, fullPredicate);
-
-							progressiveWait(trySearch);
-							trySearch++;
-						}
-
-					}else {
-
-						while(getElementsCount() == 0 && trySearch < maxTry){
-
-							channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "searching element", maxTry - trySearch);
-							foundElements = channel.findWebElement(this, tag, attributes, fullPredicate);
-
-							progressiveWait(trySearch);
-							trySearch++;
-						}
-					}*/
-
 				}
 			}
 
@@ -458,7 +431,14 @@ public class TestElement{
 
 	public void over(ActionStatus status, MouseDirection position) {
 		if(isValidated()){
-			channel.mouseMoveToElement(status, getFoundElement(), position);
+						
+			try {
+				channel.mouseMoveToElement(status, getFoundElement(), position);
+			}catch(StaleElementReferenceException ex) {
+				searchAgain();
+				over(status, position);
+			}
+						
 		}else{
 			status.setPassed(false);
 			status.setCode(ActionStatus.OBJECT_NOT_FOUND);

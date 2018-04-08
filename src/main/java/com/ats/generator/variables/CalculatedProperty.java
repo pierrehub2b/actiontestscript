@@ -9,7 +9,6 @@ import java.util.regex.PatternSyntaxException;
 import com.ats.executor.ActionTestScript;
 import com.ats.script.Script;
 import com.ats.tools.Operators;
-import com.ats.tools.Utils;
 
 public class CalculatedProperty implements Comparable<CalculatedProperty>{
 
@@ -36,7 +35,8 @@ public class CalculatedProperty implements Comparable<CalculatedProperty>{
 		if(dataFound && objectMatcher.groupCount() >= 2){
 
 			setName(objectMatcher.group(1).trim());
-			setValue(new CalculatedValue(script, Utils.atsStringValue(objectMatcher.group(2).trim())));
+			setValue(new CalculatedValue(script, objectMatcher.group(2).trim()));
+			//setValue(new CalculatedValue(script, Utils.atsStringValue(objectMatcher.group(2).trim())));
 
 		}else{
 			setValue(new CalculatedValue(script, "true"));
