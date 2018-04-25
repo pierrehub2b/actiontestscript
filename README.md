@@ -46,7 +46,7 @@ You can unzip archive into the folder of your choice, but if you do not install 
 After installation of ATS components you can create ATS projects with the following folder structure.
 
 ```
-Project
+ATS Project folder
 	/libs/
 	/src/
 		/assets/
@@ -59,8 +59,8 @@ Project
 				/subscripts/
 			/java/
 	/target/
-	/*.atsProjectProperties*
-	/*pom.xml*
+	/.atsProjectProperties
+	/pom.xml
 ```
 
 In the **src/main/ats** folder you can create ATS scripts using notepad with - *.ats* - extension.
