@@ -9,7 +9,7 @@ if(parent == null){
 	parent = window.document;
 }
 
-var elements = parent.querySelectorAll(tag);
+var elements = parent.getElementsByTagName(tag);
 var attributesList, attributeName, textValue, idx, attributeData, e;
 
 for(var i = 0, len = elements.length; i < len; i++){
@@ -49,7 +49,7 @@ for(var i = 0, len = elements.length; i < len; i++){
 	}
 };
 
-function addElement(e){
-	var eRect = e.getBoundingClientRect();
-	return result.push({atsElem:{index:i, tag:e.tagName.toLowerCase(), value:e, x:eRect.left+0.00001, y:eRect.top+0.00001, width:eRect.width+0.00001, height:eRect.height+0.00001}});
+function addElement(el){
+	var rec = el.getBoundingClientRect();
+	return result.push({atsElem:{index:i, tag:el.tagName.toLowerCase(), value:el, x:rec.left+0.00001, y:rec.top+0.00001, width:rec.width+0.00001, height:rec.height+0.00001}});
 };

@@ -10,6 +10,7 @@ import com.ats.executor.drivers.engines.WindowsDriverEngine;
 import com.ats.executor.drivers.engines.browsers.ChromeDriverEngine;
 import com.ats.executor.drivers.engines.browsers.EdgeDriverEngine;
 import com.ats.executor.drivers.engines.browsers.FirefoxDriverEngine;
+import com.ats.executor.drivers.engines.browsers.IEDriverEngine;
 import com.ats.executor.drivers.engines.browsers.OperaDriverEngine;
 import com.ats.tools.Utils;
 
@@ -32,6 +33,7 @@ public class DriverManager {
 	private DriverProcess edgeDriver;
 	private DriverProcess operaDriver;
 	private DriverProcess firefoxDriver;
+	private DriverProcess ieDriver;
 	
 	private AtsManager ats;
 
@@ -103,6 +105,8 @@ public class DriverManager {
 			return new OperaDriverEngine(channel, getOperaDriver(), desktopDriver, ats);
 		case FIREFOX_BROWSER :
 			return new FirefoxDriverEngine(channel, getFirefoxDriver(), desktopDriver, ats);
+		case "ie" :
+			return new IEDriverEngine(channel, getIEDriver(), desktopDriver, ats);
 		default :
 			return new WindowsDriverEngine(channel, application, desktopDriver, ats);
 		}
@@ -122,6 +126,14 @@ public class DriverManager {
 		return chromeDriver;
 	}
 
+	public DriverProcess getIEDriver() {
+		if(ieDriver == null){
+			ieDriver = new DriverProcess(this, ats.getDriversFolderPath(), "IEDriverServer.exe", null);
+		}
+		return ieDriver;
+	}
+	
+	
 	public DriverProcess getEdgeDriver() {
 		if(edgeDriver == null){
 			edgeDriver = new DriverProcess(this, ats.getDriversFolderPath(), MICROSOFT_WEBDRIVER_FILE_NAME + "-" + Utils.getWindowsBuildVersion() + ".exe", null);

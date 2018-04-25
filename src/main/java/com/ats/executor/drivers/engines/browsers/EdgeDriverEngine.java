@@ -33,7 +33,7 @@ public class EdgeDriverEngine extends WebDriverEngine {
 			waitAfterAction = props.getWait();
 		}
 
-		launchDriver(options, true);
+		launchDriver(options);
 	}
 
 	@Override

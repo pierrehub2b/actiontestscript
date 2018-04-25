@@ -11,13 +11,17 @@ while (parent != null){
 			parent = parent.ownerDocument.defaultView.frameElement;
 		}
 	}else{
-		parent = parent.parentNode;
+		parent = parent.parentElement;
 	}
 };
 
-function addElement(e){
-	if(e != null){
-		var rect = e.getBoundingClientRect();
-		result.push({value:e,tag:e.tagName,x:rect.left+0.00001,y:rect.top+0.00001,width:rect.width+0.00001,height:rect.height+0.00001});
+function addElement(el){
+	if(el != null){
+		try{
+			var rec = el.getBoundingClientRect();
+			result.push({value:el,tag:el.tagName,x:rec.left+0.00001,y:rec.top+0.00001,width:rec.width+0.00001,height:rec.height+0.00001});
+		}catch(error){
+			result.push({value:el,tag:'va',x:0.00001,y:0.00001,width:0.00001,height:0.00001});
+		}
 	}
 }

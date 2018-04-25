@@ -64,7 +64,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 
 		cap.setCapability(FirefoxOptions.FIREFOX_OPTIONS, options);
 		
-		launchDriver(cap, false);
+		launchDriver(cap);
 
 		requestConfig = RequestConfig.custom()
 				.setConnectTimeout(20 * 1000)

@@ -46,7 +46,7 @@ public class ChromeDriverEngine extends WebDriverEngine {
 		DesiredCapabilities caps = DesiredCapabilities.chrome(); 
 		caps.setCapability(ChromeOptions.CAPABILITY, options); 
 		
-		launchDriver(caps, false);
+		launchDriver(caps);
 	}
 	
 	@Override

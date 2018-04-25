@@ -255,7 +255,7 @@ public class Lexer {
 							parameters = matcher.group(2).split(",");
 						}			
 
-						action = new ActionCallscript(script, dataOne, options, parameters, returnValues);
+						action = new ActionCallscript(script, dataOne, parameters, returnValues);
 
 						//---------------------------------------------------------------------------
 						// Comment

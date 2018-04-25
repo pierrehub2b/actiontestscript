@@ -33,7 +33,7 @@ public class OperaDriverEngine extends WebDriverEngine {
 		DesiredCapabilities cap = new DesiredCapabilities();
 		cap.setCapability(OperaOptions.CAPABILITY, options);
 		
-		launchDriver(cap, false);
+		launchDriver(cap);
 	}
 	
 	@Override

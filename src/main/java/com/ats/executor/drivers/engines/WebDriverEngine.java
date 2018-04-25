@@ -86,7 +86,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		return driverProcess;
 	}
 
-	protected void launchDriver(MutableCapabilities cap, boolean isEdge) {
+	protected void launchDriver(MutableCapabilities cap) {
 
 		cap.setCapability(CapabilityType.SUPPORTS_FINDING_BY_CSS, false);
 		cap.setCapability(CapabilityType.PROXY, proxy);

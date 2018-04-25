@@ -11,7 +11,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,7 +41,7 @@ public class ActionCallscript extends Action {
 
 	public ActionCallscript() {}
 
-	public ActionCallscript(ScriptLoader script, String name, ArrayList<String> options, String[] parameters, String[] returnValue) {
+	public ActionCallscript(ScriptLoader script, String name, String[] parameters, String[] returnValue) {
 
 		super(script);
 		setName(name);
@@ -57,13 +56,20 @@ public class ActionCallscript extends Action {
 
 			ArrayList<CalculatedValue> paramsValues = new ArrayList<CalculatedValue>();
 			for(String param : parameters){
-				paramsValues.add(new CalculatedValue(script, param.trim()));
+				Matcher match = LOOP_REGEXP.matcher(param);
+				if(match.find()){
+					try{
+						this.loop = Integer.parseInt(match.group(1));
+					}catch (NumberFormatException e){}
+				}else {
+					paramsValues.add(new CalculatedValue(script, param.trim()));
+				}
 			}
 
 			setParameters(paramsValues.toArray(new CalculatedValue[paramsValues.size()]));
 		}
 
-		if(options != null && options.size() > 0){
+		/*if(options != null && options.size() > 0){
 
 			int loopValue = 1;
 
@@ -81,7 +87,7 @@ public class ActionCallscript extends Action {
 			}
 
 			this.loop = loopValue;
-		}
+		}*/
 
 		if(returnValue != null && returnValue.length > 0 && this.loop == 1){
 			setVariables(new Variable[returnValue.length]);
