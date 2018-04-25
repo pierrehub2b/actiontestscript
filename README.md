@@ -51,7 +51,8 @@ Project
 	/src/
 		/assets/
 			/data/
-			/resouces/
+			/lang/
+			/resources/
 		/exec/
 		/main/
 			/ats/
