@@ -176,6 +176,9 @@ public class Utils {
 					break;
 				}
 			}
+			output.close();
+			p.destroy();
+			
 		} catch (IOException e) {
 		}
 

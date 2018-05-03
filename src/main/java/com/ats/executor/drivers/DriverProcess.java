@@ -15,16 +15,14 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.executor.drivers;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.stream.Stream;
@@ -59,24 +57,6 @@ public class DriverProcess {
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-
-			int maxTry = 50;
-			while(maxTry > 0 && waitServerStarted(port)) {
-				maxTry--;
-				try {
-					Thread.sleep(200);
-				} catch (InterruptedException e) {}
-			}
-		}
-	}
-
-	private boolean waitServerStarted(int port) {
-		try (Socket socket = new Socket()) {
-			socket.connect(new InetSocketAddress("localhost", port), 100);
-			socket.close();
-			return true;
-		} catch (Exception e) {
-			return false;
 		}
 	}
 

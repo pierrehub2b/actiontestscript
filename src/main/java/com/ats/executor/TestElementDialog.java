@@ -65,7 +65,7 @@ public class TestElementDialog extends TestElement {
 		}
 
 		int tryLoop = getMaxTry();
-
+		
 		while (alert == null && tryLoop > 0) {
 			try {
 				alert = getChannel().getWebDriver().switchTo().alert();
@@ -104,7 +104,8 @@ public class TestElementDialog extends TestElement {
 			}else {
 				alert.dismiss();
 			}
-			getChannel().switchToDefaultframe();
+			getChannel().sleep(waitBox);
+			getChannel().getWebDriver().switchTo().defaultContent();
 		}
 
 		status.setPassed(true);

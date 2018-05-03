@@ -128,7 +128,6 @@ public class Channel {
 
 	public void toFront(){
 		windowsDesktopDriver.setWindowToFront(getProcessId());
-		//switchToDefaultframe();
 		showWindow(5);
 	}
 

@@ -53,7 +53,7 @@ public class EdgeDriverEngine extends WebDriverEngine {
 		}
 
 		launchDriver(options);
-	}
+	}		
 
 	@Override
 	public void waitAfterAction() {

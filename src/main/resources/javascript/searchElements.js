@@ -9,7 +9,7 @@ if(parent == null){
 	parent = window.document;
 }
 
-var elements = parent.getElementsByTagName(tag);
+var elements = parent.querySelectorAll(tag);
 var attributesList, attributeName, textValue, idx, attributeData, e;
 
 for(var i = 0, len = elements.length; i < len; i++){

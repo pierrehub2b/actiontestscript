@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.executor.drivers.engines;
 
@@ -32,6 +32,7 @@ import java.util.function.Predicate;
 
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.MutableCapabilities;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.NoSuchWindowException;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.Proxy;
@@ -62,8 +63,6 @@ import com.ats.tools.logger.MessageCode;
 
 public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngine {
 
-	private static final String resultAsync = ";var callbackResult=arguments[arguments.length-1];callbackResult(result);";
-
 	protected WindowsDesktopDriver windowsDriver;
 
 	protected Double initElementX = 0.0;
@@ -76,6 +75,8 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	private int maxTryInteractable;
 
 	private DriverProcess driverProcess;
+
+	private int currentWindow = 0;
 
 	private String firstWindow;
 
@@ -169,9 +170,12 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	@Override
 	public void waitAfterAction() {
 		int maxWait = 50;
-		while(maxWait > 0 && !((ArrayList<Boolean>) runJavaScript(ResourceContent.getReadyStatesJavaScript())).stream().parallel().allMatch(e -> true)){
+		ArrayList<Boolean> iframesStatus = (ArrayList<Boolean>) runJavaScript(ResourceContent.getReadyStatesJavaScript());
+		while(maxWait > 0 && !iframesStatus.stream().parallel().allMatch(e -> true)){
 			channel.sleep(200);
 			maxWait--;
+			
+			iframesStatus = (ArrayList<Boolean>) runJavaScript(ResourceContent.getReadyStatesJavaScript());
 		}
 	}
 
@@ -276,7 +280,25 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	@Override
 	public WebElement getRootElement() {
-		return driver.findElementByXPath("//body");
+		int maxTry = 20;
+
+		WebElement body = getBody();
+
+		while(body == null && maxTry > 0) {
+			maxTry--;
+			body = getBody();
+		}
+
+		return body;
+	}
+
+	private WebElement getBody() {
+		try {
+			return driver.findElementByXPath("//body");
+		}catch(NoSuchElementException ex) {
+			channel.sleep(200);
+			return null;
+		}
 	}
 
 	private RemoteWebElement getWebElement(FoundElement te) {
@@ -346,7 +368,8 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	@Override
 	public TestBound[] getDimensions() {
 
-		switchToDefaultframe();
+		//switchToDefaultframe();
+		switchToCurrentWindow();
 
 		Map<String, ArrayList<Double>> response = (Map<String, ArrayList<Double>>) runJavaScript(ResourceContent.getDocumentSizeJavaScript());
 		int maxTry = 10;
@@ -481,12 +504,21 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		switchWindow(windowsNum - 1);
 	}	
 
+	public void switchToCurrentWindow() {
+		switchWindow(currentWindow);
+	}
+
 	@Override
 	public void switchWindow(int index) {
-		ArrayList<String> list = new ArrayList<String>(driver.getWindowHandles());
-		if(index < list.size()) {
-			channel.sleep(300);
-			driver.switchTo().window(list.get(index));
+		if(currentWindow != index) {
+			currentWindow = index;
+			ArrayList<String> list = new ArrayList<String>(driver.getWindowHandles());
+			if(currentWindow < list.size()) {
+				channel.sleep(300);
+				driver.switchTo().window(list.get(currentWindow));
+				driver.switchTo().defaultContent();
+			}
+		}else {
 			driver.switchTo().defaultContent();
 		}
 	}
@@ -505,7 +537,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 				newHeight = height.getValue();
 			}
 
-			driver.manage().window().setSize(new Dimension(newWidth, newHeight));
+			setSize(new Dimension(newWidth, newHeight));
 		}
 
 		if(x != null || y != null){
@@ -519,8 +551,18 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 				newY = y.getValue();
 			}
 
-			driver.manage().window().setPosition(new Point(newX, newY));
+			setPosition(new Point(newX, newY));
 		}
+	}
+
+	protected void setPosition(Point pt) {
+		channel.sleep(500);
+		driver.manage().window().setPosition(pt);
+	}
+
+	protected void setSize(Dimension dim) {
+		channel.sleep(500);
+		driver.manage().window().setSize(dim);
 	}
 
 	private int closeWindowHandler(String windowHandle) {
@@ -632,7 +674,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	protected Object runJavaScript(String javaScript, Object ... params) {
-		Object result = driver.executeAsyncScript(javaScript + resultAsync, params);
+		Object result = driver.executeAsyncScript(javaScript + ";var callbackResult=arguments[arguments.length-1];callbackResult(result);", params);
 		return result;
 	}
 
@@ -659,7 +701,9 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 				try {
 					switchToFrame(testObject.getParent().getWebElement());
 				}catch(StaleElementReferenceException e) {
-					switchToDefaultframe();
+					//switchToDefaultframe();
+					switchToCurrentWindow();
+
 					testObject.getParent().searchAgain();
 					return webElementList;
 				}
@@ -667,7 +711,8 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 				startElement = testObject.getParent().getWebElement();
 			}
 		}else {
-			switchToDefaultframe();
+			//switchToDefaultframe();
+			switchToCurrentWindow();
 		}
 
 		ArrayList<Map<String, Object>> response = (ArrayList<Map<String, Object>>)runJavaScript(ResourceContent.getSearchElementsJavaScript(), startElement, tagName, attributes);

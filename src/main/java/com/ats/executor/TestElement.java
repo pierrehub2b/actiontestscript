@@ -58,7 +58,6 @@ public class TestElement{
 	public static Predicate<Integer> isOccurrencesDifferent(Integer value) {return p -> p != value;}
 	public static Predicate<Integer> isOccurrencesEqual(Integer value) {return p -> p == value;}
 
-	//private Actions action;
 	private Channel channel;
 
 	private Predicate<Integer> occurrences;
@@ -129,7 +128,6 @@ public class TestElement{
 		this.foundElements = new ArrayList<FoundElement>();
 		this.foundElements.add(new FoundElement(channel));
 		this.count = 1;
-		//this.action = new Actions(channel.getWebDriver());
 	}
 
 	public TestElement(Channel channel, int maxTry, String operator, int expectedCount, SearchedElement searchElement) {
@@ -150,7 +148,6 @@ public class TestElement{
 		this(currentChannel);
 		this.foundElements.add(element);
 		this.count = getElementsCount();
-		//this.action = new Actions(channel.getWebDriver());
 	}
 
 	protected int getMaxTry() {
@@ -162,7 +159,7 @@ public class TestElement{
 	}
 
 	public void dispose() {
-		//action = null;
+
 		channel = null;
 
 		if(parent != null) {
@@ -467,10 +464,8 @@ public class TestElement{
 
 	public void click(ActionStatus status, Keys key) {
 		channel.getActions().keyDown(key).perform();
-		//action.keyDown(key).perform();
 		click(status, false);
 		channel.getActions().keyUp(key).perform();
-		//action.keyUp(key).perform();
 	}	
 
 	public void click(ActionStatus status, boolean hold) {
@@ -492,14 +487,11 @@ public class TestElement{
 
 			if(hold) {
 				channel.getActions().clickAndHold();
-				//action.clickAndHold();
 			}else {
 				channel.getActions().click();
-				//action.click();
 			}
 
 			channel.getActions().perform();
-			//action.perform();
 			status.setPassed(true);
 
 			return;
@@ -524,14 +516,12 @@ public class TestElement{
 
 	public void drop(ActionStatus status) {
 		channel.getActions().release().perform();
-		//action.release().perform();
 		status.setPassed(true);
 	}
 
 	public void swipe(ActionStatus status, int hDirection, int vDirection) {
-		click(status, true);
-		channel.getActions().moveByOffset(hDirection, vDirection);
-		//action.moveByOffset(hDirection, vDirection);
+		drag(status);
+		channel.getActions().moveByOffset(hDirection, vDirection).perform();
 		drop(status);
 	}
 
@@ -565,7 +555,6 @@ public class TestElement{
 	public ActionStatus doubleClick(ActionStatus status) {
 		if(isValidated()){
 			channel.getActions().doubleClick().perform();
-			//action.doubleClick().perform();
 		}else{
 			status.setPassed(false);
 			status.setCode(ActionStatus.OBJECT_NOT_FOUND);
@@ -578,7 +567,6 @@ public class TestElement{
 	public ActionStatus rightClick(ActionStatus status) {
 		if(isValidated()){
 			channel.getActions().contextClick().perform();
-			//action.contextClick().perform();
 		}else{
 			status.setPassed(false);
 			status.setCode(ActionStatus.OBJECT_NOT_FOUND);
@@ -587,11 +575,6 @@ public class TestElement{
 
 		return status;
 	}
-
-	//public boolean dropTo() {
-	// TODO Auto-generated method stub
-	//	return false;
-	//}
 
 	//-------------------------------------------------------------------------------------------------------------------
 	// Attributes

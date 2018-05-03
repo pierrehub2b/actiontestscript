@@ -265,7 +265,7 @@ public class ActionTestScript extends Script implements ITest{
 
 	public TestElement findObject(int maxTryExecution, SearchedElement searchElement, String operator, int expectedCount) {
 		if(TestElementDialog.DIALOG_TAG.equals(searchElement.getTag().toLowerCase())) {
-			return new TestElementDialog(	getCurrentChannel(), channelManager.getMaxTry() + maxTryExecution,	searchElement);
+			return new TestElementDialog(getCurrentChannel(), channelManager.getMaxTry() + maxTryExecution,	searchElement);
 		}else {
 			return new TestElement(	getCurrentChannel(), channelManager.getMaxTry() + maxTryExecution, operator, expectedCount,	searchElement);
 		}

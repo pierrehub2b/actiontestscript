@@ -83,6 +83,7 @@ public class ActionMouseSwipe extends ActionMouse {
 
 	@Override
 	public void terminateExecution(ActionTestScript ts) {
+		super.terminateExecution(ts);
 		getTestElement().swipe(status, horizontalDirection, verticalDirection);
 		ts.updateVisualImage();
 		status.updateDuration();

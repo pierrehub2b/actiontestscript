@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.executor.drivers;
 
@@ -76,18 +76,22 @@ public class WindowsDesktopDriver extends WiniumDriver {
 	public long getProcessDataByWindowTitle(String windowTitle, ArrayList<String> windows) {
 
 		long pid = -1L;
+		int maxTry = 5;
 
-		List<WebElement> childs = this.findElementsByXPath("./child::*");
-		for (WebElement we : childs) {
-			String attribute = we.getAttribute("Name");
+		while(pid == -1L && maxTry > 0) {
+			List<WebElement> childs = this.findElementsByXPath("./child::*");
+			for (WebElement we : childs) {
+				String attribute = we.getAttribute("Name");
 
-			if (attribute != null && attribute.contains(windowTitle)) { 
-				try {
-					pid = Long.parseLong(we.getAttribute("ProcessId"));
-				}catch (NumberFormatException ex) {}
+				if (attribute != null && attribute.contains(windowTitle)) { 
+					try {
+						pid = Long.parseLong(we.getAttribute("ProcessId"));
+					}catch (NumberFormatException ex) {}
 
-				windows.add(getWindowHandle(we.getAttribute("NativeWindowHandle")));
+					windows.add(getWindowHandle(we.getAttribute("NativeWindowHandle")));
+				}
 			}
+			maxTry--;
 		}
 
 		return pid;
