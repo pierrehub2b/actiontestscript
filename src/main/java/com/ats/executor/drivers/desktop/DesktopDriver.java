@@ -70,7 +70,11 @@ public class DesktopDriver extends RemoteWebDriver {
 		Close (12),
 		ScreenShot (13),
 		SendKeys (14),
-		MouseMove (15);
+		MouseMove (15),
+		Mouse (16),
+		MouseDown (17),
+		MouseRelease (18),
+		MouseWheel (19);
 
 		private final int type;
 		CommandType(int value){
@@ -95,7 +99,27 @@ public class DesktopDriver extends RemoteWebDriver {
 	public void mouseMove(int x, int y) {
 		sendRequestCommand(CommandType.MouseMove, x, y);
 	}
+	
+	public void mouseClick(int button) {
+		sendRequestCommand(CommandType.Mouse, button);
+	}
+	
+	public void mouseClick(int button, int key) {
+		sendRequestCommand(CommandType.Mouse, button, key);
+	}
+	
+	public void mouseDown(int button) {
+		sendRequestCommand(CommandType.MouseDown, button);
+	}
 
+	public void mouseRelease(int button) {
+		sendRequestCommand(CommandType.MouseRelease, button);
+	}
+	
+	public void mouseWheel(int delta) {
+		sendRequestCommand(CommandType.MouseWheel, delta);
+	}
+	
 	//---------------------------------------------------------------------------------------------------------------------------
 	// get elements
 	//---------------------------------------------------------------------------------------------------------------------------
