@@ -15,15 +15,24 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
-package com.ats.tools.win32;
+package com.ats.executor.drivers.desktop;
 
-public interface W32Errors {
+import java.util.ArrayList;
+
+public class DesktopResponse {
+		
+	public ArrayList<DesktopData> capabilities = null;
 	
-    int NO_ERROR               = 0;
-    int ERROR_INVALID_FUNCTION = 1;
-    int ERROR_FILE_NOT_FOUND   = 2;
-    int ERROR_PATH_NOT_FOUND   = 3;
+	public ArrayList<DesktopElement> elements;
+	public ArrayList<DesktopWindow> windows;
+	public ArrayList<DesktopData> properties;
+		
+	public int errorCode = 0;
+	public String errorMessage = null;
+	
+	public DesktopData data = null;
+	public byte[] image;
 
 }

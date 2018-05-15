@@ -15,9 +15,12 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.executor;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 import org.openqa.selenium.Keys;
 
@@ -27,17 +30,10 @@ public class SendKeyData {
 	private static final String KEY_DOWN_ALT = "ALT";
 	private static final String KEY_DOWN_CONTROL = "CONTROL";
 
-	//private StringBuffer sequence = null;
-	//private boolean altDown = false;
-	//private boolean shiftDown = false;
-	//private boolean controlDown = false;
-
 	private String data;
 	private CharSequence chord;
 
 	public SendKeyData(String key, String spare) {
-
-		//this.sequence = new StringBuffer();
 
 		this.data = spare;
 
@@ -53,7 +49,7 @@ public class SendKeyData {
 				sequence.append(Keys.CONTROL);
 			}
 			sequence.append(spare.toLowerCase());
-			
+
 
 		}else {
 			try {
@@ -62,28 +58,10 @@ public class SendKeyData {
 		}
 
 		chord = sequence;
-
-		/*try {
-			this.sequence.append(Keys.valueOf(spare));
-		}catch(IllegalArgumentException e) {
-			this.sequence.append(spare.toLowerCase());
-		}*/
 	}
 
 	public SendKeyData(String data) {
-
 		this.data = data;
-
-		/*this.sequence = new StringBuffer();
-
-		for (int i = 0, n = data.length(); i < n; i++) {
-			char c = data.charAt(i);
-			if(Character.isDigit(c)) {
-				this.sequence.append(getNumpad(c));
-			}else {
-				this.sequence.append(c);
-			}
-	    }*/
 	}
 
 	private Keys getNumpad(char d) {
@@ -116,13 +94,6 @@ public class SendKeyData {
 		if(chord != null) {
 			return chord;
 		}
-		/*if(shiftDown) {
-			return Keys.chord(Keys.SHIFT, data);
-		}else if(altDown) {
-			return Keys.chord(Keys.ALT, data);
-		}else if(controlDown) {
-			return Keys.chord(Keys.CONTROL, data);
-		}*/
 
 		StringBuffer sequence = new StringBuffer();
 
@@ -139,20 +110,13 @@ public class SendKeyData {
 	}
 
 	public CharSequence getSequenceFirefox() {
-
 		if(chord != null) {
 			return chord;
 		}
-		
-		/*if(shiftDown) {
-			return Keys.chord(Keys.SHIFT, data);
-		}else if(altDown) {
-			return Keys.chord(Keys.ALT, data);
-		}else if(controlDown) {
-			return Keys.chord(Keys.CONTROL, data);
-		}*/
-
 		return data;
 	}
 
+	public String getSequenceDesktop() {
+		return Base64.getEncoder().encodeToString(data.getBytes(StandardCharsets.UTF_8));
+	}
 }

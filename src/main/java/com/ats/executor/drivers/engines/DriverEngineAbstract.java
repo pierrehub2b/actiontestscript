@@ -20,18 +20,16 @@ under the License.
 package com.ats.executor.drivers.engines;
 
 import java.awt.Rectangle;
-import java.util.ArrayList;
 
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Point;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import com.ats.element.FoundElement;
-import com.ats.executor.SendKeyData;
 import com.ats.executor.channels.Channel;
+import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.MouseDirectionData;
-import com.ats.generator.variables.CalculatedProperty;
 
 public abstract class DriverEngineAbstract {
 
@@ -39,10 +37,22 @@ public abstract class DriverEngineAbstract {
 	protected RemoteWebDriver driver;
 	protected String application;
 	protected String applicationPath;
+	
+	protected int currentWindow = 0;
+	
+	protected int waitAfterAction = -1;
 
 	public DriverEngineAbstract(Channel channel, String application){
 		this.channel = channel;
 		this.application = application;
+	}
+	
+	public void switchToCurrentWindow() {
+		switchWindow(currentWindow);
+	}
+
+	public void switchWindow(int idx) {
+
 	}
 
 	public String getApplication() {
@@ -53,24 +63,9 @@ public abstract class DriverEngineAbstract {
 		return applicationPath;
 	}
 
-	public RemoteWebDriver getWebDriver(){
-		return driver;
-	}
-
-	public CalculatedProperty[] getWindowsAttributes(WebElement element) {
-		ArrayList<CalculatedProperty> listAttributes = new ArrayList<CalculatedProperty>();
-		for (String attribute : FoundElement.WINDOWS_UI_PROPERTIES) {
-			String value = element.getAttribute(attribute);
-			if (value == null) continue;
-			listAttributes.add(new CalculatedProperty(attribute, value));
-		}
-
-		try{
-			listAttributes.add(new CalculatedProperty("Text", element.getText()));
-		}catch(Exception e){}
-
-		return listAttributes.toArray(new CalculatedProperty[listAttributes.size()]);
-	}
+	//public RemoteWebDriver getWebDriver(){
+	//	return driver;
+	//}
 
 	protected int getDirectionValue(int value, MouseDirectionData direction,Cartesian cart1, Cartesian cart2) {
 		if(cart1.equals(direction.getName())) {
@@ -101,9 +96,42 @@ public abstract class DriverEngineAbstract {
 		return getCartesianOffset(rect.height, position.getVerticalPos(), Cartesian.TOP, Cartesian.BOTTOM);
 	}
 	
-	public void sendTextData(WebElement webElement, ArrayList<SendKeyData> textActionList) {
-		for(SendKeyData sequence : textActionList) {
-			webElement.sendKeys(sequence.getSequence());
+	public void setWindowBound(BoundData x, BoundData y, BoundData width, BoundData height) {
+
+		if(width != null || height != null){
+			int newWidth = channel.getDimension().getWidth().intValue();
+			if(width != null) {
+				newWidth = width.getValue();
+			}
+
+			int newHeight = channel.getDimension().getHeight().intValue();
+			if(height != null) {
+				newHeight = height.getValue();
+			}
+
+			setSize(new Dimension(newWidth, newHeight));
 		}
+
+		if(x != null || y != null){
+			int newX = channel.getDimension().getX().intValue();
+			if(x != null) {
+				newX = x.getValue();
+			}
+
+			int newY = channel.getDimension().getY().intValue();
+			if(y != null) {
+				newY = y.getValue();
+			}
+
+			setPosition(new Point(newX, newY));
+		}
+	}
+
+	protected void setPosition(Point pt) {
+
+	}
+
+	protected void setSize(Dimension dim) {
+
 	}
 }

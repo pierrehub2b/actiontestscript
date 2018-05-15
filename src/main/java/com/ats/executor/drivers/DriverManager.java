@@ -19,13 +19,16 @@ under the License.
 
 package com.ats.executor.drivers;
 
+import java.awt.AWTException;
+import java.awt.Robot;
 import java.util.function.Predicate;
 
 import com.ats.driver.AtsManager;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.engines.IDriverEngine;
-import com.ats.executor.drivers.engines.WindowsDriverEngine;
+import com.ats.executor.drivers.desktop.DesktopDriver;
+import com.ats.executor.drivers.engines.DesktopDriverEngine;
 import com.ats.executor.drivers.engines.browsers.ChromeDriverEngine;
 import com.ats.executor.drivers.engines.browsers.EdgeDriverEngine;
 import com.ats.executor.drivers.engines.browsers.FirefoxDriverEngine;
@@ -37,22 +40,26 @@ public class DriverManager {
 
 	public static final String CHROME_BROWSER = "chrome";
 	public static final String FIREFOX_BROWSER = "firefox";
+	public static final String IE_BROWSER = "ie";
 	public static final String EDGE_BROWSER = "edge";
 	public static final String OPERA_BROWSER = "opera";
 	public static final String SAFARI_BROWSER = "safari";
 	
-	public static final String WINDOWS_DESKTOP_FILE_NAME = "Windows.Desktop.Driver.exe";
+	public static final String DESKTOP_DRIVER_FILE_NAME = "WinDesktop.exe";
 	public static final String CHROME_DRIVER_FILE_NAME = "chromedriver.exe";
-	public static final String MICROSOFT_WEBDRIVER_FILE_NAME = "MicrosoftWebDriver";
-	public static final String OPERA_WEBDRIVER_FILE_NAME = "operadriver.exe";
+	public static final String IE_DRIVER_FILE_NAME = "IEDriverServer.exe";
+	public static final String EDGE_DRIVER_FILE_NAME = "MicrosoftWebDriver";
+	public static final String OPERA_DRIVER_FILE_NAME = "operadriver.exe";
 	public static final String FIREFOX_DRIVER_FILE_NAME = "geckodriver.exe";
 
-	private DriverProcess winDesktopDriver;
+	private DriverProcess desktopDriver;
 	private DriverProcess chromeDriver;
 	private DriverProcess edgeDriver;
 	private DriverProcess operaDriver;
 	private DriverProcess firefoxDriver;
 	private DriverProcess ieDriver;
+	
+	private Robot robot;
 	
 	private AtsManager ats;
 
@@ -76,10 +83,10 @@ public class DriverManager {
 	
 	public static void killAllDrivers() {
 		Predicate<ProcessHandle> fullPredicate = p -> p.info().command().isPresent();
+		Predicate<ProcessHandle> desktop  =  p -> p.info().command().get().contains(DESKTOP_DRIVER_FILE_NAME);
 		Predicate<ProcessHandle> chrome  = p -> p.info().command().get().contains(CHROME_DRIVER_FILE_NAME);
-		Predicate<ProcessHandle> opera  =  p -> p.info().command().get().contains(OPERA_WEBDRIVER_FILE_NAME);
-		Predicate<ProcessHandle> desktop  =  p -> p.info().command().get().contains(WINDOWS_DESKTOP_FILE_NAME);
-		Predicate<ProcessHandle> edge  =  p -> p.info().command().get().contains(MICROSOFT_WEBDRIVER_FILE_NAME);
+		Predicate<ProcessHandle> opera  =  p -> p.info().command().get().contains(OPERA_DRIVER_FILE_NAME);
+		Predicate<ProcessHandle> edge  =  p -> p.info().command().get().contains(EDGE_DRIVER_FILE_NAME);
 		Predicate<ProcessHandle> firefox  =  p -> p.info().command().get().contains(FIREFOX_DRIVER_FILE_NAME);
 		
 		ProcessHandle
@@ -95,11 +102,22 @@ public class DriverManager {
 	
 	//--------------------------------------------------------------------------------------------------------------
 	
-	public DriverProcess getWinDesktopDriver() {
-		if(winDesktopDriver == null){
-			winDesktopDriver = new DriverProcess(this, ats.getDriversFolderPath(), WINDOWS_DESKTOP_FILE_NAME, null);
+	private Robot getRobot() {
+		if(robot == null) {
+			try {
+				robot = new Robot();
+			} catch (AWTException e) {
+				e.printStackTrace();
+			}
 		}
-		return winDesktopDriver;
+		return robot;
+	}
+	
+	public DriverProcess getDesktopDriver() {
+		if(desktopDriver == null){
+			desktopDriver = new DriverProcess(this, ats.getDriversFolderPath(), DESKTOP_DRIVER_FILE_NAME, null);
+		}
+		return desktopDriver;
 	}
 	
 	public void processTerminated(DriverProcess dp) {
@@ -114,7 +132,7 @@ public class DriverManager {
 		}
 	}
 	
-	public IDriverEngine getDriverEngine(Channel channel, String application, WindowsDesktopDriver desktopDriver) {
+	public IDriverEngine getDriverEngine(Channel channel, String application, DesktopDriver desktopDriver) {
 		switch(application.toLowerCase()) {
 		case CHROME_BROWSER :
 			return new ChromeDriverEngine(channel, getChromeDriver(), desktopDriver, ats);
@@ -124,10 +142,10 @@ public class DriverManager {
 			return new OperaDriverEngine(channel, getOperaDriver(), desktopDriver, ats);
 		case FIREFOX_BROWSER :
 			return new FirefoxDriverEngine(channel, getFirefoxDriver(), desktopDriver, ats);
-		case "ie" :
+		case IE_BROWSER :
 			return new IEDriverEngine(channel, getIEDriver(), desktopDriver, ats);
 		default :
-			return new WindowsDriverEngine(channel, application, desktopDriver, ats);
+			return new DesktopDriverEngine(channel, application, desktopDriver, ats, getRobot());
 		}
 	}
 	
@@ -147,30 +165,29 @@ public class DriverManager {
 
 	public DriverProcess getIEDriver() {
 		if(ieDriver == null){
-			ieDriver = new DriverProcess(this, ats.getDriversFolderPath(), "IEDriverServer.exe", null);
+			ieDriver = new DriverProcess(this, ats.getDriversFolderPath(), IE_DRIVER_FILE_NAME, null);
 		}
 		return ieDriver;
 	}
-	
-	
+		
 	public DriverProcess getEdgeDriver() {
 		if(edgeDriver == null){
-			edgeDriver = new DriverProcess(this, ats.getDriversFolderPath(), MICROSOFT_WEBDRIVER_FILE_NAME + "-" + Utils.getWindowsBuildVersion() + ".exe", null);
+			edgeDriver = new DriverProcess(this, ats.getDriversFolderPath(), EDGE_DRIVER_FILE_NAME + "-" + Utils.getWindowsBuildVersion() + ".exe", null);
 		}
 		return edgeDriver;
 	}
 
 	public DriverProcess getOperaDriver() {
 		if(operaDriver == null){
-			operaDriver = new DriverProcess(this, ats.getDriversFolderPath(), OPERA_WEBDRIVER_FILE_NAME, null);
+			operaDriver = new DriverProcess(this, ats.getDriversFolderPath(), OPERA_DRIVER_FILE_NAME, null);
 		}
 		return operaDriver;
 	}
 
 	public void tearDown(){
 		
-		if(winDesktopDriver != null){
-			winDesktopDriver.close();
+		if(desktopDriver != null){
+			desktopDriver.close();
 		}
 
 		if(chromeDriver != null){
@@ -187,6 +204,10 @@ public class DriverManager {
 		
 		if(firefoxDriver != null){
 			firefoxDriver.close();
+		}
+		
+		if(ieDriver != null){
+			ieDriver.close();
 		}
 	}
 }

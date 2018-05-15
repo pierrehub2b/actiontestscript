@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.element;
 
@@ -30,35 +30,20 @@ import org.openqa.selenium.remote.RemoteWebElement;
 
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
-import com.google.common.collect.ImmutableList;
+import com.ats.executor.drivers.desktop.DesktopElement;
 
 public class FoundElement{
 
 	public static final String IFRAME = "IFRAME";
-	
-	public static final ImmutableList<String> WINDOWS_UI_PROPERTIES = 
-			ImmutableList.of(
-					"ClassName", 
-					"Name", 
-					"AutomationId", 
-					"LocalizedControlType",
-					"FrameworkId", 
-					"LabeledBy", 
-					"IsEnabled",
-					"ItemType", 
-					"HelpText", 
-					"IemStatus", 
-					"AccessKey", 
-					"AcceleratorKey");
 
 	private String id;
 
 	private Double x = 0.0;
 	private Double y = 0.0;
-	
+
 	private Double screenX = 0.0;
 	private Double screenY = 0.0;
-	
+
 	private Double width = 0.0;
 	private Double height = 0.0;
 
@@ -94,7 +79,7 @@ public class FoundElement{
 		this(data);
 		this.updatePosition((Double)data.get("x"), (Double)data.get("y"), channel, offsetX, offsetY);
 	}
-	
+
 	public FoundElement(ArrayList<Map<String, Object>> listElements, Channel channel, Double initElementX, Double initElementY, ArrayList<String> frm) {
 		this(listElements.remove(0), channel, initElementX, initElementY, frm);
 		if(listElements.size() > 0) {
@@ -108,6 +93,25 @@ public class FoundElement{
 		setHeight(channel.getDimension().getHeight());
 	}
 
+
+	public FoundElement(DesktopElement element, Double channelX, Double channelY) {
+
+		this.desktop = true;
+		this.id = element.id;
+		this.tag = element.tag;
+
+		this.screenX = element.x;
+		this.screenY = element.y;
+
+		this.x = this.screenX - channelX;
+		this.y = this.screenY - channelY;
+
+		this.width = element.width;
+		this.height = element.height;
+
+		this.visible = element.visible;
+	}
+
 	public FoundElement(RemoteWebElement element, Double channelX, Double channelY) {
 		this.desktop = true;
 		this.setRemoteWebElement(element);
@@ -118,13 +122,13 @@ public class FoundElement{
 			this.tag = infoData[0];
 
 			String[] boundData = infoData[1].split(",");
-			
+
 			this.screenX = Double.parseDouble(boundData[0]);
 			this.screenY = Double.parseDouble(boundData[1]);
-			
+
 			this.x = this.screenX - channelX;
 			this.y = this.screenY - channelY;
-			
+
 			this.width = Double.parseDouble(boundData[2]);
 			this.height = Double.parseDouble(boundData[3]);
 
@@ -142,7 +146,7 @@ public class FoundElement{
 			setParent(new FoundElement(parentsList, channelX, channelY));
 		}
 	}
-	
+
 	public void dispose() {
 		if(parent != null) {
 			parent.dispose();
@@ -150,7 +154,7 @@ public class FoundElement{
 		}
 		value = null;
 	}
-	
+
 	public void updatePosition(Double x, Double y, Channel channel, Double offsetX, Double offsetY) {
 		this.setX(x + channel.getSubDimension().getX() + offsetX);
 		this.setY(y + channel.getSubDimension().getY() + offsetY);
@@ -168,7 +172,7 @@ public class FoundElement{
 	public WebElement getValue(){
 		return value;
 	}
-	
+
 	public String getElementId() {
 		return id;
 	}
@@ -190,15 +194,15 @@ public class FoundElement{
 			return new ArrayList<String>();
 		}
 	}
-	
+
 	public Double getScreenX() {
 		return screenX;
 	}
-	
+
 	public Double getScreenY() {
 		return screenY;
 	}
-	
+
 	//----------------------------------------------------------------------------------------------------------------------
 	// Getter and setter for serialization
 	//----------------------------------------------------------------------------------------------------------------------

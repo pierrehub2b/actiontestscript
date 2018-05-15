@@ -97,33 +97,18 @@ public class ChannelManager {
 
 	public boolean switchChannel(String name){
 
-		boolean foundChannel = false;
-
-		if(channelsList != null && channelsList.size() > 0){
-			if(channelsList.size() == 1){
-				channelsList.get(0).toFront();
-				foundChannel = channelsList.get(0).getName().equals(name);
-			}else{
-				for(Channel cnl : channelsList){
-					if(cnl.getName().equals(name)){
+		if(channelsList != null){
+			for(Channel cnl : channelsList){
+				if(cnl.getName().equals(name)){
+					if(!cnl.isCurrent()) {
 						setCurrentChannel(cnl);
-						foundChannel = true;
-						break;
+						cnl.toFront();
 					}
-				}
-
-				if(foundChannel) {
-					for(Channel cnl : channelsList){
-						if(!cnl.getName().equals(name)){
-							cnl.hide();
-						}
-					}
+					return true;
 				}
 			}
 		}
-
-		return foundChannel;
-
+		return false;
 	}
 
 	public boolean closeChannel(String name){

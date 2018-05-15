@@ -23,10 +23,12 @@ public class ApplicationProperties {
 	
 	private String name;
 	private String path;
+	private int wait;
 	
-	public ApplicationProperties(String name, String path) {
+	public ApplicationProperties(String name, String path, int wait) {
 		this.name = name;
 		this.path = path;
+		this.wait = wait;
 	}
 	
 	public String getName() {
@@ -35,5 +37,9 @@ public class ApplicationProperties {
 
 	public String getPath() {
 		return path;
+	}
+	
+	public int getWait() {
+		return wait;
 	}
 }

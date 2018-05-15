@@ -5,7 +5,7 @@
 	<groupId>com.actiontestscript</groupId>
 	<artifactId>ats-automated-testing</artifactId>
 
-	<version>1.2.1</version>
+	<version>1.2.2</version>
 	<packaging>jar</packaging>
 
 	<name>ats-automated-testing</name>
@@ -60,7 +60,6 @@
 
 		<!-- libraries versions -->
 		<apache.felix.version>2.3.7</apache.felix.version>
-		<lib.jna.version>4.3.0</lib.jna.version>
 		<lib.amf.serializer.version>2.2.0</lib.amf.serializer.version>
 		<lib.itext.version>7.0.4</lib.itext.version>
 		<lib.slf4j.version>1.7.25</lib.slf4j.version>
@@ -108,16 +107,6 @@
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-server</artifactId>
 			<version>${lib.selenium.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>net.java.dev.jna</groupId>
-			<artifactId>jna</artifactId>
-			<version>${lib.jna.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>net.java.dev.jna</groupId>
-			<artifactId>jna-platform</artifactId>
-			<version>${lib.jna.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.ant</groupId>

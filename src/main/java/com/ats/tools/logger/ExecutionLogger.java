@@ -23,18 +23,18 @@ import java.io.PrintStream;
 
 import com.ats.executor.channels.Channel;
 
-public class Logger {
+public class ExecutionLogger {
 
 	private final static String NO_CHANNEL = "NO_CHANNEL";
 
 	private PrintStream printOut;
 	private String channelName = NO_CHANNEL;
 
-	public Logger() {
+	public ExecutionLogger() {
 		this(0);
 	}
 	
-	public Logger(int level) {
+	public ExecutionLogger(int level) {
 		if(level > 1) {
 			this.printOut = new PrintStream(System.out);
 		}else {

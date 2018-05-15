@@ -15,14 +15,13 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.generator;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.logging.Level;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -32,6 +31,23 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 public class ATS {
+
+	public static void logError(String msg) {
+		print("\033[0;31m", "ERROR", msg);
+	}
+
+	public static void logInfo(String msg) {
+		print("\033[0;34m", "INFO", msg);
+	}
+
+	public static void logWarn(String msg) {
+		print("\033[0;33m", "WARN", msg);
+	}
+	
+	private static void print(String color, String type, String msg) {
+		System.out.println("[" + color + type + "\033[0m] " + msg);
+	}
+
 	private String[] args = null;
 	private Options options = new Options();
 
@@ -39,7 +55,7 @@ public class ATS {
 	private File destinationFolder = null;
 	private File reportFolder = null;
 	private File outputFolder = null;
-	
+
 	private boolean compile = false;
 
 	public ATS(String[] args) {
@@ -58,11 +74,11 @@ public class ATS {
 
 		CommandLineParser parser = new DefaultParser();
 		CommandLine cmd = null;
-		
+
 		try {
 			cmd = parser.parse(options, args);
 		} catch (ParseException e) {
-			Generator.log(Level.SEVERE, "Cannot parse command line : " + e.getMessage());
+			ATS.logError("Cannot parse command line : " + e.getMessage());
 		}
 
 		if (cmd.hasOption("h")) {
@@ -71,51 +87,51 @@ public class ATS {
 
 			boolean force = cmd.hasOption("f");
 			compile = cmd.hasOption("comp");
-			
+
 			File file;
 
 			String prjFolder = ".";
 			if (cmd.hasOption("prj")) {
 				prjFolder = cmd.getOptionValue("prj");
 			}
-			
+
 			file = new File(prjFolder);
-			
+
 			if(file.exists()) {
 				projectFolder = new File(file.getAbsolutePath());
 			}else {
 				Path projectPath = Paths.get(prjFolder);
 				projectFolder = projectPath.toFile();
 			}
-			
+
 			if(projectFolder.exists()) {
-				Generator.log(Level.INFO, "Using ATS project folder -> " + projectFolder.getAbsolutePath());
+				ATS.logInfo("Using ATS project folder -> " + projectFolder.getAbsolutePath());
 			}else {
-				Generator.log(Level.SEVERE, "Project folder does not exists -> " + projectFolder.getAbsolutePath());
+				ATS.logError("Project folder does not exists -> " + projectFolder.getAbsolutePath());
 			}
-			
+
 			if (cmd.hasOption("dest")) {
 				destinationFolder = new File(cmd.getOptionValue("dest"));
 				if(destinationFolder.exists()) {
 					if(force) {
-						Generator.log(Level.INFO, "Destination folder exists ! (java files will be deleted)");
+						ATS.logWarn("Destination folder exists ! (java files will be deleted)");
 					}else {
-						Generator.log(Level.SEVERE, "Destination folder exists, please delete folder or use '-force' option");
+						ATS.logError("Destination folder exists, please delete folder or use '-force' option");
 					}
 				}
-				Generator.log(Level.INFO, "Using destination folder : " + destinationFolder.getAbsolutePath());
+				ATS.logInfo("Using destination folder -> " + destinationFolder.getAbsolutePath());
 			}
 
 			if (cmd.hasOption("rep")) {
 				reportFolder = new File(cmd.getOptionValue("rep"));
 				if(reportFolder.exists()) {
 					if(force) {
-						Generator.log(Level.INFO, "Execution report folder found, it will be deleted");
+						ATS.logWarn("Execution report folder found, it will be deleted");
 					}else {
-						Generator.log(Level.SEVERE, "Execution report folder exists, please delete folder or use '-force' option");
+						ATS.logError("Execution report folder exists, please delete folder or use '-force' option");
 					}
 				}
-				Generator.log(Level.INFO, "Using report folder : " + reportFolder.getAbsolutePath());
+				ATS.logInfo("Using report folder : " + reportFolder.getAbsolutePath());
 			}
 		}
 	}
@@ -130,7 +146,7 @@ public class ATS {
 	public boolean isCompile() {
 		return compile;
 	}
-	
+
 	public File getProjectFolder() {
 		return projectFolder;
 	}

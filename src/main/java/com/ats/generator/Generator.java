@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.logging.Level;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -49,8 +48,8 @@ public class Generator implements ScriptProcessedEvent{
 
 	public static void main(String[] args) {
 
-		log(Level.INFO, "Java version : " + System.getProperty("java.version"));
-		log(Level.INFO, StringUtils.repeat("-", 72));
+		ATS.logInfo("Java version : " + System.getProperty("java.version"));
+		ATS.logInfo(StringUtils.repeat("-", 72));
 
 		ATS arguments = new ATS(args);
 		arguments.parse();
@@ -60,17 +59,17 @@ public class Generator implements ScriptProcessedEvent{
 		Generator generator = new Generator(projectData);
 		GeneratorReport report = generator.launch();
 
-		log(Level.INFO, StringUtils.repeat("-", 72));
-		log(Level.INFO, "ATS Generator finished :");
-		log(Level.INFO, "- Java files generated -> " + report.getGeneratedScriptsCount());
-		log(Level.INFO, "- Ellapsed time -> " + report.getGenerationEllapsedTime() + " ms");
-		log(Level.INFO, StringUtils.repeat("-", 72));
+		ATS.logInfo(StringUtils.repeat("-", 72));
+		ATS.logInfo("ATS Generator finished :");
+		ATS.logInfo("- Java files generated -> " + report.getGeneratedScriptsCount());
+		ATS.logInfo("- Ellapsed time -> " + report.getGenerationEllapsedTime() + " ms");
+		ATS.logInfo(StringUtils.repeat("-", 72));
 
 		if(arguments.isCompile()) {
 
 			String targetFolderPath = projectData.getTargetFolderPath().toFile().getAbsolutePath();
 			
-			log(Level.INFO, "Compile generated java files into folder -> " + targetFolderPath + "/classes");
+			ATS.logInfo("Compile generated java files into folder -> " + targetFolderPath + "/classes");
 			
 			StringBuilder xmlBuilder = new StringBuilder();
 			xmlBuilder.append("<project basedir=\"");
@@ -89,14 +88,6 @@ public class Generator implements ScriptProcessedEvent{
 				new AntCompiler(tempXml);
 
 			} catch (IOException e) {}
-		}
-	}
-
-	public static void log(Level lvl, String mess) {
-		if(lvl.equals(Level.SEVERE)) {
-			System.err.println(mess);
-		}else {
-			System.out.println("[INFO] " + mess);
 		}
 	}
 
@@ -138,7 +129,7 @@ public class Generator implements ScriptProcessedEvent{
 				lexer = new Lexer(projectData, genReport, charset);
 
 			}else{
-				log(Level.INFO, "Nothing to be done (no ATS files found !)");
+				ATS.logInfo("Nothing to be done (no ATS files found !)");
 			}
 		}
 	}

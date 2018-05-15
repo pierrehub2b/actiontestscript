@@ -68,7 +68,7 @@ public class TestElementDialog extends TestElement {
 		
 		while (alert == null && tryLoop > 0) {
 			try {
-				alert = getChannel().getWebDriver().switchTo().alert();
+				alert = getChannel().switchToAlert();
 				getChannel().sleep(waitBox);
 				setCount(1);
 			}catch(NoAlertPresentException ex) {
@@ -105,16 +105,15 @@ public class TestElementDialog extends TestElement {
 				alert.dismiss();
 			}
 			getChannel().sleep(waitBox);
-			getChannel().getWebDriver().switchTo().defaultContent();
+			getChannel().switchToDefaultContent();
 		}
 
 		status.setPassed(true);
 	}
 
 	@Override
-	public ActionStatus doubleClick(ActionStatus status) {
-		status.setPassed(true);
-		return status;
+	public void doubleClick() {
+		//do nothing
 	}
 
 	@Override
@@ -123,15 +122,13 @@ public class TestElementDialog extends TestElement {
 	}
 
 	@Override
-	public ActionStatus wheelClick(ActionStatus status) {
-		status.setPassed(true);
-		return status;
+	public void wheelClick() {
+		//do nothing
 	}
 
 	@Override
-	public ActionStatus rightClick(ActionStatus status) {
-		status.setPassed(true);
-		return status;
+	public void rightClick() {
+		//do nothing
 	}
 
 	@Override

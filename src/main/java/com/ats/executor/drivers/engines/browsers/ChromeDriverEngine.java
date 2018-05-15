@@ -25,19 +25,19 @@ import java.util.List;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
+import com.ats.driver.ApplicationProperties;
 import com.ats.driver.AtsManager;
-import com.ats.driver.BrowserProperties;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.DriverProcess;
-import com.ats.executor.drivers.WindowsDesktopDriver;
+import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.WebDriverEngine;
 
 public class ChromeDriverEngine extends WebDriverEngine {
 
-	private int waitAfterAction = 150;
+	private final static int DEFAULT_WAIT = 150;
 	
-	public ChromeDriverEngine(Channel channel, DriverProcess driverProcess, WindowsDesktopDriver windowsDriver,	AtsManager ats) {
+	public ChromeDriverEngine(Channel channel, DriverProcess driverProcess, DesktopDriver windowsDriver,	AtsManager ats) {
 		
 		super(channel, DriverManager.CHROME_BROWSER, driverProcess, windowsDriver, ats);
 
@@ -53,13 +53,17 @@ public class ChromeDriverEngine extends WebDriverEngine {
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments(args);
 		
-		BrowserProperties props = ats.getBrowserProperties(DriverManager.CHROME_BROWSER);
+		ApplicationProperties props = ats.getBrowserProperties(DriverManager.CHROME_BROWSER);
 		if(props != null) {
 			waitAfterAction = props.getWait();
 			applicationPath = props.getPath();
 			if(applicationPath != null) {
 				options.setBinary(applicationPath);
 			}
+		}
+		
+		if(waitAfterAction == -1) {
+			waitAfterAction = DEFAULT_WAIT;
 		}
 
 		DesiredCapabilities caps = DesiredCapabilities.chrome(); 

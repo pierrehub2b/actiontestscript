@@ -24,9 +24,9 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.Alert;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.RemoteWebElement;
 
 import com.ats.element.FoundElement;
 import com.ats.executor.ActionStatus;
@@ -40,8 +40,6 @@ import com.ats.generator.variables.CalculatedProperty;
 
 public interface IDriverEngine{
 	public void close();
-	public boolean isDesktop();
-	public WebDriver getWebDriver();
 	public String getApplication();
 	public String getApplicationPath();
 	public void switchWindow(int index);
@@ -52,17 +50,29 @@ public interface IDriverEngine{
 	public void waitAfterAction();
 	public TestBound[] getDimensions();
 	public FoundElement getElementFromPoint(Double x, Double y);
+	public String getAttribute(FoundElement element, String attributeName, int maxTry);
 	public CalculatedProperty[] getAttributes(FoundElement element);
-	public CalculatedProperty[] getAttributes(RemoteWebElement element);
 	public CalculatedProperty[] getCssAttributes(FoundElement element);
-	public CalculatedProperty[] getCssAttributes(RemoteWebElement element);
 	public void loadParents(FoundElement hoverElement);
 	public void switchToDefaultframe();
 	public void scroll(FoundElement foundElement, int delta);
 	public void middleClick(WebElement element);
 	public WebElement getRootElement();
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position);
-	public void sendTextData(WebElement webElement, ArrayList<SendKeyData> textActionList);
+	public void sendTextData(ActionStatus status, FoundElement foundElement, ArrayList<SendKeyData> textActionList, boolean clear);
 	public void setWindowBound(BoundData x, BoundData y, BoundData width, BoundData height);
 	public void forceScrollElement(FoundElement value);
+	public void mouseClick(boolean hold);
+	public void keyDown(Keys key);
+	public void keyUp(Keys key);
+	public void drop();
+	public void moveByOffset(int hDirection, int vDirection);
+	public void doubleClick();
+	public void rightClick();
+	public Alert switchToAlert();
+	public void switchToDefaultContent();
+	public void navigationRefresh();
+	public void navigationForward();
+	public void navigationBack();
+	public String getCurrentUrl();
 }

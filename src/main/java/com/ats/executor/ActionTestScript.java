@@ -66,7 +66,7 @@ import com.ats.script.ScriptHeader;
 import com.ats.script.actions.Action;
 import com.ats.script.actions.ActionExecute;
 import com.ats.script.actions.ActionExecuteElement;
-import com.ats.tools.logger.Logger;
+import com.ats.tools.logger.ExecutionLogger;
 import com.ats.tools.logger.MessageCode;
 
 public class ActionTestScript extends Script implements ITest{
@@ -86,7 +86,7 @@ public class ActionTestScript extends Script implements ITest{
 		init();
 	}
 
-	public ActionTestScript(Logger logger) {
+	public ActionTestScript(ExecutionLogger logger) {
 		super(logger);
 		init();
 	}
@@ -144,7 +144,7 @@ public class ActionTestScript extends Script implements ITest{
 				setRecorder(new RecorderThread(output, testName, true, false, false));
 			}
 
-			setLogger(new Logger(ctx.getSuite().getXmlSuite().getVerbose()));
+			setLogger(new ExecutionLogger(ctx.getSuite().getXmlSuite().getVerbose()));
 			sendInfo("starting script", " '" + testName + "'");
 
 			Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -607,7 +607,7 @@ public class ActionTestScript extends Script implements ITest{
 			//	status.setMessage(getCurrentChannel().goToUrl(url).toString());
 			//}
 		}
-		status.setMessage(getCurrentChannel().getWebDriver().getCurrentUrl());
+		status.setMessage(getCurrentChannel().getCurrentUrl());
 		status.setPassed(true);
 		status.updateDuration();
 	}
@@ -616,7 +616,7 @@ public class ActionTestScript extends Script implements ITest{
 		if(getCurrentChannel() != null){
 			getCurrentChannel().navigate(type);
 		}
-		status.setMessage(getCurrentChannel().getWebDriver().getCurrentUrl());
+		status.setMessage(getCurrentChannel().getCurrentUrl());
 		status.setPassed(true);
 		status.updateDuration();
 	}

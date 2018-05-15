@@ -15,18 +15,16 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
-package com.ats.tools.win32;
+package com.ats.executor.drivers.desktop;
 
-import com.sun.jna.Native;
-import com.sun.jna.platform.win32.WinDef.DWORD;
-/* https://jna.dev.java.net/ */
-public interface Kernel32 extends W32API {
-    Kernel32 INSTANCE = (Kernel32) Native.loadLibrary("kernel32", Kernel32.class, DEFAULT_OPTIONS);
-    /* http://msdn.microsoft.com/en-us/library/ms683179(VS.85).aspx */
-    HANDLE GetCurrentProcess();
-    DWORD GetCurrentProcessId();
-    /* http://msdn.microsoft.com/en-us/library/ms683215.aspx */
-    int GetProcessId(HANDLE Process);
+public class DesktopElement {
+	public String id;
+	public String tag;
+	public Double x;
+	public Double y;
+	public Double width;
+	public Double height;
+	public boolean visible;
 }

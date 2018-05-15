@@ -25,12 +25,17 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.NoSuchWindowException;
@@ -49,12 +54,12 @@ import org.openqa.selenium.remote.RemoteWebElement;
 import com.ats.driver.AtsManager;
 import com.ats.element.FoundElement;
 import com.ats.executor.ActionStatus;
+import com.ats.executor.SendKeyData;
 import com.ats.executor.TestBound;
 import com.ats.executor.TestElement;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverProcess;
-import com.ats.executor.drivers.WindowsDesktopDriver;
-import com.ats.generator.objects.BoundData;
+import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.tools.ResourceContent;
@@ -63,7 +68,7 @@ import com.ats.tools.logger.MessageCode;
 
 public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngine {
 
-	protected WindowsDesktopDriver windowsDriver;
+	protected DesktopDriver desktopDriver;
 
 	protected Double initElementX = 0.0;
 	protected Double initElementY = 0.0;
@@ -76,7 +81,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	private DriverProcess driverProcess;
 
-	private int currentWindow = 0;
+	private Actions actions;
 
 	private String firstWindow;
 
@@ -84,28 +89,24 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			Channel channel, 
 			String browser, 
 			DriverProcess driverProcess, 
-			WindowsDesktopDriver windowsDriver,
+			DesktopDriver desktopDriver,
 			AtsManager ats) {
 
 		super(channel, browser);
 
 		this.driverProcess = driverProcess;
-		this.windowsDriver = windowsDriver;
+		this.desktopDriver = desktopDriver;
 		this.proxy = ats.getProxy();
 		this.loadPageTimeOut = ats.getPageloadTimeOut();
 		this.scriptTimeout = ats.getScriptTimeOut();
 		this.maxTryInteractable = ats.getMaxTryInteractable();
 	}
 
-	@Override
-	public boolean isDesktop() {
-		return false;
-	}
-
 	protected DriverProcess getDriverProcess() {
 		return driverProcess;
 	}
 
+	@SuppressWarnings("unchecked")
 	protected void launchDriver(MutableCapabilities cap) {
 
 		cap.setCapability(CapabilityType.SUPPORTS_FINDING_BY_CSS, false);
@@ -114,6 +115,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		cap.setCapability(CapabilityType.HAS_NATIVE_EVENTS, false);
 
 		driver = new RemoteWebDriver(driverProcess.getDriverServerUrl(), cap);
+		actions = new Actions(driver);
 
 		driver.manage().timeouts().setScriptTimeout(scriptTimeout, TimeUnit.SECONDS);
 		driver.manage().timeouts().pageLoadTimeout(loadPageTimeOut, TimeUnit.SECONDS);
@@ -149,12 +151,10 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			driver.get(tempHtml.toURI().toString());
 		} catch (IOException e) {}
 
-		ArrayList<String> windows = new ArrayList<String>();
 		channel.setApplicationData(
 				applicationVersion,
 				driverVersion,
-				windowsDriver.getProcessDataByWindowTitle(titleUid, windows),
-				windows);
+				desktopDriver.getProcessDataByWindowTitle(titleUid));
 
 		firstWindow = driver.getWindowHandle();
 	}
@@ -167,6 +167,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		return channel;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void waitAfterAction() {
 		int maxWait = 50;
@@ -174,7 +175,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		while(maxWait > 0 && !iframesStatus.stream().parallel().allMatch(e -> true)){
 			channel.sleep(200);
 			maxWait--;
-			
+
 			iframesStatus = (ArrayList<Boolean>) runJavaScript(ResourceContent.getReadyStatesJavaScript());
 		}
 	}
@@ -205,6 +206,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void forceScrollElement(FoundElement element) {
 		String code = "var e=arguments[0];e.scrollIntoView();var r=e.getBoundingClientRect();var result=[r.left+0.00001, r.top+0.00001]";
@@ -225,7 +227,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		if(x < channel.getSubDimension().getX() || y < channel.getSubDimension().getY()) {
 
-			return windowsDriver.getElementFromPoint(x, y);
+			return desktopDriver.getElementFromPoint(x, y);
 
 		}else {
 
@@ -272,7 +274,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	public void loadParents(FoundElement hoverElement){
 		if(hoverElement.isDesktop()){
-			hoverElement.setParent(windowsDriver.getTestElementParent(hoverElement.getValue(), channel));
+			hoverElement.setParent(desktopDriver.getTestElementParent(hoverElement.getId(), channel));
 		}else{
 			hoverElement.setParent(getTestElementParent(hoverElement));
 		}
@@ -301,11 +303,11 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		}
 	}
 
-	private RemoteWebElement getWebElement(FoundElement te) {
+	private RemoteWebElement getWebElement(FoundElement element) {
 
 		switchToDefaultframe();
 
-		ArrayList<String>iframesData = te.getIframes();
+		ArrayList<String>iframesData = element.getIframes();
 
 		if(iframesData != null) {
 			for (String rweId : iframesData) {
@@ -316,26 +318,65 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			}
 		}
 
-		return te.getRemoteWebElement(driver);
+		return element.getRemoteWebElement(driver);
 	}
 
-	public CalculatedProperty[] getAttributes(FoundElement te){
-		if(te.isDesktop()){
-			return getWindowsAttributes(te.getRemoteWebElement(windowsDriver));
+	@Override
+	public String getAttribute(FoundElement element, String attributeName, int maxTry) {
+		
+		String result = null;
+		int tryLoop = maxTry;
+
+		while (result == null && tryLoop > 0){
+			tryLoop--;
+
+			result = element.getValue().getAttribute(attributeName);
+			if(result == null || result.length() == 0) {
+
+				for (CalculatedProperty calc : getAttributes(element)) {
+					if(attributeName.equals(calc.getName())) {
+						result = calc.getValue().getCalculated();
+					}
+				}
+
+				if(result == null || result.length() == 0) {
+					result = getCssAttributeValueByName(element, attributeName);
+				}
+			}
+		}
+		return result;
+	}
+	
+	private String getCssAttributeValueByName(FoundElement element, String name) {
+		return foundAttributeValue(name, getCssAttributes(element));
+	}
+
+	private String foundAttributeValue(String name, CalculatedProperty[] properties) {
+		Stream<CalculatedProperty> stream = Arrays.stream(properties);
+		Optional<CalculatedProperty> calc = stream.parallel().filter(c -> c.getName().equals(name)).findFirst();
+		if(calc.isPresent()) {
+			return calc.get().getValue().getCalculated();
+		}
+		return null;
+	}
+	
+	public CalculatedProperty[] getAttributes(FoundElement element){
+		if(element.isDesktop()){
+			return desktopDriver.getElementAttributes(element.getId());
 		}else {
-			return getAttributes(getWebElement(te));
+			return getAttributes(getWebElement(element));
 		}
 	}
 
-	public CalculatedProperty[] getCssAttributes(FoundElement te){
-		return getCssAttributes(getWebElement(te));
+	public CalculatedProperty[] getCssAttributes(FoundElement element){
+		return getCssAttributes(getWebElement(element));
 	}
 
-	public CalculatedProperty[] getCssAttributes(RemoteWebElement element){
+	private CalculatedProperty[] getCssAttributes(RemoteWebElement element){
 		return getAttributesList(element, ResourceContent.getElementCssJavaScript());
 	}
 
-	public CalculatedProperty[] getAttributes(RemoteWebElement element){
+	private CalculatedProperty[] getAttributes(RemoteWebElement element){
 		return getAttributesList(element, ResourceContent.getElementAttributesJavaScript());
 	}
 
@@ -368,7 +409,6 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	@Override
 	public TestBound[] getDimensions() {
 
-		//switchToDefaultframe();
 		switchToCurrentWindow();
 
 		Map<String, ArrayList<Double>> response = (Map<String, ArrayList<Double>>) runJavaScript(ResourceContent.getDocumentSizeJavaScript());
@@ -466,6 +506,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		return false;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position) {
 
@@ -491,8 +532,47 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	protected void move(WebElement element, int offsetX, int offsetY) {
-		Actions act = new Actions(driver);
-		act.moveToElement(element, offsetX, offsetY).perform();
+		actions.moveToElement(element, offsetX, offsetY).perform();
+	}
+
+	@Override
+	public void mouseClick(boolean hold) {
+		if(hold) {
+			actions.clickAndHold();
+		}else {
+			actions.click();
+		}
+		actions.perform();
+	}
+
+	@Override
+	public void keyDown(Keys key) {
+		actions.keyDown(key).perform();
+	}
+
+	@Override
+	public void keyUp(Keys key) {
+		actions.keyUp(key).perform();
+	}
+
+	@Override
+	public void drop() {
+		actions.release().perform();
+	}
+
+	@Override
+	public void moveByOffset(int hDirection, int vDirection) {
+		actions.moveByOffset(hDirection, vDirection).perform();
+	}
+
+	@Override
+	public void doubleClick() {
+		actions.doubleClick();
+	}	
+
+	@Override
+	public void rightClick() {
+		actions.contextClick().perform();
 	}
 
 	//-----------------------------------------------------------------------------------------------------------------------------------
@@ -503,10 +583,6 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		int windowsNum = driver.getWindowHandles().size();
 		switchWindow(windowsNum - 1);
 	}	
-
-	public void switchToCurrentWindow() {
-		switchWindow(currentWindow);
-	}
 
 	@Override
 	public void switchWindow(int index) {
@@ -524,42 +600,12 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	@Override
-	public void setWindowBound(BoundData x, BoundData y, BoundData width, BoundData height) {
-
-		if(width != null || height != null){
-			int newWidth = channel.getDimension().getWidth().intValue();
-			if(width != null) {
-				newWidth = width.getValue();
-			}
-
-			int newHeight = channel.getDimension().getHeight().intValue();
-			if(height != null) {
-				newHeight = height.getValue();
-			}
-
-			setSize(new Dimension(newWidth, newHeight));
-		}
-
-		if(x != null || y != null){
-			int newX = channel.getDimension().getX().intValue();
-			if(x != null) {
-				newX = x.getValue();
-			}
-
-			int newY = channel.getDimension().getY().intValue();
-			if(y != null) {
-				newY = y.getValue();
-			}
-
-			setPosition(new Point(newX, newY));
-		}
-	}
-
 	protected void setPosition(Point pt) {
 		channel.sleep(500);
 		driver.manage().window().setPosition(pt);
 	}
 
+	@Override
 	protected void setSize(Dimension dim) {
 		channel.sleep(500);
 		driver.manage().window().setSize(dim);
@@ -740,5 +786,49 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	@Override
 	public void middleClick(WebElement element) {
 		runJavaScript("var e=arguments[0];var evt=new MouseEvent(\"click\", {bubbles: true,cancelable: true,view: window, button: 1});e.dispatchEvent(evt);var result={}", element);
+	}
+
+	@Override
+	public Alert switchToAlert() {
+		return driver.switchTo().alert();
+	}
+
+	@Override
+	public void switchToDefaultContent() {
+		driver.switchTo().defaultContent();
+	}
+
+	@Override
+	public void navigationRefresh() {
+		driver.navigate().refresh();
+	}
+
+	@Override
+	public void navigationForward() {
+		driver.navigate().forward();
+	}
+
+	@Override
+	public void navigationBack() {
+		driver.navigate().back();
+	}
+
+	@Override
+	public String getCurrentUrl() {
+		return driver.getCurrentUrl();
+	}
+
+	protected void clearText(ActionStatus status, WebElement element) {
+		executeScript(status, "arguments[0].value=''", element);
+	}
+	
+	@Override
+	public void sendTextData(ActionStatus status, FoundElement element, ArrayList<SendKeyData> textActionList, boolean clear) {
+		if(clear) {
+			clearText(status, element.getValue());
+		}
+		for(SendKeyData sequence : textActionList) {
+			element.getValue().sendKeys(sequence.getSequence());
+		}
 	}
 }

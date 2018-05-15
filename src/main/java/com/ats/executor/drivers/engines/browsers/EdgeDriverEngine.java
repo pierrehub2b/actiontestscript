@@ -20,36 +20,35 @@ under the License.
 package com.ats.executor.drivers.engines.browsers;
 
 import java.net.URL;
-import java.util.ArrayList;
 
 import org.openqa.selenium.edge.EdgeOptions;
-import org.openqa.selenium.interactions.Actions;
 
+import com.ats.driver.ApplicationProperties;
 import com.ats.driver.AtsManager;
-import com.ats.driver.BrowserProperties;
-import com.ats.element.FoundElement;
 import com.ats.executor.ActionStatus;
-import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.DriverProcess;
-import com.ats.executor.drivers.WindowsDesktopDriver;
+import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.WebDriverEngine;
-import com.ats.generator.variables.CalculatedProperty;
 
 public class EdgeDriverEngine extends WebDriverEngine {
 
-	private int waitAfterAction = 200;
+	private final static int DEFAULT_WAIT = 200;
 
-	public EdgeDriverEngine(Channel channel, DriverProcess driverProcess, WindowsDesktopDriver windowsDriver, AtsManager ats) {
+	public EdgeDriverEngine(Channel channel, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
 		super(channel, DriverManager.EDGE_BROWSER, driverProcess, windowsDriver, ats);
 
 		EdgeOptions options = new EdgeOptions();
 		options.setPageLoadStrategy("normal");
 
-		BrowserProperties props = ats.getBrowserProperties(DriverManager.EDGE_BROWSER);
+		ApplicationProperties props = ats.getBrowserProperties(DriverManager.EDGE_BROWSER);
 		if(props != null) {
 			waitAfterAction = props.getWait();
+		}
+		
+		if(waitAfterAction == -1) {
+			waitAfterAction = DEFAULT_WAIT;
 		}
 
 		launchDriver(options);
@@ -72,7 +71,7 @@ public class EdgeDriverEngine extends WebDriverEngine {
 		super.goToUrl(url, newWindow);
 		waitAfterAction();
 
-		if(newWindow) {
+		/*if(newWindow) {
 			channel.sleep(100);
 
 			ArrayList<CalculatedProperty> attributes = new ArrayList<CalculatedProperty>(1);
@@ -101,7 +100,7 @@ public class EdgeDriverEngine extends WebDriverEngine {
 								if(button.isVisible()) {
 
 									TestBound bound = button.getTestBound();
-									Actions action = new Actions(windowsDriver);
+									Actions action = new Actions(desktopDriver);
 									action.moveToElement(button.getValue(), bound.getWidth().intValue()/2, 40).perform();
 									action.click().perform();
 								}
@@ -111,6 +110,6 @@ public class EdgeDriverEngine extends WebDriverEngine {
 				}
 			}
 			switchToLastWindow();
-		}
+		}*/
 	}
 }

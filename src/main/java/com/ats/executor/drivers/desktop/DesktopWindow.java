@@ -15,20 +15,11 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
-package com.ats.driver;
+package com.ats.executor.drivers.desktop;
 
-public class BrowserProperties extends ApplicationProperties {
-
-	private int wait;
-
-	public BrowserProperties(String name, String path, int wait) {
-		super(name, path);
-		this.wait = wait;
-	}
-
-	public int getWait() {
-		return wait;
-	}
+public class DesktopWindow extends DesktopElement {
+	public int pid = -1;
+	public int handle = -1;
 }

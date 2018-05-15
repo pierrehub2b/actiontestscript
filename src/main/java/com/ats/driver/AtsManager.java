@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.driver;
 
@@ -41,6 +41,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.ats.executor.TestBound;
+import com.ats.generator.ATS;
 
 public class AtsManager {
 
@@ -57,7 +58,7 @@ public class AtsManager {
 
 	private static final int SCRIPT_TIMEOUT = 60;
 	private static final int PAGELOAD_TIMEOUT = 120;
-	
+
 	private static final int MAX_TRY_INTERACTABLE = 15;
 	private static final int MAX_TRY_SEARCH = 15;
 
@@ -72,42 +73,46 @@ public class AtsManager {
 
 	private int scriptTimeOut = SCRIPT_TIMEOUT;
 	private int pageloadTimeOut = PAGELOAD_TIMEOUT;
-	
+
 	private int maxTryInteractable = MAX_TRY_INTERACTABLE;
 	private int maxTrySearch = MAX_TRY_SEARCH;
 
 	private Proxy proxy = new Proxy();
 
-	private List<BrowserProperties> browsersList = new ArrayList<BrowserProperties>();
+	private List<ApplicationProperties> browsersList = new ArrayList<ApplicationProperties>();
 	private List<ApplicationProperties> applicationsList = new ArrayList<ApplicationProperties>();
-	
+
 	public static String getVersion() {
-		
+
 		InputStream resourceAsStream = AtsManager.class.getResourceAsStream("/version.properties");
 		Properties prop = new Properties();
 		try{
 			prop.load( resourceAsStream );
 			return prop.getProperty("version");
 		}catch(Exception e) {}
-		
+
 		return null;
 	}
 
 	public AtsManager() {
 
-		String atsHome = System.getenv("ATS_HOME");
+		String atsHome = System.getProperty("ats.home");
 		if(atsHome == null || atsHome.length() == 0) {
-			atsHome = System.getProperty("ats.home");
+			atsHome = System.getenv("ATS_HOME");
 			if(atsHome == null || atsHome.length() == 0) {
 				atsHome = System.getProperty("user.home") + File.separator + ATS_FOLDER;
 			}
 		}
 
 		Path atsFolderPath = Paths.get(atsHome);
-
-		properties = loadProperties(atsFolderPath.resolve(ATS_PROPERTIES_FILE));
-		driversFolderPath = atsFolderPath.resolve(DRIVERS_FOLDER);
-		proxy.setProxyType(ProxyType.SYSTEM);
+		if(atsFolderPath.toFile().exists()) {
+			properties = loadProperties(atsFolderPath.resolve(ATS_PROPERTIES_FILE));
+			driversFolderPath = atsFolderPath.resolve(DRIVERS_FOLDER);
+			proxy.setProxyType(ProxyType.SYSTEM);
+		}else {
+			ATS.logError("ATS folder not found -> " + atsHome);
+			System.exit(0);
+		}
 	}
 
 	private Properties loadProperties(Path propertiesPath) {
@@ -212,7 +217,7 @@ public class AtsManager {
 							}catch(NumberFormatException e){}
 						}
 					}
-										
+
 					NodeList maxTryNodeList = doc.getElementsByTagName("maxTry");
 					if(maxTryNodeList != null && maxTryNodeList.getLength() > 0) {
 						NodeList maxTryNode = ((Element)maxTryNodeList.item(0)).getElementsByTagName("searchElement");
@@ -250,7 +255,7 @@ public class AtsManager {
 							break;*/
 						}
 					}
-					
+
 					NodeList applications = doc.getElementsByTagName("application");
 					if(applications != null && applications.getLength() > 0) {
 						for (int temp = 0; temp < applications.getLength(); temp++) {
@@ -263,6 +268,7 @@ public class AtsManager {
 										if(nodeList.item(0).getChildNodes().getLength() > 0) {
 											String name = nodeList.item(0).getChildNodes().item(0).getNodeValue();
 											String path = null;
+											String wait = null;
 
 											nodeList = applicationElement.getElementsByTagName("path");
 											if(nodeList != null && nodeList.getLength() > 0) {
@@ -275,7 +281,21 @@ public class AtsManager {
 													}
 												}
 											}
-											applicationsList.add(new ApplicationProperties(name, path));
+											
+											nodeList = applicationElement.getElementsByTagName("waitAction");
+											if(nodeList != null && nodeList.getLength() > 0) {
+												if(nodeList.item(0).getChildNodes().getLength() > 0) {
+													wait = nodeList.item(0).getChildNodes().item(0).getNodeValue();
+												}
+											}
+											
+											
+											int waitValue = -1;
+											try {
+												waitValue = Integer.parseInt(wait);
+											}catch(NumberFormatException e){}
+											
+											applicationsList.add(new ApplicationProperties(name, path, waitValue));
 										}
 									}
 								}
@@ -299,16 +319,12 @@ public class AtsManager {
 	}
 
 	private void addBrowserProperties(String name, String path, String wait) {
-		int waitValue = 50;
+		int waitValue = -1;
 		try {
 			waitValue = Integer.parseInt(wait);
 		}catch(NumberFormatException e){}
 
-		if(waitValue < 50) {
-			waitValue = 50;
-		}
-
-		browsersList.add(new BrowserProperties(name, path, waitValue));
+		browsersList.add(new ApplicationProperties(name, path, waitValue));
 	}
 
 	//------------------------------------------------------------------------------------------------------------------
@@ -324,10 +340,10 @@ public class AtsManager {
 		}
 		return null;
 	}
-	
-	public BrowserProperties getBrowserProperties(String name) {
+
+	public ApplicationProperties getBrowserProperties(String name) {
 		for (int i=0; i < this.browsersList.size(); i++) {
-			BrowserProperties properties = this.browsersList.get(i);
+			ApplicationProperties properties = this.browsersList.get(i);
 			if (name.equals(properties.getName())){
 				return properties;
 			}

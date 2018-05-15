@@ -39,14 +39,16 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebElement;
 
+import com.ats.driver.ApplicationProperties;
 import com.ats.driver.AtsManager;
-import com.ats.driver.BrowserProperties;
+import com.ats.element.FoundElement;
+import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.DriverProcess;
-import com.ats.executor.drivers.WindowsDesktopDriver;
+import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.WebDriverEngine;
 import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.MouseDirectionData;
@@ -55,13 +57,13 @@ import com.google.gson.JsonObject;
 
 public class FirefoxDriverEngine extends WebDriverEngine {
 
-	private int waitAfterAction = 300;
+	private final static int DEFAULT_WAIT = 300;
 
 	private final String WEB_ELEMENT_REF = "element-6066-11e4-a52e-4f735466cecf";
 	private java.net.URI driverSessionUri;
 	private RequestConfig requestConfig;
 
-	public FirefoxDriverEngine(Channel channel, DriverProcess driverProcess, WindowsDesktopDriver windowsDriver, AtsManager ats) {
+	public FirefoxDriverEngine(Channel channel, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
 		super(channel, DriverManager.FIREFOX_BROWSER, driverProcess, windowsDriver, ats);
 
 		initElementY = 5.0;
@@ -72,13 +74,17 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		options.setCapability(FirefoxDriver.MARIONETTE, true);
 		options.setPageLoadStrategy(PageLoadStrategy.NORMAL);
 
-		BrowserProperties props = ats.getBrowserProperties(DriverManager.FIREFOX_BROWSER);
+		ApplicationProperties props = ats.getBrowserProperties(DriverManager.FIREFOX_BROWSER);
 		if(props != null) {
 			waitAfterAction = props.getWait();
 			applicationPath = props.getPath();
 			if(applicationPath != null) {
 				options.setBinary(applicationPath);
 			}
+		}
+
+		if(waitAfterAction == -1) {
+			waitAfterAction = DEFAULT_WAIT;
 		}
 
 		cap.setCapability(FirefoxOptions.FIREFOX_OPTIONS, options);
@@ -136,9 +142,12 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	}
 
 	@Override
-	public void sendTextData(WebElement webElement, ArrayList<SendKeyData> textActionList) {
+	public void sendTextData(ActionStatus status, FoundElement element, ArrayList<SendKeyData> textActionList, boolean clear) {
+		if(clear) {
+			clearText(status, element.getValue());
+		}
 		for(SendKeyData sequence : textActionList) {
-			webElement.sendKeys(sequence.getSequenceFirefox());
+			element.getValue().sendKeys(sequence.getSequenceFirefox());
 		}
 	}
 

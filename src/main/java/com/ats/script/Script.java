@@ -32,7 +32,7 @@ import com.ats.generator.variables.Variable;
 import com.ats.generator.variables.transform.DateTransformer;
 import com.ats.generator.variables.transform.TimeTransformer;
 import com.ats.generator.variables.transform.Transformer;
-import com.ats.tools.logger.Logger;
+import com.ats.tools.logger.ExecutionLogger;
 
 public class Script {
 
@@ -52,11 +52,11 @@ public class Script {
 	
 	private File projectAtsFolder;
 		
-	private Logger logger = new Logger();
+	private ExecutionLogger logger = new ExecutionLogger();
 
 	public Script() {}
 	
-	public Script(Logger logger) {
+	public Script(ExecutionLogger logger) {
 		if(logger != null) {
 			setLogger(logger);
 		}
@@ -90,7 +90,7 @@ public class Script {
 		logger.sendInfo(message, value); 
 	}
 	
-	public void setLogger(Logger logger) {
+	public void setLogger(ExecutionLogger logger) {
 		this.logger = logger;
 	}
 	
