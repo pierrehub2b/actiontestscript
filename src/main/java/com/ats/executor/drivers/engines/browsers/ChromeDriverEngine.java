@@ -75,6 +75,5 @@ public class ChromeDriverEngine extends WebDriverEngine {
 	@Override
 	public void waitAfterAction() {
 		channel.sleep(waitAfterAction);
-		super.waitAfterAction();
 	}
 }

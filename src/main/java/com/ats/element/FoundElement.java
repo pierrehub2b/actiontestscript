@@ -21,7 +21,6 @@ package com.ats.element;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Map;
 
 import org.openqa.selenium.WebElement;
@@ -55,8 +54,6 @@ public class FoundElement{
 	private FoundElement parent;
 	private boolean visible = true;
 
-	private String iframesList;
-
 	public FoundElement() {}
 
 	public FoundElement(Map<String, Object> data) {
@@ -67,23 +64,15 @@ public class FoundElement{
 		this.height = (Double)data.get("height");
 	}
 
-	public FoundElement(Map<String, Object> data, Channel channel, Double offsetX, Double offsetY, ArrayList<String> iframes) {
-		this(data, channel, offsetX, offsetY);
-		if(this.isIframe()) {
-			this.id = iframes.remove(iframes.size()-1);
-		}
-		this.iframesList  = String.join(",", iframes);
-	}
-
 	public FoundElement(Map<String, Object> data, Channel channel, Double offsetX, Double offsetY) {
 		this(data);
 		this.updatePosition((Double)data.get("x"), (Double)data.get("y"), channel, offsetX, offsetY);
 	}
 
-	public FoundElement(ArrayList<Map<String, Object>> listElements, Channel channel, Double initElementX, Double initElementY, ArrayList<String> frm) {
-		this(listElements.remove(0), channel, initElementX, initElementY, frm);
+	public FoundElement(ArrayList<Map<String, Object>> listElements, Channel channel, Double initElementX, Double initElementY) {
+		this(listElements.remove(0), channel, initElementX, initElementY);
 		if(listElements.size() > 0) {
-			setParent(new FoundElement (listElements, channel, initElementX, initElementY, frm));
+			setParent(new FoundElement (listElements, channel, initElementX, initElementY));
 		}
 	}
 
@@ -92,7 +81,6 @@ public class FoundElement{
 		setWidth(channel.getDimension().getWidth());
 		setHeight(channel.getDimension().getHeight());
 	}
-
 
 	public FoundElement(DesktopElement element, Double channelX, Double channelY) {
 
@@ -187,14 +175,6 @@ public class FoundElement{
 		return new Rectangle(x.intValue(), y.intValue(), width.intValue(), height.intValue());
 	}
 
-	public ArrayList<String> getIframes() {
-		if(iframesList != null && iframesList.length() > 0) {
-			return new ArrayList<String>(Arrays.asList(iframesList.split(",")));
-		}else {
-			return new ArrayList<String>();
-		}
-	}
-
 	public Double getScreenX() {
 		return screenX;
 	}
@@ -277,14 +257,6 @@ public class FoundElement{
 
 	public void setTag(String tag) {
 		this.tag = tag;
-	}
-
-	public String getIframesList() {
-		return iframesList;
-	}
-
-	public void setIframesList(String s) {
-		this.iframesList = s;
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------

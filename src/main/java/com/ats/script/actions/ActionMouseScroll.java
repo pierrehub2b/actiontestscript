@@ -62,6 +62,9 @@ public class ActionMouseScroll extends ActionMouse {
 	
 	@Override
 	public void terminateExecution(ActionTestScript ts) {
+		
+		super.terminateExecution(ts);
+		
 		ts.updateVisualValue(value + "");
 		getTestElement().mouseWheel(value);
 		ts.updateVisualImage();

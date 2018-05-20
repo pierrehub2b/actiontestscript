@@ -62,7 +62,6 @@ public class IEDriverEngine extends WebDriverEngine {
 	@Override
 	public void waitAfterAction() {
 		channel.sleep(waitAfterAction);
-		super.waitAfterAction();
 	}
 
 	@Override

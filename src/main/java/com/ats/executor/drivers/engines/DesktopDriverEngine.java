@@ -22,9 +22,6 @@ package com.ats.executor.drivers.engines;
 import java.awt.MouseInfo;
 import java.awt.PointerInfo;
 import java.awt.Rectangle;
-import java.awt.Robot;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -60,16 +57,14 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	private final static int DEFAULT_WAIT = 100;
 
 	private Process applicationProcess = null;
-	private Robot robot;
 	
-	private String buildNumber;
+	private String osVersion;
 	private String osName;
 
-	public DesktopDriverEngine(Channel channel, String application, DesktopDriver desktopDriver, AtsManager ats, Robot robot) {
+	public DesktopDriverEngine(Channel channel, String application, DesktopDriver desktopDriver, AtsManager ats) {
 
 		super(channel, application);
 		
-		this.robot = robot;
 		this.driver = desktopDriver;
 
 		int firstSpace = application.indexOf(" ");
@@ -103,7 +98,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 			} catch (URISyntaxException e) {}
 		}
 
-		if(exeFile == null) {//last chance
+		if(exeFile == null) {//last chance to find exe file ....
 			exeFile = new File(application);
 		}
 
@@ -122,14 +117,14 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 			String driverVersion = "N/A";
 			String appVersion = "N/A";
 
-			ArrayList<DesktopData> capabilities = ((DesktopDriver)driver).getVersion(applicationPath);
+			ArrayList<DesktopData> capabilities = desktopDriver.getVersion(applicationPath);
 			for (DesktopData data : capabilities) {
 				if("DriverVersion".equals(data.getName())) {
 					driverVersion = data.getValue();
 				}else if("ApplicationVersion".equals(data.getName())) {
 					appVersion = data.getValue();
 				}else if("BuildNumber".equals(data.getName())) {
-					buildNumber = data.getValue();
+					osVersion = data.getValue();
 				}else if("Caption".equals(data.getName())) {
 					osName = data.getValue();
 				}
@@ -147,6 +142,11 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 			desktopDriver.resizeWindow(channel, channel.getDimension().getSize());
 		}
 	}
+	
+	@Override
+	public DesktopDriver getDesktopDriver() {
+		return (DesktopDriver)driver;
+	}
 
 	@Override
 	public void waitAfterAction() {
@@ -154,12 +154,12 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	}
 
 	public void loadParents(FoundElement hoverElement){
-		hoverElement.setParent(((DesktopDriver)driver).getTestElementParent(hoverElement.getId(), channel));
+		hoverElement.setParent(getDesktopDriver().getTestElementParent(hoverElement.getId(), channel));
 	}
 
 	@Override
 	public String getAttribute(FoundElement element, String attributeName, int maxTry) {
-		return ((DesktopDriver)driver).getElementAttribute(element.getId(), attributeName);
+		return getDesktopDriver().getElementAttribute(element.getId(), attributeName);
 	}
 
 	public CalculatedProperty[] getAttributes(FoundElement element){
@@ -167,7 +167,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	}
 
 	public CalculatedProperty[] getAttributes(String elementId){
-		return ((DesktopDriver)driver).getElementAttributes(elementId);
+		return getDesktopDriver().getElementAttributes(elementId);
 	}
 
 	@Override
@@ -180,13 +180,13 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	//---------------------------------------------------------------------------------------------------------------------
 
 	public FoundElement getElementFromPoint(Double x, Double y){
-		return ((DesktopDriver)driver).getElementFromPoint(x, y);
+		return getDesktopDriver().getElementFromPoint(x, y);
 	}
 
 	@Override
 	public TestBound[] getDimensions() {
 
-		List<DesktopWindow> wins = ((DesktopDriver)driver).getWindowsByPid(channel.getProcessId());
+		List<DesktopWindow> wins = getDesktopDriver().getWindowsByPid(channel.getProcessId());
 		if(wins != null && wins.size() > 0){
 			DesktopWindow firstWin = wins.get(0);
 
@@ -203,7 +203,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 
 	@Override
 	public void close() {
-		((DesktopDriver)driver).closeAllWindows(channel.getProcessId());
+		getDesktopDriver().closeAllWindows(channel.getProcessId());
 		if(applicationProcess != null) {
 			applicationProcess.destroyForcibly();
 		}
@@ -211,72 +211,32 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 
 	@Override
 	public void switchWindow(int index) {
-		((DesktopDriver)driver).switchTo(channel, index);
+		getDesktopDriver().switchTo(channel, index);
 	}
 
 	@Override
 	public void closeWindow(ActionStatus status, int index) {
-		((DesktopDriver)driver).closeWindow(channel, index);
-	}
-
-	@Override
-	public Object executeScript(ActionStatus status, String script, Object... params) {
-		status.setPassed(true);
-		return null;
-	}
-
-	@Override
-	public void goToUrl(URL url, boolean newWindow) {
-		// Do nothing
-	}
-
-	@Override
-	public ArrayList<FoundElement> findWebElement(Channel channel, TestElement testObject, String tagName, String[] attributes,
-			Predicate<Map<String, Object>> searchPredicate) {
-
-		ArrayList<FoundElement> result = new ArrayList<FoundElement>();
-
-		return result;
-	}
-
-	@Override
-	public void switchToDefaultframe() {
-		//do nothing
-	}
-
-	@Override
-	public void forceScrollElement(FoundElement value) {
-		// TODO Auto-generated method stub
-
+		getDesktopDriver().closeWindow(channel, index);
 	}
 
 	@Override
 	public void scroll(FoundElement element, int delta) {
-		robot.mouseWheel(delta);
+		getDesktopDriver().mouseWheel(delta);
 	}
 
 	@Override
 	public void middleClick(WebElement element) {
-		robot.mousePress(InputEvent.BUTTON2_DOWN_MASK);
+		getDesktopDriver().mouseMiddleClick();
 	}
 
 	@Override
 	public void doubleClick() {
-		mouseClick(false);
-		robot.delay(50);
-		mouseClick(false);
+		getDesktopDriver().doubleClick();
 	}
 
 	@Override
 	public void rightClick() {
-		robot.mousePress(InputEvent.BUTTON3_DOWN_MASK);
-		robot.delay(50);
-		robot.mouseRelease(InputEvent.BUTTON3_DOWN_MASK);
-	}
-
-	@Override
-	public WebElement getRootElement() {
-		return null;
+		getDesktopDriver().mouseRightClick();
 	}
 
 	@Override
@@ -287,33 +247,31 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 		int offsetX = getOffsetX(rect, position) + foundElement.getScreenX().intValue();
 		int offsetY = getOffsetY(rect, position) + foundElement.getScreenY().intValue();
 		
-		((DesktopDriver)driver).mouseMove(offsetX, offsetY);
+		getDesktopDriver().mouseMove(offsetX, offsetY);
 	}
 
 	@Override
 	public void mouseClick(boolean hold) {
-		//((DesktopDriver)driver).mousePress(1);
-		robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-		if(!hold) {
-			//((DesktopDriver)driver).mouseRelease(1);
-			robot.delay(50);
-			robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+		if(hold) {
+			getDesktopDriver().mouseDown();
+		}else {
+			getDesktopDriver().mouseClick();
 		}
+	}
+	
+	@Override
+	public void drop() {
+		getDesktopDriver().mouseRelease();
 	}
 
 	@Override
 	public void keyDown(Keys key) {
-		robot.keyPress(key.getCodePoint());
+		getDesktopDriver().keyDown(key.getCodePoint());
 	}
 
 	@Override
 	public void keyUp(Keys key) {
-		robot.keyRelease(key.getCodePoint());
-	}
-
-	@Override
-	public void drop() {
-		robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+		getDesktopDriver().keyUp(key.getCodePoint());
 	}
 
 	@Override
@@ -322,29 +280,70 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 		PointerInfo a = MouseInfo.getPointerInfo();
 		java.awt.Point pt = a.getLocation();
 
-		robot.mouseMove(pt.x + hDirection, pt.y + vDirection);
+		getDesktopDriver().mouseMove(pt.x + hDirection, pt.y + vDirection);
 	}
 
 	@Override
 	protected void setPosition(Point pt) {
-		channel.sleep(200);
-		((DesktopDriver)driver).moveWindow(channel, pt);
+		getDesktopDriver().moveWindow(channel, pt);
 	}
 
 	@Override
 	protected void setSize(Dimension size) {
-		channel.sleep(200);
-		((DesktopDriver)driver).resizeWindow(channel, size);
+		getDesktopDriver().resizeWindow(channel, size);
+	}
+		
+	@Override
+	public void sendTextData(ActionStatus status, FoundElement element, ArrayList<SendKeyData> textActionList,	boolean clear) {
+		mouseMoveToElement(status, element, new MouseDirection());
+		mouseClick(false);
+		
+		if(clear) {
+			getDesktopDriver().clearText();
+		}
+		
+		for(SendKeyData sequence : textActionList) {
+			getDesktopDriver().sendKeys(sequence.getSequenceDesktop());
+		}
 	}
 
+	//--------------------------------------------------
+	//do nothing with followings methods for the moment ....
+	//--------------------------------------------------
+	
+	@Override
+	public Object executeScript(ActionStatus status, String script, Object... params) {
+		status.setPassed(true);
+		return null;
+	}
+
+	@Override
+	public void goToUrl(URL url, boolean newWindow) {} // open default browser ?
+
+	@Override
+	public ArrayList<FoundElement> findWebElement(Channel channel, TestElement testObject, String tagName, String[] attributes,
+			Predicate<Map<String, Object>> searchPredicate) {
+		return new ArrayList<FoundElement>();
+	}
+	
+	@Override
+	public WebElement getRootElement() {
+		return null;
+	}
+	
+	@Override
+	public void switchToDefaultframe() {}
+
+	@Override
+	public void forceScrollElement(FoundElement value) {}
+	
 	@Override
 	public Alert switchToAlert() {
 		return null;
 	}
 
 	@Override
-	public void switchToDefaultContent() {
-	}
+	public void switchToDefaultContent() {}
 
 	@Override
 	public void navigationRefresh() {}
@@ -359,25 +358,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	public String getCurrentUrl() {
 		return null;
 	}
-
+	
 	@Override
-	public void sendTextData(ActionStatus status, FoundElement element, ArrayList<SendKeyData> textActionList,	boolean clear) {
-		mouseMoveToElement(status, element, new MouseDirection());
-		mouseClick(false);
-		
-		if(clear) {
-			robot.keyPress(KeyEvent.VK_CONTROL);
-			robot.keyPress(KeyEvent.VK_A);
-			
-			robot.keyRelease(KeyEvent.VK_A);
-			robot.keyRelease(KeyEvent.VK_CONTROL);
-			
-			robot.keyPress(KeyEvent.VK_BACK_SPACE);
-			robot.keyRelease(KeyEvent.VK_BACK_SPACE);
-		}
-		
-		for(SendKeyData sequence : textActionList) {
-			((DesktopDriver)driver).sendKeys(sequence.getSequenceDesktop());
-		}
-	}
+	public void switchToIframe(String iframe) {}
 }

@@ -21,6 +21,8 @@ package com.ats.executor.drivers.engines.browsers;
 
 import java.net.URL;
 
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Point;
 import org.openqa.selenium.edge.EdgeOptions;
 
 import com.ats.driver.ApplicationProperties;
@@ -55,9 +57,20 @@ public class EdgeDriverEngine extends WebDriverEngine {
 	}		
 
 	@Override
+	protected void setPosition(Point pt) {
+		channel.sleep(500);
+		super.setPosition(pt);
+	}
+
+	@Override
+	protected void setSize(Dimension dim) {
+		channel.sleep(500);
+		super.setSize(dim);
+	}
+
+	@Override
 	public void waitAfterAction() {
 		channel.sleep(waitAfterAction);
-		super.waitAfterAction();
 	}
 
 	@Override

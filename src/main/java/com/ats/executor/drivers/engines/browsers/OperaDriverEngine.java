@@ -62,6 +62,5 @@ public class OperaDriverEngine extends WebDriverEngine {
 	@Override
 	public void waitAfterAction() {
 		channel.sleep(waitAfterAction);
-		super.waitAfterAction();
 	}
 }

@@ -158,6 +158,11 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		firstWindow = driver.getWindowHandle();
 	}
+	
+	@Override
+	public DesktopDriver getDesktopDriver() {
+		return desktopDriver;
+	}
 
 	protected void closeDriver() {
 		driverProcess.close();
@@ -167,17 +172,16 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		return channel;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void waitAfterAction() {
-		int maxWait = 50;
+		/*int maxWait = 50;
 		ArrayList<Boolean> iframesStatus = (ArrayList<Boolean>) runJavaScript(ResourceContent.getReadyStatesJavaScript());
 		while(maxWait > 0 && !iframesStatus.stream().parallel().allMatch(e -> true)){
 			channel.sleep(200);
 			maxWait--;
 
 			iframesStatus = (ArrayList<Boolean>) runJavaScript(ResourceContent.getReadyStatesJavaScript());
-		}
+		}*/
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------
@@ -217,12 +221,6 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		}
 	}
 
-	private void addWebElement(ArrayList<FoundElement> webElementList, Map<String, Object> elements){
-		if(elements != null){
-			webElementList.add(new FoundElement(elements, channel, initElementX, initElementY));
-		}
-	}
-
 	public FoundElement getElementFromPoint(Double x, Double y){
 
 		if(x < channel.getSubDimension().getX() || y < channel.getSubDimension().getY()) {
@@ -241,10 +239,6 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	private FoundElement loadElement(Double x, Double y, Double offsetX, Double offsetY) {
-		return loadElement(x, y, offsetX, offsetY, new ArrayList<String>());
-	}
-
-	private FoundElement loadElement(Double x, Double y, Double offsetX, Double offsetY, ArrayList<String> iframes) {
 
 		@SuppressWarnings("unchecked")
 		Map<String, Object> objectData = (Map<String, Object>) runJavaScript(ResourceContent.getHoverElementJavaScript(), x - offsetX, y - offsetY);
@@ -254,17 +248,15 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 				FoundElement frm = new FoundElement(objectData);
 
-				iframes.add(frm.getId());
-
 				switchToFrame(frm.getValue());
 
 				offsetX += (Double)objectData.get("x");
 				offsetY += (Double)objectData.get("y");
 
-				return loadElement(x, y, offsetX, offsetY, iframes);
+				return loadElement(x, y, offsetX, offsetY);
 
 			} else {
-				return new FoundElement(objectData, channel, offsetX, offsetY, iframes);
+				return new FoundElement(objectData, channel, offsetX, offsetY);
 			}
 
 		} else {
@@ -304,20 +296,6 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	private RemoteWebElement getWebElement(FoundElement element) {
-
-		switchToDefaultframe();
-
-		ArrayList<String>iframesData = element.getIframes();
-
-		if(iframesData != null) {
-			for (String rweId : iframesData) {
-				RemoteWebElement rwe = new RemoteWebElement();
-				rwe.setId(rweId);
-				rwe.setParent(driver);
-				switchToFrame(rwe);
-			}
-		}
-
 		return element.getRemoteWebElement(driver);
 	}
 
@@ -327,10 +305,14 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		String result = null;
 		int tryLoop = maxTry;
 
+		
+		RemoteWebElement elem = getWebElement(element);
+		
+		
 		while (result == null && tryLoop > 0){
 			tryLoop--;
 
-			result = element.getValue().getAttribute(attributeName);
+			result = elem.getAttribute(attributeName);
 			if(result == null || result.length() == 0) {
 
 				for (CalculatedProperty calc : getAttributes(element)) {
@@ -395,7 +377,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		ArrayList<Map<String, Object>> listElements = (ArrayList<Map<String, Object>>) runJavaScript(ResourceContent.getParentElementJavaScript(), element.getValue());
 
 		if(listElements != null && listElements.size() > 0){
-			return new FoundElement(listElements, channel, initElementX, initElementY, element.getIframes());
+			return new FoundElement(listElements, channel, initElementX, initElementY);
 		}
 
 		return null;
@@ -741,7 +723,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		ArrayList<FoundElement> webElementList = new ArrayList<FoundElement>();
 		WebElement startElement = null;
-
+		
 		if(testObject.getParent() != null){
 			if(testObject.getParent().isIframe()) {
 				try {
@@ -760,13 +742,19 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			//switchToDefaultframe();
 			switchToCurrentWindow();
 		}
-
+		
 		ArrayList<Map<String, Object>> response = (ArrayList<Map<String, Object>>)runJavaScript(ResourceContent.getSearchElementsJavaScript(), startElement, tagName, attributes);
 		if(response != null){
 			response.parallelStream().filter(predicate).forEachOrdered(e -> addWebElement(webElementList, (Map<String, Object>) e.get("atsElem")));
 		}
 
 		return webElementList;
+	}
+	
+	private void addWebElement(ArrayList<FoundElement> webElementList, Map<String, Object> elements){
+		if(elements != null){
+			webElementList.add(new FoundElement(elements, channel, initElementX, initElementY));
+		}
 	}
 
 	@Override
@@ -781,6 +769,14 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	private void switchToFrame(WebElement we) {
 		driver.switchTo().frame(we);
+	}
+	
+	@Override
+	public void switchToIframe(String iframe) {
+		RemoteWebElement rwe = new RemoteWebElement();
+		rwe.setId(iframe);
+		rwe.setParent(driver);
+		switchToFrame(rwe);
 	}
 
 	@Override

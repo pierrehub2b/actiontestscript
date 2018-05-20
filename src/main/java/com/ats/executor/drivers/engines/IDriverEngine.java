@@ -34,12 +34,14 @@ import com.ats.executor.SendKeyData;
 import com.ats.executor.TestBound;
 import com.ats.executor.TestElement;
 import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 
 public interface IDriverEngine{
 	public void close();
+	public DesktopDriver getDesktopDriver();
 	public String getApplication();
 	public String getApplicationPath();
 	public void switchWindow(int index);
@@ -75,4 +77,5 @@ public interface IDriverEngine{
 	public void navigationForward();
 	public void navigationBack();
 	public String getCurrentUrl();
+	public void switchToIframe(String iframe);
 }

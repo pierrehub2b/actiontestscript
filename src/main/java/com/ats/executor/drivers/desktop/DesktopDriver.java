@@ -41,7 +41,7 @@ import com.exadel.flamingo.flex.messaging.amf.io.AMF3Deserializer;
 
 public class DesktopDriver extends RemoteWebDriver {
 
-	private static final String DESKTOP_REQUEST_SEPARATOR = "|";
+	private static final String DESKTOP_REQUEST_SEPARATOR = "\n";
 
 	private List<FoundElement> elementMapLocation;
 
@@ -56,28 +56,82 @@ public class DesktopDriver extends RemoteWebDriver {
 	public enum CommandType
 	{
 		Version (0),
-		Window (1),
-		Windows (2),
-		Move (3),
-		Resize (4),
-		ToFront (5),
-		CloseAll (6),
-		Elements (7),
-		Childs (8),
-		Attribute (9),
-		Parents (10),
-		Switch (11),
-		Close (12),
-		ScreenShot (13),
-		SendKeys (14),
-		MouseMove (15),
-		Mouse (16),
-		MouseDown (17),
-		MouseRelease (18),
-		MouseWheel (19);
+		ScreenShot (1),
+		Window (2),
+		Element (3),
+		Keyboard (4),
+		Mouse (5);
 
 		private final int type;
 		CommandType(int value){
+			this.type = value;
+		}
+
+		public String toString(){ return this.type + ""; }
+	};
+	
+	public enum MouseType
+	{
+		Move (0),
+		Click (1),
+		RightClick (2),
+		MiddleClick (3),
+		DoubleClick (4),
+		Down (5),
+		Release (6),
+		Wheel (7);
+
+		private final int type;
+		MouseType(int value){
+			this.type = value;
+		}
+
+		public String toString(){ return this.type + ""; }
+	};
+	
+	public enum KeyType
+	{
+		Clear (0),
+		Enter (1),
+		Down (2),
+		Release (3);
+
+		private final int type;
+		KeyType(int value){
+			this.type = value;
+		}
+
+		public String toString(){ return this.type + ""; }
+	};
+	
+	public enum WindowType
+	{
+		Pid (0),
+		List (1),
+		Move (2),
+		Resize (3),
+		ToFront (4),
+		Switch (5),
+		Close (6),
+		CloseAll (7);
+
+		private final int type;
+		WindowType(int value){
+			this.type = value;
+		}
+
+		public String toString(){ return this.type + ""; }
+	};
+	
+	public enum ElementType
+	{
+		Childs (0),
+		Parents (1),
+		Find (2),
+		Attributes (3);
+
+		private final int type;
+		ElementType(int value){
 			this.type = value;
 		}
 
@@ -91,33 +145,57 @@ public class DesktopDriver extends RemoteWebDriver {
 	public int getDriverPort() {
 		return driverPort;
 	}
+	
+	public void clearText() {
+		sendRequestCommand(CommandType.Keyboard, KeyType.Clear);
+	}
 
 	public void sendKeys(String data) {
-		sendRequestCommand(CommandType.SendKeys, data);
+		sendRequestCommand(CommandType.Keyboard, KeyType.Enter, data);
 	}
 	
 	public void mouseMove(int x, int y) {
-		sendRequestCommand(CommandType.MouseMove, x, y);
+		sendRequestCommand(CommandType.Mouse, MouseType.Move, x, y);
 	}
 	
-	public void mouseClick(int button) {
-		sendRequestCommand(CommandType.Mouse, button);
+	public void mouseClick() {
+		sendRequestCommand(CommandType.Mouse, MouseType.Click);
 	}
 	
-	public void mouseClick(int button, int key) {
-		sendRequestCommand(CommandType.Mouse, button, key);
+	public void mouseMiddleClick() {
+		sendRequestCommand(CommandType.Mouse, MouseType.MiddleClick);
 	}
 	
-	public void mouseDown(int button) {
-		sendRequestCommand(CommandType.MouseDown, button);
+	public void mouseRightClick() {
+		sendRequestCommand(CommandType.Mouse, MouseType.RightClick);
+	}
+	
+	public void mouseClick(int key) {
+		sendRequestCommand(CommandType.Mouse, MouseType.Click, key);
+	}
+	
+	public void mouseDown() {
+		sendRequestCommand(CommandType.Mouse, MouseType.Down);
 	}
 
-	public void mouseRelease(int button) {
-		sendRequestCommand(CommandType.MouseRelease, button);
+	public void mouseRelease() {
+		sendRequestCommand(CommandType.Mouse, MouseType.Release);
 	}
 	
 	public void mouseWheel(int delta) {
-		sendRequestCommand(CommandType.MouseWheel, delta);
+		sendRequestCommand(CommandType.Mouse, MouseType.Wheel, delta);
+	}
+	
+	public void doubleClick() {
+		sendRequestCommand(CommandType.Mouse, MouseType.DoubleClick);
+	}
+	
+	public void keyDown(int codePoint) {
+		sendRequestCommand(CommandType.Keyboard, KeyType.Down, codePoint);
+	}
+	
+	public void keyUp(int codePoint) {
+		sendRequestCommand(CommandType.Keyboard, KeyType.Release, codePoint);
 	}
 	
 	//---------------------------------------------------------------------------------------------------------------------------
@@ -128,9 +206,9 @@ public class DesktopDriver extends RemoteWebDriver {
 
 		ArrayList<FoundElement> listElements = new ArrayList<FoundElement>();
 
-		DesktopResponse resp = sendRequestCommand(CommandType.Elements, pid);
+		DesktopResponse resp = sendRequestCommand(CommandType.Element, ElementType.Find, pid);
 
-		if(resp.elements != null) {
+		if(resp != null && resp.elements != null) {
 			resp.elements.forEach(e -> listElements.add(new FoundElement(e, channelX, channelY)));
 		}
 
@@ -143,7 +221,7 @@ public class DesktopDriver extends RemoteWebDriver {
 		int maxTry = 50;
 
 		while(pid == -1L && maxTry > 0) {
-			DesktopResponse resp = sendRequestCommand(CommandType.Window, windowTitle);
+			DesktopResponse resp = sendRequestCommand(CommandType.Window, WindowType.Pid, windowTitle);
 			if(resp.windows != null && resp.windows.size() > 0) {
 				pid = resp.windows.get(0).pid;
 			}else {
@@ -178,7 +256,9 @@ public class DesktopDriver extends RemoteWebDriver {
 
 					Rectangle rect = testElement.getRectangle();
 
-					if (!rect.contains(x, y) || hoverElement.getWidth() <= testElement.getWidth() && hoverElement.getHeight() <= testElement.getHeight()) continue;
+					if (!rect.contains(x, y) 
+							|| hoverElement.getWidth() <= testElement.getWidth() 
+							&& hoverElement.getHeight() <= testElement.getHeight()) continue;
 					hoverElement = testElement;
 				}
 			}
@@ -195,7 +275,7 @@ public class DesktopDriver extends RemoteWebDriver {
 
 		List<DesktopWindow> windows = new ArrayList<DesktopWindow>();
 
-		DesktopResponse resp = sendRequestCommand(CommandType.Windows, pid);
+		DesktopResponse resp = sendRequestCommand(CommandType.Window, WindowType.List, pid);
 
 		if(resp.windows != null) {
 			resp.windows.forEach(e -> windows.add((DesktopWindow)e));
@@ -205,31 +285,31 @@ public class DesktopDriver extends RemoteWebDriver {
 	}
 
 	public void setWindowToFront(Long processId) {
-		sendRequestCommand(CommandType.ToFront, processId);
+		sendRequestCommand(CommandType.Window, WindowType.ToFront, processId);
 	}
 
 	public void moveWindow(Channel channel, Point point) {
-		sendRequestCommand(CommandType.Move, channel.getHandle(), point.x, point.y);
+		sendRequestCommand(CommandType.Window, WindowType.Move, channel.getHandle(), point.x, point.y);
 	}
 
 	public void resizeWindow(Channel channel, Dimension size) {
-		sendRequestCommand(CommandType.Resize, channel.getHandle(), size.width, size.height);
+		sendRequestCommand(CommandType.Window, WindowType.Resize, channel.getHandle(), size.width, size.height);
 	}
 
 	public void closeAllWindows(Long pid) {
-		sendRequestCommand(CommandType.CloseAll, pid);
+		sendRequestCommand(CommandType.Window, WindowType.CloseAll, pid);
 	}
 
 	public void switchTo(Channel channel, int index) {
-		sendRequestCommand(CommandType.Switch, channel.getHandle());
+		sendRequestCommand(CommandType.Window, WindowType.Switch, channel.getHandle());
 	}
 
 	public void closeWindow(Channel channel, int index) {
-		sendRequestCommand(CommandType.Close, channel.getHandle());
+		sendRequestCommand(CommandType.Window, WindowType.Close, channel.getHandle());
 	}
 
 	public Double[] getWindowSize(Long pid) {
-		DesktopResponse resp = sendRequestCommand(CommandType.Windows, pid);
+		DesktopResponse resp = sendRequestCommand(CommandType.Window, WindowType.List, pid);
 		if(resp.windows != null && resp.windows.size() > 0) {
 			DesktopWindow win = resp.windows.get(0);
 			return new Double[] {win.x, win.y, win.width, win.height};
@@ -239,7 +319,7 @@ public class DesktopDriver extends RemoteWebDriver {
 
 	public FoundElement getTestElementParent(String elementId, Channel channel){
 
-		DesktopResponse resp = sendRequestCommand(CommandType.Parents, elementId);
+		DesktopResponse resp = sendRequestCommand(CommandType.Element, ElementType.Parents, elementId);
 
 		FoundElement result = null;
 
@@ -264,7 +344,7 @@ public class DesktopDriver extends RemoteWebDriver {
 
 		ArrayList<CalculatedProperty> listAttributes = new ArrayList<CalculatedProperty>();
 
-		DesktopResponse resp = sendRequestCommand(CommandType.Attribute, elementId);
+		DesktopResponse resp = sendRequestCommand(CommandType.Element, ElementType.Attributes, elementId);
 		if(resp.properties != null) {
 			for(DesktopData data : resp.properties) {
 				listAttributes.add(new CalculatedProperty(data.getName(), data.getValue()));
@@ -292,9 +372,9 @@ public class DesktopDriver extends RemoteWebDriver {
 
 		DesktopResponse response = null;
 		if(parentId != null){
-			response = sendRequestCommand(CommandType.Childs, parentId, tag);
+			response = sendRequestCommand(CommandType.Element, ElementType.Childs, parentId, tag);
 		}else{
-			response = sendRequestCommand(CommandType.Elements, channel.getProcessId(), tag);
+			response = sendRequestCommand(CommandType.Element, ElementType.Find, channel.getProcessId(), tag);
 		}
 
 		if(response.elements != null) {
@@ -305,8 +385,11 @@ public class DesktopDriver extends RemoteWebDriver {
 	}
 
 	public String getElementAttribute(String elementId, String attribute) {
-		DesktopResponse resp = sendRequestCommand(CommandType.Attribute, elementId, attribute);
-		return resp.data.getValue();
+		DesktopResponse resp = sendRequestCommand(CommandType.Element, ElementType.Attributes, elementId, attribute);
+		if(resp.data != null) {
+			return resp.data.getValue();
+		}
+		return null;
 	}
 
 	private static class LoadMapElement

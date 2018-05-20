@@ -32,6 +32,8 @@ public class DriverProcess {
 	private int port = 4444;
 	private Process process;
 	private DriverManager manager;
+	
+	private boolean started = true;
 
 	public DriverProcess(DriverManager manager, Path driverFolderPath, String driverFileName, String[] args) {
 
@@ -56,13 +58,20 @@ public class DriverProcess {
 				process = builder.start();
 			} catch (IOException e1) {
 				e1.printStackTrace();
+				started = false;
 			}
+		}else{
+			started = false;
 		}
 	}
 	
 	//--------------------------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------------------------
 
+	public boolean isStarted() {
+		return started;
+	}
+	
 	public int getPort() {
 		return port;
 	}

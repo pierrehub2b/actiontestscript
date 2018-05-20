@@ -472,7 +472,7 @@ public class TestElement{
 			status.setPassed(true);
 
 			return;
-
+			
 		}catch(ElementNotVisibleException e0) {	
 
 			status.setCode(ActionStatus.OBJECT_NOT_VISIBLE);

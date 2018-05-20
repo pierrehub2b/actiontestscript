@@ -39,9 +39,9 @@ public class CalculatedValue{
 	private static final Pattern PARAMETER_PATTERN = Pattern.compile("\\$param\\s*?\\((\\d+),?(\\s*?[^\\)]*)?\\)", Pattern.CASE_INSENSITIVE);
 	private static final Pattern ENV_PATTERN = Pattern.compile("\\$env\\(([^\\)]*)\\)", Pattern.CASE_INSENSITIVE);
 
-	private static final Pattern TODAY_PATTERN = Pattern.compile("^\\$today$", Pattern.CASE_INSENSITIVE);
-	private static final Pattern NOW_PATTERN = Pattern.compile("^\\$now$", Pattern.CASE_INSENSITIVE);
-	private static final Pattern UUID_PATTERN = Pattern.compile("^\\$uuid$", Pattern.CASE_INSENSITIVE);
+	private static final Pattern TODAY_PATTERN = Pattern.compile("\\$today", Pattern.CASE_INSENSITIVE);
+	private static final Pattern NOW_PATTERN = Pattern.compile("\\$now", Pattern.CASE_INSENSITIVE);
+	private static final Pattern UUID_PATTERN = Pattern.compile("\\$uuid", Pattern.CASE_INSENSITIVE);
 	
 	public static final Pattern KEY_REGEXP = Pattern.compile("\\$key\\s?\\((\\w+)\\-?([^\\)]*)?\\)");
 

@@ -93,6 +93,10 @@ public class Channel {
 		this.refreshLocation();
 	}
 	
+	public DesktopDriver getDesktopDriver() {
+		return engine.getDesktopDriver();
+	}
+	
 	public int getHandle() {
 		List<DesktopWindow> processWindows = desktopDriver.getWindowsByPid(getProcessId());
 		if(processWindows != null && processWindows.size() > 0) {
@@ -188,14 +192,6 @@ public class Channel {
 	// Getter and setter for serialization
 	//----------------------------------------------------------------------------------------------------------------------
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
 	public String getApplication() {
 		return engine.getApplication();
 	}
@@ -211,6 +207,19 @@ public class Channel {
 	}
 	public void setDriverVersion(String url) {} // read only	
 
+	public boolean isDesktop() {
+		return engine instanceof DesktopDriverEngine;
+	}
+	public void setDesktop(boolean value) {} // read only
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+	
 	public boolean isCurrent() {
 		return current;
 	}
@@ -221,11 +230,7 @@ public class Channel {
 			toFront();
 		}
 	}
-
-	public boolean isDesktop() {
-		return engine instanceof DesktopDriverEngine;
-	}
-
+	
 	public String getApplicationVersion() {
 		return applicationVersion;
 	}
@@ -417,5 +422,9 @@ public class Channel {
 
 	public String getCurrentUrl() {
 		return engine.getCurrentUrl();
+	}
+
+	public void switchToIframe(String id) {
+		engine.switchToIframe(id);
 	}
 }

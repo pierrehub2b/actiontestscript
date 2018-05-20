@@ -19,16 +19,14 @@ under the License.
 
 package com.ats.executor.drivers;
 
-import java.awt.AWTException;
-import java.awt.Robot;
 import java.util.function.Predicate;
 
 import com.ats.driver.AtsManager;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
-import com.ats.executor.drivers.engines.IDriverEngine;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.DesktopDriverEngine;
+import com.ats.executor.drivers.engines.IDriverEngine;
 import com.ats.executor.drivers.engines.browsers.ChromeDriverEngine;
 import com.ats.executor.drivers.engines.browsers.EdgeDriverEngine;
 import com.ats.executor.drivers.engines.browsers.FirefoxDriverEngine;
@@ -59,8 +57,6 @@ public class DriverManager {
 	private DriverProcess firefoxDriver;
 	private DriverProcess ieDriver;
 	
-	private Robot robot;
-	
 	private AtsManager ats;
 
 	public DriverManager() {
@@ -77,6 +73,14 @@ public class DriverManager {
 	
 	public int getMaxTry() {
 		return ats.getMaxTrySearch();
+	}
+	
+	private String windowsBuildVersion;
+	private String getWindowsBuildVersion() {
+		if(windowsBuildVersion == null) {
+			windowsBuildVersion = Utils.getWindowsBuildVersion();
+		}
+		return windowsBuildVersion;
 	}
 	
 	//--------------------------------------------------------------------------------------------------------------
@@ -101,17 +105,6 @@ public class DriverManager {
 	}
 	
 	//--------------------------------------------------------------------------------------------------------------
-	
-	private Robot getRobot() {
-		if(robot == null) {
-			try {
-				robot = new Robot();
-			} catch (AWTException e) {
-				e.printStackTrace();
-			}
-		}
-		return robot;
-	}
 	
 	public DriverProcess getDesktopDriver() {
 		if(desktopDriver == null){
@@ -145,7 +138,7 @@ public class DriverManager {
 		case IE_BROWSER :
 			return new IEDriverEngine(channel, getIEDriver(), desktopDriver, ats);
 		default :
-			return new DesktopDriverEngine(channel, application, desktopDriver, ats, getRobot());
+			return new DesktopDriverEngine(channel, application, desktopDriver, ats);
 		}
 	}
 	
@@ -171,8 +164,8 @@ public class DriverManager {
 	}
 		
 	public DriverProcess getEdgeDriver() {
-		if(edgeDriver == null){
-			edgeDriver = new DriverProcess(this, ats.getDriversFolderPath(), EDGE_DRIVER_FILE_NAME + "-" + Utils.getWindowsBuildVersion() + ".exe", null);
+		if(edgeDriver == null || !edgeDriver.isStarted()){
+			edgeDriver = new DriverProcess(this, ats.getDriversFolderPath(), EDGE_DRIVER_FILE_NAME + "-" + getWindowsBuildVersion() + ".exe", null);
 		}
 		return edgeDriver;
 	}

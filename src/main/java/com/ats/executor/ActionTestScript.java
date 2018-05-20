@@ -377,8 +377,8 @@ public class ActionTestScript extends Script implements ITest{
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_UUID_FUNCTION_NAME = "ui";
-	public String ui() {
+	public static final String JAVA_UUID_FUNCTION_NAME = "uid";
+	public String uid() {
 		return getUuidValue();
 	}
 

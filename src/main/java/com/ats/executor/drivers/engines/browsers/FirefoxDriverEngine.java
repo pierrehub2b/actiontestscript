@@ -117,9 +117,6 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	@Override
 	public void waitAfterAction() {
 		channel.sleep(waitAfterAction);
-		try {
-			super.waitAfterAction();
-		}catch(WebDriverException e) {}
 	}
 
 	@Override
