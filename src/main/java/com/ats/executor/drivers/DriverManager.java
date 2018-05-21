@@ -43,7 +43,7 @@ public class DriverManager {
 	public static final String OPERA_BROWSER = "opera";
 	public static final String SAFARI_BROWSER = "safari";
 	
-	public static final String DESKTOP_DRIVER_FILE_NAME = "WinDesktop.exe";
+	public static final String DESKTOP_DRIVER_FILE_NAME = "windowsdriver.exe";
 	public static final String CHROME_DRIVER_FILE_NAME = "chromedriver.exe";
 	public static final String IE_DRIVER_FILE_NAME = "IEDriverServer.exe";
 	public static final String EDGE_DRIVER_FILE_NAME = "MicrosoftWebDriver";

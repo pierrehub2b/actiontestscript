@@ -5,7 +5,7 @@
 	<groupId>com.actiontestscript</groupId>
 	<artifactId>ats-automated-testing</artifactId>
 
-	<version>1.2.2</version>
+	<version>1.2.3</version>
 	<packaging>jar</packaging>
 
 	<name>ats-automated-testing</name>
@@ -67,8 +67,6 @@
 		<lib.selenium.version>3.11.0</lib.selenium.version>
 		<lib.testng.version>6.14.2</lib.testng.version>
 		<lib.gson.version>2.8.2</lib.gson.version>
-		<lib.winium.element.version>LATEST</lib.winium.element.version>
-		<lib.winium.webdriver.version>LATEST</lib.winium.webdriver.version>
 		<lib.junit.version>LATEST</lib.junit.version>
 		<lib.apache.ant.version>LATEST</lib.apache.ant.version>
 		<lib.apache.cli.version>1.4</lib.apache.cli.version>
@@ -112,11 +110,6 @@
 			<groupId>org.apache.ant</groupId>
 			<artifactId>ant</artifactId>
 			<version>${lib.apache.ant.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.github.2gis.winium</groupId>
-			<artifactId>winium-elements-desktop</artifactId>
-			<version>${lib.winium.element.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.exadel.flamingo.flex</groupId>
