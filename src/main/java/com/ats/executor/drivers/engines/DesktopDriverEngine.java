@@ -105,10 +105,11 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 		if(exeFile != null && exeFile.exists() && exeFile.isFile()){
 
 			applicationPath = exeFile.getAbsolutePath();
+			String[] args = new String[] {applicationPath, applicationArguments};
 
 			Runtime runtime = Runtime.getRuntime();
 			try{
-				applicationProcess = runtime.exec(applicationPath + applicationArguments);
+				applicationProcess = runtime.exec(args);
 			} catch (IOException e) {
 				channel.setStartError(e.getMessage());
 				return;
