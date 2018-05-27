@@ -82,7 +82,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 		if(properties != null) {
 			waitAfterAction = properties.getWait();
 			exeFile = new File(properties.getPath());
-			if(exeFile.exists()) {
+			if(exeFile.exists() && exeFile.isFile()) {
 				fileUri = exeFile.toURI();
 			}
 		}
@@ -95,7 +95,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 			try {
 				fileUri = new URI(application);
 				exeFile = new File(fileUri);
-			} catch (URISyntaxException e) {}
+			} catch (URISyntaxException | IllegalArgumentException e1) {}
 		}
 
 		if(exeFile == null) {//last chance to find exe file ....
@@ -307,6 +307,11 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 			getDesktopDriver().sendKeys(sequence.getSequenceDesktop());
 		}
 	}
+	
+	@Override
+	public void setWindowToFront() {
+		//no window order management implemented for the moment
+	}
 
 	//--------------------------------------------------
 	//do nothing with followings methods for the moment ....
@@ -331,9 +336,6 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	public WebElement getRootElement() {
 		return null;
 	}
-	
-	@Override
-	public void switchToDefaultframe() {}
 
 	@Override
 	public void forceScrollElement(FoundElement value) {}
@@ -362,4 +364,5 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	
 	@Override
 	public void switchToIframe(String iframe) {}
+
 }

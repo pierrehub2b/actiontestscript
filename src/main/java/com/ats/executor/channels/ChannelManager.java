@@ -26,7 +26,7 @@ import com.ats.executor.ActionTestScript;
 import com.ats.executor.drivers.DriverManager;
 
 public class ChannelManager {
-
+	
 	private Channel currentChannel;
 	private ArrayList<Channel> channelsList;
 
@@ -88,9 +88,14 @@ public class ChannelManager {
 			if(newChannel.getStartError() == null) {
 				channelsList.add(newChannel);
 				setCurrentChannel(newChannel);
+				
+				sendInfo("Start channel", " -> " + app);
 			}else {
 				status.setCode(ActionStatus.CHANNEL_START_ERROR);
 				status.setMessage(newChannel.getStartError());
+				status.setPassed(false);
+				
+				sendError(ActionStatus.CHANNEL_START_ERROR, newChannel.getStartError());
 			}
 		}
 	}
@@ -103,6 +108,8 @@ public class ChannelManager {
 					if(!cnl.isCurrent()) {
 						setCurrentChannel(cnl);
 						cnl.toFront();
+						
+						sendInfo("switch channel", " '" + name + "'");
 					}
 					return true;
 				}
@@ -122,6 +129,8 @@ public class ChannelManager {
 					channelsList.remove(channel);
 					foundChannel = true;
 
+					sendInfo("close channel", " '" + name + "'");
+					
 					break;
 				}
 			}
@@ -143,6 +152,14 @@ public class ChannelManager {
 		}
 
 		return true;
+	}
+	
+	private void sendInfo(String type, String message) {
+		mainScript.sendInfo(type, " '" + message + "'");
+	}
+	
+	private void sendError(int code, String message) {
+		mainScript.sendLog(code, message);
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------

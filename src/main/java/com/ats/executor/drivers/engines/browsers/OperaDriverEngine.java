@@ -19,6 +19,10 @@ under the License.
 
 package com.ats.executor.drivers.engines.browsers;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.opera.OperaOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
@@ -37,8 +41,18 @@ public class OperaDriverEngine extends WebDriverEngine {
 	public OperaDriverEngine(Channel channel, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
 		super(channel, DriverManager.OPERA_BROWSER, driverProcess, windowsDriver, ats);
 				
+		List<String> args = new ArrayList<String>();
+
+		args.add("--disable-infobars");
+		args.add("--disable-notifications");
+		args.add("--no-default-browser-check");
+		args.add("--disable-web-security");
+		args.add("--allow-running-insecure-content");
+		args.add("test-type");
+		
 		OperaOptions options = new OperaOptions();
 		options.setCapability("opera.log.level", "SEVERE");
+		options.addArguments(args);
 				
 		ApplicationProperties props = ats.getBrowserProperties(DriverManager.OPERA_BROWSER);
 		if(props != null) {

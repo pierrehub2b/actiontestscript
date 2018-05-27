@@ -29,14 +29,14 @@ public class ExecutionLogger {
 
 	private PrintStream printOut;
 	private String channelName = NO_CHANNEL;
-
-	public ExecutionLogger() {
-		this(0);
-	}
 	
-	public ExecutionLogger(int level) {
+	public ExecutionLogger() {
+		this.printOut = new NullPrintStream();
+	}
+
+	public ExecutionLogger(PrintStream sysout, int level) {
 		if(level > 1) {
-			this.printOut = new PrintStream(System.out);
+			this.printOut = sysout;
 		}else {
 			this.printOut = new NullPrintStream();
 		}

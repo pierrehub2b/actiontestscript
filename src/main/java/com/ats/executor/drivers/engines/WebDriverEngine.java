@@ -26,8 +26,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -84,6 +86,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	private Actions actions;
 
 	private String firstWindow;
+	protected int waitBeforeSwitch = 100;
 
 	public WebDriverEngine(
 			Channel channel, 
@@ -114,7 +117,23 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		cap.setCapability(CapabilityType.UNEXPECTED_ALERT_BEHAVIOUR, UnexpectedAlertBehaviour.DISMISS);
 		cap.setCapability(CapabilityType.HAS_NATIVE_EVENTS, false);
 
-		driver = new RemoteWebDriver(driverProcess.getDriverServerUrl(), cap);
+		int maxTry = 20;
+		String errorMessage = null;
+		while(driver == null && maxTry > 0) {
+			try{
+				driver = new RemoteWebDriver(driverProcess.getDriverServerUrl(), cap);
+			}catch(Exception ex){
+				errorMessage = ex.getMessage();
+				driver = null;
+			}
+			maxTry--;
+		}
+		
+		if(maxTry == 0) {
+			channel.setStartError(errorMessage);
+			return;
+		}
+								
 		actions = new Actions(driver);
 
 		driver.manage().timeouts().setScriptTimeout(scriptTimeout, TimeUnit.SECONDS);
@@ -158,7 +177,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		firstWindow = driver.getWindowHandle();
 	}
-	
+
 	@Override
 	public DesktopDriver getDesktopDriver() {
 		return desktopDriver;
@@ -229,7 +248,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		}else {
 
-			switchToDefaultframe();
+			switchToDefaultContent();
 
 			x -= channel.getSubDimension().getX();
 			y -= channel.getSubDimension().getY();
@@ -301,34 +320,52 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	@Override
 	public String getAttribute(FoundElement element, String attributeName, int maxTry) {
-		
+
 		String result = null;
 		int tryLoop = maxTry;
 
-		
-		RemoteWebElement elem = getWebElement(element);
-		
-		
 		while (result == null && tryLoop > 0){
 			tryLoop--;
+			result = getAttribute(element, attributeName);
+			
+			if(!doubleCheckAttribute(result, element, attributeName)) {
+				channel.sleep(200);
+				result = null;
+			}
+		}
+		
+		return result;
+	}
+	
+	private boolean doubleCheckAttribute(String verify, FoundElement element, String attributeName) {
+		String current = getAttribute(element, attributeName);
+		return current != null && current.equals(verify);
+	}
+	
+	private String getAttribute(FoundElement element, String attributeName) {
+		
+		RemoteWebElement elem = getWebElement(element);
+		String result = elem.getAttribute(attributeName);
+		
+		if(result == null) {
 
-			result = elem.getAttribute(attributeName);
-			if(result == null || result.length() == 0) {
-
-				for (CalculatedProperty calc : getAttributes(element)) {
-					if(attributeName.equals(calc.getName())) {
-						result = calc.getValue().getCalculated();
-					}
+			for (CalculatedProperty calc : getAttributes(element)) {
+				if(attributeName.equals(calc.getName())) {
+					result = calc.getValue().getCalculated();
 				}
+			}
 
-				if(result == null || result.length() == 0) {
-					result = getCssAttributeValueByName(element, attributeName);
-				}
+			if(result == null) {
+				result = getCssAttributeValueByName(element, attributeName);
+			}
+			
+			if(result == null) {
+				channel.sleep(200);
 			}
 		}
 		return result;
 	}
-	
+
 	private String getCssAttributeValueByName(FoundElement element, String name) {
 		return foundAttributeValue(name, getCssAttributes(element));
 	}
@@ -341,7 +378,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		}
 		return null;
 	}
-	
+
 	public CalculatedProperty[] getAttributes(FoundElement element){
 		if(element.isDesktop()){
 			return desktopDriver.getElementAttributes(element.getId());
@@ -391,39 +428,16 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	@Override
 	public TestBound[] getDimensions() {
 
-		switchToCurrentWindow();
+		switchWindow(currentWindow);
 
 		Map<String, ArrayList<Double>> response = (Map<String, ArrayList<Double>>) runJavaScript(ResourceContent.getDocumentSizeJavaScript());
-		int maxTry = 10;
 
-		while (response == null && maxTry > 0) {
-			response = (Map<String, ArrayList<Double>>) runJavaScript(ResourceContent.getDocumentSizeJavaScript());
-			maxTry--;
-		}
-
-		TestBound testDimension = null;
-		TestBound testSubDimension = null;
+		TestBound testDimension = new TestBound();
+		TestBound testSubDimension = new TestBound();
 
 		if(response != null) {
-			ArrayList<Double> dimension = response.get("main");
-			ArrayList<Double> subDimension = response.get("sub");
-
-			testDimension = new TestBound(
-					dimension.get(0),
-					dimension.get(1),
-					dimension.get(2),
-					dimension.get(3));
-
-			testSubDimension = new TestBound(
-					subDimension.get(0),
-					subDimension.get(1),
-					subDimension.get(2),
-					subDimension.get(3));
-
-
-		}else {
-			testDimension = new TestBound(0.0, 0.0, 500.0, 500.0);
-			testSubDimension = new TestBound(0.0, 0.0, 500.0, 500.0);
+			testDimension.update(response.get("main"));
+			testSubDimension.update(response.get("sub"));
 		}
 
 		return new TestBound[]{testDimension, testSubDimension};
@@ -463,30 +477,28 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	private boolean waitElementInteractable (FoundElement element) {
 
 		RemoteWebElement rwe = (RemoteWebElement)element.getValue();
+		runJavaScript(ResourceContent.getVisibilityJavaScript(), rwe);
 
 		int maxTry = maxTryInteractable;
-		boolean interactable = isInteractable(rwe);
+		boolean interactable = rwe.isEnabled();
 
 		while(!interactable && maxTry > 0) {
-			interactable = isInteractable(rwe);
-
+						
 			channel.sendLog(MessageCode.OBJECT_INTERACTABLE, "wait element interactable", maxTry);
-			channel.sleep(200);
+			channel.sleep(300);
+			
+			interactable = rwe.isEnabled();
+			
 			maxTry--;
 		}
 
 		return interactable;
 	}
 
-	private boolean isInteractable(RemoteWebElement rwe) {
-
-		if((Boolean) runJavaScript(ResourceContent.getVisibilityJavaScript(), rwe)) {
-			if(rwe.isEnabled()) {
-				return true;
-			}
-		}
-		return false;
-	}
+	// here I must found a way to be sure that the element is enabled AND visible, I have found thar is nothing working on both chrome, firefox, opera and edge browsers
+	/*protected boolean isInteractable(RemoteWebElement rwe) {
+		return (Boolean) runJavaScript(ResourceContent.getVisibilityJavaScript(), rwe) && rwe.isEnabled();
+	}*/
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -508,8 +520,8 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		}else {
 			status.setPassed(false);
-			status.setCode(ActionStatus.OBJECT_NOT_VISIBLE);
-			status.setMessage("element not visible");
+			status.setCode(ActionStatus.OBJECT_NOT_INTERACTABLE);
+			status.setMessage("Element is not interactable");
 		}
 	}
 
@@ -558,26 +570,80 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	//-----------------------------------------------------------------------------------------------------------------------------------
-	// Window management
+	// Iframes management
 	//-----------------------------------------------------------------------------------------------------------------------------------
 
+	@Override
+	public void switchToDefaultContent() {
+		channel.sleep(waitBeforeSwitch);
+		try {
+			driver.switchTo().defaultContent();
+		}catch (NoSuchWindowException e) {
+			switchWindow(0);
+		}
+	}
+
+	private void switchToFrame(WebElement we) {
+		channel.sleep(waitBeforeSwitch);
+		driver.switchTo().frame(we);
+	}
+
+	@Override
+	public void switchToIframe(String iframe) {
+		RemoteWebElement rwe = new RemoteWebElement();
+		rwe.setId(iframe);
+		rwe.setParent(driver);
+		switchToFrame(rwe);
+	}
+	
+	//-----------------------------------------------------------------------------------------------------------------------------------
+	// Window management
+	//-----------------------------------------------------------------------------------------------------------------------------------
+	
+	protected void switchToWindowHandle(String handle) {
+		channel.sleep(waitBeforeSwitch);
+		driver.switchTo().window(handle);
+		switchToDefaultContent();
+	}
+	
 	protected void switchToLastWindow() {
 		int windowsNum = driver.getWindowHandles().size();
 		switchWindow(windowsNum - 1);
-	}	
+	}		
+	
+	protected void switchToFirstWindow(String[] list) {
+		switchToWindowHandle(list[0]);
+		currentWindow = 0;
+	}
 
 	@Override
 	public void switchWindow(int index) {
+
 		if(currentWindow != index) {
-			currentWindow = index;
-			ArrayList<String> list = new ArrayList<String>(driver.getWindowHandles());
-			if(currentWindow < list.size()) {
-				channel.sleep(300);
-				driver.switchTo().window(list.get(currentWindow));
-				driver.switchTo().defaultContent();
+			
+			Set<String> list = driver.getWindowHandles();
+						
+			int maxTry = 20;
+			while(index >= list.size() && maxTry > 0) {
+				list = driver.getWindowHandles();
+				channel.sleep(500);
+				maxTry--;
+			}
+			
+			String[] wins = list.toArray(new String[list.size()]);
+			
+			if(maxTry == 0) {
+				switchToFirstWindow(wins);
+			}else {
+				try {
+					switchToWindowHandle(wins[index]);
+					currentWindow = index;
+				}catch(NoSuchWindowException ex) {
+					switchToFirstWindow(wins);
+				}	
 			}
 		}else {
-			driver.switchTo().defaultContent();
+			switchToDefaultContent();
 		}
 	}
 
@@ -595,8 +661,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	private int closeWindowHandler(String windowHandle) {
 
-		driver.switchTo().window(windowHandle);
-		driver.switchTo().defaultContent();
+		switchToWindowHandle(windowHandle);
 
 		if(firstWindow.equals(windowHandle)) {
 			try {
@@ -636,8 +701,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 			if(windowCount > 0) {
 				try {
-					driver.switchTo().window(list.get(0));
-					driver.switchTo().defaultContent();
+					switchToWindowHandle(list.get(0));
 				}catch(UnhandledAlertException e) {
 					try {
 						driver.switchTo().alert().accept();
@@ -667,7 +731,15 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			if(windowCount == 0) {
 				channel.lastWindowClosed(status);
 			}
+
+			index--;
 		}
+
+		if(index < 0) {
+			index = 0;
+		}
+
+		currentWindow = index;
 	}
 
 	//-----------------------------------------------------------------------------------------------------------------------------------
@@ -708,7 +780,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	@Override
 	public void goToUrl(URL url, boolean newWindow) {
-		driver.switchTo().defaultContent();
+		switchToDefaultContent();
 		if(newWindow) {
 			driver.executeScript("window.open('" + url.toString() + "', '_blank', 'height=" + channel.getSubDimension().getHeight() + ",width=" + channel.getSubDimension().getWidth() + "');");
 		}else {
@@ -723,13 +795,12 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		ArrayList<FoundElement> webElementList = new ArrayList<FoundElement>();
 		WebElement startElement = null;
-		
+
 		if(testObject.getParent() != null){
 			if(testObject.getParent().isIframe()) {
 				try {
 					switchToFrame(testObject.getParent().getWebElement());
 				}catch(StaleElementReferenceException e) {
-					//switchToDefaultframe();
 					switchToCurrentWindow();
 
 					testObject.getParent().searchAgain();
@@ -739,44 +810,21 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 				startElement = testObject.getParent().getWebElement();
 			}
 		}else {
-			//switchToDefaultframe();
 			switchToCurrentWindow();
 		}
-		
+
 		ArrayList<Map<String, Object>> response = (ArrayList<Map<String, Object>>)runJavaScript(ResourceContent.getSearchElementsJavaScript(), startElement, tagName, attributes);
 		if(response != null){
-			response.parallelStream().filter(predicate).forEachOrdered(e -> addWebElement(webElementList, (Map<String, Object>) e.get("atsElem")));
+			response.parallelStream().filter(predicate).forEachOrdered(e -> addWebElement(webElementList, (Map<String, Object>) e.get("ats-elt")));
 		}
 
 		return webElementList;
 	}
-	
+
 	private void addWebElement(ArrayList<FoundElement> webElementList, Map<String, Object> elements){
 		if(elements != null){
 			webElementList.add(new FoundElement(elements, channel, initElementX, initElementY));
 		}
-	}
-
-	@Override
-	public void switchToDefaultframe() {
-		try {
-			driver.switchTo().defaultContent();
-		}catch (NoSuchWindowException e) {
-			switchWindow(0);
-			driver.switchTo().defaultContent();
-		}
-	}
-
-	private void switchToFrame(WebElement we) {
-		driver.switchTo().frame(we);
-	}
-	
-	@Override
-	public void switchToIframe(String iframe) {
-		RemoteWebElement rwe = new RemoteWebElement();
-		rwe.setId(iframe);
-		rwe.setParent(driver);
-		switchToFrame(rwe);
 	}
 
 	@Override
@@ -787,11 +835,6 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	@Override
 	public Alert switchToAlert() {
 		return driver.switchTo().alert();
-	}
-
-	@Override
-	public void switchToDefaultContent() {
-		driver.switchTo().defaultContent();
 	}
 
 	@Override
@@ -817,7 +860,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	protected void clearText(ActionStatus status, WebElement element) {
 		executeScript(status, "arguments[0].value=''", element);
 	}
-	
+
 	@Override
 	public void sendTextData(ActionStatus status, FoundElement element, ArrayList<SendKeyData> textActionList, boolean clear) {
 		if(clear) {
@@ -825,6 +868,14 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		}
 		for(SendKeyData sequence : textActionList) {
 			element.getValue().sendKeys(sequence.getSequence());
+		}
+	}
+
+	@Override
+	public void setWindowToFront() {
+		List<String> listWins = new ArrayList<>(driver.getWindowHandles());
+		if(listWins.size() > currentWindow) {
+			driver.switchTo().window(listWins.get(currentWindow));
 		}
 	}
 }

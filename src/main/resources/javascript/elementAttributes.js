@@ -19,4 +19,13 @@ if(textValue){
 
 if(element.value){
 	result.push(['value', element.value]);
+	if(element.tagName == 'INPUT'){
+		if(element.type == 'radio' || element.type == 'checkbox'){
+			if(element.checked == true){
+				result.push(['checked', 'true']);
+			}else{
+				result.push(['checked', 'false']);
+			}			
+		}
+	}
 };

@@ -1,16 +1,14 @@
-var elem = arguments[0];
-var result = isVisible(elem);
+var e = arguments[0];
+if(!isAnyPartOfElementInViewport(e)){
+	e.scrollIntoView();
+}
+var result = true;
 
-function isVisible(obj)
-{
-    if (!obj) return false;
-    if (obj == document) return true;
-    
-    if (window.getComputedStyle) {
-        var style = window.getComputedStyle(obj, null);
-        if (style.display == 'none') return false;
-        if (style.visibility == 'hidden') return false;
-    }
-    
-    return isVisible(obj.parentNode);
+function isAnyPartOfElementInViewport(el) {
+    const rect = el.getBoundingClientRect();
+    const windowHeight = (window.innerHeight || document.documentElement.clientHeight);
+    const windowWidth = (window.innerWidth || document.documentElement.clientWidth);
+    const vertInView = (rect.top <= windowHeight) && ((rect.top + rect.height) >= 0);
+    const horInView = (rect.left <= windowWidth) && ((rect.left + rect.width) >= 0);
+    return (vertInView && horInView);
 }

@@ -364,7 +364,7 @@ public class TestElement{
 			status.setPassed(false);
 			status.setCode(ActionStatus.OCCURRENCES_ERROR);
 			status.setData(count);
-			status.setMessage("occurences error : [" + expected + "] expected occurence(s) but [" + count + "] occurence(s) found");
+			status.setMessage("[" + expected + "] expected occurence(s) but [" + count + "] occurence(s) found");
 		}
 	}
 
@@ -420,7 +420,7 @@ public class TestElement{
 		}else{
 			status.setPassed(false);
 			status.setCode(ActionStatus.OBJECT_NOT_FOUND);
-			status.setMessage("Object not found, cannot select index !");
+			status.setMessage("Element not found, cannot select index !");
 		}
 	}
 
@@ -441,7 +441,7 @@ public class TestElement{
 		}else{
 			status.setPassed(false);
 			status.setCode(ActionStatus.OBJECT_NOT_FOUND);
-			status.setMessage("Object not found, cannot execute over action !");
+			status.setMessage("Element not found, cannot execute over action");
 		}
 	}
 
@@ -480,7 +480,7 @@ public class TestElement{
 
 		}catch(WebDriverException e0) {	
 			if(e0.getMessage().contains("is not clickable") || e0.getMessage().contains("Element is obscured")) {
-				status.setCode(ActionStatus.OBJECT_NOT_CLICKABLE);
+				status.setCode(ActionStatus.OBJECT_NOT_INTERACTABLE);
 			}
 		}catch (Exception e) {
 			status.setMessage(e.getMessage());
@@ -548,7 +548,7 @@ public class TestElement{
 		}else{
 			status.setPassed(false);
 			status.setCode(ActionStatus.OBJECT_NOT_FOUND);
-			status.setMessage("Object not found, cannot execute script action !");
+			status.setMessage("Element not found, cannot execute script action !");
 		}
 		return null;
 	}

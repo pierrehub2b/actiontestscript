@@ -85,9 +85,6 @@ public class Channel {
 
 		this.desktopDriver = new DesktopDriver(driverManager);
 		this.engine = driverManager.getDriverEngine(this, application, this.desktopDriver);
-
-		//this.desktop = engine.isDesktop();
-
 		this.maxTry = driverManager.getMaxTry();
 
 		this.refreshLocation();
@@ -106,26 +103,23 @@ public class Channel {
 	}
 
 	public void refreshLocation(){
-
-		Double[] winRect = desktopDriver.getWindowSize(getProcessId());
-
 		TestBound[] dimensions = engine.getDimensions();
-		TestBound mainDimension = dimensions[0];
+		setDimensions(dimensions[0], dimensions[1]);
+	}
 
-		mainDimension.setX(winRect[0] + 7);
-		mainDimension.setY(winRect[1]);
-
-		setDimension(mainDimension);
-		setSubDimension(dimensions[1]);
+	public void setDimensions(TestBound dim1, TestBound dim2) {
+		setDimension(dim1);
+		setSubDimension(dim2);
 	}
 
 	public void refreshMapElementLocation(){
-		refreshLocation();
 		desktopDriver.refreshElementMapLocation(this);
+		refreshLocation();
 	}
 
 	public void toFront(){
-		desktopDriver.setWindowToFront(getProcessId());
+		engine.setWindowToFront();
+		desktopDriver.setChannelToFront(getProcessId());
 	}
 
 	public byte[] getScreenShot(){
@@ -310,10 +304,6 @@ public class Channel {
 
 	public WebElement getRootElement() {
 		return engine.getRootElement();
-	}
-
-	public void switchToDefaultframe() {
-		engine.switchToDefaultframe();
 	}
 
 	public void switchWindow(int index){

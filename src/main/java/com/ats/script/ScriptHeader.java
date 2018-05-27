@@ -29,6 +29,7 @@ import java.util.Properties;
 import java.util.StringJoiner;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.Test;
 
@@ -184,9 +185,9 @@ public class ScriptHeader {
 	public String getJavaCode() {
 
 		String code = javaCode.replaceAll("#CLASS_NAME#", name);
-		code = code.replace("#DESCRIPTION#", description);
-		code = code.replace("#PREREQUISITES#", prerequisite);
-		code = code.replace("#AUTHOR_NAME#", author);
+		code = code.replace("#DESCRIPTION#", StringEscapeUtils.escapeJava(description));
+		code = code.replace("#PREREQUISITES#", StringEscapeUtils.escapeJava(prerequisite));
+		code = code.replace("#AUTHOR_NAME#", StringEscapeUtils.escapeJava(author));
 		code = code.replace("#GROUP_DATA#", groupCode());
 		code = code.replace("#ATS_VERSION#", atsVersion);
 

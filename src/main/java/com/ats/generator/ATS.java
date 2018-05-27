@@ -33,19 +33,19 @@ import org.apache.commons.cli.ParseException;
 public class ATS {
 
 	public static void logError(String msg) {
-		print("\033[0;31m", "ERROR", msg);
+		print("ERROR", msg);
 	}
 
 	public static void logInfo(String msg) {
-		print("\033[0;34m", "INFO", msg);
+		print("INFO", msg);
 	}
 
 	public static void logWarn(String msg) {
-		print("\033[0;33m", "WARN", msg);
+		print("WARN", msg);
 	}
 	
-	private static void print(String color, String type, String msg) {
-		System.out.println("[" + color + type + "\033[0m] " + msg);
+	private static void print(String type, String msg) {
+		System.out.println("[" + type + "] " + msg);
 	}
 
 	private String[] args = null;

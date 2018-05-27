@@ -57,7 +57,7 @@ import com.google.gson.JsonObject;
 
 public class FirefoxDriverEngine extends WebDriverEngine {
 
-	private final static int DEFAULT_WAIT = 300;
+	private final static int DEFAULT_WAIT = 200;
 
 	private final String WEB_ELEMENT_REF = "element-6066-11e4-a52e-4f735466cecf";
 	private java.net.URI driverSessionUri;
@@ -67,6 +67,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		super(channel, DriverManager.FIREFOX_BROWSER, driverProcess, windowsDriver, ats);
 
 		initElementY = 5.0;
+		waitBeforeSwitch = 300;
 
 		DesiredCapabilities cap = new DesiredCapabilities();
 
@@ -100,13 +101,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		} catch (URISyntaxException e) {}
 
 	}
-	
-	@Override
-	public void switchToDefaultframe() {
-		String mainWindow = (String) driver.getWindowHandles().toArray()[0];
-		driver.switchTo().window(mainWindow);
-	}
-	
+
 	@Override
 	public TestBound[] getDimensions() {
 		TestBound[] dimension = super.getDimensions();

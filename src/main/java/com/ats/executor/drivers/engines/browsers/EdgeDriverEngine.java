@@ -24,6 +24,7 @@ import java.net.URL;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.edge.EdgeOptions;
+import org.openqa.selenium.remote.CapabilityType;
 
 import com.ats.driver.ApplicationProperties;
 import com.ats.driver.AtsManager;
@@ -43,6 +44,7 @@ public class EdgeDriverEngine extends WebDriverEngine {
 
 		EdgeOptions options = new EdgeOptions();
 		options.setPageLoadStrategy("normal");
+		options.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
 
 		ApplicationProperties props = ats.getBrowserProperties(DriverManager.EDGE_BROWSER);
 		if(props != null) {

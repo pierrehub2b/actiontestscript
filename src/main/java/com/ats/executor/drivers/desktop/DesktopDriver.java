@@ -284,7 +284,7 @@ public class DesktopDriver extends RemoteWebDriver {
 		return windows;
 	}
 
-	public void setWindowToFront(Long processId) {
+	public void setChannelToFront(Long processId) {
 		sendRequestCommand(CommandType.Window, WindowType.ToFront, processId);
 	}
 

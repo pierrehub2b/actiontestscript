@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.script.actions;
 
@@ -51,7 +51,7 @@ public class ActionComment extends Action {
 		setType(type);
 		setComment(value);
 	}
-	
+
 	//---------------------------------------------------------------------------------------------------------------------------------
 	// Code Generator
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -69,13 +69,14 @@ public class ActionComment extends Action {
 
 	@Override
 	public void execute(ActionTestScript ts) {
-		if(SCRIPT_TYPE.equals(type) || LOG_TYPE.equals(type)) {
-			status = new ActionStatus(ts.getCurrentChannel());
-		}else {
-			super.execute(ts);
-			ts.updateVisualValue(type, comment.getCalculated());
+		status = new ActionStatus(ts.getCurrentChannel());
+		if(ts.getCurrentChannel() != null) {
+			if(STEP_TYPE.equals(type)) {
+				super.execute(ts);
+				ts.updateVisualValue(type, comment.getCalculated());
+			}
+			status.updateDuration();
 		}
-		status.updateDuration();
 	}
 
 	//--------------------------------------------------------

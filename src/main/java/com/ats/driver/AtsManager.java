@@ -267,7 +267,7 @@ public class AtsManager {
 									if(nodeList != null && nodeList.getLength() > 0) {
 										if(nodeList.item(0).getChildNodes().getLength() > 0) {
 											String name = nodeList.item(0).getChildNodes().item(0).getNodeValue();
-											String path = null;
+											String path = "";
 											String wait = null;
 
 											nodeList = applicationElement.getElementsByTagName("path");
@@ -277,7 +277,7 @@ public class AtsManager {
 
 													File checkFile = new File(path);
 													if(!checkFile.exists() || !checkFile.isFile()) {
-														path = null;
+														path = "";
 													}
 												}
 											}

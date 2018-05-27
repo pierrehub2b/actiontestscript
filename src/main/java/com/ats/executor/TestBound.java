@@ -19,15 +19,17 @@ under the License.
 
 package com.ats.executor;
 
+import java.util.ArrayList;
+
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 
 public class TestBound {
 
-	private Double x;
-	private Double y;
-	private Double width;
-	private Double height;
+	private Double x = 0.0;
+	private Double y = 0.0;
+	private Double width = 0.0;
+	private Double height = 0.0;
 	
 	public TestBound() {}
 
@@ -58,6 +60,14 @@ public class TestBound {
 	public void updateLocation(Double x, Double y) {
 		this.x += x;
 		this.y += y;		
+	}
+	
+
+	public void update(ArrayList<Double> dim) {
+		this.x = dim.get(0);
+		this.y = dim.get(1);
+		this.width = dim.get(2);
+		this.height = dim.get(3);
 	}
 	
 	//----------------------------------------------------------------------------------------------------------------------

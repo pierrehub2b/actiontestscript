@@ -230,11 +230,10 @@ public class ActionCallscript extends Action {
 				if(csvUrl == null) {
 
 					status.setPassed(false);
-					status.setMessage("CSV file url not found : " + csvFilePath);
+					status.setMessage("CSV file not found : " + csvFilePath);
 
 					return;
 				}
-
 
 				try {
 					URLConnection urlConn = csvUrl.openConnection();

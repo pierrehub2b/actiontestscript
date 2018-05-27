@@ -113,7 +113,9 @@ public class ActionTestScript extends Script implements ITest{
 
 	@BeforeSuite(alwaysRun=true)
 	public void beforeSuite() {
-		System.out.println("ATS script started (version " + AtsManager.getVersion() + ")");
+		System.out.println("----------------------------------------------");
+		System.out.println("    ATS script started (version " + AtsManager.getVersion() + ")");
+		System.out.println("----------------------------------------------\n");
 	}
 
 	@BeforeClass(alwaysRun=true)
@@ -130,9 +132,8 @@ public class ActionTestScript extends Script implements ITest{
 		}else {
 			
 			setTestParameters(runner.getTest().getAllParameters());
-
 			String visualReport = getEnvironmentValue("visual.report", "");
-
+			
 			if("true".equals(visualReport.trim().toLowerCase())) {
 
 				String outputDirectory = runner.getOutputDirectory();
@@ -144,7 +145,7 @@ public class ActionTestScript extends Script implements ITest{
 				setRecorder(new RecorderThread(output, testName, true, false, false));
 			}
 
-			setLogger(new ExecutionLogger(ctx.getSuite().getXmlSuite().getVerbose()));
+			setLogger(new ExecutionLogger(System.out, (int)ctx.getSuite().getXmlSuite().getVerbose()));
 			sendInfo("starting script", " '" + testName + "'");
 
 			Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -224,11 +225,10 @@ public class ActionTestScript extends Script implements ITest{
 
 	public void tearDown(){
 		sendInfo("script's execution terminated", ", closing drivers ...");
-		getChannelManager().tearDown();
 		if(getRecorder() != null) {
-			getRecorder().terminate();
 			setRecorder(null);
 		}
+		getChannelManager().tearDown();
 	}
 
 	//----------------------------------------------------------------------------------------------------------
@@ -521,14 +521,13 @@ public class ActionTestScript extends Script implements ITest{
 
 	private void execFinished(ActionStatus status, boolean stop) {
 		if(!status.isPassed()) {
-
 			String atsScriptError = "(" + getTestName() + "." + ATS_EXTENSION + ":" + atsCodeLine + ")";
 
 			if(status.getCode() == ActionStatus.CHANNEL_NOT_FOUND) {
-				fail("ATS script error -> No running channel, please check that 'start channel action' has been added to the script " + atsScriptError);
+				fail("ATS error -> No running channel, please check that 'start channel action' has been added to the script " + atsScriptError);
 			}else {
 				if(stop) {
-					fail("ATS script error -> " + status.getMessage() + " after " + status.getDuration() + " ms " + atsScriptError);
+					fail("ATS error -> " + status.getFailMessage() + " " + atsScriptError + "\n" + status.getChannelInfo());
 				}else {
 					getTopScript().sendLog(MessageCode.NON_BLOCKING_FAILED, "ATS script info -> Not stoppable action failed", status.getMessage() + atsScriptError);
 				}
@@ -541,18 +540,15 @@ public class ActionTestScript extends Script implements ITest{
 	//-----------------------------------------------------------------------------------------------------------
 
 	public void startChannel(ActionStatus status, String name, String app){
-		sendInfo("start channel", " '" + name + "' -> " + app);
 		getChannelManager().startChannel(status, name, app);
 		updateStatus(status);
 	}
 
 	public void switchChannel(ActionStatus status, String name){
-		sendInfo("switch channel", " '" + name + "'");
 		updateStatus(status, getChannelManager().switchChannel(name));
 	}
 
 	public void closeChannel(ActionStatus status, String name){
-		sendInfo("close channel", " '" + name + "'");
 		updateStatus(status, getChannelManager().closeChannel(name));
 	}
 
@@ -626,71 +622,85 @@ public class ActionTestScript extends Script implements ITest{
 	//-----------------------------------------------------------------------------------------------------------
 
 	private RecorderThread recorder;
+	private boolean record = false;
+	
+	public boolean isRecord() {
+		return topScript.record;
+	}
+	
 	public RecorderThread getRecorder() {
 		return topScript.recorder;
 	}
 
 	public void setRecorder(RecorderThread value) {
-		this.recorder = value;
+		if(value == null) {
+			if(this.recorder != null) {
+				this.recorder.terminate();
+				this.recorder = null;
+			}
+			this.record = false;
+		}else {
+			this.recorder = value;
+			this.record = true;
+		}
 	}
 
 	public void startRecorder(ScriptHeader info, boolean visual, boolean pdf, boolean xml) {
-		if(getRecorder() == null) {
+		if(isRecord()) {
 			topScript.setRecorder(new RecorderThread(info, projectData, visual, pdf, xml));
 		}
 	}
 
 	public void stopRecorder() {
-		if(getRecorder() != null) {
-			getRecorder().terminate();
+		if(isRecord()) {
 			topScript.setRecorder(null);
 		}
 	}
 
 	public void pauseRecorder(boolean value) {
-		if(getRecorder() != null) {
+		if(isRecord()) {
 			getRecorder().setPause(value);
 		}
 	}
 
 	public void updateVisualImage() {
-		if(getRecorder() != null) {
+		if(isRecord() && getCurrentChannel() != null) {
 			getRecorder().updateVisualImage(getCurrentChannel().getScreenShot());
 		}
 	}
 
 	public void updateVisualElement(TestElement to) {
-		if(getRecorder() != null) {
+		if(isRecord()) {
 			getRecorder().updateVisualElement(to);
 		}
 	}
 
 	public void updateVisualValue(String value) {
-		if(getRecorder() != null) {
+		if(isRecord()) {
 			getRecorder().updateVisualValue(value);
 		}
 	}
 
 	public void updateVisualValue(String value, String data) {
-		if(getRecorder() != null) {
+		if(isRecord()) {
 			getRecorder().updateVisualValue(value, data);
 		}
 	}
 	
 	public void updateVisualValue(String type, MouseDirection position) {
-		if(getRecorder() != null) {
+		if(isRecord()) {
 			getRecorder().updateVisualValue(type, position);
 		}
 	}
 
 	public void updateVisualStatus(boolean value) {
-		if(getRecorder() != null) {
+		if(isRecord()) {
 			getRecorder().updateVisualStatus(value);
 		}
 	}	
 
 	public void newVisual(Action action) {
-		if(getRecorder() != null && getCurrentChannel() != null) {
+		if(isRecord() && getCurrentChannel() != null) {
 			getRecorder().addVisual(getCurrentChannel(), action);
 		}
 	}

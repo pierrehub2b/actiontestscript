@@ -56,7 +56,7 @@ public interface IDriverEngine{
 	public CalculatedProperty[] getAttributes(FoundElement element);
 	public CalculatedProperty[] getCssAttributes(FoundElement element);
 	public void loadParents(FoundElement hoverElement);
-	public void switchToDefaultframe();
+	//public void switchToDefaultframe();
 	public void scroll(FoundElement foundElement, int delta);
 	public void middleClick(WebElement element);
 	public WebElement getRootElement();
@@ -78,4 +78,5 @@ public interface IDriverEngine{
 	public void navigationBack();
 	public String getCurrentUrl();
 	public void switchToIframe(String iframe);
+	public void setWindowToFront();
 }

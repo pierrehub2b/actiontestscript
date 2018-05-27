@@ -25,7 +25,7 @@ public class ActionStatus {
 
 	public static final int OBJECT_NOT_FOUND = -1;
 	public static final int OBJECT_NOT_VISIBLE = -2;
-	public static final int OBJECT_NOT_CLICKABLE = -3;
+	public static final int OBJECT_NOT_INTERACTABLE = -3;
 	public static final int ENTER_TEXT_FAIL = -4;
 	public static final int ATTRIBUTE_NOT_SET = -5;
 	public static final int ATTRIBUTE_CHECK_FAIL = -6;
@@ -164,5 +164,13 @@ public class ActionStatus {
 
 	public void setCpuUsage(long cpuUsage) {
 		this.cpuUsage = cpuUsage;
+	}
+
+	public String getFailMessage() {
+		return message + " after " + duration + " ms";
+	}
+
+	public String getChannelInfo() {
+		return "Channel [ " + channel.getName() + " ] with application : " + channel.getApplication();
 	}
 }
