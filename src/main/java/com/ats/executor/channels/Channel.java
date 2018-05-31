@@ -359,8 +359,8 @@ public class Channel {
 		engine.scroll(foundElement, delta);
 	}
 
-	public void middleClick(WebElement element) {
-		engine.middleClick(element);
+	public void middleClick(ActionStatus status, TestElement element) {
+		engine.middleClick(status, element);
 	}
 
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position) {

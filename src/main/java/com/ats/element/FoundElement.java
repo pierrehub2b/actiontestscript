@@ -57,8 +57,7 @@ public class FoundElement{
 	public FoundElement() {}
 
 	public FoundElement(Map<String, Object> data) {
-		this.value = (RemoteWebElement) data.get("value");
-		this.id = value.getId();
+		this.setRemoteWebElement((RemoteWebElement) data.get("value"));
 		this.tag = (String) data.get("tag");
 		this.width = (Double)data.get("width");
 		this.height = (Double)data.get("height");
@@ -262,7 +261,7 @@ public class FoundElement{
 	//----------------------------------------------------------------------------------------------------------------------
 	// Remote element
 	//----------------------------------------------------------------------------------------------------------------------
-
+	
 	public RemoteWebElement getRemoteWebElement(RemoteWebDriver driver) {
 		RemoteWebElement element = new RemoteWebElement();
 		element.setId(id);

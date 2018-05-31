@@ -22,7 +22,6 @@ package com.ats.executor.drivers.engines.browsers;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.opera.OperaOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
@@ -41,6 +40,8 @@ public class OperaDriverEngine extends WebDriverEngine {
 	public OperaDriverEngine(Channel channel, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
 		super(channel, DriverManager.OPERA_BROWSER, driverProcess, windowsDriver, ats);
 				
+		initElementX = 20.0;
+		
 		List<String> args = new ArrayList<String>();
 
 		args.add("--disable-infobars");

@@ -45,6 +45,7 @@ import com.ats.element.FoundElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
 import com.ats.executor.TestBound;
+import com.ats.executor.TestElement;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.DriverProcess;
@@ -66,13 +67,13 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	public FirefoxDriverEngine(Channel channel, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
 		super(channel, DriverManager.FIREFOX_BROWSER, driverProcess, windowsDriver, ats);
 
-		initElementY = 5.0;
+		initElementY = 4.0;
 		waitBeforeSwitch = 300;
 
 		DesiredCapabilities cap = new DesiredCapabilities();
 
 		FirefoxOptions options = new FirefoxOptions();
-		options.setCapability(FirefoxDriver.MARIONETTE, true);
+		options.setCapability(FirefoxDriver.MARIONETTE, false);
 		options.setPageLoadStrategy(PageLoadStrategy.NORMAL);
 
 		ApplicationProperties props = ats.getBrowserProperties(DriverManager.FIREFOX_BROWSER);
@@ -131,6 +132,11 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		Object result = super.runJavaScript(javaScript, params);
 		channel.sleep(waitAfterAction);
 		return result;
+	}
+	
+	@Override
+	public void middleClick(ActionStatus status, TestElement element) {
+		middleClickSimulation(status, element);
 	}
 
 	@Override

@@ -58,7 +58,7 @@ public interface IDriverEngine{
 	public void loadParents(FoundElement hoverElement);
 	//public void switchToDefaultframe();
 	public void scroll(FoundElement foundElement, int delta);
-	public void middleClick(WebElement element);
+	public void middleClick(ActionStatus status, TestElement element);
 	public WebElement getRootElement();
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position);
 	public void sendTextData(ActionStatus status, FoundElement foundElement, ArrayList<SendKeyData> textActionList, boolean clear);

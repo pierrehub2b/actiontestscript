@@ -89,7 +89,7 @@ public class ActionMouseKey extends ActionMouse {
 			long currentTime = System.currentTimeMillis();
 
 			if(Mouse.WHEEL_CLICK.equals(getType())) {
-				getTestElement().wheelClick();
+				getTestElement().wheelClick(status);
 			}else if(Mouse.RIGHT_CLICK.equals(getType())) {
 				getTestElement().rightClick();
 			}else if(Mouse.DOUBLE_CLICK.equals(getType())) {

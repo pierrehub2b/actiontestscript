@@ -226,7 +226,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	}
 
 	@Override
-	public void middleClick(WebElement element) {
+	public void middleClick(ActionStatus status, TestElement element) {
 		getDesktopDriver().mouseMiddleClick();
 	}
 

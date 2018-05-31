@@ -29,6 +29,7 @@ import org.openqa.selenium.remote.CapabilityType;
 import com.ats.driver.ApplicationProperties;
 import com.ats.driver.AtsManager;
 import com.ats.executor.ActionStatus;
+import com.ats.executor.TestElement;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.DriverProcess;
@@ -79,6 +80,11 @@ public class EdgeDriverEngine extends WebDriverEngine {
 	public void closeWindow(ActionStatus status, int index) {
 		channel.sleep(500);
 		super.closeWindow(status, index);
+	}
+	
+	@Override
+	public void middleClick(ActionStatus status, TestElement element) {
+		middleClickSimulation(status, element);
 	}
 
 	@Override

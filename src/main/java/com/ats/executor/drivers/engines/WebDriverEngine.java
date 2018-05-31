@@ -248,7 +248,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		}else {
 
-			switchToDefaultContent();
+			//switchToDefaultContent();
 
 			x -= channel.getSubDimension().getX();
 			y -= channel.getSubDimension().getY();
@@ -513,7 +513,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 			move(foundElement.getValue(), offsetX, offsetY);
 
-			ArrayList<Double> newPosition =  (ArrayList<Double>) runJavaScript("var rect=arguments[0].getBoundingClientRect();var result=[rect.left+0.00001, rect.top+0.00001]", foundElement.getValue());
+			ArrayList<Double> newPosition =  (ArrayList<Double>) runJavaScript("var rect=arguments[0].getBoundingClientRect();var result=[rect.left+0.00001, rect.top+0.00001];", foundElement.getValue());
 			if(newPosition.size() > 1) {
 				foundElement.updatePosition(newPosition.get(0), newPosition.get(1), channel, 0.0, 0.0);
 			}
@@ -774,8 +774,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	protected Object runJavaScript(String javaScript, Object ... params) {
-		Object result = driver.executeAsyncScript(javaScript + ";var callbackResult=arguments[arguments.length-1];callbackResult(result);", params);
-		return result;
+		return driver.executeAsyncScript(javaScript + ";var callbackResult=arguments[arguments.length-1];callbackResult(result);", params);
 	}
 
 	@Override
@@ -828,8 +827,12 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	@Override
-	public void middleClick(WebElement element) {
-		runJavaScript("var e=arguments[0];var evt=new MouseEvent(\"click\", {bubbles: true,cancelable: true,view: window, button: 1});e.dispatchEvent(evt);var result={}", element);
+	public void middleClick(ActionStatus status, TestElement element) {
+		runJavaScript("var evt=new MouseEvent('click', {bubbles: true,cancelable: true,view: window, button: 1}),result={};arguments[0].dispatchEvent(evt);", element.getWebElement());
+	}
+	
+	protected void middleClickSimulation(ActionStatus status, TestElement element) {
+		element.click(status, Keys.CONTROL);
 	}
 
 	@Override

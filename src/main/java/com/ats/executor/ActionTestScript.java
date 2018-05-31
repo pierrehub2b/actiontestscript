@@ -225,7 +225,7 @@ public class ActionTestScript extends Script implements ITest{
 
 	public void tearDown(){
 		sendInfo("script's execution terminated", ", closing drivers ...");
-		if(getRecorder() != null) {
+		if(isRecord()) {
 			setRecorder(null);
 		}
 		getChannelManager().tearDown();
@@ -646,7 +646,7 @@ public class ActionTestScript extends Script implements ITest{
 	}
 
 	public void startRecorder(ScriptHeader info, boolean visual, boolean pdf, boolean xml) {
-		if(isRecord()) {
+		if(!isRecord()) {
 			topScript.setRecorder(new RecorderThread(info, projectData, visual, pdf, xml));
 		}
 	}

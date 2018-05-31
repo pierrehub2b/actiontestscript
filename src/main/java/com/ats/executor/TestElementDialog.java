@@ -122,7 +122,7 @@ public class TestElementDialog extends TestElement {
 	}
 
 	@Override
-	public void wheelClick() {
+	public void wheelClick(ActionStatus status) {
 		//do nothing
 	}
 

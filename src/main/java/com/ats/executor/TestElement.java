@@ -510,8 +510,8 @@ public class TestElement{
 		}
 	}
 
-	public void wheelClick() {
-		channel.middleClick(getWebElement());
+	public void wheelClick(ActionStatus status) {
+		channel.middleClick(status, this);
 	}
 
 	public void doubleClick() {

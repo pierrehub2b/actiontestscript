@@ -19,6 +19,9 @@ under the License.
 
 package com.ats.executor.drivers.engines.browsers;
 
+import java.net.URL;
+
+import org.openqa.selenium.NoSuchWindowException;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
@@ -72,7 +75,24 @@ public class IEDriverEngine extends WebDriverEngine {
 	
 	@Override
 	protected Object runJavaScript(String javaScript, Object ... params) {
-		//Object result = driver.executeScript(javaScript, params);
-		return null;
+		Object response = null;
+		try {
+			response = driver.executeScript(javaScript + "return result;", params);
+		}catch(Exception ex) {}
+		return response;
+	}
+	
+	@Override
+	public void goToUrl(URL url, boolean newWindow) {
+		switchToDefaultContent();
+		driver.get(url.toString());
+	}
+	
+	@Override
+	public void switchToDefaultContent() {
+		channel.sleep(waitBeforeSwitch);
+		try {
+			driver.switchTo().defaultContent();
+		}catch (NoSuchWindowException e) {}
 	}
 }
