@@ -25,7 +25,6 @@ import java.util.List;
 import org.openqa.selenium.opera.OperaOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
-import com.ats.driver.ApplicationProperties;
 import com.ats.driver.AtsManager;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
@@ -35,10 +34,10 @@ import com.ats.executor.drivers.engines.WebDriverEngine;
 
 public class OperaDriverEngine extends WebDriverEngine {
 
-	private final static int DEFAULT_WAIT = 150;
+	private final static int DEFAULT_WAIT = 120;
 	
 	public OperaDriverEngine(Channel channel, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
-		super(channel, DriverManager.OPERA_BROWSER, driverProcess, windowsDriver, ats);
+		super(channel, DriverManager.OPERA_BROWSER, driverProcess, windowsDriver, ats, DEFAULT_WAIT);
 				
 		initElementX = 20.0;
 		
@@ -55,27 +54,13 @@ public class OperaDriverEngine extends WebDriverEngine {
 		options.setCapability("opera.log.level", "SEVERE");
 		options.addArguments(args);
 				
-		ApplicationProperties props = ats.getBrowserProperties(DriverManager.OPERA_BROWSER);
-		if(props != null) {
-			waitAfterAction = props.getWait();
-			applicationPath = props.getPath();
-			if(applicationPath != null) {
-				options.setBinary(applicationPath);
-			}
-		}
-		
-		if(waitAfterAction == -1) {
-			waitAfterAction = DEFAULT_WAIT;
+		if(applicationPath != null) {
+			options.setBinary(applicationPath);
 		}
 				
 		DesiredCapabilities cap = new DesiredCapabilities();
 		cap.setCapability(OperaOptions.CAPABILITY, options);
 		
 		launchDriver(cap);
-	}
-	
-	@Override
-	public void waitAfterAction() {
-		channel.sleep(waitAfterAction);
 	}
 }

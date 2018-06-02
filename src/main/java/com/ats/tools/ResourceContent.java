@@ -15,11 +15,12 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.tools;
 
 import java.io.IOException;
+import java.util.Base64;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.ByteStreams;
@@ -35,9 +36,9 @@ public class ResourceContent {
 	private static String elementAttributesJavaScript;
 	private static String parentElementJavaScript;
 	private static String elementCssJavaScript;
-	private static String readyStatesJavaScript;
-	
 	private static byte[] tick24Icon;
+	private static String atsLogo;
+	private static String pageStyle;
 
 	static {
 		visibilityJavaScript = getScript("visibility");
@@ -48,14 +49,14 @@ public class ResourceContent {
 		elementAttributesJavaScript = getScript("elementAttributes");
 		parentElementJavaScript = getScript("parentElement");
 		elementCssJavaScript = getScript("elementCss");
-		readyStatesJavaScript = getScript("readyStates");
-		
 		tick24Icon = getIcon("tick", 24);
+		atsLogo = Base64.getEncoder().encodeToString(getLogo());
+		pageStyle = getData("jsStyle");		
 	}
 
 	//-----------------------------------------------------------------------------------------------------------------------------------
 	//-----------------------------------------------------------------------------------------------------------------------------------
-	
+
 	private static String getScript(String ressourceName){
 		try {
 			String javaScript = Resources.toString(ResourceContent.class.getResource("/javascript/" + ressourceName + ".js"), Charsets.UTF_8);
@@ -73,18 +74,42 @@ public class ResourceContent {
 			return new byte[0];
 		}
 	}
+
+	private static byte[] getLogo(){
+		try {
+			return Resources.toByteArray(ResourceContent.class.getResource("/icon/ats_power.png"));
+		} catch (IOException e1) {
+			return new byte[] {};
+		}
+	}
+	
+	public static String getData(String name) {
+		try {
+			return Resources.toString(ResourceContent.class.getResource("/" + name), Charsets.UTF_8);
+		} catch (IOException e1) {
+			return "";
+		}
+	}
 	
 	//-----------------------------------------------------------------------------------------------------------------------------------
 	//-----------------------------------------------------------------------------------------------------------------------------------
+
+	public static String getPageStyle() {
+		return pageStyle;
+	}
+	
+	public static String getAtsLogo() {
+		return atsLogo;
+	}
 	
 	public static byte[] getTick24Icon() {
 		return tick24Icon;
 	}
-	
+
 	public static String getVisibilityJavaScript() {
 		return visibilityJavaScript;
 	}
-	
+
 	public static String getScrollElementJavaScript() {
 		return scrollElementJavaScript;
 	}
@@ -111,9 +136,5 @@ public class ResourceContent {
 
 	public static String getElementCssJavaScript() {
 		return elementCssJavaScript;
-	}
-
-	public static String getReadyStatesJavaScript() {
-		return readyStatesJavaScript;
 	}
 }

@@ -25,7 +25,6 @@ import org.openqa.selenium.NoSuchWindowException;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
-import com.ats.driver.ApplicationProperties;
 import com.ats.driver.AtsManager;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
@@ -38,7 +37,7 @@ public class IEDriverEngine extends WebDriverEngine {
 	private final static int DEFAULT_WAIT = 200;
 
 	public IEDriverEngine(Channel channel, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
-		super(channel, "ie", driverProcess, windowsDriver, ats);
+		super(channel, "ie", driverProcess, windowsDriver, ats, DEFAULT_WAIT);
 
 		//InternetExplorerOptions options = new InternetExplorerOptions();
 		//options..setPageLoadStrategy("normal");
@@ -50,21 +49,8 @@ public class IEDriverEngine extends WebDriverEngine {
 		capabilities.setCapability(InternetExplorerDriver.INTRODUCE_FLAKINESS_BY_IGNORING_SECURITY_DOMAINS, true);
 		capabilities.setCapability(InternetExplorerDriver.FORCE_CREATE_PROCESS, true);
 
-		ApplicationProperties props = ats.getBrowserProperties("ie");
-		if(props != null) {
-			waitAfterAction = props.getWait();
-		}
-
-		if(waitAfterAction == -1) {
-			waitAfterAction = DEFAULT_WAIT;
-		}
 
 		launchDriver(capabilities);
-	}
-
-	@Override
-	public void waitAfterAction() {
-		channel.sleep(waitAfterAction);
 	}
 
 	@Override

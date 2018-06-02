@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.executor.drivers.engines.browsers;
 
@@ -39,7 +39,6 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebElement;
 
-import com.ats.driver.ApplicationProperties;
 import com.ats.driver.AtsManager;
 import com.ats.element.FoundElement;
 import com.ats.executor.ActionStatus;
@@ -65,7 +64,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	private RequestConfig requestConfig;
 
 	public FirefoxDriverEngine(Channel channel, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
-		super(channel, DriverManager.FIREFOX_BROWSER, driverProcess, windowsDriver, ats);
+		super(channel, DriverManager.FIREFOX_BROWSER, driverProcess, windowsDriver, ats, DEFAULT_WAIT);
 
 		initElementY = 4.0;
 		waitBeforeSwitch = 300;
@@ -76,21 +75,12 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		options.setCapability(FirefoxDriver.MARIONETTE, false);
 		options.setPageLoadStrategy(PageLoadStrategy.NORMAL);
 
-		ApplicationProperties props = ats.getBrowserProperties(DriverManager.FIREFOX_BROWSER);
-		if(props != null) {
-			waitAfterAction = props.getWait();
-			applicationPath = props.getPath();
-			if(applicationPath != null) {
-				options.setBinary(applicationPath);
-			}
-		}
-
-		if(waitAfterAction == -1) {
-			waitAfterAction = DEFAULT_WAIT;
+		if(applicationPath != null) {
+			options.setBinary(applicationPath);
 		}
 
 		cap.setCapability(FirefoxOptions.FIREFOX_OPTIONS, options);
-		
+
 		launchDriver(cap);
 
 		requestConfig = RequestConfig.custom()
@@ -111,11 +101,6 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	}
 
 	@Override
-	public void waitAfterAction() {
-		channel.sleep(waitAfterAction);
-	}
-
-	@Override
 	protected int getDirectionValue(int value, MouseDirectionData direction, Cartesian cart1, Cartesian cart2) {
 		int offset = super.getDirectionValue(value, direction, cart1, cart2);
 		offset -= value/2;
@@ -127,13 +112,6 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		return 0;
 	}
 
-	@Override
-	protected Object runJavaScript(String javaScript, Object... params) {
-		Object result = super.runJavaScript(javaScript, params);
-		channel.sleep(waitAfterAction);
-		return result;
-	}
-	
 	@Override
 	public void middleClick(ActionStatus status, TestElement element) {
 		middleClickSimulation(status, element);

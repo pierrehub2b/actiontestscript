@@ -15,58 +15,73 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.tools;
 
-import java.io.IOException;
-import java.util.Base64;
-
 import com.ats.driver.AtsManager;
 import com.ats.executor.TestBound;
-import com.google.common.io.Resources;
 
 public final class StartHtmlPage {
-    
-    public static byte[] getAtsBrowserContent(String titleUid, String applicationVersion, String driverVersion, TestBound testBound) {
-    	
-    	if(driverVersion == null) {
-    		driverVersion = "N/A";
-    	}
 
-    	StringBuilder htmlContent = new StringBuilder();
-    	htmlContent.append("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><title>");
-    	htmlContent.append(titleUid);
-    	htmlContent.append("</title><style>span {font-family: Arial; color: #606b6f; text-shadow: 2px 2px 12px rgba(96,107,111,0.6)}</style></head><body bgcolor=\"#f2f2f2\"><a href=\"https://www.actiontestscript.com\"><img src=\"data:image/png;base64, ");
-    	
-    	try {
-    		htmlContent.append(Base64.getEncoder().encodeToString(Resources.toByteArray(ResourceContent.class.getResource("/icon/ats_power.png"))));
-		} catch (IOException e1) {}
-    	
-    	htmlContent.append("\" alt=\"ActionTestScript\"/></a><div style=\"padding-left: 40px;\"><span>- ActionTestScript version : ");
-    	htmlContent.append(AtsManager.getVersion());
-    	htmlContent.append("&nbsp;</span></div>");
-    	
-    	htmlContent.append("<div style=\"padding-left: 40px;\"><span>- Browser version : ");
-    	htmlContent.append(applicationVersion);
-    	htmlContent.append("&nbsp;</span></div>");
-    	
-    	htmlContent.append("<div style=\"padding-left: 40px;\"><span>- Driver version : ");
-    	htmlContent.append(driverVersion);
-    	htmlContent.append("&nbsp;</span></div>");
-    	
-    	htmlContent.append("<div style=\"padding-left: 40px;\"><span>- Browser position  : ");
-    	htmlContent.append(testBound.getX());
-    	htmlContent.append(" : ");
-    	htmlContent.append(testBound.getY());
-    	htmlContent.append("</span></div>");
-    	
-    	htmlContent.append("<div style=\"padding-left: 40px;\"><span>- Browser size  : ");
-    	htmlContent.append(testBound.getWidth());
-    	htmlContent.append(" x ");
-    	htmlContent.append(testBound.getHeight());
-    	htmlContent.append("</span></div></body></html>");
-    			    	
-    	return htmlContent.toString().getBytes();
-    }
+	public static byte[] getAtsBrowserContent(
+			String titleUid,
+			String browserName,
+			String browserPath,
+			String browserVersion, 
+			String driverVersion, 
+			TestBound testBound,
+			int actionWait) {
+
+		if(driverVersion == null) {
+			driverVersion = "N/A";
+		}
+
+		StringBuilder htmlContent = new StringBuilder();
+		htmlContent.append("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">");
+
+		htmlContent.append(ResourceContent.getPageStyle());
+		
+		htmlContent.append("<title>");
+		htmlContent.append(titleUid);
+		htmlContent.append("</title></head><body bgcolor=\"#f2f2f2\"><div><div id=\"header\"><div class=\"clearfix\"><i>...</i></div></div><div id=\"content-wrapper\"><div class=\"site\"><div class=\"article js-hide-during-search\"><a href=\"https://www.actiontestscript.com\"><img src=\"data:image/png;base64, ");
+
+		htmlContent.append(ResourceContent.getAtsLogo());
+
+		htmlContent.append("\" alt=\"ActionTestScript\"/></a><div class=\"article-body content-body wikistyle markdown-format\"><div class=\"intro\" style=\"margin-left:30px\">");
+
+		htmlContent.append("<p><strong>ActionTestScript version : </strong>");
+		htmlContent.append(AtsManager.getVersion());
+
+		htmlContent.append("<br><strong>Driver version : </strong>");
+		htmlContent.append(driverVersion);
+
+		htmlContent.append("<br><strong>Wait after action : </strong>");
+		htmlContent.append(actionWait);
+		htmlContent.append(" ms</p></div><div class=\"alert note\" style=\"margin-left:30px;min-width: 240px;display: inline-block\"><p>");
+
+		htmlContent.append("<strong>Browser name : </strong>");
+		htmlContent.append(browserName);
+		htmlContent.append("<br><strong>Browser version : </strong>");
+		htmlContent.append(browserVersion);
+
+		if(browserPath != null) {
+			htmlContent.append("<br><strong>Browser binary path : </strong>");
+			htmlContent.append(browserPath);
+		}
+
+		htmlContent.append("<br><strong>Browser position : </strong>");
+		htmlContent.append(testBound.getX().intValue());
+		htmlContent.append(" , ");
+		htmlContent.append(testBound.getY().intValue());
+		
+		htmlContent.append("<br><strong>Browser size : </strong>");
+		htmlContent.append(testBound.getWidth().intValue());
+		htmlContent.append(" x ");
+		htmlContent.append(testBound.getHeight().intValue());
+
+		htmlContent.append("</p></div></body></html>");
+
+		return htmlContent.toString().getBytes();
+	}
 }

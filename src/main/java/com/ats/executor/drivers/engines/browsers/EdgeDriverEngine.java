@@ -26,7 +26,6 @@ import org.openqa.selenium.Point;
 import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.remote.CapabilityType;
 
-import com.ats.driver.ApplicationProperties;
 import com.ats.driver.AtsManager;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.TestElement;
@@ -38,26 +37,17 @@ import com.ats.executor.drivers.engines.WebDriverEngine;
 
 public class EdgeDriverEngine extends WebDriverEngine {
 
-	private final static int DEFAULT_WAIT = 200;
+	private final static int DEFAULT_WAIT = 150;
 
 	public EdgeDriverEngine(Channel channel, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
-		super(channel, DriverManager.EDGE_BROWSER, driverProcess, windowsDriver, ats);
+		super(channel, DriverManager.EDGE_BROWSER, driverProcess, windowsDriver, ats, DEFAULT_WAIT);
 
 		EdgeOptions options = new EdgeOptions();
 		options.setPageLoadStrategy("normal");
 		options.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
 
-		ApplicationProperties props = ats.getBrowserProperties(DriverManager.EDGE_BROWSER);
-		if(props != null) {
-			waitAfterAction = props.getWait();
-		}
-		
-		if(waitAfterAction == -1) {
-			waitAfterAction = DEFAULT_WAIT;
-		}
-
 		launchDriver(options);
-	}		
+	}
 
 	@Override
 	protected void setPosition(Point pt) {
@@ -69,11 +59,6 @@ public class EdgeDriverEngine extends WebDriverEngine {
 	protected void setSize(Dimension dim) {
 		channel.sleep(500);
 		super.setSize(dim);
-	}
-
-	@Override
-	public void waitAfterAction() {
-		channel.sleep(waitAfterAction);
 	}
 
 	@Override

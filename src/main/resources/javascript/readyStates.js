@@ -1,1 +1,0 @@
-var result = [window.document.readyState=='complete'];

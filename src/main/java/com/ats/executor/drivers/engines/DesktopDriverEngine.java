@@ -38,7 +38,6 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 
-import com.ats.driver.ApplicationProperties;
 import com.ats.driver.AtsManager;
 import com.ats.element.FoundElement;
 import com.ats.executor.ActionStatus;
@@ -63,7 +62,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 
 	public DesktopDriverEngine(Channel channel, String application, DesktopDriver desktopDriver, AtsManager ats) {
 
-		super(channel, application);
+		super(channel, application, ats, DEFAULT_WAIT);
 		
 		this.driver = desktopDriver;
 
@@ -78,17 +77,11 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 		URI fileUri = null;
 		File exeFile = null;
 
-		ApplicationProperties properties = ats.getApplicationProperties(application);
-		if(properties != null) {
-			waitAfterAction = properties.getWait();
-			exeFile = new File(properties.getPath());
+		if(applicationPath != null) {
+			exeFile = new File(applicationPath);
 			if(exeFile.exists() && exeFile.isFile()) {
 				fileUri = exeFile.toURI();
 			}
-		}
-
-		if(waitAfterAction == -1) {
-			waitAfterAction = DEFAULT_WAIT;
 		}
 
 		if(fileUri == null) {
@@ -145,13 +138,13 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	}
 	
 	@Override
+	public void waitAfterAction() {
+		actionWait();
+	}
+	
+	@Override
 	public DesktopDriver getDesktopDriver() {
 		return (DesktopDriver)driver;
-	}
-
-	@Override
-	public void waitAfterAction() {
-		channel.sleep(waitAfterAction);
 	}
 
 	public void loadParents(FoundElement hoverElement){

@@ -25,6 +25,8 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
+import com.ats.driver.ApplicationProperties;
+import com.ats.driver.AtsManager;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.Cartesian;
@@ -40,11 +42,21 @@ public abstract class DriverEngineAbstract {
 	
 	protected int currentWindow = 0;
 	
-	protected int waitAfterAction = -1;
+	private int actionWait = -1;
 
-	public DriverEngineAbstract(Channel channel, String application){
+	public DriverEngineAbstract(Channel channel, String application, AtsManager ats, int defaultWait){
 		this.channel = channel;
 		this.application = application;
+		
+		ApplicationProperties props = ats.getBrowserProperties(application);
+		if(props != null) {
+			actionWait = props.getWait();
+			applicationPath = props.getPath();
+		}
+		
+		if(actionWait == -1) {
+			actionWait = defaultWait;
+		}
 	}
 	
 	public void switchToCurrentWindow() {
@@ -62,10 +74,14 @@ public abstract class DriverEngineAbstract {
 	public String getApplicationPath() {
 		return applicationPath;
 	}
-
-	//public RemoteWebDriver getWebDriver(){
-	//	return driver;
-	//}
+	
+	public void actionWait() {
+		channel.sleep(actionWait);
+	}
+	
+	public int getActionWait() {
+		return actionWait;
+	}
 
 	protected int getDirectionValue(int value, MouseDirectionData direction,Cartesian cart1, Cartesian cart2) {
 		if(cart1.equals(direction.getName())) {

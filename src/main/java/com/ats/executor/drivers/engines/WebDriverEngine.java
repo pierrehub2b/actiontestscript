@@ -93,9 +93,10 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			String browser, 
 			DriverProcess driverProcess, 
 			DesktopDriver desktopDriver,
-			AtsManager ats) {
+			AtsManager ats,
+			int defaultWait) {
 
-		super(channel, browser);
+		super(channel, browser, ats, defaultWait);
 
 		this.driverProcess = driverProcess;
 		this.desktopDriver = desktopDriver;
@@ -128,12 +129,12 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			}
 			maxTry--;
 		}
-		
+
 		if(maxTry == 0) {
 			channel.setStartError(errorMessage);
 			return;
 		}
-								
+
 		actions = new Actions(driver);
 
 		driver.manage().timeouts().setScriptTimeout(scriptTimeout, TimeUnit.SECONDS);
@@ -166,7 +167,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			File tempHtml = File.createTempFile("ats_", ".html");
 			tempHtml.deleteOnExit();
 
-			Files.write(tempHtml.toPath(), StartHtmlPage.getAtsBrowserContent(titleUid, applicationVersion, driverVersion, channel.getDimension()));
+			Files.write(tempHtml.toPath(), StartHtmlPage.getAtsBrowserContent(titleUid, application, applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait()));
 			driver.get(tempHtml.toURI().toString());
 		} catch (IOException e) {}
 
@@ -193,6 +194,21 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	@Override
 	public void waitAfterAction() {
+		actionWait();
+	}
+	
+	protected void waitReadyState() {
+		
+		int maxTry = 40;
+		String readyState = "return window.document.readyState=='complete';";
+		Boolean ready = (Boolean) driver.executeScript(readyState);
+		
+		while(!ready && maxTry > 0) {
+			channel.sleep(200);
+			ready = (Boolean) driver.executeScript(readyState);
+			maxTry--;
+		}
+		
 		/*int maxWait = 50;
 		ArrayList<Boolean> iframesStatus = (ArrayList<Boolean>) runJavaScript(ResourceContent.getReadyStatesJavaScript());
 		while(maxWait > 0 && !iframesStatus.stream().parallel().allMatch(e -> true)){
@@ -327,26 +343,26 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		while (result == null && tryLoop > 0){
 			tryLoop--;
 			result = getAttribute(element, attributeName);
-			
+
 			if(!doubleCheckAttribute(result, element, attributeName)) {
 				channel.sleep(200);
 				result = null;
 			}
 		}
-		
+
 		return result;
 	}
-	
+
 	private boolean doubleCheckAttribute(String verify, FoundElement element, String attributeName) {
 		String current = getAttribute(element, attributeName);
 		return current != null && current.equals(verify);
 	}
-	
+
 	private String getAttribute(FoundElement element, String attributeName) {
-		
+
 		RemoteWebElement elem = getWebElement(element);
 		String result = elem.getAttribute(attributeName);
-		
+
 		if(result == null) {
 
 			for (CalculatedProperty calc : getAttributes(element)) {
@@ -358,7 +374,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			if(result == null) {
 				result = getCssAttributeValueByName(element, attributeName);
 			}
-			
+
 			if(result == null) {
 				channel.sleep(200);
 			}
@@ -483,12 +499,12 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		boolean interactable = rwe.isEnabled();
 
 		while(!interactable && maxTry > 0) {
-						
+
 			channel.sendLog(MessageCode.OBJECT_INTERACTABLE, "wait element interactable", maxTry);
 			channel.sleep(300);
-			
+
 			interactable = rwe.isEnabled();
-			
+
 			maxTry--;
 		}
 
@@ -595,22 +611,22 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		rwe.setParent(driver);
 		switchToFrame(rwe);
 	}
-	
+
 	//-----------------------------------------------------------------------------------------------------------------------------------
 	// Window management
 	//-----------------------------------------------------------------------------------------------------------------------------------
-	
+
 	protected void switchToWindowHandle(String handle) {
 		channel.sleep(waitBeforeSwitch);
 		driver.switchTo().window(handle);
 		switchToDefaultContent();
 	}
-	
+
 	protected void switchToLastWindow() {
 		int windowsNum = driver.getWindowHandles().size();
 		switchWindow(windowsNum - 1);
 	}		
-	
+
 	protected void switchToFirstWindow(String[] list) {
 		switchToWindowHandle(list[0]);
 		currentWindow = 0;
@@ -620,18 +636,18 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	public void switchWindow(int index) {
 
 		if(currentWindow != index) {
-			
+
 			Set<String> list = driver.getWindowHandles();
-						
+
 			int maxTry = 20;
 			while(index >= list.size() && maxTry > 0) {
 				list = driver.getWindowHandles();
 				channel.sleep(500);
 				maxTry--;
 			}
-			
+
 			String[] wins = list.toArray(new String[list.size()]);
-			
+
 			if(maxTry == 0) {
 				switchToFirstWindow(wins);
 			}else {
@@ -810,8 +826,9 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			}
 		}else {
 			switchToCurrentWindow();
+			waitReadyState();
 		}
-
+		
 		ArrayList<Map<String, Object>> response = (ArrayList<Map<String, Object>>)runJavaScript(ResourceContent.getSearchElementsJavaScript(), startElement, tagName, attributes);
 		if(response != null){
 			response.parallelStream().filter(predicate).forEachOrdered(e -> addWebElement(webElementList, (Map<String, Object>) e.get("ats-elt")));
@@ -830,7 +847,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	public void middleClick(ActionStatus status, TestElement element) {
 		runJavaScript("var evt=new MouseEvent('click', {bubbles: true,cancelable: true,view: window, button: 1}),result={};arguments[0].dispatchEvent(evt);", element.getWebElement());
 	}
-	
+
 	protected void middleClickSimulation(ActionStatus status, TestElement element) {
 		element.click(status, Keys.CONTROL);
 	}

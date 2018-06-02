@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.executor.drivers.engines.browsers;
 
@@ -25,7 +25,6 @@ import java.util.List;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
-import com.ats.driver.ApplicationProperties;
 import com.ats.driver.AtsManager;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
@@ -35,11 +34,11 @@ import com.ats.executor.drivers.engines.WebDriverEngine;
 
 public class ChromeDriverEngine extends WebDriverEngine {
 
-	private final static int DEFAULT_WAIT = 150;
-	
-	public ChromeDriverEngine(Channel channel, DriverProcess driverProcess, DesktopDriver windowsDriver,	AtsManager ats) {
-		
-		super(channel, DriverManager.CHROME_BROWSER, driverProcess, windowsDriver, ats);
+	private final static int DEFAULT_WAIT = 100;
+
+	public ChromeDriverEngine(Channel channel, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
+
+		super(channel, DriverManager.CHROME_BROWSER, driverProcess, windowsDriver, ats, DEFAULT_WAIT);
 
 		List<String> args = new ArrayList<String>();
 
@@ -52,28 +51,14 @@ public class ChromeDriverEngine extends WebDriverEngine {
 
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments(args);
-		
-		ApplicationProperties props = ats.getBrowserProperties(DriverManager.CHROME_BROWSER);
-		if(props != null) {
-			waitAfterAction = props.getWait();
-			applicationPath = props.getPath();
-			if(applicationPath != null) {
-				options.setBinary(applicationPath);
-			}
-		}
-		
-		if(waitAfterAction == -1) {
-			waitAfterAction = DEFAULT_WAIT;
+
+		if(applicationPath != null) {
+			options.setBinary(applicationPath);
 		}
 
 		DesiredCapabilities caps = DesiredCapabilities.chrome(); 
 		caps.setCapability(ChromeOptions.CAPABILITY, options); 
-		
+
 		launchDriver(caps);
-	}
-	
-	@Override
-	public void waitAfterAction() {
-		channel.sleep(waitAfterAction);
 	}
 }
