@@ -69,9 +69,12 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 		int firstSpace = application.indexOf(" ");
 		String applicationArguments = "";
 
+		ArrayList<String> args = new ArrayList<String>();
+		
 		if(firstSpace > 0){
 			applicationArguments = application.substring(firstSpace);
 			application = application.substring(0, firstSpace);
+			args.add(applicationArguments);
 		}
 
 		URI fileUri = null;
@@ -98,11 +101,11 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 		if(exeFile != null && exeFile.exists() && exeFile.isFile()){
 
 			applicationPath = exeFile.getAbsolutePath();
-			String[] args = new String[] {applicationPath, applicationArguments};
+			args.add(0, applicationPath);
 
 			Runtime runtime = Runtime.getRuntime();
 			try{
-				applicationProcess = runtime.exec(args);
+				applicationProcess = runtime.exec(args.toArray(new String[args.size()]));
 			} catch (IOException e) {
 				channel.setStartError(e.getMessage());
 				return;
