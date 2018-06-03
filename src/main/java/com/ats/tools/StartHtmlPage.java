@@ -31,7 +31,8 @@ public final class StartHtmlPage {
 			String browserVersion, 
 			String driverVersion, 
 			TestBound testBound,
-			int actionWait) {
+			int actionWait,
+			int maxtry) {
 
 		if(driverVersion == null) {
 			driverVersion = "N/A";
@@ -44,7 +45,11 @@ public final class StartHtmlPage {
 		
 		htmlContent.append("<title>");
 		htmlContent.append(titleUid);
-		htmlContent.append("</title></head><body bgcolor=\"#f2f2f2\"><div><div id=\"header\"><div class=\"clearfix\"><i>...</i></div></div><div id=\"content-wrapper\"><div class=\"site\"><div class=\"article js-hide-during-search\"><a href=\"https://www.actiontestscript.com\"><img src=\"data:image/png;base64, ");
+		htmlContent.append("</title></head><body bgcolor=\"#f2f2f2\"><div><div id=\"header\"><div class=\"clearfix\">");
+		htmlContent.append("ActionTestScript (ver. ");
+		htmlContent.append(AtsManager.getVersion());
+		htmlContent.append(")");
+		htmlContent.append("</div></div><div id=\"content-wrapper\"><div class=\"site\"><div class=\"article js-hide-during-search\"><a href=\"https://www.actiontestscript.com\"><img src=\"data:image/png;base64, ");
 
 		htmlContent.append(ResourceContent.getAtsLogo());
 
@@ -55,27 +60,31 @@ public final class StartHtmlPage {
 
 		htmlContent.append("<br><strong>Driver version : </strong>");
 		htmlContent.append(driverVersion);
+		
+		htmlContent.append("<br><strong>Search element max try : </strong>");
+		htmlContent.append(maxtry);
 
 		htmlContent.append("<br><strong>Wait after action : </strong>");
 		htmlContent.append(actionWait);
 		htmlContent.append(" ms</p></div><div class=\"alert note\" style=\"margin-left:30px;min-width: 240px;display: inline-block\"><p>");
 
-		htmlContent.append("<strong>Browser name : </strong>");
+		htmlContent.append("<strong>Browser : </strong>");
+		htmlContent.append("<br><strong>  - Name : </strong>");
 		htmlContent.append(browserName);
-		htmlContent.append("<br><strong>Browser version : </strong>");
+		htmlContent.append("<br><strong>  - Version : </strong>");
 		htmlContent.append(browserVersion);
 
 		if(browserPath != null) {
-			htmlContent.append("<br><strong>Browser binary path : </strong>");
+			htmlContent.append("<br><strong>  - Binary path : </strong>");
 			htmlContent.append(browserPath);
 		}
 
-		htmlContent.append("<br><strong>Browser position : </strong>");
+		htmlContent.append("<br><strong>  - Start position : </strong>");
 		htmlContent.append(testBound.getX().intValue());
-		htmlContent.append(" , ");
+		htmlContent.append(" x ");
 		htmlContent.append(testBound.getY().intValue());
 		
-		htmlContent.append("<br><strong>Browser size : </strong>");
+		htmlContent.append("<br><strong>  - Start size : </strong>");
 		htmlContent.append(testBound.getWidth().intValue());
 		htmlContent.append(" x ");
 		htmlContent.append(testBound.getHeight().intValue());

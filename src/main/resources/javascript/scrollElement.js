@@ -1,12 +1,5 @@
-var element = arguments[0];
-var scrolled = false;
+const element = arguments[0];
 var result = [];
-
-function scroll(e){
-	e.scrollIntoView(false);
-	var rect = e.getBoundingClientRect();
-	return [rect.right+0.00001, rect.top+0.00001];
-};
 
 var topOfPage = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
 var heightOfPage = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
@@ -33,5 +26,7 @@ if (document.layers){
 }
 
 if (((topOfPage + heightOfPage) < (elY + elH)) || (elY < topOfPage) || ((leftOfPage + widthOfPage) < (elX + elW)) || (elX < leftOfPage)) {
-	result = scroll(element);
+	element.scrollIntoView(false);
+	var rect = e.getBoundingClientRect();
+	result = [rect.right+0.00001, rect.top+0.00001];
 }

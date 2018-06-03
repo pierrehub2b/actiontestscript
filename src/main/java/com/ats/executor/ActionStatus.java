@@ -171,6 +171,6 @@ public class ActionStatus {
 	}
 
 	public String getChannelInfo() {
-		return "Channel [ " + channel.getName() + " ] with application : " + channel.getApplication();
+		return "   - Channel : " + channel.getName() + "\n   - Application : " + channel.getApplication();
 	}
 }

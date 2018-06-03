@@ -1,16 +1,14 @@
 var parent = arguments[0];
-var tag = arguments[1];
-var attributes = arguments[2];
-var attributesLen = attributes.length;	
-
-var result = [];
+const tag = arguments[1];
+const attributes = arguments[2];
+const attributesLen = attributes.length;	
 
 if(parent == null){
 	parent = window.document;
 }
 
-var elements = parent.querySelectorAll(tag);
-var attributesList, attributeName, textValue, foundElement, e;
+const elements = parent.querySelectorAll(tag);
+var attributesList, attributeName, textValue, foundElement, e, result = [];
 
 for(var i = 0, len = elements.length; i < len; i++){
 	e = elements[i];

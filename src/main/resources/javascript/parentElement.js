@@ -1,5 +1,4 @@
-var parent = arguments[0].parentNode;
-var result = [];
+var parent = arguments[0].parentNode, result = [];
 
 while (parent != null){
 	addElement(parent);

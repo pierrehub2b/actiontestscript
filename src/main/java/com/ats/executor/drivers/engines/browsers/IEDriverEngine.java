@@ -73,12 +73,4 @@ public class IEDriverEngine extends WebDriverEngine {
 		switchToDefaultContent();
 		driver.get(url.toString());
 	}
-	
-	@Override
-	public void switchToDefaultContent() {
-		channel.sleep(waitBeforeSwitch);
-		try {
-			driver.switchTo().defaultContent();
-		}catch (NoSuchWindowException e) {}
-	}
 }

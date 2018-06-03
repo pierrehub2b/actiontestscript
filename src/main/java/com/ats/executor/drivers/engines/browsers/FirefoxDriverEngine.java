@@ -67,7 +67,6 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		super(channel, DriverManager.FIREFOX_BROWSER, driverProcess, windowsDriver, ats, DEFAULT_WAIT);
 
 		initElementY = 4.0;
-		waitBeforeSwitch = 300;
 
 		DesiredCapabilities cap = new DesiredCapabilities();
 
@@ -91,6 +90,24 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 			driverSessionUri = new URI(driverProcess.getDriverServerUrl() + "/session/" + driver.getSessionId().toString() + "/actions");
 		} catch (URISyntaxException e) {}
 
+	}
+
+	@Override
+	public void switchToDefaultContent() {
+		channel.sleep(200);
+		super.switchToDefaultContent();
+	}
+
+	@Override
+	protected void switchToWindowHandle(String handle) {
+		channel.sleep(200);
+		super.switchToWindowHandle(handle);
+	}
+
+	@Override
+	protected void switchToFrame(WebElement we) {
+		channel.sleep(200);
+		super.switchToFrame(we);
 	}
 
 	@Override

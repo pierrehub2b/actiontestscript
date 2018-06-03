@@ -79,13 +79,14 @@ public class Channel {
 			String application) {
 
 		this.mainScript = script;
+		this.maxTry = driverManager.getMaxTry();
 		this.name = name;
 		this.dimension = driverManager.getApplicationBound();
 		this.current = true;
 
 		this.desktopDriver = new DesktopDriver(driverManager);
 		this.engine = driverManager.getDriverEngine(this, application, this.desktopDriver);
-		this.maxTry = driverManager.getMaxTry();
+		
 
 		this.refreshLocation();
 	}
@@ -412,9 +413,5 @@ public class Channel {
 
 	public String getCurrentUrl() {
 		return engine.getCurrentUrl();
-	}
-
-	public void switchToIframe(String id) {
-		engine.switchToIframe(id);
 	}
 }

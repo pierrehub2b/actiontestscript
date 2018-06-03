@@ -86,7 +86,6 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	private Actions actions;
 
 	private String firstWindow;
-	protected int waitBeforeSwitch = 100;
 
 	public WebDriverEngine(
 			Channel channel, 
@@ -167,7 +166,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			File tempHtml = File.createTempFile("ats_", ".html");
 			tempHtml.deleteOnExit();
 
-			Files.write(tempHtml.toPath(), StartHtmlPage.getAtsBrowserContent(titleUid, application, applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait()));
+			Files.write(tempHtml.toPath(), StartHtmlPage.getAtsBrowserContent(titleUid, application, applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait(), channel.getMaxTry()));
 			driver.get(tempHtml.toURI().toString());
 		} catch (IOException e) {}
 
@@ -200,12 +199,8 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	protected void waitReadyState() {
 		
 		int maxTry = 40;
-		String readyState = "return window.document.readyState=='complete';";
-		Boolean ready = (Boolean) driver.executeScript(readyState);
-		
-		while(!ready && maxTry > 0) {
+		while(!((Boolean)driver.executeScript("return window.document.readyState=='complete';")) && maxTry > 0) {
 			channel.sleep(200);
-			ready = (Boolean) driver.executeScript(readyState);
 			maxTry--;
 		}
 		
@@ -354,6 +349,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	private boolean doubleCheckAttribute(String verify, FoundElement element, String attributeName) {
+		channel.sleep(50);
 		String current = getAttribute(element, attributeName);
 		return current != null && current.equals(verify);
 	}
@@ -591,7 +587,6 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	@Override
 	public void switchToDefaultContent() {
-		channel.sleep(waitBeforeSwitch);
 		try {
 			driver.switchTo().defaultContent();
 		}catch (NoSuchWindowException e) {
@@ -599,17 +594,8 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		}
 	}
 
-	private void switchToFrame(WebElement we) {
-		channel.sleep(waitBeforeSwitch);
+	protected void switchToFrame(WebElement we) {
 		driver.switchTo().frame(we);
-	}
-
-	@Override
-	public void switchToIframe(String iframe) {
-		RemoteWebElement rwe = new RemoteWebElement();
-		rwe.setId(iframe);
-		rwe.setParent(driver);
-		switchToFrame(rwe);
 	}
 
 	//-----------------------------------------------------------------------------------------------------------------------------------
@@ -617,7 +603,6 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	//-----------------------------------------------------------------------------------------------------------------------------------
 
 	protected void switchToWindowHandle(String handle) {
-		channel.sleep(waitBeforeSwitch);
 		driver.switchTo().window(handle);
 		switchToDefaultContent();
 	}

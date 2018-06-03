@@ -521,15 +521,15 @@ public class ActionTestScript extends Script implements ITest{
 
 	private void execFinished(ActionStatus status, boolean stop) {
 		if(!status.isPassed()) {
-			String atsScriptError = "(" + getTestName() + "." + ATS_EXTENSION + ":" + atsCodeLine + ")";
+			String atsScriptLine = "(" + getTestName() + "." + ATS_EXTENSION + ":" + atsCodeLine + ")";
 
 			if(status.getCode() == ActionStatus.CHANNEL_NOT_FOUND) {
-				fail("ATS error -> No running channel, please check that 'start channel action' has been added to the script " + atsScriptError);
+				fail("[ATS-ERROR] -> No running channel, please check that 'start channel action' has been added to the script " + atsScriptLine);
 			}else {
 				if(stop) {
-					fail("ATS error -> " + status.getFailMessage() + " " + atsScriptError + "\n" + status.getChannelInfo());
+					fail("[ATS-ERROR] -> " + status.getFailMessage() + " " + atsScriptLine + "\n" + status.getChannelInfo());
 				}else {
-					getTopScript().sendLog(MessageCode.NON_BLOCKING_FAILED, "ATS script info -> Not stoppable action failed", status.getMessage() + atsScriptError);
+					getTopScript().sendLog(MessageCode.NON_BLOCKING_FAILED, "[ATS-INFO] -> Not stoppable action failed", status.getMessage() + atsScriptLine);
 				}
 			}
 		}

@@ -77,6 +77,5 @@ public interface IDriverEngine{
 	public void navigationForward();
 	public void navigationBack();
 	public String getCurrentUrl();
-	public void switchToIframe(String iframe);
 	public void setWindowToFront();
 }

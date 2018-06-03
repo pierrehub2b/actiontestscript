@@ -354,8 +354,4 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	public String getCurrentUrl() {
 		return null;
 	}
-	
-	@Override
-	public void switchToIframe(String iframe) {}
-
 }

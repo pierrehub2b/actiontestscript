@@ -1,6 +1,5 @@
-var element = arguments[0];
-var result = [];
-var attrib, textValue;
+const element = arguments[0];
+var attrib, textValue, result = [];
 
 for(var i=0, len=element.attributes.length; i<len; i++){
 	attrib = element.attributes[i];

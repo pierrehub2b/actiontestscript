@@ -34,7 +34,7 @@ import com.ats.executor.drivers.engines.WebDriverEngine;
 
 public class ChromeDriverEngine extends WebDriverEngine {
 
-	private final static int DEFAULT_WAIT = 100;
+	private final static int DEFAULT_WAIT = 130;
 
 	public ChromeDriverEngine(Channel channel, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
 

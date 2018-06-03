@@ -23,6 +23,7 @@ import java.net.URL;
 
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.remote.CapabilityType;
 
@@ -41,7 +42,7 @@ public class EdgeDriverEngine extends WebDriverEngine {
 
 	public EdgeDriverEngine(Channel channel, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
 		super(channel, DriverManager.EDGE_BROWSER, driverProcess, windowsDriver, ats, DEFAULT_WAIT);
-
+		
 		EdgeOptions options = new EdgeOptions();
 		options.setPageLoadStrategy("normal");
 		options.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
@@ -70,6 +71,24 @@ public class EdgeDriverEngine extends WebDriverEngine {
 	@Override
 	public void middleClick(ActionStatus status, TestElement element) {
 		middleClickSimulation(status, element);
+	}
+	
+	@Override
+	public void switchToDefaultContent() {
+		channel.sleep(300);
+		super.switchToDefaultContent();
+	}
+
+	@Override
+	protected void switchToWindowHandle(String handle) {
+		channel.sleep(300);
+		super.switchToWindowHandle(handle);
+	}
+
+	@Override
+	protected void switchToFrame(WebElement we) {
+		channel.sleep(300);
+		super.switchToFrame(we);
 	}
 
 	@Override
