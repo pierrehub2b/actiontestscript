@@ -189,7 +189,30 @@ Here is an example of global ATS configuration file (*.atsProperties* file in AT
 
 ## List of available ATS actions
 
-*(This part of the readme is under progress, please comme back in a few days to see final version of this document ...)*
+```
+channel-start : *Start a new application channel with specified name*
+channel-switch : *Switch to specified channel name, the channel application come in front of other channels*
+channel-close : *Close specified channel name*
+goto-url : *Navigate to specified url*
+subscript : *Call Ats or Java subscript*
+keyboard : *Enter keyboard data*
+click : *Simple click on found element*
+over : *Make a mouse over action on found element*
+drag : *Start a drag action on a found element*
+drop : *Drop action on found element*
+swipe : *Execute a swipe gesture on found element*
+scroll : *Execute mouse wheel action*
+check-property : *Check property value of found element*
+check-count : *Check number of element found with defined criterias*
+check-value : *Make a comparison between two values*
+property : *Catch property of found element to script variable*
+window-resize : *Resize or relocate current channel application window*
+window-switch : *Switch between channel opened windows (or tab)*
+window-close : *Close indexed window*
+select : *Select item by value, text or index on a found select element*
+javascript : *Execute javascript code on found element*
+comment
+```
 
 ## Thirdparty components
 
