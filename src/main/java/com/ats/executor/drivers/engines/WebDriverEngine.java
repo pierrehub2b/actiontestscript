@@ -793,6 +793,10 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	public ArrayList<FoundElement> findWebElement(Channel channel, TestElement testObject, String tagName, String[] attributes,
 			Predicate<Map<String, Object>> predicate) {
 
+		if(tagName == null) {
+			tagName = "BODY";
+		}
+		
 		ArrayList<FoundElement> webElementList = new ArrayList<FoundElement>();
 		WebElement startElement = null;
 

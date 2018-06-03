@@ -7,7 +7,7 @@ const vertInView = (rect.top <= windowHeight) && ((rect.top + rect.height) >= 0)
 const horInView = (rect.left <= windowWidth) && ((rect.left + rect.width) >= 0);
 
 if(!vertInView || !horInView){
-	e.scrollIntoView();
+	el.scrollIntoView();
 }
 
 var result = true;
