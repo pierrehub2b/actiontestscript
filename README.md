@@ -65,13 +65,13 @@ ATS Project folder
 
 In the **src/main/ats** folder you can create ATS scripts using notepad with - *.ats* - extension.
 
-## Create ATS project
+## Sample ATS project
 
-Download ATS simple project : http://www.actiontestscript.com/ats-project.zip
+You can download an ATS test project : https://github.com/pierrehub2b/ats_test/archive/master.zip
 
 Unzip this folder and now you can edit *.atsProjectProperties* and *pom.xml* files according to your needs. 
 
-There is a simple ATS file in the src/main/ats folder, you can edit this script with notpad or any ATS Editor application ...
+You can launch test of the project using java command line, Ant target or Maven goal.
 
 
 ## Execute project
@@ -110,6 +110,19 @@ Generated and copied classes from *target/generated* folder will be compiled int
 Contents of folder *src/assets/* will be copied into the *target/classes* folder.
 
 Tests are ready to be launched with TestNG.
+
+**Or**
+
+You can generate, compile and execute project using command line with Java and Maven (see 'Installing' chapter for ATS distribution path)
+
+* Execute Maven
+
+```
+cd [path-to-your-ats-project]
+mvn clean test
+```
+
+The default TestNG suite in the pom.xml file will be executed, this suite is define with 'maven-surefire-plugin' and 'suiteXmlFile' property.
 
 ## Customize ATS on host machine
 
