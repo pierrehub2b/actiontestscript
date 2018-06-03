@@ -191,25 +191,25 @@ Here is an example of global ATS configuration file (*.atsProperties* file in AT
 
 ```
 channel-start : Start a new application channel with specified name
-channel-switch : Switch to specified channel name (application window send to foreground)
+channel-switch : Switch to specified channel name (send application window to foreground)
 channel-close : Close specified channel name
 goto-url : Navigate to specified url
 subscript : Call Ats or Java subscript
-keyboard : Enter keyboard data
+keyboard : Enter keyboard action
 click : Simple click on found element
-over : Make a mouse over action on found element
-drag : Start a drag action on a found element
-drop : Drop action on found element
-swipe : Execute a swipe gesture on found element
+over : Make mouse over action on found element
+drag : Mouse start drag action on found element
+drop : Mouse drop action on found element
+swipe : Execute mouse swipe gesture on found element
 scroll : Execute mouse wheel action
 check-property : Check property value of found element
 check-count : Check number of element found with defined criterias
-check-value : Make a comparison between two values
-property : Catch property of found element to script variable
+check-value : Make comparison between two values
+property : Catch property value of found element into variable
 window-resize : Resize or relocate current channel application window
-window-switch : Switch between channel opened windows (or tab)
+window-switch : Switch between windows (or tab) of current channel
 window-close : Close indexed window
-select : Select item by value, text or index on a found select element
+select : Select item by value, text or index of found select element
 javascript : Execute javascript code on found element
 comment : Add comment to script
 ```
