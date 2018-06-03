@@ -122,7 +122,7 @@ cd [path-to-your-ats-project]
 mvn clean test
 ```
 
-The default TestNG suite in the pom.xml file will be executed, this suite is define with 'maven-surefire-plugin' and 'suiteXmlFile' property.
+The default TestNG suite in the pom.xml file will be executed, this suite is define with *'maven-surefire-plugin'* and *'suiteXmlFile'* property.
 
 ## Customize ATS on host machine
 
