@@ -190,7 +190,7 @@ Here is an example of global ATS configuration file (*.atsProperties* file in AT
 ## List of available ATS actions
 
 ```
-channel-start : *Start a new application channel with specified name*
+*channel-start : Start a new application channel with specified name
 channel-switch : *Switch to specified channel name, the channel application come in front of other channels*
 channel-close : *Close specified channel name*
 goto-url : *Navigate to specified url*
