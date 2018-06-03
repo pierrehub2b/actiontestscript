@@ -316,15 +316,15 @@ public class Lexer {
 
 					}else if(ActionAssertCount.SCRIPT_LABEL_COUNT.equals(actionType)){
 
-						action = new ActionAssertCount(script, stopExec, options, dataArray, dataOne.replaceAll("\\s+", ""));
+						action = new ActionAssertCount(script, stopExec, options, dataArray, dataOne);
 
 					}else if(ActionAssertProperty.SCRIPT_LABEL_PROPERTY.equals(actionType)){
 
-						action = new ActionAssertProperty(script, stopExec, options, dataArray, dataOne.replaceAll("\\s+", ""));
+						action = new ActionAssertProperty(script, stopExec, options, dataArray, dataOne);
 
 					}else if(ActionAssertValue.SCRIPT_LABEL_VALUE.equals(actionType)){
 
-						action = new ActionAssertValue(script, stopExec, dataOne.replaceAll("\\s+", ""));
+						action = new ActionAssertValue(script, stopExec, dataOne.trim());
 
 					}
 				}

@@ -58,8 +58,8 @@ public class ActionAssertValue extends ActionExecute {
 	private boolean splitData(ScriptLoader script, Matcher m, boolean regexp) {
 		if(m.find()) {
 			setRegexp(regexp);
-			setValue1(new CalculatedValue(script, m.group(1)));
-			setValue2(new CalculatedValue(script, m.group(2)));
+			setValue1(new CalculatedValue(script, m.group(1).trim()));
+			setValue2(new CalculatedValue(script, m.group(2).trim()));
 			return true;
 		}
 		return false;

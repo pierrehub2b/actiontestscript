@@ -32,6 +32,7 @@ public class SendKeyData {
 
 	private String data;
 	private CharSequence chord;
+	private boolean enterKey = false;
 
 	public SendKeyData(String key, String spare) {
 
@@ -47,6 +48,7 @@ public class SendKeyData {
 				sequence.append(Keys.ALT);
 			}else if(KEY_DOWN_CONTROL.equals(key)) {
 				sequence.append(Keys.CONTROL);
+				this.enterKey = true;
 			}
 			sequence.append(spare.toLowerCase());
 
@@ -107,6 +109,10 @@ public class SendKeyData {
 		}
 
 		return sequence;
+	}	
+
+	public boolean isEnterKey() {
+		return enterKey;
 	}
 
 	public CharSequence getSequenceFirefox() {

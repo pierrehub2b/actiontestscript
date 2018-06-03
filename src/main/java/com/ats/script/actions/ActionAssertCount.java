@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.script.actions;
 
@@ -46,16 +46,20 @@ public class ActionAssertCount extends ActionExecuteElement {
 		Matcher m = COUNT_PATTERN.matcher(data);
 		if(m.matches()) {
 			try {
-				setValue(Integer.parseInt(m.group(2))); 
+				setValue(Integer.parseInt(m.group(2).trim())); 
 			}catch(NumberFormatException e) {}
 
 			if(m.groupCount() > 2) {
-				if("+".equals(m.group(3))) {
+				switch (m.group(3).trim()) {
+				case "+":
 					setOperator(Operators.GREATER_EQUALS);
-				}else if ("-".equals(m.group(3)) && this.value > 0){
+					break;
+				case "-":
 					setOperator(Operators.LOWER_EQUALS);
-				}else if ("!".equals(m.group(3))){
+					break;
+				case "!":
 					setOperator(Operators.DIFFERENT);
+					break;
 				}
 			}
 		}
@@ -66,7 +70,7 @@ public class ActionAssertCount extends ActionExecuteElement {
 		setOperator(operator);
 		setValue(value);
 	}
-	
+
 	//---------------------------------------------------------------------------------------------------------------------------------
 	// Code Generator
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -78,27 +82,27 @@ public class ActionAssertCount extends ActionExecuteElement {
 
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
-	
+
 	@Override
 	public void execute(ActionTestScript ts) {
 		super.execute(ts, operator, value);
 	}
-	
+
 	@Override
 	public void terminateExecution(ActionTestScript ts) {
-	
+
 		getTestElement().checkOccurrences(status, operator, value);
-		
+
 		if(status.isPassed()) {
 			ts.updateVisualStatus(true);
 		}
-				
+
 		status.getElement().setFoundElements(null);
 		status.updateDuration();
-		
+
 		ts.updateVisualValue("occurences", operator + " " + value);
 	}
-	
+
 	//--------------------------------------------------------
 	// getters and setters for serialization
 	//--------------------------------------------------------

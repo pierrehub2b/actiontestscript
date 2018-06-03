@@ -20,6 +20,7 @@ under the License.
 package com.ats.executor.drivers.engines.browsers;
 
 import java.net.URL;
+import java.util.ArrayList;
 
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
@@ -28,7 +29,9 @@ import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.remote.CapabilityType;
 
 import com.ats.driver.AtsManager;
+import com.ats.element.FoundElement;
 import com.ats.executor.ActionStatus;
+import com.ats.executor.SendKeyData;
 import com.ats.executor.TestElement;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
@@ -44,7 +47,7 @@ public class EdgeDriverEngine extends WebDriverEngine {
 		super(channel, DriverManager.EDGE_BROWSER, driverProcess, windowsDriver, ats, DEFAULT_WAIT);
 		
 		EdgeOptions options = new EdgeOptions();
-		options.setPageLoadStrategy("normal");
+		options.setPageLoadStrategy("eager");
 		options.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
 
 		launchDriver(options);
@@ -75,20 +78,41 @@ public class EdgeDriverEngine extends WebDriverEngine {
 	
 	@Override
 	public void switchToDefaultContent() {
-		channel.sleep(300);
+		channel.sleep(150);
 		super.switchToDefaultContent();
+		channel.sleep(150);
 	}
 
 	@Override
 	protected void switchToWindowHandle(String handle) {
-		channel.sleep(300);
+		channel.sleep(150);
 		super.switchToWindowHandle(handle);
+		channel.sleep(150);
 	}
 
 	@Override
 	protected void switchToFrame(WebElement we) {
-		channel.sleep(300);
+		channel.sleep(150);
 		super.switchToFrame(we);
+		channel.sleep(150);
+	}
+
+	@Override
+	public void sendTextData(ActionStatus status, FoundElement element, ArrayList<SendKeyData> textActionList, boolean clear) {
+		boolean enterKey = false;
+		if(clear) {
+			clearText(status, element.getValue());
+		}
+		for(SendKeyData sequence : textActionList) {
+			element.getValue().sendKeys(sequence.getSequence());
+			if(sequence.isEnterKey()) {
+				enterKey = true;
+			}
+		}
+		
+		if(enterKey) {
+			channel.sleep(300);
+		}
 	}
 
 	@Override
