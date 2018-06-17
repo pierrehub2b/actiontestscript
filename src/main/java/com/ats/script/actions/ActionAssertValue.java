@@ -88,9 +88,12 @@ public class ActionAssertValue extends ActionExecute {
 			status.setPassed(value1.getCalculated().equals(value2.getCalculated()));
 		}
 
-		if(!status.isPassed()) {
+		if(status.isPassed()) {
+			ts.updateVisualStatus(true);
+		}else {
 			status.setCode(ActionStatus.VALUES_COMPARE_FAIL);
 			status.setMessage("Value1 : '" + value1.getCalculated() + "' does not match Value2 : '" + value2.getCalculated() + "'");
+			ts.updateVisualValue(value1.getCalculated(), value2.getCalculated());
 		}
 		
 		status.updateDuration();

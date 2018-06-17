@@ -55,32 +55,28 @@ public class EdgeDriverEngine extends WebDriverEngine {
 
 	@Override
 	protected void setPosition(Point pt) {
-		channel.sleep(500);
+		channel.sleep(250);
 		super.setPosition(pt);
+		channel.sleep(250);
 	}
 
 	@Override
 	protected void setSize(Dimension dim) {
-		channel.sleep(500);
+		channel.sleep(250);
 		super.setSize(dim);
+		channel.sleep(250);
 	}
 
 	@Override
 	public void closeWindow(ActionStatus status, int index) {
 		channel.sleep(500);
 		super.closeWindow(status, index);
+		channel.sleep(500);
 	}
 	
 	@Override
 	public void middleClick(ActionStatus status, TestElement element) {
 		middleClickSimulation(status, element);
-	}
-	
-	@Override
-	public void switchToDefaultContent() {
-		channel.sleep(150);
-		super.switchToDefaultContent();
-		channel.sleep(150);
 	}
 
 	@Override

@@ -49,8 +49,7 @@ public class ActionChannelStart extends ActionChannel {
 		ts.startChannel(status, getName(), application.getCalculated());
 		status.updateDuration();
 		
-		ts.newVisual(this);
-		ts.updateVisualValue(getName(), application.getCalculated()); 
+		ts.updateVisualValue(getName(), application.getCalculated());
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

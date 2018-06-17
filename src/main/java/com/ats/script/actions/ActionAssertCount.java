@@ -93,9 +93,7 @@ public class ActionAssertCount extends ActionExecuteElement {
 
 		getTestElement().checkOccurrences(status, operator, value);
 
-		if(status.isPassed()) {
-			ts.updateVisualStatus(true);
-		}
+		ts.updateVisualStatus(status.isPassed());
 
 		status.getElement().setFoundElements(null);
 		status.updateDuration();

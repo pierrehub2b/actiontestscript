@@ -211,15 +211,16 @@ public class Script {
 		String value = null;
 		if(testParameters != null) {
 			value = testParameters.get(name);
+			if(value != null) {
+				return value;
+			}
 		}
 
-		if(value == null) {
-			value = System.getenv(name);
-		}
-		
+		value = System.getenv(name);
 		if(value != null) {
 			return value;
 		}
+
 		return defaultValue;
 	}
 

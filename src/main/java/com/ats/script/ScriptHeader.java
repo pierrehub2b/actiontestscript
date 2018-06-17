@@ -48,6 +48,7 @@ public class ScriptHeader {
 	private String projectPath = "";
 	private String packageName = "";
 	private String name = "";
+	private String id = "";
 
 	private List<String> groups = null;
 	private String description = "";
@@ -233,6 +234,14 @@ public class ScriptHeader {
 
 	public void setName(String value) {
 		this.name = value;
+	}
+	
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String value) {
+		this.id = value;
 	}
 
 	public String getPackageName() {

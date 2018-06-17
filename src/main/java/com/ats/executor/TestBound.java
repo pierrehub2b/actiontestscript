@@ -62,7 +62,6 @@ public class TestBound {
 		this.y += y;		
 	}
 	
-
 	public void update(ArrayList<Double> dim) {
 		this.x = dim.get(0);
 		this.y = dim.get(1);

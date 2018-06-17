@@ -141,6 +141,7 @@ public class ActionExecuteElement extends ActionExecute {
 
 		if(testElement.isValidated()) {
 			status.setPassed(true);
+			ts.updateVisualStatus(true);
 		}else {
 			status.setPassed(false);
 			status.setCode(ActionStatus.OBJECT_NOT_FOUND);

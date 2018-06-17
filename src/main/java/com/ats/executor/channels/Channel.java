@@ -43,7 +43,9 @@ import com.ats.executor.drivers.engines.DesktopDriverEngine;
 import com.ats.executor.drivers.engines.IDriverEngine;
 import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.MouseDirection;
+import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
+import com.ats.script.ScriptHeader;
 import com.ats.script.actions.ActionGotoUrl;
 
 public class Channel {
@@ -87,7 +89,6 @@ public class Channel {
 		this.desktopDriver = new DesktopDriver(driverManager);
 		this.engine = driverManager.getDriverEngine(this, application, this.desktopDriver);
 		
-
 		this.refreshLocation();
 	}
 	
@@ -147,6 +148,10 @@ public class Channel {
 		if(procs.isPresent()) {
 			this.process = procs.get();
 		}
+	}
+	
+	public void switchToFrame(String id) {
+		engine.switchToFrame(id);
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------
@@ -413,5 +418,45 @@ public class Channel {
 
 	public String getCurrentUrl() {
 		return engine.getCurrentUrl();
+	}
+
+	//----------------------------------------------------------------------------------------------------------
+	// Visual reporting
+	//----------------------------------------------------------------------------------------------------------
+
+	public void startVisualRecord(String outputPath, ScriptHeader script, int quality) {
+		getDesktopDriver().startVisualRecord(this, outputPath, script, quality);
+	}
+	
+	public void stopVisualRecord() {
+		getDesktopDriver().stopVisualRecord();
+	}
+
+	public void createVisualAction(String actionName, int scriptLine) {
+		getDesktopDriver().createVisualAction(this, actionName, scriptLine);
+	}
+
+	public void updateVisualImage() {
+		getDesktopDriver().updateVisualImage(dimension);
+	}
+
+	public void updateVisualValue(String value) {
+		getDesktopDriver().updateVisualValue(value);
+	}
+
+	public void updateVisualData(String value, String data) {
+		getDesktopDriver().updateVisualData(value, data);
+	}
+
+	public void updateVisualPosition(String type, MouseDirectionData hdir, MouseDirectionData vdir) {
+		getDesktopDriver().updateVisualPosition(type, hdir, vdir);
+	}
+
+	public void updateVisualStatus(boolean value) {
+		getDesktopDriver().updateVisualStatus(value);
+	}
+
+	public void updateVisualElement(TestElement element) {
+		getDesktopDriver().updateVisualElement(element);
 	}
 }

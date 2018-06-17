@@ -32,7 +32,6 @@ public class ResourceContent {
 	private static String scrollElementJavaScript;
 	private static String searchElementsJavaScript;
 	private static String documentSizeJavaScript;
-	private static String hoverElementJavaScript;
 	private static String elementAttributesJavaScript;
 	private static String parentElementJavaScript;
 	private static String elementCssJavaScript;
@@ -45,7 +44,6 @@ public class ResourceContent {
 		scrollElementJavaScript = getScript("scrollElement");
 		searchElementsJavaScript = getScript("searchElements");
 		documentSizeJavaScript = getScript("documentSize");
-		hoverElementJavaScript = getScript("hoverElement");
 		elementAttributesJavaScript = getScript("elementAttributes");
 		parentElementJavaScript = getScript("parentElement");
 		elementCssJavaScript = getScript("elementCss");
@@ -120,10 +118,6 @@ public class ResourceContent {
 
 	public static String getDocumentSizeJavaScript() {
 		return documentSizeJavaScript;
-	}
-
-	public static String getHoverElementJavaScript() {
-		return hoverElementJavaScript;
 	}
 
 	public static String getElementAttributesJavaScript() {

@@ -21,7 +21,6 @@ package com.ats.executor.drivers.engines.browsers;
 
 import java.net.URL;
 
-import org.openqa.selenium.NoSuchWindowException;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 

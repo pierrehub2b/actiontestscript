@@ -95,7 +95,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			AtsManager ats,
 			int defaultWait) {
 
-		super(channel, browser, ats, defaultWait);
+		super(channel, browser, ats.getBrowserProperties(browser), defaultWait);
 
 		this.driverProcess = driverProcess;
 		this.desktopDriver = desktopDriver;
@@ -148,6 +148,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		String applicationVersion = "N/A";
 		String driverVersion = null;
+		
 		Map<String, ?> infos = (this.driver).getCapabilities().asMap();
 		for (Map.Entry<String, ?> entry : infos.entrySet()){
 			if("browserVersion".equals(entry.getKey()) || "version".equals(entry.getKey())){
@@ -259,7 +260,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		}else {
 
-			//switchToDefaultContent();
+			switchToDefaultContent();
 
 			x -= channel.getSubDimension().getX();
 			y -= channel.getSubDimension().getY();
@@ -271,7 +272,8 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	private FoundElement loadElement(Double x, Double y, Double offsetX, Double offsetY) {
 
 		@SuppressWarnings("unchecked")
-		Map<String, Object> objectData = (Map<String, Object>) runJavaScript(ResourceContent.getHoverElementJavaScript(), x - offsetX, y - offsetY);
+		Map<String, Object> objectData = (Map<String, Object>)driver.executeScript("var e=document.elementFromPoint(" + (x - offsetX) + "," + (y - offsetY) + ");if(e){var r=e.getBoundingClientRect();return {value:e,tag:e.tagName,x:r.left+0.00001,y:r.top+0.00001,width:r.width+0.00001,height:r.height+0.00001};};return null;");
+				
 		if(objectData != null){
 
 			if(FoundElement.IFRAME.equals(objectData.get("tag"))){
@@ -590,14 +592,22 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		try {
 			driver.switchTo().defaultContent();
 		}catch (NoSuchWindowException e) {
-			switchWindow(0);
+			//switchWindow(0);
 		}
+	}
+	
+	@Override
+	public void switchToFrame(String id) {
+		RemoteWebElement rwe = new RemoteWebElement();
+		rwe.setId(id);
+		rwe.setParent(driver);
+		switchToFrame(rwe);
 	}
 
 	protected void switchToFrame(WebElement we) {
 		driver.switchTo().frame(we);
 	}
-
+	
 	//-----------------------------------------------------------------------------------------------------------------------------------
 	// Window management
 	//-----------------------------------------------------------------------------------------------------------------------------------
@@ -786,6 +796,8 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		}else {
 			driver.executeScript("var result=window.location.assign('" + url.toString() + "')");
 		}
+		channel.sleep(200);
+		waitReadyState();
 	}
 
 	@SuppressWarnings("unchecked")

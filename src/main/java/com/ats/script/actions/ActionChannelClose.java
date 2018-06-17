@@ -42,6 +42,7 @@ public class ActionChannelClose extends ActionChannel {
 	@Override
 	public void execute(ActionTestScript ts) {
 		super.execute(ts);
+
 		ts.updateVisualValue(getName());
 		
 		status.resetDuration();

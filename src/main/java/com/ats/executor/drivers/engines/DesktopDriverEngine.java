@@ -62,7 +62,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 
 	public DesktopDriverEngine(Channel channel, String application, DesktopDriver desktopDriver, AtsManager ats) {
 
-		super(channel, application, ats, DEFAULT_WAIT);
+		super(channel, application, ats.getApplicationProperties(application), DEFAULT_WAIT);
 		
 		this.driver = desktopDriver;
 
@@ -357,4 +357,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	public String getCurrentUrl() {
 		return null;
 	}
+
+	@Override
+	public void switchToFrame(String id) {}
 }

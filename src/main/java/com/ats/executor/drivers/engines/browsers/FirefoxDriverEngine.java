@@ -69,10 +69,12 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		initElementY = 4.0;
 
 		DesiredCapabilities cap = new DesiredCapabilities();
-
+		
 		FirefoxOptions options = new FirefoxOptions();
-		options.setCapability(FirefoxDriver.MARIONETTE, false);
-		options.setPageLoadStrategy(PageLoadStrategy.NORMAL);
+		options.setCapability(FirefoxDriver.MARIONETTE, true);
+		options.setCapability("acceptSslCerts ","true");
+		options.setCapability("acceptInsecureCerts ","true");
+		options.setPageLoadStrategy(PageLoadStrategy.EAGER);
 
 		if(applicationPath != null) {
 			options.setBinary(applicationPath);
@@ -93,21 +95,17 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	}
 
 	@Override
-	public void switchToDefaultContent() {
-		channel.sleep(200);
-		super.switchToDefaultContent();
-	}
-
-	@Override
 	protected void switchToWindowHandle(String handle) {
-		channel.sleep(200);
+		channel.sleep(150);
 		super.switchToWindowHandle(handle);
+		channel.sleep(150);
 	}
 
 	@Override
 	protected void switchToFrame(WebElement we) {
-		channel.sleep(200);
+		channel.sleep(150);
 		super.switchToFrame(we);
+		channel.sleep(150);
 	}
 
 	@Override

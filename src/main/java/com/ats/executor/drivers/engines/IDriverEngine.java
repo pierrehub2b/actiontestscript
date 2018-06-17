@@ -78,4 +78,5 @@ public interface IDriverEngine{
 	public void navigationBack();
 	public String getCurrentUrl();
 	public void setWindowToFront();
+	public void switchToFrame(String id);
 }

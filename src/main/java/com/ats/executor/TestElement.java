@@ -289,6 +289,10 @@ public class TestElement{
 			return false;
 		}
 	}
+	
+	public String getElementTag() {
+		return elementTag;
+	}
 
 	//----------------------------------------------------------------------------------------------------------------------
 	// Getter and setter for serialization

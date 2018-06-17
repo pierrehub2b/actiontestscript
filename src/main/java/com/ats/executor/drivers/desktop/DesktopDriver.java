@@ -20,8 +20,10 @@ under the License.
 package com.ats.executor.drivers.desktop;
 
 import java.awt.Rectangle;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -34,9 +36,13 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 import com.ats.element.FoundElement;
 import com.ats.executor.TestBound;
+import com.ats.executor.TestElement;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
+import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
+import com.ats.script.ScriptHeader;
+import com.ats.script.actions.ActionChannelStart;
 import com.exadel.flamingo.flex.messaging.amf.io.AMF3Deserializer;
 
 public class DesktopDriver extends RemoteWebDriver {
@@ -53,10 +59,14 @@ public class DesktopDriver extends RemoteWebDriver {
 		this.driverPort = driverManager.getDesktopDriver().getDriverServerUrl().getPort();
 	}
 
+	//------------------------------------------------------------------------------------------------------------
+	// Enum types
+	//------------------------------------------------------------------------------------------------------------
+
 	public enum CommandType
 	{
 		Version (0),
-		ScreenShot (1),
+		Record (1),
 		Window (2),
 		Element (3),
 		Keyboard (4),
@@ -69,7 +79,7 @@ public class DesktopDriver extends RemoteWebDriver {
 
 		public String toString(){ return this.type + ""; }
 	};
-	
+
 	public enum MouseType
 	{
 		Move (0),
@@ -88,7 +98,7 @@ public class DesktopDriver extends RemoteWebDriver {
 
 		public String toString(){ return this.type + ""; }
 	};
-	
+
 	public enum KeyType
 	{
 		Clear (0),
@@ -103,7 +113,7 @@ public class DesktopDriver extends RemoteWebDriver {
 
 		public String toString(){ return this.type + ""; }
 	};
-	
+
 	public enum WindowType
 	{
 		Pid (0),
@@ -122,7 +132,7 @@ public class DesktopDriver extends RemoteWebDriver {
 
 		public String toString(){ return this.type + ""; }
 	};
-	
+
 	public enum ElementType
 	{
 		Childs (0),
@@ -138,6 +148,30 @@ public class DesktopDriver extends RemoteWebDriver {
 		public String toString(){ return this.type + ""; }
 	};
 
+	public enum RecordType
+	{
+		Stop (0),
+		Screenshot (1),
+		Start (2),
+		Create (3),
+		Image (4),
+		Value (5),
+		Data(6),
+		Status(7),
+		Element(8),
+		Position(9);
+
+		private final int type;
+		RecordType(int value){
+			this.type = value;
+		}
+
+		public String toString(){ return this.type + ""; }
+	};
+
+	//------------------------------------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------------------------------------
+
 	public String getDriverHost() {
 		return driverHost;
 	}
@@ -145,7 +179,7 @@ public class DesktopDriver extends RemoteWebDriver {
 	public int getDriverPort() {
 		return driverPort;
 	}
-	
+
 	public void clearText() {
 		sendRequestCommand(CommandType.Keyboard, KeyType.Clear);
 	}
@@ -153,27 +187,27 @@ public class DesktopDriver extends RemoteWebDriver {
 	public void sendKeys(String data) {
 		sendRequestCommand(CommandType.Keyboard, KeyType.Enter, data);
 	}
-	
+
 	public void mouseMove(int x, int y) {
 		sendRequestCommand(CommandType.Mouse, MouseType.Move, x, y);
 	}
-	
+
 	public void mouseClick() {
 		sendRequestCommand(CommandType.Mouse, MouseType.Click);
 	}
-	
+
 	public void mouseMiddleClick() {
 		sendRequestCommand(CommandType.Mouse, MouseType.MiddleClick);
 	}
-	
+
 	public void mouseRightClick() {
 		sendRequestCommand(CommandType.Mouse, MouseType.RightClick);
 	}
-	
+
 	public void mouseClick(int key) {
 		sendRequestCommand(CommandType.Mouse, MouseType.Click, key);
 	}
-	
+
 	public void mouseDown() {
 		sendRequestCommand(CommandType.Mouse, MouseType.Down);
 	}
@@ -181,23 +215,23 @@ public class DesktopDriver extends RemoteWebDriver {
 	public void mouseRelease() {
 		sendRequestCommand(CommandType.Mouse, MouseType.Release);
 	}
-	
+
 	public void mouseWheel(int delta) {
 		sendRequestCommand(CommandType.Mouse, MouseType.Wheel, delta);
 	}
-	
+
 	public void doubleClick() {
 		sendRequestCommand(CommandType.Mouse, MouseType.DoubleClick);
 	}
-	
+
 	public void keyDown(int codePoint) {
 		sendRequestCommand(CommandType.Keyboard, KeyType.Down, codePoint);
 	}
-	
+
 	public void keyUp(int codePoint) {
 		sendRequestCommand(CommandType.Keyboard, KeyType.Release, codePoint);
 	}
-	
+
 	//---------------------------------------------------------------------------------------------------------------------------
 	// get elements
 	//---------------------------------------------------------------------------------------------------------------------------
@@ -412,17 +446,101 @@ public class DesktopDriver extends RemoteWebDriver {
 		}
 	}
 
+	//---------------------------------------------------------------------------------------
+	//visual actions
+	//---------------------------------------------------------------------------------------
+
+	public void stopVisualRecord() {
+		sendRequestCommand(CommandType.Record, RecordType.Stop);
+	}
+
 	public byte[] getScreenshotByte(Double x, Double y, Double w, Double h){
-		DesktopResponse resp = sendRequestCommand(CommandType.ScreenShot, x.intValue(), y.intValue(), w.intValue(), h.intValue());
+		DesktopResponse resp = sendRequestCommand(CommandType.Record, RecordType.Screenshot, x.intValue(), y.intValue(), w.intValue(), h.intValue());
 		return resp.image;
 	}
+
+	public void startVisualRecord(Channel channel, 
+			String absolutePath, ScriptHeader script, int quality) {
+		
+		sendRequestCommand(CommandType.Record, RecordType.Start, absolutePath, script.getId(), script.getQualifiedName(), script.getDescription(), script.getAuthor(), String.join(",", script.getGroups()), script.getPrerequisite(), quality);
+		
+		createVisualAction(channel, ActionChannelStart.class.getName(), 0);
+	}
+
+	public void createVisualAction(Channel channel, String actionType, int scriptLine) {
+		sendRequestCommand(CommandType.Record, RecordType.Create, actionType, scriptLine, 
+				channel.getName(), channel.getDimension().getX().intValue(), channel.getDimension().getY().intValue(), channel.getDimension().getWidth().intValue(), channel.getDimension().getHeight().intValue());
+	}
+
+	public void updateVisualImage(TestBound dimension) {
+		sendRequestCommand(CommandType.Record, RecordType.Image, dimension.getX().intValue(), dimension.getY().intValue(), dimension.getWidth().intValue(), dimension.getHeight().intValue());
+	}
+
+	public void updateVisualValue(String value) {
+		sendRequestCommand(CommandType.Record, RecordType.Value, value);
+	}
+
+	public void updateVisualData(String value, String data) {
+		sendRequestCommand(CommandType.Record, RecordType.Data, value, data);
+	}
+
+	public void updateVisualStatus(boolean value) {
+		sendRequestCommand(CommandType.Record, RecordType.Status, value);
+	}
+
+	public void updateVisualElement(TestElement element) {
+		
+		Double x = 0.0;
+		Double y = 0.0;
+		Double w = 0.0;
+		Double h = 0.0;
+		
+		int numElements = element.getFoundElements().size();
+		
+		if(numElements > 0) {
+			TestBound bound = element.getFoundElements().get(0).getTestBound();
+			
+			x = bound.getX();
+			y = bound.getY();
+			w = bound.getWidth();
+			h = bound.getHeight();
+		}
+
+		sendRequestCommand(CommandType.Record, RecordType.Element, 
+				x.intValue(), y.intValue(), w.intValue(), h.intValue(), 
+				element.getTotalSearchDuration(), numElements, element.getCriterias(), element.getElementTag());
+	}
+
+	public void updateVisualPosition(String type, MouseDirectionData hdir, MouseDirectionData vdir) {
+
+		String hdirName = "";
+		int hdirValue = 0;
+
+		String vdirName = "";
+		int vdirValue = 0;
+
+		if(hdir != null) {
+			hdirName = hdir.getName();
+			hdirValue = hdir.getValue();
+		}
+
+		if(vdir != null) {
+			vdirName = vdir.getName();
+			vdirValue = vdir.getValue();
+		}
+
+		sendRequestCommand(CommandType.Record, RecordType.Position, hdirName, hdirValue, vdirName, vdirValue);
+	}
+
+	//---------------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------
 
 	private DesktopResponse sendRequestCommand(Object... request) {
 
 		DesktopResponse response = null;
 		String data = StringUtils.join(request, DESKTOP_REQUEST_SEPARATOR);
 		int maxTry = 30;
-		
+
 		while((response = sendRequest(data)) == null && maxTry > 0) {
 			try {
 				Thread.sleep(200);
@@ -431,14 +549,14 @@ public class DesktopDriver extends RemoteWebDriver {
 		}
 		return response;
 	}
-	
+
 	private DesktopResponse sendRequest(String data) {
-		
+
 		DesktopResponse response = null;
 		try {
 			Socket socket = new Socket(getDriverHost(), getDriverPort());
 
-			PrintWriter writer = new PrintWriter(socket.getOutputStream());
+			PrintWriter writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
 			writer.print(data);
 			writer.flush();
 

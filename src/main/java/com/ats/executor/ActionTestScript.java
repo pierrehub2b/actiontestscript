@@ -59,7 +59,7 @@ import com.ats.generator.variables.transform.NumericTransformer;
 import com.ats.generator.variables.transform.RegexpTransformer;
 import com.ats.generator.variables.transform.TimeTransformer;
 import com.ats.generator.variables.transform.Transformer;
-import com.ats.recorder.RecorderThread;
+import com.ats.recorder.VisualRecorder;
 import com.ats.script.ProjectData;
 import com.ats.script.Script;
 import com.ats.script.ScriptHeader;
@@ -132,19 +132,39 @@ public class ActionTestScript extends Script implements ITest{
 		}else {
 			
 			setTestParameters(runner.getTest().getAllParameters());
-			String visualReport = getEnvironmentValue("visual.report", "");
 			
-			if("true".equals(visualReport.trim().toLowerCase())) {
+			//-----------------------------------------------------------
+			// check report output specified
+			//-----------------------------------------------------------
+			
+			int visualQuality = 0;
+			boolean xml = false;
+			
+			String visualReport = getEnvironmentValue("visual.report", "0");
+			try {
+				visualQuality = Integer.parseInt(visualReport);
+			}catch(NumberFormatException e) {};
 
+			String xmlReport = getEnvironmentValue("xml.report", "");
+			xml = "true".equals(xmlReport.toLowerCase());
+			
+			if(visualQuality > 0 || xml) {
 				String outputDirectory = runner.getOutputDirectory();
 
+				if(visualQuality == 0) {
+					visualQuality = 3;
+				}
+				
 				File output = new File(outputDirectory);
 				if(!output.exists()) {
 					output.mkdirs();
 				}
-				setRecorder(new RecorderThread(output, testName, true, false, false));
+				setRecorder(new VisualRecorder(output, testName, visualQuality, xml));
 			}
-
+			
+			//-----------------------------------------------------------
+			//-----------------------------------------------------------
+			
 			setLogger(new ExecutionLogger(System.out, (int)ctx.getSuite().getXmlSuite().getVerbose()));
 			sendInfo("starting script", " '" + testName + "'");
 
@@ -542,10 +562,12 @@ public class ActionTestScript extends Script implements ITest{
 	public void startChannel(ActionStatus status, String name, String app){
 		getChannelManager().startChannel(status, name, app);
 		updateStatus(status);
+		updateRecorderChannel(getChannelManager().getCurrentChannel());
 	}
 
 	public void switchChannel(ActionStatus status, String name){
 		updateStatus(status, getChannelManager().switchChannel(name));
+		updateRecorderChannel(getChannelManager().getCurrentChannel());
 	}
 
 	public void closeChannel(ActionStatus status, String name){
@@ -621,34 +643,35 @@ public class ActionTestScript extends Script implements ITest{
 	//  - Animation recorder
 	//-----------------------------------------------------------------------------------------------------------
 
-	private RecorderThread recorder;
-	private boolean record = false;
+	private VisualRecorder recorder;
 	
-	public boolean isRecord() {
-		return topScript.record;
+	public void updateRecorderChannel(Channel channel) {
+		if(getRecorder() != null) {
+			getRecorder().setChannel(channel);
+		}
 	}
 	
-	public RecorderThread getRecorder() {
+	public boolean isRecord() {
+		return topScript.recorder != null && getCurrentChannel() != null;
+	}
+	
+	public VisualRecorder getRecorder() {
 		return topScript.recorder;
 	}
 
-	public void setRecorder(RecorderThread value) {
+	public void setRecorder(VisualRecorder value) {
 		if(value == null) {
 			if(this.recorder != null) {
 				this.recorder.terminate();
 				this.recorder = null;
 			}
-			this.record = false;
 		}else {
 			this.recorder = value;
-			this.record = true;
 		}
 	}
 
-	public void startRecorder(ScriptHeader info, boolean visual, boolean pdf, boolean xml) {
-		if(!isRecord()) {
-			topScript.setRecorder(new RecorderThread(info, projectData, visual, pdf, xml));
-		}
+	public void startRecorder(ScriptHeader info, int quality, boolean xml) {
+		topScript.setRecorder(new VisualRecorder(info, projectData, quality, xml));
 	}
 
 	public void stopRecorder() {
@@ -657,15 +680,9 @@ public class ActionTestScript extends Script implements ITest{
 		}
 	}
 
-	public void pauseRecorder(boolean value) {
-		if(isRecord()) {
-			getRecorder().setPause(value);
-		}
-	}
-
 	public void updateVisualImage() {
-		if(isRecord() && getCurrentChannel() != null) {
-			getRecorder().updateVisualImage(getCurrentChannel().getScreenShot());
+		if(isRecord()) {
+			getRecorder().updateVisualImage();
 		}
 	}
 
@@ -700,8 +717,8 @@ public class ActionTestScript extends Script implements ITest{
 	}	
 
 	public void newVisual(Action action) {
-		if(isRecord() && getCurrentChannel() != null) {
-			getRecorder().addVisual(getCurrentChannel(), action);
+		if(isRecord()) {
+			getRecorder().createVisualAction(action);
 		}
 	}
 }

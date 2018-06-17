@@ -58,6 +58,7 @@ public class AtsManager {
 
 	private static final int SCRIPT_TIMEOUT = 60;
 	private static final int PAGELOAD_TIMEOUT = 120;
+	private static final int WATCHDOG_TIMEOUT = 300;
 
 	private static final int MAX_TRY_INTERACTABLE = 15;
 	private static final int MAX_TRY_SEARCH = 15;
@@ -73,6 +74,7 @@ public class AtsManager {
 
 	private int scriptTimeOut = SCRIPT_TIMEOUT;
 	private int pageloadTimeOut = PAGELOAD_TIMEOUT;
+	private int watchDogTimeOut = WATCHDOG_TIMEOUT;
 
 	private int maxTryInteractable = MAX_TRY_INTERACTABLE;
 	private int maxTrySearch = MAX_TRY_SEARCH;
@@ -215,6 +217,17 @@ public class AtsManager {
 							try {
 								pageloadTimeOut = Integer.parseInt(timeOut.item(0).getChildNodes().item(0).getNodeValue());
 							}catch(NumberFormatException e){}
+						}
+						
+						timeOut = ((Element)timeOutNode.item(0)).getElementsByTagName("watchDog");
+						if(timeOut != null && timeOut.getLength() > 0) {
+							try {
+								watchDogTimeOut = Integer.parseInt(timeOut.item(0).getChildNodes().item(0).getNodeValue());
+							}catch(NumberFormatException e){}
+							
+							if(watchDogTimeOut < WATCHDOG_TIMEOUT) {
+								watchDogTimeOut = WATCHDOG_TIMEOUT;
+							}
 						}
 					}
 
@@ -361,6 +374,10 @@ public class AtsManager {
 
 	public int getPageloadTimeOut() {
 		return pageloadTimeOut;
+	}
+	
+	public int getWatchDogTimeOut() {
+		return watchDogTimeOut;
 	}
 
 	public TestBound getApplicationBound() {

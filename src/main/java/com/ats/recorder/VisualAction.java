@@ -15,10 +15,13 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.recorder;
 
+import java.beans.Transient;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -27,6 +30,7 @@ import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.script.actions.Action;
 import com.ats.script.actions.ActionComment;
+import com.google.common.io.Files;
 
 public class VisualAction {
 
@@ -37,21 +41,20 @@ public class VisualAction {
 
 	private ArrayList<byte[]> images;
 
+	private String imageType;
+
 	private String channelName;
-	private TestBound channelDimension;
+	private TestBound channelBound;
 
 	private String type;
 	private int line;
-	private String scriptName;
 	private String value = "";
 	private String data = "";
 	private MouseDirection position;
 
-	private TestBound elementBound;
-	private long totalSearchDuration;
-	private int numElements = -1;
+	private VisualElement element;
 
-	private String criterias;
+	public VisualAction() {}
 
 	public VisualAction(Channel channel, Action action) {
 
@@ -59,9 +62,6 @@ public class VisualAction {
 			this.images = new ArrayList<byte[]>();
 			this.images.add(channel.getScreenShot());		
 		}
-
-		this.channelName = channel.getName();
-		this.channelDimension = channel.getDimension();
 
 		this.type = action.getClass().getSimpleName();
 		this.line = action.getLine();
@@ -74,16 +74,88 @@ public class VisualAction {
 		}
 	}
 
+	public String getImageFileName() {
+		return index + "." + imageType;
+	}
+	
+	public void saveImageFile(Path folder) {
+		if(images.size() > 0) {
+			try {
+				Files.write(images.get(images.size()-1), folder.resolve(getImageFileName()).toFile());
+			} catch (IOException e) {}
+		}
+
+	}
+
 	//--------------------------------------------------------
 	// getters and setters for serialization
 	//--------------------------------------------------------
+	
+	public String getChannelName() {
+		return channelName;
+	}
 
+	public void setChannelName(String channelName) {
+		this.channelName = channelName;
+	}
+
+	public TestBound getChannelBound() {
+		return channelBound;
+	}
+
+	public void setChannelBound(TestBound channelBound) {
+		this.channelBound = channelBound;
+	}
+	
+	public String getData() {
+		return data;
+	}
+
+	public void setData(String value) {
+		if(value != null) {
+			this.data = value;
+		}
+	}
+		
+	public VisualElement getElement() {
+		return element;
+	}
+
+	public void setElement(VisualElement element) {
+		this.element = element;
+	}
+	
+	@Transient
+	public ArrayList<byte[]> getImages() {
+		return images;
+	}
+
+	public void setImages(ArrayList<byte[]> list) {
+		this.images = list;
+	}
+	
+	public String getImageType() {
+		return imageType;
+	}
+
+	public void setImageType(String imageType) {
+		this.imageType = imageType;
+	}
+	
 	public int getIndex() {
 		return index;
 	}
 
 	public void setIndex(int index) {
 		this.index = index;
+	}
+	
+	public int getLine() {
+		return line;
+	}
+
+	public void setLine(int line) {
+		this.line = line;
 	}
 
 	public boolean isPassed() {
@@ -92,6 +164,14 @@ public class VisualAction {
 
 	public void setPassed(boolean passed) {
 		this.passed = passed;
+	}
+	
+	public MouseDirection getPosition() {
+		return position;
+	}
+
+	public void setPosition(MouseDirection position) {
+		this.position = position;
 	}
 
 	public Long getTimeLine() {
@@ -102,52 +182,12 @@ public class VisualAction {
 		this.timeLine = timeLine;
 	}
 
-	public ArrayList<byte[]> getImages() {
-		return images;
-	}
-
-	public void setImages(ArrayList<byte[]> list) {
-		this.images = list;
-	}
-
-	public String getChannelName() {
-		return channelName;
-	}
-
-	public void setChannelName(String channelName) {
-		this.channelName = channelName;
-	}
-
-	public TestBound getChannelDimension() {
-		return channelDimension;
-	}
-
-	public void setChannelDimension(TestBound channelDimension) {
-		this.channelDimension = channelDimension;
-	}
-
 	public String getType() {
 		return type;
 	}
 
 	public void setType(String type) {
 		this.type = type;
-	}
-
-	public int getLine() {
-		return line;
-	}
-
-	public void setLine(int line) {
-		this.line = line;
-	}
-
-	public String getScriptName() {
-		return scriptName;
-	}
-
-	public void setScriptName(String scriptName) {
-		this.scriptName = scriptName;
 	}
 
 	public String getValue() {
@@ -158,55 +198,5 @@ public class VisualAction {
 		if(value != null) {
 			this.value = value;
 		}
-	}
-
-	public String getData() {
-		return data;
-	}
-
-	public void setData(String value) {
-		if(value != null) {
-			this.data = value;
-		}
-	}
-
-	public TestBound getElementBound() {
-		return elementBound;
-	}
-
-	public void setElementBound(TestBound elementBound) {
-		this.elementBound = elementBound;
-	}
-
-	public long getTotalSearchDuration() {
-		return totalSearchDuration;
-	}
-
-	public void setTotalSearchDuration(long totalSearchDuration) {
-		this.totalSearchDuration = totalSearchDuration;
-	}
-
-	public int getNumElements() {
-		return numElements;
-	}
-
-	public void setNumElements(int numElements) {
-		this.numElements = numElements;
-	}
-
-	public String getCriterias() {
-		return criterias;
-	}
-
-	public void setCriterias(String value) {
-		this.criterias = value;
-	}
-
-	public MouseDirection getPosition() {
-		return position;
-	}
-
-	public void setPosition(MouseDirection position) {
-		this.position = position;
 	}
 }
