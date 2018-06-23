@@ -56,14 +56,6 @@ public abstract class DriverEngineAbstract {
 			actionWait = defaultWait;
 		}
 	}
-	
-	public void switchToCurrentWindow() {
-		switchWindow(currentWindow);
-	}
-
-	public void switchWindow(int idx) {
-
-	}
 
 	public String getApplication() {
 		return application;

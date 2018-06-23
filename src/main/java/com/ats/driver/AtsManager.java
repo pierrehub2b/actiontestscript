@@ -60,7 +60,6 @@ public class AtsManager {
 	private static final int PAGELOAD_TIMEOUT = 120;
 	private static final int WATCHDOG_TIMEOUT = 300;
 
-	private static final int MAX_TRY_INTERACTABLE = 15;
 	private static final int MAX_TRY_SEARCH = 15;
 
 	private Path driversFolderPath;
@@ -76,7 +75,6 @@ public class AtsManager {
 	private int pageloadTimeOut = PAGELOAD_TIMEOUT;
 	private int watchDogTimeOut = WATCHDOG_TIMEOUT;
 
-	private int maxTryInteractable = MAX_TRY_INTERACTABLE;
 	private int maxTrySearch = MAX_TRY_SEARCH;
 
 	private Proxy proxy = new Proxy();
@@ -239,13 +237,6 @@ public class AtsManager {
 								maxTrySearch = Integer.parseInt(maxTryNode.item(0).getChildNodes().item(0).getNodeValue());
 							}catch(NumberFormatException e){}
 						}
-
-						maxTryNode = ((Element)maxTryNodeList.item(0)).getElementsByTagName("interactable");
-						if(maxTryNode != null && maxTryNode.getLength() > 0) {
-							try {
-								maxTryInteractable = Integer.parseInt(maxTryNode.item(0).getChildNodes().item(0).getNodeValue());
-							}catch(NumberFormatException e){}
-						}
 					}
 
 					NodeList proxyNode = doc.getElementsByTagName("proxy");
@@ -390,10 +381,6 @@ public class AtsManager {
 
 	public Path getDriversFolderPath() {
 		return driversFolderPath;
-	}
-
-	public int getMaxTryInteractable() {
-		return maxTryInteractable;
 	}
 
 	public int getMaxTrySearch() {

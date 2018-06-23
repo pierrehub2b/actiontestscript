@@ -81,6 +81,7 @@ public class ActionTestScript extends Script implements ITest{
 	private String[] returnValues;
 
 	private String testName;
+	protected ScriptHeader getHeader() {return null;}
 
 	public ActionTestScript() {
 		init();
@@ -159,7 +160,11 @@ public class ActionTestScript extends Script implements ITest{
 				if(!output.exists()) {
 					output.mkdirs();
 				}
-				setRecorder(new VisualRecorder(output, testName, visualQuality, xml));
+			
+				ScriptHeader header = getHeader();
+				header.setName(getTestName());
+				header.setAtsVersion(AtsManager.getVersion());
+				setRecorder(new VisualRecorder(output, header, visualQuality, xml));
 			}
 			
 			//-----------------------------------------------------------
@@ -185,6 +190,7 @@ public class ActionTestScript extends Script implements ITest{
 
 	@AfterTest(alwaysRun=true)
 	public void testFinished() {
+		setRecorder(null);
 		tearDown();
 	}
 
@@ -245,9 +251,6 @@ public class ActionTestScript extends Script implements ITest{
 
 	public void tearDown(){
 		sendInfo("script's execution terminated", ", closing drivers ...");
-		if(isRecord()) {
-			setRecorder(null);
-		}
 		getChannelManager().tearDown();
 	}
 
@@ -694,6 +697,13 @@ public class ActionTestScript extends Script implements ITest{
 
 	public void updateVisualValue(String value) {
 		if(isRecord()) {
+			getRecorder().updateVisualValue(value);
+		}
+	}
+	
+	public void updateVisualValueAndImage(String value) {
+		if(isRecord()) {
+			getRecorder().updateVisualImage();
 			getRecorder().updateVisualValue(value);
 		}
 	}

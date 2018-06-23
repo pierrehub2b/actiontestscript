@@ -34,7 +34,6 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebElement;
@@ -57,7 +56,7 @@ import com.google.gson.JsonObject;
 
 public class FirefoxDriverEngine extends WebDriverEngine {
 
-	private final static int DEFAULT_WAIT = 200;
+	private final static int DEFAULT_WAIT = 150;
 
 	private final String WEB_ELEMENT_REF = "element-6066-11e4-a52e-4f735466cecf";
 	private java.net.URI driverSessionUri;
@@ -66,12 +65,10 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	public FirefoxDriverEngine(Channel channel, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
 		super(channel, DriverManager.FIREFOX_BROWSER, driverProcess, windowsDriver, ats, DEFAULT_WAIT);
 
-		initElementY = 4.0;
-
 		DesiredCapabilities cap = new DesiredCapabilities();
-		
+
 		FirefoxOptions options = new FirefoxOptions();
-		options.setCapability(FirefoxDriver.MARIONETTE, true);
+		options.setCapability("marionnette ","true");
 		options.setCapability("acceptSslCerts ","true");
 		options.setCapability("acceptInsecureCerts ","true");
 		options.setPageLoadStrategy(PageLoadStrategy.EAGER);
@@ -85,9 +82,9 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		launchDriver(cap);
 
 		requestConfig = RequestConfig.custom()
-				.setConnectTimeout(20 * 1000)
-				.setConnectionRequestTimeout(20 * 1000)
-				.setSocketTimeout(20 * 1000).build();
+				.setConnectTimeout(2000)
+				.setConnectionRequestTimeout(2000)
+				.setSocketTimeout(2000).build();
 		try {
 			driverSessionUri = new URI(driverProcess.getDriverServerUrl() + "/session/" + driver.getSessionId().toString() + "/actions");
 		} catch (URISyntaxException e) {}
@@ -96,16 +93,14 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 
 	@Override
 	protected void switchToWindowHandle(String handle) {
-		channel.sleep(150);
 		super.switchToWindowHandle(handle);
-		channel.sleep(150);
+		actionWait();
 	}
 
 	@Override
 	protected void switchToFrame(WebElement we) {
-		channel.sleep(150);
 		super.switchToFrame(we);
-		channel.sleep(150);
+		actionWait();
 	}
 
 	@Override
@@ -133,10 +128,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	}
 
 	@Override
-	public void sendTextData(ActionStatus status, FoundElement element, ArrayList<SendKeyData> textActionList, boolean clear) {
-		if(clear) {
-			clearText(status, element.getValue());
-		}
+	public void sendTextData(ActionStatus status, FoundElement element, ArrayList<SendKeyData> textActionList) {
 		for(SendKeyData sequence : textActionList) {
 			element.getValue().sendKeys(sequence.getSequenceFirefox());
 		}
@@ -144,11 +136,72 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 
 	@Override
 	protected void move(WebElement element, int offsetX, int offsetY) {
+		JsonArray actionList = new JsonArray();
+		actionList.add(getMoveAction(((RemoteWebElement)element).getId(), offsetX, offsetY));
+		
+		executeAction(getElementAction(actionList));
+	}
 
-		JsonObject postData = getElementAction((RemoteWebElement)element,offsetX, offsetY);
+	@Override
+	protected void click() {
+		JsonArray actionList = new JsonArray();
+		actionList.add(getMouseClickAction("pointerDown"));
+		actionList.add(getMouseClickAction("pointerUp"));
+
+		executeAction(getElementAction(actionList));
+	}
+
+	private JsonObject getMouseClickAction(String type) {
+		JsonObject action = new JsonObject();
+		action.addProperty("type", type);
+		action.addProperty("button", 0);
+		return action;
+	}
+
+	private JsonObject getMoveAction(String elemId, int offsetX, int offsetY) {
+		JsonObject action = new JsonObject();
+		action.addProperty("duration", 200);
+		action.addProperty("x", offsetX);
+		action.addProperty("y", offsetY);
+		action.addProperty("type", "pointerMove");
+		action.add("origin", getElementOrigin(elemId));
+		return action;
+	}
+
+	private JsonObject getElementOrigin(String elemId) {
+		JsonObject origin = new JsonObject();
+		origin.addProperty("ELEMENT", elemId);
+		origin.addProperty(WEB_ELEMENT_REF, elemId);
+		return origin;
+	}
+
+	private JsonObject getElementAction(JsonArray actionList) {
+
+		JsonObject parameters = new JsonObject();
+		parameters.addProperty("pointerType", "mouse");
+
+		JsonObject actions = new JsonObject();
+
+		actions.addProperty("id", "default mouse");
+		actions.addProperty("type", "pointer");
+
+		actions.add("parameters", parameters);
+		actions.add("actions", actionList);
+
+		JsonArray chainedAction = new JsonArray();
+		chainedAction.add(actions);
+
+		JsonObject postData = new JsonObject();
+		postData.add("actions", chainedAction);
+
+		return postData;
+	}
+
+	private void executeAction(JsonObject action) {
+
 		StringEntity postDataEntity = null;
 		try {
-			postDataEntity = new StringEntity(postData.toString());
+			postDataEntity = new StringEntity(action.toString());
 		} catch (UnsupportedEncodingException e) {
 			return;
 		}
@@ -174,42 +227,5 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 				httpClient.close();
 			} catch (IOException e) {}
 		}
-	}
-
-	private JsonObject getElementAction(RemoteWebElement elem, int offsetX, int offsetY) {
-
-		String elemId = elem.getId();
-
-		JsonObject origin = new JsonObject();
-		origin.addProperty("ELEMENT", elemId);
-		origin.addProperty(WEB_ELEMENT_REF, elemId);
-
-		JsonObject action = new JsonObject();
-		action.addProperty("duration", 200);
-		action.addProperty("x", offsetX);
-		action.addProperty("y", offsetY);
-		action.addProperty("type", "pointerMove");
-		action.add("origin", origin);
-
-		JsonArray actionList = new JsonArray();
-		actionList.add(action);
-
-		JsonObject parameters = new JsonObject();
-		parameters.addProperty("pointerType", "mouse");
-
-		JsonObject actions = new JsonObject();
-		actions.addProperty("id", "default mouse");
-		actions.addProperty("type", "pointer");
-		actions.add("parameters", parameters);
-
-		actions.add("actions", actionList);
-
-		JsonArray chainedAction = new JsonArray();
-		chainedAction.add(actions);
-
-		JsonObject postData = new JsonObject();
-		postData.add("actions", chainedAction);
-
-		return postData;
 	}
 }

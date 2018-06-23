@@ -21,6 +21,8 @@ package com.ats.executor.drivers.engines.browsers;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.function.Predicate;
 
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
@@ -46,32 +48,35 @@ public class EdgeDriverEngine extends WebDriverEngine {
 	public EdgeDriverEngine(Channel channel, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
 		super(channel, DriverManager.EDGE_BROWSER, driverProcess, windowsDriver, ats, DEFAULT_WAIT);
 		
+		this.searchElementScript = "var interval=setInterval(function(){if(window.document.readyState==='complete'){clearInterval(interval);done();}},200);" + this.searchElementScript;
+		
 		EdgeOptions options = new EdgeOptions();
-		options.setPageLoadStrategy("eager");
 		options.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
+		options.setCapability(CapabilityType.ACCEPT_INSECURE_CERTS, true);
+		options.setPageLoadStrategy("eager");
 
 		launchDriver(options);
 	}
 
 	@Override
 	protected void setPosition(Point pt) {
-		channel.sleep(250);
+		actionWait();
 		super.setPosition(pt);
-		channel.sleep(250);
+		actionWait();
 	}
 
 	@Override
 	protected void setSize(Dimension dim) {
-		channel.sleep(250);
+		actionWait();
 		super.setSize(dim);
-		channel.sleep(250);
+		actionWait();
 	}
 
 	@Override
 	public void closeWindow(ActionStatus status, int index) {
-		channel.sleep(500);
+		actionWait();
 		super.closeWindow(status, index);
-		channel.sleep(500);
+		actionWait();
 	}
 	
 	@Override
@@ -81,24 +86,22 @@ public class EdgeDriverEngine extends WebDriverEngine {
 
 	@Override
 	protected void switchToWindowHandle(String handle) {
-		channel.sleep(150);
+		actionWait();
 		super.switchToWindowHandle(handle);
-		channel.sleep(150);
+		actionWait();
 	}
 
 	@Override
 	protected void switchToFrame(WebElement we) {
-		channel.sleep(150);
+		actionWait();
 		super.switchToFrame(we);
-		channel.sleep(150);
+		actionWait();
 	}
 
 	@Override
-	public void sendTextData(ActionStatus status, FoundElement element, ArrayList<SendKeyData> textActionList, boolean clear) {
+	public void sendTextData(ActionStatus status, FoundElement element, ArrayList<SendKeyData> textActionList) {
 		boolean enterKey = false;
-		if(clear) {
-			clearText(status, element.getValue());
-		}
+
 		for(SendKeyData sequence : textActionList) {
 			element.getValue().sendKeys(sequence.getSequence());
 			if(sequence.isEnterKey()) {
@@ -107,8 +110,21 @@ public class EdgeDriverEngine extends WebDriverEngine {
 		}
 		
 		if(enterKey) {
-			channel.sleep(300);
+			actionWait();
 		}
+	}
+	
+	@Override
+	public ArrayList<FoundElement> findWebElement(Channel channel, TestElement testObject, String tagName,
+			String[] attributes, Predicate<Map<String, Object>> predicate) {
+		
+		int maxTry = 40;
+		while(!((Boolean)runJavaScript("var result=window.document.readyState=='complete';")) && maxTry > 0) {
+			channel.sleep(200);
+			maxTry--;
+		}
+		
+		return super.findWebElement(channel, testObject, tagName, attributes, predicate);
 	}
 
 	@Override

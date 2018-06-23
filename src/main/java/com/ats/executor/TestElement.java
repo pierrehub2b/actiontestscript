@@ -29,7 +29,6 @@ import java.util.function.Predicate;
 import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
@@ -193,7 +192,7 @@ public class TestElement{
 					foundElements = channel.findDesktopElement(parentId, tag, properties);
 					
 				}else{
-
+					
 					int trySearch = 0;
 
 					ArrayList<String> attributeList = new ArrayList<String>();
@@ -376,10 +375,12 @@ public class TestElement{
 	// Text ...
 	//-------------------------------------------------------------------------------------------------------------------
 
-	public void sendText(ActionStatus status, boolean clear, CalculatedValue text) {
-		if(status.isPassed()) {
-			channel.sendTextData(status, getFoundElement(), text.getCalculatedText(), clear);
-		}
+	public void sendText(ActionStatus status, CalculatedValue text) {
+		channel.sendTextData(status, getFoundElement(), text.getCalculatedText());
+	}
+	
+	public void clearText(ActionStatus status) {
+		channel.clearText(status, getFoundElement());
 	}
 
 	//-------------------------------------------------------------------------------------------------------------------
@@ -441,7 +442,7 @@ public class TestElement{
 				searchAgain();
 				over(status, position);
 			}
-						
+
 		}else{
 			status.setPassed(false);
 			status.setCode(ActionStatus.OBJECT_NOT_FOUND);
@@ -472,7 +473,7 @@ public class TestElement{
 
 		try {
 
-			channel.mouseClick(hold);
+			channel.mouseClick(getFoundElement(), hold);
 			status.setPassed(true);
 
 			return;
@@ -482,13 +483,13 @@ public class TestElement{
 			status.setCode(ActionStatus.OBJECT_NOT_VISIBLE);
 			mouseWheel(0);
 
-		}catch(WebDriverException e0) {	
+		}/*catch(WebDriverException e0) {	
 			if(e0.getMessage().contains("is not clickable") || e0.getMessage().contains("Element is obscured")) {
 				status.setCode(ActionStatus.OBJECT_NOT_INTERACTABLE);
 			}
 		}catch (Exception e) {
 			status.setMessage(e.getMessage());
-		}
+		}*/
 	}
 
 	public void drag(ActionStatus status) {

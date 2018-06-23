@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.script.actions;
 
@@ -89,20 +89,21 @@ public class ActionText extends ActionExecuteElement {
 			dataText = text.getCalculated();
 		}
 
-		ts.updateVisualValue(dataText);
-
 		status.resetDuration();
 
 		getTestElement().over(status, new MouseDirection());
 		if(status.isPassed()) {
 			getTestElement().click(status, false);
 			if(status.isPassed()) {
-				getTestElement().sendText(status, insert == -1, text);
+				getTestElement().clearText(status);
+				if(status.isPassed()) {
+					ts.updateVisualValueAndImage(dataText);
+					getTestElement().sendText(status, text);
+				}
 			}
 		}
 
 		status.updateDuration();
-
 		ts.updateVisualImage();
 	}
 

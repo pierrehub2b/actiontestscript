@@ -38,14 +38,16 @@ public class ScriptParser {
 	public static final String ATS_ASSIGN_SEPARATOR = "=>";
 	public static final String ATS_PROPERTIES_FILE = ".atsProjectProperties";
 
+	public static final String SCRIPT_ID = "id";
 	public static final String SCRIPT_GROUPS_LABEL = "groups";
 	public static final String SCRIPT_DESCRIPTION_LABEL = "description";
-	public static final String SCRIPT_DATE_CREATED_LABEL = "created-at";
+	public static final String SCRIPT_DATE_CREATED_LABEL = "created";
 	public static final String SCRIPT_RETURN_LABEL = "return";
 
 	public static final String SCRIPT_AUTHOR_LABEL = "author";
 	public static final String SCRIPT_PREREQUISITE_LABEL = "prerequisite";
 
+	private static final Pattern ID_PATTERN = Pattern.compile("^" + SCRIPT_ID + " *?\\" + ATS_SEPARATOR + "(.*)", Pattern.CASE_INSENSITIVE);
 	private static final Pattern DESCRIPTION_PATTERN = Pattern.compile("^" + SCRIPT_DESCRIPTION_LABEL + " *?\\" + ATS_SEPARATOR + "(.*)", Pattern.CASE_INSENSITIVE);
 	private static final Pattern CREATED_DATE_PATTERN = Pattern.compile("^" + SCRIPT_DATE_CREATED_LABEL + " *?\\" + ATS_SEPARATOR + "(.*)", Pattern.CASE_INSENSITIVE);
 	private static final Pattern RETURN_PATTERN = Pattern.compile("^" + SCRIPT_RETURN_LABEL + " *?\\" + ATS_SEPARATOR + "(.*)", Pattern.CASE_INSENSITIVE);
@@ -94,6 +96,10 @@ public class ScriptParser {
 
 			script.setDescription(getDataGroup(m, 1));
 
+		}else if((m = ID_PATTERN.matcher(data)) != null && m.find()){
+
+			script.setId(getDataGroup(m, 1));
+			
 		}else if((m = CREATED_DATE_PATTERN.matcher(data)) != null && m.find()){
 
 			try {

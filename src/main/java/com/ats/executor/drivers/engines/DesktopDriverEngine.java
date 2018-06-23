@@ -248,7 +248,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	}
 
 	@Override
-	public void mouseClick(boolean hold) {
+	public void mouseClick(FoundElement element, boolean hold) {
 		if(hold) {
 			getDesktopDriver().mouseDown();
 		}else {
@@ -291,14 +291,14 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	}
 		
 	@Override
-	public void sendTextData(ActionStatus status, FoundElement element, ArrayList<SendKeyData> textActionList,	boolean clear) {
+	public void clearText(ActionStatus status, FoundElement element) {
 		mouseMoveToElement(status, element, new MouseDirection());
-		mouseClick(false);
-		
-		if(clear) {
-			getDesktopDriver().clearText();
-		}
-		
+		mouseClick(element, false);
+		getDesktopDriver().clearText();
+	}
+	
+	@Override
+	public void sendTextData(ActionStatus status, FoundElement element, ArrayList<SendKeyData> textActionList) {
 		for(SendKeyData sequence : textActionList) {
 			getDesktopDriver().sendKeys(sequence.getSequenceDesktop());
 		}

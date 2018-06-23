@@ -77,9 +77,9 @@ public class TestElementDialog extends TestElement {
 			}
 		}
 	}
-
+	
 	@Override
-	public void sendText(ActionStatus status, boolean clear, CalculatedValue text) {
+	public void sendText(ActionStatus status, CalculatedValue text) {
 		getChannel().sleep(waitBox);
 		alert.sendKeys(text.getCalculated());
 	}
@@ -88,11 +88,6 @@ public class TestElementDialog extends TestElement {
 	public String getAttribute(String name) {
 		getChannel().sleep(waitBox);
 		return alert.getText();
-	}
-
-	@Override
-	public void over(ActionStatus status, MouseDirection position) {
-		//do nothing
 	}
 
 	@Override
@@ -112,6 +107,22 @@ public class TestElementDialog extends TestElement {
 	}
 
 	@Override
+	public CalculatedProperty[] getAttributes() {
+		CalculatedProperty prop = new CalculatedProperty("text", alert.getText());
+		return new CalculatedProperty[] {prop};
+	}
+	
+	@Override
+	public void clearText(ActionStatus status) {
+		//do nothing
+	}
+	
+	@Override
+	public void over(ActionStatus status, MouseDirection position) {
+		//do nothing
+	}
+	
+	@Override
 	public void doubleClick() {
 		//do nothing
 	}
@@ -129,11 +140,5 @@ public class TestElementDialog extends TestElement {
 	@Override
 	public void rightClick() {
 		//do nothing
-	}
-
-	@Override
-	public CalculatedProperty[] getAttributes() {
-		CalculatedProperty prop = new CalculatedProperty("text", alert.getText());
-		return new CalculatedProperty[] {prop};
 	}
 }

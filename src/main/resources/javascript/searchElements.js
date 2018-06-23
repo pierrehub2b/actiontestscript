@@ -1,7 +1,7 @@
 var parent = arguments[0];
 const tag = arguments[1];
 const attributes = arguments[2];
-const attributesLen = attributes.length;	
+const attributesLen = arguments[3];	
 
 if(parent == null){
 	parent = window.document;

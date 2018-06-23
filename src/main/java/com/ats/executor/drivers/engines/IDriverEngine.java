@@ -56,15 +56,15 @@ public interface IDriverEngine{
 	public CalculatedProperty[] getAttributes(FoundElement element);
 	public CalculatedProperty[] getCssAttributes(FoundElement element);
 	public void loadParents(FoundElement hoverElement);
-	//public void switchToDefaultframe();
 	public void scroll(FoundElement foundElement, int delta);
 	public void middleClick(ActionStatus status, TestElement element);
 	public WebElement getRootElement();
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position);
-	public void sendTextData(ActionStatus status, FoundElement foundElement, ArrayList<SendKeyData> textActionList, boolean clear);
+	public void sendTextData(ActionStatus status, FoundElement foundElement, ArrayList<SendKeyData> textActionList);
+	public void clearText(ActionStatus status, FoundElement foundElement);
 	public void setWindowBound(BoundData x, BoundData y, BoundData width, BoundData height);
 	public void forceScrollElement(FoundElement value);
-	public void mouseClick(boolean hold);
+	public void mouseClick(FoundElement element, boolean hold);
 	public void keyDown(Keys key);
 	public void keyUp(Keys key);
 	public void drop();

@@ -42,13 +42,9 @@ import com.ats.script.actions.Action;
 public class ScriptLoader extends Script {
 
 	private ScriptParser parser;
-
 	private ScriptHeader header;
-
 	private String javaCode = null;
-
 	private Charset charset;
-
 	private ArrayList<Action> actions;
 
 	public ScriptLoader(){}
@@ -155,7 +151,6 @@ public class ScriptLoader extends Script {
 				variableCode.append(codeLine(variable.getJavaCode()));
 			}
 
-
 			StringBuilder code = new StringBuilder(header.getJavaCode());
 
 			code.append("\r\n\r\n\t\t//------------------------------------------------------------------------\r\n");
@@ -214,7 +209,10 @@ public class ScriptLoader extends Script {
 		}
 	}
 
-
+	public void setId(String data) {
+		header.setId(data);
+	}
+	
 	public void setDescription(String data) {
 		header.setDescription(data);
 	}

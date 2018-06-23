@@ -115,8 +115,8 @@ public class Channel {
 	}
 
 	public void refreshMapElementLocation(){
-		desktopDriver.refreshElementMapLocation(this);
 		refreshLocation();
+		desktopDriver.refreshElementMapLocation(this);
 	}
 
 	public void toFront(){
@@ -374,13 +374,17 @@ public class Channel {
 		actionTerminated();
 	}
 	
-	public void mouseClick(boolean hold) {
-		engine.mouseClick(hold);
+	public void mouseClick(FoundElement element, boolean hold) {
+		engine.mouseClick(element, hold);
 		actionTerminated();
 	}
 
-	public void sendTextData(ActionStatus status, FoundElement foundElement, ArrayList<SendKeyData> textActionList, boolean clear) {
-		engine.sendTextData(status, foundElement, textActionList, clear);
+	public void clearText(ActionStatus status, FoundElement element) {
+		engine.clearText(status, element);
+	}
+	
+	public void sendTextData(ActionStatus status, FoundElement foundElement, ArrayList<SendKeyData> textActionList) {
+		engine.sendTextData(status, foundElement, textActionList);
 		actionTerminated();
 	}
 

@@ -64,7 +64,7 @@ public class ActionAssertProperty extends ActionExecuteElement {
 		super.terminateExecution(ts);
 		
 		String attributeValue = getTestElement().getAttribute(value.getName());
-
+		
 		if(attributeValue == null) {
 			status.setPassed(false);
 			status.setCode(ActionStatus.ATTRIBUTE_NOT_SET);

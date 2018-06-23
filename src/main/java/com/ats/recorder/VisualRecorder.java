@@ -45,13 +45,9 @@ public class VisualRecorder {
 		initAndStart(output, header, quality, xml);
 	}
 
-	public VisualRecorder(File outputFolder, String testName, int quality, boolean xml) {
+	public VisualRecorder(File outputFolder, ScriptHeader header, int quality, boolean xml) {
 
 		Path output = outputFolder.toPath();
-
-		ScriptHeader header = new ScriptHeader();
-		header.setName(testName);
-
 		initAndStart(output, header, quality, xml);
 	}
 

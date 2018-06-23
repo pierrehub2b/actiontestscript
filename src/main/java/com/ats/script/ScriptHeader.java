@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -59,6 +60,14 @@ public class ScriptHeader {
 	private String atsVersion = "N/A";
 
 	public ScriptHeader(){} // needed for serialization
+	
+	public ScriptHeader(String id, String author, String description, String prerequisites, String groups){
+		this.id = id;
+		this.author = author;
+		this.description = description;
+		this.prerequisite = prerequisites;
+		this.groups = Arrays.asList(groups.split(","));
+	}
 
 	public ScriptHeader(ProjectData projectData, File file){
 
@@ -109,10 +118,15 @@ public class ScriptHeader {
 			groups.add(grp.trim());
 		}
 	}
-
-	private String groupCode() {
-		StringBuilder code = new StringBuilder("");
-
+	
+	public String getDataGroups() {
+		if(groups != null){
+			return String.join(",", groups);
+		}
+		return "";
+	}
+	
+	public String getJoinedGroups() {
 		if(groups != null){
 			StringJoiner joiner = new StringJoiner(", ");
 			for(int i = 0; i < groups.size(); i++){
@@ -120,14 +134,19 @@ public class ScriptHeader {
 					joiner.add("\"" + groups.get(i) + "\"");
 				}
 			}
-			if(joiner.length() > 0) {
-				code.append("(groups={" + joiner.toString() + "})");
-			}
+			return joiner.toString();
 		}
-
-		return code.toString();
+		return "";
 	}
-
+	
+	private String getGroupCode() {
+		String code = getJoinedGroups();
+		if(code.length() > 0){
+			return "(groups={" + code + "})";
+		}
+		return "";
+	}
+	
 	public String getQualifiedName() {
 		if(packageName.length() > 0) {
 			return packageName + "." + name;
@@ -140,7 +159,6 @@ public class ScriptHeader {
 		this.atsVersion = version;
 	}
 
-	//private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 	private static final String javaCode = String.join(
 			System.getProperty("line.separator")
 			, ""
@@ -149,6 +167,7 @@ public class ScriptHeader {
 			, ""
 			, "import " + ActionTestScript.class.getName() + ";"
 			, "import " + Action.class.getPackageName() + ".*;"
+			, "import " + ScriptHeader.class.getPackageName() + ".*;"
 			, ""
 			, "import " + Cartesian.class.getName() + ";"
 			, "import " + Mouse.class.getName() + ";"
@@ -172,25 +191,33 @@ public class ScriptHeader {
 			, ""
 			, "\t/**"
 			, "\t* Test Name : <b>#CLASS_NAME#</b>"
-			, "\t* Test Author : <b>#AUTHOR_NAME#</b>"
-			, "\t* Test Description : <i>#DESCRIPTION#</i>"
-			, "\t* Test Prerequisites : <i>#PREREQUISITES#</i>"
 			, "\t* Generated at : <b>" + DateFormat.getDateTimeInstance().format(new Date()) + "</b>"
 			, "\t*/"
+			, ""
+			, "\t@Override"
+			, "\tprotected " + ScriptHeader.class.getSimpleName() + " getHeader(){"
+			, "\t\treturn new ScriptHeader("
+			, "\t\t\t\"#SCRIPT_ID#\","
+			, "\t\t\t\"#AUTHOR_NAME#\","
+			, "\t\t\t\"#DESCRIPTION#\","
+			, "\t\t\t\"#PREREQUISITES#\","
+			, "\t\t\t\"#GROUP_DESCRIPTION#\");"
+			, "\t}"
 			, ""
 			, "\t@Test#GROUP_DATA#"
 			, "\tpublic void " + ActionTestScript.MAIN_TEST_FUNCTION + "(){"
 			);
 
-
 	public String getJavaCode() {
 
 		String code = javaCode.replaceAll("#CLASS_NAME#", name);
+		code = code.replace("#SCRIPT_ID#", StringEscapeUtils.escapeJava(id));
 		code = code.replace("#DESCRIPTION#", StringEscapeUtils.escapeJava(description));
 		code = code.replace("#PREREQUISITES#", StringEscapeUtils.escapeJava(prerequisite));
 		code = code.replace("#AUTHOR_NAME#", StringEscapeUtils.escapeJava(author));
-		code = code.replace("#GROUP_DATA#", groupCode());
+		code = code.replace("#GROUP_DATA#", getGroupCode());
 		code = code.replace("#ATS_VERSION#", atsVersion);
+		code = code.replace("#GROUP_DESCRIPTION#", getDataGroups());
 
 		if(packageName.length() > 0) {
 			code = "package " + packageName + ";\r\n" + code;
@@ -198,7 +225,7 @@ public class ScriptHeader {
 
 		return code;
 	}
-
+	
 	//-------------------------------------------------------------------------------------------------
 	//  getters and setters for serialization
 	//-------------------------------------------------------------------------------------------------
