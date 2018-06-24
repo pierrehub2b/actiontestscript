@@ -151,10 +151,6 @@ public class ActionTestScript extends Script implements ITest{
 			
 			if(visualQuality > 0 || xml) {
 				String outputDirectory = runner.getOutputDirectory();
-
-				if(visualQuality == 0) {
-					visualQuality = 3;
-				}
 				
 				File output = new File(outputDirectory);
 				if(!output.exists()) {

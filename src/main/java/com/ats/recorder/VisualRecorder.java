@@ -34,8 +34,9 @@ public class VisualRecorder {
 	private Channel channel;
 	private String outputPath;
 	private ScriptHeader scriptHeader;
-	private int visualQuality;
-	private boolean xml;
+	
+	private int visualQuality = 3;
+	private boolean xml = false;
 
 	public VisualRecorder(ScriptHeader header, ProjectData project, int quality, boolean xml) {
 
@@ -54,8 +55,11 @@ public class VisualRecorder {
 	private void initAndStart(Path output, ScriptHeader header, int quality, boolean xml) {
 		this.outputPath = output.toFile().getAbsolutePath();
 		this.scriptHeader = header;
-		this.visualQuality = quality;
 		this.xml = xml;
+		
+		if(quality > 0) {
+			this.visualQuality = quality;
+		}
 	}
 
 	public void setChannel(Channel channel) {
