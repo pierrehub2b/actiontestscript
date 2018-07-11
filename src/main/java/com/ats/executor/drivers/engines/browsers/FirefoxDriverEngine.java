@@ -34,7 +34,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebElement;
-import org.openqa.selenium.remote.UnreachableBrowserException;
 
 import com.ats.driver.AtsManager;
 import com.ats.element.FoundElement;

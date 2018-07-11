@@ -735,6 +735,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 				iframe = testObject.getParent().getWebElement();
 				Point pt = iframe.getLocation();
+				
 				offsetIframeX += pt.getX();
 				offsetIframeY += pt.getY();
 
@@ -757,25 +758,17 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 			switchToDefaultContent();
 		}
-
-		//ArrayList<Map<String, Object>> response = (ArrayList<Map<String, Object>>)runJavaScript(searchElementScript, startElement, tagName, attributes, attributes.length);
-		ArrayList<Map<String, Object>> response = getElementsList(startElement, tagName, attributes);
+		
+		ArrayList<Map<String, Object>> response = (ArrayList<Map<String, Object>>) runJavaScript(searchElementScript, startElement, tagName, attributes, attributes.size());
 		if(response != null){
-			response.parallelStream().filter(predicate).forEachOrdered(e -> addWebElement(webElementList, (ArrayList<Object>)e.get("ats-elt")));
+			
+			final double elmX = initElementX + offsetIframeX;
+			final double elmY = initElementY + offsetIframeY;
+			
+			response.parallelStream().filter(predicate).forEachOrdered(e -> webElementList.add(new FoundElement((ArrayList<Object>)e.get("ats-elt"), channel, elmX, elmY)));
 		}
 
 		return webElementList;
-	}
-
-	protected ArrayList<Map<String, Object>> getElementsList(WebElement startElement, String tagName, ArrayList<String> attributes) {
-		Object data = runJavaScript(searchElementScript, startElement, tagName, attributes, attributes.size());
-		return (ArrayList<Map<String, Object>>)data;
-	}
-
-	private void addWebElement(ArrayList<FoundElement> webElementList, ArrayList<Object> element){
-		if(element != null){
-			webElementList.add(new FoundElement(element, channel, initElementX + offsetIframeX, initElementY + offsetIframeY));
-		}
 	}
 
 	@Override

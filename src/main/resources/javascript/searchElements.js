@@ -5,9 +5,10 @@ const attributesLen = arguments[3];
 
 if(parent == null){
 	parent = window.document;
-}
+};
 
-const elements = parent.getElementsByTagName(tag);
+const elts = parent.getElementsByTagName(tag);
+const eltsLength = elts.length;
 
 function addElement(e){
 	let rec = e.getBoundingClientRect();
@@ -15,41 +16,44 @@ function addElement(e){
 	return result[result.length-1];
 };
 
-for(var i = 0, len = elements.length; i < len; i++){
+if(attributesLen == 0){
+
+	for(var h = 0; h < eltsLength; h++){
+		addElement(elts[h]);
+	}
+
+}else{
 	
-	let e = elements[i];
-	
-	if(attributesLen == 0){
-		addElement(e);
-	}else{
-	
-		let attributesList = [];
-		for(var j=0; j < attributesLen; j++){
+	for(var i = 0; i < eltsLength; i++){
+
+		let e = elts[i], attributesList = [];
 		
+		for(var j = 0; j < attributesLen; j++){
+
 			let attributeName = attributes[j];
-						
+
 			if(attributeName == 'text'){
 				let textValue = e.textContent;
 				if(textValue){
-					attributesList.push(['text', textValue.trim().replace(/\xA0/g,' ').replace(/\s+/g,' ')]);
+					attributesList[attributesList.length] = ['text', textValue.trim().replace(/\xA0/g,' ').replace(/\s+/g,' ')];
 				}
 			}else{
 				if(attributeName == 'checked' && e.tagName == 'INPUT' && (e.type == 'radio' || e.type == 'checkbox')){
 					if(e.checked == true){
-						attributesList.push(['checked', 'true']);
+						attributesList[attributesList.length] = ['checked', 'true'];
 					}else{
-						attributesList.push(['checked', 'false']);
+						attributesList[attributesList.length] = ['checked', 'false'];
 					}		
 				}else{
 					if(e.hasAttribute(attributeName)){
-						attributesList.push([attributeName, e.getAttribute(attributeName)]);
+						attributesList[attributesList.length] = [attributeName, e.getAttribute(attributeName)];
 					}else{
-						attributesList.push([attributeName, window.getComputedStyle(e,null).getPropertyValue(attributeName)]);
+						attributesList[attributesList.length] = [attributeName, window.getComputedStyle(e,null).getPropertyValue(attributeName)];
 					}
 				}
 			}
 		}
-	
+		
 		if(attributesList.length == attributesLen){
 			let newElem = addElement(e);
 			for(var k=0; k < attributesLen; k++){
