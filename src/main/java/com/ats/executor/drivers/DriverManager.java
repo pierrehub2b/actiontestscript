@@ -75,6 +75,10 @@ public class DriverManager {
 		return ats.getMaxTrySearch();
 	}
 	
+	public int getMaxTryProperty() {
+		return ats.getMaxTryProperty();
+	}
+	
 	private String windowsBuildVersion;
 	private String getWindowsBuildVersion() {
 		if(windowsBuildVersion == null) {

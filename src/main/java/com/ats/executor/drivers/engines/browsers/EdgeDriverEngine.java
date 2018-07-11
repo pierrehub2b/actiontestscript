@@ -48,12 +48,13 @@ public class EdgeDriverEngine extends WebDriverEngine {
 	public EdgeDriverEngine(Channel channel, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
 		super(channel, DriverManager.EDGE_BROWSER, driverProcess, windowsDriver, ats, DEFAULT_WAIT);
 		
-		this.searchElementScript = "var interval=setInterval(function(){if(window.document.readyState==='complete'){clearInterval(interval);done();}},200);" + this.searchElementScript;
+		this.searchElementScript = JS_WAIT_BEFORE_SEARCH + JS_SEARCH_ELEMENT;
+		this.autoScrollElement = JS_AUTO_SCROLL_CALC;
 		
 		EdgeOptions options = new EdgeOptions();
 		options.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
 		options.setCapability(CapabilityType.ACCEPT_INSECURE_CERTS, true);
-		options.setPageLoadStrategy("eager");
+		options.setPageLoadStrategy("none");
 
 		launchDriver(options);
 	}
@@ -82,6 +83,12 @@ public class EdgeDriverEngine extends WebDriverEngine {
 	@Override
 	public void middleClick(ActionStatus status, TestElement element) {
 		middleClickSimulation(status, element);
+	}
+	
+	@Override
+	protected void move(FoundElement element, int offsetX, int offsetY) {
+		forceScrollElement(element);
+		super.move(element, offsetX, offsetY);
 	}
 
 	@Override
@@ -116,14 +123,12 @@ public class EdgeDriverEngine extends WebDriverEngine {
 	
 	@Override
 	public ArrayList<FoundElement> findWebElement(Channel channel, TestElement testObject, String tagName,
-			String[] attributes, Predicate<Map<String, Object>> predicate) {
-		
+			ArrayList<String> attributes, Predicate<Map<String, Object>> predicate) {
 		int maxTry = 40;
-		while(!((Boolean)runJavaScript("var result=window.document.readyState=='complete';")) && maxTry > 0) {
+		while(!((Boolean)runJavaScript(JS_WAIT_READYSTATE)) && maxTry > 0) {
 			channel.sleep(200);
 			maxTry--;
 		}
-		
 		return super.findWebElement(channel, testObject, tagName, attributes, predicate);
 	}
 
@@ -131,46 +136,5 @@ public class EdgeDriverEngine extends WebDriverEngine {
 	public void goToUrl(URL url, boolean newWindow) {
 		super.goToUrl(url, newWindow);
 		waitAfterAction();
-
-		/*if(newWindow) {
-			channel.sleep(100);
-
-			ArrayList<CalculatedProperty> attributes = new ArrayList<CalculatedProperty>(1);
-			attributes.add(new CalculatedProperty("ClassName", "LandmarkTarget"));
-			ArrayList<FoundElement> listElements = channel.findWindowsElement(null, "Group", attributes);
-
-			if(listElements.size() > 0) {
-				FoundElement parent = listElements.get(0);
-				if(parent.isVisible()) {
-
-					attributes = new ArrayList<CalculatedProperty>(1);
-					attributes.add(new CalculatedProperty("ClassName", "NotificationBar"));
-					listElements = channel.findWindowsElement(parent.getValue(), "ToolBar", attributes);
-
-					if(listElements.size() > 0) {
-						parent = listElements.get(0);
-						if(parent.isVisible()) {
-
-							attributes = new ArrayList<CalculatedProperty>(1);
-							attributes.add(new CalculatedProperty("ClassName", "Button"));
-
-							listElements = channel.findWindowsElement(parent.getValue(), "Button", attributes);
-
-							if(listElements.size() > 1) {
-								FoundElement button = listElements.get(1);
-								if(button.isVisible()) {
-
-									TestBound bound = button.getTestBound();
-									Actions action = new Actions(desktopDriver);
-									action.moveToElement(button.getValue(), bound.getWidth().intValue()/2, 40).perform();
-									action.click().perform();
-								}
-							}
-						}
-					}
-				}
-			}
-			switchToLastWindow();
-		}*/
 	}
 }

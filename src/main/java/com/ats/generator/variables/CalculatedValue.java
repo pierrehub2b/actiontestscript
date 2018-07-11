@@ -35,10 +35,6 @@ import com.ats.tools.Utils;
 
 public class CalculatedValue{
 
-
-	private static final Pattern PARAMETER_PATTERN = Pattern.compile("\\$param\\s*?\\((\\d+),?(\\s*?[^\\)]*)?\\)", Pattern.CASE_INSENSITIVE);
-	private static final Pattern ENV_PATTERN = Pattern.compile("\\$env\\(([^\\)]*)\\)", Pattern.CASE_INSENSITIVE);
-
 	private static final Pattern TODAY_PATTERN = Pattern.compile("\\$today", Pattern.CASE_INSENSITIVE);
 	private static final Pattern NOW_PATTERN = Pattern.compile("\\$now", Pattern.CASE_INSENSITIVE);
 	private static final Pattern UUID_PATTERN = Pattern.compile("\\$uuid", Pattern.CASE_INSENSITIVE);
@@ -87,94 +83,61 @@ public class CalculatedValue{
 
 			Matcher mv = Variable.SCRIPT_PATTERN.matcher(dataValue);
 			while (mv.find()) {
+				
 				String variableName = mv.group(1);
 				dataValue = dataValue.replace(mv.group(0), script.getVariableValue(variableName));
+				
 				javaCode = javaCode.replace(mv.group(0), "\", " + variableName + ", \"");
 			}
 
-			mv = PARAMETER_PATTERN.matcher(dataValue);
+			mv = ParameterValue.PARAMETER_PATTERN.matcher(dataValue);
 			while (mv.find()) {
-				String replace = mv.group(0);
-				String value = mv.group(1).trim();
-
-				String defaultValue = mv.group(2).trim();
-
-				int index = 0;
-				try{
-					index = Integer.parseInt(value);
-				}catch(NumberFormatException e){}
-
-				StringBuilder codeBuilder = new StringBuilder("(");
-				codeBuilder.append(index);
-
-				if(defaultValue.length() > 0) {
-					codeBuilder.append(", \"");
-					codeBuilder.append(defaultValue);
-					codeBuilder.append("\"");
-				}
-
-				codeBuilder.append(")");
-				javaCode = javaCode.replace(replace, "\", " + ActionTestScript.JAVA_PARAM_FUNCTION_NAME + codeBuilder.toString() + ", \"");
-
-				String paramValue = script.getParameterValue(index, defaultValue);
-				dataValue = dataValue.replace(replace, paramValue);
+				
+				ParameterValue sp = new ParameterValue(mv);
+				dataValue = dataValue.replace(sp.getReplace(), script.getParameterValue(sp.getValue(), sp.getDefaultValue()));
+				
+				javaCode = javaCode.replace(sp.getReplace(), "\", " + ActionTestScript.JAVA_PARAM_FUNCTION_NAME + sp.getCode() + ", \"");
 			}
 
-			mv = ENV_PATTERN.matcher(dataValue);
+			mv = EnvironmentValue.ENV_PATTERN.matcher(dataValue);
 			while (mv.find()) {
 
-				String replace = mv.group(0);
-				String[] envData = mv.group(1).split(",");
-
-				String value = envData[0].trim();
-				String defaultValue = "";
+				EnvironmentValue sp = new EnvironmentValue(mv);
+				dataValue = dataValue.replace(sp.getReplace(), script.getEnvironmentValue(sp.getValue(), sp.getDefaultValue()));
 				
-				if(envData.length > 1) {
-					defaultValue = envData[1].trim();
-				}
-
-				StringBuilder codeBuilder = new StringBuilder("(\"");
-				codeBuilder.append(value);
-				codeBuilder.append("\"");
-
-				if(defaultValue.length() > 0) {
-					defaultValue = defaultValue.trim();
-					codeBuilder.append(", \"");
-					codeBuilder.append(defaultValue);
-					codeBuilder.append("\"");
-				}
-
-				String envValue = script.getEnvironmentValue(value, defaultValue);
-				dataValue = dataValue.replace(replace, envValue);
-
-				codeBuilder.append(")");
-				javaCode = javaCode.replace(replace, "\", " + ActionTestScript.JAVA_ENV_FUNCTION_NAME + codeBuilder.toString() + ", \"");
-
+				javaCode = javaCode.replace(sp.getReplace(), "\", " + ActionTestScript.JAVA_ENV_FUNCTION_NAME + sp.getCode() + ", \"");
 			}
 
 			mv = TODAY_PATTERN.matcher(dataValue);
 			while (mv.find()) {
+				
 				String replace = mv.group(0);
 				dataValue = dataValue.replace(replace, DateTransformer.getTodayValue());
+				
 				javaCode = javaCode.replace(replace, "\", " + ActionTestScript.JAVA_TODAY_FUNCTION_NAME + "(), \"");
 			}
 
 			mv = NOW_PATTERN.matcher(dataValue);
 			while (mv.find()) {
+				
 				String replace = mv.group(0);
 				dataValue = dataValue.replace(replace, TimeTransformer.getNowValue());
+				
 				javaCode = javaCode.replace(replace, "\", " + ActionTestScript.JAVA_NOW_FUNCTION_NAME + "(), \"");
 			}
 
 			mv = UUID_PATTERN.matcher(dataValue);
 			while (mv.find()) {
+				
 				String replace = mv.group(0);
 				dataValue = dataValue.replace(replace, UUID.randomUUID().toString());
+				
 				javaCode = javaCode.replace(replace, "\", " + ActionTestScript.JAVA_UUID_FUNCTION_NAME + "(), \"");
 			}
 
 			mv = KEY_REGEXP.matcher(dataValue);
 			while (mv.find()) {
+				
 				String replace = mv.group(0);
 				String value = mv.group(1).trim().toUpperCase();
 
@@ -197,16 +160,7 @@ public class CalculatedValue{
 
 	public String getJavaCode(){
 
-		String value = javaCode;
-		//String value = Utils.atsStringValue(javaCode);
-
-		/*value = value.replaceAll(SPACE_PATTERN, " ");
-		value = value.replaceAll(TAB_PATTERN, "\t");
-		value = value.replaceAll(EQUAL_PATTERN, "=");
-		value = value.replaceAll(COMMA_PATTERN, ",");
-		value = value.replaceAll(BREAK_PATTERN, " ");*/
-
-		value = "\"" + value + "\"";
+		String value = "\"" + javaCode + "\"";
 
 		value = unnecessaryStartQuotes.matcher(value).replaceFirst("");
 		value = unnecessaryEndQuotes.matcher(value).replaceFirst("");

@@ -89,7 +89,7 @@ public final class StartHtmlPage {
 		htmlContent.append(" x ");
 		htmlContent.append(testBound.getHeight().intValue());
 
-		htmlContent.append("</p></div></body></html>");
+		htmlContent.append("</p></div></div></body></html>");
 
 		return htmlContent.toString().getBytes();
 	}

@@ -48,7 +48,7 @@ public interface IDriverEngine{
 	public void closeWindow(ActionStatus status, int index);
 	public Object executeScript(ActionStatus status, String script, Object ... params);
 	public void goToUrl(URL url, boolean newWindow);
-	public ArrayList<FoundElement> findWebElement(Channel channel, TestElement testObject, String tagName, String[] attributes, Predicate<Map<String, Object>> searchPredicate);
+	public ArrayList<FoundElement> findWebElement(Channel channel, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<Map<String, Object>> searchPredicate);
 	public void waitAfterAction();
 	public TestBound[] getDimensions();
 	public FoundElement getElementFromPoint(Double x, Double y);
@@ -78,5 +78,5 @@ public interface IDriverEngine{
 	public void navigationBack();
 	public String getCurrentUrl();
 	public void setWindowToFront();
-	public void switchToFrame(String id);
+	public void switchToFrameId(String id);
 }

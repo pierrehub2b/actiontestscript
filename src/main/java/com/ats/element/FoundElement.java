@@ -21,7 +21,6 @@ package com.ats.element;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
-import java.util.Map;
 
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -56,22 +55,22 @@ public class FoundElement{
 
 	public FoundElement() {}
 
-	public FoundElement(Map<String, Object> data) {
-		this.setRemoteWebElement((RemoteWebElement) data.get("value"));
-		this.tag = (String) data.get("tag");
-		this.width = (Double)data.get("width");
-		this.height = (Double)data.get("height");
+	public FoundElement(ArrayList<Object> element) {
+		this.setRemoteWebElement((RemoteWebElement) element.get(0));
+		this.tag = (String) element.get(1);
+		this.width = (Double)element.get(2);
+		this.height = (Double)element.get(3);
 	}
 
-	public FoundElement(Map<String, Object> data, Channel channel, Double offsetX, Double offsetY) {
-		this(data);
-		this.updatePosition((Double)data.get("x"), (Double)data.get("y"), channel, offsetX, offsetY);
+	public FoundElement(ArrayList<Object> element, Channel channel, Double offsetX, Double offsetY) {
+		this(element);
+		this.updatePosition((Double)element.get(4), (Double)element.get(5), channel, offsetX, offsetY);
 	}
 
-	public FoundElement(ArrayList<Map<String, Object>> listElements, Channel channel, Double initElementX, Double initElementY) {
+	public FoundElement(Channel channel, ArrayList<ArrayList<Object>> listElements, Double initElementX, Double initElementY) {
 		this(listElements.remove(0), channel, initElementX, initElementY);
 		if(listElements.size() > 0) {
-			setParent(new FoundElement (listElements, channel, initElementX, initElementY));
+			setParent(new FoundElement(channel, listElements, initElementX, initElementY));
 		}
 	}
 

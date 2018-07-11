@@ -78,9 +78,9 @@ public class TestElement{
 	}
 
 	public TestElement(Channel channel, int maxTry, String operator, int expectedCount) {
-		this.channel = channel;
-		this.maxTry = maxTry;
 
+		this(channel, maxTry);
+		
 		switch (operator) {
 		case Operators.DIFFERENT :
 			this.occurrences = isOccurrencesDifferent(expectedCount);
@@ -195,19 +195,18 @@ public class TestElement{
 					
 					int trySearch = 0;
 
-					ArrayList<String> attributeList = new ArrayList<String>();
+					ArrayList<String> attributes = new ArrayList<String>();
 
 					Predicate<Map<String, Object>> fullPredicate = Objects::nonNull;
 
 					if(properties != null){
 						for (CalculatedProperty property : properties){
 							criterias += "," + property.getName() + ":" + property.getValue().getCalculated();
-							attributeList.add(property.getName());
 							fullPredicate = property.getPredicate(fullPredicate);
+							
+							attributes.add(property.getName());
 						}
 					}
-
-					String[] attributes = attributeList.toArray(new String[attributeList.size()]);
 
 					foundElements = channel.findWebElement(this, tag, attributes, fullPredicate);
 					while (!isValidated() && trySearch < maxTry) {
@@ -534,7 +533,7 @@ public class TestElement{
 	public String getAttribute(String name){
 		
 		if(isValidated()){
-			return channel.getAttribute(getFoundElement(), name, maxTry + channel.getMaxTry());
+			return channel.getAttribute(getFoundElement(), name, maxTry + channel.getMaxTryProperty());
 		}
 		return null;
 	}

@@ -28,5 +28,5 @@ if (document.layers){
 if (((topOfPage + heightOfPage) < (elY + elH)) || (elY < topOfPage) || ((leftOfPage + widthOfPage) < (elX + elW)) || (elX < leftOfPage)) {
 	element.scrollIntoView(false);
 	var rect = element.getBoundingClientRect();
-	result = [rect.right+0.00001, rect.top+0.00001];
+	result = [rect.right+0.0001, rect.top+0.0001];
 }

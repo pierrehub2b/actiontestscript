@@ -63,6 +63,7 @@ public class Channel {
 	private String startError;
 
 	private int maxTry = 0;
+	private int maxTryProperty = 5;
 
 	private String applicationVersion;
 	private String driverVersion;
@@ -82,6 +83,7 @@ public class Channel {
 
 		this.mainScript = script;
 		this.maxTry = driverManager.getMaxTry();
+		this.maxTryProperty = driverManager.getMaxTryProperty();
 		this.name = name;
 		this.dimension = driverManager.getApplicationBound();
 		this.current = true;
@@ -151,7 +153,7 @@ public class Channel {
 	}
 	
 	public void switchToFrame(String id) {
-		engine.switchToFrame(id);
+		engine.switchToFrameId(id);
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------
@@ -350,7 +352,7 @@ public class Channel {
 		}
 	}
 
-	public ArrayList<FoundElement> findWebElement(TestElement testObject, String tagName, String[] attributes, Predicate<Map<String, Object>> searchPredicate) {
+	public ArrayList<FoundElement> findWebElement(TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<Map<String, Object>> searchPredicate) {
 		return engine.findWebElement(this, testObject, tagName, attributes, searchPredicate);
 	}
 
@@ -390,6 +392,10 @@ public class Channel {
 
 	public int getMaxTry() {
 		return maxTry;
+	}
+	
+	public int getMaxTryProperty() {
+		return maxTryProperty;
 	}
 
 	public void forceScrollElement(FoundElement foundElement) {

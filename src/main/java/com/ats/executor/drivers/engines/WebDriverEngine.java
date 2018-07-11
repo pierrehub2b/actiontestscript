@@ -22,6 +22,9 @@ package com.ats.executor.drivers.engines;
 import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -35,6 +38,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
@@ -44,7 +51,6 @@ import org.openqa.selenium.NoSuchWindowException;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.UnexpectedAlertBehaviour;
 import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
@@ -64,7 +70,6 @@ import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
-import com.ats.tools.ResourceContent;
 import com.ats.tools.StartHtmlPage;
 
 @SuppressWarnings("unchecked")
@@ -84,9 +89,11 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	private Actions actions;
 
-	private String firstWindow;
-	
-	protected String searchElementScript;
+	protected java.net.URI driverSession;
+	protected RequestConfig requestConfig;
+
+	protected String searchElementScript = JS_SEARCH_ELEMENT;
+	protected String autoScrollElement = JS_AUTO_SCROLL;
 
 	public WebDriverEngine(
 			Channel channel, 
@@ -103,7 +110,6 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		this.proxy = ats.getProxy();
 		this.loadPageTimeOut = ats.getPageloadTimeOut();
 		this.scriptTimeout = ats.getScriptTimeOut();
-		this.searchElementScript = ResourceContent.getSearchElementsJavaScript();
 	}
 
 	protected DriverProcess getDriverProcess() {
@@ -114,7 +120,6 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		cap.setCapability(CapabilityType.SUPPORTS_FINDING_BY_CSS, false);
 		cap.setCapability(CapabilityType.PROXY, proxy);
-		cap.setCapability(CapabilityType.UNEXPECTED_ALERT_BEHAVIOUR, UnexpectedAlertBehaviour.DISMISS);
 		cap.setCapability(CapabilityType.HAS_NATIVE_EVENTS, false);
 
 		int maxTry = 20;
@@ -176,7 +181,13 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 				driverVersion,
 				desktopDriver.getProcessDataByWindowTitle(titleUid));
 
-		firstWindow = driver.getWindowHandle();
+		requestConfig = RequestConfig.custom()
+				.setConnectTimeout(3500)
+				.setConnectionRequestTimeout(3500)
+				.setSocketTimeout(3500).build();
+		try {
+			driverSession = new URI(driverProcess.getDriverServerUrl() + "/session/" + driver.getSessionId().toString());
+		} catch (URISyntaxException e) {}
 	}
 
 	@Override
@@ -206,9 +217,9 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		if(element != null && element.getTag() != null) {
 			String code = null;
 			if(delta == 0) {
-				code = ResourceContent.getScrollElementJavaScript();
+				code = JS_ELEMENT_AUTOSCROLL;
 			}else {
-				code = "var e=arguments[0];var d=arguments[1];e.scrollTop += d;var r=e.getBoundingClientRect();var result=[r.left+0.00001, r.top+0.00001]";
+				code = JS_ELEMENT_SCROLL;
 			}
 
 			ArrayList<Double> newPosition =  (ArrayList<Double>) runJavaScript(code, element.getValue(), delta);
@@ -218,15 +229,13 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			}
 
 		}else {
-			runJavaScript("window.scrollBy(0,arguments[0]);var result=[0.00001, 0.00001]", delta);
+			runJavaScript(JS_WINDOW_SCROLL, delta);
 		}
 	}
 
 	@Override
 	public void forceScrollElement(FoundElement element) {
-		String code = "var e=arguments[0];e.scrollIntoView();var r=e.getBoundingClientRect();var result=[r.left+0.00001, r.top+0.00001]";
-		ArrayList<Double> newPosition =  (ArrayList<Double>) runJavaScript(code, element.getValue());
-
+		ArrayList<Double> newPosition =  (ArrayList<Double>) runJavaScript(autoScrollElement, element.getValue());
 		if(newPosition.size() > 1) {
 			element.updatePosition(newPosition.get(0), newPosition.get(1), channel, 0.0, 0.0);
 		}
@@ -251,18 +260,18 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	private FoundElement loadElement(Double x, Double y, Double offsetX, Double offsetY) {
 
-		Map<String, Object> objectData = (Map<String, Object>)runJavaScript("var result=null;var e=document.elementFromPoint(arguments[0],arguments[1]);if(e){var r=e.getBoundingClientRect();result={value:e,tag:e.tagName,x:r.left+0.00001,y:r.top+0.00001,width:r.width+0.00001,height:r.height+0.00001};};", x - offsetX, y - offsetY);
-		
+		ArrayList<Object> objectData = (ArrayList<Object>)runJavaScript(JS_ELEMENT_DATA, x - offsetX, y - offsetY);
+
 		if(objectData != null){
 
-			if(FoundElement.IFRAME.equals(objectData.get("tag"))){
+			if(FoundElement.IFRAME.equals(objectData.get(1))){
 
 				FoundElement frm = new FoundElement(objectData);
 
 				switchToFrame(frm.getValue());
 
-				offsetX += (Double)objectData.get("x");
-				offsetY += (Double)objectData.get("y");
+				offsetX += (Double)objectData.get(4);
+				offsetY += (Double)objectData.get(5);
 
 				return loadElement(x, y, offsetX, offsetY);
 
@@ -320,7 +329,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			tryLoop--;
 			result = getAttribute(element, attributeName);
 
-			if(!doubleCheckAttribute(result, element, attributeName)) {
+			if(result != null && !doubleCheckAttribute(result, element, attributeName)) {
 				result = null;
 			}
 		}
@@ -343,16 +352,13 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 			for (CalculatedProperty calc : getAttributes(element)) {
 				if(attributeName.equals(calc.getName())) {
-					result = calc.getValue().getCalculated();
+					return calc.getValue().getCalculated();
 				}
 			}
+			result = getCssAttributeValueByName(element, attributeName);
 
 			if(result == null) {
-				result = getCssAttributeValueByName(element, attributeName);
-			}
-
-			if(result == null) {
-				channel.sleep(200);
+				channel.sleep(100);
 			}
 		}
 		return result;
@@ -384,11 +390,11 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	private CalculatedProperty[] getCssAttributes(RemoteWebElement element){
-		return getAttributesList(element, ResourceContent.getElementCssJavaScript());
+		return getAttributesList(element, JS_ELEMENT_CSS);
 	}
 
 	private CalculatedProperty[] getAttributes(RemoteWebElement element){
-		return getAttributesList(element, ResourceContent.getElementAttributesJavaScript());
+		return getAttributesList(element, JS_ELEMENT_ATTRIBUTES);
 	}
 
 	private CalculatedProperty[] getAttributesList(RemoteWebElement element, String script) {
@@ -401,10 +407,10 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	public FoundElement getTestElementParent(FoundElement element){
 
-		ArrayList<Map<String, Object>> listElements = (ArrayList<Map<String, Object>>) runJavaScript(ResourceContent.getParentElementJavaScript(), element.getValue());
+		ArrayList<ArrayList<Object>> listElements = (ArrayList<ArrayList<Object>>) runJavaScript(JS_ELEMENT_PARENTS, element.getValue());
 
 		if(listElements != null && listElements.size() > 0){
-			return new FoundElement(listElements, channel, initElementX, initElementY);
+			return new FoundElement(channel, listElements, initElementX, initElementY);
 		}
 
 		return null;
@@ -419,14 +425,14 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		switchWindow(currentWindow);
 
-		Map<String, ArrayList<Double>> response = (Map<String, ArrayList<Double>>) runJavaScript(ResourceContent.getDocumentSizeJavaScript());
+		ArrayList<ArrayList<Double>> response = (ArrayList<ArrayList<Double>>) runJavaScript(JS_DOCUMENT_SIZE);
 
 		TestBound testDimension = new TestBound();
 		TestBound testSubDimension = new TestBound();
 
 		if(response != null) {
-			testDimension.update(response.get("main"));
-			testSubDimension.update(response.get("sub"));
+			testDimension.update(response.get(0));
+			testSubDimension.update(response.get(1));
 		}
 
 		return new TestBound[]{testDimension, testSubDimension};
@@ -441,22 +447,15 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 				list.addAll(driver.getWindowHandles());
 			}catch(WebDriverException e) {}
 
-			if(list.size() > 0) {
-				for (String handle : list) {
-					closeWindowHandler(handle);
+			while(list.size() > 0) {
+				String winHandler = list.remove(list.size()-1);
+				if(list.size() == 0) {
+					closeLastWindow(new ActionStatus(channel));
+				}else {
+					closeWindowHandler(winHandler);
 				}
 			}
 		}
-
-		try {
-			driver.quit();
-		}catch(UnhandledAlertException e) {
-			try {
-				driver.switchTo().alert().accept();
-			}catch(WebDriverException e0) {}
-		}catch(Exception e) {}
-
-		getDriverProcess().close();
 	}
 
 	//-----------------------------------------------------------------------------------------------------------------------------------
@@ -476,29 +475,25 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		int offsetX = getOffsetX(rect, position);
 		int offsetY = getOffsetY(rect, position);
 
-		move(foundElement.getValue(), offsetX, offsetY);
+		move(foundElement, offsetX, offsetY);
 
-		ArrayList<Double> newPosition =  (ArrayList<Double>) runJavaScript("var rect=arguments[0].getBoundingClientRect();var result=[rect.left+0.00001, rect.top+0.00001];", foundElement.getValue());
+		ArrayList<Double> newPosition =  (ArrayList<Double>) runJavaScript(JS_ELEMENT_BOUNDING, foundElement.getValue());
 		if(newPosition.size() > 1) {
 			foundElement.updatePosition(newPosition.get(0), newPosition.get(1), channel, 0.0, 0.0);
 		}
 	}
 
-	protected void move(WebElement element, int offsetX, int offsetY) {
-		actions.moveToElement(element, offsetX, offsetY).perform();
+	protected void move(FoundElement element, int offsetX, int offsetY) {
+		actions.moveToElement(element.getValue(), offsetX, offsetY).perform();
 	}
 
 	@Override
 	public void mouseClick(FoundElement element, boolean hold) {
 		if(hold) {
-			actions.clickAndHold().perform();
+			actions.clickAndHold(element.getValue()).perform();
 		}else {
-			click();
+			actions.click(element.getValue()).perform();
 		}
-	}
-
-	protected void click() {
-		actions.click().perform();
 	}
 
 	@Override
@@ -545,7 +540,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	@Override
-	public void switchToFrame(String id) {
+	public void switchToFrameId(String id) {
 		RemoteWebElement rwe = new RemoteWebElement();
 		rwe.setId(id);
 		rwe.setParent(driver);
@@ -618,60 +613,10 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		driver.manage().window().setSize(dim);
 	}
 
-	private int closeWindowHandler(String windowHandle) {
-
+	private void closeWindowHandler(String windowHandle) {
 		switchToWindowHandle(windowHandle);
-
-		if(firstWindow.equals(windowHandle)) {
-			try {
-				driver.close();
-			}catch(WebDriverException e) {}
-		}else {
-			runJavaScript("var result=null;window.close();");
-		}
-
+		driver.close();
 		channel.sleep(200);
-
-		ArrayList<String> list = new ArrayList<String>();
-		try {
-			list.addAll(driver.getWindowHandles());
-		}catch(WebDriverException e) {}
-
-		int windowCount = list.size();
-
-		if(windowCount > 0) {
-
-			if(list.contains(windowHandle)) {
-
-				windowCount--;
-
-				channel.sleep(300);
-				try {
-					driver.switchTo().alert().accept();
-				}catch(WebDriverException e0) {}
-				channel.sleep(200);
-
-				list = new ArrayList<String>();
-				try {
-					list.addAll(driver.getWindowHandles());
-				}catch(WebDriverException e) {}
-
-			}
-
-			if(windowCount > 0) {
-				try {
-					switchToWindowHandle(list.get(0));
-				}catch(UnhandledAlertException e) {
-					try {
-						driver.switchTo().alert().accept();
-					}catch(WebDriverException e0) {}
-				}
-			}
-		}
-
-		channel.sleep(100);
-
-		return windowCount;
 	}
 
 	@Override
@@ -682,23 +627,46 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			list.addAll(driver.getWindowHandles());
 		}catch(WebDriverException e) {}
 
-		if(index < list.size()) {
+		if(list.size() == 1) {
 
-			int windowCount = closeWindowHandler(list.get(index));
+			closeLastWindow(status);
 
-			status.setOccurences(windowCount);
-			if(windowCount == 0) {
-				channel.lastWindowClosed(status);
+		}else {
+
+			if(index < list.size()) {
+				closeWindowHandler(list.get(index));
+				index--;
 			}
 
-			index--;
+			if(index < 0) {
+				index = 0;
+			}
+
+			currentWindow = index;
+			switchToWindowHandle(list.get(index));
+		}
+	}
+
+	private void closeLastWindow(ActionStatus status) {
+
+		CloseableHttpClient httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
+		HttpDelete request = new HttpDelete(driverSession + "/window");
+		request.addHeader("content-type", "application/json");
+
+		try {
+			httpClient.execute(request);
+		} catch (SocketTimeoutException e) {
+
+		} catch (IOException e) {
+
+		} finally {
+			try {
+				httpClient.close();
+			} catch (IOException e) {}
 		}
 
-		if(index < 0) {
-			index = 0;
-		}
-
-		currentWindow = index;
+		closeDriver();
+		channel.lastWindowClosed(status);
 	}
 
 	//-----------------------------------------------------------------------------------------------------------------------------------
@@ -733,26 +701,28 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	protected Object runJavaScript(String javaScript, Object ... params) {
-		return driver.executeAsyncScript(javaScript + ";var callbackResult=arguments[arguments.length-1];callbackResult(result);", params);
+		try {
+			return driver.executeAsyncScript(javaScript + ";arguments[arguments.length-1](result);", params);
+		}catch(Exception ex) {
+			return null;
+		}
 	}
 
 	@Override
 	public void goToUrl(URL url, boolean newWindow) {
 		switchToDefaultContent();
-		if(newWindow) {
-			runJavaScript("var result=window.location.assign(arguments[0],'_blank', 'height='+arguments[0]+',width=' + arguments[0])", url.toString(), channel.getSubDimension().getHeight(), channel.getSubDimension().getWidth());
-		}else {
-			driver.get(url.toString());
-		}
+		driver.get(url.toString());
 		actionWait();
 	}
 
-	private boolean iframeSwitched = false;
-	
+	private WebElement iframe = null;
+	private double offsetIframeX = 0.0;
+	private double offsetIframeY = 0.0;
+
 	@Override
-	public ArrayList<FoundElement> findWebElement(Channel channel, TestElement testObject, String tagName, String[] attributes,
+	public ArrayList<FoundElement> findWebElement(Channel channel, TestElement testObject, String tagName, ArrayList<String> attributes,
 			Predicate<Map<String, Object>> predicate) {
-		
+
 		if(tagName == null) {
 			tagName = "BODY";
 		}
@@ -762,11 +732,14 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		if(testObject.getParent() != null){
 			if(testObject.getParent().isIframe()) {
-				
-				iframeSwitched = true;
-				
+
+				iframe = testObject.getParent().getWebElement();
+				Point pt = iframe.getLocation();
+				offsetIframeX += pt.getX();
+				offsetIframeY += pt.getY();
+
 				try {
-					switchToFrame(testObject.getParent().getWebElement());
+					switchToFrame(iframe);
 				}catch(StaleElementReferenceException e) {
 
 					testObject.getParent().searchAgain();
@@ -775,29 +748,39 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			}else {
 				startElement = testObject.getParent().getWebElement();
 			}
-			
-		}else if(iframeSwitched){
-			iframeSwitched = false;
+
+		}else if(iframe != null){
+
+			iframe = null;
+			offsetIframeX = 0.0;
+			offsetIframeY = 0.0;
+
 			switchToDefaultContent();
 		}
 
-		ArrayList<Map<String, Object>> response = (ArrayList<Map<String, Object>>)runJavaScript(searchElementScript, startElement, tagName, attributes, attributes.length);
+		//ArrayList<Map<String, Object>> response = (ArrayList<Map<String, Object>>)runJavaScript(searchElementScript, startElement, tagName, attributes, attributes.length);
+		ArrayList<Map<String, Object>> response = getElementsList(startElement, tagName, attributes);
 		if(response != null){
-			response.parallelStream().filter(predicate).forEachOrdered(e -> addWebElement(webElementList, (Map<String, Object>) e.get("ats-elt")));
+			response.parallelStream().filter(predicate).forEachOrdered(e -> addWebElement(webElementList, (ArrayList<Object>)e.get("ats-elt")));
 		}
-		
+
 		return webElementList;
 	}
 
-	private void addWebElement(ArrayList<FoundElement> webElementList, Map<String, Object> elements){
-		if(elements != null){
-			webElementList.add(new FoundElement(elements, channel, initElementX, initElementY));
+	protected ArrayList<Map<String, Object>> getElementsList(WebElement startElement, String tagName, ArrayList<String> attributes) {
+		Object data = runJavaScript(searchElementScript, startElement, tagName, attributes, attributes.size());
+		return (ArrayList<Map<String, Object>>)data;
+	}
+
+	private void addWebElement(ArrayList<FoundElement> webElementList, ArrayList<Object> element){
+		if(element != null){
+			webElementList.add(new FoundElement(element, channel, initElementX + offsetIframeX, initElementY + offsetIframeY));
 		}
 	}
 
 	@Override
 	public void middleClick(ActionStatus status, TestElement element) {
-		runJavaScript("var evt=new MouseEvent('click', {bubbles: true,cancelable: true,view: window, button: 1}),result={};arguments[0].dispatchEvent(evt);", element.getWebElement());
+		runJavaScript(JS_MIDDLE_CLICK, element.getWebElement());
 	}
 
 	protected void middleClickSimulation(ActionStatus status, TestElement element) {
@@ -826,7 +809,11 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	@Override
 	public String getCurrentUrl() {
-		return driver.getCurrentUrl();
+		try {
+			return driver.getCurrentUrl();
+		}catch(UnhandledAlertException e) {
+			return "";
+		}
 	}
 
 	@Override

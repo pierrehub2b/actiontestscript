@@ -1,4 +1,4 @@
-var parent = arguments[0];
+var parent = arguments[0], result = [];
 const tag = arguments[1];
 const attributes = arguments[2];
 const attributesLen = arguments[3];	
@@ -7,28 +7,31 @@ if(parent == null){
 	parent = window.document;
 }
 
-const elements = parent.querySelectorAll(tag);
-var attributesList, attributeName, textValue, foundElement, e, result = [];
+const elements = parent.getElementsByTagName(tag);
+
+function addElement(e){
+	let rec = e.getBoundingClientRect();
+	result[result.length] = {'ats-elt':[e, e.tagName, rec.width+0.0001, rec.height+0.0001, rec.left+0.0001, rec.top+0.0001]};
+	return result[result.length-1];
+};
 
 for(var i = 0, len = elements.length; i < len; i++){
-	e = elements[i];
+	
+	let e = elements[i];
 	
 	if(attributesLen == 0){
-		result.push(getElement(e));
+		addElement(e);
 	}else{
 	
-		attributesList = [];
+		let attributesList = [];
 		for(var j=0; j < attributesLen; j++){
 		
-			attributeName = attributes[j];
+			let attributeName = attributes[j];
 						
 			if(attributeName == 'text'){
-				textValue = e.textContent;
+				let textValue = e.textContent;
 				if(textValue){
-					textValue = textValue.trim();
-					textValue = textValue.replace(/\xA0/g,' ');
-					textValue = textValue.replace(/\s+/g,' ');
-					attributesList.push([attributeName, textValue]);
+					attributesList.push(['text', textValue.trim().replace(/\xA0/g,' ').replace(/\s+/g,' ')]);
 				}
 			}else{
 				if(attributeName == 'checked' && e.tagName == 'INPUT' && (e.type == 'radio' || e.type == 'checkbox')){
@@ -48,16 +51,10 @@ for(var i = 0, len = elements.length; i < len; i++){
 		}
 	
 		if(attributesList.length == attributesLen){
-			foundElement = getElement(e);
+			let newElem = addElement(e);
 			for(var k=0; k < attributesLen; k++){
-				foundElement[attributesList[k][0]] = attributesList[k][1];
+				newElem[attributesList[k][0]] = attributesList[k][1];
 			}
-			result.push(foundElement);
 		}
 	}
-};
-
-function getElement(el){
-	var rec = el.getBoundingClientRect();
-	return {'ats-elt':{index:result.length, tag:el.tagName.toLowerCase(), value:el, x:rec.left+0.00001, y:rec.top+0.00001, width:rec.width+0.00001, height:rec.height+0.00001}};
 };

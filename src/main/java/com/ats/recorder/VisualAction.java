@@ -27,7 +27,6 @@ import java.util.Arrays;
 
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
-import com.ats.generator.objects.MouseDirection;
 import com.ats.script.actions.Action;
 import com.ats.script.actions.ActionComment;
 import com.google.common.io.Files;
@@ -50,7 +49,6 @@ public class VisualAction {
 	private int line;
 	private String value = "";
 	private String data = "";
-	private MouseDirection position;
 
 	private VisualElement element;
 
@@ -164,14 +162,6 @@ public class VisualAction {
 
 	public void setPassed(boolean passed) {
 		this.passed = passed;
-	}
-	
-	public MouseDirection getPosition() {
-		return position;
-	}
-
-	public void setPosition(MouseDirection position) {
-		this.position = position;
 	}
 
 	public Long getTimeLine() {

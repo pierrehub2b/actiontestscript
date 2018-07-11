@@ -28,25 +28,22 @@ import com.google.common.io.Resources;
 
 public class ResourceContent {
 
-	private static String visibilityJavaScript;
 	private static String scrollElementJavaScript;
 	private static String searchElementsJavaScript;
 	private static String documentSizeJavaScript;
 	private static String elementAttributesJavaScript;
 	private static String parentElementJavaScript;
-	private static String elementCssJavaScript;
 	private static byte[] tick24Icon;
 	private static String atsLogo;
 	private static String pageStyle;
 
 	static {
-		visibilityJavaScript = getScript("visibility");
-		scrollElementJavaScript = getScript("scrollElement");
-		searchElementsJavaScript = getScript("searchElements");
 		documentSizeJavaScript = getScript("documentSize");
 		elementAttributesJavaScript = getScript("elementAttributes");
 		parentElementJavaScript = getScript("parentElement");
-		elementCssJavaScript = getScript("elementCss");
+		scrollElementJavaScript = getScript("scrollElement");
+		searchElementsJavaScript = getScript("searchElements");
+
 		tick24Icon = getIcon("tick", 24);
 		atsLogo = Base64.getEncoder().encodeToString(getLogo());
 		pageStyle = getData("jsStyle");		
@@ -104,10 +101,6 @@ public class ResourceContent {
 		return tick24Icon;
 	}
 
-	public static String getVisibilityJavaScript() {
-		return visibilityJavaScript;
-	}
-
 	public static String getScrollElementJavaScript() {
 		return scrollElementJavaScript;
 	}
@@ -126,9 +119,5 @@ public class ResourceContent {
 
 	public static String getParentElementJavaScript() {
 		return parentElementJavaScript;
-	}
-
-	public static String getElementCssJavaScript() {
-		return elementCssJavaScript;
 	}
 }

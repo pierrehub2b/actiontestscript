@@ -80,7 +80,6 @@ public class ActionAssertProperty extends ActionExecuteElement {
 				
 				ts.updateVisualStatus(true);
 				ts.updateVisualValue(value.getName() + " = " + value.getValue().getCalculated(), attributeValue);
-				
 			}else {
 				status.setPassed(false);
 				status.setCode(ActionStatus.ATTRIBUTE_CHECK_FAIL);

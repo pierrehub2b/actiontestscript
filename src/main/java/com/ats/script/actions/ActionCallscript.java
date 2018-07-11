@@ -50,6 +50,7 @@ public class ActionCallscript extends Action {
 	private static final String ASSETS_PROTOCOLE = "assets:///";
 	private static final String FILE_PROTOCOLE = "file:///";
 	private static final String HTTP_PROTOCOLE = "http://";
+	private static final String HTTPS_PROTOCOLE = "https://";
 
 	private String name;
 
@@ -68,45 +69,26 @@ public class ActionCallscript extends Action {
 		if(parameters != null && parameters.length > 0) {
 
 			String firstParam = parameters[0];
-			if(firstParam.startsWith(ASSETS_PROTOCOLE) || firstParam.startsWith(FILE_PROTOCOLE) || firstParam.startsWith(HTTP_PROTOCOLE)) {
+			if(firstParam.startsWith(ASSETS_PROTOCOLE) || firstParam.startsWith(FILE_PROTOCOLE) || firstParam.startsWith(HTTP_PROTOCOLE) || firstParam.startsWith(HTTPS_PROTOCOLE)) {
 				setCsvFilePath(firstParam);
-				return;
-			}
-
-			ArrayList<CalculatedValue> paramsValues = new ArrayList<CalculatedValue>();
-			for(String param : parameters){
-				Matcher match = LOOP_REGEXP.matcher(param);
-				if(match.find()){
-					try{
-						this.loop = Integer.parseInt(match.group(1));
-					}catch (NumberFormatException e){}
-				}else {
-					paramsValues.add(new CalculatedValue(script, param.trim()));
+			}else {
+				ArrayList<CalculatedValue> paramsValues = new ArrayList<CalculatedValue>();
+				for(String param : parameters){
+					
+					param = param.replaceAll("\n", ",");
+					
+					Matcher match = LOOP_REGEXP.matcher(param);
+					if(match.find()){
+						try{
+							this.loop = Integer.parseInt(match.group(1));
+						}catch (NumberFormatException e){}
+					}else {
+						paramsValues.add(new CalculatedValue(script, param.trim()));
+					}
 				}
+				setParameters(paramsValues.toArray(new CalculatedValue[paramsValues.size()]));
 			}
-
-			setParameters(paramsValues.toArray(new CalculatedValue[paramsValues.size()]));
 		}
-
-		/*if(options != null && options.size() > 0){
-
-			int loopValue = 1;
-
-			Iterator<String> itr = options.iterator();
-			while (itr.hasNext())
-			{
-				String param = itr.next().trim();
-				Matcher match = LOOP_REGEXP.matcher(param);
-				if(match.find()){
-					try{
-						loopValue = Integer.parseInt(match.group(1));
-						break;
-					}catch (NumberFormatException e){}
-				}
-			}
-
-			this.loop = loopValue;
-		}*/
 
 		if(returnValue != null && returnValue.length > 0 && this.loop == 1){
 			setVariables(new Variable[returnValue.length]);

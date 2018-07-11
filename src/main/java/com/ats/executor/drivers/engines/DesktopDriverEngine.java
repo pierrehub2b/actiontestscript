@@ -323,7 +323,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	public void goToUrl(URL url, boolean newWindow) {} // open default browser ?
 
 	@Override
-	public ArrayList<FoundElement> findWebElement(Channel channel, TestElement testObject, String tagName, String[] attributes,
+	public ArrayList<FoundElement> findWebElement(Channel channel, TestElement testObject, String tagName, ArrayList<String> attributes,
 			Predicate<Map<String, Object>> searchPredicate) {
 		return new ArrayList<FoundElement>();
 	}
@@ -359,5 +359,5 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	}
 
 	@Override
-	public void switchToFrame(String id) {}
+	public void switchToFrameId(String id) {}
 }

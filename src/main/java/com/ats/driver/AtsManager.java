@@ -61,6 +61,7 @@ public class AtsManager {
 	private static final int WATCHDOG_TIMEOUT = 300;
 
 	private static final int MAX_TRY_SEARCH = 15;
+	private static final int MAX_TRY_PROPERTY = 10;
 
 	private Path driversFolderPath;
 	private Properties properties;
@@ -76,6 +77,7 @@ public class AtsManager {
 	private int watchDogTimeOut = WATCHDOG_TIMEOUT;
 
 	private int maxTrySearch = MAX_TRY_SEARCH;
+	private int maxTryProperty = MAX_TRY_PROPERTY;
 
 	private Proxy proxy = new Proxy();
 
@@ -237,6 +239,13 @@ public class AtsManager {
 								maxTrySearch = Integer.parseInt(maxTryNode.item(0).getChildNodes().item(0).getNodeValue());
 							}catch(NumberFormatException e){}
 						}
+						
+						maxTryNode = ((Element)maxTryNodeList.item(0)).getElementsByTagName("getProperty");
+						if(maxTryNode != null && maxTryNode.getLength() > 0) {
+							try {
+								maxTryProperty = Integer.parseInt(maxTryNode.item(0).getChildNodes().item(0).getNodeValue());
+							}catch(NumberFormatException e){}
+						}
 					}
 
 					NodeList proxyNode = doc.getElementsByTagName("proxy");
@@ -385,5 +394,9 @@ public class AtsManager {
 
 	public int getMaxTrySearch() {
 		return maxTrySearch;
+	}
+	
+	public int getMaxTryProperty() {
+		return maxTryProperty;
 	}
 }

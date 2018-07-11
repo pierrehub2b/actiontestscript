@@ -14,13 +14,11 @@ while (parent != null){
 	}
 };
 
-function addElement(el){
-	if(el != null){
-		try{
-			var rec = el.getBoundingClientRect();
-			result.push({value:el,tag:el.tagName,x:rec.left+0.00001,y:rec.top+0.00001,width:rec.width+0.00001,height:rec.height+0.00001});
-		}catch(error){
-			result.push({value:el,tag:'',x:0.00001,y:0.00001,width:0.00001,height:0.00001});
-		}
+function addElement(e){
+	try{
+		let rec = e.getBoundingClientRect();
+		result[result.length] = [e, e.tagName, rec.width+0.0001, rec.height+0.0001, rec.left+0.0001, rec.top+0.0001];
+	}catch(error){
+		result[result.length] = [e, '', 0.0001, 0.0001, 0.0001, 0.0001];
 	}
 }

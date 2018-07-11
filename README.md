@@ -143,11 +143,12 @@ Here is an example of global ATS configuration file (*.atsProperties* file in AT
 	</appBounding>
 	<maxTry>
 		<searchElement>15</searchElement>
-		<interactable>15</interactable>
+		<getProperty>10</getProperty>
 	</maxTry>
 	<timeOut>
 		<script>60</script>
 		<pageLoad>120</pageLoad>
+		<watchDog>180</watchDog>
 	</timeOut>
 	<browsers>
 		<browser>

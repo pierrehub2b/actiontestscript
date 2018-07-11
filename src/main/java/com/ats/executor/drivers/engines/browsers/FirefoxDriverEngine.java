@@ -22,11 +22,8 @@ package com.ats.executor.drivers.engines.browsers;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.SocketTimeoutException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -37,6 +34,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebElement;
+import org.openqa.selenium.remote.UnreachableBrowserException;
 
 import com.ats.driver.AtsManager;
 import com.ats.element.FoundElement;
@@ -58,12 +56,10 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 
 	private final static int DEFAULT_WAIT = 150;
 
-	private final String WEB_ELEMENT_REF = "element-6066-11e4-a52e-4f735466cecf";
-	private java.net.URI driverSessionUri;
-	private RequestConfig requestConfig;
-
 	public FirefoxDriverEngine(Channel channel, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
 		super(channel, DriverManager.FIREFOX_BROWSER, driverProcess, windowsDriver, ats, DEFAULT_WAIT);
+
+		this.autoScrollElement = JS_AUTO_SCROLL_MOZ;
 
 		DesiredCapabilities cap = new DesiredCapabilities();
 
@@ -71,7 +67,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		options.setCapability("marionnette ","true");
 		options.setCapability("acceptSslCerts ","true");
 		options.setCapability("acceptInsecureCerts ","true");
-		options.setPageLoadStrategy(PageLoadStrategy.EAGER);
+		options.setPageLoadStrategy(PageLoadStrategy.NONE);
 
 		if(applicationPath != null) {
 			options.setBinary(applicationPath);
@@ -80,14 +76,6 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		cap.setCapability(FirefoxOptions.FIREFOX_OPTIONS, options);
 
 		launchDriver(cap);
-
-		requestConfig = RequestConfig.custom()
-				.setConnectTimeout(2000)
-				.setConnectionRequestTimeout(2000)
-				.setSocketTimeout(2000).build();
-		try {
-			driverSessionUri = new URI(driverProcess.getDriverServerUrl() + "/session/" + driver.getSessionId().toString() + "/actions");
-		} catch (URISyntaxException e) {}
 
 	}
 
@@ -135,14 +123,17 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	}
 
 	@Override
-	protected void move(WebElement element, int offsetX, int offsetY) {
+	protected void move(FoundElement element, int offsetX, int offsetY) {
+
+		forceScrollElement(element);
+
 		JsonArray actionList = new JsonArray();
-		actionList.add(getMoveAction(((RemoteWebElement)element).getId(), offsetX, offsetY));
-		
+		actionList.add(getMoveAction(((RemoteWebElement)element.getValue()).getId(), offsetX, offsetY));
+
 		executeAction(getElementAction(actionList));
 	}
 
-	@Override
+	/*@Override
 	protected void click() {
 		JsonArray actionList = new JsonArray();
 		actionList.add(getMouseClickAction("pointerDown"));
@@ -156,7 +147,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		action.addProperty("type", type);
 		action.addProperty("button", 0);
 		return action;
-	}
+	}*/
 
 	private JsonObject getMoveAction(String elemId, int offsetX, int offsetY) {
 		JsonObject action = new JsonObject();
@@ -207,7 +198,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		}
 
 		CloseableHttpClient httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
-		HttpPost request = new HttpPost(driverSessionUri);
+		HttpPost request = new HttpPost(driverSession + "/actions");
 		request.addHeader("content-type", "application/json");
 
 		try {
