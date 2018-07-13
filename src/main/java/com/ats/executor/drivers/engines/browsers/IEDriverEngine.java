@@ -19,8 +19,7 @@ under the License.
 
 package com.ats.executor.drivers.engines.browsers;
 
-import org.openqa.selenium.ie.InternetExplorerDriver;
-import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.ie.InternetExplorerOptions;
 
 import com.ats.driver.AtsManager;
 import com.ats.executor.channels.Channel;
@@ -34,18 +33,19 @@ public class IEDriverEngine extends WebDriverEngine {
 
 	public IEDriverEngine(Channel channel, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
 		super(channel, "ie", driverProcess, windowsDriver, ats, DEFAULT_WAIT);
+				
+		InternetExplorerOptions ieOptions = new InternetExplorerOptions();
+		ieOptions.introduceFlakinessByIgnoringSecurityDomains();
+		ieOptions.enableNativeEvents();
+		ieOptions.enablePersistentHovering();
 		
-		DesiredCapabilities capabilities = DesiredCapabilities.internetExplorer();
-		capabilities.setCapability(InternetExplorerDriver.REQUIRE_WINDOW_FOCUS, true);  
-		capabilities.setCapability(InternetExplorerDriver.IGNORE_ZOOM_SETTING, false);
-		capabilities.setCapability(InternetExplorerDriver.IE_ENSURE_CLEAN_SESSION, true);
-		capabilities.setCapability(InternetExplorerDriver.INTRODUCE_FLAKINESS_BY_IGNORING_SECURITY_DOMAINS, true);
-		capabilities.setCapability(InternetExplorerDriver.ENABLE_ELEMENT_CACHE_CLEANUP, true);
-		capabilities.setCapability(InternetExplorerDriver.NATIVE_EVENTS, true);
-		capabilities.setCapability(InternetExplorerDriver.UNEXPECTED_ALERT_BEHAVIOR, "accept");
-		capabilities.setCapability(InternetExplorerDriver.ENABLE_PERSISTENT_HOVERING, true);
-		//capabilities.setCapability(InternetExplorerDriver.FORCE_CREATE_PROCESS, true);
+		/*ieOptions.ignoreZoomSettings();
+		ieOptions.requireWindowFocus();
+		ieOptions.enableNativeEvents();
+		ieOptions.enablePersistentHovering();*/
+		//ieOptions.destructivelyEnsureCleanSession();
 
-		launchDriver(capabilities);
+		launchDriver(ieOptions);
 	}
+
 }

@@ -154,7 +154,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		String applicationVersion = "N/A";
 		String driverVersion = null;
 
-		Map<String, ?> infos = (this.driver).getCapabilities().asMap();
+		Map<String, ?> infos = driver.getCapabilities().asMap();
 		for (Map.Entry<String, ?> entry : infos.entrySet()){
 			if("browserVersion".equals(entry.getKey()) || "version".equals(entry.getKey())){
 				applicationVersion = entry.getValue().toString();
@@ -172,7 +172,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			File tempHtml = File.createTempFile("ats_", ".html");
 			tempHtml.deleteOnExit();
 
-			Files.write(tempHtml.toPath(), StartHtmlPage.getAtsBrowserContent(titleUid, application, applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait(), channel.getMaxTry()));
+			Files.write(tempHtml.toPath(), StartHtmlPage.getAtsBrowserContent(titleUid, application, applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait(), channel.getMaxTry(), channel.getMaxTryProperty()));
 			driver.get(tempHtml.toURI().toString());
 		} catch (IOException e) {}
 
@@ -461,11 +461,6 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	//-----------------------------------------------------------------------------------------------------------------------------------
 	// Mouse position by browser
 	//-----------------------------------------------------------------------------------------------------------------------------------
-
-	// here I must found a way to be sure that the element is enabled AND visible, I have found thar is nothing working on both chrome, firefox, opera and edge browsers
-	/*protected boolean isInteractable(RemoteWebElement rwe) {
-		return (Boolean) runJavaScript(ResourceContent.getVisibilityJavaScript(), rwe) && rwe.isEnabled();
-	}*/
 
 	@Override
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position) {
@@ -817,7 +812,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	@Override
 	public void sendTextData(ActionStatus status, FoundElement element, ArrayList<SendKeyData> textActionList) {
 		for(SendKeyData sequence : textActionList) {
-			element.getValue().sendKeys(sequence.getSequence());
+			actions.sendKeys(element.getValue(), sequence.getSequence()).perform();
 		}
 	}
 

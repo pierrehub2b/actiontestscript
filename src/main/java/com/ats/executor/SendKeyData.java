@@ -20,6 +20,7 @@ under the License.
 package com.ats.executor;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Base64;
 
 import org.openqa.selenium.Keys;
@@ -51,7 +52,6 @@ public class SendKeyData {
 				this.enterKey = true;
 			}
 			sequence.append(spare.toLowerCase());
-
 
 		}else {
 			try {
@@ -115,7 +115,7 @@ public class SendKeyData {
 		return enterKey;
 	}
 
-	public CharSequence getSequenceFirefox() {
+	public CharSequence getDataSequence() {
 		if(chord != null) {
 			return chord;
 		}

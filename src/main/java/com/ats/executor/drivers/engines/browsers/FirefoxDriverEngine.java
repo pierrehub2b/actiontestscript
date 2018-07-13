@@ -66,7 +66,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		options.setCapability("marionnette ","true");
 		options.setCapability("acceptSslCerts ","true");
 		options.setCapability("acceptInsecureCerts ","true");
-		options.setPageLoadStrategy(PageLoadStrategy.NONE);
+		options.setPageLoadStrategy(PageLoadStrategy.NORMAL);
 
 		if(applicationPath != null) {
 			options.setBinary(applicationPath);
@@ -117,7 +117,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	@Override
 	public void sendTextData(ActionStatus status, FoundElement element, ArrayList<SendKeyData> textActionList) {
 		for(SendKeyData sequence : textActionList) {
-			element.getValue().sendKeys(sequence.getSequenceFirefox());
+			element.getValue().sendKeys(sequence.getDataSequence());
 		}
 	}
 

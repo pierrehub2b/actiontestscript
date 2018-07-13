@@ -32,7 +32,8 @@ public final class StartHtmlPage {
 			String driverVersion, 
 			TestBound testBound,
 			int actionWait,
-			int maxtry) {
+			int maxtry,
+			int maxTryProperty) {
 
 		if(driverVersion == null) {
 			driverVersion = "N/A";
@@ -63,6 +64,9 @@ public final class StartHtmlPage {
 		
 		htmlContent.append("<br><strong>Search element max try : </strong>");
 		htmlContent.append(maxtry);
+		
+		htmlContent.append("<br><strong>Get property max try : </strong>");
+		htmlContent.append(maxTryProperty);
 
 		htmlContent.append("<br><strong>Wait after action : </strong>");
 		htmlContent.append(actionWait);
