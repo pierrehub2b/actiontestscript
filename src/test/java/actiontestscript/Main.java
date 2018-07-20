@@ -1,15 +1,23 @@
 package actiontestscript;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.imageio.ImageIO;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -39,7 +47,9 @@ import org.openqa.selenium.remote.RemoteWebElement;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.ats.executor.TestBound;
 import com.ats.recorder.VisualAction;
+import com.ats.recorder.VisualImage;
 import com.ats.recorder.VisualReport;
 import com.ats.tools.ResourceContent;
 import com.ats.tools.Utils;
@@ -100,6 +110,8 @@ public class Main {
 		System.exit(0);
 
 		File xmlFolder = new File("C:\\Users\\huber\\Desktop\\xml");
+		Path xmlFolderPath = xmlFolder.toPath();
+		
 		File atsvFile = new File("C:\\Users\\huber\\Desktop\\subscripts.DemoCalculatrice.atsv");
 		try {
 			Utils.deleteRecursive(xmlFolder);
@@ -121,6 +133,8 @@ public class Main {
 			
 			fis = new FileInputStream(atsvFile);
 			AMF3Deserializer amf3 = new AMF3Deserializer(fis);
+			
+			ArrayList<VisualImage> imagesList = new ArrayList<VisualImage>();
 						
 			Element atsRoot = document.createElement("ats");
 			document.appendChild(atsRoot);
@@ -263,11 +277,12 @@ public class Main {
 					action.appendChild(element);
 				}								
 				
-				va.saveImageFile(xmlFolder.toPath());
+				
 			}
 			
 			amf3.close();
-			
+			imagesList.stream().parallel().forEach(vi -> saveImageFile(xmlFolderPath, vi.getName(), vi.getData(), vi.getBound()));
+
 		} catch (IOException e1) {
 			//e1.printStackTrace();
 		} finally {
@@ -289,14 +304,25 @@ public class Main {
 			//e.printStackTrace();
 		}
 
+	}
+	
+	private static void saveImageFile(Path xmlFolderPath, String fileName, byte[] data, TestBound bound) {
 
+		InputStream in = new ByteArrayInputStream(data);
+		try {
+			BufferedImage buffImage = ImageIO.read(in);
 
+			Graphics2D g2d = buffImage.createGraphics();
+			g2d.setColor(Color.MAGENTA);
+			g2d.setStroke(new BasicStroke(3));
+			g2d.drawRect(bound.getX().intValue()-6, bound.getY().intValue()-7, bound.getWidth().intValue(), bound.getHeight().intValue());
+			g2d.dispose();
 
+			ImageIO.write(buffImage, "png", xmlFolderPath.resolve(fileName).toFile());
 
-
-
-
-
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
 	}
 
 }

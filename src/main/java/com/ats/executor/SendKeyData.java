@@ -20,7 +20,6 @@ under the License.
 package com.ats.executor;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Base64;
 
 import org.openqa.selenium.Keys;

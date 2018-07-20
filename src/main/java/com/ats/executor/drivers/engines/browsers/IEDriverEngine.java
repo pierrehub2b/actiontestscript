@@ -15,17 +15,22 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.executor.drivers.engines.browsers;
+
+import java.awt.Rectangle;
 
 import org.openqa.selenium.ie.InternetExplorerOptions;
 
 import com.ats.driver.AtsManager;
+import com.ats.element.FoundElement;
+import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.WebDriverEngine;
+import com.ats.generator.objects.MouseDirection;
 
 public class IEDriverEngine extends WebDriverEngine {
 
@@ -33,19 +38,36 @@ public class IEDriverEngine extends WebDriverEngine {
 
 	public IEDriverEngine(Channel channel, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
 		super(channel, "ie", driverProcess, windowsDriver, ats, DEFAULT_WAIT);
-				
+
 		InternetExplorerOptions ieOptions = new InternetExplorerOptions();
 		ieOptions.introduceFlakinessByIgnoringSecurityDomains();
 		ieOptions.enableNativeEvents();
 		ieOptions.enablePersistentHovering();
-		
-		/*ieOptions.ignoreZoomSettings();
-		ieOptions.requireWindowFocus();
-		ieOptions.enableNativeEvents();
-		ieOptions.enablePersistentHovering();*/
-		//ieOptions.destructivelyEnsureCleanSession();
 
 		launchDriver(ieOptions);
 	}
 
+	@Override
+	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position) {
+		
+		Rectangle rect = foundElement.getRectangle();
+
+		getDesktopDriver().mouseMove(
+				getOffsetX(rect, position) + foundElement.getScreenX().intValue(),
+				getOffsetY(rect, position) + foundElement.getScreenY().intValue() - 9);
+	}
+
+	@Override
+	public void mouseClick(FoundElement element, boolean hold) {
+		if(hold) {
+			getDesktopDriver().mouseDown();
+		}else {
+			super.mouseClick(element, false);
+		}
+	}
+	
+	@Override
+	public void drop() {
+		getDesktopDriver().mouseRelease();
+	}
 }

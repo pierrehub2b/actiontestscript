@@ -110,7 +110,7 @@ public class ActionExecuteElement extends ActionExecute {
 					testElement = ts.findObject(maxTry, searchElement, operator, value);
 				}
 
-				ts.updateVisualElement(testElement);
+				//ts.updateVisualElement(testElement);
 
 				status.setElement(testElement);
 				status.setSearchDuration(testElement.getTotalSearchDuration());
@@ -141,11 +141,13 @@ public class ActionExecuteElement extends ActionExecute {
 
 		if(testElement.isValidated()) {
 			status.setPassed(true);
-			ts.updateVisualStatus(true);
+			ts.updateVisualElement(testElement);
 		}else {
 			status.setPassed(false);
 			status.setCode(ActionStatus.OBJECT_NOT_FOUND);
 			status.setMessage("Element not found");
+			
+			ts.updateVisualStatus(ActionStatus.OBJECT_NOT_FOUND, testElement.getCriterias(), testElement.getTotalSearchDuration() + "");
 		}
 
 		testElement.terminateExecution();

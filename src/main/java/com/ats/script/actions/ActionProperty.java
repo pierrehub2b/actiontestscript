@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.script.actions;
 
@@ -41,13 +41,13 @@ public class ActionProperty extends ActionExecuteElement {
 		setName(name);
 		setVariable(script.getVariable(varName, true));
 	}
-	
+
 	public ActionProperty(Script script, boolean stop, int maxTry, SearchedElement element, String name, Variable variable) {
 		super(script, stop, maxTry, element);
 		setName(name);
 		setVariable(variable);
 	}
-	
+
 	//---------------------------------------------------------------------------------------------------------------------------------
 	// Code Generator
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -59,26 +59,33 @@ public class ActionProperty extends ActionExecuteElement {
 
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
-	
+
 	@Override
 	public void terminateExecution(ActionTestScript ts) {
-		
+
 		super.terminateExecution(ts);
 		
-		String attributeValue = getTestElement().getAttribute(name);
+		if(status.isPassed()) {
+			String attributeValue = getTestElement().getAttribute(name);
 
-		if(attributeValue == null) {
-			status.setPassed(false);
-			status.setCode(ActionStatus.ATTRIBUTE_NOT_SET);
-			status.setData(name);
-			status.setMessage("Attribute '" + name + "' not found !");
-		}else {
-			status.setMessage(attributeValue);
-			variable.updateValue(attributeValue);
+			if(attributeValue == null) {
+				status.setPassed(false);
+				status.setCode(ActionStatus.ATTRIBUTE_NOT_SET);
+				status.setData(name);
+				status.setMessage("Attribute '" + name + "' not found !");
+				
+				ts.updateVisualStatus(ActionStatus.ATTRIBUTE_NOT_SET, name, status.getDuration() + "");
+				
+			}else {
+				status.setMessage(attributeValue);
+				variable.updateValue(attributeValue);
+				
+				ts.updateVisualStatus(0, name, attributeValue);
+			}
 		}
-
+		
 		status.updateDuration();
-		ts.updateVisualValue(name, status.getElement().toString());
+
 	}
 
 	//--------------------------------------------------------

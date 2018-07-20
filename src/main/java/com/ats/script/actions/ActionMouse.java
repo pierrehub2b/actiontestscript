@@ -65,11 +65,8 @@ public class ActionMouse extends ActionExecuteElement {
 
 		status.resetDuration();
 
-		//ts.updateVisualImage();
 		getTestElement().over(status, position);
 		ts.updateVisualImage();
-
-		//ts.updateVisualElement(getTestElement());
 		
 		status.updateDuration();
 

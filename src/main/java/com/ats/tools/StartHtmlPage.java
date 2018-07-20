@@ -33,7 +33,10 @@ public final class StartHtmlPage {
 			TestBound testBound,
 			int actionWait,
 			int maxtry,
-			int maxTryProperty) {
+			int maxTryProperty,
+			int scriptTimeout,
+			int pageLoadTimeout,
+			int watchdog) {
 
 		if(driverVersion == null) {
 			driverVersion = "N/A";
@@ -67,11 +70,20 @@ public final class StartHtmlPage {
 		
 		htmlContent.append("<br><strong>Get property max try : </strong>");
 		htmlContent.append(maxTryProperty);
+		
+		htmlContent.append("<br>JavaScript execution time out : ");
+		htmlContent.append(scriptTimeout);
+		htmlContent.append(" s");
+		
+		htmlContent.append("<br>Page load time out : ");
+		htmlContent.append(pageLoadTimeout);
+		htmlContent.append(" s");
+		
+		htmlContent.append("<br>Action execution watchdog : ");
+		htmlContent.append(watchdog);
+		htmlContent.append(" s");
 
-		htmlContent.append("<br><strong>Wait after action : </strong>");
-		htmlContent.append(actionWait);
-		htmlContent.append(" ms</p></div><div class=\"alert note\" style=\"margin-left:30px;min-width: 240px;display: inline-block\"><p>");
-
+		htmlContent.append("</p></div><div class=\"alert note\" style=\"margin-left:30px;min-width: 240px;display: inline-block\"><p>");
 		htmlContent.append("<strong>Browser : </strong>");
 		htmlContent.append("<br><strong>  - Name : </strong>");
 		htmlContent.append(browserName);
@@ -92,6 +104,10 @@ public final class StartHtmlPage {
 		htmlContent.append(testBound.getWidth().intValue());
 		htmlContent.append(" x ");
 		htmlContent.append(testBound.getHeight().intValue());
+		
+		htmlContent.append("<br><strong>  - Wait after action : </strong>");
+		htmlContent.append(actionWait);
+		htmlContent.append(" ms");
 
 		htmlContent.append("</p></div></div></body></html>");
 

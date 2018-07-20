@@ -22,7 +22,6 @@ package com.ats.executor.drivers;
 import java.util.function.Predicate;
 
 import com.ats.driver.AtsManager;
-import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.DesktopDriverEngine;
@@ -57,29 +56,13 @@ public class DriverManager {
 	private DriverProcess firefoxDriver;
 	private DriverProcess ieDriver;
 	
-	private AtsManager ats;
-
-	public DriverManager() {
-		this.ats = new AtsManager();
-	}
+	public static AtsManager ATS = new AtsManager();
+	private String windowsBuildVersion;
 	
 	public String getDriverFolderPath() {
-		return ats.getDriversFolderPath().toFile().getAbsolutePath();
+		return ATS.getDriversFolderPath().toFile().getAbsolutePath();
 	}
 	
-	public TestBound getApplicationBound() {
-		return ats.getApplicationBound();
-	}
-	
-	public int getMaxTry() {
-		return ats.getMaxTrySearch();
-	}
-	
-	public int getMaxTryProperty() {
-		return ats.getMaxTryProperty();
-	}
-	
-	private String windowsBuildVersion;
 	private String getWindowsBuildVersion() {
 		if(windowsBuildVersion == null) {
 			windowsBuildVersion = Utils.getWindowsBuildVersion();
@@ -112,7 +95,7 @@ public class DriverManager {
 	
 	public DriverProcess getDesktopDriver() {
 		if(desktopDriver == null){
-			desktopDriver = new DriverProcess(this, ats.getDriversFolderPath(), DESKTOP_DRIVER_FILE_NAME, null);
+			desktopDriver = new DriverProcess(this, ATS.getDriversFolderPath(), DESKTOP_DRIVER_FILE_NAME, null);
 		}
 		return desktopDriver;
 	}
@@ -132,51 +115,51 @@ public class DriverManager {
 	public IDriverEngine getDriverEngine(Channel channel, String application, DesktopDriver desktopDriver) {
 		switch(application.toLowerCase()) {
 		case CHROME_BROWSER :
-			return new ChromeDriverEngine(channel, getChromeDriver(), desktopDriver, ats);
+			return new ChromeDriverEngine(channel, getChromeDriver(), desktopDriver, ATS);
 		case EDGE_BROWSER :
-			return new EdgeDriverEngine(channel, getEdgeDriver(), desktopDriver, ats);
+			return new EdgeDriverEngine(channel, getEdgeDriver(), desktopDriver, ATS);
 		case OPERA_BROWSER :
-			return new OperaDriverEngine(channel, getOperaDriver(), desktopDriver, ats);
+			return new OperaDriverEngine(channel, getOperaDriver(), desktopDriver, ATS);
 		case FIREFOX_BROWSER :
-			return new FirefoxDriverEngine(channel, getFirefoxDriver(), desktopDriver, ats);
+			return new FirefoxDriverEngine(channel, getFirefoxDriver(), desktopDriver, ATS);
 		case IE_BROWSER :
-			return new IEDriverEngine(channel, getIEDriver(), desktopDriver, ats);
+			return new IEDriverEngine(channel, getIEDriver(), desktopDriver, ATS);
 		default :
-			return new DesktopDriverEngine(channel, application, desktopDriver, ats);
+			return new DesktopDriverEngine(channel, application, desktopDriver, ATS);
 		}
 	}
 	
 	public DriverProcess getFirefoxDriver() {
 		if(firefoxDriver == null){
-			firefoxDriver = new DriverProcess(this, ats.getDriversFolderPath(), FIREFOX_DRIVER_FILE_NAME, null);
+			firefoxDriver = new DriverProcess(this, ATS.getDriversFolderPath(), FIREFOX_DRIVER_FILE_NAME, null);
 		}
 		return firefoxDriver;
 	}
 
 	public DriverProcess getChromeDriver() {
 		if(chromeDriver == null){
-			chromeDriver = new DriverProcess(this, ats.getDriversFolderPath(), CHROME_DRIVER_FILE_NAME, null);
+			chromeDriver = new DriverProcess(this, ATS.getDriversFolderPath(), CHROME_DRIVER_FILE_NAME, null);
 		}
 		return chromeDriver;
 	}
 
 	public DriverProcess getIEDriver() {
 		if(ieDriver == null){
-			ieDriver = new DriverProcess(this, ats.getDriversFolderPath(), IE_DRIVER_FILE_NAME, null);
+			ieDriver = new DriverProcess(this, ATS.getDriversFolderPath(), IE_DRIVER_FILE_NAME, null);
 		}
 		return ieDriver;
 	}
 		
 	public DriverProcess getEdgeDriver() {
 		if(edgeDriver == null || !edgeDriver.isStarted()){
-			edgeDriver = new DriverProcess(this, ats.getDriversFolderPath(), EDGE_DRIVER_FILE_NAME + "-" + getWindowsBuildVersion() + ".exe", null);
+			edgeDriver = new DriverProcess(this, ATS.getDriversFolderPath(), EDGE_DRIVER_FILE_NAME + "-" + getWindowsBuildVersion() + ".exe", null);
 		}
 		return edgeDriver;
 	}
 
 	public DriverProcess getOperaDriver() {
 		if(operaDriver == null){
-			operaDriver = new DriverProcess(this, ats.getDriversFolderPath(), OPERA_DRIVER_FILE_NAME, null);
+			operaDriver = new DriverProcess(this, ATS.getDriversFolderPath(), OPERA_DRIVER_FILE_NAME, null);
 		}
 		return operaDriver;
 	}

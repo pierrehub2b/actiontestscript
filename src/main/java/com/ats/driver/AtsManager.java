@@ -58,10 +58,13 @@ public class AtsManager {
 
 	private static final int SCRIPT_TIMEOUT = 60;
 	private static final int PAGELOAD_TIMEOUT = 120;
-	private static final int WATCHDOG_TIMEOUT = 300;
+	private static final int WATCHDOG_TIMEOUT = 200;
 
 	private static final int MAX_TRY_SEARCH = 15;
 	private static final int MAX_TRY_PROPERTY = 10;
+	
+	//-----------------------------------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------------------------
 
 	private Path driversFolderPath;
 	private Properties properties;
@@ -224,10 +227,6 @@ public class AtsManager {
 							try {
 								watchDogTimeOut = Integer.parseInt(timeOut.item(0).getChildNodes().item(0).getNodeValue());
 							}catch(NumberFormatException e){}
-							
-							if(watchDogTimeOut < WATCHDOG_TIMEOUT) {
-								watchDogTimeOut = WATCHDOG_TIMEOUT;
-							}
 						}
 					}
 

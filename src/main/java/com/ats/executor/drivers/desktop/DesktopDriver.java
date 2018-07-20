@@ -484,8 +484,8 @@ public class DesktopDriver extends RemoteWebDriver {
 		sendRequestCommand(CommandType.Record, RecordType.Data, value, data);
 	}
 
-	public void updateVisualStatus(boolean value) {
-		sendRequestCommand(CommandType.Record, RecordType.Status, value);
+	public void updateVisualStatus(int error) {
+		sendRequestCommand(CommandType.Record, RecordType.Status, error);
 	}
 
 	public void updateVisualElement(TestElement element) {

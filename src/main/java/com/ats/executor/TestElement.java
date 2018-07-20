@@ -356,7 +356,7 @@ public class TestElement{
 	// Assertion ...
 	//-------------------------------------------------------------------------------------------------------------------
 
-	public void checkOccurrences(ActionStatus status, String operator, int expected) {
+	public int checkOccurrences(ActionStatus status, String operator, int expected) {
 
 		terminateExecution();
 
@@ -368,6 +368,8 @@ public class TestElement{
 			status.setData(count);
 			status.setMessage("[" + expected + "] expected occurence(s) but [" + count + "] occurence(s) found");
 		}
+		
+		return count;
 	}
 
 	//-------------------------------------------------------------------------------------------------------------------

@@ -44,7 +44,7 @@ public class ChannelManager {
 	}
 
 	public int getMaxTry() {
-		return driverManager.getMaxTry();
+		return DriverManager.ATS.getMaxTrySearch();
 	}
 
 	public Channel getCurrentChannel(){

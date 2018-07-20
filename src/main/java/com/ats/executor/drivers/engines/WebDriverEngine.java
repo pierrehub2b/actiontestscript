@@ -82,9 +82,6 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	private Proxy proxy;
 
-	private int scriptTimeout;
-	private int loadPageTimeOut;
-
 	private DriverProcess driverProcess;
 
 	private Actions actions;
@@ -108,8 +105,6 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		this.driverProcess = driverProcess;
 		this.desktopDriver = desktopDriver;
 		this.proxy = ats.getProxy();
-		this.loadPageTimeOut = ats.getPageloadTimeOut();
-		this.scriptTimeout = ats.getScriptTimeOut();
 	}
 
 	protected DriverProcess getDriverProcess() {
@@ -121,7 +116,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		cap.setCapability(CapabilityType.SUPPORTS_FINDING_BY_CSS, false);
 		cap.setCapability(CapabilityType.PROXY, proxy);
 		cap.setCapability(CapabilityType.HAS_NATIVE_EVENTS, false);
-
+		
 		int maxTry = 20;
 		String errorMessage = null;
 		while(driver == null && maxTry > 0) {
@@ -141,8 +136,8 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		actions = new Actions(driver);
 
-		driver.manage().timeouts().setScriptTimeout(scriptTimeout, TimeUnit.SECONDS);
-		driver.manage().timeouts().pageLoadTimeout(loadPageTimeOut, TimeUnit.SECONDS);
+		driver.manage().timeouts().setScriptTimeout(channel.getScriptTimeout(), TimeUnit.SECONDS);
+		driver.manage().timeouts().pageLoadTimeout(channel.getPageLoadTimeout(), TimeUnit.SECONDS);
 
 		try{
 			driver.manage().window().setSize(channel.getDimension().getSize());
@@ -150,6 +145,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		}catch(Exception ex){
 			System.err.println(ex.getMessage());
 		}
+
 
 		String applicationVersion = "N/A";
 		String driverVersion = null;
@@ -172,7 +168,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			File tempHtml = File.createTempFile("ats_", ".html");
 			tempHtml.deleteOnExit();
 
-			Files.write(tempHtml.toPath(), StartHtmlPage.getAtsBrowserContent(titleUid, application, applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait(), channel.getMaxTry(), channel.getMaxTryProperty()));
+			Files.write(tempHtml.toPath(), StartHtmlPage.getAtsBrowserContent(titleUid, application, applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait(), channel.getMaxTry(), channel.getMaxTryProperty(), channel.getScriptTimeout(), channel.getPageLoadTimeout(), channel.getWatchdog()));
 			driver.get(tempHtml.toURI().toString());
 		} catch (IOException e) {}
 
@@ -424,18 +420,18 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	public TestBound[] getDimensions() {
 
 		switchWindow(currentWindow);
+		
+		TestBound dimension = new TestBound();
+		TestBound subDimension = new TestBound();
 
-		ArrayList<ArrayList<Double>> response = (ArrayList<ArrayList<Double>>) runJavaScript(JS_DOCUMENT_SIZE);
-
-		TestBound testDimension = new TestBound();
-		TestBound testSubDimension = new TestBound();
+		ArrayList<Double> response = (ArrayList<Double>) runJavaScript(JS_DOCUMENT_SIZE);
 
 		if(response != null) {
-			testDimension.update(response.get(0));
-			testSubDimension.update(response.get(1));
+			dimension.update(response.get(0), response.get(1), response.get(2), response.get(3));
+			subDimension.update(response.get(4), response.get(5), response.get(6), response.get(7));
 		}
 
-		return new TestBound[]{testDimension, testSubDimension};
+		return new TestBound[]{dimension, subDimension};
 	}
 
 	@Override

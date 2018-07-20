@@ -182,10 +182,11 @@ Here is an example of global ATS configuration file (*.atsProperties* file in AT
 ```
 * You can define the proxy used by browsers during execution of the test.
 * You can define initial window size of a tested application and it's initial position (appBounding).
-* You can define default maxTry action in order to wait that an element exists or wait element is interactable before execution action on it.
+* You can define default maxTry action to wait element exists or wait it is interactable before execute action.
+* You can define default maxTry get property to wait element's property exists and is not null.
 * You can define default timeout (in sec.) for executing javascript or wait page loaded (web application).
 * For each browser used you can define the time to wait after each actions in miliseconds and the path of the binaries of the browser if needed.
-* You can add options to the browsers driver
+* You can add options to the browsers driver.
 * You can define application name and path of installed applications on the host machine.
 
 ## List of available ATS actions
@@ -208,7 +209,7 @@ check-count : Check number of element found with defined criterias
 check-value : Make comparison between two values
 property : Catch property value of found element into variable
 window-resize : Resize or relocate current channel application window
-window-switch : Switch between windows (or tab) of current channel
+window-switch : Switch between windows (or tabs) of current channel
 window-close : Close indexed window
 select : Select item by value, text or index of found select element
 javascript : Execute javascript code on found element

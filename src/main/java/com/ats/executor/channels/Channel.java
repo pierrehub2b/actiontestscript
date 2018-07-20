@@ -57,13 +57,17 @@ public class Channel {
 
 	private ActionTestScript mainScript;
 
-	private TestBound dimension;
+	private TestBound dimension = DriverManager.ATS.getApplicationBound();
 	private TestBound subDimension;
 
 	private String startError;
 
-	private int maxTry = 0;
-	private int maxTryProperty = 5;
+	private int maxTry = DriverManager.ATS.getMaxTrySearch();
+	private int maxTryProperty = DriverManager.ATS.getMaxTryProperty();
+	
+	private int scriptTimeout = DriverManager.ATS.getScriptTimeOut();
+	private int pageLoadTimeout = DriverManager.ATS.getPageloadTimeOut();
+	private int watchdog = DriverManager.ATS.getWatchDogTimeOut();
 
 	private String applicationVersion;
 	private String driverVersion;
@@ -82,10 +86,8 @@ public class Channel {
 			String application) {
 
 		this.mainScript = script;
-		this.maxTry = driverManager.getMaxTry();
-		this.maxTryProperty = driverManager.getMaxTryProperty();
+		
 		this.name = name;
-		this.dimension = driverManager.getApplicationBound();
 		this.current = true;
 
 		this.desktopDriver = new DesktopDriver(driverManager);
@@ -140,7 +142,6 @@ public class Channel {
 	private byte[] screenShot(TestBound dim) {
 		mainScript.sleep(50);
 		return desktopDriver.getScreenshotByte(dim.getX(), dim.getY(), dim.getWidth(), dim.getHeight());
-		//return engine.getScreenShot(dim); 
 	}
 
 	public void setApplicationData(String version, String dVersion, long pid) {
@@ -397,6 +398,18 @@ public class Channel {
 	public int getMaxTryProperty() {
 		return maxTryProperty;
 	}
+	
+	public int getScriptTimeout() {
+		return scriptTimeout;
+	}
+	
+	public int getPageLoadTimeout() {
+		return pageLoadTimeout;
+	}
+	
+	public int getWatchdog() {
+		return watchdog;
+	}
 
 	public void forceScrollElement(FoundElement foundElement) {
 		engine.forceScrollElement(foundElement);
@@ -462,11 +475,16 @@ public class Channel {
 		getDesktopDriver().updateVisualPosition(type, hdir, vdir);
 	}
 
-	public void updateVisualStatus(boolean value) {
-		getDesktopDriver().updateVisualStatus(value);
+	public void updateVisualStatus(int error) {
+		getDesktopDriver().updateVisualStatus(error);
 	}
 
 	public void updateVisualElement(TestElement element) {
 		getDesktopDriver().updateVisualElement(element);
+	}
+
+	public void updateVisualStatus(int error, String value, String data) {
+		getDesktopDriver().updateVisualStatus(error);
+		getDesktopDriver().updateVisualData(value, data);
 	}
 }

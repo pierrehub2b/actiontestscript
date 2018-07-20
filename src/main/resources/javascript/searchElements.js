@@ -3,6 +3,9 @@ const tag = arguments[1];
 const attributes = arguments[2];
 const attributesLen = arguments[3];	
 
+const screenOffsetX = (window.outerWidth - window.innerWidth)/2 + window.screenX + 0.0001;
+const screenOffsetY = window.outerHeight - window.innerHeight + window.screenY + 0.0001;
+
 if(parent == null){
 	parent = window.document;
 };
@@ -12,7 +15,7 @@ const eltsLength = elts.length;
 
 var result = [], addElement = function (e){
 	let rec = e.getBoundingClientRect();
-	result[result.length] = {'ats-elt':[e, e.tagName, rec.width+0.0001, rec.height+0.0001, rec.left+0.0001, rec.top+0.0001]};
+	result[result.length] = {'ats-elt':[e, e.tagName, rec.width+0.0001, rec.height+0.0001, rec.left+0.0001, rec.top+0.0001, screenOffsetX, screenOffsetY]};
 	return result[result.length-1];
 };
 
@@ -26,9 +29,9 @@ if(attributesLen == 0){
 
 	var i = 0, loop = function (){
 
-		let e = elts[i], attributesList = [];
+		let e = elts[i], attributesList = [], j = 0;
 
-		for(var j = 0; j < attributesLen; j++){
+		while(j < attributesLen){
 
 			let attributeName = attributes[j];
 
@@ -52,16 +55,20 @@ if(attributesLen == 0){
 					}
 				}
 			}
+			j++;
 		}
 
 		if(attributesList.length == attributesLen){
-			let newElem = addElement(e);
-			for(var k=0; k < attributesLen; k++){
+			let newElem = addElement(e), k = 0;
+			while(k < attributesLen){
 				newElem[attributesList[k][0]] = attributesList[k][1];
+				k++;
 			}
 		}
-
-		i++;
 	};
-	for (; i < eltsLength; ) loop();
+	
+	while (i < eltsLength) {
+		loop();
+		i++;
+	}
 };

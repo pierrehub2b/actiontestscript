@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.executor;
 
@@ -124,23 +124,23 @@ public class ActionTestScript extends Script implements ITest{
 
 		TestRunner runner = (TestRunner) ctx;
 		setTestName(this.getClass().getName());
-		
+
 		String checkMode = runner.getTest().getParameter("check.mode");
 		if("true".equals(checkMode)) {
-			
+
 			throw new SkipException("check mode : " + testName);
 
 		}else {
-			
+
 			setTestParameters(runner.getTest().getAllParameters());
-			
+
 			//-----------------------------------------------------------
 			// check report output specified
 			//-----------------------------------------------------------
-			
+
 			int visualQuality = 0;
 			boolean xml = false;
-			
+
 			String visualReport = getEnvironmentValue("visual.report", "0");
 			try {
 				visualQuality = Integer.parseInt(visualReport);
@@ -148,24 +148,24 @@ public class ActionTestScript extends Script implements ITest{
 
 			String xmlReport = getEnvironmentValue("xml.report", "");
 			xml = "true".equals(xmlReport.toLowerCase());
-			
+
 			if(visualQuality > 0 || xml) {
 				String outputDirectory = runner.getOutputDirectory();
-				
+
 				File output = new File(outputDirectory);
 				if(!output.exists()) {
 					output.mkdirs();
 				}
-			
+
 				ScriptHeader header = getHeader();
 				header.setName(getTestName());
 				header.setAtsVersion(AtsManager.getVersion());
 				setRecorder(new VisualRecorder(output, header, visualQuality, xml));
 			}
-			
+
 			//-----------------------------------------------------------
 			//-----------------------------------------------------------
-			
+
 			setLogger(new ExecutionLogger(System.out, (int)ctx.getSuite().getXmlSuite().getVerbose()));
 			sendInfo("starting script", " '" + testName + "'");
 
@@ -643,17 +643,17 @@ public class ActionTestScript extends Script implements ITest{
 	//-----------------------------------------------------------------------------------------------------------
 
 	private VisualRecorder recorder;
-	
+
 	public void updateRecorderChannel(Channel channel) {
 		if(getRecorder() != null) {
 			getRecorder().setChannel(channel);
 		}
 	}
-	
+
 	public boolean isRecord() {
 		return topScript.recorder != null && getCurrentChannel() != null;
 	}
-	
+
 	public VisualRecorder getRecorder() {
 		return topScript.recorder;
 	}
@@ -685,19 +685,12 @@ public class ActionTestScript extends Script implements ITest{
 		}
 	}
 
-	public void updateVisualElement(TestElement to) {
-		if(isRecord()) {
-			getRecorder().updateVisualImage();
-			getRecorder().updateVisualElement(to);
-		}
-	}
-
 	public void updateVisualValue(String value) {
 		if(isRecord()) {
 			getRecorder().updateVisualValue(value);
 		}
 	}
-	
+
 	public void updateVisualValueAndImage(String value) {
 		if(isRecord()) {
 			getRecorder().updateVisualImage();
@@ -710,22 +703,35 @@ public class ActionTestScript extends Script implements ITest{
 			getRecorder().updateVisualValue(value, data);
 		}
 	}
-	
+
 	public void updateVisualValue(String type, MouseDirection position) {
 		if(isRecord()) {
 			getRecorder().updateVisualValue(type, position);
 		}
 	}
 
-	public void updateVisualStatus(boolean value) {
+	public void updateVisualStatus(int error) {
 		if(isRecord()) {
-			getRecorder().updateVisualStatus(value);
+			getRecorder().updateVisualStatus(error);
+		}
+	}	
+
+	public void updateVisualStatus(int error, String value, String data) {
+		if(isRecord()) {
+			getRecorder().updateVisualStatus(error, value, data);
 		}
 	}	
 
 	public void newVisual(Action action) {
 		if(isRecord()) {
 			getRecorder().createVisualAction(action);
+		}
+	}
+	
+	public void updateVisualElement(TestElement element) {
+		if(isRecord()) {
+			getRecorder().updateVisualStatus(0);
+			getRecorder().updateVisualElement(element);
 		}
 	}
 }

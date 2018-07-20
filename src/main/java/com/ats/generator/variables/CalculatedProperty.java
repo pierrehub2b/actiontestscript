@@ -124,6 +124,14 @@ public class CalculatedProperty implements Comparable<CalculatedProperty>{
 		return regexpPattern;
 	}
 
+	public String getExpectedResult() {
+		String result = getName();
+		if(isRegexp()) {
+			return result + " match " + getValue().getCalculated();
+		}else {
+			return result + " == " + getValue().getCalculated();
+		}
+	}
 	//--------------------------------------------------------
 	// getters and setters for serialization
 	//--------------------------------------------------------

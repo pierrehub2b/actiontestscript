@@ -20,8 +20,6 @@ under the License.
 package com.ats.recorder;
 
 import java.beans.Transient;
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -29,14 +27,13 @@ import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.script.actions.Action;
 import com.ats.script.actions.ActionComment;
-import com.google.common.io.Files;
 
 public class VisualAction {
-
+	
 	private int index;
 	private Long timeLine;
 
-	private boolean passed;
+	private int error;
 
 	private ArrayList<byte[]> images;
 
@@ -75,20 +72,11 @@ public class VisualAction {
 	public String getImageFileName() {
 		return index + "." + imageType;
 	}
-	
-	public void saveImageFile(Path folder) {
-		if(images.size() > 0) {
-			try {
-				Files.write(images.get(images.size()-1), folder.resolve(getImageFileName()).toFile());
-			} catch (IOException e) {}
-		}
-
-	}
 
 	//--------------------------------------------------------
 	// getters and setters for serialization
 	//--------------------------------------------------------
-	
+
 	public String getChannelName() {
 		return channelName;
 	}
@@ -104,7 +92,7 @@ public class VisualAction {
 	public void setChannelBound(TestBound channelBound) {
 		this.channelBound = channelBound;
 	}
-	
+
 	public String getData() {
 		return data;
 	}
@@ -114,7 +102,7 @@ public class VisualAction {
 			this.data = value;
 		}
 	}
-		
+
 	public VisualElement getElement() {
 		return element;
 	}
@@ -122,7 +110,7 @@ public class VisualAction {
 	public void setElement(VisualElement element) {
 		this.element = element;
 	}
-	
+
 	@Transient
 	public ArrayList<byte[]> getImages() {
 		return images;
@@ -131,7 +119,7 @@ public class VisualAction {
 	public void setImages(ArrayList<byte[]> list) {
 		this.images = list;
 	}
-	
+
 	public String getImageType() {
 		return imageType;
 	}
@@ -139,7 +127,7 @@ public class VisualAction {
 	public void setImageType(String imageType) {
 		this.imageType = imageType;
 	}
-	
+
 	public int getIndex() {
 		return index;
 	}
@@ -147,7 +135,7 @@ public class VisualAction {
 	public void setIndex(int index) {
 		this.index = index;
 	}
-	
+
 	public int getLine() {
 		return line;
 	}
@@ -155,13 +143,13 @@ public class VisualAction {
 	public void setLine(int line) {
 		this.line = line;
 	}
-
-	public boolean isPassed() {
-		return passed;
+	
+	public int getError() {
+		return error;
 	}
 
-	public void setPassed(boolean passed) {
-		this.passed = passed;
+	public void setError(int error) {
+		this.error = error;
 	}
 
 	public Long getTimeLine() {
@@ -187,6 +175,12 @@ public class VisualAction {
 	public void setValue(String value) {
 		if(value != null) {
 			this.value = value;
+		}
+	}
+
+	public void addImage(ArrayList<VisualImage> imagesList) {
+		if(images.size() > 0 && element != null && element.getBound() != null) {
+			imagesList.add(new VisualImage(getImageFileName(), images.get(images.size()-1), element.getBound()));
 		}
 	}
 }

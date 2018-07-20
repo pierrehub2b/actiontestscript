@@ -63,8 +63,15 @@ public class FoundElement{
 	}
 
 	public FoundElement(ArrayList<Object> element, Channel channel, Double offsetX, Double offsetY) {
+		
 		this(element);
-		this.updatePosition((Double)element.get(4), (Double)element.get(5), channel, offsetX, offsetY);
+		
+		Double elemX = (Double)element.get(4);
+		Double elemY = (Double)element.get(5);
+				
+		this.updatePosition(elemX, elemY, channel, offsetX, offsetY);
+		this.screenX = (Double)element.get(6) + elemX;
+		this.screenY = (Double)element.get(7) + elemY;
 	}
 
 	public FoundElement(Channel channel, ArrayList<ArrayList<Object>> listElements, Double initElementX, Double initElementY) {
