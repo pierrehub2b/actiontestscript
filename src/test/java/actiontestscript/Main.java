@@ -199,7 +199,7 @@ public class Main {
 				action.appendChild(timeLine);
 				
 				Element passed = document.createElement("passed");
-				passed.setTextContent(va.isPassed()+"");
+				passed.setTextContent((va.getError() == 0) + "");
 				action.appendChild(passed);
 				
 				Element value = document.createElement("value");
