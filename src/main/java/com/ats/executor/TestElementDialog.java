@@ -128,7 +128,7 @@ public class TestElementDialog extends TestElement {
 	}
 
 	@Override
-	public void terminateExecution() {
+	public void terminateExecution(ActionTestScript script, int error) {
 		//do nothing
 	}
 

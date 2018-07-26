@@ -24,7 +24,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.ats.element.SearchedElement;
-import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
@@ -92,15 +91,7 @@ public class ActionAssertCount extends ActionExecuteElement {
 	@Override
 	public void terminateExecution(ActionTestScript ts) {
 
-		int count = getTestElement().checkOccurrences(status, operator, value);
-
-		String expectedResult = "occurences " + operator + " " + count;
-		
-		if(status.isPassed()) {
-			ts.updateVisualStatus(0, expectedResult, value + "");
-		}else {
-			ts.updateVisualStatus(ActionStatus.OCCURRENCES_ERROR, expectedResult, value + "");
-		}
+		getTestElement().checkOccurrences(ts, status, operator, value);
 		
 		status.getElement().setFoundElements(null);
 		status.updateDuration();

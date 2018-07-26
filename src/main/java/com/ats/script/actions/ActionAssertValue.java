@@ -81,22 +81,27 @@ public class ActionAssertValue extends ActionExecute {
 	public void execute(ActionTestScript ts) {
 		
 		super.execute(ts);
+		
+		String value2Label = value2.getCalculated();
+		
 		if(isRegexp()) {
+			value2Label = "regexp -> " + value2Label;
+			
 			Matcher m = Pattern.compile(value2.getCalculated()).matcher(value1.getCalculated());
 			status.setPassed(m.matches());
 		}else {
 			status.setPassed(value1.getCalculated().equals(value2.getCalculated()));
 		}
 
-		if(status.isPassed()) {
-			ts.updateVisualStatus(0);
-		}else {
-			status.setCode(ActionStatus.VALUES_COMPARE_FAIL);
-			status.setMessage("Value1 : '" + value1.getCalculated() + "' does not match Value2 : '" + value2.getCalculated() + "'");
+		int error = 0;
+		if(!status.isPassed()) {
 			
-			ts.updateVisualStatus(ActionStatus.VALUES_COMPARE_FAIL, value1.getCalculated(), value2.getCalculated());
+			status.setCode(ActionStatus.VALUES_COMPARE_FAIL);
+			status.setMessage(value1.getCalculated() + "' does not match '" + value2Label + "'");
+			error = ActionStatus.VALUES_COMPARE_FAIL;
 		}
 		
+		ts.updateVisualStatus(error, value1.getCalculated(), value2Label);
 		status.updateDuration();
 	}
 

@@ -139,18 +139,18 @@ public class ActionExecuteElement extends ActionExecute {
 
 	public void terminateExecution(ActionTestScript ts) {
 
+		int error = 0;
+		
 		if(testElement.isValidated()) {
 			status.setPassed(true);
-			ts.updateVisualElement(testElement);
 		}else {
 			status.setPassed(false);
 			status.setCode(ActionStatus.OBJECT_NOT_FOUND);
 			status.setMessage("Element not found");
-			
-			ts.updateVisualStatus(ActionStatus.OBJECT_NOT_FOUND, testElement.getCriterias(), testElement.getTotalSearchDuration() + "");
+			error = ActionStatus.OBJECT_NOT_FOUND;
 		}
 
-		testElement.terminateExecution();
+		testElement.terminateExecution(ts, error);
 	}
 
 	public TestElement getTestElement() {

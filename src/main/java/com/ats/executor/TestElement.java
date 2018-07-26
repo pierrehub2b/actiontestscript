@@ -193,8 +193,7 @@ public class TestElement{
 					
 				}else{
 					
-					int trySearch = 0;
-
+					
 					ArrayList<String> attributes = new ArrayList<String>();
 
 					Predicate<Map<String, Object>> fullPredicate = Objects::nonNull;
@@ -208,14 +207,15 @@ public class TestElement{
 						}
 					}
 
+					int trySearch = 0;
+					
 					foundElements = channel.findWebElement(this, tag, attributes, fullPredicate);
 					while (!isValidated() && trySearch < maxTry) {
 
-						channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "searching element", maxTry - trySearch);
-
 						progressiveWait(trySearch);
 						trySearch++;
-
+						
+						channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "searching element", maxTry - trySearch);
 						foundElements = channel.findWebElement(this, tag, attributes, fullPredicate);
 					}
 				}
@@ -356,10 +356,10 @@ public class TestElement{
 	// Assertion ...
 	//-------------------------------------------------------------------------------------------------------------------
 
-	public int checkOccurrences(ActionStatus status, String operator, int expected) {
+	public void checkOccurrences(ActionTestScript ts, ActionStatus status, String operator, int expected) {
 
-		terminateExecution();
-
+		int error = 0;
+		
 		if(isValidated()) {
 			status.setPassed(true);
 		}else {
@@ -367,9 +367,13 @@ public class TestElement{
 			status.setCode(ActionStatus.OCCURRENCES_ERROR);
 			status.setData(count);
 			status.setMessage("[" + expected + "] expected occurence(s) but [" + count + "] occurence(s) found");
+			
+			error = ActionStatus.OCCURRENCES_ERROR;
 		}
 		
-		return count;
+		ts.updateVisualStatus(error, count + "", operator + " " + expected);
+		
+		terminateExecution(ts, error);
 	}
 
 	//-------------------------------------------------------------------------------------------------------------------
@@ -559,7 +563,8 @@ public class TestElement{
 		return null;
 	}
 
-	public void terminateExecution() {
+	public void terminateExecution(ActionTestScript script, int error) {
+		script.updateVisualElement(error, this);
 		channel.actionTerminated();
 	}
 }

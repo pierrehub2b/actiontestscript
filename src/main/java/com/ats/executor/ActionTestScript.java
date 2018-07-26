@@ -728,9 +728,9 @@ public class ActionTestScript extends Script implements ITest{
 		}
 	}
 	
-	public void updateVisualElement(TestElement element) {
+	public void updateVisualElement(int error, TestElement element) {
 		if(isRecord()) {
-			getRecorder().updateVisualStatus(0);
+			getRecorder().updateVisualStatus(error);
 			getRecorder().updateVisualElement(element);
 		}
 	}
