@@ -28,7 +28,6 @@ import java.util.function.Predicate;
 
 import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
@@ -167,17 +166,15 @@ public class TestElement{
 		}
 	}
 
-	private List<CalculatedProperty> elementProperties;
 	private String elementTag;
 	
 	private void initSearch(String tag, List<CalculatedProperty> properties) {
 
 		if(channel != null){
 		
-			elementProperties = properties;
 			elementTag = tag;
-
 			criterias = tag;
+			
 			searchDuration = System.currentTimeMillis();
 
 			if(parent == null || (parent != null && parent.getCount() > 0)){
@@ -216,6 +213,8 @@ public class TestElement{
 						trySearch++;
 						
 						channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "searching element", maxTry - trySearch);
+						channel.switchToDefaultContent();
+						
 						foundElements = channel.findWebElement(this, tag, attributes, fullPredicate);
 					}
 				}
@@ -233,10 +232,6 @@ public class TestElement{
 
 	private void progressiveWait(int current) {
 		channel.sleep(200 + current*50);
-	}
-
-	public void searchAgain() {
-		initSearch(elementTag, elementProperties);
 	}
 
 	private int getElementsCount() {
@@ -440,14 +435,7 @@ public class TestElement{
 
 	public void over(ActionStatus status, MouseDirection position) {
 		if(isValidated()){
-						
-			try {
-				channel.mouseMoveToElement(status, getFoundElement(), position);
-			}catch(StaleElementReferenceException ex) {
-				searchAgain();
-				over(status, position);
-			}
-
+			channel.mouseMoveToElement(status, getFoundElement(), position);
 		}else{
 			status.setPassed(false);
 			status.setCode(ActionStatus.OBJECT_NOT_FOUND);

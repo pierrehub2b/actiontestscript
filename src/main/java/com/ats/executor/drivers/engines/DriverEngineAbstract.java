@@ -36,7 +36,7 @@ import com.ats.tools.ResourceContent;
 public abstract class DriverEngineAbstract {
 
 	protected final String WEB_ELEMENT_REF = "element-6066-11e4-a52e-4f735466cecf";
-		
+
 	//-----------------------------------------------------------------------------------------------------------------------------
 	// Javascript static code
 	//-----------------------------------------------------------------------------------------------------------------------------
@@ -162,11 +162,6 @@ public abstract class DriverEngineAbstract {
 		}
 	}
 
-	protected void setPosition(Point pt) {
-
-	}
-
-	protected void setSize(Dimension dim) {
-
-	}
+	protected void setPosition(Point pt) {} // no action by default
+	protected void setSize(Dimension dim) {} // no action by default
 }

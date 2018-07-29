@@ -146,7 +146,6 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			System.err.println(ex.getMessage());
 		}
 
-
 		String applicationVersion = "N/A";
 		String driverVersion = null;
 
@@ -231,7 +230,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	@Override
 	public void forceScrollElement(FoundElement element) {
-		ArrayList<Double> newPosition =  (ArrayList<Double>) runJavaScript(autoScrollElement, element.getValue());
+		ArrayList<Double> newPosition = (ArrayList<Double>) runJavaScript(autoScrollElement, element.getValue());
 		if(newPosition.size() > 1) {
 			element.updatePosition(newPosition.get(0), newPosition.get(1), channel, 0.0, 0.0);
 		}
@@ -260,7 +259,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		if(objectData != null){
 
-			if(FoundElement.IFRAME.equals(objectData.get(1))){
+			if(FoundElement.checkIframe(objectData.get(1).toString())){
 
 				FoundElement frm = new FoundElement(objectData);
 
@@ -725,18 +724,20 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			if(testObject.getParent().isIframe()) {
 
 				iframe = testObject.getParent().getWebElement();
-				Point pt = iframe.getLocation();
-				
-				offsetIframeX += pt.getX();
-				offsetIframeY += pt.getY();
 
 				try {
+					
+					Point pt = iframe.getLocation();
+					
+					offsetIframeX += pt.getX();
+					offsetIframeY += pt.getY();
+										
 					switchToFrame(iframe);
+					
 				}catch(StaleElementReferenceException e) {
-
-					testObject.getParent().searchAgain();
 					return webElementList;
 				}
+				
 			}else {
 				startElement = testObject.getParent().getWebElement();
 			}

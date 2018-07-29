@@ -32,7 +32,7 @@ import com.ats.executor.drivers.desktop.DesktopElement;
 
 public class FoundElement{
 
-	public static final String IFRAME = "IFRAME";
+	private static final String IFRAME = "IFRAME";
 
 	private String id;
 
@@ -52,6 +52,10 @@ public class FoundElement{
 	private RemoteWebElement value;
 	private FoundElement parent;
 	private boolean visible = true;
+	
+	public static boolean checkIframe(String value) {
+		return IFRAME.equals(value.toUpperCase());
+	}
 
 	public FoundElement() {}
 
@@ -159,7 +163,7 @@ public class FoundElement{
 	}
 
 	public boolean isIframe(){
-		return IFRAME.equals(this.tag.toUpperCase());
+		return checkIframe(this.tag);
 	}
 
 	public WebElement getValue(){

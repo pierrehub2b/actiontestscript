@@ -37,16 +37,11 @@ public class SearchedElement {
 	private static final Pattern OBJECT_INDEX_PATTERN = Pattern.compile("\\s*?index\\((\\d+)\\)\\s*?");
 
 	private String tag = "*";
-	
 	private SearchedElement parent;
-	
 	private int index = 0;
-
 	private List<CalculatedProperty> criterias;
 
-	public SearchedElement() {
-
-	}
+	public SearchedElement() {} // default constructor
 
 	public SearchedElement(Script script, ArrayList<String> elements) {
 
@@ -65,11 +60,12 @@ public class SearchedElement {
 				if(objectMatcher.groupCount() >= 2){
 					Stream<String> stream1 = Arrays.stream(objectMatcher.group(2).split(","));
 					stream1.forEach(s -> addCriteria(script, s));
-					//stream1.forEach(s -> addCriteria(script, s.replace("%2C", ",").replace("%3D", "=").replace("%5B", "[").replace("%5D", "]").replace("%20", " ")));
 				}
+				
 			}else{
 				setTag(value.trim());
 			}
+			
 		}else if(value != null){
 			setTag(value.trim());
 		}
