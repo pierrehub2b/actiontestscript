@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,12 +67,43 @@ import com.ats.executor.TestElement;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
+import com.ats.executor.drivers.desktop.DesktopWindow;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
+import com.ats.script.actions.ActionGotoUrl;
+import com.ats.tools.ResourceContent;
 import com.ats.tools.StartHtmlPage;
 
 @SuppressWarnings("unchecked")
 public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngine {
+
+	protected static final String WEB_ELEMENT_REF = "element-6066-11e4-a52e-4f735466cecf";
+
+	//-----------------------------------------------------------------------------------------------------------------------------
+	// Javascript static code
+	//-----------------------------------------------------------------------------------------------------------------------------
+
+	protected static final String JS_WAIT_READYSTATE = "var result=window.document.readyState=='complete';";
+	protected static final String JS_WAIT_BEFORE_SEARCH = "var interval=setInterval(function(){if(window.document.readyState==='complete'){clearInterval(interval);done();}},200);";
+
+	protected static final String JS_AUTO_SCROLL = "var e=arguments[0];e.scrollIntoView();var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
+	protected static final String JS_AUTO_SCROLL_CALC = "var e=arguments[0];var r=e.getBoundingClientRect();var top=r.top + window.pageYOffset;window.scrollTo(0, top-(window.innerHeight / 2));r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
+	protected static final String JS_AUTO_SCROLL_MOZ = "var e=arguments[0];e.scrollIntoView({behavior:'auto',block:'center',inline:'center'});var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
+
+	protected static final String JS_ELEMENT_SCROLL = "var e=arguments[0];var d=arguments[1];e.scrollTop += d;var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
+	protected static final String JS_WINDOW_SCROLL = "window.scrollBy(0,arguments[0]);var result=[0.0001, 0.0001]";
+	protected static final String JS_ELEMENT_DATA = "var result=null;var e=document.elementFromPoint(arguments[0],arguments[1]);if(e){var r=e.getBoundingClientRect();result=[e, e.tagName, r.width+0.0001, r.height+0.0001, r.left+0.0001, r.top+0.0001, 0.0001, 0.0001];};";
+	protected static final String JS_ELEMENT_BOUNDING = "var rect=arguments[0].getBoundingClientRect();var result=[rect.left+0.0001, rect.top+0.0001];";
+	protected static final String JS_MIDDLE_CLICK = "var evt=new MouseEvent('click', {bubbles: true,cancelable: true,view: window, button: 1}),result={};arguments[0].dispatchEvent(evt);";
+	protected static final String JS_ELEMENT_CSS = "var result=[];var o=getComputedStyle(arguments[0]);for(var i=0, len=o.length; i < len; i++){result.push([o[i], o.getPropertyValue(o[i])]);};";
+
+	protected static final String JS_SEARCH_ELEMENT = ResourceContent.getSearchElementsJavaScript();
+	protected static final String JS_ELEMENT_AUTOSCROLL = ResourceContent.getScrollElementJavaScript();
+	protected static final String JS_ELEMENT_ATTRIBUTES = ResourceContent.getElementAttributesJavaScript();
+	protected static final String JS_ELEMENT_PARENTS = ResourceContent.getParentElementJavaScript();
+	protected static final String JS_DOCUMENT_SIZE = ResourceContent.getDocumentSizeJavaScript();
+
+	//-----------------------------------------------------------------------------------------------------------------------------
 
 	protected DesktopDriver desktopDriver;
 
@@ -116,7 +146,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		cap.setCapability(CapabilityType.SUPPORTS_FINDING_BY_CSS, false);
 		cap.setCapability(CapabilityType.PROXY, proxy);
 		cap.setCapability(CapabilityType.HAS_NATIVE_EVENTS, false);
-		
+
 		int maxTry = 20;
 		String errorMessage = null;
 		while(driver == null && maxTry > 0) {
@@ -171,10 +201,24 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			driver.get(tempHtml.toURI().toString());
 		} catch (IOException e) {}
 
-		channel.setApplicationData(
-				applicationVersion,
-				driverVersion,
-				desktopDriver.getProcessDataByWindowTitle(titleUid));
+
+		maxTry = 10;
+		while(maxTry > 0) {
+			DesktopWindow window = desktopDriver.getWindowByTitle(titleUid);
+			if(window != null) {
+
+				channel.setApplicationData(
+						applicationVersion,
+						driverVersion,
+						window.pid);
+
+				maxTry = 0;
+
+			}else {
+				channel.sleep(300);
+				maxTry--;
+			}
+		}
 
 		requestConfig = RequestConfig.custom()
 				.setConnectTimeout(3500)
@@ -419,7 +463,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	public TestBound[] getDimensions() {
 
 		switchWindow(currentWindow);
-		
+
 		TestBound dimension = new TestBound();
 		TestBound subDimension = new TestBound();
 
@@ -699,9 +743,27 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	@Override
-	public void goToUrl(URL url, boolean newWindow) {
-		switchToDefaultContent();
-		driver.get(url.toString());
+	public void goToUrl(ActionStatus status, String url) {
+
+		if(ActionGotoUrl.REFRESH.equals(url)) {
+			driver.navigate().refresh();
+		}else if(ActionGotoUrl.NEXT.equals(url)) {
+			driver.navigate().forward();
+		}else if(ActionGotoUrl.BACK.equals(url)) {
+			driver.navigate().back();
+		}else {
+			switchToDefaultContent();
+
+			if(!url.startsWith("https://") && !url.startsWith("http://") && !url.startsWith("file://") ) {
+				url = "http://" + url;
+			}
+			driver.get(url);
+		}
+
+		status.setPassed(true);
+		status.setData(url);
+		status.setMessage(getCurrentUrl());
+
 		actionWait();
 	}
 
@@ -710,8 +772,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	private double offsetIframeY = 0.0;
 
 	@Override
-	public ArrayList<FoundElement> findWebElement(Channel channel, TestElement testObject, String tagName, ArrayList<String> attributes,
-			Predicate<Map<String, Object>> predicate) {
+	public ArrayList<FoundElement> findElements(Channel channel, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<Object> predicate) {
 
 		if(tagName == null) {
 			tagName = "BODY";
@@ -726,18 +787,18 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 				iframe = testObject.getParent().getWebElement();
 
 				try {
-					
+
 					Point pt = iframe.getLocation();
-					
+
 					offsetIframeX += pt.getX();
 					offsetIframeY += pt.getY();
-										
+
 					switchToFrame(iframe);
-					
+
 				}catch(StaleElementReferenceException e) {
 					return webElementList;
 				}
-				
+
 			}else {
 				startElement = testObject.getParent().getWebElement();
 			}
@@ -750,13 +811,13 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 			switchToDefaultContent();
 		}
-		
+
 		ArrayList<Map<String, Object>> response = (ArrayList<Map<String, Object>>) runJavaScript(searchElementScript, startElement, tagName, attributes, attributes.size());
 		if(response != null){
-			
+
 			final double elmX = initElementX + offsetIframeX;
 			final double elmY = initElementY + offsetIframeY;
-			
+
 			response.parallelStream().filter(predicate).forEachOrdered(e -> webElementList.add(new FoundElement((ArrayList<Object>)e.get("ats-elt"), channel, elmX, elmY)));
 		}
 
@@ -777,23 +838,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		return driver.switchTo().alert();
 	}
 
-	@Override
-	public void navigationRefresh() {
-		driver.navigate().refresh();
-	}
-
-	@Override
-	public void navigationForward() {
-		driver.navigate().forward();
-	}
-
-	@Override
-	public void navigationBack() {
-		driver.navigate().back();
-	}
-
-	@Override
-	public String getCurrentUrl() {
+	private String getCurrentUrl() {
 		try {
 			return driver.getCurrentUrl();
 		}catch(UnhandledAlertException e) {

@@ -19,6 +19,8 @@ under the License.
 
 package com.ats.executor.drivers.desktop;
 
+import java.util.ArrayList;
+
 public class DesktopElement {
 	public String id;
 	public String tag;
@@ -27,4 +29,15 @@ public class DesktopElement {
 	public Double width;
 	public Double height;
 	public boolean visible;
+	
+	public ArrayList<DesktopData> attributes;
+	
+	public String get(String name) {
+		for (DesktopData data : attributes) {
+			if(data.getName().equals(name)) {
+				return data.getValue();
+			}
+		}
+		return null;
+	}
 }

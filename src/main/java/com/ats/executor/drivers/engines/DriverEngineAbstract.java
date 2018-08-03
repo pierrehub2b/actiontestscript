@@ -31,37 +31,8 @@ import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.MouseDirectionData;
-import com.ats.tools.ResourceContent;
 
 public abstract class DriverEngineAbstract {
-
-	protected final String WEB_ELEMENT_REF = "element-6066-11e4-a52e-4f735466cecf";
-
-	//-----------------------------------------------------------------------------------------------------------------------------
-	// Javascript static code
-	//-----------------------------------------------------------------------------------------------------------------------------
-	
-	protected final String JS_WAIT_READYSTATE = "var result=window.document.readyState=='complete';";
-	protected final String JS_WAIT_BEFORE_SEARCH = "var interval=setInterval(function(){if(window.document.readyState==='complete'){clearInterval(interval);done();}},200);";
-	
-	protected final String JS_AUTO_SCROLL = "var e=arguments[0];e.scrollIntoView();var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
-	protected final String JS_AUTO_SCROLL_CALC = "var e=arguments[0];var r=e.getBoundingClientRect();var top=r.top + window.pageYOffset;window.scrollTo(0, top-(window.innerHeight / 2));r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
-	protected final String JS_AUTO_SCROLL_MOZ = "var e=arguments[0];e.scrollIntoView({behavior:'auto',block:'center',inline:'center'});var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
-	
-	protected final String JS_ELEMENT_SCROLL = "var e=arguments[0];var d=arguments[1];e.scrollTop += d;var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
-	protected final String JS_WINDOW_SCROLL = "window.scrollBy(0,arguments[0]);var result=[0.0001, 0.0001]";
-	protected final String JS_ELEMENT_DATA = "var result=null;var e=document.elementFromPoint(arguments[0],arguments[1]);if(e){var r=e.getBoundingClientRect();result=[e, e.tagName, r.width+0.0001, r.height+0.0001, r.left+0.0001, r.top+0.0001, 0.0001, 0.0001];};";
-	protected final String JS_ELEMENT_BOUNDING = "var rect=arguments[0].getBoundingClientRect();var result=[rect.left+0.0001, rect.top+0.0001];";
-	protected final String JS_MIDDLE_CLICK = "var evt=new MouseEvent('click', {bubbles: true,cancelable: true,view: window, button: 1}),result={};arguments[0].dispatchEvent(evt);";
-	protected final String JS_ELEMENT_CSS = "var result=[];var o=getComputedStyle(arguments[0]);for(var i=0, len=o.length; i < len; i++){result.push([o[i], o.getPropertyValue(o[i])]);};";
-	
-	protected final String JS_SEARCH_ELEMENT = ResourceContent.getSearchElementsJavaScript();
-	protected final String JS_ELEMENT_AUTOSCROLL = ResourceContent.getScrollElementJavaScript();
-	protected final String JS_ELEMENT_ATTRIBUTES = ResourceContent.getElementAttributesJavaScript();
-	protected final String JS_ELEMENT_PARENTS = ResourceContent.getParentElementJavaScript();
-	protected final String JS_DOCUMENT_SIZE = ResourceContent.getDocumentSizeJavaScript();
-		
-	//-----------------------------------------------------------------------------------------------------------------------------
 	
 	protected Channel channel;
 	protected RemoteWebDriver driver;
@@ -84,6 +55,10 @@ public abstract class DriverEngineAbstract {
 		if(actionWait == -1) {
 			actionWait = defaultWait;
 		}
+	}
+	
+	public void setDriver(RemoteWebDriver driver) {
+		this.driver = driver;
 	}
 
 	public String getApplication() {

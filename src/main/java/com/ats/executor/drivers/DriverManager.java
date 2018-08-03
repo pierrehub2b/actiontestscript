@@ -24,13 +24,14 @@ import java.util.function.Predicate;
 import com.ats.driver.AtsManager;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.desktop.DesktopDriver;
-import com.ats.executor.drivers.engines.DesktopDriverEngine;
 import com.ats.executor.drivers.engines.IDriverEngine;
 import com.ats.executor.drivers.engines.browsers.ChromeDriverEngine;
 import com.ats.executor.drivers.engines.browsers.EdgeDriverEngine;
 import com.ats.executor.drivers.engines.browsers.FirefoxDriverEngine;
 import com.ats.executor.drivers.engines.browsers.IEDriverEngine;
 import com.ats.executor.drivers.engines.browsers.OperaDriverEngine;
+import com.ats.executor.drivers.engines.desktop.DesktopDriverEngine;
+import com.ats.executor.drivers.engines.desktop.ExplorerDriverEngine;
 import com.ats.tools.Utils;
 
 public class DriverManager {
@@ -41,7 +42,7 @@ public class DriverManager {
 	public static final String EDGE_BROWSER = "edge";
 	public static final String OPERA_BROWSER = "opera";
 	public static final String SAFARI_BROWSER = "safari";
-	
+		
 	public static final String DESKTOP_DRIVER_FILE_NAME = "windowsdriver.exe";
 	public static final String CHROME_DRIVER_FILE_NAME = "chromedriver.exe";
 	public static final String IE_DRIVER_FILE_NAME = "IEDriverServer.exe";
@@ -49,6 +50,8 @@ public class DriverManager {
 	public static final String OPERA_DRIVER_FILE_NAME = "operadriver.exe";
 	public static final String FIREFOX_DRIVER_FILE_NAME = "geckodriver.exe";
 
+	public static final String DESKTOP_EXPLORER = "explorer";
+	
 	private DriverProcess desktopDriver;
 	private DriverProcess chromeDriver;
 	private DriverProcess edgeDriver;
@@ -124,6 +127,8 @@ public class DriverManager {
 			return new FirefoxDriverEngine(channel, getFirefoxDriver(), desktopDriver, ATS);
 		case IE_BROWSER :
 			return new IEDriverEngine(channel, getIEDriver(), desktopDriver, ATS);
+		case DESKTOP_EXPLORER :
+			return new ExplorerDriverEngine(channel, desktopDriver, ATS);
 		default :
 			return new DesktopDriverEngine(channel, application, desktopDriver, ATS);
 		}

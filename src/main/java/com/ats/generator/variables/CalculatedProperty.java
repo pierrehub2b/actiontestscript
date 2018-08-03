@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import com.ats.executor.ActionTestScript;
+import com.ats.executor.drivers.desktop.DesktopElement;
 import com.ats.script.Script;
 import com.ats.tools.Operators;
 
@@ -81,13 +82,24 @@ public class CalculatedProperty implements Comparable<CalculatedProperty>{
 		return ActionTestScript.JAVA_PROPERTY_FUNCTION_NAME + "(" + isRegexp() + ", \"" + name + "\", " + value.getJavaCode() + ")";
 	}
 
-	public Predicate<Map<String, Object>> getPredicate(Predicate<Map<String, Object>> predicate){
+	public Predicate<Object> getMapPredicate(Predicate<Object> predicate){
 		if(isRegexp()){
 			predicate = predicate.and(
 					p -> matchRegexp(
-							p.get(name).toString().trim()));
+							((Map<String, Object>)p).get(name).toString().trim()));
 		}else{
-			predicate = predicate.and(p -> matchText(p.get(name)));
+			predicate = predicate.and(p -> matchText(((Map<String, Object>)p).get(name)));
+		}
+		return predicate;
+	}
+	
+	public Predicate<Object> getDesktopPredicate(Predicate<Object> predicate){
+		if(isRegexp()){
+			predicate = predicate.and(
+					p -> matchRegexp(
+							((DesktopElement)p).get(name).toString().trim()));
+		}else{
+			predicate = predicate.and(p -> matchText(((DesktopElement)p).get(name)));
 		}
 		return predicate;
 	}
@@ -106,7 +118,7 @@ public class CalculatedProperty implements Comparable<CalculatedProperty>{
 			textValue = obj.toString().trim();
 		}
 		return textValue.equals(value.getCalculated());
-	}	
+	}
 
 	public boolean matchRegexp(String s){
 		Matcher m = getRegexpPattern().matcher(s);

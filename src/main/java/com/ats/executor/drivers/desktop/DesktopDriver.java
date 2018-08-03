@@ -26,7 +26,6 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
@@ -35,10 +34,12 @@ import org.openqa.selenium.Point;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import com.ats.element.FoundElement;
+import com.ats.executor.ActionStatus;
 import com.ats.executor.TestBound;
 import com.ats.executor.TestElement;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
+import com.ats.executor.drivers.engines.desktop.DesktopDriverEngine;
 import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.ScriptHeader;
@@ -47,16 +48,27 @@ import com.exadel.flamingo.flex.messaging.amf.io.AMF3Deserializer;
 
 public class DesktopDriver extends RemoteWebDriver {
 
-	private static final String DESKTOP_REQUEST_SEPARATOR = "\n";
+	public static final String DESKTOP_REQUEST_SEPARATOR = "\n";
 
 	private List<FoundElement> elementMapLocation;
 
 	private String driverHost;
 	private int driverPort;
+	
+	private DesktopDriverEngine engine;
 
 	public DesktopDriver(DriverManager driverManager) {
 		this.driverHost = driverManager.getDesktopDriver().getDriverServerUrl().getHost();
 		this.driverPort = driverManager.getDesktopDriver().getDriverServerUrl().getPort();
+	}
+	
+	public void setEngine(DesktopDriverEngine engine) {
+		this.engine = engine;
+		engine.setDriver(this);
+	}
+	
+	public DesktopDriverEngine getEngine() {
+		return engine;
 	}
 
 	//------------------------------------------------------------------------------------------------------------
@@ -116,14 +128,16 @@ public class DesktopDriver extends RemoteWebDriver {
 
 	public enum WindowType
 	{
-		Pid (0),
-		List (1),
-		Move (2),
-		Resize (3),
-		ToFront (4),
-		Switch (5),
-		Close (6),
-		CloseAll (7);
+		Title (0),
+		Handle(1),
+		List (2),
+		Move (3),
+		Resize (4),
+		ToFront (5),
+		Switch (6),
+		Close (7),
+		CloseAll (8),
+		Url (9);
 
 		private final int type;
 		WindowType(int value){
@@ -236,37 +250,17 @@ public class DesktopDriver extends RemoteWebDriver {
 	// get elements
 	//---------------------------------------------------------------------------------------------------------------------------
 
-	public List<FoundElement> getWebElementsListByPid(int pid, Double channelX, Double channelY) {
+	public List<FoundElement> getWebElementsListByHandle(Double channelX, Double channelY, int handle) {
 
 		ArrayList<FoundElement> listElements = new ArrayList<FoundElement>();
 
-		DesktopResponse resp = sendRequestCommand(CommandType.Element, ElementType.Find, pid);
+		DesktopResponse resp = sendRequestCommand(CommandType.Element, ElementType.Find, handle, "*");
 
 		if(resp != null && resp.elements != null) {
 			resp.elements.forEach(e -> listElements.add(new FoundElement(e, channelX, channelY)));
 		}
 
 		return listElements;
-	}
-
-	public long getProcessDataByWindowTitle(String windowTitle) {
-
-		long pid = -1L;
-		int maxTry = 50;
-
-		while(pid == -1L && maxTry > 0) {
-			DesktopResponse resp = sendRequestCommand(CommandType.Window, WindowType.Pid, windowTitle);
-			if(resp.windows != null && resp.windows.size() > 0) {
-				pid = resp.windows.get(0).pid;
-			}else {
-				maxTry--;
-				try {
-					Thread.sleep(300);
-				} catch (InterruptedException e) {}
-			}
-		}
-
-		return pid;
 	}
 
 	public void refreshElementMapLocation(Channel channel) {
@@ -312,14 +306,30 @@ public class DesktopDriver extends RemoteWebDriver {
 		DesktopResponse resp = sendRequestCommand(CommandType.Window, WindowType.List, pid);
 
 		if(resp.windows != null) {
-			resp.windows.forEach(e -> windows.add((DesktopWindow)e));
+			resp.windows.forEach(e -> windows.add(e));
 		}
 
 		return windows;
 	}
+	
+	public DesktopWindow getWindowByHandle(int handle) {
+		DesktopResponse resp = sendRequestCommand(CommandType.Window, WindowType.Handle, handle);
+		if(resp != null && resp.windows != null && resp.windows.size() > 0) {
+			return resp.windows.get(0);
+		}
+		return null;
+	}
+	
+	public DesktopWindow getWindowByTitle(String title) {
+		DesktopResponse resp = sendRequestCommand(CommandType.Window, WindowType.Title, title);
+		if(resp != null && resp.windows != null && resp.windows.size() > 0) {
+			return resp.windows.get(0);
+		}
+		return null;
+	}
 
-	public void setChannelToFront(Long processId) {
-		sendRequestCommand(CommandType.Window, WindowType.ToFront, processId);
+	public void setChannelToFront(int handle) {
+		sendRequestCommand(CommandType.Window, WindowType.ToFront, handle);
 	}
 
 	public void moveWindow(Channel channel, Point point) {
@@ -341,14 +351,18 @@ public class DesktopDriver extends RemoteWebDriver {
 	public void closeWindow(Channel channel, int index) {
 		sendRequestCommand(CommandType.Window, WindowType.Close, channel.getHandle());
 	}
-
-	public Double[] getWindowSize(Long pid) {
-		DesktopResponse resp = sendRequestCommand(CommandType.Window, WindowType.List, pid);
-		if(resp.windows != null && resp.windows.size() > 0) {
-			DesktopWindow win = resp.windows.get(0);
-			return new Double[] {win.x, win.y, win.width, win.height};
+	
+	public void closeWindow(int handle) {
+		sendRequestCommand(CommandType.Window, WindowType.Close, handle);
+	}
+	
+	public void gotoUrl(ActionStatus status, int handle, String url) {
+		DesktopResponse resp = sendRequestCommand(CommandType.Window, WindowType.Url, handle, url);
+		if(resp != null) {
+			status.setCode(resp.errorCode);
+			status.setData(url);
+			status.setMessage(resp.errorMessage);
 		}
-		return new Double[] {0.0, 0.0, 0.0, 0.0};
 	}
 
 	public FoundElement getTestElementParent(String elementId, Channel channel){
@@ -388,31 +402,30 @@ public class DesktopDriver extends RemoteWebDriver {
 		return listAttributes.toArray(new CalculatedProperty[listAttributes.size()]);
 	}
 
-	public ArrayList<FoundElement> findElementByTag(String parentId, String tag, List<CalculatedProperty> attributes, Channel channel) {
+	public ArrayList<FoundElement> findElements(Channel channel, TestElement testElement, String tag, ArrayList<String> attributes, Predicate<Object> predicate) {
 
 		//channel.refreshLocation();
 		TestBound channelDimension = channel.getDimension();
-
 		ArrayList<FoundElement> foundElements = new ArrayList<FoundElement>();
-
-		Predicate<DesktopElement> fullPredicate = Objects::nonNull;
-		for(CalculatedProperty calc : attributes){
-			if(calc.isRegexp()){
-				fullPredicate = fullPredicate.and(e -> getElementAttribute(e.id, calc.getName()).matches(calc.getValue().getCalculated()));
-			}else{
-				fullPredicate = fullPredicate.and(e -> getElementAttribute(e.id, calc.getName()).equals(calc.getValue().getCalculated()));
+		
+		DesktopResponse response = null;
+		
+		if(testElement.getParent() != null){
+			if(attributes.isEmpty()) {
+				response = sendRequestCommand(CommandType.Element, ElementType.Childs, testElement.getParent().getWebElementId(), tag);
+			}else {
+				response = sendRequestCommand(CommandType.Element, ElementType.Childs, testElement.getParent().getWebElementId(), tag, String.join(DESKTOP_REQUEST_SEPARATOR, attributes));
+			}
+		}else{
+			if(attributes.isEmpty()) {
+				response = sendRequestCommand(CommandType.Element, ElementType.Find, channel.getHandle(), tag);
+			}else {
+				response = sendRequestCommand(CommandType.Element, ElementType.Find, channel.getHandle(), tag, String.join(DESKTOP_REQUEST_SEPARATOR, attributes));
 			}
 		}
 
-		DesktopResponse response = null;
-		if(parentId != null){
-			response = sendRequestCommand(CommandType.Element, ElementType.Childs, parentId, tag);
-		}else{
-			response = sendRequestCommand(CommandType.Element, ElementType.Find, channel.getProcessId(), tag);
-		}
-
 		if(response.elements != null) {
-			response.elements.parallelStream().filter(fullPredicate).forEach(e -> foundElements.add(new FoundElement(e, channelDimension.getX(), channelDimension.getY())));
+			response.elements.parallelStream().filter(predicate).forEach(e -> foundElements.add(new FoundElement(e, channelDimension.getX(), channelDimension.getY())));
 		}		
 
 		return foundElements;
@@ -430,19 +443,19 @@ public class DesktopDriver extends RemoteWebDriver {
 	implements Runnable {
 		final Double channelX;
 		final Double channelY;
-		final int pid;
+		final int handle;
 		final DesktopDriver driver;
 
 		public LoadMapElement(Channel channel, DesktopDriver driver) {
 			this.channelX = channel.getDimension().getX() - 10;
 			this.channelY = channel.getDimension().getY() - 10;
-			this.pid = channel.getProcessId().intValue();
+			this.handle = channel.getHandle();
 			this.driver = driver;
 		}
 
 		@Override
 		public void run() {
-			this.driver.setElementMapLocation(this.driver.getWebElementsListByPid(this.pid, this.channelX, this.channelY));
+			this.driver.setElementMapLocation(this.driver.getWebElementsListByHandle(this.channelX, this.channelY, this.handle));
 		}
 	}
 
@@ -535,7 +548,7 @@ public class DesktopDriver extends RemoteWebDriver {
 	//---------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------
 
-	private DesktopResponse sendRequestCommand(Object... request) {
+	public DesktopResponse sendRequestCommand(Object... request) {
 
 		DesktopResponse response = null;
 		String data = StringUtils.join(request, DESKTOP_REQUEST_SEPARATOR);

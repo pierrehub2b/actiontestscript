@@ -19,9 +19,7 @@ under the License.
 
 package com.ats.executor.drivers.engines.browsers;
 
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.function.Predicate;
 
 import org.openqa.selenium.Dimension;
@@ -122,19 +120,18 @@ public class EdgeDriverEngine extends WebDriverEngine {
 	}
 	
 	@Override
-	public ArrayList<FoundElement> findWebElement(Channel channel, TestElement testObject, String tagName,
-			ArrayList<String> attributes, Predicate<Map<String, Object>> predicate) {
+	public ArrayList<FoundElement> findElements(Channel channel, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<Object> predicate) {
 		int maxTry = 40;
 		while(!((Boolean)runJavaScript(JS_WAIT_READYSTATE)) && maxTry > 0) {
 			channel.sleep(200);
 			maxTry--;
 		}
-		return super.findWebElement(channel, testObject, tagName, attributes, predicate);
+		return super.findElements(channel, testObject, tagName, attributes, predicate);
 	}
 
 	@Override
-	public void goToUrl(URL url, boolean newWindow) {
-		super.goToUrl(url, newWindow);
+	public void goToUrl(ActionStatus status, String url) {
+		super.goToUrl(status, url);
 		waitAfterAction();
 	}
 }

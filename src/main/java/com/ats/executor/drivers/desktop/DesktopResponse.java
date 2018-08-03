@@ -28,7 +28,7 @@ public class DesktopResponse {
 	public ArrayList<DesktopElement> elements;
 	public ArrayList<DesktopWindow> windows;
 	public ArrayList<DesktopData> properties;
-		
+
 	public int errorCode = 0;
 	public String errorMessage = null;
 	

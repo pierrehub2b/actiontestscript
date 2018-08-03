@@ -19,9 +19,7 @@ under the License.
 
 package com.ats.executor.drivers.engines;
 
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.function.Predicate;
 
 import org.openqa.selenium.Alert;
@@ -47,8 +45,8 @@ public interface IDriverEngine{
 	public void switchWindow(int index);
 	public void closeWindow(ActionStatus status, int index);
 	public Object executeScript(ActionStatus status, String script, Object ... params);
-	public void goToUrl(URL url, boolean newWindow);
-	public ArrayList<FoundElement> findWebElement(Channel channel, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<Map<String, Object>> searchPredicate);
+	public void goToUrl(ActionStatus status, String url);
+	public ArrayList<FoundElement> findElements(Channel channel, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<Object> searchPredicate);
 	public void waitAfterAction();
 	public TestBound[] getDimensions();
 	public FoundElement getElementFromPoint(Double x, Double y);
@@ -73,10 +71,6 @@ public interface IDriverEngine{
 	public void rightClick();
 	public Alert switchToAlert();
 	public void switchToDefaultContent();
-	public void navigationRefresh();
-	public void navigationForward();
-	public void navigationBack();
-	public String getCurrentUrl();
 	public void setWindowToFront();
 	public void switchToFrameId(String id);
 }

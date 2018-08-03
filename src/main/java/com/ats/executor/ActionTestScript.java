@@ -22,7 +22,6 @@ package com.ats.executor;
 import static org.testng.Assert.fail;
 
 import java.io.File;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -612,29 +611,10 @@ public class ActionTestScript extends Script implements ITest{
 	//  - Goto Url Action
 	//-----------------------------------------------------------------------------------------------------------
 
-	public void navigate(ActionStatus status, URL url, boolean newWindow) {
+	public void navigate(ActionStatus status, String url) {
 		if(getCurrentChannel() != null){
-
-			sendInfo("goto url", " '" + url.toString() + "'");
-
-			getCurrentChannel().navigate(url, newWindow);
-
-			//TODO check url with browser
-			//if(Utils.checkUrl(status, url)) {
-			//	status.setMessage(getCurrentChannel().goToUrl(url).toString());
-			//}
+			getCurrentChannel().navigate(status, url);
 		}
-		status.setMessage(getCurrentChannel().getCurrentUrl());
-		status.setPassed(true);
-		status.updateDuration();
-	}
-
-	public void navigate(ActionStatus status, String type){
-		if(getCurrentChannel() != null){
-			getCurrentChannel().navigate(type);
-		}
-		status.setMessage(getCurrentChannel().getCurrentUrl());
-		status.setPassed(true);
 		status.updateDuration();
 	}
 
@@ -727,7 +707,7 @@ public class ActionTestScript extends Script implements ITest{
 			getRecorder().createVisualAction(action);
 		}
 	}
-	
+
 	public void updateVisualElement(int error, TestElement element) {
 		if(isRecord()) {
 			getRecorder().updateVisualStatus(error);

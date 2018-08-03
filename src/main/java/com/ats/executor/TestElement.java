@@ -15,14 +15,13 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.executor;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
 
@@ -34,6 +33,7 @@ import org.openqa.selenium.support.ui.Select;
 import com.ats.element.FoundElement;
 import com.ats.element.SearchedElement;
 import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.engines.IDriverEngine;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
@@ -55,7 +55,7 @@ public class TestElement{
 	private Channel channel;
 
 	private Predicate<Integer> occurrences;
-	
+
 	private int count = 0;
 
 	private long searchDuration = 0;
@@ -69,8 +69,6 @@ public class TestElement{
 
 	private String criterias;
 
-	private boolean desktop = false;
-
 	public TestElement(Channel channel, int maxTry) {
 		this.channel = channel;
 		this.maxTry = maxTry;
@@ -79,7 +77,7 @@ public class TestElement{
 	public TestElement(Channel channel, int maxTry, String operator, int expectedCount) {
 
 		this(channel, maxTry);
-		
+
 		switch (operator) {
 		case Operators.DIFFERENT :
 			this.occurrences = isOccurrencesDifferent(expectedCount);
@@ -106,12 +104,6 @@ public class TestElement{
 
 		this(channel, maxTry, operator, expectedCount);
 		this.parent = parent;
-		this.desktop = channel.isDesktop();
-
-		if(tag.startsWith(DESKTOP_PREFIX)){
-			this.desktop = true;
-			tag = tag.substring(DESKTOP_PREFIX.length());
-		}
 
 		initSearch(tag, criterias);
 	}
@@ -132,8 +124,6 @@ public class TestElement{
 		if(searchElement.getParent() != null){
 			this.parent = new TestElement(channel, maxTry, operator, expectedCount, searchElement.getParent());
 		}
-
-		this.desktop = searchElement.getTag().startsWith(DESKTOP_PREFIX);
 
 		initSearch(searchElement.getTag(), searchElement.getCriterias());
 	}
@@ -167,55 +157,61 @@ public class TestElement{
 	}
 
 	private String elementTag;
-	
+
 	private void initSearch(String tag, List<CalculatedProperty> properties) {
 
 		if(channel != null){
-		
+
+			IDriverEngine engine;
+			boolean desktop = channel.isDesktop();
+
+			if(tag.startsWith(DESKTOP_PREFIX)){
+				desktop = true;
+				tag = tag.substring(DESKTOP_PREFIX.length());
+				
+				engine = channel.getDesktopDriverEngine();
+			}else {
+				engine = channel.getDriverEngine();
+			}
+
 			elementTag = tag;
 			criterias = tag;
-			
+
 			searchDuration = System.currentTimeMillis();
+
+			int trySearch = 0;
 
 			if(parent == null || (parent != null && parent.getCount() > 0)){
 
-				if(desktop || channel.isDesktop()){
-					
-					String parentId = null;
-					if(parent != null) {
-						parentId = parent.getWebElementId();
-					}
+				ArrayList<String> attributes = new ArrayList<String>();
+				Predicate<Object> fullPredicate = Objects::nonNull;
 
-					foundElements = channel.findDesktopElement(parentId, tag, properties);
-					
-				}else{
-					
-					
-					ArrayList<String> attributes = new ArrayList<String>();
-
-					Predicate<Map<String, Object>> fullPredicate = Objects::nonNull;
-
-					if(properties != null){
+				if(properties != null){
+					if(desktop){
 						for (CalculatedProperty property : properties){
 							criterias += "," + property.getName() + ":" + property.getValue().getCalculated();
-							fullPredicate = property.getPredicate(fullPredicate);
-							
+							fullPredicate = property.getDesktopPredicate(fullPredicate);
+
+							attributes.add(property.getName());
+						}
+					}else {
+						for (CalculatedProperty property : properties){
+							criterias += "," + property.getName() + ":" + property.getValue().getCalculated();
+							fullPredicate = property.getMapPredicate(fullPredicate);
+
 							attributes.add(property.getName());
 						}
 					}
+				}
 
-					int trySearch = 0;
-					
-					foundElements = channel.findWebElement(this, tag, attributes, fullPredicate);
-					while (!isValidated() && trySearch < maxTry) {
-
+				while (trySearch < maxTry) {
+					foundElements = engine.findElements(channel, this, tag, attributes, fullPredicate);
+					if(isValidated()) {
+						trySearch = maxTry;
+					}else {
+						channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "searching element", maxTry - trySearch);
 						progressiveWait(trySearch);
 						trySearch++;
-						
-						channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "searching element", maxTry - trySearch);
-						channel.switchToDefaultContent();
-						
-						foundElements = channel.findWebElement(this, tag, attributes, fullPredicate);
 					}
 				}
 			}
@@ -259,7 +255,7 @@ public class TestElement{
 	public WebElement getWebElement() {
 		return getFoundElement().getValue();
 	}
-	
+
 	public String getWebElementId() {
 		return getFoundElement().getId();
 	}
@@ -282,7 +278,7 @@ public class TestElement{
 			return false;
 		}
 	}
-	
+
 	public String getElementTag() {
 		return elementTag;
 	}
@@ -354,7 +350,7 @@ public class TestElement{
 	public void checkOccurrences(ActionTestScript ts, ActionStatus status, String operator, int expected) {
 
 		int error = 0;
-		
+
 		if(isValidated()) {
 			status.setPassed(true);
 		}else {
@@ -362,12 +358,12 @@ public class TestElement{
 			status.setCode(ActionStatus.OCCURRENCES_ERROR);
 			status.setData(count);
 			status.setMessage("[" + expected + "] expected occurence(s) but [" + count + "] occurence(s) found");
-			
+
 			error = ActionStatus.OCCURRENCES_ERROR;
 		}
-		
+
 		ts.updateVisualStatus(error, count + "", operator + " " + expected);
-		
+
 		terminateExecution(ts, error);
 	}
 
@@ -378,7 +374,7 @@ public class TestElement{
 	public void sendText(ActionStatus status, CalculatedValue text) {
 		channel.sendTextData(status, getFoundElement(), text.getCalculatedText());
 	}
-	
+
 	public void clearText(ActionStatus status) {
 		channel.clearText(status, getFoundElement());
 	}
@@ -470,7 +466,7 @@ public class TestElement{
 			status.setPassed(true);
 
 			return;
-			
+
 		}catch(ElementNotVisibleException e0) {	
 
 			status.setCode(ActionStatus.OBJECT_NOT_VISIBLE);
@@ -525,7 +521,7 @@ public class TestElement{
 	//-------------------------------------------------------------------------------------------------------------------
 
 	public String getAttribute(String name){
-		
+
 		if(isValidated()){
 			return channel.getAttribute(getFoundElement(), name, maxTry + channel.getMaxTryProperty());
 		}

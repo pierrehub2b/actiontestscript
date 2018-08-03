@@ -15,14 +15,10 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.script.actions;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
@@ -59,29 +55,10 @@ public class ActionGotoUrl extends ActionExecute {
 	@Override
 	public void execute(ActionTestScript ts) {
 		super.execute(ts);
-
-		if(NEXT.equals(url.getCalculated()) || REFRESH.equals(url.getCalculated()) || BACK.equals(url.getCalculated())) {
-			ts.navigate(status, url.getCalculated());
-			ts.updateVisualImage();
-		}else {
-			
-			String urlString = url.getCalculated();
-			if(!urlString.startsWith("https://") && !urlString.startsWith("http://") && !urlString.startsWith("file://") ) {
-				urlString = "http://" + urlString;
-			}
-
-			try {
-
-				ts.navigate(status, new URL(urlString), false);
-				ts.updateVisualValue(urlString);
-				ts.updateVisualImage();
-
-			} catch (MalformedURLException e) {
-				status.setPassed(false);
-				status.setData(urlString);
-				status.setCode(ActionStatus.MALFORMED_GOTO_URL);
-			} 
-		}
+		
+		ts.navigate(status, url.getCalculated());
+		ts.updateVisualValue(url.getCalculated());
+		ts.updateVisualImage();
 	}
 
 	//--------------------------------------------------------

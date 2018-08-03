@@ -19,12 +19,9 @@ under the License.
 
 package com.ats.executor.channels;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.Keys;
@@ -39,14 +36,13 @@ import com.ats.executor.TestElement;
 import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.desktop.DesktopWindow;
-import com.ats.executor.drivers.engines.DesktopDriverEngine;
 import com.ats.executor.drivers.engines.IDriverEngine;
+import com.ats.executor.drivers.engines.desktop.DesktopDriverEngine;
 import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.ScriptHeader;
-import com.ats.script.actions.ActionGotoUrl;
 
 public class Channel {
 
@@ -74,6 +70,8 @@ public class Channel {
 
 	private ProcessHandle process = null;
 	private DesktopDriver desktopDriver;
+	
+	private int winHandle = -1;
 
 	//----------------------------------------------------------------------------------------------------------------------
 	// Constructor
@@ -101,9 +99,13 @@ public class Channel {
 	}
 	
 	public int getHandle() {
-		List<DesktopWindow> processWindows = desktopDriver.getWindowsByPid(getProcessId());
-		if(processWindows != null && processWindows.size() > 0) {
-			return processWindows.get(0).handle;
+		if(winHandle > 0) {
+			return winHandle;
+		}else {
+			List<DesktopWindow> processWindows = desktopDriver.getWindowsByPid(getProcessId());
+			if(processWindows != null && processWindows.size() > 0) {
+				return processWindows.get(0).handle;
+			}
 		}
 		return -1;
 	}
@@ -125,7 +127,7 @@ public class Channel {
 
 	public void toFront(){
 		engine.setWindowToFront();
-		desktopDriver.setChannelToFront(getProcessId());
+		desktopDriver.setChannelToFront(getHandle());
 	}
 
 	public byte[] getScreenShot(){
@@ -151,6 +153,12 @@ public class Channel {
 		if(procs.isPresent()) {
 			this.process = procs.get();
 		}
+	}
+	
+	public void setApplicationData(int handle) {
+		this.applicationVersion = "";
+		this.driverVersion = "";
+		this.winHandle = handle;
 	}
 	
 	public void switchToFrame(String id) {
@@ -339,26 +347,16 @@ public class Channel {
 		engine.switchToDefaultContent();
 	}
 
-	public void navigate(URL url, boolean newWindow) {
-		engine.goToUrl(url, newWindow);
+	public void navigate(ActionStatus status, String url) {
+		engine.goToUrl(status, url);
+	}
+	
+	public IDriverEngine getDesktopDriverEngine() {
+		return getDesktopDriver().getEngine();
 	}
 
-	public void navigate(String type) {
-		if(ActionGotoUrl.REFRESH.equals(type)) {
-			engine.navigationRefresh();
-		}else if(ActionGotoUrl.NEXT.equals(type)) {
-			engine.navigationForward();
-		}else if(ActionGotoUrl.BACK.equals(type)) {
-			engine.navigationBack();
-		}
-	}
-
-	public ArrayList<FoundElement> findWebElement(TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<Map<String, Object>> searchPredicate) {
-		return engine.findWebElement(this, testObject, tagName, attributes, searchPredicate);
-	}
-
-	public ArrayList<FoundElement> findDesktopElement(String parentId, String tag, List<CalculatedProperty> attributes) {
-		return desktopDriver.findElementByTag(parentId, tag, attributes, this);
+	public IDriverEngine getDriverEngine() {
+		return engine;
 	}
 
 	//----------------------------------------------------------------------------------------------------------
@@ -437,10 +435,6 @@ public class Channel {
 
 	public void rightClick() {
 		engine.rightClick();
-	}
-
-	public String getCurrentUrl() {
-		return engine.getCurrentUrl();
 	}
 
 	//----------------------------------------------------------------------------------------------------------
