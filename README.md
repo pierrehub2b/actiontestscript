@@ -136,8 +136,6 @@ Here is an example of global ATS configuration file (*.atsProperties* file in AT
 <execute>
 	<proxy>
 		<type>system</type>
-		<host>proxyhost</host>
-		<port>8080</port>
 	</proxy>
 	<appBounding>
 		<x>20</x>
@@ -201,9 +199,9 @@ Proxy types available are 'system', 'auto', 'direct' and 'manual', if 'manual' t
 * You can define page load timeout (in sec.) for web application *[timeOut -> pageLoad]*.
 * You can define action execution terminating timeout (in sec.) to prevent browser or application infinite hangup *[timeOut -> watchDog]*.
 * For each browser used you can define following parameters :
-- Path of the binaries files *[path]*
-- Time to wait after each actions (in millisec.) *[waitAction]*
-- Time to wait for double check attributes value (in millisec.) *[waitProperty]*
+  - Path of the binaries files *[path]*
+  - Time to wait after each actions (in millisec.) *[waitAction]*
+  - Time to wait for double check attributes value (in millisec.) *[waitProperty]*
 * You can add options to the browsers driver.
 * You can define application name and path of installed applications on the host machine.
 
