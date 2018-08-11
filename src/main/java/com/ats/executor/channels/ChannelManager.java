@@ -84,18 +84,13 @@ public class ChannelManager {
 
 	public void startChannel(ActionStatus status, String name, String app){
 		if(getChannel(name) == null){
-			Channel newChannel = new Channel(mainScript, driverManager, name, app);
-			if(newChannel.getStartError() == null) {
+			Channel newChannel = new Channel(status, mainScript, driverManager, name, app);
+			if(status.isPassed()) {
 				channelsList.add(newChannel);
 				setCurrentChannel(newChannel);
-				
 				sendInfo("Start channel", " -> " + app);
 			}else {
-				status.setCode(ActionStatus.CHANNEL_START_ERROR);
-				status.setMessage(newChannel.getStartError());
-				status.setPassed(false);
-				
-				sendError(ActionStatus.CHANNEL_START_ERROR, newChannel.getStartError());
+				sendError(ActionStatus.CHANNEL_START_ERROR, status.getMessage());
 			}
 		}
 	}

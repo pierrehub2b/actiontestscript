@@ -24,11 +24,13 @@ public class ApplicationProperties {
 	private String name;
 	private String path;
 	private int wait;
+	private int check;
 	
-	public ApplicationProperties(String name, String path, int wait) {
+	public ApplicationProperties(String name, String path, int wait, int check) {
 		this.name = name;
 		this.path = path;
 		this.wait = wait;
+		this.check = check;
 	}
 	
 	public String getName() {
@@ -41,5 +43,9 @@ public class ApplicationProperties {
 	
 	public int getWait() {
 		return wait;
+	}
+	
+	public int getCheck() {
+		return check;
 	}
 }

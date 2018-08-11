@@ -19,7 +19,7 @@ public class ExplorerDriverEngine extends DesktopDriverEngine {
 	private Desktop desktop;
 	private DesktopWindow window;
 
-	public ExplorerDriverEngine(Channel channel, DesktopDriver desktopDriver, AtsManager ats) {
+	public ExplorerDriverEngine(Channel channel, ActionStatus status, DesktopDriver desktopDriver, AtsManager ats) {
 		super(channel, DriverManager.DESKTOP_EXPLORER, desktopDriver, ats.getApplicationProperties(DriverManager.DESKTOP_EXPLORER), DEFAULT_WAIT);
 
 		String folderName = "";

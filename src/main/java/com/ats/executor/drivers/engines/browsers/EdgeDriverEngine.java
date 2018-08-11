@@ -29,6 +29,7 @@ import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.remote.CapabilityType;
 
 import com.ats.driver.AtsManager;
+import com.ats.element.AtsElement;
 import com.ats.element.FoundElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
@@ -43,7 +44,7 @@ public class EdgeDriverEngine extends WebDriverEngine {
 
 	private final static int DEFAULT_WAIT = 150;
 
-	public EdgeDriverEngine(Channel channel, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
+	public EdgeDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
 		super(channel, DriverManager.EDGE_BROWSER, driverProcess, windowsDriver, ats, DEFAULT_WAIT);
 		
 		this.searchElementScript = JS_WAIT_BEFORE_SEARCH + JS_SEARCH_ELEMENT;
@@ -53,8 +54,9 @@ public class EdgeDriverEngine extends WebDriverEngine {
 		options.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
 		options.setCapability(CapabilityType.ACCEPT_INSECURE_CERTS, true);
 		options.setPageLoadStrategy("normal");
+		options.setCapability(CapabilityType.PROXY, ats.getProxy().getProxy());
 
-		launchDriver(options);
+		launchDriver(status, options);
 	}
 
 	@Override
@@ -120,7 +122,7 @@ public class EdgeDriverEngine extends WebDriverEngine {
 	}
 	
 	@Override
-	public ArrayList<FoundElement> findElements(Channel channel, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<Object> predicate) {
+	public ArrayList<FoundElement> findElements(Channel channel, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsElement> predicate) {
 		int maxTry = 40;
 		while(!((Boolean)runJavaScript(JS_WAIT_READYSTATE)) && maxTry > 0) {
 			channel.sleep(200);

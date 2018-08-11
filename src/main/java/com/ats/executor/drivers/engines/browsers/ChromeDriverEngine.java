@@ -23,9 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.CapabilityType;
 
 import com.ats.driver.AtsManager;
+import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.DriverProcess;
@@ -36,7 +37,7 @@ public class ChromeDriverEngine extends WebDriverEngine {
 
 	private final static int DEFAULT_WAIT = 130;
 
-	public ChromeDriverEngine(Channel channel, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
+	public ChromeDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
 
 		super(channel, DriverManager.CHROME_BROWSER, driverProcess, windowsDriver, ats, DEFAULT_WAIT);
 
@@ -55,10 +56,13 @@ public class ChromeDriverEngine extends WebDriverEngine {
 		if(applicationPath != null) {
 			options.setBinary(applicationPath);
 		}
-
-		DesiredCapabilities caps = DesiredCapabilities.chrome(); 
+		
+		options.setCapability(CapabilityType.PROXY, ats.getProxy().getProxy());
+		
+		/*DesiredCapabilities caps = DesiredCapabilities.chrome(); 
 		caps.setCapability(ChromeOptions.CAPABILITY, options); 
+		caps.setCapability(CapabilityType.PROXY, ats.getProxy().getProxy());*/
 
-		launchDriver(caps);
+		launchDriver(status, options);
 	}
 }

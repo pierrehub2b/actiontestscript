@@ -23,9 +23,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.openqa.selenium.opera.OperaOptions;
+import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.ats.driver.AtsManager;
+import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.DriverProcess;
@@ -36,7 +38,7 @@ public class OperaDriverEngine extends WebDriverEngine {
 
 	private final static int DEFAULT_WAIT = 130;
 	
-	public OperaDriverEngine(Channel channel, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
+	public OperaDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
 		super(channel, DriverManager.OPERA_BROWSER, driverProcess, windowsDriver, ats, DEFAULT_WAIT);
 				
 		initElementX = 20.0;
@@ -60,7 +62,8 @@ public class OperaDriverEngine extends WebDriverEngine {
 				
 		DesiredCapabilities cap = new DesiredCapabilities();
 		cap.setCapability(OperaOptions.CAPABILITY, options);
+		cap.setCapability(CapabilityType.PROXY, ats.getProxy().getProxy());
 		
-		launchDriver(cap);
+		launchDriver(status, cap);
 	}
 }

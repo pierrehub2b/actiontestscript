@@ -189,10 +189,10 @@ public class ActionTestScript extends Script implements ITest{
 		tearDown();
 	}
 
-	@AfterMethod(alwaysRun=true)
+	/*@AfterMethod(alwaysRun=true)
 	public void cleanup(){
 		tearDown();
-	}
+	}*/
 
 	@Override
 	public String getTestName() {
@@ -511,6 +511,11 @@ public class ActionTestScript extends Script implements ITest{
 	private int atsCodeLine = -1;
 
 	public static final String JAVA_EXECUTE_FUNCTION_NAME = "exec";
+
+	public void exec(Action action){
+		action.execute(this);
+	}
+
 	public void exec(int line, Action action){
 		atsCodeLine = line;
 		action.execute(this);
@@ -559,8 +564,10 @@ public class ActionTestScript extends Script implements ITest{
 
 	public void startChannel(ActionStatus status, String name, String app){
 		getChannelManager().startChannel(status, name, app);
-		updateStatus(status);
-		updateRecorderChannel(getChannelManager().getCurrentChannel());
+		if(status.isPassed()) {
+			updateStatus(status);
+			updateRecorderChannel(getChannelManager().getCurrentChannel());
+		}
 	}
 
 	public void switchChannel(ActionStatus status, String name){

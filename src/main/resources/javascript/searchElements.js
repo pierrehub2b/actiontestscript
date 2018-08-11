@@ -1,4 +1,4 @@
-var parent = arguments[0];
+var result = [], parent = arguments[0];
 const tag = arguments[1];
 const attributes = arguments[2];
 const attributesLen = arguments[3];	
@@ -13,23 +13,22 @@ if(parent == null){
 const elts = parent.getElementsByTagName(tag);
 const eltsLength = elts.length;
 
-var result = [], addElement = function (e){
+var addElement = function (e, a){
 	let rec = e.getBoundingClientRect();
-	result[result.length] = {'ats-elt':[e, e.tagName, rec.width+0.0001, rec.height+0.0001, rec.left+0.0001, rec.top+0.0001, screenOffsetX, screenOffsetY]};
-	return result[result.length-1];
+	result[result.length] = [e, e.tagName, rec.width+0.0001, rec.height+0.0001, rec.left+0.0001, rec.top+0.0001, screenOffsetX, screenOffsetY, a];
 };
 
 if(attributesLen == 0){
 
 	for(var h = 0; h < eltsLength; h++){
-		addElement(elts[h]);
+		addElement(elts[h], {});
 	}
 
 }else{
 
 	var i = 0, loop = function (){
 
-		let e = elts[i], attributesList = [], j = 0;
+		let e = elts[i], a = {}, j = 0;
 
 		while(j < attributesLen){
 
@@ -38,32 +37,28 @@ if(attributesLen == 0){
 			if(attributeName == 'text'){
 				let textValue = e.textContent;
 				if(textValue){
-					attributesList[attributesList.length] = ['text', textValue.replace(/\xA0/g,' ').trim()];
+					a['text'] = textValue.replace(/\xA0/g,' ').trim();
 				}
 			}else{
 				if(attributeName == 'checked' && e.tagName == 'INPUT' && (e.type == 'radio' || e.type == 'checkbox')){
 					if(e.checked == true){
-						attributesList[attributesList.length] = ['checked', 'true'];
+						a['checked'] = 'true';
 					}else{
-						attributesList[attributesList.length] = ['checked', 'false'];
+						a['checked'] = 'false';
 					}		
 				}else{
 					if(e.hasAttribute(attributeName)){
-						attributesList[attributesList.length] = [attributeName, e.getAttribute(attributeName)];
+						a[attributeName] = e.getAttribute(attributeName);
 					}else{
-						attributesList[attributesList.length] = [attributeName, window.getComputedStyle(e,null).getPropertyValue(attributeName)];
+						a[attributeName] = window.getComputedStyle(e,null).getPropertyValue(attributeName);
 					}
 				}
 			}
 			j++;
 		}
 
-		if(attributesList.length == attributesLen){
-			let newElem = addElement(e), k = 0;
-			while(k < attributesLen){
-				newElem[attributesList[k][0]] = attributesList[k][1];
-				k++;
-			}
+		if(Object.keys(a).length == attributesLen){
+			addElement(e, a);
 		}
 	};
 	

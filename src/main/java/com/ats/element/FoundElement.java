@@ -28,11 +28,8 @@ import org.openqa.selenium.remote.RemoteWebElement;
 
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
-import com.ats.executor.drivers.desktop.DesktopElement;
 
 public class FoundElement{
-
-	private static final String IFRAME = "IFRAME";
 
 	private String id;
 
@@ -52,97 +49,65 @@ public class FoundElement{
 	private RemoteWebElement value;
 	private FoundElement parent;
 	private boolean visible = true;
-	
-	public static boolean checkIframe(String value) {
-		return IFRAME.equals(value.toUpperCase());
-	}
 
+	//------------------------------------------------------------------------------------------------------------------------------
+	// contructors
+	//------------------------------------------------------------------------------------------------------------------------------
+	
 	public FoundElement() {}
 
-	public FoundElement(ArrayList<Object> element) {
-		this.setRemoteWebElement((RemoteWebElement) element.get(0));
-		this.tag = (String) element.get(1);
-		this.width = (Double)element.get(2);
-		this.height = (Double)element.get(3);
-	}
-
-	public FoundElement(ArrayList<Object> element, Channel channel, Double offsetX, Double offsetY) {
-		
-		this(element);
-		
-		Double elemX = (Double)element.get(4);
-		Double elemY = (Double)element.get(5);
-				
-		this.updatePosition(elemX, elemY, channel, offsetX, offsetY);
-		this.screenX = (Double)element.get(6) + elemX;
-		this.screenY = (Double)element.get(7) + elemY;
-	}
-
-	public FoundElement(Channel channel, ArrayList<ArrayList<Object>> listElements, Double initElementX, Double initElementY) {
-		this(listElements.remove(0), channel, initElementX, initElementY);
-		if(listElements.size() > 0) {
-			setParent(new FoundElement(channel, listElements, initElementX, initElementY));
-		}
-	}
-
 	public FoundElement(Channel channel) {
-		this.value = (RemoteWebElement) channel.getRootElement();
-		setWidth(channel.getDimension().getWidth());
-		setHeight(channel.getDimension().getHeight());
+		this.setRemoteWebElement((RemoteWebElement) channel.getRootElement());
+		this.width = channel.getDimension().getWidth();
+		this.height = channel.getDimension().getHeight();
 	}
 
-	public FoundElement(DesktopElement element, Double channelX, Double channelY) {
+	public FoundElement(AtsElement element) {
+		this.setRemoteWebElement(element.getElement());
+		this.tag = element.getTag();
+		this.width = element.getWidth();
+		this.height = element.getHeight();
+	}
+
+	public FoundElement(AtsElement element, Channel channel, Double offsetX, Double offsetY) {
+
+		this(element);
+
+		Double elemX = element.getX();
+		Double elemY = element.getY();
+
+		this.updatePosition(elemX, elemY, channel, offsetX, offsetY);
+		this.screenX = element.getScreenX() + elemX;
+		this.screenY = element.getScreenY() + elemY;
+	}
+
+	public FoundElement(AtsElement element, TestBound channelDimension) {
 
 		this.desktop = true;
-		this.id = element.id;
-		this.tag = element.tag;
+		this.visible = element.isVisible();
+		this.id = element.getId();
 
-		this.screenX = element.x;
-		this.screenY = element.y;
+		this.tag = element.getTag();
+		this.width = element.getWidth();
+		this.height = element.getHeight();
 
-		this.x = this.screenX - channelX;
-		this.y = this.screenY - channelY;
+		this.screenX = element.getX();
+		this.screenY = element.getY();
 
-		this.width = element.width;
-		this.height = element.height;
-
-		this.visible = element.visible;
+		this.x = this.screenX - channelDimension.getX();
+		this.y = this.screenY - channelDimension.getY();
 	}
 
-	public FoundElement(RemoteWebElement element, Double channelX, Double channelY) {
-		this.desktop = true;
-		this.setRemoteWebElement(element);
-
-		String info = element.getAttribute("InfoData");
-		if(info != null){
-			String[] infoData = info.split(":");
-			this.tag = infoData[0];
-
-			String[] boundData = infoData[1].split(",");
-
-			this.screenX = Double.parseDouble(boundData[0]);
-			this.screenY = Double.parseDouble(boundData[1]);
-
-			this.x = this.screenX - channelX;
-			this.y = this.screenY - channelY;
-
-			this.width = Double.parseDouble(boundData[2]);
-			this.height = Double.parseDouble(boundData[3]);
-
-			this.visible = !"True".equals(infoData[2]);
-
-		}else{
-			this.tag = "undefined";
-			this.visible = false;
+	public FoundElement(Channel channel, ArrayList<AtsElement> elements, Double initElementX, Double initElementY) {
+		this(elements.remove(0), channel, initElementX, initElementY);
+		if(elements.size() > 0) {
+			setParent(new FoundElement(channel, elements, initElementX, initElementY));
 		}
 	}
-
-	public FoundElement(ArrayList<WebElement> parentsList, Double channelX, Double channelY) {
-		this((RemoteWebElement) parentsList.remove(0), channelX, channelY);
-		if(parentsList.size() > 0) {
-			setParent(new FoundElement(parentsList, channelX, channelY));
-		}
-	}
+	
+	//------------------------------------------------------------------------------------------------------------------------------
+	// end of contructors
+	//------------------------------------------------------------------------------------------------------------------------------
 
 	public void dispose() {
 		if(parent != null) {
@@ -163,7 +128,7 @@ public class FoundElement{
 	}
 
 	public boolean isIframe(){
-		return checkIframe(this.tag);
+		return AtsElement.checkIframe(this.tag);
 	}
 
 	public WebElement getValue(){
@@ -191,7 +156,7 @@ public class FoundElement{
 	public Double getScreenY() {
 		return screenY;
 	}
-
+	
 	//----------------------------------------------------------------------------------------------------------------------
 	// Getter and setter for serialization
 	//----------------------------------------------------------------------------------------------------------------------
@@ -271,7 +236,7 @@ public class FoundElement{
 	//----------------------------------------------------------------------------------------------------------------------
 	// Remote element
 	//----------------------------------------------------------------------------------------------------------------------
-	
+
 	public RemoteWebElement getRemoteWebElement(RemoteWebDriver driver) {
 		RemoteWebElement element = new RemoteWebElement();
 		element.setId(id);

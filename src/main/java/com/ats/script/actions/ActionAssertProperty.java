@@ -78,6 +78,7 @@ public class ActionAssertProperty extends ActionExecuteElement {
 				String expectedResult = value.getExpectedResult();
 				
 				if(value.checkProperty(attributeValue)) {
+		
 					status.setPassed(true);
 					status.setMessage(attributeValue);
 					

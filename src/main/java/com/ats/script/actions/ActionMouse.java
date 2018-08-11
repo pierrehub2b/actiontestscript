@@ -69,8 +69,7 @@ public class ActionMouse extends ActionExecuteElement {
 		ts.updateVisualImage();
 		
 		status.updateDuration();
-
-		
+	
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

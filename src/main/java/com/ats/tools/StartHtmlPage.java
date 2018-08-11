@@ -32,6 +32,7 @@ public final class StartHtmlPage {
 			String driverVersion, 
 			TestBound testBound,
 			int actionWait,
+			int propertyWait,
 			int maxtry,
 			int maxTryProperty,
 			int scriptTimeout,
@@ -107,6 +108,10 @@ public final class StartHtmlPage {
 		
 		htmlContent.append("<br><strong>  - Wait after action : </strong>");
 		htmlContent.append(actionWait);
+		htmlContent.append(" ms");
+		
+		htmlContent.append("<br><strong>  - Wait property check : </strong>");
+		htmlContent.append(propertyWait);
 		htmlContent.append(" ms");
 
 		htmlContent.append("</p></div></div></body></html>");

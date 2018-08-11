@@ -42,18 +42,24 @@ public abstract class DriverEngineAbstract {
 	protected int currentWindow = 0;
 	
 	private int actionWait = -1;
+	private int propertyWait = -1;
 
-	public DriverEngineAbstract(Channel channel, String application, ApplicationProperties props, int defaultWait){
+	public DriverEngineAbstract(Channel channel, String application, ApplicationProperties props, int defaultWait, int defaultCheck){
 		this.channel = channel;
 		this.application = application;
 		
 		if(props != null) {
 			actionWait = props.getWait();
+			propertyWait = props.getCheck();
 			applicationPath = props.getPath();
 		}
 		
 		if(actionWait == -1) {
 			actionWait = defaultWait;
+		}
+		
+		if(propertyWait == -1) {
+			propertyWait = defaultCheck;
 		}
 	}
 	
@@ -75,6 +81,10 @@ public abstract class DriverEngineAbstract {
 	
 	public int getActionWait() {
 		return actionWait;
+	}
+	
+	public int getPropertyWait() {
+		return propertyWait;
 	}
 
 	protected int getDirectionValue(int value, MouseDirectionData direction,Cartesian cart1, Cartesian cart2) {

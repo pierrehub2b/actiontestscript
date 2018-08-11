@@ -19,7 +19,13 @@ under the License.
 
 package com.ats.executor.drivers.desktop;
 
-public class DesktopWindow extends DesktopElement {
+import com.ats.element.AtsElement;
+
+public class DesktopWindow extends AtsElement {
 	public int pid = -1;
 	public int handle = -1;
+	
+	public DesktopWindow() {
+		super();
+	}
 }

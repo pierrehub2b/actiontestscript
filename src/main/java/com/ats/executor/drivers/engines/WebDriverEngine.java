@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.http.client.config.RequestConfig;
@@ -48,7 +49,6 @@ import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.NoSuchWindowException;
 import org.openqa.selenium.Point;
-import org.openqa.selenium.Proxy;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriverException;
@@ -59,12 +59,14 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.RemoteWebElement;
 
 import com.ats.driver.AtsManager;
+import com.ats.element.AtsElement;
 import com.ats.element.FoundElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
 import com.ats.executor.TestBound;
 import com.ats.executor.TestElement;
 import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.desktop.DesktopWindow;
@@ -95,7 +97,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	protected static final String JS_ELEMENT_DATA = "var result=null;var e=document.elementFromPoint(arguments[0],arguments[1]);if(e){var r=e.getBoundingClientRect();result=[e, e.tagName, r.width+0.0001, r.height+0.0001, r.left+0.0001, r.top+0.0001, 0.0001, 0.0001];};";
 	protected static final String JS_ELEMENT_BOUNDING = "var rect=arguments[0].getBoundingClientRect();var result=[rect.left+0.0001, rect.top+0.0001];";
 	protected static final String JS_MIDDLE_CLICK = "var evt=new MouseEvent('click', {bubbles: true,cancelable: true,view: window, button: 1}),result={};arguments[0].dispatchEvent(evt);";
-	protected static final String JS_ELEMENT_CSS = "var result=[];var o=getComputedStyle(arguments[0]);for(var i=0, len=o.length; i < len; i++){result.push([o[i], o.getPropertyValue(o[i])]);};";
+	protected static final String JS_ELEMENT_CSS = "var result={};var o=getComputedStyle(arguments[0]);for(var i=0, len=o.length; i < len; i++){result[o[i]]=o.getPropertyValue(o[i]);};";
 
 	protected static final String JS_SEARCH_ELEMENT = ResourceContent.getSearchElementsJavaScript();
 	protected static final String JS_ELEMENT_AUTOSCROLL = ResourceContent.getScrollElementJavaScript();
@@ -109,8 +111,6 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	protected Double initElementX = 0.0;
 	protected Double initElementY = 0.0;
-
-	private Proxy proxy;
 
 	private DriverProcess driverProcess;
 
@@ -130,44 +130,56 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			AtsManager ats,
 			int defaultWait) {
 
-		super(channel, browser, ats.getBrowserProperties(browser), defaultWait);
+		super(channel, browser, ats.getBrowserProperties(browser), defaultWait, 60);
 
 		this.driverProcess = driverProcess;
 		this.desktopDriver = desktopDriver;
-		this.proxy = ats.getProxy();
 	}
 
 	protected DriverProcess getDriverProcess() {
 		return driverProcess;
 	}
 
-	protected void launchDriver(MutableCapabilities cap) {
+	protected void launchDriver(ActionStatus status, MutableCapabilities cap) {
 
+		int maxTrySearch = DriverManager.ATS.getMaxTrySearch();
+		int maxTryProperty = DriverManager.ATS.getMaxTryProperty();
+		
+		int scriptTimeout = DriverManager.ATS.getScriptTimeOut();
+		int pageLoadTimeout = DriverManager.ATS.getPageloadTimeOut();
+		int watchdog = DriverManager.ATS.getWatchDogTimeOut();		
+		
 		cap.setCapability(CapabilityType.SUPPORTS_FINDING_BY_CSS, false);
-		cap.setCapability(CapabilityType.PROXY, proxy);
 		cap.setCapability(CapabilityType.HAS_NATIVE_EVENTS, false);
 
 		int maxTry = 20;
 		String errorMessage = null;
-		while(driver == null && maxTry > 0) {
+		
+		while(maxTry > 0) {
 			try{
 				driver = new RemoteWebDriver(driverProcess.getDriverServerUrl(), cap);
+				maxTry = 0;
 			}catch(Exception ex){
 				errorMessage = ex.getMessage();
-				driver = null;
+				maxTry--;
 			}
-			maxTry--;
 		}
 
-		if(maxTry == 0) {
-			channel.setStartError(errorMessage);
+		if(driver != null) {
+			status.setPassed(true);
+		}else {
+			status.setCode(ActionStatus.CHANNEL_START_ERROR);
+			status.setMessage(errorMessage);
+			status.setPassed(false);
+			
+			driverProcess.close();
 			return;
 		}
 
 		actions = new Actions(driver);
 
-		driver.manage().timeouts().setScriptTimeout(channel.getScriptTimeout(), TimeUnit.SECONDS);
-		driver.manage().timeouts().pageLoadTimeout(channel.getPageLoadTimeout(), TimeUnit.SECONDS);
+		driver.manage().timeouts().setScriptTimeout(scriptTimeout, TimeUnit.SECONDS);
+		driver.manage().timeouts().pageLoadTimeout(pageLoadTimeout, TimeUnit.SECONDS);
 
 		try{
 			driver.manage().window().setSize(channel.getDimension().getSize());
@@ -197,7 +209,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			File tempHtml = File.createTempFile("ats_", ".html");
 			tempHtml.deleteOnExit();
 
-			Files.write(tempHtml.toPath(), StartHtmlPage.getAtsBrowserContent(titleUid, application, applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait(), channel.getMaxTry(), channel.getMaxTryProperty(), channel.getScriptTimeout(), channel.getPageLoadTimeout(), channel.getWatchdog()));
+			Files.write(tempHtml.toPath(), StartHtmlPage.getAtsBrowserContent(titleUid, application, applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait(), getPropertyWait(), maxTrySearch, maxTryProperty, scriptTimeout, pageLoadTimeout, watchdog));
 			driver.get(tempHtml.toURI().toString());
 		} catch (IOException e) {}
 
@@ -303,19 +315,21 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		if(objectData != null){
 
-			if(FoundElement.checkIframe(objectData.get(1).toString())){
+			AtsElement element = new AtsElement(objectData);
 
-				FoundElement frm = new FoundElement(objectData);
+			if(element.isIframe()){
+
+				FoundElement frm = new FoundElement(element);
 
 				switchToFrame(frm.getValue());
 
-				offsetX += (Double)objectData.get(4);
-				offsetY += (Double)objectData.get(5);
+				offsetX += element.getX();
+				offsetY += element.getY();
 
 				return loadElement(x, y, offsetX, offsetY);
 
 			} else {
-				return new FoundElement(objectData, channel, offsetX, offsetY);
+				return new FoundElement(element, channel, offsetX, offsetY);
 			}
 
 		} else {
@@ -360,24 +374,20 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	@Override
 	public String getAttribute(FoundElement element, String attributeName, int maxTry) {
-
-		String result = null;
 		int tryLoop = maxTry;
-
-		while (result == null && tryLoop > 0){
-			tryLoop--;
-			result = getAttribute(element, attributeName);
-
-			if(result != null && !doubleCheckAttribute(result, element, attributeName)) {
-				result = null;
+		while (tryLoop > 0){
+			String result = getAttribute(element, attributeName);
+			if(result != null && doubleCheckAttribute(result, element, attributeName)) {
+				return result;
 			}
+			tryLoop--;
 		}
-
-		return result;
+		return null;
 	}
 
 	private boolean doubleCheckAttribute(String verify, FoundElement element, String attributeName) {
-		channel.sleep(50);
+		channel.sleep(getPropertyWait());
+		
 		String current = getAttribute(element, attributeName);
 		return current != null && current.equals(verify);
 	}
@@ -437,19 +447,21 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	private CalculatedProperty[] getAttributesList(RemoteWebElement element, String script) {
-		ArrayList<ArrayList<String>> result = (ArrayList<ArrayList<String>>) runJavaScript(script, element);
+		Map<String, String> result = (Map<String, String>) runJavaScript(script, element);
 		if(result != null){
-			return result.stream().parallel().map(p -> new CalculatedProperty(p.get(0), p.get(1))).toArray(s -> new CalculatedProperty[s]);
+			return result.entrySet().stream().parallel().map(e -> new CalculatedProperty(e.getKey(), e.getValue())).toArray(c -> new CalculatedProperty[c]);
 		}
 		return null;
 	}
 
 	public FoundElement getTestElementParent(FoundElement element){
-
 		ArrayList<ArrayList<Object>> listElements = (ArrayList<ArrayList<Object>>) runJavaScript(JS_ELEMENT_PARENTS, element.getValue());
-
-		if(listElements != null && listElements.size() > 0){
-			return new FoundElement(channel, listElements, initElementX, initElementY);
+		if(listElements != null){
+			return new FoundElement(
+					channel, 
+					listElements.stream().map(e -> new AtsElement(e)).collect(Collectors.toCollection(ArrayList::new)), 
+					initElementX, 
+					initElementY);
 		}
 
 		return null;
@@ -511,7 +523,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		move(foundElement, offsetX, offsetY);
 
-		ArrayList<Double> newPosition =  (ArrayList<Double>) runJavaScript(JS_ELEMENT_BOUNDING, foundElement.getValue());
+		ArrayList<Double> newPosition =  (ArrayList<Double>) runJavaScript(status, JS_ELEMENT_BOUNDING, foundElement.getValue());
 		if(newPosition.size() > 1) {
 			foundElement.updatePosition(newPosition.get(0), newPosition.get(1), channel, 0.0, 0.0);
 		}
@@ -709,37 +721,30 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	@Override
 	public Object executeScript(ActionStatus status, String javaScript, Object... params) {
-
-		Object result = null;
-
-		try {
-
-			result = runJavaScript("var result=null;" + javaScript + ";", params);
-
-			status.setPassed(true);
-			if(result != null) {
-				status.setMessage(result.toString());
-			}
-
-		} catch(WebDriverException e){
-			if(e instanceof StaleElementReferenceException) {
-				throw e;
-			}else {
-				status.setPassed(false);
-				status.setCode(ActionStatus.JAVASCRIPT_ERROR);
-				status.setMessage(e.getMessage().replace("javascript error:", ""));
-			}
+		Object result = runJavaScript(status, "var result={};" + javaScript + ";", params);
+		if(status.isPassed() && result != null) {
+			status.setMessage(result.toString());
 		}
-
 		return result;
 	}
 
+	//TODO remove this default method and add actionstatus
 	protected Object runJavaScript(String javaScript, Object ... params) {
+		return runJavaScript(new ActionStatus(channel), javaScript, params);
+	}
+
+	protected Object runJavaScript(ActionStatus status, String javaScript, Object ... params) {
+		
+		status.setPassed(true);
 		try {
 			return driver.executeAsyncScript(javaScript + ";arguments[arguments.length-1](result);", params);
 		}catch(Exception ex) {
-			return null;
+			status.setPassed(false);
+			status.setCode(ActionStatus.JAVASCRIPT_ERROR);
+			status.setMessage(ex.getMessage());
 		}
+		
+		return null;
 	}
 
 	@Override
@@ -772,13 +777,12 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	private double offsetIframeY = 0.0;
 
 	@Override
-	public ArrayList<FoundElement> findElements(Channel channel, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<Object> predicate) {
+	public ArrayList<FoundElement> findElements(Channel channel, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsElement> predicate) {
 
 		if(tagName == null) {
 			tagName = "BODY";
 		}
 
-		ArrayList<FoundElement> webElementList = new ArrayList<FoundElement>();
 		WebElement startElement = null;
 
 		if(testObject.getParent() != null){
@@ -796,7 +800,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 					switchToFrame(iframe);
 
 				}catch(StaleElementReferenceException e) {
-					return webElementList;
+					return new ArrayList<FoundElement>();
 				}
 
 			}else {
@@ -812,21 +816,23 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			switchToDefaultContent();
 		}
 
-		ArrayList<Map<String, Object>> response = (ArrayList<Map<String, Object>>) runJavaScript(searchElementScript, startElement, tagName, attributes, attributes.size());
+		ArrayList<ArrayList<Object>> response = (ArrayList<ArrayList<Object>>) runJavaScript(searchElementScript, startElement, tagName, attributes, attributes.size());
 		if(response != null){
+
+			ArrayList<AtsElement> elements = response.parallelStream().map(e -> new AtsElement(e)).collect(Collectors.toCollection(ArrayList::new));
 
 			final double elmX = initElementX + offsetIframeX;
 			final double elmY = initElementY + offsetIframeY;
 
-			response.parallelStream().filter(predicate).forEachOrdered(e -> webElementList.add(new FoundElement((ArrayList<Object>)e.get("ats-elt"), channel, elmX, elmY)));
+			return elements.parallelStream().filter(predicate).map(e -> new FoundElement(e, channel, elmX, elmY)).collect(Collectors.toCollection(ArrayList::new));
+		}else {
+			return new ArrayList<FoundElement>();
 		}
-
-		return webElementList;
 	}
 
 	@Override
 	public void middleClick(ActionStatus status, TestElement element) {
-		runJavaScript(JS_MIDDLE_CLICK, element.getWebElement());
+		runJavaScript(status, JS_MIDDLE_CLICK, element.getWebElement());
 	}
 
 	protected void middleClickSimulation(ActionStatus status, TestElement element) {

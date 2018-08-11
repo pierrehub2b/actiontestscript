@@ -55,7 +55,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 
 	private final static int DEFAULT_WAIT = 150;
 
-	public FirefoxDriverEngine(Channel channel, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
+	public FirefoxDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
 		super(channel, DriverManager.FIREFOX_BROWSER, driverProcess, windowsDriver, ats, DEFAULT_WAIT);
 
 		this.autoScrollElement = JS_AUTO_SCROLL_MOZ;
@@ -66,6 +66,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		options.setCapability("marionnette ","true");
 		options.setCapability("acceptSslCerts ","true");
 		options.setCapability("acceptInsecureCerts ","true");
+		options.setCapability("proxy", ats.getProxy().getGeckoProxy());
 		options.setPageLoadStrategy(PageLoadStrategy.NORMAL);
 
 		if(applicationPath != null) {
@@ -74,8 +75,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 
 		cap.setCapability(FirefoxOptions.FIREFOX_OPTIONS, options);
 
-		launchDriver(cap);
-
+		launchDriver(status, cap);
 	}
 
 	@Override

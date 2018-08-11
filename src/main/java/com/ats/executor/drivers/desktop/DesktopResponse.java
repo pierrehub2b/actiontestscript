@@ -21,11 +21,13 @@ package com.ats.executor.drivers.desktop;
 
 import java.util.ArrayList;
 
+import com.ats.element.AtsElement;
+
 public class DesktopResponse {
 		
 	public ArrayList<DesktopData> capabilities = null;
 	
-	public ArrayList<DesktopElement> elements;
+	public ArrayList<AtsElement> elements;
 	public ArrayList<DesktopWindow> windows;
 	public ArrayList<DesktopData> properties;
 

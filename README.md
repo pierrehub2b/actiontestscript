@@ -134,7 +134,11 @@ Here is an example of global ATS configuration file (*.atsProperties* file in AT
 ```
 <?xml version="1.0" encoding="UTF-8"?>
 <execute>
-	<proxy>system</proxy>
+	<proxy>
+		<type>system</type>
+		<host>proxyhost</host>
+		<port>8080</port>
+	</proxy>
 	<appBounding>
 		<x>20</x>
 		<y>20</y>
@@ -166,6 +170,7 @@ Here is an example of global ATS configuration file (*.atsProperties* file in AT
 		<browser>
 			<name>firefox</name>
 			<waitAction>200</waitAction>
+			<waitProperty>70</waitProperty>
 		</browser>
 	</browsers>
 	<applications>
@@ -181,11 +186,24 @@ Here is an example of global ATS configuration file (*.atsProperties* file in AT
 </execute>
 ```
 * You can define the proxy used by browsers during execution of the test.
-* You can define initial window size of a tested application and it's initial position (appBounding).
-* You can define default maxTry action to wait element exists or wait it is interactable before execute action.
-* You can define default maxTry get property to wait element's property exists and is not null.
-* You can define default timeout (in sec.) for executing javascript or wait page loaded (web application).
-* For each browser used you can define the time to wait after each actions in miliseconds and the path of the binaries of the browser if needed.
+Proxy types available are 'system', 'auto', 'direct' and 'manual', if 'manual' type is selected you have to define host and port of the proxy :
+```
+<proxy>
+	<type>manual</type>
+	<host>proxyhost</host>
+	<port>8080</port>
+</proxy>
+```
+* You can define initial window size of a tested application and it's initial position *[appBounding]*.
+* You can define default maxTry action to wait element exists or wait it is interactable before execute action *[searchElement]*.
+* You can define default maxTry get property to wait element's property exists and is not null *[getProperty]*.
+* You can define javascript execution timeout (in sec.) for web application *[timeOut -> script]*.
+* You can define page load timeout (in sec.) for web application *[timeOut -> pageLoad]*.
+* You can define action execution terminating timeout (in sec.) to prevent browser or application infinite hangup *[timeOut -> watchDog]*.
+* For each browser used you can define following parameters :
+- Path of the binaries files *[path]*
+- Time to wait after each actions (in millisec.) *[waitAction]*
+- Time to wait for double check attributes value (in millisec.) *[waitProperty]*
 * You can add options to the browsers driver.
 * You can define application name and path of installed applications on the host machine.
 

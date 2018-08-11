@@ -22,6 +22,7 @@ package com.ats.executor.drivers.engines.browsers;
 import java.awt.Rectangle;
 
 import org.openqa.selenium.ie.InternetExplorerOptions;
+import org.openqa.selenium.remote.CapabilityType;
 
 import com.ats.driver.AtsManager;
 import com.ats.element.FoundElement;
@@ -36,15 +37,17 @@ public class IEDriverEngine extends WebDriverEngine {
 
 	private final static int DEFAULT_WAIT = 150;
 
-	public IEDriverEngine(Channel channel, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
+	public IEDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
 		super(channel, "ie", driverProcess, windowsDriver, ats, DEFAULT_WAIT);
 
 		InternetExplorerOptions ieOptions = new InternetExplorerOptions();
 		ieOptions.introduceFlakinessByIgnoringSecurityDomains();
 		ieOptions.enableNativeEvents();
 		ieOptions.enablePersistentHovering();
+		
+		ieOptions.setCapability(CapabilityType.PROXY, ats.getProxy().getProxy());
 
-		launchDriver(ieOptions);
+		launchDriver(status, ieOptions);
 	}
 
 	@Override

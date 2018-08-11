@@ -22,6 +22,7 @@ package com.ats.executor.drivers;
 import java.util.function.Predicate;
 
 import com.ats.driver.AtsManager;
+import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.IDriverEngine;
@@ -115,22 +116,22 @@ public class DriverManager {
 		}
 	}
 	
-	public IDriverEngine getDriverEngine(Channel channel, String application, DesktopDriver desktopDriver) {
+	public IDriverEngine getDriverEngine(Channel channel, ActionStatus status, String application, DesktopDriver desktopDriver) {
 		switch(application.toLowerCase()) {
 		case CHROME_BROWSER :
-			return new ChromeDriverEngine(channel, getChromeDriver(), desktopDriver, ATS);
+			return new ChromeDriverEngine(channel, status, getChromeDriver(), desktopDriver, ATS);
 		case EDGE_BROWSER :
-			return new EdgeDriverEngine(channel, getEdgeDriver(), desktopDriver, ATS);
+			return new EdgeDriverEngine(channel, status, getEdgeDriver(), desktopDriver, ATS);
 		case OPERA_BROWSER :
-			return new OperaDriverEngine(channel, getOperaDriver(), desktopDriver, ATS);
+			return new OperaDriverEngine(channel, status, getOperaDriver(), desktopDriver, ATS);
 		case FIREFOX_BROWSER :
-			return new FirefoxDriverEngine(channel, getFirefoxDriver(), desktopDriver, ATS);
+			return new FirefoxDriverEngine(channel, status, getFirefoxDriver(), desktopDriver, ATS);
 		case IE_BROWSER :
-			return new IEDriverEngine(channel, getIEDriver(), desktopDriver, ATS);
+			return new IEDriverEngine(channel, status, getIEDriver(), desktopDriver, ATS);
 		case DESKTOP_EXPLORER :
-			return new ExplorerDriverEngine(channel, desktopDriver, ATS);
+			return new ExplorerDriverEngine(channel, status, desktopDriver, ATS);
 		default :
-			return new DesktopDriverEngine(channel, application, desktopDriver, ATS);
+			return new DesktopDriverEngine(channel, status, application, desktopDriver, ATS);
 		}
 	}
 	

@@ -37,6 +37,7 @@ import org.openqa.selenium.WebElement;
 
 import com.ats.driver.ApplicationProperties;
 import com.ats.driver.AtsManager;
+import com.ats.element.AtsElement;
 import com.ats.element.FoundElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
@@ -61,11 +62,11 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	private String osName;
 
 	public DesktopDriverEngine(Channel channel, String application, DesktopDriver desktopDriver, ApplicationProperties applicationProperties, int defaultWait) {
-		super(channel, application, applicationProperties, DEFAULT_WAIT);
+		super(channel, application, applicationProperties, DEFAULT_WAIT, 0);
 		desktopDriver.setEngine(this);
 	}
 	
-	public DesktopDriverEngine(Channel channel, String application, DesktopDriver desktopDriver, AtsManager ats) {
+	public DesktopDriverEngine(Channel channel, ActionStatus status, String application, DesktopDriver desktopDriver, AtsManager ats) {
 
 		this(channel, application, desktopDriver, ats.getApplicationProperties(application), DEFAULT_WAIT);
 
@@ -108,9 +109,16 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 
 			Runtime runtime = Runtime.getRuntime();
 			try{
+				
 				applicationProcess = runtime.exec(args.toArray(new String[args.size()]));
+				status.setPassed(true);
+				
 			} catch (IOException e) {
-				channel.setStartError(e.getMessage());
+				
+				status.setCode(ActionStatus.CHANNEL_START_ERROR);
+				status.setMessage(e.getMessage());
+				status.setPassed(false);
+				
 				return;
 			}
 
@@ -188,7 +196,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	}
 	
 	@Override
-	public ArrayList<FoundElement> findElements(Channel channel, TestElement testElement, String tag, ArrayList<String> attributes, Predicate<Object> predicate) {
+	public ArrayList<FoundElement> findElements(Channel channel, TestElement testElement, String tag, ArrayList<String> attributes, Predicate<AtsElement> predicate) {
 		return getDesktopDriver().findElements(channel, testElement, tag, attributes, predicate);
 	}
 
@@ -198,10 +206,10 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 		DesktopWindow win = getDesktopDriver().getWindowByHandle(channel.getHandle());
 		if(win != null){
 			return new TestBound[]{new TestBound(
-					win.x,
-					win.y,
-					win.width,
-					win.height), 
+					win.getX(),
+					win.getY(),
+					win.getWidth(),
+					win.getHeight()), 
 					channel.getSubDimension()};
 
 		}
@@ -350,4 +358,5 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 
 	@Override
 	public void switchToFrameId(String id) {}
+
 }

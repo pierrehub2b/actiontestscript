@@ -30,10 +30,10 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
+import com.ats.element.AtsElement;
 import com.ats.element.FoundElement;
 import com.ats.element.SearchedElement;
 import com.ats.executor.channels.Channel;
-import com.ats.executor.drivers.engines.IDriverEngine;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
@@ -162,18 +162,6 @@ public class TestElement{
 
 		if(channel != null){
 
-			IDriverEngine engine;
-			boolean desktop = channel.isDesktop();
-
-			if(tag.startsWith(DESKTOP_PREFIX)){
-				desktop = true;
-				tag = tag.substring(DESKTOP_PREFIX.length());
-				
-				engine = channel.getDesktopDriverEngine();
-			}else {
-				engine = channel.getDriverEngine();
-			}
-
 			elementTag = tag;
 			criterias = tag;
 
@@ -184,28 +172,17 @@ public class TestElement{
 			if(parent == null || (parent != null && parent.getCount() > 0)){
 
 				ArrayList<String> attributes = new ArrayList<String>();
-				Predicate<Object> fullPredicate = Objects::nonNull;
+				Predicate<AtsElement> fullPredicate = Objects::nonNull;
 
-				if(properties != null){
-					if(desktop){
-						for (CalculatedProperty property : properties){
-							criterias += "," + property.getName() + ":" + property.getValue().getCalculated();
-							fullPredicate = property.getDesktopPredicate(fullPredicate);
+				for (CalculatedProperty property : properties){
+					criterias += "," + property.getName() + ":" + property.getValue().getCalculated();
+					fullPredicate = property.getPredicate(fullPredicate);
 
-							attributes.add(property.getName());
-						}
-					}else {
-						for (CalculatedProperty property : properties){
-							criterias += "," + property.getName() + ":" + property.getValue().getCalculated();
-							fullPredicate = property.getMapPredicate(fullPredicate);
-
-							attributes.add(property.getName());
-						}
-					}
+					attributes.add(property.getName());
 				}
 
 				while (trySearch < maxTry) {
-					foundElements = engine.findElements(channel, this, tag, attributes, fullPredicate);
+					foundElements = channel.getDriverEngine().findElements(channel, this, tag, attributes, fullPredicate);
 					if(isValidated()) {
 						trySearch = maxTry;
 					}else {
@@ -523,7 +500,7 @@ public class TestElement{
 	public String getAttribute(String name){
 
 		if(isValidated()){
-			return channel.getAttribute(getFoundElement(), name, maxTry + channel.getMaxTryProperty());
+			return channel.getAttribute(getFoundElement(), name, maxTry);
 		}
 		return null;
 	}

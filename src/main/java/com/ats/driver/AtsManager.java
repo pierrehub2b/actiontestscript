@@ -32,8 +32,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.openqa.selenium.Proxy;
-import org.openqa.selenium.Proxy.ProxyType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -82,7 +80,7 @@ public class AtsManager {
 	private int maxTrySearch = MAX_TRY_SEARCH;
 	private int maxTryProperty = MAX_TRY_PROPERTY;
 
-	private Proxy proxy = new Proxy();
+	private AtsProxy proxy;
 
 	private List<ApplicationProperties> browsersList = new ArrayList<ApplicationProperties>();
 	private List<ApplicationProperties> applicationsList = new ArrayList<ApplicationProperties>();
@@ -113,10 +111,13 @@ public class AtsManager {
 		if(atsFolderPath.toFile().exists()) {
 			properties = loadProperties(atsFolderPath.resolve(ATS_PROPERTIES_FILE));
 			driversFolderPath = atsFolderPath.resolve(DRIVERS_FOLDER);
-			proxy.setProxyType(ProxyType.SYSTEM);
 		}else {
 			ATS.logError("ATS folder not found -> " + atsHome);
 			System.exit(0);
+		}
+		
+		if(proxy == null) {
+			proxy = new AtsProxy(AtsProxy.SYSTEM);
 		}
 	}
 
@@ -125,7 +126,7 @@ public class AtsManager {
 		File xmlFile = propertiesPath.toFile();
 		if(xmlFile.exists()) {
 			try {
-
+				
 				DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 
 				try {
@@ -147,6 +148,7 @@ public class AtsManager {
 											String name = nodeList.item(0).getChildNodes().item(0).getNodeValue();
 											String path = null;
 											String wait = null;
+											String check = null;
 
 											nodeList = browserElement.getElementsByTagName("path");
 											if(nodeList != null && nodeList.getLength() > 0) {
@@ -166,8 +168,15 @@ public class AtsManager {
 													wait = nodeList.item(0).getChildNodes().item(0).getNodeValue();
 												}
 											}
-
-											addBrowserProperties(name, path, wait);
+																					
+											nodeList = browserElement.getElementsByTagName("waitProperty");
+											if(nodeList != null && nodeList.getLength() > 0) {
+												if(nodeList.item(0).getChildNodes().getLength() > 0) {
+													check = nodeList.item(0).getChildNodes().item(0).getNodeValue();
+												}
+											}
+											
+											addBrowserProperties(name, path, wait, check);
 										}
 									}
 								}
@@ -208,6 +217,7 @@ public class AtsManager {
 
 					NodeList timeOutNode = doc.getElementsByTagName("timeOut");
 					if(timeOutNode != null && timeOutNode.getLength() > 0) {
+						
 						NodeList timeOut = ((Element)timeOutNode.item(0)).getElementsByTagName("script");
 						if(timeOut != null && timeOut.getLength() > 0) {
 							try {
@@ -246,25 +256,44 @@ public class AtsManager {
 							}catch(NumberFormatException e){}
 						}
 					}
-
+					
 					NodeList proxyNode = doc.getElementsByTagName("proxy");
 					if(proxyNode != null && proxyNode.getLength() > 0) {
-						String proxyValue = proxyNode.item(0).getChildNodes().item(0).getNodeValue();
-
-						switch (proxyValue){
-
-						case "auto" :
-							proxy.setProxyType(ProxyType.AUTODETECT);
-							break;
-
-						case "direct" :
-							proxy.setProxyType(ProxyType.DIRECT);
-							break;
-
-							/*case "manual" :
-							proxy.setProxyType(ProxyType.MANUAL);
-							proxy.setHttpProxy(PROXY_ADDRESS); 
-							break;*/
+						
+						NodeList data = ((Element)proxyNode.item(0)).getElementsByTagName("type");
+						if(data != null && data.getLength() > 0) {
+							
+							String type = data.item(0).getChildNodes().item(0).getNodeValue();
+							
+							if(AtsProxy.DIRECT.equals(type)) {
+								
+								proxy = new AtsProxy(AtsProxy.DIRECT);
+								
+							}else if(AtsProxy.AUTO.equals(type)) {
+								
+								proxy = new AtsProxy(AtsProxy.AUTO);
+								
+							}else if(AtsProxy.MANUAL.equals(type)) {
+								
+								String host = null;
+								int port = -1;
+								
+								data = ((Element)proxyNode.item(0)).getElementsByTagName("host");
+								if(data != null && data.getLength() > 0) {
+									host = data.item(0).getChildNodes().item(0).getNodeValue();
+								}
+								
+								data = ((Element)proxyNode.item(0)).getElementsByTagName("port");
+								if(data != null && data.getLength() > 0) {
+									try {
+										port = Integer.parseInt(data.item(0).getChildNodes().item(0).getNodeValue());
+									}catch(NumberFormatException e){}
+								}
+								
+								if(host != null && port > 0) {
+									proxy = new AtsProxy(AtsProxy.MANUAL, host, port);
+								}
+							}
 						}
 					}
 
@@ -300,14 +329,13 @@ public class AtsManager {
 													wait = nodeList.item(0).getChildNodes().item(0).getNodeValue();
 												}
 											}
-											
-											
+																						
 											int waitValue = -1;
 											try {
 												waitValue = Integer.parseInt(wait);
 											}catch(NumberFormatException e){}
 											
-											applicationsList.add(new ApplicationProperties(name, path, waitValue));
+											applicationsList.add(new ApplicationProperties(name, path, waitValue, -1));
 										}
 									}
 								}
@@ -330,13 +358,18 @@ public class AtsManager {
 		return new Properties();
 	}
 
-	private void addBrowserProperties(String name, String path, String wait) {
+	private void addBrowserProperties(String name, String path, String wait, String check) {
 		int waitValue = -1;
 		try {
 			waitValue = Integer.parseInt(wait);
 		}catch(NumberFormatException e){}
+		
+		int checkProperty = -1;
+		try {
+			checkProperty = Integer.parseInt(check);
+		}catch(NumberFormatException e){}
 
-		browsersList.add(new ApplicationProperties(name, path, waitValue));
+		browsersList.add(new ApplicationProperties(name, path, waitValue, checkProperty));
 	}
 
 	//------------------------------------------------------------------------------------------------------------------
@@ -363,7 +396,7 @@ public class AtsManager {
 		return null;
 	}
 
-	public Proxy getProxy() {
+	public AtsProxy getProxy() {
 		return proxy;
 	}
 

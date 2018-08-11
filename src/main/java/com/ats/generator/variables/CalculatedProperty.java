@@ -15,18 +15,17 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.generator.variables;
 
-import java.util.Map;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import com.ats.element.AtsElement;
 import com.ats.executor.ActionTestScript;
-import com.ats.executor.drivers.desktop.DesktopElement;
 import com.ats.script.Script;
 import com.ats.tools.Operators;
 
@@ -53,7 +52,7 @@ public class CalculatedProperty implements Comparable<CalculatedProperty>{
 		}
 
 		if(dataFound && objectMatcher.groupCount() >= 2){
-			
+
 			setName(objectMatcher.group(1).trim());
 			setValue(new CalculatedValue(script, objectMatcher.group(2).trim()));
 
@@ -82,46 +81,35 @@ public class CalculatedProperty implements Comparable<CalculatedProperty>{
 		return ActionTestScript.JAVA_PROPERTY_FUNCTION_NAME + "(" + isRegexp() + ", \"" + name + "\", " + value.getJavaCode() + ")";
 	}
 
-	public Predicate<Object> getMapPredicate(Predicate<Object> predicate){
-		if(isRegexp()){
-			predicate = predicate.and(
-					p -> matchRegexp(
-							((Map<String, Object>)p).get(name).toString().trim()));
-		}else{
-			predicate = predicate.and(p -> matchText(((Map<String, Object>)p).get(name)));
+	public Predicate<AtsElement> getPredicate(Predicate<AtsElement> predicate){
+		if(isRegexp()) {
+			return predicate.and(p -> matchRegexp(p.getAttribute(name)));
+		}else {
+			return predicate.and(p -> matchText(p.getAttribute(name)));
 		}
-		return predicate;
-	}
-	
-	public Predicate<Object> getDesktopPredicate(Predicate<Object> predicate){
-		if(isRegexp()){
-			predicate = predicate.and(
-					p -> matchRegexp(
-							((DesktopElement)p).get(name).toString().trim()));
-		}else{
-			predicate = predicate.and(p -> matchText(((DesktopElement)p).get(name)));
-		}
-		return predicate;
 	}
 
-	public boolean checkProperty(Object data) {
+	public boolean checkProperty(String data) {
 		if(isRegexp()){
-			return matchRegexp((String)data);
+			return matchRegexp(data);
 		}else{
 			return matchText(data);
 		}
 	}
 
-	public boolean matchText(Object obj){
-		String textValue = "";
-		if(obj != null && obj.toString() != null){
-			textValue = obj.toString().trim();
+	public boolean matchText(String data){
+		if(data == null) {
+			return false;
 		}
-		return textValue.equals(value.getCalculated());
+		return data.trim().equals(value.getCalculated());
 	}
 
-	public boolean matchRegexp(String s){
-		Matcher m = getRegexpPattern().matcher(s);
+	public boolean matchRegexp(String data){
+		if(data == null) {
+			return false;
+		}
+
+		Matcher m = getRegexpPattern().matcher(data.trim());
 		return m.matches();
 	}
 

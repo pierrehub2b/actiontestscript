@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.executor.channels;
 
@@ -56,21 +56,14 @@ public class Channel {
 	private TestBound dimension = DriverManager.ATS.getApplicationBound();
 	private TestBound subDimension;
 
-	private String startError;
-
-	private int maxTry = DriverManager.ATS.getMaxTrySearch();
-	private int maxTryProperty = DriverManager.ATS.getMaxTryProperty();
-	
-	private int scriptTimeout = DriverManager.ATS.getScriptTimeOut();
-	private int pageLoadTimeout = DriverManager.ATS.getPageloadTimeOut();
-	private int watchdog = DriverManager.ATS.getWatchDogTimeOut();
+	//private String startError;
 
 	private String applicationVersion;
 	private String driverVersion;
 
 	private ProcessHandle process = null;
 	private DesktopDriver desktopDriver;
-	
+
 	private int winHandle = -1;
 
 	//----------------------------------------------------------------------------------------------------------------------
@@ -78,26 +71,31 @@ public class Channel {
 	//----------------------------------------------------------------------------------------------------------------------
 
 	public Channel(
+			ActionStatus status,
 			ActionTestScript script,
 			DriverManager driverManager, 
 			String name, 
 			String application) {
 
-		this.mainScript = script;
+		status.setChannel(this);
 		
+		this.mainScript = script;
+
 		this.name = name;
 		this.current = true;
 
 		this.desktopDriver = new DesktopDriver(driverManager);
-		this.engine = driverManager.getDriverEngine(this, application, this.desktopDriver);
-		
-		this.refreshLocation();
+		this.engine = driverManager.getDriverEngine(this, status, application, this.desktopDriver);
+
+		if(status.isPassed()) {
+			this.refreshLocation();
+		}
 	}
-	
+
 	public DesktopDriver getDesktopDriver() {
 		return engine.getDesktopDriver();
 	}
-	
+
 	public int getHandle() {
 		if(winHandle > 0) {
 			return winHandle;
@@ -151,16 +149,15 @@ public class Channel {
 		this.driverVersion = dVersion;
 		Optional<ProcessHandle> procs = ProcessHandle.of(pid);
 		if(procs.isPresent()) {
-			this.process = procs.get();
-		}
+			this.process = procs.get();		}
 	}
-	
+
 	public void setApplicationData(int handle) {
 		this.applicationVersion = "";
 		this.driverVersion = "";
 		this.winHandle = handle;
 	}
-	
+
 	public void switchToFrame(String id) {
 		engine.switchToFrameId(id);
 	}
@@ -186,9 +183,9 @@ public class Channel {
 	public CalculatedProperty[] getAttributes(FoundElement element){
 		return engine.getAttributes(element);
 	}
-	
+
 	public String getAttribute(FoundElement element, String attributeName, int maxTry){
-		return engine.getAttribute(element, attributeName, maxTry);
+		return engine.getAttribute(element, attributeName, maxTry + DriverManager.ATS.getMaxTryProperty());
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------
@@ -230,7 +227,7 @@ public class Channel {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 	public boolean isCurrent() {
 		return current;
 	}
@@ -241,7 +238,7 @@ public class Channel {
 			toFront();
 		}
 	}
-	
+
 	public String getApplicationVersion() {
 		return applicationVersion;
 	}
@@ -250,13 +247,13 @@ public class Channel {
 		this.applicationVersion = applicationVersion;
 	}
 
-	public void setStartError(String error) {
+	/*public void setStartError(String error) {
 		this.startError = error;
 	}
 
 	public String getStartError() {
 		return startError;
-	}
+	}*/
 
 	//----------------------------------------------------------------------------------------------------------------------
 	//----------------------------------------------------------------------------------------------------------------------
@@ -338,11 +335,11 @@ public class Channel {
 	public Object executeScript(ActionStatus status, String script, Object ... params){
 		return engine.executeScript(status, script, params);
 	}	
-	
+
 	public Alert switchToAlert() {
 		return engine.switchToAlert();
 	}
-	
+
 	public void switchToDefaultContent() {
 		engine.switchToDefaultContent();
 	}
@@ -350,7 +347,7 @@ public class Channel {
 	public void navigate(ActionStatus status, String url) {
 		engine.goToUrl(status, url);
 	}
-	
+
 	public IDriverEngine getDesktopDriverEngine() {
 		return getDesktopDriver().getEngine();
 	}
@@ -374,7 +371,7 @@ public class Channel {
 		engine.mouseMoveToElement(status, foundElement, position);
 		actionTerminated();
 	}
-	
+
 	public void mouseClick(FoundElement element, boolean hold) {
 		engine.mouseClick(element, hold);
 		actionTerminated();
@@ -383,30 +380,10 @@ public class Channel {
 	public void clearText(ActionStatus status, FoundElement element) {
 		engine.clearText(status, element);
 	}
-	
+
 	public void sendTextData(ActionStatus status, FoundElement foundElement, ArrayList<SendKeyData> textActionList) {
 		engine.sendTextData(status, foundElement, textActionList);
 		actionTerminated();
-	}
-
-	public int getMaxTry() {
-		return maxTry;
-	}
-	
-	public int getMaxTryProperty() {
-		return maxTryProperty;
-	}
-	
-	public int getScriptTimeout() {
-		return scriptTimeout;
-	}
-	
-	public int getPageLoadTimeout() {
-		return pageLoadTimeout;
-	}
-	
-	public int getWatchdog() {
-		return watchdog;
 	}
 
 	public void forceScrollElement(FoundElement foundElement) {
@@ -444,7 +421,7 @@ public class Channel {
 	public void startVisualRecord(String outputPath, ScriptHeader script, int quality) {
 		getDesktopDriver().startVisualRecord(this, outputPath, script, quality);
 	}
-	
+
 	public void stopVisualRecord() {
 		getDesktopDriver().stopVisualRecord();
 	}
