@@ -125,7 +125,6 @@ public class ChannelManager {
 					foundChannel = true;
 
 					sendInfo("close channel", " '" + name + "'");
-					
 					break;
 				}
 			}
@@ -137,11 +136,9 @@ public class ChannelManager {
 
 		if(channelsList.size() > 0){
 			setCurrentChannel(channelsList.get(0));
-
 			if(!foundChannel) {
 				return false;
 			}
-
 		}else{
 			setCurrentChannel(null);
 		}

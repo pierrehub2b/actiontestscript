@@ -58,10 +58,6 @@ public class ChromeDriverEngine extends WebDriverEngine {
 		}
 		
 		options.setCapability(CapabilityType.PROXY, ats.getProxy().getProxy());
-		
-		/*DesiredCapabilities caps = DesiredCapabilities.chrome(); 
-		caps.setCapability(ChromeOptions.CAPABILITY, options); 
-		caps.setCapability(CapabilityType.PROXY, ats.getProxy().getProxy());*/
 
 		launchDriver(status, options);
 	}

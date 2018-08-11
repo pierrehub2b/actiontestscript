@@ -53,8 +53,8 @@ public class EdgeDriverEngine extends WebDriverEngine {
 		EdgeOptions options = new EdgeOptions();
 		options.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
 		options.setCapability(CapabilityType.ACCEPT_INSECURE_CERTS, true);
-		options.setPageLoadStrategy("normal");
 		options.setCapability(CapabilityType.PROXY, ats.getProxy().getProxy());
+		options.setPageLoadStrategy("normal");
 
 		launchDriver(status, options);
 	}

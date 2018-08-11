@@ -83,12 +83,13 @@ public class DriverManager {
 		Predicate<ProcessHandle> opera  =  p -> p.info().command().get().contains(OPERA_DRIVER_FILE_NAME);
 		Predicate<ProcessHandle> edge  =  p -> p.info().command().get().contains(EDGE_DRIVER_FILE_NAME);
 		Predicate<ProcessHandle> firefox  =  p -> p.info().command().get().contains(FIREFOX_DRIVER_FILE_NAME);
+		Predicate<ProcessHandle> ie  =  p -> p.info().command().get().contains(IE_DRIVER_FILE_NAME);
 		
 		ProcessHandle
 		.allProcesses()
 		.parallel()
 		.filter(fullPredicate)
-		.filter(chrome.or(edge).or(firefox).or(opera).or(desktop))
+		.filter(chrome.or(edge).or(firefox).or(opera).or(ie).or(desktop))
 		.forEach(p2 -> {
 			p2.children().parallel().forEach(p3 -> p3.destroy());
 			p2.destroy();
@@ -113,6 +114,8 @@ public class DriverManager {
 			edgeDriver = null;
 		}else if(dp.equals(chromeDriver)) {
 			chromeDriver = null;
+		}else if(dp.equals(ieDriver)) {
+			ieDriver = null;
 		}
 	}
 	

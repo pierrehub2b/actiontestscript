@@ -33,7 +33,6 @@ import org.testng.ITestContext;
 import org.testng.SkipException;
 import org.testng.TestRunner;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeSuite;

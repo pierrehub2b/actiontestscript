@@ -72,7 +72,7 @@ public class AtsProxy {
 			json.addProperty("sslProxyPort", port);
 
 		}else {
-			json.addProperty("proxyType", "SYSTEM");
+			json.addProperty("proxyType", type.toUpperCase());
 		}
 
 		return json;

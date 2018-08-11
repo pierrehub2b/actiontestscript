@@ -32,7 +32,6 @@ import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebElement;
 
 import com.ats.driver.AtsManager;
@@ -60,8 +59,6 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 
 		this.autoScrollElement = JS_AUTO_SCROLL_MOZ;
 
-		DesiredCapabilities cap = new DesiredCapabilities();
-
 		FirefoxOptions options = new FirefoxOptions();
 		options.setCapability("marionnette ","true");
 		options.setCapability("acceptSslCerts ","true");
@@ -73,9 +70,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 			options.setBinary(applicationPath);
 		}
 
-		cap.setCapability(FirefoxOptions.FIREFOX_OPTIONS, options);
-
-		launchDriver(status, cap);
+		launchDriver(status, options);
 	}
 
 	@Override

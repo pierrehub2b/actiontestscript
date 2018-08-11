@@ -56,8 +56,6 @@ public class Channel {
 	private TestBound dimension = DriverManager.ATS.getApplicationBound();
 	private TestBound subDimension;
 
-	//private String startError;
-
 	private String applicationVersion;
 	private String driverVersion;
 
@@ -246,14 +244,6 @@ public class Channel {
 	public void setApplicationVersion(String applicationVersion) {
 		this.applicationVersion = applicationVersion;
 	}
-
-	/*public void setStartError(String error) {
-		this.startError = error;
-	}
-
-	public String getStartError() {
-		return startError;
-	}*/
 
 	//----------------------------------------------------------------------------------------------------------------------
 	//----------------------------------------------------------------------------------------------------------------------

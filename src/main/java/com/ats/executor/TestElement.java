@@ -51,7 +51,7 @@ public class TestElement{
 	public static Predicate<Integer> isOccurrencesMoreOrEqualThan(Integer value) {return p -> p >= value;}
 	public static Predicate<Integer> isOccurrencesDifferent(Integer value) {return p -> p != value;}
 	public static Predicate<Integer> isOccurrencesEqual(Integer value) {return p -> p == value;}
-
+	
 	private Channel channel;
 
 	private Predicate<Integer> occurrences;

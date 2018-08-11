@@ -184,7 +184,7 @@ Here is an example of global ATS configuration file (*.atsProperties* file in AT
 </execute>
 ```
 * You can define the proxy used by browsers during execution of the test.
-Proxy types available are 'system', 'auto', 'direct' and 'manual', if 'manual' type is selected you have to define host and port of the proxy :
+Proxy types available are *'system'*, *'auto'*, *'direct'* and *'manual'*, if *'manual'* type is selected you have to define host and port of the proxy :
 ```
 <proxy>
 	<type>manual</type>
@@ -192,18 +192,18 @@ Proxy types available are 'system', 'auto', 'direct' and 'manual', if 'manual' t
 	<port>8080</port>
 </proxy>
 ```
-* You can define initial window size of a tested application and it's initial position *[appBounding]*.
-* You can define default maxTry action to wait element exists or wait it is interactable before execute action *[searchElement]*.
-* You can define default maxTry get property to wait element's property exists and is not null *[getProperty]*.
-* You can define javascript execution timeout (in sec.) for web application *[timeOut -> script]*.
-* You can define page load timeout (in sec.) for web application *[timeOut -> pageLoad]*.
-* You can define action execution terminating timeout (in sec.) to prevent browser or application infinite hangup *[timeOut -> watchDog]*.
+* **[appBounding]** : initial window size of a tested application and it's initial position
+* **[searchElement]** : action's maxTry to wait element exists or wait element is interactable before execute
+* **[getProperty]** : action's maxTry get property to wait element's property exists and property is not null
+* **[timeOut -> script]** : javascript execution timeout (in sec.) for web application only
+* **[timeOut -> pageLoad]** : page load timeout (in sec.) for web application only
+* **[timeOut -> watchDog]** : action's execution timeout (in sec.) to prevent browser or application infinite hangup
 * For each browser used you can define following parameters :
-  - Path of the binaries files *[path]*
-  - Time to wait after each actions (in millisec.) *[waitAction]*
-  - Time to wait for double check attributes value (in millisec.) *[waitProperty]*
-* You can add options to the browsers driver.
-* You can define application name and path of installed applications on the host machine.
+  - **[path]** : the application binary file path
+  - **[waitAction]** : wait after each actions (in millisec.)
+  - **[waitProperty]** : wait for double check attributes value (in millisec.) 
+* You can add options to the browsers driver
+* You can define application name and path of installed applications on the host machine
 
 ## List of available ATS actions
 

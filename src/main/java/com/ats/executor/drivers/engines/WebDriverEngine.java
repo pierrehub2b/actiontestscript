@@ -258,6 +258,11 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	public void waitAfterAction() {
 		actionWait();
 	}
+	
+	private Set<String> getWindowsHandle() {
+		driver.switchTo().defaultContent();
+		return driver.getWindowHandles();
+	}
 
 	//---------------------------------------------------------------------------------------------------------------------
 	// 
@@ -495,7 +500,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			ArrayList<String> list = new ArrayList<String>();
 
 			try {
-				list.addAll(driver.getWindowHandles());
+				list.addAll(getWindowsHandle());
 			}catch(WebDriverException e) {}
 
 			while(list.size() > 0) {
@@ -607,7 +612,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	protected void switchToLastWindow() {
-		int windowsNum = driver.getWindowHandles().size();
+		int windowsNum = getWindowsHandle().size();
 		switchWindow(windowsNum - 1);
 	}		
 
@@ -621,11 +626,11 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		if(currentWindow != index) {
 
-			Set<String> list = driver.getWindowHandles();
+			Set<String> list = getWindowsHandle();
 
 			int maxTry = 20;
 			while(index >= list.size() && maxTry > 0) {
-				list = driver.getWindowHandles();
+				list = getWindowsHandle();
 				channel.sleep(500);
 				maxTry--;
 			}
@@ -670,7 +675,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		ArrayList<String> list = new ArrayList<String>();
 		try {
-			list.addAll(driver.getWindowHandles());
+			list.addAll(getWindowsHandle());
 		}catch(WebDriverException e) {}
 
 		if(list.size() == 1) {
@@ -866,7 +871,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	@Override
 	public void setWindowToFront() {
-		List<String> listWins = new ArrayList<>(driver.getWindowHandles());
+		List<String> listWins = new ArrayList<>(getWindowsHandle());
 		if(listWins.size() > currentWindow) {
 			driver.switchTo().window(listWins.get(currentWindow));
 		}

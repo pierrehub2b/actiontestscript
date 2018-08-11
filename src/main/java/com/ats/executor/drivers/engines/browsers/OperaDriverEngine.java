@@ -24,7 +24,6 @@ import java.util.List;
 
 import org.openqa.selenium.opera.OperaOptions;
 import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.ats.driver.AtsManager;
 import com.ats.executor.ActionStatus;
@@ -54,16 +53,13 @@ public class OperaDriverEngine extends WebDriverEngine {
 		
 		OperaOptions options = new OperaOptions();
 		options.setCapability("opera.log.level", "SEVERE");
+		options.setCapability(CapabilityType.PROXY, ats.getProxy().getProxy());
 		options.addArguments(args);
 				
 		if(applicationPath != null) {
 			options.setBinary(applicationPath);
 		}
-				
-		DesiredCapabilities cap = new DesiredCapabilities();
-		cap.setCapability(OperaOptions.CAPABILITY, options);
-		cap.setCapability(CapabilityType.PROXY, ats.getProxy().getProxy());
 		
-		launchDriver(status, cap);
+		launchDriver(status, options);
 	}
 }
