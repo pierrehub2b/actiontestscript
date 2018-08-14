@@ -54,7 +54,7 @@ public class ResourceContent {
 
 	private static String getScript(String ressourceName){
 		try {
-			String javaScript = Resources.toString(ResourceContent.class.getResource("/javascript/" + ressourceName + ".js"), Charsets.UTF_8);
+			final String javaScript = Resources.toString(ResourceContent.class.getResource("/javascript/" + ressourceName + ".js"), Charsets.UTF_8);
 			return javaScript.replaceAll("[\n\t\r]", "");
 		} catch (IOException e) {
 			e.printStackTrace();

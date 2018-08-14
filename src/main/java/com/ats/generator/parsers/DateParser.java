@@ -33,19 +33,19 @@ public final class DateParser {
 		
 		String code = JAVA_DATE_START_FUNCTION;
 		
-		Matcher dateMatcher = DATE_PATTERN.matcher(data);
+		final Matcher dateMatcher = DATE_PATTERN.matcher(data);
 		
 		while (dateMatcher.find()) {
 						
-			String fixedMonth = dateMatcher.group(1);
-			String fixedDay = dateMatcher.group(2);
-			String fixedYear = dateMatcher.group(3);
+			final String fixedMonth = dateMatcher.group(1);
+			final String fixedDay = dateMatcher.group(2);
+			final String fixedYear = dateMatcher.group(3);
 			
 			if(fixedMonth != null && fixedDay != null && fixedYear != null){
 				code = "LocalDate.parse(\"" + fixedMonth + "/" + fixedDay + "/" + fixedYear + "\")";
 			}
 						
-			boolean addValue = "+".equals(dateMatcher.group(4));
+			final boolean addValue = "+".equals(dateMatcher.group(4));
 			String increment = dateMatcher.group(5);
 			String incrementType = dateMatcher.group(6);
 			

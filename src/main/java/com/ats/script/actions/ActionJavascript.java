@@ -77,18 +77,17 @@ public class ActionJavascript extends ActionExecuteElement {
 		
 		super.terminateExecution(ts);
 		
-		ts.updateVisualValue(jsCode.getCalculated());
+		ts.updateVisual(jsCode.getCalculated());
 		
-		status.resetDuration();
+		status.startDuration();
 		Object result = getTestElement().executeScript(status, jsCode.getCalculated());
-		status.updateDuration();
+		status.endDuration();
 		
 		if(variable != null && result != null) {
 			variable.updateValue(result.toString());
 		}
 
-		ts.updateVisualImage();
-		
+		ts.updateVisualWithImage(0, status.getDuration());
 	}
 
 	//--------------------------------------------------------

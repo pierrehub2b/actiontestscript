@@ -76,8 +76,9 @@ public class ActionSelect extends ActionExecuteElement {
 		super.terminateExecution(ts);
 		
 		getTestElement().select(status, selectValue, select, ctrl);
-		ts.updateVisualImage();
-		status.updateDuration();
+		status.endDuration();
+		
+		ts.updateVisualWithImage(0, status.getDuration());
 	}
 
 	//--------------------------------------------------------

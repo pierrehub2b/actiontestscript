@@ -27,6 +27,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -35,11 +37,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageOutputStream;
 import javax.net.ssl.HttpsURLConnection;
 import javax.swing.Icon;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.io.input.BOMInputStream;
 
 import com.ats.executor.ActionStatus;
 import com.google.gson.JsonArray;
@@ -47,25 +55,22 @@ import com.google.gson.JsonPrimitive;
 
 public class Utils {
 
-	public static String escapeAts(String data) {
+	public static String unescapeAts(String data) {
 		return data.replaceAll("&sp;", " ").replaceAll("&co;", ",").replaceAll("&eq;", "=").replaceAll("&rb;", "]").replaceAll("&lb;", "[");
 	}
 
 	public static int string2Int(String value){
-
-		int result = 0;
-
 		try {
-			result = Integer.parseInt(value);
-		} catch (NumberFormatException e) {}
-
-		return result;
+			return Integer.parseInt(value);
+		} catch (NumberFormatException e) {
+			return 0;
+		}
 	}
 
 	public static JsonArray string2JsonArray(String value){
+		final char[] letters = value.toCharArray();
 		JsonArray array = new JsonArray();
-		char[] letters = value.toCharArray();
-		for (char ch : letters) {
+		for (final char ch : letters) {
 			array.add(new JsonPrimitive((int)ch));
 		}
 		return array;
@@ -75,7 +80,7 @@ public class Utils {
 		if (!path.exists()) throw new FileNotFoundException(path.getAbsolutePath());
 		boolean ret = true;
 		if (path.isDirectory()){
-			for (File f : path.listFiles()){
+			for (final File f : path.listFiles()){
 				ret = ret && Utils.deleteRecursive(f);
 			}
 		}
@@ -85,7 +90,7 @@ public class Utils {
 	public static void deleteRecursiveJavaFiles(File f) throws FileNotFoundException{
 		if (!f.exists()) throw new FileNotFoundException(f.getAbsolutePath());
 		if (f.isDirectory()){
-			for (File f0 : f.listFiles()){
+			for (final File f0 : f.listFiles()){
 				if(f0.isDirectory()) {
 					deleteRecursiveJavaFiles(f0);
 					if(f0.listFiles().length == 0) {
@@ -129,7 +134,7 @@ public class Utils {
 			return false;
 		}
 
-		if(responseCode == HttpsURLConnection.HTTP_OK) {
+		if(responseCode == HttpURLConnection.HTTP_OK) {
 			return true;
 		}else {
 			status.setPassed(false);
@@ -141,8 +146,9 @@ public class Utils {
 
 	public static byte[] iconToImage(Icon icon) {
 
-		BufferedImage img = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g2d = img.createGraphics();
+		final BufferedImage img = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
+		final Graphics2D g2d = img.createGraphics();
+		
 		icon.paintIcon(null, g2d, 0, 0);
 		g2d.dispose();
 
@@ -166,7 +172,7 @@ public class Utils {
 		String buildNumber = "";
 		try {
 			final Process p = Runtime.getRuntime().exec("wmic os get BuildNumber");
-			BufferedReader output = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			final BufferedReader output = new BufferedReader(new InputStreamReader(p.getInputStream()));
 
 			String line;
 			while ((line = output.readLine()) != null) {
@@ -199,5 +205,29 @@ public class Utils {
 	    } catch (IOException e) {
 	        e.printStackTrace();
 	    }
+	}
+	
+	public static ArrayList<String[]> loadCsvData(String url) throws MalformedURLException, IOException{
+		return loadCsvData(new URL(url));
+	}
+	
+	public static ArrayList<String[]> loadCsvData(URL url) throws IOException{
+
+		ArrayList<String[]> result = new ArrayList<String[]>();
+		try {
+			final Reader reader = new InputStreamReader(new BOMInputStream(url.openStream()), "UTF-8");
+			final CSVParser parser = new CSVParser(reader, CSVFormat.EXCEL.withAllowMissingColumnNames());
+			
+			for (final CSVRecord record : parser) {
+				String[] lineData = new String[record.size()];
+				for (int i=0; i < record.size(); i++) {
+					lineData[i] = record.get(i);
+				}
+				result.add(lineData);
+		    }
+			parser.close();
+		} catch (UnsupportedEncodingException e) {
+		}
+		return result;
 	}
 }

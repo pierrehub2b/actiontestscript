@@ -41,7 +41,6 @@ import com.ats.driver.AtsManager;
 import com.ats.element.SearchedElement;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.channels.ChannelManager;
-import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.MouseDirectionData;
@@ -57,7 +56,9 @@ import com.ats.generator.variables.transform.NumericTransformer;
 import com.ats.generator.variables.transform.RegexpTransformer;
 import com.ats.generator.variables.transform.TimeTransformer;
 import com.ats.generator.variables.transform.Transformer;
+import com.ats.recorder.IVisualRecorder;
 import com.ats.recorder.VisualRecorder;
+import com.ats.recorder.VisualRecorderNull;
 import com.ats.script.ProjectData;
 import com.ats.script.Script;
 import com.ats.script.ScriptHeader;
@@ -120,7 +121,7 @@ public class ActionTestScript extends Script implements ITest{
 	@BeforeClass(alwaysRun=true)
 	public void beforeAtsTest(ITestContext ctx) {
 
-		TestRunner runner = (TestRunner) ctx;
+		final TestRunner runner = (TestRunner) ctx;
 		setTestName(this.getClass().getName());
 
 		String checkMode = runner.getTest().getParameter("check.mode");
@@ -137,25 +138,20 @@ public class ActionTestScript extends Script implements ITest{
 			//-----------------------------------------------------------
 
 			int visualQuality = 0;
-			boolean xml = false;
-
-			String visualReport = getEnvironmentValue("visual.report", "0");
 			try {
-				visualQuality = Integer.parseInt(visualReport);
+				visualQuality = Integer.parseInt(getEnvironmentValue("visual.report", "0"));
 			}catch(NumberFormatException e) {};
 
-			String xmlReport = getEnvironmentValue("xml.report", "");
-			xml = "true".equals(xmlReport.toLowerCase());
+			boolean xml = "true".equals(getEnvironmentValue("xml.report", "").toLowerCase());
 
 			if(visualQuality > 0 || xml) {
-				String outputDirectory = runner.getOutputDirectory();
 
-				File output = new File(outputDirectory);
+				final File output = new File(runner.getOutputDirectory());
 				if(!output.exists()) {
 					output.mkdirs();
 				}
 
-				ScriptHeader header = getHeader();
+				final ScriptHeader header = getHeader();
 				header.setName(getTestName());
 				header.setAtsVersion(AtsManager.getVersion());
 				setRecorder(new VisualRecorder(output, header, visualQuality, xml));
@@ -164,10 +160,11 @@ public class ActionTestScript extends Script implements ITest{
 			//-----------------------------------------------------------
 			//-----------------------------------------------------------
 
-			setLogger(new ExecutionLogger(System.out, (int)ctx.getSuite().getXmlSuite().getVerbose()));
-			sendInfo("starting script", " '" + testName + "'");
+			setLogger(new ExecutionLogger(System.out, ctx.getSuite().getXmlSuite().getVerbose()));
+			sendInfo("Starting script", " '" + testName + "'");
 
 			Runtime.getRuntime().addShutdownHook(new Thread() {
+				@Override
 				public void run() {
 					tearDown();
 				}
@@ -179,12 +176,12 @@ public class ActionTestScript extends Script implements ITest{
 
 	@AfterClass(alwaysRun=true)
 	public void afterClass() {
-		sendInfo("script terminated", " '" + testName + "'");
+		sendInfo("Script terminated", " '" + testName + "'");
 	}
 
 	@AfterTest(alwaysRun=true)
 	public void testFinished() {
-		setRecorder(null);
+		stopRecorder();
 		tearDown();
 	}
 
@@ -244,7 +241,7 @@ public class ActionTestScript extends Script implements ITest{
 	}
 
 	public void tearDown(){
-		sendInfo("script's execution terminated", ", closing drivers ...");
+		sendInfo("Closing drivers ...", "");
 		getChannelManager().tearDown();
 	}
 
@@ -254,7 +251,7 @@ public class ActionTestScript extends Script implements ITest{
 
 	public TestElement findObject(TestElement parent, String tag, String operator, int expectedCount, CalculatedProperty...criterias) {
 
-		List<CalculatedProperty> list = new ArrayList<CalculatedProperty>();
+		final List<CalculatedProperty> list = new ArrayList<CalculatedProperty>();
 		for (CalculatedProperty criteria : criterias) {
 			list.add(criteria);
 		}
@@ -510,7 +507,6 @@ public class ActionTestScript extends Script implements ITest{
 	private int atsCodeLine = -1;
 
 	public static final String JAVA_EXECUTE_FUNCTION_NAME = "exec";
-
 	public void exec(Action action){
 		action.execute(this);
 	}
@@ -543,7 +539,7 @@ public class ActionTestScript extends Script implements ITest{
 
 	private void execFinished(ActionStatus status, boolean stop) {
 		if(!status.isPassed()) {
-			String atsScriptLine = "(" + getTestName() + "." + ATS_EXTENSION + ":" + atsCodeLine + ")";
+			final String atsScriptLine = "(" + getTestName() + "." + ATS_EXTENSION + ":" + atsCodeLine + ")";
 
 			if(status.getCode() == ActionStatus.CHANNEL_NOT_FOUND) {
 				fail("[ATS-ERROR] -> No running channel, please check that 'start channel action' has been added to the script " + atsScriptLine);
@@ -558,99 +554,22 @@ public class ActionTestScript extends Script implements ITest{
 	}
 
 	//-----------------------------------------------------------------------------------------------------------
-	//  - Channel action
-	//-----------------------------------------------------------------------------------------------------------
-
-	public void startChannel(ActionStatus status, String name, String app){
-		getChannelManager().startChannel(status, name, app);
-		if(status.isPassed()) {
-			updateStatus(status);
-			updateRecorderChannel(getChannelManager().getCurrentChannel());
-		}
-	}
-
-	public void switchChannel(ActionStatus status, String name){
-		updateStatus(status, getChannelManager().switchChannel(name));
-		updateRecorderChannel(getChannelManager().getCurrentChannel());
-	}
-
-	public void closeChannel(ActionStatus status, String name){
-		updateStatus(status, getChannelManager().closeChannel(name));
-	}
-
-	private void updateStatus(ActionStatus status, boolean foundChannel){
-		if(!foundChannel) {
-			status.setCode(ActionStatus.CHANNEL_NOT_FOUND);
-		}
-		updateStatus(status);
-	}
-
-	private void updateStatus(ActionStatus status){
-		status.setData(getChannelManager().getChannelsList());
-	}
-
-	//-----------------------------------------------------------------------------------------------------------
-	//  - Window action
-	//-----------------------------------------------------------------------------------------------------------
-
-	public void setWindowBound(ActionStatus status, BoundData x, BoundData y, BoundData width, BoundData height){
-		if(getCurrentChannel() != null){
-			getCurrentChannel().setWindowBound(x, y, width, height);
-		}
-	}
-
-	public void switchWindow(ActionStatus status, int index){
-		if(getCurrentChannel() != null){
-			getCurrentChannel().switchWindow(index);
-			status.setPassed(true);
-		}
-	}
-
-	public void closeWindow(ActionStatus status, int index){
-		if(getCurrentChannel() != null){
-			getCurrentChannel().closeWindow(status, index);
-			status.setPassed(true);
-		}
-	}
-
-	//-----------------------------------------------------------------------------------------------------------
-	//  - Goto Url Action
-	//-----------------------------------------------------------------------------------------------------------
-
-	public void navigate(ActionStatus status, String url) {
-		if(getCurrentChannel() != null){
-			getCurrentChannel().navigate(status, url);
-		}
-		status.updateDuration();
-	}
-
-	//-----------------------------------------------------------------------------------------------------------
 	//  - Animation recorder
 	//-----------------------------------------------------------------------------------------------------------
 
-	private VisualRecorder recorder;
+	private IVisualRecorder recorder = new VisualRecorderNull();
 
 	public void updateRecorderChannel(Channel channel) {
-		if(getRecorder() != null) {
-			getRecorder().setChannel(channel);
-		}
+		getRecorder().setChannel(channel);
 	}
 
-	public boolean isRecord() {
-		return topScript.recorder != null && getCurrentChannel() != null;
-	}
-
-	public VisualRecorder getRecorder() {
+	public IVisualRecorder getRecorder() {
 		return topScript.recorder;
 	}
 
-	public void setRecorder(VisualRecorder value) {
-		if(value == null) {
-			if(this.recorder != null) {
-				this.recorder.terminate();
-				this.recorder = null;
-			}
-		}else {
+	public void setRecorder(IVisualRecorder value) {
+		if((value instanceof VisualRecorderNull && this.recorder instanceof VisualRecorder) || (value instanceof VisualRecorder && this.recorder instanceof VisualRecorderNull)) {
+			this.recorder.terminate();
 			this.recorder = value;
 		}
 	}
@@ -660,64 +579,60 @@ public class ActionTestScript extends Script implements ITest{
 	}
 
 	public void stopRecorder() {
-		if(isRecord()) {
-			topScript.setRecorder(null);
-		}
+		topScript.setRecorder(new VisualRecorderNull());
 	}
 
-	public void updateVisualImage() {
-		if(isRecord()) {
-			getRecorder().updateVisualImage();
-		}
+	public void createVisual(Action action) {
+		getRecorder().createVisualAction(action);
+	}
+	
+	public void createVisual(Action action, Channel channel, long duration, String name, String app) {
+		getRecorder().setChannel(channel);
+		createVisual(action);
+		updateVisual(0, duration, name, app);
 	}
 
-	public void updateVisualValue(String value) {
-		if(isRecord()) {
-			getRecorder().updateVisualValue(value);
-		}
+	public void updateVisual(String value) {
+		getRecorder().updateVisualValue(value);
 	}
 
-	public void updateVisualValueAndImage(String value) {
-		if(isRecord()) {
-			getRecorder().updateVisualImage();
-			getRecorder().updateVisualValue(value);
-		}
+	public void updateVisualWithImage(int error, long duration) {
+		updateVisual(error, duration);
+		getRecorder().updateVisualImage();
+	}
+	
+	public void updateVisualWithImage(int error, long duration, String value) {
+		updateVisualWithImage(error, duration);
+		updateVisual(value);
 	}
 
-	public void updateVisualValue(String value, String data) {
-		if(isRecord()) {
-			getRecorder().updateVisualValue(value, data);
-		}
+	public void updateVisual(String value, String data) {
+		getRecorder().updateVisualValue(value, data);
 	}
 
-	public void updateVisualValue(String type, MouseDirection position) {
-		if(isRecord()) {
-			getRecorder().updateVisualValue(type, position);
-		}
+	public void updateVisual(String type, MouseDirection position) {
+		getRecorder().updateVisualValue(type, position);
 	}
 
-	public void updateVisualStatus(int error) {
-		if(isRecord()) {
-			getRecorder().updateVisualStatus(error);
-		}
+	public void updateVisual(int error, long duration) {
+		getRecorder().updateVisualStatus(error, duration);
 	}	
 
-	public void updateVisualStatus(int error, String value, String data) {
-		if(isRecord()) {
-			getRecorder().updateVisualStatus(error, value, data);
-		}
+	public void updateVisual(int error, long duration, String value) {
+		getRecorder().updateVisualStatus(error, duration, value);
+	}
+	
+	public void updateVisual(int error, long duration, String value, String data) {
+		getRecorder().updateVisualStatus(error, duration, value, data);
+	}
+	
+	public void updateVisual(int error, long duration, String value, String data, TestElement element) {
+		updateVisual(error, duration, value, data);
+		getRecorder().updateVisualElement(element);
 	}	
 
-	public void newVisual(Action action) {
-		if(isRecord()) {
-			getRecorder().createVisualAction(action);
-		}
-	}
-
-	public void updateVisualElement(int error, TestElement element) {
-		if(isRecord()) {
-			getRecorder().updateVisualStatus(error);
-			getRecorder().updateVisualElement(element);
-		}
+	public void updateVisual(int error, long duration, TestElement element) {
+		updateVisual(error, duration);
+		getRecorder().updateVisualElement(element);
 	}
 }

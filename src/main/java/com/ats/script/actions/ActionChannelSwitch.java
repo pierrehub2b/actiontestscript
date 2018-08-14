@@ -38,13 +38,9 @@ public class ActionChannelSwitch extends ActionChannel {
 	@Override
 	public void execute(ActionTestScript ts) {
 		super.execute(ts);
-		ts.updateVisualValue(getName());
-		
-		status.resetDuration();
-		ts.switchChannel(status, getName());
-		status.updateDuration();
-		
-		ts.updateVisualImage();
+
+		ts.updateVisual(getName());
+		ts.getChannelManager().switchChannel(status, getName());
 	}
 	
 	//---------------------------------------------------------------------------------------------------------------------------------

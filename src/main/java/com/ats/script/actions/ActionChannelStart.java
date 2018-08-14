@@ -20,6 +20,7 @@ under the License.
 package com.ats.script.actions;
 
 import com.ats.element.SearchedElement;
+import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
@@ -44,12 +45,8 @@ public class ActionChannelStart extends ActionChannel {
 
 	@Override
 	public void execute(ActionTestScript ts) {
-		super.execute(ts);
-		
-		ts.startChannel(status, getName(), application.getCalculated());
-		status.updateDuration();
-		
-		ts.updateVisualValue(getName(), application.getCalculated());
+		setStatus(new ActionStatus(null));
+		ts.getChannelManager().startChannel(status, this, getName(), application.getCalculated());
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

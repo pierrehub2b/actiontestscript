@@ -65,10 +65,11 @@ public class ActionMouseScroll extends ActionMouse {
 		
 		super.terminateExecution(ts);
 		
-		ts.updateVisualValue(value + "");
+		ts.updateVisual(value + "");
 		getTestElement().mouseWheel(value);
-		ts.updateVisualImage();
-		status.updateDuration();
+		status.endDuration();
+		
+		ts.updateVisualWithImage(0, status.getDuration());
 	}
 
 	//--------------------------------------------------------

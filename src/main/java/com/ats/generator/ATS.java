@@ -72,7 +72,7 @@ public class ATS {
 
 	public void parse() {
 
-		CommandLineParser parser = new DefaultParser();
+		final CommandLineParser parser = new DefaultParser();
 		CommandLine cmd = null;
 
 		try {
@@ -85,7 +85,7 @@ public class ATS {
 			help();
 		}else {
 
-			boolean force = cmd.hasOption("f");
+			final boolean force = cmd.hasOption("f");
 			compile = cmd.hasOption("comp");
 
 			File file;
@@ -137,7 +137,7 @@ public class ATS {
 	}
 
 	private void help() {
-		HelpFormatter formater = new HelpFormatter();
+		final HelpFormatter formater = new HelpFormatter();
 		formater.printHelp("ATS Java Code Generator", options);
 	}
 

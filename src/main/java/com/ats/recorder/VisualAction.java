@@ -34,6 +34,7 @@ public class VisualAction {
 	private Long timeLine;
 
 	private int error;
+	private long duration;
 
 	private ArrayList<byte[]> images;
 
@@ -151,6 +152,14 @@ public class VisualAction {
 	public void setError(int error) {
 		this.error = error;
 	}
+	
+	public long getDuration() {
+		return duration;
+	}
+
+	public void setDuration(long duration) {
+		this.duration = duration;
+	}
 
 	public Long getTimeLine() {
 		return timeLine;
@@ -179,8 +188,12 @@ public class VisualAction {
 	}
 
 	public void addImage(ArrayList<VisualImage> imagesList) {
-		if(images.size() > 0 && element != null && element.getBound() != null) {
-			imagesList.add(new VisualImage(getImageFileName(), images.get(images.size()-1), element.getBound()));
+		if(images.size() > 0) {
+			if(element != null && element.getBound() != null) {
+				imagesList.add(new VisualImage(getImageFileName(), images.get(0), element.getBound()));
+			}else {
+				imagesList.add(new VisualImage(getImageFileName(), images.get(images.size()-1)));
+			}
 		}
 	}
 }

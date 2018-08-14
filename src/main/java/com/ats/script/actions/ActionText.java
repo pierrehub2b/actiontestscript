@@ -89,7 +89,7 @@ public class ActionText extends ActionExecuteElement {
 			dataText = text.getCalculated();
 		}
 
-		status.resetDuration();
+		status.startDuration();
 
 		getTestElement().over(status, new MouseDirection());
 		if(status.isPassed()) {
@@ -97,14 +97,13 @@ public class ActionText extends ActionExecuteElement {
 			if(status.isPassed()) {
 				getTestElement().clearText(status);
 				if(status.isPassed()) {
-					ts.updateVisualValueAndImage(dataText);
 					getTestElement().sendText(status, text);
+					
+					status.endDuration();
+					ts.updateVisualWithImage(0, status.getDuration(), dataText);
 				}
 			}
 		}
-
-		status.updateDuration();
-		ts.updateVisualImage();
 	}
 
 	//--------------------------------------------------------

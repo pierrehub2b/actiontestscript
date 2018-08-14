@@ -20,7 +20,6 @@ under the License.
 package com.ats.executor.drivers.engines.desktop;
 
 import java.awt.MouseInfo;
-import java.awt.PointerInfo;
 import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
@@ -107,7 +106,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 			applicationPath = exeFile.getAbsolutePath();
 			args.add(0, applicationPath);
 
-			Runtime runtime = Runtime.getRuntime();
+			final Runtime runtime = Runtime.getRuntime();
 			try{
 				
 				applicationProcess = runtime.exec(args.toArray(new String[args.size()]));
@@ -125,7 +124,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 			String driverVersion = "N/A";
 			String appVersion = "N/A";
 
-			ArrayList<DesktopData> capabilities = desktopDriver.getVersion(applicationPath);
+			final ArrayList<DesktopData> capabilities = desktopDriver.getVersion(applicationPath);
 			for (DesktopData data : capabilities) {
 				if("DriverVersion".equals(data.getName())) {
 					driverVersion = data.getValue();
@@ -165,6 +164,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 		return (DesktopDriver)driver;
 	}
 
+	@Override
 	public void loadParents(FoundElement hoverElement){
 		hoverElement.setParent(getDesktopDriver().getTestElementParent(hoverElement.getId(), channel));
 	}
@@ -174,6 +174,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 		return getDesktopDriver().getElementAttribute(element.getId(), attributeName);
 	}
 
+	@Override
 	public CalculatedProperty[] getAttributes(FoundElement element){
 		return getAttributes(element.getId());
 	}
@@ -191,6 +192,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	// 
 	//---------------------------------------------------------------------------------------------------------------------
 
+	@Override
 	public FoundElement getElementFromPoint(Double x, Double y){
 		return getDesktopDriver().getElementFromPoint(x, y);
 	}
@@ -256,13 +258,10 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 
 	@Override
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position) {
-
-		Rectangle rect = foundElement.getRectangle();
-
-		int offsetX = getOffsetX(rect, position) + foundElement.getScreenX().intValue();
-		int offsetY = getOffsetY(rect, position) + foundElement.getScreenY().intValue();
-		
-		getDesktopDriver().mouseMove(offsetX, offsetY);
+		final Rectangle rect = foundElement.getRectangle();
+		getDesktopDriver().mouseMove(
+				getOffsetX(rect, position) + foundElement.getScreenX().intValue(), 
+				getOffsetY(rect, position) + foundElement.getScreenY().intValue());
 	}
 
 	@Override
@@ -291,10 +290,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 
 	@Override
 	public void moveByOffset(int hDirection, int vDirection) {
-
-		PointerInfo a = MouseInfo.getPointerInfo();
-		java.awt.Point pt = a.getLocation();
-
+		final java.awt.Point pt = MouseInfo.getPointerInfo().getLocation();
 		getDesktopDriver().mouseMove(pt.x + hDirection, pt.y + vDirection);
 	}
 

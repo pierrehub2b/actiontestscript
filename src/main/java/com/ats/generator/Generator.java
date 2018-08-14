@@ -51,13 +51,13 @@ public class Generator implements ScriptProcessedEvent{
 		ATS.logInfo("Java version : " + System.getProperty("java.version"));
 		ATS.logInfo(StringUtils.repeat("-", 72));
 
-		ATS arguments = new ATS(args);
+		final ATS arguments = new ATS(args);
 		arguments.parse();
 
-		ProjectData projectData = ProjectData.getProjectData(arguments.getProjectFolder(), arguments.getDestinationFolder(), arguments.getReportFolder());
+		final ProjectData projectData = ProjectData.getProjectData(arguments.getProjectFolder(), arguments.getDestinationFolder(), arguments.getReportFolder());
 
-		Generator generator = new Generator(projectData);
-		GeneratorReport report = generator.launch();
+		final Generator generator = new Generator(projectData);
+		final GeneratorReport report = generator.launch();
 
 		ATS.logInfo(StringUtils.repeat("-", 72));
 		ATS.logInfo("ATS Generator finished :");
@@ -67,7 +67,7 @@ public class Generator implements ScriptProcessedEvent{
 
 		if(arguments.isCompile()) {
 
-			String targetFolderPath = projectData.getTargetFolderPath().toFile().getAbsolutePath();
+			final String targetFolderPath = projectData.getTargetFolderPath().toFile().getAbsolutePath();
 			
 			ATS.logInfo("Compile generated java files into folder -> " + targetFolderPath + "/classes");
 			
@@ -102,7 +102,7 @@ public class Generator implements ScriptProcessedEvent{
 
 		genReport = new GeneratorReport();
 
-		File atsSourceFolder = projectData.getAtsSourceFolder().toFile();
+		final File atsSourceFolder = projectData.getAtsSourceFolder().toFile();
 
 		if(atsSourceFolder.exists()){
 
@@ -144,7 +144,7 @@ public class Generator implements ScriptProcessedEvent{
 
 		Utils.copyDir(projectData.getJavaSourceFolder().toString(), projectData.getJavaDestinationFolder().toString(), true);
 
-		Stream<File> stream = filesList.parallelStream();
+		final Stream<File> stream = filesList.parallelStream();
 		stream.forEach(f -> loadScript(f));
 		stream.close();
 
@@ -157,7 +157,7 @@ public class Generator implements ScriptProcessedEvent{
 	}
 
 	private void loadScript(File f){
-		ScriptLoader sc = lexer.loadScript(f, new ScriptProcessedNotifier(this));
+		final ScriptLoader sc = lexer.loadScript(f, new ScriptProcessedNotifier(this));
 		sc.generateJavaFile();
 	}
 

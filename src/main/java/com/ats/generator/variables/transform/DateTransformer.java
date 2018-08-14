@@ -58,7 +58,7 @@ public class DateTransformer extends Transformer {
 	}
 	
 	public static String getTodayValue() {
-		LocalDate date = LocalDate.now();
+		final LocalDate date = LocalDate.now();
 		return date.format(DATE_FORMATTER);
 	}
 

@@ -72,7 +72,7 @@ public class CalculatedValue{
 
 	public CalculatedValue(Script script, String dataValue) {
 
-		dataValue = Utils.escapeAts(dataValue);
+		dataValue = Utils.unescapeAts(dataValue);
 		
 		this.setScript(script);
 		this.setData(dataValue);
@@ -84,7 +84,7 @@ public class CalculatedValue{
 			Matcher mv = Variable.SCRIPT_PATTERN.matcher(dataValue);
 			while (mv.find()) {
 				
-				String variableName = mv.group(1);
+				final String variableName = mv.group(1);
 				dataValue = dataValue.replace(mv.group(0), script.getVariableValue(variableName));
 				
 				javaCode = javaCode.replace(mv.group(0), "\", " + variableName + ", \"");
@@ -93,7 +93,7 @@ public class CalculatedValue{
 			mv = ParameterValue.PARAMETER_PATTERN.matcher(dataValue);
 			while (mv.find()) {
 				
-				ParameterValue sp = new ParameterValue(mv);
+				final ParameterValue sp = new ParameterValue(mv);
 				dataValue = dataValue.replace(sp.getReplace(), script.getParameterValue(sp.getValue(), sp.getDefaultValue()));
 				
 				javaCode = javaCode.replace(sp.getReplace(), "\", " + ActionTestScript.JAVA_PARAM_FUNCTION_NAME + sp.getCode() + ", \"");
@@ -102,7 +102,7 @@ public class CalculatedValue{
 			mv = EnvironmentValue.ENV_PATTERN.matcher(dataValue);
 			while (mv.find()) {
 
-				EnvironmentValue sp = new EnvironmentValue(mv);
+				final EnvironmentValue sp = new EnvironmentValue(mv);
 				dataValue = dataValue.replace(sp.getReplace(), script.getEnvironmentValue(sp.getValue(), sp.getDefaultValue()));
 				
 				javaCode = javaCode.replace(sp.getReplace(), "\", " + ActionTestScript.JAVA_ENV_FUNCTION_NAME + sp.getCode() + ", \"");
@@ -111,7 +111,7 @@ public class CalculatedValue{
 			mv = TODAY_PATTERN.matcher(dataValue);
 			while (mv.find()) {
 				
-				String replace = mv.group(0);
+				final String replace = mv.group(0);
 				dataValue = dataValue.replace(replace, DateTransformer.getTodayValue());
 				
 				javaCode = javaCode.replace(replace, "\", " + ActionTestScript.JAVA_TODAY_FUNCTION_NAME + "(), \"");
@@ -120,7 +120,7 @@ public class CalculatedValue{
 			mv = NOW_PATTERN.matcher(dataValue);
 			while (mv.find()) {
 				
-				String replace = mv.group(0);
+				final String replace = mv.group(0);
 				dataValue = dataValue.replace(replace, TimeTransformer.getNowValue());
 				
 				javaCode = javaCode.replace(replace, "\", " + ActionTestScript.JAVA_NOW_FUNCTION_NAME + "(), \"");
@@ -129,7 +129,7 @@ public class CalculatedValue{
 			mv = UUID_PATTERN.matcher(dataValue);
 			while (mv.find()) {
 				
-				String replace = mv.group(0);
+				final String replace = mv.group(0);
 				dataValue = dataValue.replace(replace, UUID.randomUUID().toString());
 				
 				javaCode = javaCode.replace(replace, "\", " + ActionTestScript.JAVA_UUID_FUNCTION_NAME + "(), \"");
@@ -138,10 +138,10 @@ public class CalculatedValue{
 			mv = KEY_REGEXP.matcher(dataValue);
 			while (mv.find()) {
 				
-				String replace = mv.group(0);
-				String value = mv.group(1).trim().toUpperCase();
-
-				String spareKey = mv.group(2);
+				final String replace = mv.group(0);
+				final String value = mv.group(1).trim().toUpperCase();
+				final String spareKey = mv.group(2);
+				
 				if(spareKey.length() > 0) {
 					javaCode = javaCode.replace(replace, "\", " + "Keys.chord(Keys." + value + ", \"" + spareKey.toLowerCase() + "\"), \"");
 				}else {
@@ -195,8 +195,8 @@ public class CalculatedValue{
 	public String getCalculated() {
 		if(calculated == null){
 			if(dataList != null) {
-				StringBuilder builder = new StringBuilder("");
-				for(Object obj : dataList) {
+				final StringBuilder builder = new StringBuilder("");
+				for(final Object obj : dataList) {
 					if (obj instanceof Variable) {
 						builder.append(((Variable) obj).getCalculatedValue());
 					}else {
@@ -213,7 +213,7 @@ public class CalculatedValue{
 	
 	public ArrayList<SendKeyData> getCalculatedText(){
 
-		ArrayList<SendKeyData> chainKeys = new ArrayList<SendKeyData>();
+		final ArrayList<SendKeyData> chainKeys = new ArrayList<SendKeyData>();
 		
 		if(calculated != null){
 			
@@ -241,12 +241,12 @@ public class CalculatedValue{
 
 		int start = 0;		
 
-		Matcher match = KEY_REGEXP.matcher(s);
+		final Matcher match = KEY_REGEXP.matcher(s);
 		while(match.find()) {
 
 			int end = match.start();
 			if(end > 0) {
-				SendKeyData sendKey = new SendKeyData(s.substring(start, end));
+				final SendKeyData sendKey = new SendKeyData(s.substring(start, end));
 				chain.add(sendKey);
 			}
 

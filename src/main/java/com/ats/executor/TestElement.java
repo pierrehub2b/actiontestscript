@@ -186,7 +186,7 @@ public class TestElement{
 					if(isValidated()) {
 						trySearch = maxTry;
 					}else {
-						channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "searching element", maxTry - trySearch);
+						channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "Searching element", maxTry - trySearch);
 						progressiveWait(trySearch);
 						trySearch++;
 					}
@@ -339,9 +339,8 @@ public class TestElement{
 			error = ActionStatus.OCCURRENCES_ERROR;
 		}
 
-		ts.updateVisualStatus(error, count + "", operator + " " + expected);
-
-		terminateExecution(ts, error);
+		status.endDuration();
+		terminateExecution(ts, error, status.getDuration(), count + "", operator + " " + expected);
 	}
 
 	//-------------------------------------------------------------------------------------------------------------------
@@ -524,8 +523,13 @@ public class TestElement{
 		return null;
 	}
 
-	public void terminateExecution(ActionTestScript script, int error) {
-		script.updateVisualElement(error, this);
+	public void terminateExecution(ActionTestScript script, int error, Long duration) {
+		script.updateVisual(error, duration, this);
+		channel.actionTerminated();
+	}
+	
+	public void terminateExecution(ActionTestScript script, int error, Long duration, String value, String data) {
+		script.updateVisual(error, duration, value, data, this);
 		channel.actionTerminated();
 	}
 }

@@ -58,7 +58,7 @@ public class TimeTransformer extends Transformer {
 	}
 	
 	public static String getNowValue() {
-		LocalTime time = LocalTime.now();
+		final LocalTime time = LocalTime.now();
 		return time.format(TIME_FORMATTER);
 	}
 

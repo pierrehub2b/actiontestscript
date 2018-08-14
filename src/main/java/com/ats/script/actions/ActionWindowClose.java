@@ -40,8 +40,13 @@ public class ActionWindowClose extends ActionWindow {
 	@Override
 	public void execute(ActionTestScript ts) {
 		super.execute(ts);
-		ts.closeWindow(status, getNum());
-		status.updateDuration();
-		ts.updateVisualImage();
+		
+		if(ts.getCurrentChannel() != null){
+			ts.getCurrentChannel().closeWindow(status, getNum());
+			status.setPassed(true);
+		}
+		
+		status.endDuration();
+		ts.updateVisualWithImage(0, status.getDuration());
 	}
 }

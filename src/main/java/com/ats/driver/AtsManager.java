@@ -87,7 +87,7 @@ public class AtsManager {
 
 	public static String getVersion() {
 
-		InputStream resourceAsStream = AtsManager.class.getResourceAsStream("/version.properties");
+		final InputStream resourceAsStream = AtsManager.class.getResourceAsStream("/version.properties");
 		Properties prop = new Properties();
 		try{
 			prop.load( resourceAsStream );
@@ -107,7 +107,7 @@ public class AtsManager {
 			}
 		}
 
-		Path atsFolderPath = Paths.get(atsHome);
+		final Path atsFolderPath = Paths.get(atsHome);
 		if(atsFolderPath.toFile().exists()) {
 			properties = loadProperties(atsFolderPath.resolve(ATS_PROPERTIES_FILE));
 			driversFolderPath = atsFolderPath.resolve(DRIVERS_FOLDER);
@@ -123,15 +123,15 @@ public class AtsManager {
 
 	private Properties loadProperties(Path propertiesPath) {
 
-		File xmlFile = propertiesPath.toFile();
+		final File xmlFile = propertiesPath.toFile();
 		if(xmlFile.exists()) {
 			try {
 				
-				DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+				final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 
 				try {
-					DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-					Document doc = dBuilder.parse(xmlFile);
+					final DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+					final Document doc = dBuilder.parse(xmlFile);
 
 					doc.getDocumentElement().normalize();
 
@@ -155,7 +155,7 @@ public class AtsManager {
 												if(nodeList.item(0).getChildNodes().getLength() > 0) {
 													path = nodeList.item(0).getChildNodes().item(0).getNodeValue();
 
-													File checkFile = new File(path);
+													final File checkFile = new File(path);
 													if(!checkFile.exists() || !checkFile.isFile()) {
 														path = null;
 													}
@@ -215,7 +215,7 @@ public class AtsManager {
 						}
 					}
 
-					NodeList timeOutNode = doc.getElementsByTagName("timeOut");
+					final NodeList timeOutNode = doc.getElementsByTagName("timeOut");
 					if(timeOutNode != null && timeOutNode.getLength() > 0) {
 						
 						NodeList timeOut = ((Element)timeOutNode.item(0)).getElementsByTagName("script");
@@ -240,7 +240,7 @@ public class AtsManager {
 						}
 					}
 
-					NodeList maxTryNodeList = doc.getElementsByTagName("maxTry");
+					final NodeList maxTryNodeList = doc.getElementsByTagName("maxTry");
 					if(maxTryNodeList != null && maxTryNodeList.getLength() > 0) {
 						NodeList maxTryNode = ((Element)maxTryNodeList.item(0)).getElementsByTagName("searchElement");
 						if(maxTryNode != null && maxTryNode.getLength() > 0) {
@@ -257,7 +257,7 @@ public class AtsManager {
 						}
 					}
 					
-					NodeList proxyNode = doc.getElementsByTagName("proxy");
+					final NodeList proxyNode = doc.getElementsByTagName("proxy");
 					if(proxyNode != null && proxyNode.getLength() > 0) {
 						
 						NodeList data = ((Element)proxyNode.item(0)).getElementsByTagName("type");
@@ -297,7 +297,7 @@ public class AtsManager {
 						}
 					}
 
-					NodeList applications = doc.getElementsByTagName("application");
+					final NodeList applications = doc.getElementsByTagName("application");
 					if(applications != null && applications.getLength() > 0) {
 						for (int temp = 0; temp < applications.getLength(); temp++) {
 							Node application = applications.item(temp);
@@ -378,7 +378,7 @@ public class AtsManager {
 
 	public ApplicationProperties getApplicationProperties(String name) {
 		for (int i=0; i < this.applicationsList.size(); i++) {
-			ApplicationProperties properties = this.applicationsList.get(i);
+			final ApplicationProperties properties = this.applicationsList.get(i);
 			if (name.equals(properties.getName())){
 				return properties;
 			}
@@ -388,7 +388,7 @@ public class AtsManager {
 
 	public ApplicationProperties getBrowserProperties(String name) {
 		for (int i=0; i < this.browsersList.size(); i++) {
-			ApplicationProperties properties = this.browsersList.get(i);
+			final ApplicationProperties properties = this.browsersList.get(i);
 			if (name.equals(properties.getName())){
 				return properties;
 			}

@@ -64,6 +64,8 @@ public class Channel {
 
 	private int winHandle = -1;
 
+	private boolean closing = false;
+
 	//----------------------------------------------------------------------------------------------------------------------
 	// Constructor
 	//----------------------------------------------------------------------------------------------------------------------
@@ -76,7 +78,7 @@ public class Channel {
 			String application) {
 
 		status.setChannel(this);
-		
+
 		this.mainScript = script;
 
 		this.name = name;
@@ -87,6 +89,8 @@ public class Channel {
 
 		if(status.isPassed()) {
 			this.refreshLocation();
+		}else {
+			this.mainScript.sendLog(ActionStatus.CHANNEL_START_ERROR, status.getMessage());
 		}
 	}
 
@@ -279,6 +283,7 @@ public class Channel {
 	//----------------------------------------------------------------------------------------------------------------------
 
 	public void close(){
+		closing = true;
 		engine.close();
 		if(process != null) {
 			process.descendants().forEach(p -> p.destroy());
@@ -287,7 +292,9 @@ public class Channel {
 	}
 
 	public void lastWindowClosed(ActionStatus status) {
-		mainScript.closeChannel(status, name);
+		if(!closing) {
+			mainScript.getChannelManager().closeChannel(status, name);
+		}
 	}
 
 	//----------------------------------------------------------------------------------------------------------
@@ -416,8 +423,8 @@ public class Channel {
 		getDesktopDriver().stopVisualRecord();
 	}
 
-	public void createVisualAction(String actionName, int scriptLine) {
-		getDesktopDriver().createVisualAction(this, actionName, scriptLine);
+	public void createVisualAction(String actionName, int scriptLine, long timeline) {
+		getDesktopDriver().createVisualAction(this, actionName, scriptLine, timeline);
 	}
 
 	public void updateVisualImage() {
@@ -436,16 +443,21 @@ public class Channel {
 		getDesktopDriver().updateVisualPosition(type, hdir, vdir);
 	}
 
-	public void updateVisualStatus(int error) {
-		getDesktopDriver().updateVisualStatus(error);
-	}
-
 	public void updateVisualElement(TestElement element) {
 		getDesktopDriver().updateVisualElement(element);
 	}
 
-	public void updateVisualStatus(int error, String value, String data) {
-		getDesktopDriver().updateVisualStatus(error);
+	public void updateVisualStatus(int error, long duration) {
+		getDesktopDriver().updateVisualStatus(error, duration);
+	}
+	
+	public void updateVisualStatus(int error, long duration, String value) {
+		getDesktopDriver().updateVisualStatus(error, duration);
+		getDesktopDriver().updateVisualValue(value);
+	}
+	
+	public void updateVisualStatus(int error, long duration, String value, String data) {
+		getDesktopDriver().updateVisualStatus(error, duration);
 		getDesktopDriver().updateVisualData(value, data);
 	}
 }

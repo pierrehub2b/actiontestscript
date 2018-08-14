@@ -73,8 +73,8 @@ public class FoundElement{
 
 		this(element);
 
-		Double elemX = element.getX();
-		Double elemY = element.getY();
+		final Double elemX = element.getX();
+		final Double elemY = element.getY();
 
 		this.updatePosition(elemX, elemY, channel, offsetX, offsetY);
 		this.screenX = element.getScreenX() + elemX;
@@ -238,7 +238,7 @@ public class FoundElement{
 	//----------------------------------------------------------------------------------------------------------------------
 
 	public RemoteWebElement getRemoteWebElement(RemoteWebDriver driver) {
-		RemoteWebElement element = new RemoteWebElement();
+		final RemoteWebElement element = new RemoteWebElement();
 		element.setId(id);
 		element.setParent(driver);
 		return element;

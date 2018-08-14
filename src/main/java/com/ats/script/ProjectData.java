@@ -61,7 +61,7 @@ public class ProjectData {
 	private Path reportDestinationFolderPath;
 
 	public static ProjectData getProjectData(File sourceFolder, File destinationFolder, File reportFolder) {
-		File xmlDataFile = checkLtfProjectFolder(sourceFolder);
+		final File xmlDataFile = checkLtfProjectFolder(sourceFolder);
 		if(xmlDataFile != null) {
 			return new ProjectData(xmlDataFile, destinationFolder, reportFolder);
 		}else {
@@ -71,7 +71,7 @@ public class ProjectData {
 
 	private static File checkLtfProjectFolder(File f){
 		if(f != null){
-			File xmlPropertiesFile = f.toPath().resolve(ScriptParser.ATS_PROPERTIES_FILE).toFile();
+			final File xmlPropertiesFile = f.toPath().resolve(ScriptParser.ATS_PROPERTIES_FILE).toFile();
 			if(xmlPropertiesFile.exists()){
 				return xmlPropertiesFile;
 			}else{
@@ -118,14 +118,14 @@ public class ProjectData {
 
 		folder = new File(folderPath);
 		
-		Path targetFolderPath = getTargetFolderPath();
+		final Path targetFolderPath = getTargetFolderPath();
 
 		javaDestinationFolderPath = targetFolderPath.resolve(TARGET_FOLDER_GENERATED);
 		reportDestinationFolderPath = targetFolderPath.resolve(TARGET_FOLDER_REPORT);
 	}
 
 	public void initFolders() {
-		File javaFolder = javaDestinationFolderPath.toFile();
+		final File javaFolder = javaDestinationFolderPath.toFile();
 		try {
 			Utils.deleteRecursiveJavaFiles(javaFolder);
 			javaFolder.mkdirs();
@@ -134,8 +134,8 @@ public class ProjectData {
 
 	private void parseXmlFile(File xmlPropertiesFile) {
 		try {
-			DocumentBuilder dBuilder = docFactory.newDocumentBuilder();
-			Document doc = dBuilder.parse(xmlPropertiesFile);
+			final DocumentBuilder dBuilder = docFactory.newDocumentBuilder();
+			final Document doc = dBuilder.parse(xmlPropertiesFile);
 
 			Node xmlNode = doc.getElementsByTagName("domain").item(0);
 			if(xmlNode != null){

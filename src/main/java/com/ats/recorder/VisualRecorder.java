@@ -38,7 +38,7 @@ import com.ats.script.actions.Action;
 import com.ats.tools.Utils;
 import com.exadel.flamingo.flex.messaging.amf.io.AMF3Deserializer;
 
-public class VisualRecorder {
+public class VisualRecorder implements IVisualRecorder {
 
 	private Channel channel;
 	private String outputPath;
@@ -48,6 +48,8 @@ public class VisualRecorder {
 	private boolean xml = false;
 
 	private Path xmlFolderPath;
+	
+	private long started;
 
 	public VisualRecorder(ScriptHeader header, ProjectData project, int quality, boolean xml) {
 
@@ -74,19 +76,23 @@ public class VisualRecorder {
 		if(quality > 0) {
 			this.visualQuality = quality;
 		}
+		
+		this.started = System.currentTimeMillis();
 	}
 
 	private static void saveImageFile(Path folder, String fileName, byte[] data, TestBound bound) {
 
-		InputStream in = new ByteArrayInputStream(data);
+		final InputStream in = new ByteArrayInputStream(data);
 		try {
-			BufferedImage buffImage = ImageIO.read(in);
+			final BufferedImage buffImage = ImageIO.read(in);
 
-			Graphics2D g2d = buffImage.createGraphics();
-			g2d.setColor(Color.MAGENTA);
-			g2d.setStroke(new BasicStroke(3));
-			g2d.drawRect(bound.getX().intValue()-6, bound.getY().intValue()-7, bound.getWidth().intValue(), bound.getHeight().intValue());
-			g2d.dispose();
+			if(bound != null) {
+				final Graphics2D g2d = buffImage.createGraphics();
+				g2d.setColor(Color.MAGENTA);
+				g2d.setStroke(new BasicStroke(3));
+				g2d.drawRect(bound.getX().intValue()-6, bound.getY().intValue()-7, bound.getWidth().intValue(), bound.getHeight().intValue());
+				g2d.dispose();
+			}
 
 			ImageIO.write(buffImage, "png", folder.resolve(fileName).toFile());
 
@@ -98,27 +104,30 @@ public class VisualRecorder {
 	//--------------------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------------------
 
+	@Override
 	public void setChannel(Channel channel) {
 		if(this.channel == null) {
 			channel.startVisualRecord(outputPath, scriptHeader, visualQuality);
 		}
 		this.channel = channel;
+		//updateVisualImage();
 	}
 
+	@Override
 	public void terminate() {
 		if(channel != null) {
 			channel.stopVisualRecord();
 
 			if(xml) {
 
-				Path output = Paths.get(outputPath);
-
-				File atsvFile = output.resolve(scriptHeader.getQualifiedName() + ".atsv").toFile();
+				final Path output = Paths.get(outputPath);
+				final File atsvFile = output.resolve(scriptHeader.getQualifiedName() + ".atsv").toFile();
+				
 				if(atsvFile.exists()) {
 
 					ArrayList<VisualImage> imagesList = new ArrayList<VisualImage>();
 
-					File xmlFolder = output.resolve(scriptHeader.getQualifiedName() + "_xml").toFile();
+					final File xmlFolder = output.resolve(scriptHeader.getQualifiedName() + "_xml").toFile();
 					try {
 						Utils.deleteRecursive(xmlFolder);
 					} catch (FileNotFoundException e) {}
@@ -133,24 +142,24 @@ public class VisualRecorder {
 					} catch (ParserConfigurationException e2) {
 					}
 
-					Document document= builder.newDocument();
+					final Document document= builder.newDocument();
 
 					FileInputStream fis = null;
 					try {
 
 						fis = new FileInputStream(atsvFile);
-						AMF3Deserializer amf3 = new AMF3Deserializer(fis);
+						final AMF3Deserializer amf3 = new AMF3Deserializer(fis);
 
-						Element atsRoot = document.createElement("ats");
+						final Element atsRoot = document.createElement("ats");
 						document.appendChild(atsRoot);
 
 						//------------------------------------------------------------------------------------------------------
 						// script header
 						//------------------------------------------------------------------------------------------------------
 
-						VisualReport report = (VisualReport) amf3.readObject();
+						final VisualReport report = (VisualReport) amf3.readObject();
 
-						Element script = document.createElement("script");
+						final Element script = document.createElement("script");
 						atsRoot.appendChild(script);
 
 						script.setAttribute("id", report.getId());					
@@ -188,9 +197,9 @@ public class VisualRecorder {
 
 						while(amf3.available() > 0) {
 
-							VisualAction va = (VisualAction) amf3.readObject();
+							final VisualAction va = (VisualAction) amf3.readObject();
 
-							Element action = document.createElement("action");
+							final Element action = document.createElement("action");
 							action.setAttribute("index", va.getIndex() + "");
 							action.setAttribute("type", va.getType());
 							actions.appendChild(action);
@@ -207,6 +216,10 @@ public class VisualRecorder {
 							error.setTextContent(va.getError() + "");
 							action.appendChild(error);
 							
+							Element duration = document.createElement("duration");
+							duration.setTextContent(va.getDuration() + "");
+							action.appendChild(duration);
+
 							Element passed = document.createElement("passed");
 							passed.setTextContent((va.getError() == 0) + "");
 							action.appendChild(passed);
@@ -290,7 +303,7 @@ public class VisualRecorder {
 						}
 
 						amf3.close();
-						imagesList.stream().parallel().forEach(vi -> saveImageFile(xmlFolderPath, vi.getName(), vi.getData(), vi.getBound()));
+						imagesList.parallelStream().forEach(i -> saveImageFile(xmlFolderPath, i.getName(), i.getData(), i.getBound()));
 
 					} catch (IOException e1) {
 						//e1.printStackTrace();
@@ -304,9 +317,9 @@ public class VisualRecorder {
 					}
 
 
-					TransformerFactory transformerFactory = TransformerFactory.newInstance();
+					final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 					try {
-						Transformer transformer = transformerFactory.newTransformer();
+						final Transformer transformer = transformerFactory.newTransformer();
 						transformer.transform(new DOMSource(document), new StreamResult(xmlFolder.toPath().resolve("actions.xml").toFile()));
 					} catch (TransformerConfigurationException e) {
 						//e.printStackTrace();
@@ -318,35 +331,48 @@ public class VisualRecorder {
 		}
 	}
 
+	@Override
 	public void createVisualAction(Action action) {
-		channel.createVisualAction(action.getClass().getName(), action.getLine());
+		channel.createVisualAction(action.getClass().getName(), action.getLine(), System.currentTimeMillis() - started);
 	}
 
+	@Override
 	public void updateVisualImage() {
 		channel.updateVisualImage();
 	}
 
+	@Override
 	public void updateVisualValue(String value) {
 		channel.updateVisualValue(value);
 	}
 
+	@Override
 	public void updateVisualValue(String value, String data) {
 		channel.updateVisualData(value, data);
 	}
 
+	@Override
 	public void updateVisualValue(String type, MouseDirection position) {
 		channel.updateVisualPosition(type, position.getHorizontalPos(), position.getVerticalPos());
 	}
 
-	public void updateVisualStatus(int error) {
-		channel.updateVisualStatus(error);
+	@Override
+	public void updateVisualStatus(int error, Long duration) {
+		channel.updateVisualStatus(error, duration);
 	}
 
+	@Override
 	public void updateVisualElement(TestElement element) {
 		channel.updateVisualElement(element);
 	}
 
-	public void updateVisualStatus(int error, String value, String data) {
-		channel.updateVisualStatus(error, value, data);
+	@Override
+	public void updateVisualStatus(int error, Long duration, String value, String data) {
+		channel.updateVisualStatus(error, duration, value, data);
+	}
+
+	@Override
+	public void updateVisualStatus(int error, Long duration, String value) {
+		channel.updateVisualStatus(error, duration, value);
 	}
 }

@@ -100,7 +100,8 @@ public class ActionExecuteElement extends ActionExecute {
 
 			status.setPassed(false);
 			status.setCode(ActionStatus.CHANNEL_NOT_FOUND);
-
+			status.endDuration();
+			
 		}else {
 
 			if(testElement == null) {
@@ -122,7 +123,7 @@ public class ActionExecuteElement extends ActionExecute {
 				terminateExecution(ts);
 			}
 
-			status.updateDuration();
+			//status.updateDuration();
 		}
 	}
 
@@ -150,7 +151,8 @@ public class ActionExecuteElement extends ActionExecute {
 			error = ActionStatus.OBJECT_NOT_FOUND;
 		}
 
-		testElement.terminateExecution(ts, error);
+		status.endDuration();
+		testElement.terminateExecution(ts, error, status.getDuration());
 	}
 
 	public TestElement getTestElement() {

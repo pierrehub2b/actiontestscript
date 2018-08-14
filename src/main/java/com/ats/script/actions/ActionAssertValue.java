@@ -101,8 +101,9 @@ public class ActionAssertValue extends ActionExecute {
 			error = ActionStatus.VALUES_COMPARE_FAIL;
 		}
 		
-		ts.updateVisualStatus(error, value1.getCalculated(), value2Label);
-		status.updateDuration();
+		status.endDuration();
+		ts.updateVisual(error, status.getDuration(), value1.getCalculated(), value2Label);
+
 	}
 
 	//--------------------------------------------------------

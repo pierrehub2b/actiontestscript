@@ -63,16 +63,16 @@ public class ActionStatus {
 		this.startedAt = System.currentTimeMillis();
 	}
 
-	public void updateDuration() {
-		duration = System.currentTimeMillis() - startedAt;
-	}
-
 	public void updateDuration(long currentTime) {
 		duration += System.currentTimeMillis() - currentTime;
 	}
 
-	public void resetDuration() {
+	public void startDuration() {
 		duration = System.currentTimeMillis();
+	}
+	
+	public void endDuration() {
+		duration = System.currentTimeMillis() - startedAt;
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------
@@ -171,6 +171,9 @@ public class ActionStatus {
 	}
 
 	public String getChannelInfo() {
+		if(channel == null) {
+			return "";
+		}
 		return "   - Channel : " + channel.getName() + "\n   - Application : " + channel.getApplication();
 	}
 }

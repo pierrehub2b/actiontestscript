@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
@@ -48,6 +49,15 @@ public class Main {
 
 	public static void main(String[] argsx) throws FileNotFoundException, ParserConfigurationException, TransformerException, InterruptedException, MalformedURLException {
 
+		/*try {
+			//Utils.loadCsvData("file:///D:\\agilitestWorkspace\\ats_test\\src\\assets\\data\\FichierCSVtest.csv");
+			Utils.loadCsvData("https://www.caipture.com/demo/browsers.csv");
+		} catch (IOException e3) {
+			e3.printStackTrace();
+		}
+		//Utils.loadCsvData("https://www.caipture.com/demo/browsers.csv");
+		
+		System.exit(0);
 		
 		
 		System.setProperty("webdriver.ie.driver", "C:\\Users\\huber\\.actiontestscript\\drivers\\IEDriverServer.exe");
@@ -96,218 +106,231 @@ public class Main {
 		driver.switchTo().frame(rwe);
 		
 		
-		System.exit(0);
+		System.exit(0);*/
 
-		File xmlFolder = new File("C:\\Users\\huber\\Desktop\\xml");
-		Path xmlFolderPath = xmlFolder.toPath();
-		
-		File atsvFile = new File("C:\\Users\\huber\\Desktop\\subscripts.DemoCalculatrice.atsv");
-		try {
-			Utils.deleteRecursive(xmlFolder);
-		} catch (FileNotFoundException e) {}
 
-		xmlFolder.mkdirs();
+
+		final File atsvFile = new File("D:\\agilitestWorkspace\\ats_test\\target\\report\\subscripts\\subscripts.DemoCalculatrice.atsv");
 		
-		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder builder = null;
-		try {
-			builder = factory.newDocumentBuilder();
-		} catch (ParserConfigurationException e2) {
-		}
+		Path xmlFolderPath;
 		
-		Document document= builder.newDocument();
-		
-		FileInputStream fis = null;
-		try {
-			
-			fis = new FileInputStream(atsvFile);
-			AMF3Deserializer amf3 = new AMF3Deserializer(fis);
-			
+		if(atsvFile.exists()) {
+
 			ArrayList<VisualImage> imagesList = new ArrayList<VisualImage>();
-						
-			Element atsRoot = document.createElement("ats");
-			document.appendChild(atsRoot);
-			
-			//------------------------------------------------------------------------------------------------------
-			// script header
-			//------------------------------------------------------------------------------------------------------
-			
-			VisualReport report = (VisualReport) amf3.readObject();
-			
-			Element script = document.createElement("script");
-			atsRoot.appendChild(script);
-			
-			script.setAttribute("id", report.getId());					
-			script.setAttribute("name", report.getName());
-			
-			Element description = document.createElement("description");
-			description.setTextContent(report.getDescription());
-			script.appendChild(description);
-			
-			Element author = document.createElement("author");
-			author.setTextContent(report.getAuthor());
-			script.appendChild(author);
-			
-			Element prerequisite = document.createElement("prerequisite");
-			prerequisite.setTextContent(report.getPrerequisite());
-			script.appendChild(prerequisite);
-			
-			Element executed = document.createElement("executed");
-			executed.setTextContent(report.getExecuted());
-			script.appendChild(executed);
-			
-			Element groups = document.createElement("groups");
-			groups.setTextContent(report.getGroups());
-			script.appendChild(groups);
-			
-			Element quality = document.createElement("quality");
-			quality.setTextContent(report.getQuality()+"");
-			script.appendChild(quality);
-									
-			//------------------------------------------------------------------------------------------------------
-			//------------------------------------------------------------------------------------------------------
-			
-			Element actions = document.createElement("actions");
-			atsRoot.appendChild(actions);
-			
-			while(amf3.available() > 0) {
-				
-				VisualAction va = (VisualAction) amf3.readObject();
-				
-				Element action = document.createElement("action");
-				action.setAttribute("index", va.getIndex()+"");
-				action.setAttribute("type", va.getType());
-				actions.appendChild(action);
-				
-				Element line = document.createElement("line");
-				line.setTextContent(va.getLine()+"");
-				action.appendChild(line);
-				
-				Element timeLine = document.createElement("timeLine");
-				timeLine.setTextContent(va.getTimeLine()+"");
-				action.appendChild(timeLine);
-				
-				Element passed = document.createElement("passed");
-				passed.setTextContent((va.getError() == 0) + "");
-				action.appendChild(passed);
-				
-				Element value = document.createElement("value");
-				value.setTextContent(va.getValue());
-				action.appendChild(value);
-				
-				Element data = document.createElement("data");
-				data.setTextContent(va.getData());
-				action.appendChild(data);
-				
-				Element image = document.createElement("img");
-				image.setAttribute("src", va.getImageFileName());
-				image.setAttribute("width", va.getChannelBound().getWidth().intValue()+"");
-				image.setAttribute("height", va.getChannelBound().getHeight().intValue()+"");
-				action.appendChild(image);
-				
-				Element channel = document.createElement("channel");
-				channel.setAttribute("name", va.getChannelName());
 
-				Element channelBound = document.createElement("bound");
-				Element channelX = document.createElement("x");
-				channelX.setTextContent(va.getChannelBound().getX().intValue()+"");
-				channelBound.appendChild(channelX);
-				
-				Element channelY = document.createElement("y");
-				channelY.setTextContent(va.getChannelBound().getY().intValue()+"");
-				channelBound.appendChild(channelY);
-				
-				Element channelWidth = document.createElement("width");
-				channelWidth.setTextContent(va.getChannelBound().getWidth().intValue()+"");
-				channelBound.appendChild(channelWidth);
-				
-				Element channelHeight = document.createElement("height");
-				channelHeight.setTextContent(va.getChannelBound().getHeight().intValue()+"");
-				channelBound.appendChild(channelHeight);
-				
-				channel.appendChild(channelBound);
-				action.appendChild(channel);
-								
-				if(va.getElement() != null) {
-					
-					Element element = document.createElement("element");
-					element.setAttribute("tag", va.getElement().getTag());
-					
-					Element criterias = document.createElement("criterias");
-					criterias.setTextContent(va.getElement().getCriterias());
-					element.appendChild(criterias);
-					
-					Element foundElements = document.createElement("foundElements");
-					foundElements.setTextContent(va.getElement().getFoundElements()+"");
-					element.appendChild(foundElements);
-					
-					Element searchDuration = document.createElement("searchDuration");
-					searchDuration.setTextContent(va.getElement().getSearchDuration()+"");
-					element.appendChild(searchDuration);
-					
-					Element elementBound = document.createElement("bound");
-					Element elementX = document.createElement("x");
-					elementX.setTextContent(va.getElement().getBound().getX().intValue()+"");
-					elementBound.appendChild(elementX);
-					
-					Element elementY = document.createElement("y");
-					elementY.setTextContent(va.getElement().getBound().getY().intValue()+"");
-					elementBound.appendChild(elementY);
-					
-					Element elementWidth = document.createElement("width");
-					elementWidth.setTextContent(va.getElement().getBound().getWidth().intValue()+"");
-					elementBound.appendChild(elementWidth);
-					
-					Element elementHeight = document.createElement("height");
-					elementHeight.setTextContent(va.getElement().getBound().getHeight().intValue()+"");
-					elementBound.appendChild(elementHeight);
-					
-					element.appendChild(elementBound);
-					action.appendChild(element);
-				}								
-				
-				
-			}
-			
-			amf3.close();
-			imagesList.stream().parallel().forEach(vi -> saveImageFile(xmlFolderPath, vi.getName(), vi.getData(), vi.getBound()));
-
-		} catch (IOException e1) {
-			//e1.printStackTrace();
-		} finally {
+			final File xmlFolder = new File("C:\\Users\\huber\\Desktop\\xml");
 			try {
-				if (fis != null)
-					fis.close();
-			} catch (IOException ex) {
-				//ex.printStackTrace();
+				Utils.deleteRecursive(xmlFolder);
+			} catch (FileNotFoundException e) {}
+
+			xmlFolder.mkdirs();
+			xmlFolderPath = xmlFolder.toPath();
+
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder builder = null;
+			try {
+				builder = factory.newDocumentBuilder();
+			} catch (ParserConfigurationException e2) {
+			}
+
+			final Document document= builder.newDocument();
+
+			FileInputStream fis = null;
+			try {
+
+				fis = new FileInputStream(atsvFile);
+				final AMF3Deserializer amf3 = new AMF3Deserializer(fis);
+
+				final Element atsRoot = document.createElement("ats");
+				document.appendChild(atsRoot);
+
+				//------------------------------------------------------------------------------------------------------
+				// script header
+				//------------------------------------------------------------------------------------------------------
+
+				final VisualReport report = (VisualReport) amf3.readObject();
+
+				final Element script = document.createElement("script");
+				atsRoot.appendChild(script);
+
+				script.setAttribute("id", report.getId());					
+				script.setAttribute("name", report.getName());
+
+				Element description = document.createElement("description");
+				description.setTextContent(report.getDescription());
+				script.appendChild(description);
+
+				Element author = document.createElement("author");
+				author.setTextContent(report.getAuthor());
+				script.appendChild(author);
+
+				Element prerequisite = document.createElement("prerequisite");
+				prerequisite.setTextContent(report.getPrerequisite());
+				script.appendChild(prerequisite);
+
+				Element executed = document.createElement("executed");
+				executed.setTextContent(report.getExecuted());
+				script.appendChild(executed);
+
+				Element groups = document.createElement("groups");
+				groups.setTextContent(report.getGroups());
+				script.appendChild(groups);
+
+				Element quality = document.createElement("quality");
+				quality.setTextContent(report.getQuality() + "");
+				script.appendChild(quality);
+
+				//------------------------------------------------------------------------------------------------------
+				//------------------------------------------------------------------------------------------------------
+
+				Element actions = document.createElement("actions");
+				atsRoot.appendChild(actions);
+
+				while(amf3.available() > 0) {
+
+					final VisualAction va = (VisualAction) amf3.readObject();
+
+					final Element action = document.createElement("action");
+					action.setAttribute("index", va.getIndex() + "");
+					action.setAttribute("type", va.getType());
+					actions.appendChild(action);
+
+					Element line = document.createElement("line");
+					line.setTextContent(va.getLine()+"");
+					action.appendChild(line);
+
+					Element timeLine = document.createElement("timeLine");
+					timeLine.setTextContent(va.getTimeLine() + "");
+					action.appendChild(timeLine);
+
+					Element error = document.createElement("error");
+					error.setTextContent(va.getError() + "");
+					action.appendChild(error);
+
+					Element passed = document.createElement("passed");
+					passed.setTextContent((va.getError() == 0) + "");
+					action.appendChild(passed);
+
+					Element value = document.createElement("value");
+					value.setTextContent(va.getValue());
+					action.appendChild(value);
+
+					Element data = document.createElement("data");
+					data.setTextContent(va.getData());
+					action.appendChild(data);
+
+					Element image = document.createElement("img");
+					image.setAttribute("src", va.getImageFileName());
+					image.setAttribute("width", va.getChannelBound().getWidth().intValue() + "");
+					image.setAttribute("height", va.getChannelBound().getHeight().intValue() + "");
+					action.appendChild(image);
+
+					Element channel = document.createElement("channel");
+					channel.setAttribute("name", va.getChannelName());
+
+					Element channelBound = document.createElement("bound");
+					Element channelX = document.createElement("x");
+					channelX.setTextContent(va.getChannelBound().getX().intValue() + "");
+					channelBound.appendChild(channelX);
+
+					Element channelY = document.createElement("y");
+					channelY.setTextContent(va.getChannelBound().getY().intValue() + "");
+					channelBound.appendChild(channelY);
+
+					Element channelWidth = document.createElement("width");
+					channelWidth.setTextContent(va.getChannelBound().getWidth().intValue() + "");
+					channelBound.appendChild(channelWidth);
+
+					Element channelHeight = document.createElement("height");
+					channelHeight.setTextContent(va.getChannelBound().getHeight().intValue() + "");
+					channelBound.appendChild(channelHeight);
+
+					channel.appendChild(channelBound);
+					action.appendChild(channel);
+
+					if(va.getElement() != null) {
+
+						Element element = document.createElement("element");
+						element.setAttribute("tag", va.getElement().getTag());
+
+						Element criterias = document.createElement("criterias");
+						criterias.setTextContent(va.getElement().getCriterias());
+						element.appendChild(criterias);
+
+						Element foundElements = document.createElement("foundElements");
+						foundElements.setTextContent(va.getElement().getFoundElements() + "");
+						element.appendChild(foundElements);
+
+						Element searchDuration = document.createElement("searchDuration");
+						searchDuration.setTextContent(va.getElement().getSearchDuration() + "");
+						element.appendChild(searchDuration);
+
+						Element elementBound = document.createElement("bound");
+						Element elementX = document.createElement("x");
+						elementX.setTextContent(va.getElement().getBound().getX().intValue() + "");
+						elementBound.appendChild(elementX);
+
+						Element elementY = document.createElement("y");
+						elementY.setTextContent(va.getElement().getBound().getY().intValue() + "");
+						elementBound.appendChild(elementY);
+
+						Element elementWidth = document.createElement("width");
+						elementWidth.setTextContent(va.getElement().getBound().getWidth().intValue() + "");
+						elementBound.appendChild(elementWidth);
+
+						Element elementHeight = document.createElement("height");
+						elementHeight.setTextContent(va.getElement().getBound().getHeight().intValue() + "");
+						elementBound.appendChild(elementHeight);
+
+						element.appendChild(elementBound);
+						action.appendChild(element);
+					}								
+
+					va.addImage(imagesList);
+				}
+
+				amf3.close();
+				imagesList.parallelStream().forEach(i -> saveImageFile(xmlFolderPath, i.getName(), i.getData(), i.getBound()));
+
+			} catch (IOException e1) {
+				//e1.printStackTrace();
+			} finally {
+				try {
+					if (fis != null)
+						fis.close();
+				} catch (IOException ex) {
+					//ex.printStackTrace();
+				}
+			}
+
+
+			final TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			try {
+				Transformer transformer = transformerFactory.newTransformer();
+				transformer.transform(new DOMSource(document), new StreamResult(xmlFolder.toPath().resolve("actions.xml").toFile()));
+			} catch (TransformerConfigurationException e) {
+				//e.printStackTrace();
+			} catch (TransformerException e) {
+				//e.printStackTrace();
 			}
 		}
-							
-		TransformerFactory transformerFactory = TransformerFactory.newInstance();
-		try {
-			Transformer transformer = transformerFactory.newTransformer();
-			transformer.transform(new DOMSource(document), new StreamResult(xmlFolder.toPath().resolve("actions.xml").toFile()));
-		} catch (TransformerConfigurationException e) {
-			//e.printStackTrace();
-		} catch (TransformerException e) {
-			//e.printStackTrace();
-		}
-
 	}
 	
-	private static void saveImageFile(Path xmlFolderPath, String fileName, byte[] data, TestBound bound) {
+	private static void saveImageFile(Path folder, String fileName, byte[] data, TestBound bound) {
 
-		InputStream in = new ByteArrayInputStream(data);
+		final InputStream in = new ByteArrayInputStream(data);
 		try {
-			BufferedImage buffImage = ImageIO.read(in);
+			final BufferedImage buffImage = ImageIO.read(in);
 
-			Graphics2D g2d = buffImage.createGraphics();
-			g2d.setColor(Color.MAGENTA);
-			g2d.setStroke(new BasicStroke(3));
-			g2d.drawRect(bound.getX().intValue()-6, bound.getY().intValue()-7, bound.getWidth().intValue(), bound.getHeight().intValue());
-			g2d.dispose();
+			if(bound != null) {
+				final Graphics2D g2d = buffImage.createGraphics();
+				g2d.setColor(Color.MAGENTA);
+				g2d.setStroke(new BasicStroke(3));
+				g2d.drawRect(bound.getX().intValue()-6, bound.getY().intValue()-7, bound.getWidth().intValue(), bound.getHeight().intValue());
+				g2d.dispose();
+			}
 
-			ImageIO.write(buffImage, "png", xmlFolderPath.resolve(fileName).toFile());
+			ImageIO.write(buffImage, "png", folder.resolve(fileName).toFile());
 
 		} catch (IOException e1) {
 			e1.printStackTrace();

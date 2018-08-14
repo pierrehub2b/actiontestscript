@@ -142,12 +142,12 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	protected void launchDriver(ActionStatus status, MutableCapabilities cap) {
 
-		int maxTrySearch = DriverManager.ATS.getMaxTrySearch();
-		int maxTryProperty = DriverManager.ATS.getMaxTryProperty();
+		final int maxTrySearch = DriverManager.ATS.getMaxTrySearch();
+		final int maxTryProperty = DriverManager.ATS.getMaxTryProperty();
 		
-		int scriptTimeout = DriverManager.ATS.getScriptTimeOut();
-		int pageLoadTimeout = DriverManager.ATS.getPageloadTimeOut();
-		int watchdog = DriverManager.ATS.getWatchDogTimeOut();		
+		final int scriptTimeout = DriverManager.ATS.getScriptTimeOut();
+		final int pageLoadTimeout = DriverManager.ATS.getPageloadTimeOut();
+		final int watchdog = DriverManager.ATS.getWatchDogTimeOut();		
 		
 		cap.setCapability(CapabilityType.SUPPORTS_FINDING_BY_CSS, false);
 		cap.setCapability(CapabilityType.HAS_NATIVE_EVENTS, false);
@@ -168,10 +168,10 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		if(driver != null) {
 			status.setPassed(true);
 		}else {
+			status.setPassed(false);
 			status.setCode(ActionStatus.CHANNEL_START_ERROR);
 			status.setMessage(errorMessage);
-			status.setPassed(false);
-			
+						
 			driverProcess.close();
 			return;
 		}
@@ -204,9 +204,9 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			}
 		}
 
-		String titleUid = UUID.randomUUID().toString();
+		final String titleUid = UUID.randomUUID().toString();
 		try {
-			File tempHtml = File.createTempFile("ats_", ".html");
+			final File tempHtml = File.createTempFile("ats_", ".html");
 			tempHtml.deleteOnExit();
 
 			Files.write(tempHtml.toPath(), StartHtmlPage.getAtsBrowserContent(titleUid, application, applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait(), getPropertyWait(), maxTrySearch, maxTryProperty, scriptTimeout, pageLoadTimeout, watchdog));
@@ -216,7 +216,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		maxTry = 10;
 		while(maxTry > 0) {
-			DesktopWindow window = desktopDriver.getWindowByTitle(titleUid);
+			final DesktopWindow window = desktopDriver.getWindowByTitle(titleUid);
 			if(window != null) {
 
 				channel.setApplicationData(
@@ -278,7 +278,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 				code = JS_ELEMENT_SCROLL;
 			}
 
-			ArrayList<Double> newPosition =  (ArrayList<Double>) runJavaScript(code, element.getValue(), delta);
+			final ArrayList<Double> newPosition =  (ArrayList<Double>) runJavaScript(code, element.getValue(), delta);
 
 			if(newPosition.size() > 1) {
 				element.updatePosition(newPosition.get(0), newPosition.get(1), channel, 0.0, 0.0);
@@ -291,12 +291,13 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	@Override
 	public void forceScrollElement(FoundElement element) {
-		ArrayList<Double> newPosition = (ArrayList<Double>) runJavaScript(autoScrollElement, element.getValue());
+		final ArrayList<Double> newPosition = (ArrayList<Double>) runJavaScript(autoScrollElement, element.getValue());
 		if(newPosition.size() > 1) {
 			element.updatePosition(newPosition.get(0), newPosition.get(1), channel, 0.0, 0.0);
 		}
 	}
 
+	@Override
 	public FoundElement getElementFromPoint(Double x, Double y){
 
 		if(x < channel.getSubDimension().getX() || y < channel.getSubDimension().getY()) {
@@ -316,11 +317,11 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	private FoundElement loadElement(Double x, Double y, Double offsetX, Double offsetY) {
 
-		ArrayList<Object> objectData = (ArrayList<Object>)runJavaScript(JS_ELEMENT_DATA, x - offsetX, y - offsetY);
+		final ArrayList<Object> objectData = (ArrayList<Object>)runJavaScript(JS_ELEMENT_DATA, x - offsetX, y - offsetY);
 
 		if(objectData != null){
 
-			AtsElement element = new AtsElement(objectData);
+			final AtsElement element = new AtsElement(objectData);
 
 			if(element.isIframe()){
 
@@ -342,6 +343,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		}
 	}
 
+	@Override
 	public void loadParents(FoundElement hoverElement){
 		if(hoverElement.isDesktop()){
 			hoverElement.setParent(desktopDriver.getTestElementParent(hoverElement.getId(), channel));
@@ -393,13 +395,13 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	private boolean doubleCheckAttribute(String verify, FoundElement element, String attributeName) {
 		channel.sleep(getPropertyWait());
 		
-		String current = getAttribute(element, attributeName);
+		final String current = getAttribute(element, attributeName);
 		return current != null && current.equals(verify);
 	}
 
 	private String getAttribute(FoundElement element, String attributeName) {
 
-		RemoteWebElement elem = getWebElement(element);
+		final RemoteWebElement elem = getWebElement(element);
 		String result = elem.getAttribute(attributeName);
 
 		if(result == null) {
@@ -423,14 +425,15 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	private String foundAttributeValue(String name, CalculatedProperty[] properties) {
-		Stream<CalculatedProperty> stream = Arrays.stream(properties);
-		Optional<CalculatedProperty> calc = stream.parallel().filter(c -> c.getName().equals(name)).findFirst();
+		final Stream<CalculatedProperty> stream = Arrays.stream(properties);
+		final Optional<CalculatedProperty> calc = stream.parallel().filter(c -> c.getName().equals(name)).findFirst();
 		if(calc.isPresent()) {
 			return calc.get().getValue().getCalculated();
 		}
 		return null;
 	}
 
+	@Override
 	public CalculatedProperty[] getAttributes(FoundElement element){
 		if(element.isDesktop()){
 			return desktopDriver.getElementAttributes(element.getId());
@@ -439,6 +442,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		}
 	}
 
+	@Override
 	public CalculatedProperty[] getCssAttributes(FoundElement element){
 		return getCssAttributes(getWebElement(element));
 	}
@@ -452,7 +456,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	private CalculatedProperty[] getAttributesList(RemoteWebElement element, String script) {
-		Map<String, String> result = (Map<String, String>) runJavaScript(script, element);
+		final Map<String, String> result = (Map<String, String>) runJavaScript(script, element);
 		if(result != null){
 			return result.entrySet().stream().parallel().map(e -> new CalculatedProperty(e.getKey(), e.getValue())).toArray(c -> new CalculatedProperty[c]);
 		}
@@ -460,7 +464,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	public FoundElement getTestElementParent(FoundElement element){
-		ArrayList<ArrayList<Object>> listElements = (ArrayList<ArrayList<Object>>) runJavaScript(JS_ELEMENT_PARENTS, element.getValue());
+		final ArrayList<ArrayList<Object>> listElements = (ArrayList<ArrayList<Object>>) runJavaScript(JS_ELEMENT_PARENTS, element.getValue());
 		if(listElements != null){
 			return new FoundElement(
 					channel, 
@@ -484,7 +488,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		TestBound dimension = new TestBound();
 		TestBound subDimension = new TestBound();
 
-		ArrayList<Double> response = (ArrayList<Double>) runJavaScript(JS_DOCUMENT_SIZE);
+		final ArrayList<Double> response = (ArrayList<Double>) runJavaScript(JS_DOCUMENT_SIZE);
 
 		if(response != null) {
 			dimension.update(response.get(0), response.get(1), response.get(2), response.get(3));
@@ -497,14 +501,14 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	@Override
 	public void close() {
 		if(driver != null){
-			ArrayList<String> list = new ArrayList<String>();
+			final ArrayList<String> list = new ArrayList<String>();
 
 			try {
 				list.addAll(getWindowsHandle());
 			}catch(WebDriverException e) {}
 
 			while(list.size() > 0) {
-				String winHandler = list.remove(list.size()-1);
+				final String winHandler = list.remove(list.size()-1);
 				if(list.size() == 0) {
 					closeLastWindow(new ActionStatus(channel));
 				}else {
@@ -521,14 +525,10 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	@Override
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position) {
 
-		Rectangle rect = foundElement.getRectangle();
+		final Rectangle rect = foundElement.getRectangle();
+		move(foundElement, getOffsetX(rect, position), getOffsetY(rect, position));
 
-		int offsetX = getOffsetX(rect, position);
-		int offsetY = getOffsetY(rect, position);
-
-		move(foundElement, offsetX, offsetY);
-
-		ArrayList<Double> newPosition =  (ArrayList<Double>) runJavaScript(status, JS_ELEMENT_BOUNDING, foundElement.getValue());
+		final ArrayList<Double> newPosition =  (ArrayList<Double>) runJavaScript(status, JS_ELEMENT_BOUNDING, foundElement.getValue());
 		if(newPosition.size() > 1) {
 			foundElement.updatePosition(newPosition.get(0), newPosition.get(1), channel, 0.0, 0.0);
 		}
@@ -592,7 +592,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	@Override
 	public void switchToFrameId(String id) {
-		RemoteWebElement rwe = new RemoteWebElement();
+		final RemoteWebElement rwe = new RemoteWebElement();
 		rwe.setId(id);
 		rwe.setParent(driver);
 		switchToFrame(rwe);
@@ -673,7 +673,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	@Override
 	public void closeWindow(ActionStatus status, int index) {
 
-		ArrayList<String> list = new ArrayList<String>();
+		final ArrayList<String> list = new ArrayList<String>();
 		try {
 			list.addAll(getWindowsHandle());
 		}catch(WebDriverException e) {}
@@ -700,8 +700,8 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	private void closeLastWindow(ActionStatus status) {
 
-		CloseableHttpClient httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
-		HttpDelete request = new HttpDelete(driverSession + "/window");
+		final CloseableHttpClient httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
+		final HttpDelete request = new HttpDelete(driverSession + "/window");
 		request.addHeader("content-type", "application/json");
 
 		try {
@@ -726,7 +726,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	@Override
 	public Object executeScript(ActionStatus status, String javaScript, Object... params) {
-		Object result = runJavaScript(status, "var result={};" + javaScript + ";", params);
+		final Object result = runJavaScript(status, "var result={};" + javaScript + ";", params);
 		if(status.isPassed() && result != null) {
 			status.setMessage(result.toString());
 		}
@@ -797,7 +797,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 				try {
 
-					Point pt = iframe.getLocation();
+					final Point pt = iframe.getLocation();
 
 					offsetIframeX += pt.getX();
 					offsetIframeY += pt.getY();
@@ -821,10 +821,10 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			switchToDefaultContent();
 		}
 
-		ArrayList<ArrayList<Object>> response = (ArrayList<ArrayList<Object>>) runJavaScript(searchElementScript, startElement, tagName, attributes, attributes.size());
+		final ArrayList<ArrayList<Object>> response = (ArrayList<ArrayList<Object>>) runJavaScript(searchElementScript, startElement, tagName, attributes, attributes.size());
 		if(response != null){
 
-			ArrayList<AtsElement> elements = response.parallelStream().map(e -> new AtsElement(e)).collect(Collectors.toCollection(ArrayList::new));
+			final ArrayList<AtsElement> elements = response.parallelStream().map(e -> new AtsElement(e)).collect(Collectors.toCollection(ArrayList::new));
 
 			final double elmX = initElementX + offsetIframeX;
 			final double elmY = initElementY + offsetIframeY;
@@ -871,7 +871,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	@Override
 	public void setWindowToFront() {
-		List<String> listWins = new ArrayList<>(getWindowsHandle());
+		final List<String> listWins = new ArrayList<>(getWindowsHandle());
 		if(listWins.size() > currentWindow) {
 			driver.switchTo().window(listWins.get(currentWindow));
 		}

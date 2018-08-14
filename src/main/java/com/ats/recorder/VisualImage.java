@@ -8,9 +8,13 @@ public class VisualImage {
 	private byte[] data;
 	private TestBound bound;
 
-	public VisualImage(String name, byte[] data, TestBound bound) {
+	public VisualImage(String name, byte[] data) {
 		setName(name);
 		setData(data);
+	}
+	
+	public VisualImage(String name, byte[] data, TestBound bound) {
+		this(name,  data);
 		setBound(bound);
 	}
 	

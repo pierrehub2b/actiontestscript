@@ -21,14 +21,11 @@ package com.ats.script.actions;
 
 import static org.testng.Assert.fail;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.StringJoiner;
 import java.util.regex.Matcher;
@@ -39,6 +36,7 @@ import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.Variable;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
+import com.ats.tools.Utils;
 import com.ats.tools.logger.MessageCode;
 
 public class ActionCallscript extends Action {
@@ -190,7 +188,8 @@ public class ActionCallscript extends Action {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void execute(ActionTestScript ts) {
-		super.execute(ts);
+		
+		super.execute(ts.getCurrentChannel());
 
 		try {
 
@@ -210,28 +209,15 @@ public class ActionCallscript extends Action {
 				}
 
 				if(csvUrl == null) {
-
 					status.setPassed(false);
 					status.setMessage("CSV file not found : " + csvFilePath);
-
 					return;
 				}
-
+				
 				try {
-					URLConnection urlConn = csvUrl.openConnection();
-
-					InputStreamReader inputCSV = new InputStreamReader(((URLConnection) urlConn).getInputStream());
-					BufferedReader br = new BufferedReader(inputCSV);
-
-					ArrayList<String[]> data = new ArrayList<String[]>();
-
-					String csvLine;
-					while ((csvLine = br.readLine()) != null) {
-						if(csvLine.length() > 0) {
-							data.add(csvLine.split(","));
-						}
-					}
-
+					
+					ArrayList<String[]> data = Utils.loadCsvData(csvUrl);
+					
 					for (String[] param : data) {
 						ts.getTopScript().sendInfo("Call subscript -> ", name);
 
@@ -274,6 +260,8 @@ public class ActionCallscript extends Action {
 		} catch (NoSuchMethodException e) {
 		} catch (SecurityException e) {
 		}
+		
+		status.endDuration();
 	}
 
 	private String[] getCalculatedParameters() {

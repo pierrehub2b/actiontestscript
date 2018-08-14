@@ -110,7 +110,7 @@ public final class StartHtmlPage {
 		htmlContent.append(actionWait);
 		htmlContent.append(" ms");
 		
-		htmlContent.append("<br><strong>  - Wait property check : </strong>");
+		htmlContent.append("<br><strong>  - Double check property : </strong>");
 		htmlContent.append(propertyWait);
 		htmlContent.append(" ms");
 

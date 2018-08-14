@@ -40,8 +40,13 @@ public class ActionWindowSwitch extends ActionWindow {
 	@Override
 	public void execute(ActionTestScript ts) {
 		super.execute(ts);
-		ts.switchWindow(status, getNum());
-		status.updateDuration();
-		ts.updateVisualImage();
+		
+		if(ts.getCurrentChannel() != null){
+			ts.getCurrentChannel().switchWindow(getNum());
+			status.setPassed(true);
+		}
+		
+		status.endDuration();
+		ts.updateVisualWithImage(0, status.getDuration());
 	}
 }

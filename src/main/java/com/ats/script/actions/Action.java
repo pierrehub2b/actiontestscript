@@ -21,6 +21,7 @@ package com.ats.script.actions;
 
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
+import com.ats.executor.channels.Channel;
 import com.ats.script.Script;
 
 public class Action {
@@ -49,7 +50,11 @@ public class Action {
 
 	public void execute(ActionTestScript ts){
 		setStatus(new ActionStatus(ts.getCurrentChannel()));
-		ts.newVisual(this);
+		ts.createVisual(this);
+	}
+	
+	public void execute(Channel channel){
+		setStatus(new ActionStatus(channel));
 	}
 
 	//--------------------------------------------------------

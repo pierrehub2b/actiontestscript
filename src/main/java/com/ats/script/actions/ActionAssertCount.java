@@ -92,9 +92,7 @@ public class ActionAssertCount extends ActionExecuteElement {
 	public void terminateExecution(ActionTestScript ts) {
 
 		getTestElement().checkOccurrences(ts, status, operator, value);
-		
 		status.getElement().setFoundElements(null);
-		status.updateDuration();
 	}
 
 	//--------------------------------------------------------

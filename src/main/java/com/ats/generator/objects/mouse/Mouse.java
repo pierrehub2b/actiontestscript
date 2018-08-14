@@ -32,8 +32,6 @@ public class Mouse {
 
 	public static final String DRAG = "drag";
 	public static final String DROP = "drop";
-	
-	//public static final String SCROLL = "scroll";
 
 	private String type = "undefined";
 	private MouseDirection position;

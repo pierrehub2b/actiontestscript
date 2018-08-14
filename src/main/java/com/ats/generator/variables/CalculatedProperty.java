@@ -108,9 +108,7 @@ public class CalculatedProperty implements Comparable<CalculatedProperty>{
 		if(data == null) {
 			return false;
 		}
-
-		Matcher m = getRegexpPattern().matcher(data.trim());
-		return m.matches();
+		return getRegexpPattern().matcher(data.trim()).matches();
 	}
 
 	private Pattern getRegexpPattern(){
@@ -125,7 +123,7 @@ public class CalculatedProperty implements Comparable<CalculatedProperty>{
 	}
 
 	public String getExpectedResult() {
-		String result = getName();
+		final String result = getName();
 		if(isRegexp()) {
 			return result + " match " + getValue().getCalculated();
 		}else {

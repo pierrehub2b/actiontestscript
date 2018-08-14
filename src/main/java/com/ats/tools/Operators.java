@@ -33,9 +33,6 @@ public final class Operators {
 
 	private static final String REGEXP = "=~";
 
-	//public static final Pattern SINGLE_PATTERN = Pattern.compile("(.*)(" + EQUAL + "|" + LOWER + "|" + GREATER + ")(.*)");
-	//public static final Pattern DOUBLE_PATTERN = Pattern.compile("(.*)(" + REGEXP + "|" + DIFFERENT + "|" + LOWER_EQUALS + "|" + GREATER_EQUALS + ")(.*)");
-
 	public static final Pattern REGEXP_PATTERN = Pattern.compile("(.*)" + REGEXP + "(.*)");
 	public static final Pattern EQUAL_PATTERN = Pattern.compile("(.*)" + EQUAL + "(.*)");
 

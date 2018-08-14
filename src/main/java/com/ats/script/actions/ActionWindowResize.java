@@ -103,9 +103,13 @@ public class ActionWindowResize extends ActionWindow {
 	@Override
 	public void execute(ActionTestScript ts) {
 		super.execute(ts);
-		ts.setWindowBound(status, x, y, width, height);
-		status.updateDuration();
-		ts.updateVisualImage();
+		
+		if(ts.getCurrentChannel() != null){
+			ts.getCurrentChannel().setWindowBound(x, y, width, height);
+		}
+
+		status.endDuration();
+		ts.updateVisualWithImage(0, status.getDuration());
 	}
 
 	//--------------------------------------------------------

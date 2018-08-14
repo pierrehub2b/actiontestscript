@@ -122,15 +122,15 @@ public class ScriptLoader extends Script {
 			// return values 
 			//-------------------------------------------------------------------------------------------------
 
-			StringBuilder returnValuesBuilder = new StringBuilder("");
-			CalculatedValue[] returnValues = getReturns();
+			final StringBuilder returnValuesBuilder = new StringBuilder("");
+			final CalculatedValue[] returnValues = getReturns();
 
 			if(returnValues != null) {
 				returnValuesBuilder.append("\r\n\r\n\t\t");
 				returnValuesBuilder.append(ActionTestScript.JAVA_RETURNS_FUNCTION_NAME);
 				returnValuesBuilder.append("(");
 
-				ArrayList<String> returnValuesCode = new ArrayList<String>();
+				final ArrayList<String> returnValuesCode = new ArrayList<String>();
 				for(CalculatedValue ret : returnValues){
 					returnValuesCode.add(ret.getJavaCode());
 				}
@@ -196,11 +196,11 @@ public class ScriptLoader extends Script {
 	public void generateJavaFile(){
 		if(header.getJavaDestinationFolder() != null){
 
-			File javaFile = header.getJavaFile();
+			final File javaFile = header.getJavaFile();
 			try {
 				javaFile.getParentFile().mkdirs();
 
-				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter( new FileOutputStream(javaFile, false), charset));
+				final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter( new FileOutputStream(javaFile, false), charset));
 				writer.write(getJavaCode());
 				writer.close();
 
@@ -265,11 +265,11 @@ public class ScriptLoader extends Script {
 	public static void main(String[] args) {
 		if(args.length == 1){
 
-			File scriptFile = new File(args[0]);
+			final File scriptFile = new File(args[0]);
 			if(scriptFile.exists() && scriptFile.isFile() && scriptFile.getName().toLowerCase().endsWith(ATS_EXTENSION)){
 
-				GeneratorReport report = new GeneratorReport();
-				Lexer lexer = new Lexer(report);
+				final GeneratorReport report = new GeneratorReport();
+				final Lexer lexer = new Lexer(report);
 				lexer.loadScript(scriptFile);
 			}
 		}

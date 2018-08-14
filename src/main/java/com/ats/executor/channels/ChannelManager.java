@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.executor.channels;
 
@@ -24,9 +24,10 @@ import java.util.ArrayList;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.drivers.DriverManager;
+import com.ats.script.actions.ActionChannelStart;
 
 public class ChannelManager {
-	
+
 	private Channel currentChannel;
 	private ArrayList<Channel> channelsList;
 
@@ -82,78 +83,105 @@ public class ChannelManager {
 		return null;// Channel with name : does not exists or has been closed
 	}
 
-	public void startChannel(ActionStatus status, String name, String app){
+	public void startChannel(ActionStatus status, ActionChannelStart action, String name, String app){
 		if(getChannel(name) == null){
-			Channel newChannel = new Channel(status, mainScript, driverManager, name, app);
-			if(status.isPassed()) {
-				channelsList.add(newChannel);
-				setCurrentChannel(newChannel);
-				sendInfo("Start channel", " -> " + app);
-			}else {
-				sendError(ActionStatus.CHANNEL_START_ERROR, status.getMessage());
-			}
+			final Channel newChannel = new Channel(status, mainScript, driverManager, name, app);
+
+			channelsList.add(newChannel);
+			setCurrentChannel(newChannel);
+			sendInfo("Start channel with application", app);
+
+			status.setData(getChannelsList());
+			status.setChannel(newChannel);
+
+			status.endDuration();
+			mainScript.createVisual(action, newChannel, status.getDuration(), name, app);
 		}
 	}
 
-	public boolean switchChannel(String name){
+	public void switchChannel(ActionStatus status, String name){
 
+		boolean found = false;
+
+		status.startDuration();
 		if(channelsList != null){
 			for(Channel cnl : channelsList){
 				if(cnl.getName().equals(name)){
+
+					found = true;
+
 					if(!cnl.isCurrent()) {
 						setCurrentChannel(cnl);
 						cnl.toFront();
-						
-						sendInfo("switch channel", " '" + name + "'");
+
+						sendInfo("Switch to channel", name);
+
+						status.setData(getChannelsList());
+
+						mainScript.getRecorder().setChannel(cnl);
 					}
-					return true;
 				}
 			}
 		}
-		return false;
+
+		status.setPassed(found);
+		status.endDuration();
 	}
 
-	public boolean closeChannel(String name){
+	public void closeChannel(ActionStatus status, String name){
 
-		boolean foundChannel = false;
+		status.startDuration();
 
 		if(name.length() > 0) {
+
+			Channel closeChannel = null;
+
 			for(Channel channel : channelsList){
 				if(channel.getName().equals(name)){
-					channel.close();
-					channelsList.remove(channel);
-					foundChannel = true;
-
-					sendInfo("close channel", " '" + name + "'");
+					closeChannel = channel;
 					break;
 				}
 			}
-		}else {
-			getCurrentChannel().close();
-			channelsList.remove(getCurrentChannel());
-			foundChannel = true;
-		}
 
-		if(channelsList.size() > 0){
-			setCurrentChannel(channelsList.get(0));
-			if(!foundChannel) {
-				return false;
+			if(closeChannel != null) {
+
+				channelsList.remove(closeChannel);
+				closeChannel.close();
+
+				sendInfo("Close channel");
+
+				if(channelsList.size() > 0){
+					final Channel current = channelsList.get(0);
+					setCurrentChannel(current);
+					mainScript.getRecorder().setChannel(current);
+				}else{
+					setCurrentChannel(null);
+				}
+
+				status.setPassed(true);
+				status.setData(getChannelsList());
+
+			}else {
+				status.setPassed(false);
+				status.setMessage("Channel named '" + name + "' has not be found !");
 			}
-		}else{
-			setCurrentChannel(null);
+
+		}else {
+			status.setPassed(false);
+			status.setMessage("Channel name cannot be empty !");
 		}
 
-		return true;
+		status.endDuration();
+	}
+
+	private void sendInfo(String type) {
+		mainScript.sendInfo(type, "");
 	}
 	
 	private void sendInfo(String type, String message) {
-		mainScript.sendInfo(type, " '" + message + "'");
+		mainScript.sendInfo(type, " -> " + message);
 	}
 	
-	private void sendError(int code, String message) {
-		mainScript.sendLog(code, message);
-	}
-
 	//----------------------------------------------------------------------------------------------------------------------
 	//----------------------------------------------------------------------------------------------------------------------
 

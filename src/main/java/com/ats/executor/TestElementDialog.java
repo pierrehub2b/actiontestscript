@@ -27,7 +27,6 @@ import org.openqa.selenium.NoAlertPresentException;
 import com.ats.element.FoundElement;
 import com.ats.element.SearchedElement;
 import com.ats.executor.channels.Channel;
-import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
 
@@ -110,35 +109,5 @@ public class TestElementDialog extends TestElement {
 	public CalculatedProperty[] getAttributes() {
 		CalculatedProperty prop = new CalculatedProperty("text", alert.getText());
 		return new CalculatedProperty[] {prop};
-	}
-	
-	@Override
-	public void clearText(ActionStatus status) {
-		//do nothing
-	}
-	
-	@Override
-	public void over(ActionStatus status, MouseDirection position) {
-		//do nothing
-	}
-	
-	@Override
-	public void doubleClick() {
-		//do nothing
-	}
-
-	@Override
-	public void terminateExecution(ActionTestScript script, int error) {
-		//do nothing
-	}
-
-	@Override
-	public void wheelClick(ActionStatus status) {
-		//do nothing
-	}
-
-	@Override
-	public void rightClick() {
-		//do nothing
 	}
 }

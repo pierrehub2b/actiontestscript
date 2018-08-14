@@ -67,6 +67,7 @@ public class ActionProperty extends ActionExecuteElement {
 		
 		if(status.isPassed()) {
 			String attributeValue = getTestElement().getAttribute(name);
+			status.endDuration();
 
 			if(attributeValue == null) {
 				status.setPassed(false);
@@ -74,18 +75,15 @@ public class ActionProperty extends ActionExecuteElement {
 				status.setData(name);
 				status.setMessage("Attribute '" + name + "' not found !");
 				
-				ts.updateVisualStatus(ActionStatus.ATTRIBUTE_NOT_SET, name, status.getDuration() + "");
+				ts.updateVisual(ActionStatus.ATTRIBUTE_NOT_SET, status.getDuration(), name);
 				
 			}else {
 				status.setMessage(attributeValue);
 				variable.updateValue(attributeValue);
 				
-				ts.updateVisualStatus(0, name, attributeValue);
+				ts.updateVisual(0, status.getDuration(), name, attributeValue);
 			}
 		}
-		
-		status.updateDuration();
-
 	}
 
 	//--------------------------------------------------------

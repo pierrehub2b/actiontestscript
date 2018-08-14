@@ -73,9 +73,9 @@ public class ActionComment extends Action {
 		if(ts.getCurrentChannel() != null) {
 			if(STEP_TYPE.equals(type)) {
 				super.execute(ts);
-				ts.updateVisualValue(type, comment.getCalculated());
+				status.endDuration();
+				ts.updateVisual(type, comment.getCalculated());
 			}
-			status.updateDuration();
 		}
 	}
 

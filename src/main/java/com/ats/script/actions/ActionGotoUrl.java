@@ -56,9 +56,13 @@ public class ActionGotoUrl extends ActionExecute {
 	public void execute(ActionTestScript ts) {
 		super.execute(ts);
 		
-		ts.navigate(status, url.getCalculated());
-		ts.updateVisualValue(url.getCalculated());
-		ts.updateVisualImage();
+		final String urlString = url.getCalculated();
+
+		if(ts.getCurrentChannel() != null){
+			ts.getCurrentChannel().navigate(status, urlString);
+		}
+		status.endDuration();
+		ts.updateVisualWithImage(0, status.getDuration(), urlString);
 	}
 
 	//--------------------------------------------------------

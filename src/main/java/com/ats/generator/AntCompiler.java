@@ -29,7 +29,7 @@ import org.apache.tools.ant.ProjectHelper;
 public class AntCompiler {
 	public static void main(String[] args) throws IOException {
 		if(args.length > 0) {
-			File buildFile = new File(args[0]);
+			final File buildFile = new File(args[0]);
 			if(buildFile.exists()) {
 				new AntCompiler(buildFile);
 			}
