@@ -28,6 +28,7 @@ import com.ats.element.SearchedElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.TestElement;
+import com.ats.executor.channels.Channel;
 import com.ats.script.Script;
 import com.ats.tools.Operators;
 
@@ -92,11 +93,11 @@ public class ActionExecuteElement extends ActionExecute {
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
 
-	public void execute(ActionTestScript ts, String operator, int value) {
+	public void execute(ActionTestScript ts, Channel channel, String operator, int value) {
 
-		super.execute(ts);
+		super.execute(ts, channel);
 
-		if(ts.getCurrentChannel() == null) {
+		if(channel == null) {
 
 			status.setPassed(false);
 			status.setCode(ActionStatus.CHANNEL_NOT_FOUND);
@@ -111,8 +112,6 @@ public class ActionExecuteElement extends ActionExecute {
 					testElement = ts.findObject(maxTry, searchElement, operator, value);
 				}
 
-				//ts.updateVisualElement(testElement);
-
 				status.setElement(testElement);
 				status.setSearchDuration(testElement.getTotalSearchDuration());
 				status.setData(testElement.getCount());
@@ -122,14 +121,12 @@ public class ActionExecuteElement extends ActionExecute {
 			}else {
 				terminateExecution(ts);
 			}
-
-			//status.updateDuration();
 		}
 	}
 
 	@Override
-	public void execute(ActionTestScript ts) {
-		execute(ts, Operators.GREATER, 0);
+	public void execute(ActionTestScript ts, Channel channel) {
+		execute(ts, channel, Operators.GREATER, 0);
 	}	
 
 	private void asyncExec(ActionTestScript ts) {

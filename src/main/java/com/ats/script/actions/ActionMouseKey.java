@@ -86,8 +86,9 @@ public class ActionMouseKey extends ActionMouse {
 		super.terminateExecution(ts);
 
 		if(status.isPassed()) {
-			long currentTime = System.currentTimeMillis();
 
+			ts.getRecorder().updateScreen(true);
+			
 			if(Mouse.WHEEL_CLICK.equals(getType())) {
 				getTestElement().wheelClick(status);
 			}else if(Mouse.RIGHT_CLICK.equals(getType())) {
@@ -101,8 +102,9 @@ public class ActionMouseKey extends ActionMouse {
 					getTestElement().click(status, false);
 				}
 			}
-
-			status.updateDuration(currentTime);
+			
+			status.endDuration();
+			ts.getRecorder().updateScreen(0, status.getDuration());
 		}
 	}
 

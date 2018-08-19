@@ -42,7 +42,6 @@ import com.ats.element.SearchedElement;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.channels.ChannelManager;
 import com.ats.generator.objects.Cartesian;
-import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.objects.mouse.Mouse;
 import com.ats.generator.objects.mouse.MouseKey;
@@ -161,7 +160,7 @@ public class ActionTestScript extends Script implements ITest{
 			//-----------------------------------------------------------
 
 			setLogger(new ExecutionLogger(System.out, ctx.getSuite().getXmlSuite().getVerbose()));
-			sendInfo("Starting script", " '" + testName + "'");
+			sendInfo("Starting script", " -> " + testName);
 
 			Runtime.getRuntime().addShutdownHook(new Thread() {
 				@Override
@@ -176,7 +175,7 @@ public class ActionTestScript extends Script implements ITest{
 
 	@AfterClass(alwaysRun=true)
 	public void afterClass() {
-		sendInfo("Script terminated", " '" + testName + "'");
+		sendInfo("Script terminated", " -> " + testName);
 	}
 
 	@AfterTest(alwaysRun=true)
@@ -508,25 +507,25 @@ public class ActionTestScript extends Script implements ITest{
 
 	public static final String JAVA_EXECUTE_FUNCTION_NAME = "exec";
 	public void exec(Action action){
-		action.execute(this);
+		action.execute(this, getCurrentChannel());
 	}
 
 	public void exec(int line, Action action){
 		atsCodeLine = line;
-		action.execute(this);
+		exec(action);
 		execFinished(action.getStatus(), true);
 	}
 
 	public void exec(int line, ActionExecute action){
 		atsCodeLine = line;
-		action.execute(this);
+		exec(action);
 		execFinished(action.getStatus(), action.isStop());
 	}
 
 	public void exec(int line, ActionExecuteElement action){
 		atsCodeLine = line;
 		try {
-			action.execute(this);
+			exec(action);
 			execFinished(action.getStatus(), action.isStop());
 		}catch (StaleElementReferenceException ex) {
 			sleep(200);
@@ -559,18 +558,14 @@ public class ActionTestScript extends Script implements ITest{
 
 	private IVisualRecorder recorder = new VisualRecorderNull();
 
-	public void updateRecorderChannel(Channel channel) {
-		getRecorder().setChannel(channel);
-	}
-
 	public IVisualRecorder getRecorder() {
 		return topScript.recorder;
 	}
 
 	public void setRecorder(IVisualRecorder value) {
 		if((value instanceof VisualRecorderNull && this.recorder instanceof VisualRecorder) || (value instanceof VisualRecorder && this.recorder instanceof VisualRecorderNull)) {
-			this.recorder.terminate();
-			this.recorder = value;
+			this.topScript.recorder.terminate();
+			this.topScript.recorder = value;
 		}
 	}
 
@@ -580,59 +575,5 @@ public class ActionTestScript extends Script implements ITest{
 
 	public void stopRecorder() {
 		topScript.setRecorder(new VisualRecorderNull());
-	}
-
-	public void createVisual(Action action) {
-		getRecorder().createVisualAction(action);
-	}
-	
-	public void createVisual(Action action, Channel channel, long duration, String name, String app) {
-		getRecorder().setChannel(channel);
-		createVisual(action);
-		updateVisual(0, duration, name, app);
-	}
-
-	public void updateVisual(String value) {
-		getRecorder().updateVisualValue(value);
-	}
-
-	public void updateVisualWithImage(int error, long duration) {
-		updateVisual(error, duration);
-		getRecorder().updateVisualImage();
-	}
-	
-	public void updateVisualWithImage(int error, long duration, String value) {
-		updateVisualWithImage(error, duration);
-		updateVisual(value);
-	}
-
-	public void updateVisual(String value, String data) {
-		getRecorder().updateVisualValue(value, data);
-	}
-
-	public void updateVisual(String type, MouseDirection position) {
-		getRecorder().updateVisualValue(type, position);
-	}
-
-	public void updateVisual(int error, long duration) {
-		getRecorder().updateVisualStatus(error, duration);
-	}	
-
-	public void updateVisual(int error, long duration, String value) {
-		getRecorder().updateVisualStatus(error, duration, value);
-	}
-	
-	public void updateVisual(int error, long duration, String value, String data) {
-		getRecorder().updateVisualStatus(error, duration, value, data);
-	}
-	
-	public void updateVisual(int error, long duration, String value, String data, TestElement element) {
-		updateVisual(error, duration, value, data);
-		getRecorder().updateVisualElement(element);
-	}	
-
-	public void updateVisual(int error, long duration, TestElement element) {
-		updateVisual(error, duration);
-		getRecorder().updateVisualElement(element);
 	}
 }

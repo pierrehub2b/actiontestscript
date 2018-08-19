@@ -32,6 +32,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.ats.executor.ActionTestScript;
+import com.ats.executor.channels.Channel;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.Variable;
 import com.ats.script.Script;
@@ -187,9 +188,9 @@ public class ActionCallscript extends Action {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void execute(ActionTestScript ts) {
+	public void execute(ActionTestScript ts, Channel channel) {
 		
-		super.execute(ts.getCurrentChannel());
+		super.execute(channel);
 
 		try {
 

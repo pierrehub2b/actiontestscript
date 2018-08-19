@@ -77,8 +77,6 @@ public class ActionJavascript extends ActionExecuteElement {
 		
 		super.terminateExecution(ts);
 		
-		ts.updateVisual(jsCode.getCalculated());
-		
 		status.startDuration();
 		Object result = getTestElement().executeScript(status, jsCode.getCalculated());
 		status.endDuration();
@@ -87,7 +85,7 @@ public class ActionJavascript extends ActionExecuteElement {
 			variable.updateValue(result.toString());
 		}
 
-		ts.updateVisualWithImage(0, status.getDuration());
+		ts.getRecorder().updateScreen(0, status.getDuration(), jsCode.getCalculated());
 	}
 
 	//--------------------------------------------------------

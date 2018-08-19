@@ -48,9 +48,9 @@ public class Action {
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
 
-	public void execute(ActionTestScript ts){
-		setStatus(new ActionStatus(ts.getCurrentChannel()));
-		ts.createVisual(this);
+	public void execute(ActionTestScript ts, Channel channel){
+		execute(channel);
+		ts.getRecorder().createVisualAction(this);
 	}
 	
 	public void execute(Channel channel){

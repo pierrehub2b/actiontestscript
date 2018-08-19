@@ -67,6 +67,11 @@ public class ChannelManager {
 		currentChannel = channel;
 		mainScript.setCurrentChannel(channel);
 	}
+	
+	private void noChannel() {
+		currentChannel = null;
+		mainScript.setCurrentChannel(null);
+	}
 
 	public void closeAllChannels(){
 		while(channelsList.size() > 0){
@@ -93,9 +98,9 @@ public class ChannelManager {
 
 			status.setData(getChannelsList());
 			status.setChannel(newChannel);
-
 			status.endDuration();
-			mainScript.createVisual(action, newChannel, status.getDuration(), name, app);
+			
+			mainScript.getRecorder().createVisualAction(action, status.getDuration(), name, app);
 		}
 	}
 
@@ -117,8 +122,8 @@ public class ChannelManager {
 						sendInfo("Switch to channel", name);
 
 						status.setData(getChannelsList());
-
-						mainScript.getRecorder().setChannel(cnl);
+						status.setChannel(cnl);
+						//mainScript.getRecorder().setChannel(cnl);
 					}
 				}
 			}
@@ -153,9 +158,9 @@ public class ChannelManager {
 				if(channelsList.size() > 0){
 					final Channel current = channelsList.get(0);
 					setCurrentChannel(current);
-					mainScript.getRecorder().setChannel(current);
+					status.setChannel(current);
 				}else{
-					setCurrentChannel(null);
+					noChannel();
 				}
 
 				status.setPassed(true);

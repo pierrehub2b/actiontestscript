@@ -7,7 +7,7 @@ public class VisualReport extends VisualAction{
 	private String description;
 	private String author;
 	private String prerequisite;
-	private String executed;
+	private String started;
 	private String groups;
 	private int quality;
 	
@@ -45,11 +45,11 @@ public class VisualReport extends VisualAction{
 	public void setPrerequisite(String prerequisite) {
 		this.prerequisite = prerequisite;
 	}
-	public String getExecuted() {
-		return executed;
+	public String getStarted() {
+		return started;
 	}
-	public void setExecuted(String executed) {
-		this.executed = executed;
+	public void setStarted(String value) {
+		this.started = value;
 	}
 	public String getGroups() {
 		return groups;

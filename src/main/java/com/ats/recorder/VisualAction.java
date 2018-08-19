@@ -20,6 +20,7 @@ under the License.
 package com.ats.recorder;
 
 import java.beans.Transient;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -37,6 +38,7 @@ public class VisualAction {
 	private long duration;
 
 	private ArrayList<byte[]> images;
+	private int imageRef;
 
 	private String imageType;
 
@@ -68,10 +70,6 @@ public class VisualAction {
 		if(!Arrays.equals(images.get(images.size()-1), newScreen)){
 			images.add(newScreen);
 		}
-	}
-
-	public String getImageFileName() {
-		return index + "." + imageType;
 	}
 
 	//--------------------------------------------------------
@@ -186,14 +184,32 @@ public class VisualAction {
 			this.value = value;
 		}
 	}
+	
+	public int getImageRef() {
+		return imageRef;
+	}
 
-	public void addImage(ArrayList<VisualImage> imagesList) {
+	public void setImageRef(int imageRef) {
+		this.imageRef = imageRef;
+	}
+
+	public void addImage(Path folder, ArrayList<VisualImage> imagesList) {
 		if(images.size() > 0) {
 			if(element != null && element.getBound() != null) {
-				imagesList.add(new VisualImage(getImageFileName(), images.get(0), element.getBound()));
+				
+				int imageRef = 0;
+				if(images.size() > getImageRef()) {
+					imageRef = getImageRef();
+				}
+				
+				imagesList.add(new VisualImage(folder, getImageFileName(), getImageType(), images.get(imageRef), element.getBound()));
 			}else {
-				imagesList.add(new VisualImage(getImageFileName(), images.get(images.size()-1)));
+				imagesList.add(new VisualImage(folder, getImageFileName(), getImageType(), images.get(images.size()-1)));
 			}
 		}
+	}
+
+	public String getImageFileName() {
+		return index + "." + imageType;
 	}
 }

@@ -468,8 +468,8 @@ public class DesktopDriver extends RemoteWebDriver {
 		return resp.image;
 	}
 
-	public void startVisualRecord(Channel channel, String absolutePath, ScriptHeader script, int quality) {
-		sendRequestCommand(CommandType.Record, RecordType.Start, absolutePath, script.getId(), script.getQualifiedName(), script.getDescription(), script.getAuthor(), script.getJoinedGroups(), script.getPrerequisite(), quality);
+	public void startVisualRecord(Channel channel, String absolutePath, ScriptHeader script, int quality, long started) {
+		sendRequestCommand(CommandType.Record, RecordType.Start, absolutePath, script.getId(), script.getQualifiedName(), script.getDescription(), script.getAuthor(), script.getJoinedGroups(), script.getPrerequisite(), quality, started);
 	}
 
 	public void createVisualAction(Channel channel, String actionType, int scriptLine, long timeline) {
@@ -477,8 +477,8 @@ public class DesktopDriver extends RemoteWebDriver {
 				channel.getName(), channel.getDimension().getX().intValue(), channel.getDimension().getY().intValue(), channel.getDimension().getWidth().intValue(), channel.getDimension().getHeight().intValue());
 	}
 
-	public void updateVisualImage(TestBound dimension) {
-		sendRequestCommand(CommandType.Record, RecordType.Image, dimension.getX().intValue(), dimension.getY().intValue(), dimension.getWidth().intValue(), dimension.getHeight().intValue());
+	public void updateVisualImage(TestBound dimension, boolean isRef) {
+		sendRequestCommand(CommandType.Record, RecordType.Image, dimension.getX().intValue(), dimension.getY().intValue(), dimension.getWidth().intValue(), dimension.getHeight().intValue(), isRef);
 	}
 
 	public void updateVisualValue(String value) {

@@ -1,34 +1,10 @@
 package com.ats.recorder;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 
-import javax.imageio.ImageIO;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import com.ats.executor.TestBound;
+import com.ats.executor.ActionStatus;
 import com.ats.executor.TestElement;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.MouseDirection;
@@ -36,7 +12,6 @@ import com.ats.script.ProjectData;
 import com.ats.script.ScriptHeader;
 import com.ats.script.actions.Action;
 import com.ats.tools.Utils;
-import com.exadel.flamingo.flex.messaging.amf.io.AMF3Deserializer;
 
 public class VisualRecorder implements IVisualRecorder {
 
@@ -46,8 +21,6 @@ public class VisualRecorder implements IVisualRecorder {
 
 	private int visualQuality = 3;
 	private boolean xml = false;
-
-	private Path xmlFolderPath;
 	
 	private long started;
 
@@ -79,300 +52,121 @@ public class VisualRecorder implements IVisualRecorder {
 		
 		this.started = System.currentTimeMillis();
 	}
-
-	private static void saveImageFile(Path folder, String fileName, byte[] data, TestBound bound) {
-
-		final InputStream in = new ByteArrayInputStream(data);
-		try {
-			final BufferedImage buffImage = ImageIO.read(in);
-
-			if(bound != null) {
-				final Graphics2D g2d = buffImage.createGraphics();
-				g2d.setColor(Color.MAGENTA);
-				g2d.setStroke(new BasicStroke(3));
-				g2d.drawRect(bound.getX().intValue()-6, bound.getY().intValue()-7, bound.getWidth().intValue(), bound.getHeight().intValue());
-				g2d.dispose();
-			}
-
-			ImageIO.write(buffImage, "png", folder.resolve(fileName).toFile());
-
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-	}
-
+	
 	//--------------------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------------------
-
-	@Override
-	public void setChannel(Channel channel) {
-		if(this.channel == null) {
-			channel.startVisualRecord(outputPath, scriptHeader, visualQuality);
-		}
-		this.channel = channel;
-		//updateVisualImage();
-	}
-
+	
 	@Override
 	public void terminate() {
 		if(channel != null) {
 			channel.stopVisualRecord();
-
 			if(xml) {
-
-				final Path output = Paths.get(outputPath);
-				final File atsvFile = output.resolve(scriptHeader.getQualifiedName() + ".atsv").toFile();
-				
-				if(atsvFile.exists()) {
-
-					ArrayList<VisualImage> imagesList = new ArrayList<VisualImage>();
-
-					final File xmlFolder = output.resolve(scriptHeader.getQualifiedName() + "_xml").toFile();
-					try {
-						Utils.deleteRecursive(xmlFolder);
-					} catch (FileNotFoundException e) {}
-
-					xmlFolder.mkdirs();
-					xmlFolderPath = xmlFolder.toPath();
-
-					DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-					DocumentBuilder builder = null;
-					try {
-						builder = factory.newDocumentBuilder();
-					} catch (ParserConfigurationException e2) {
-					}
-
-					final Document document= builder.newDocument();
-
-					FileInputStream fis = null;
-					try {
-
-						fis = new FileInputStream(atsvFile);
-						final AMF3Deserializer amf3 = new AMF3Deserializer(fis);
-
-						final Element atsRoot = document.createElement("ats");
-						document.appendChild(atsRoot);
-
-						//------------------------------------------------------------------------------------------------------
-						// script header
-						//------------------------------------------------------------------------------------------------------
-
-						final VisualReport report = (VisualReport) amf3.readObject();
-
-						final Element script = document.createElement("script");
-						atsRoot.appendChild(script);
-
-						script.setAttribute("id", report.getId());					
-						script.setAttribute("name", report.getName());
-
-						Element description = document.createElement("description");
-						description.setTextContent(report.getDescription());
-						script.appendChild(description);
-
-						Element author = document.createElement("author");
-						author.setTextContent(report.getAuthor());
-						script.appendChild(author);
-
-						Element prerequisite = document.createElement("prerequisite");
-						prerequisite.setTextContent(report.getPrerequisite());
-						script.appendChild(prerequisite);
-
-						Element executed = document.createElement("executed");
-						executed.setTextContent(report.getExecuted());
-						script.appendChild(executed);
-
-						Element groups = document.createElement("groups");
-						groups.setTextContent(report.getGroups());
-						script.appendChild(groups);
-
-						Element quality = document.createElement("quality");
-						quality.setTextContent(report.getQuality() + "");
-						script.appendChild(quality);
-
-						//------------------------------------------------------------------------------------------------------
-						//------------------------------------------------------------------------------------------------------
-
-						Element actions = document.createElement("actions");
-						atsRoot.appendChild(actions);
-
-						while(amf3.available() > 0) {
-
-							final VisualAction va = (VisualAction) amf3.readObject();
-
-							final Element action = document.createElement("action");
-							action.setAttribute("index", va.getIndex() + "");
-							action.setAttribute("type", va.getType());
-							actions.appendChild(action);
-
-							Element line = document.createElement("line");
-							line.setTextContent(va.getLine()+"");
-							action.appendChild(line);
-
-							Element timeLine = document.createElement("timeLine");
-							timeLine.setTextContent(va.getTimeLine() + "");
-							action.appendChild(timeLine);
-
-							Element error = document.createElement("error");
-							error.setTextContent(va.getError() + "");
-							action.appendChild(error);
-							
-							Element duration = document.createElement("duration");
-							duration.setTextContent(va.getDuration() + "");
-							action.appendChild(duration);
-
-							Element passed = document.createElement("passed");
-							passed.setTextContent((va.getError() == 0) + "");
-							action.appendChild(passed);
-
-							Element value = document.createElement("value");
-							value.setTextContent(va.getValue());
-							action.appendChild(value);
-
-							Element data = document.createElement("data");
-							data.setTextContent(va.getData());
-							action.appendChild(data);
-
-							Element image = document.createElement("img");
-							image.setAttribute("src", va.getImageFileName());
-							image.setAttribute("width", va.getChannelBound().getWidth().intValue() + "");
-							image.setAttribute("height", va.getChannelBound().getHeight().intValue() + "");
-							action.appendChild(image);
-
-							Element channel = document.createElement("channel");
-							channel.setAttribute("name", va.getChannelName());
-
-							Element channelBound = document.createElement("bound");
-							Element channelX = document.createElement("x");
-							channelX.setTextContent(va.getChannelBound().getX().intValue() + "");
-							channelBound.appendChild(channelX);
-
-							Element channelY = document.createElement("y");
-							channelY.setTextContent(va.getChannelBound().getY().intValue() + "");
-							channelBound.appendChild(channelY);
-
-							Element channelWidth = document.createElement("width");
-							channelWidth.setTextContent(va.getChannelBound().getWidth().intValue() + "");
-							channelBound.appendChild(channelWidth);
-
-							Element channelHeight = document.createElement("height");
-							channelHeight.setTextContent(va.getChannelBound().getHeight().intValue() + "");
-							channelBound.appendChild(channelHeight);
-
-							channel.appendChild(channelBound);
-							action.appendChild(channel);
-
-							if(va.getElement() != null) {
-
-								Element element = document.createElement("element");
-								element.setAttribute("tag", va.getElement().getTag());
-
-								Element criterias = document.createElement("criterias");
-								criterias.setTextContent(va.getElement().getCriterias());
-								element.appendChild(criterias);
-
-								Element foundElements = document.createElement("foundElements");
-								foundElements.setTextContent(va.getElement().getFoundElements() + "");
-								element.appendChild(foundElements);
-
-								Element searchDuration = document.createElement("searchDuration");
-								searchDuration.setTextContent(va.getElement().getSearchDuration() + "");
-								element.appendChild(searchDuration);
-
-								Element elementBound = document.createElement("bound");
-								Element elementX = document.createElement("x");
-								elementX.setTextContent(va.getElement().getBound().getX().intValue() + "");
-								elementBound.appendChild(elementX);
-
-								Element elementY = document.createElement("y");
-								elementY.setTextContent(va.getElement().getBound().getY().intValue() + "");
-								elementBound.appendChild(elementY);
-
-								Element elementWidth = document.createElement("width");
-								elementWidth.setTextContent(va.getElement().getBound().getWidth().intValue() + "");
-								elementBound.appendChild(elementWidth);
-
-								Element elementHeight = document.createElement("height");
-								elementHeight.setTextContent(va.getElement().getBound().getHeight().intValue() + "");
-								elementBound.appendChild(elementHeight);
-
-								element.appendChild(elementBound);
-								action.appendChild(element);
-							}								
-
-							va.addImage(imagesList);
-						}
-
-						amf3.close();
-						imagesList.parallelStream().forEach(i -> saveImageFile(xmlFolderPath, i.getName(), i.getData(), i.getBound()));
-
-					} catch (IOException e1) {
-						//e1.printStackTrace();
-					} finally {
-						try {
-							if (fis != null)
-								fis.close();
-						} catch (IOException ex) {
-							//ex.printStackTrace();
-						}
-					}
-
-
-					final TransformerFactory transformerFactory = TransformerFactory.newInstance();
-					try {
-						final Transformer transformer = transformerFactory.newTransformer();
-						transformer.transform(new DOMSource(document), new StreamResult(xmlFolder.toPath().resolve("actions.xml").toFile()));
-					} catch (TransformerConfigurationException e) {
-						//e.printStackTrace();
-					} catch (TransformerException e) {
-						//e.printStackTrace();
-					}
-				}
+				Utils.createXmlReport(Paths.get(outputPath), scriptHeader.getQualifiedName());
 			}
 		}
 	}
-
+	
+	private void setChannel(Channel channel) {
+		if(this.channel == null) {
+			channel.startVisualRecord(outputPath, scriptHeader, visualQuality, started);
+		}
+		this.channel = channel;
+	}
+	
+	@Override
+	public void createVisualAction(Action action, long duration, String name, String app) {
+		setChannel(action.getStatus().getChannel());
+		channel.createVisualAction(action.getClass().getName(), action.getLine(), System.currentTimeMillis() - started - duration);
+		update(0, duration, name, app);
+	}
+	
 	@Override
 	public void createVisualAction(Action action) {
+		setChannel(action.getStatus().getChannel());
 		channel.createVisualAction(action.getClass().getName(), action.getLine(), System.currentTimeMillis() - started);
 	}
-
+	
 	@Override
-	public void updateVisualImage() {
-		channel.updateVisualImage();
+	public void update(int error, long duration, String value, String data) {
+		channel.updateVisualAction(error, duration, value, data);
 	}
 
 	@Override
-	public void updateVisualValue(String value) {
-		channel.updateVisualValue(value);
+	public void update(int error, long duration, String value) {
+		channel.updateVisualAction(error, duration, value);
+	}
+	
+	@Override
+	public void updateScreen(boolean ref) {
+		channel.sleep(100);
+		channel.updateVisualAction(ref);
 	}
 
 	@Override
-	public void updateVisualValue(String value, String data) {
-		channel.updateVisualData(value, data);
+	public void update(String value) {
+		channel.updateVisualAction(value);
 	}
 
 	@Override
-	public void updateVisualValue(String type, MouseDirection position) {
-		channel.updateVisualPosition(type, position.getHorizontalPos(), position.getVerticalPos());
+	public void update(String value, String data) {
+		channel.updateVisualAction(value, data);
 	}
 
 	@Override
-	public void updateVisualStatus(int error, Long duration) {
-		channel.updateVisualStatus(error, duration);
+	public void update(String type, MouseDirection position) {
+		channel.updateVisualAction(type, position.getHorizontalPos(), position.getVerticalPos());
 	}
 
 	@Override
-	public void updateVisualElement(TestElement element) {
-		channel.updateVisualElement(element);
+	public void update(int error, long duration) {
+		channel.updateVisualAction(error, duration);
 	}
 
 	@Override
-	public void updateVisualStatus(int error, Long duration, String value, String data) {
-		channel.updateVisualStatus(error, duration, value, data);
+	public void update(TestElement element) {
+		channel.updateVisualAction(element);
 	}
 
 	@Override
-	public void updateVisualStatus(int error, Long duration, String value) {
-		channel.updateVisualStatus(error, duration, value);
+	public void updateScreen(TestElement element) {
+		channel.mouseMoveToElement(new ActionStatus(channel), element.getFoundElement(), new MouseDirection());
+		channel.updateVisualAction(element);
+	}
+	
+	//-----------------------------------------------------------------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------------------------------------------------------
+	
+	@Override
+	public void updateScreen(int error, long duration) {
+		update(error, duration);
+		updateScreen(false);
+	}
+	
+	@Override
+	public void updateScreen(int error, long duration, String value) {
+		update(error, duration, value);
+		updateScreen(false);
+	}
+	
+	@Override
+	public void updateScreen(int error, long duration, String type, MouseDirection position) {
+		update(error, duration);
+		update(type, position);
+		updateScreen(false);
+	}
+	
+	//-----------------------------------------------------------------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------------------------------------------------------
+	
+	@Override
+	public void update(int error, long duration, TestElement element) {
+		update(error, duration);
+		update(element);
+	}
+	
+	@Override
+	public void update(int error, long duration, String value, String data, TestElement element) {
+		update(error, duration, value, data);
+		update(element);
 	}
 }

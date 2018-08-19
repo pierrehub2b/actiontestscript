@@ -3,8 +3,6 @@ package com.ats.driver;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.Proxy.ProxyType;
 
-import com.google.gson.JsonObject;
-
 public class AtsProxy {
 
 	public final static String AUTO = "auto";
@@ -39,7 +37,7 @@ public class AtsProxy {
 	//------------------------------------------------------------------------------------------
 	//------------------------------------------------------------------------------------------
 
-	public Proxy getProxy() {
+	public Proxy getValue() {
 
 		Proxy proxy = new Proxy();
 
@@ -59,7 +57,7 @@ public class AtsProxy {
 		return proxy;
 	}
 
-	public JsonObject getGeckoProxy() {
+	/*public JsonObject getGeckoProxy() {
 
 		JsonObject json = new JsonObject();
 		
@@ -76,5 +74,5 @@ public class AtsProxy {
 		}
 
 		return json;
-	}
+	}*/
 }

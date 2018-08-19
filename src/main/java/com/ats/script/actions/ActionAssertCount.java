@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 
 import com.ats.element.SearchedElement;
 import com.ats.executor.ActionTestScript;
+import com.ats.executor.channels.Channel;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
 import com.ats.tools.Operators;
@@ -84,8 +85,8 @@ public class ActionAssertCount extends ActionExecuteElement {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void execute(ActionTestScript ts) {
-		super.execute(ts, operator, value);
+	public void execute(ActionTestScript ts, Channel channel) {
+		super.execute(ts, channel, operator, value);
 	}
 
 	@Override

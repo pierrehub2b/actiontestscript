@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.remote.CapabilityType;
 
 import com.ats.driver.AtsManager;
 import com.ats.executor.ActionStatus;
@@ -57,8 +56,6 @@ public class ChromeDriverEngine extends WebDriverEngine {
 			options.setBinary(applicationPath);
 		}
 		
-		options.setCapability(CapabilityType.PROXY, ats.getProxy().getProxy());
-
 		launchDriver(status, options);
 	}
 }

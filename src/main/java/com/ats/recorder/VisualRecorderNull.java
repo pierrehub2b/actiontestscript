@@ -1,16 +1,11 @@
 package com.ats.recorder;
 
 import com.ats.executor.TestElement;
-import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.script.actions.Action;
 
 public class VisualRecorderNull implements IVisualRecorder {
-
-	@Override
-	public void setChannel(Channel channel) {
-	}
-
+	
 	@Override
 	public void terminate() {
 	}
@@ -18,36 +13,64 @@ public class VisualRecorderNull implements IVisualRecorder {
 	@Override
 	public void createVisualAction(Action action) {
 	}
-
+	
 	@Override
-	public void updateVisualImage() {
+	public void updateScreen(boolean ref) {
 	}
 
 	@Override
-	public void updateVisualValue(String value) {
+	public void update(String value) {
 	}
 
 	@Override
-	public void updateVisualValue(String value, String data) {
+	public void update(String value, String data) {
 	}
 
 	@Override
-	public void updateVisualValue(String type, MouseDirection position) {
+	public void update(String type, MouseDirection position) {
 	}
 
 	@Override
-	public void updateVisualElement(TestElement element) {
+	public void update(TestElement element) {
 	}
 
 	@Override
-	public void updateVisualStatus(int error, Long duration) {
+	public void update(int error, long duration) {
 	}
 
 	@Override
-	public void updateVisualStatus(int error, Long duration, String value) {
+	public void update(int error, long duration, String value) {
 	}
 
 	@Override
-	public void updateVisualStatus(int error, Long duration, String value, String data) {
+	public void update(int error, long duration, String value, String data) {
+	}
+
+	@Override
+	public void createVisualAction(Action action, long duration, String name, String app) {
+	}
+
+	@Override
+	public void updateScreen(int error, long duration) {
+	}
+
+	@Override
+	public void updateScreen(int i, long duration, String calculated) {
+	}
+
+	@Override
+	public void update(int error, long duration, String value, String data, TestElement element) {
+	}
+
+	@Override
+	public void update(int error, long duration, TestElement element) {
+	}
+
+	@Override
+	public void updateScreen(int error, long duration, String type, MouseDirection position) {
+	}
+
+	@Override
+	public void updateScreen(TestElement element) {
 	}
 }

@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.openqa.selenium.opera.OperaOptions;
-import org.openqa.selenium.remote.CapabilityType;
 
 import com.ats.driver.AtsManager;
 import com.ats.executor.ActionStatus;
@@ -53,7 +52,6 @@ public class OperaDriverEngine extends WebDriverEngine {
 		
 		OperaOptions options = new OperaOptions();
 		options.setCapability("opera.log.level", "SEVERE");
-		options.setCapability(CapabilityType.PROXY, ats.getProxy().getProxy());
 		options.addArguments(args);
 				
 		if(applicationPath != null) {

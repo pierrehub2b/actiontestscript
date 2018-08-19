@@ -149,6 +149,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		final int pageLoadTimeout = DriverManager.ATS.getPageloadTimeOut();
 		final int watchdog = DriverManager.ATS.getWatchDogTimeOut();		
 		
+		cap.setCapability(CapabilityType.PROXY, DriverManager.ATS.getProxy().getValue());
 		cap.setCapability(CapabilityType.SUPPORTS_FINDING_BY_CSS, false);
 		cap.setCapability(CapabilityType.HAS_NATIVE_EVENTS, false);
 
@@ -292,7 +293,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	@Override
 	public void forceScrollElement(FoundElement element) {
 		final ArrayList<Double> newPosition = (ArrayList<Double>) runJavaScript(autoScrollElement, element.getValue());
-		if(newPosition.size() > 1) {
+		if(newPosition != null && newPosition.size() > 1) {
 			element.updatePosition(newPosition.get(0), newPosition.get(1), channel, 0.0, 0.0);
 		}
 	}
@@ -743,6 +744,8 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		status.setPassed(true);
 		try {
 			return driver.executeAsyncScript(javaScript + ";arguments[arguments.length-1](result);", params);
+		}catch(StaleElementReferenceException ex) {
+			throw ex;
 		}catch(Exception ex) {
 			status.setPassed(false);
 			status.setCode(ActionStatus.JAVASCRIPT_ERROR);

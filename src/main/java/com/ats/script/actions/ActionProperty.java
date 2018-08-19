@@ -74,14 +74,14 @@ public class ActionProperty extends ActionExecuteElement {
 				status.setCode(ActionStatus.ATTRIBUTE_NOT_SET);
 				status.setData(name);
 				status.setMessage("Attribute '" + name + "' not found !");
-				
-				ts.updateVisual(ActionStatus.ATTRIBUTE_NOT_SET, status.getDuration(), name);
+
+				ts.getRecorder().update(ActionStatus.ATTRIBUTE_NOT_SET, status.getDuration(), name);
 				
 			}else {
 				status.setMessage(attributeValue);
 				variable.updateValue(attributeValue);
 				
-				ts.updateVisual(0, status.getDuration(), name, attributeValue);
+				ts.getRecorder().update(0, status.getDuration(), name, attributeValue);
 			}
 		}
 	}

@@ -20,6 +20,7 @@ under the License.
 package com.ats.script.actions;
 
 import com.ats.executor.ActionTestScript;
+import com.ats.executor.channels.Channel;
 import com.ats.script.Script;
 
 public class ActionWindowClose extends ActionWindow {
@@ -38,15 +39,15 @@ public class ActionWindowClose extends ActionWindow {
 	}
 
 	@Override
-	public void execute(ActionTestScript ts) {
-		super.execute(ts);
+	public void execute(ActionTestScript ts, Channel channel) {
+		super.execute(ts, channel);
 		
-		if(ts.getCurrentChannel() != null){
-			ts.getCurrentChannel().closeWindow(status, getNum());
+		if(channel != null){
+			channel.closeWindow(status, getNum());
 			status.setPassed(true);
 		}
 		
 		status.endDuration();
-		ts.updateVisualWithImage(0, status.getDuration());
+		ts.getRecorder().updateScreen(0, status.getDuration());
 	}
 }

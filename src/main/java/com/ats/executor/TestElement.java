@@ -37,6 +37,7 @@ import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
+import com.ats.recorder.IVisualRecorder;
 import com.ats.script.actions.ActionSelect;
 import com.ats.tools.Operators;
 import com.ats.tools.logger.MessageCode;
@@ -68,6 +69,24 @@ public class TestElement{
 	private int index;
 
 	private String criterias;
+	
+	protected IVisualRecorder recorder;
+	
+	public void dispose() {
+
+		channel = null;
+		recorder = null;
+		occurrences = null;
+
+		if(parent != null) {
+			parent.dispose();
+			parent = null;
+		}
+
+		while(foundElements.size() > 0) {
+			foundElements.remove(0).dispose();
+		}
+	}
 
 	public TestElement(Channel channel, int maxTry) {
 		this.channel = channel;
@@ -140,20 +159,6 @@ public class TestElement{
 
 	protected Channel getChannel() {
 		return channel;
-	}
-
-	public void dispose() {
-
-		channel = null;
-
-		if(parent != null) {
-			parent.dispose();
-			parent = null;
-		}
-
-		while(foundElements.size() > 0) {
-			foundElements.remove(0).dispose();
-		}
 	}
 
 	private String elementTag;
@@ -524,12 +529,18 @@ public class TestElement{
 	}
 
 	public void terminateExecution(ActionTestScript script, int error, Long duration) {
-		script.updateVisual(error, duration, this);
+		recorder = script.getRecorder();
+		recorder.update(error, duration, this);
 		channel.actionTerminated();
 	}
 	
 	public void terminateExecution(ActionTestScript script, int error, Long duration, String value, String data) {
-		script.updateVisual(error, duration, value, data, this);
+		recorder = script.getRecorder();
+		recorder.update(error, duration, value, data, this);
 		channel.actionTerminated();
+	}
+	
+	public void updateScreen() {
+		recorder.updateScreen(this);
 	}
 }

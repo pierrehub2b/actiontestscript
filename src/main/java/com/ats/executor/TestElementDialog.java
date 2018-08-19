@@ -27,6 +27,7 @@ import org.openqa.selenium.NoAlertPresentException;
 import com.ats.element.FoundElement;
 import com.ats.element.SearchedElement;
 import com.ats.executor.channels.Channel;
+import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
 
@@ -75,6 +76,24 @@ public class TestElementDialog extends TestElement {
 				tryLoop--;
 			}
 		}
+	}
+	
+	@Override
+	public void updateScreen() {
+		recorder.updateScreen(true);
+	}
+	
+	@Override
+	public FoundElement getFoundElement() {
+		return null;
+	}
+	
+	@Override
+	public void over(ActionStatus status, MouseDirection position) {
+	}
+	
+	@Override
+	public void clearText(ActionStatus status) {
 	}
 	
 	@Override

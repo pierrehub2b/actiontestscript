@@ -65,6 +65,8 @@ public class ActionAssertProperty extends ActionExecuteElement {
 
 		if(status.isPassed()) {
 			
+			getTestElement().updateScreen();
+			
 			final String attributeValue = getTestElement().getAttribute(value.getName());
 			status.endDuration();		
 			
@@ -74,7 +76,8 @@ public class ActionAssertProperty extends ActionExecuteElement {
 				status.setData(value.getName());
 				status.setMessage("Attribute '" + value.getName() + "' not found !");
 
-				ts.updateVisual(ActionStatus.ATTRIBUTE_NOT_SET, status.getDuration(), value.getName());
+				ts.getRecorder().update(ActionStatus.ATTRIBUTE_NOT_SET, status.getDuration(), value.getName());
+
 			}else {
 					
 				String expectedResult = value.getExpectedResult();
@@ -84,15 +87,15 @@ public class ActionAssertProperty extends ActionExecuteElement {
 					status.setPassed(true);
 					status.setMessage(attributeValue);
 					
-					ts.updateVisual(0, status.getDuration(), expectedResult, attributeValue);
+					ts.getRecorder().update(0, status.getDuration(), expectedResult, attributeValue);
+
 				}else {
-					
 					status.setPassed(false);
 					status.setCode(ActionStatus.ATTRIBUTE_CHECK_FAIL);
 					status.setData(new String[]{attributeValue, value.getValue().getCalculated()});
 					status.setMessage("Expected result : '" + expectedResult + "'");
 					
-					ts.updateVisual(ActionStatus.ATTRIBUTE_CHECK_FAIL, status.getDuration(), expectedResult, attributeValue);
+					ts.getRecorder().update(ActionStatus.ATTRIBUTE_CHECK_FAIL, status.getDuration(), expectedResult, attributeValue);
 				}
 			}
 		}

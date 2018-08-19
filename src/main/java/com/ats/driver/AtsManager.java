@@ -343,7 +343,6 @@ public class AtsManager {
 						}
 					}
 
-
 				} catch (ParserConfigurationException e) {
 
 				} catch (SAXException e) {

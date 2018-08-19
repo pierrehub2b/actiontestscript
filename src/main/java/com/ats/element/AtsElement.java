@@ -12,6 +12,7 @@ import com.ats.executor.drivers.desktop.DesktopData;
 public class AtsElement {
 
 	private static final String IFRAME = "IFRAME";
+	private static final String FRAME = "FRAME";
 
 	private RemoteWebElement element;
 	private String id;
@@ -27,7 +28,8 @@ public class AtsElement {
 	private boolean visible = true;
 
 	public static boolean checkIframe(String value) {
-		return IFRAME.equals(value.toUpperCase());
+		value = value.toUpperCase();
+		return IFRAME.equals(value) || FRAME.equals(value);
 	}
 
 	public AtsElement() {}

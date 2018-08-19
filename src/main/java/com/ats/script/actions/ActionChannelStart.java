@@ -22,6 +22,7 @@ package com.ats.script.actions;
 import com.ats.element.SearchedElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
+import com.ats.executor.channels.Channel;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
 
@@ -44,8 +45,8 @@ public class ActionChannelStart extends ActionChannel {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void execute(ActionTestScript ts) {
-		setStatus(new ActionStatus(null));
+	public void execute(ActionTestScript ts, Channel channel) {
+		setStatus(new ActionStatus(channel));
 		ts.getChannelManager().startChannel(status, this, getName(), application.getCalculated());
 	}
 

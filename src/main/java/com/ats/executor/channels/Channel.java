@@ -415,8 +415,8 @@ public class Channel {
 	// Visual reporting
 	//----------------------------------------------------------------------------------------------------------
 
-	public void startVisualRecord(String outputPath, ScriptHeader script, int quality) {
-		getDesktopDriver().startVisualRecord(this, outputPath, script, quality);
+	public void startVisualRecord(String outputPath, ScriptHeader script, int quality, long started) {
+		getDesktopDriver().startVisualRecord(this, outputPath, script, quality, started);
 	}
 
 	public void stopVisualRecord() {
@@ -427,36 +427,36 @@ public class Channel {
 		getDesktopDriver().createVisualAction(this, actionName, scriptLine, timeline);
 	}
 
-	public void updateVisualImage() {
-		getDesktopDriver().updateVisualImage(dimension);
+	public void updateVisualAction(boolean isRef) {
+		getDesktopDriver().updateVisualImage(dimension, isRef);
 	}
 
-	public void updateVisualValue(String value) {
+	public void updateVisualAction(String value) {
 		getDesktopDriver().updateVisualValue(value);
 	}
 
-	public void updateVisualData(String value, String data) {
+	public void updateVisualAction(String value, String data) {
 		getDesktopDriver().updateVisualData(value, data);
 	}
 
-	public void updateVisualPosition(String type, MouseDirectionData hdir, MouseDirectionData vdir) {
+	public void updateVisualAction(String type, MouseDirectionData hdir, MouseDirectionData vdir) {
 		getDesktopDriver().updateVisualPosition(type, hdir, vdir);
 	}
 
-	public void updateVisualElement(TestElement element) {
+	public void updateVisualAction(TestElement element) {
 		getDesktopDriver().updateVisualElement(element);
 	}
 
-	public void updateVisualStatus(int error, long duration) {
+	public void updateVisualAction(int error, long duration) {
 		getDesktopDriver().updateVisualStatus(error, duration);
 	}
 	
-	public void updateVisualStatus(int error, long duration, String value) {
+	public void updateVisualAction(int error, long duration, String value) {
 		getDesktopDriver().updateVisualStatus(error, duration);
 		getDesktopDriver().updateVisualValue(value);
 	}
 	
-	public void updateVisualStatus(int error, long duration, String value, String data) {
+	public void updateVisualAction(int error, long duration, String value, String data) {
 		getDesktopDriver().updateVisualStatus(error, duration);
 		getDesktopDriver().updateVisualData(value, data);
 	}

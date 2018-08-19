@@ -22,7 +22,6 @@ package com.ats.executor.drivers.engines.browsers;
 import java.awt.Rectangle;
 
 import org.openqa.selenium.ie.InternetExplorerOptions;
-import org.openqa.selenium.remote.CapabilityType;
 
 import com.ats.driver.AtsManager;
 import com.ats.element.FoundElement;
@@ -44,8 +43,6 @@ public class IEDriverEngine extends WebDriverEngine {
 		ieOptions.introduceFlakinessByIgnoringSecurityDomains();
 		ieOptions.enableNativeEvents();
 		ieOptions.enablePersistentHovering();
-		
-		ieOptions.setCapability(CapabilityType.PROXY, ats.getProxy().getProxy());
 
 		launchDriver(status, ieOptions);
 	}

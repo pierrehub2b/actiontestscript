@@ -63,7 +63,6 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		options.setCapability("marionnette ","true");
 		options.setCapability("acceptSslCerts ","true");
 		options.setCapability("acceptInsecureCerts ","true");
-		options.setCapability("proxy", ats.getProxy().getGeckoProxy());
 		options.setPageLoadStrategy(PageLoadStrategy.NORMAL);
 
 		if(applicationPath != null) {

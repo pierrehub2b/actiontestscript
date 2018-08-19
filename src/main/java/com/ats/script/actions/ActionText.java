@@ -97,10 +97,12 @@ public class ActionText extends ActionExecuteElement {
 			if(status.isPassed()) {
 				getTestElement().clearText(status);
 				if(status.isPassed()) {
+					
+					ts.getRecorder().updateScreen(true);
 					getTestElement().sendText(status, text);
 					
 					status.endDuration();
-					ts.updateVisualWithImage(0, status.getDuration(), dataText);
+					ts.getRecorder().updateScreen(0, status.getDuration(), dataText);
 				}
 			}
 		}
