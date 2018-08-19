@@ -17,23 +17,20 @@ specific language governing permissions and limitations
 under the License.
 */
 
-package com.ats.executor;
+package com.ats.element;
 
 import java.util.List;
 
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.NoAlertPresentException;
 
-import com.ats.element.FoundElement;
-import com.ats.element.SearchedElement;
+import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
 
 public class TestElementDialog extends TestElement {
-
-	public static final String DIALOG_TAG = "dialog";
 	
 	private static final int waitBox = 500;
 

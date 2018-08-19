@@ -273,7 +273,6 @@ public class Utils {
 
 	public static void createXmlReport(Path output, String qualifiedName) {
 
-		//final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		final File atsvFile = output.resolve(qualifiedName + ".atsv").toFile();
 
 		if(atsvFile.exists()) {

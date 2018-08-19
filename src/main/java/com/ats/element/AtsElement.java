@@ -13,6 +13,8 @@ public class AtsElement {
 
 	private static final String IFRAME = "IFRAME";
 	private static final String FRAME = "FRAME";
+	private static final String DIALOG = "DIALOG";
+	private static final String DESKTOP = "DESK"; //TODO manage desktop elements
 
 	private RemoteWebElement element;
 	private String id;
@@ -30,6 +32,10 @@ public class AtsElement {
 	public static boolean checkIframe(String value) {
 		value = value.toUpperCase();
 		return IFRAME.equals(value) || FRAME.equals(value);
+	}
+	
+	public static boolean checkDialog(String value) {
+		return DIALOG.equals(value.toUpperCase());
 	}
 
 	public AtsElement() {}

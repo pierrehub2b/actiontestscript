@@ -36,9 +36,9 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 import com.ats.element.AtsElement;
 import com.ats.element.FoundElement;
+import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.TestBound;
-import com.ats.executor.TestElement;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.engines.desktop.DesktopDriverEngine;

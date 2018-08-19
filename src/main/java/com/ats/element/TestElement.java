@@ -17,7 +17,7 @@ specific language governing permissions and limitations
 under the License.
  */
 
-package com.ats.executor;
+package com.ats.element;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -30,9 +30,8 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
-import com.ats.element.AtsElement;
-import com.ats.element.FoundElement;
-import com.ats.element.SearchedElement;
+import com.ats.executor.ActionStatus;
+import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
@@ -43,8 +42,6 @@ import com.ats.tools.Operators;
 import com.ats.tools.logger.MessageCode;
 
 public class TestElement{
-
-	public static final String DESKTOP_PREFIX = "desk:";
 
 	public static Predicate<Integer> isOccurrencesMoreThan(Integer value) {return p -> p > value;}
 	public static Predicate<Integer> isOccurrencesLessThan(Integer value) {return p -> p < value;}

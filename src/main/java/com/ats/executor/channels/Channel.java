@@ -28,11 +28,11 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
 import com.ats.element.FoundElement;
+import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.SendKeyData;
 import com.ats.executor.TestBound;
-import com.ats.executor.TestElement;
 import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.desktop.DesktopWindow;

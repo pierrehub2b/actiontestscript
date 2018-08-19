@@ -4,8 +4,8 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
-import com.ats.executor.TestElement;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.script.ProjectData;

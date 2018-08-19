@@ -38,7 +38,10 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeSuite;
 
 import com.ats.driver.AtsManager;
+import com.ats.element.AtsElement;
 import com.ats.element.SearchedElement;
+import com.ats.element.TestElement;
+import com.ats.element.TestElementDialog;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.channels.ChannelManager;
 import com.ats.generator.objects.Cartesian;
@@ -255,7 +258,7 @@ public class ActionTestScript extends Script implements ITest{
 			list.add(criteria);
 		}
 
-		if(TestElementDialog.DIALOG_TAG.equals(tag)) {
+		if(AtsElement.checkDialog(tag)) {
 			return new TestElementDialog(
 					getCurrentChannel(), 
 					channelManager.getMaxTry(),
@@ -272,12 +275,8 @@ public class ActionTestScript extends Script implements ITest{
 		}
 	}
 
-	public TestElement findObject() {
-		return new TestElement(getCurrentChannel());
-	}
-
 	public TestElement findObject(int maxTryExecution, SearchedElement searchElement, String operator, int expectedCount) {
-		if(TestElementDialog.DIALOG_TAG.equals(searchElement.getTag().toLowerCase())) {
+		if(AtsElement.checkDialog(searchElement.getTag())) {
 			return new TestElementDialog(getCurrentChannel(), channelManager.getMaxTry() + maxTryExecution,	searchElement);
 		}else {
 			return new TestElement(	getCurrentChannel(), channelManager.getMaxTry() + maxTryExecution, operator, expectedCount,	searchElement);

@@ -1,6 +1,6 @@
 package com.ats.recorder;
 
-import com.ats.executor.TestElement;
+import com.ats.element.TestElement;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.script.actions.Action;
 

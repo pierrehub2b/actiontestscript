@@ -28,10 +28,10 @@ import org.openqa.selenium.WebElement;
 
 import com.ats.element.AtsElement;
 import com.ats.element.FoundElement;
+import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
 import com.ats.executor.TestBound;
-import com.ats.executor.TestElement;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.generator.objects.BoundData;

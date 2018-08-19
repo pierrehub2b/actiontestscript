@@ -25,9 +25,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.ats.element.SearchedElement;
+import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
-import com.ats.executor.TestElement;
 import com.ats.executor.channels.Channel;
 import com.ats.script.Script;
 import com.ats.tools.Operators;
@@ -107,7 +107,7 @@ public class ActionExecuteElement extends ActionExecute {
 
 			if(testElement == null) {
 				if(searchElement == null) {
-					testElement = ts.findObject();
+					testElement = new TestElement(channel);
 				}else {
 					testElement = ts.findObject(maxTry, searchElement, operator, value);
 				}
