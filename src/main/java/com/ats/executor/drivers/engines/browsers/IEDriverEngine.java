@@ -41,7 +41,6 @@ public class IEDriverEngine extends WebDriverEngine {
 
 		InternetExplorerOptions ieOptions = new InternetExplorerOptions();
 		ieOptions.introduceFlakinessByIgnoringSecurityDomains();
-		ieOptions.enableNativeEvents();
 		ieOptions.enablePersistentHovering();
 
 		launchDriver(status, ieOptions);
