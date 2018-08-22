@@ -66,6 +66,7 @@ public class TestElement{
 	private int index;
 
 	private String criterias;
+	private String searchedTag;
 	
 	protected IVisualRecorder recorder;
 	
@@ -85,9 +86,23 @@ public class TestElement{
 		}
 	}
 
+	public TestElement(Channel channel) {
+		this.channel = channel;
+		this.index = 0;
+		this.foundElements = new ArrayList<FoundElement>();
+		this.foundElements.add(new FoundElement(channel));
+		this.count = 1;
+	}
+	
 	public TestElement(Channel channel, int maxTry) {
 		this.channel = channel;
 		this.maxTry = maxTry;
+	}
+	
+	public TestElement(FoundElement element, Channel currentChannel) {
+		this(currentChannel);
+		this.foundElements.add(element);
+		this.count = getElementsCount();
 	}
 
 	public TestElement(Channel channel, int maxTry, String operator, int expectedCount) {
@@ -124,14 +139,6 @@ public class TestElement{
 		initSearch(tag, criterias);
 	}
 
-	public TestElement(Channel channel) {
-		this.channel = channel;
-		this.index = 0;
-		this.foundElements = new ArrayList<FoundElement>();
-		this.foundElements.add(new FoundElement(channel));
-		this.count = 1;
-	}
-
 	public TestElement(Channel channel, int maxTry, String operator, int expectedCount, SearchedElement searchElement) {
 
 		this(channel, maxTry, operator, expectedCount);
@@ -144,12 +151,6 @@ public class TestElement{
 		initSearch(searchElement.getTag(), searchElement.getCriterias());
 	}
 
-	public TestElement(FoundElement element, Channel currentChannel) {
-		this(currentChannel);
-		this.foundElements.add(element);
-		this.count = getElementsCount();
-	}
-
 	protected int getMaxTry() {
 		return maxTry;
 	}
@@ -158,13 +159,11 @@ public class TestElement{
 		return channel;
 	}
 
-	private String elementTag;
-
 	private void initSearch(String tag, List<CalculatedProperty> properties) {
 
 		if(channel != null){
 
-			elementTag = tag;
+			searchedTag = tag;
 			criterias = tag;
 
 			searchDuration = System.currentTimeMillis();
@@ -258,8 +257,8 @@ public class TestElement{
 		}
 	}
 
-	public String getElementTag() {
-		return elementTag;
+	public String getSearchedTag() {
+		return searchedTag;
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------

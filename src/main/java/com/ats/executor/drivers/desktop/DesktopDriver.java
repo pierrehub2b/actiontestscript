@@ -513,7 +513,7 @@ public class DesktopDriver extends RemoteWebDriver {
 
 		sendRequestCommand(CommandType.Record, RecordType.Element, 
 				x.intValue(), y.intValue(), w.intValue(), h.intValue(), 
-				element.getTotalSearchDuration(), numElements, element.getCriterias(), element.getElementTag());
+				element.getTotalSearchDuration(), numElements, element.getCriterias(), element.getSearchedTag());
 	}
 
 	public void updateVisualPosition(String type, MouseDirectionData hdir, MouseDirectionData vdir) {
@@ -544,7 +544,7 @@ public class DesktopDriver extends RemoteWebDriver {
 
 		DesktopResponse response = null;
 		String data = StringUtils.join(request, DESKTOP_REQUEST_SEPARATOR);
-		int maxTry = 30;
+		int maxTry = 20;
 
 		while((response = sendRequest(data)) == null && maxTry > 0) {
 			try {

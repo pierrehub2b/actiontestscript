@@ -22,8 +22,6 @@ package com.ats.executor;
 import static org.testng.Assert.fail;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 
 import org.openqa.selenium.Keys;
@@ -38,10 +36,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeSuite;
 
 import com.ats.driver.AtsManager;
-import com.ats.element.AtsElement;
 import com.ats.element.SearchedElement;
-import com.ats.element.TestElement;
-import com.ats.element.TestElementDialog;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.channels.ChannelManager;
 import com.ats.generator.objects.Cartesian;
@@ -122,7 +117,7 @@ public class ActionTestScript extends Script implements ITest{
 
 	@BeforeClass(alwaysRun=true)
 	public void beforeAtsTest(ITestContext ctx) {
-
+		
 		final TestRunner runner = (TestRunner) ctx;
 		setTestName(this.getClass().getName());
 
@@ -245,42 +240,6 @@ public class ActionTestScript extends Script implements ITest{
 	public void tearDown(){
 		sendInfo("Closing drivers ...", "");
 		getChannelManager().tearDown();
-	}
-
-	//----------------------------------------------------------------------------------------------------------
-	// Script's test object
-	//----------------------------------------------------------------------------------------------------------
-
-	public TestElement findObject(TestElement parent, String tag, String operator, int expectedCount, CalculatedProperty...criterias) {
-
-		final List<CalculatedProperty> list = new ArrayList<CalculatedProperty>();
-		for (CalculatedProperty criteria : criterias) {
-			list.add(criteria);
-		}
-
-		if(AtsElement.checkDialog(tag)) {
-			return new TestElementDialog(
-					getCurrentChannel(), 
-					channelManager.getMaxTry(),
-					list);
-		}else {
-			return new TestElement(
-					getCurrentChannel(), 
-					channelManager.getMaxTry(),
-					operator,
-					expectedCount,
-					parent, 
-					tag,
-					list);
-		}
-	}
-
-	public TestElement findObject(int maxTryExecution, SearchedElement searchElement, String operator, int expectedCount) {
-		if(AtsElement.checkDialog(searchElement.getTag())) {
-			return new TestElementDialog(getCurrentChannel(), channelManager.getMaxTry() + maxTryExecution,	searchElement);
-		}else {
-			return new TestElement(	getCurrentChannel(), channelManager.getMaxTry() + maxTryExecution, operator, expectedCount,	searchElement);
-		}
 	}
 
 	//----------------------------------------------------------------------------------------------------------

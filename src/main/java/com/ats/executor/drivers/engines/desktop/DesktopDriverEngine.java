@@ -154,6 +154,18 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 		}
 	}
 	
+	public String getOsVersion() {
+		return osVersion;
+	}
+
+	public String getOsName() {
+		return osName;
+	}
+	
+	//---------------------------------------------------------------------------------------------------------------------
+	// 
+	//---------------------------------------------------------------------------------------------------------------------
+
 	@Override
 	public void waitAfterAction() {
 		actionWait();

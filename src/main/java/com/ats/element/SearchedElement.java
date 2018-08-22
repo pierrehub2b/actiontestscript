@@ -33,6 +33,9 @@ import com.ats.script.Script;
 
 public class SearchedElement {
 
+	private static final String DIALOG = "DIALOG";
+	private static final String DESKTOP = "DESK-";
+	
 	private static final Pattern OBJECT_PATTERN = Pattern.compile("(.*)\\[(.*)\\]", Pattern.CASE_INSENSITIVE);
 	private static final Pattern OBJECT_INDEX_PATTERN = Pattern.compile("\\s*?index\\((\\d+)\\)\\s*?");
 
@@ -96,6 +99,14 @@ public class SearchedElement {
 				criterias.remove(0).dispose();
 			}
 		}
+	}
+	
+	public boolean isDialog() {
+		return DIALOG.equals(tag.toUpperCase());
+	}
+	
+	public boolean isDesktop() {
+		return tag != null && tag.toUpperCase().startsWith(DESKTOP);
 	}
 
 	private void addCriteria(Script script, String data){

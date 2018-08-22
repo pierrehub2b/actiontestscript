@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 
 import com.ats.element.SearchedElement;
 import com.ats.element.TestElement;
+import com.ats.element.TestElementDialog;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
@@ -109,7 +110,11 @@ public class ActionExecuteElement extends ActionExecute {
 				if(searchElement == null) {
 					testElement = new TestElement(channel);
 				}else {
-					testElement = ts.findObject(maxTry, searchElement, operator, value);
+					if(searchElement.isDialog()) {
+						testElement = new TestElementDialog(channel, ts.getChannelManager().getMaxTry() + maxTry, searchElement);
+					}else {
+						testElement = new TestElement(channel, ts.getChannelManager().getMaxTry() + maxTry, operator, value, searchElement);
+					}
 				}
 
 				status.setElement(testElement);

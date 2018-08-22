@@ -65,7 +65,7 @@
 		<lib.slf4j.version>1.7.25</lib.slf4j.version>
 		<lib.mxparser.version>4.1.1</lib.mxparser.version>
 		<lib.selenium.version>3.14.0</lib.selenium.version>
-		<lib.testng.version>6.14.2</lib.testng.version>
+		<lib.testng.version>6.14.3</lib.testng.version>
 		<lib.junit.version>LATEST</lib.junit.version>
 		<lib.apache.ant.version>LATEST</lib.apache.ant.version>
 		<lib.apache.cli.version>1.4</lib.apache.cli.version>
