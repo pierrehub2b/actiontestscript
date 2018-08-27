@@ -105,11 +105,11 @@ public class EdgeDriverEngine extends WebDriverEngine {
 	}
 
 	@Override
-	public void sendTextData(ActionStatus status, FoundElement element, ArrayList<SendKeyData> textActionList) {
+	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {
 		boolean enterKey = false;
 
 		for(SendKeyData sequence : textActionList) {
-			element.getValue().sendKeys(sequence.getSequence());
+			element.getWebElement().sendKeys(sequence.getSequence());
 			if(sequence.isEnterKey()) {
 				enterKey = true;
 			}

@@ -1,7 +1,8 @@
 package actiontestscript;
 
-import java.io.FileNotFoundException;
-import java.net.MalformedURLException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Paths;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -11,7 +12,7 @@ import com.ats.tools.Utils;
 
 public class Main {
 
-	public static void main(String[] argsx) throws FileNotFoundException, ParserConfigurationException, TransformerException, InterruptedException, MalformedURLException {
+	public static void main(String[] argsx) throws ParserConfigurationException, TransformerException, InterruptedException, IOException {
 
 		/*try {
 			//Utils.loadCsvData("file:///D:\\agilitestWorkspace\\ats_test\\src\\assets\\data\\FichierCSVtest.csv");
@@ -63,6 +64,31 @@ public class Main {
 		
 		
 		System.exit(0);*/
+		
+		String[] commands = new String[] {"explorer", "shell:appsFolder\\Microsoft.BingWeather_8wekyb3d8bbwe!App"};
+		
+		
+		Runtime rt = Runtime.getRuntime();
+		Process proc = rt.exec(commands);
+
+		BufferedReader stdInput = new BufferedReader(new 
+		     InputStreamReader(proc.getInputStream()));
+
+		BufferedReader stdError = new BufferedReader(new 
+		     InputStreamReader(proc.getErrorStream()));
+
+		// read the output from the command
+		System.out.println("Here is the standard output of the command:\n");
+		String s = null;
+		while ((s = stdInput.readLine()) != null) {
+		    System.out.println(s);
+		}
+
+		// read any errors from the attempted command
+		System.out.println("Here is the standard error of the command (if any):\n");
+		while ((s = stdError.readLine()) != null) {
+		    System.out.println(s);
+		}
 
 		Utils.createXmlReport(Paths.get("D:\\agilitestWorkspace\\ats_test\\target\\report\\subscripts"), "subscripts.CheckoutForm");
 	}

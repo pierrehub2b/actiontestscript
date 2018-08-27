@@ -22,7 +22,6 @@ package com.ats.executor.drivers.engines.browsers;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.SocketTimeoutException;
-import java.util.ArrayList;
 
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -38,7 +37,6 @@ import com.ats.driver.AtsManager;
 import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
-import com.ats.executor.SendKeyData;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
@@ -106,13 +104,6 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	@Override
 	public void middleClick(ActionStatus status, TestElement element) {
 		middleClickSimulation(status, element);
-	}
-
-	@Override
-	public void sendTextData(ActionStatus status, FoundElement element, ArrayList<SendKeyData> textActionList) {
-		for(SendKeyData sequence : textActionList) {
-			element.getValue().sendKeys(sequence.getDataSequence());
-		}
 	}
 
 	@Override

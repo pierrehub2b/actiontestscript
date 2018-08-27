@@ -151,7 +151,8 @@ public class Channel {
 		this.driverVersion = dVersion;
 		Optional<ProcessHandle> procs = ProcessHandle.of(pid);
 		if(procs.isPresent()) {
-			this.process = procs.get();		}
+			this.process = procs.get();	
+		}
 	}
 
 	public void setApplicationData(int handle) {
@@ -378,8 +379,8 @@ public class Channel {
 		engine.clearText(status, element);
 	}
 
-	public void sendTextData(ActionStatus status, FoundElement foundElement, ArrayList<SendKeyData> textActionList) {
-		engine.sendTextData(status, foundElement, textActionList);
+	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {
+		engine.sendTextData(status, element, textActionList);
 		actionTerminated();
 	}
 

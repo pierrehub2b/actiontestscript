@@ -20,12 +20,15 @@ under the License.
 package com.ats.executor.drivers.engines.browsers;
 
 import java.awt.Rectangle;
+import java.util.ArrayList;
 
 import org.openqa.selenium.ie.InternetExplorerOptions;
 
 import com.ats.driver.AtsManager;
 import com.ats.element.FoundElement;
+import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
+import com.ats.executor.SendKeyData;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
@@ -68,5 +71,18 @@ public class IEDriverEngine extends WebDriverEngine {
 	@Override
 	public void drop() {
 		getDesktopDriver().mouseRelease();
+	}
+	
+	@Override
+	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {
+		if(element.isNumeric()) {
+			for(SendKeyData sequence : textActionList) {
+				element.executeScript(status, "value='" + sequence.getData() + "'");
+			}
+		}else {
+			for(SendKeyData sequence : textActionList) {
+				element.getWebElement().sendKeys(sequence.getSequence());
+			}
+		}
 	}
 }

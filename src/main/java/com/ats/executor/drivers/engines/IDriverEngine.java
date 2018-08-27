@@ -59,7 +59,7 @@ public interface IDriverEngine{
 	public void middleClick(ActionStatus status, TestElement element);
 	public WebElement getRootElement();
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position);
-	public void sendTextData(ActionStatus status, FoundElement foundElement, ArrayList<SendKeyData> textActionList);
+	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList);
 	public void clearText(ActionStatus status, FoundElement foundElement);
 	public void setWindowBound(BoundData x, BoundData y, BoundData width, BoundData height);
 	public void forceScrollElement(FoundElement value);

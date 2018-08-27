@@ -324,7 +324,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	}
 	
 	@Override
-	public void sendTextData(ActionStatus status, FoundElement element, ArrayList<SendKeyData> textActionList) {
+	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {
 		for(SendKeyData sequence : textActionList) {
 			getDesktopDriver().sendKeys(sequence.getSequenceDesktop());
 		}

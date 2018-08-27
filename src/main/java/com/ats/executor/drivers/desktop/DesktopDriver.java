@@ -305,9 +305,7 @@ public class DesktopDriver extends RemoteWebDriver {
 	public List<DesktopWindow> getWindowsByPid(Long pid) {
 
 		final DesktopResponse resp = sendRequestCommand(CommandType.Window, WindowType.List, pid);
-
 		if(resp.windows != null) {
-			//resp.windows.forEach(e -> windows.add(e));
 			return resp.windows;
 		}else {
 			return new ArrayList<DesktopWindow>();

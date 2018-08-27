@@ -17,6 +17,7 @@ public class AtsElement {
 	private RemoteWebElement element;
 	private String id;
 	private String tag;
+	private boolean numeric;
 	private Double width;
 	private Double height;
 	private Double x;
@@ -37,15 +38,16 @@ public class AtsElement {
 	public AtsElement(ArrayList<Object> data) {
 		this.element = (RemoteWebElement) data.get(0);
 		this.tag = data.get(1).toString();
-		this.width = (Double) data.get(2);
-		this.height = (Double) data.get(3);
-		this.x = (Double) data.get(4);
-		this.y = (Double) data.get(5);
-		this.screenX = (Double) data.get(6);
-		this.screenY = (Double) data.get(7);
+		this.numeric = (boolean) data.get(2);
+		this.width = (Double) data.get(3);
+		this.height = (Double) data.get(4);
+		this.x = (Double) data.get(5);
+		this.y = (Double) data.get(6);
+		this.screenX = (Double) data.get(7);
+		this.screenY = (Double) data.get(8);
 		
-		if(data.size() > 8) {
-			this.attributes = (Map<String, String>) data.get(8);
+		if(data.size() > 9) {
+			this.attributes = (Map<String, String>) data.get(9);
 		}
 	}
 
@@ -115,6 +117,10 @@ public class AtsElement {
 
 	public void setVisible(boolean visible) {
 		this.visible = visible;
+	}
+	
+	public boolean isNumeric() {
+		return numeric;
 	}
 
 	//----------------------------------------------------------------------------------------

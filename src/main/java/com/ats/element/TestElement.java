@@ -229,6 +229,10 @@ public class TestElement{
 	public FoundElement getFoundElement() {
 		return foundElements.get(index); 
 	}
+	
+	public boolean isNumeric() {
+		return getFoundElement().isNumeric();
+	}
 
 	public WebElement getWebElement() {
 		return getFoundElement().getValue();
@@ -349,7 +353,7 @@ public class TestElement{
 	//-------------------------------------------------------------------------------------------------------------------
 
 	public void sendText(ActionStatus status, CalculatedValue text) {
-		channel.sendTextData(status, getFoundElement(), text.getCalculatedText());
+		channel.sendTextData(status, this, text.getCalculatedText());
 	}
 
 	public void clearText(ActionStatus status) {

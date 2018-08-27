@@ -109,16 +109,13 @@ public class SendKeyData {
 
 		return sequence;
 	}	
+	
+	public String getData() {
+		return data;
+	}	
 
 	public boolean isEnterKey() {
 		return enterKey;
-	}
-
-	public CharSequence getDataSequence() {
-		if(chord != null) {
-			return chord;
-		}
-		return data;
 	}
 
 	public String getSequenceDesktop() {

@@ -15,7 +15,7 @@ const eltsLength = elts.length;
 
 var addElement = function (e, a){
 	let rec = e.getBoundingClientRect();
-	result[result.length] = [e, e.tagName, rec.width+0.0001, rec.height+0.0001, rec.left+0.0001, rec.top+0.0001, screenOffsetX, screenOffsetY, a];
+	result[result.length] = [e, e.tagName, e.getAttribute('inputmode')=='numeric', rec.width+0.0001, rec.height+0.0001, rec.left+0.0001, rec.top+0.0001, screenOffsetX, screenOffsetY, a];
 };
 
 if(attributesLen == 0){

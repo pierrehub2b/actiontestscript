@@ -49,6 +49,7 @@ public class FoundElement{
 	private RemoteWebElement value;
 	private FoundElement parent;
 	private boolean visible = true;
+	private boolean numeric = false;
 
 	//------------------------------------------------------------------------------------------------------------------------------
 	// contructors
@@ -67,6 +68,7 @@ public class FoundElement{
 		this.tag = element.getTag();
 		this.width = element.getWidth();
 		this.height = element.getHeight();
+		this.numeric = element.isNumeric();
 	}
 
 	public FoundElement(AtsElement element, Channel channel, Double offsetX, Double offsetY) {
@@ -155,6 +157,10 @@ public class FoundElement{
 
 	public Double getScreenY() {
 		return screenY;
+	}
+	
+	public boolean isNumeric() {
+		return numeric;
 	}
 	
 	//----------------------------------------------------------------------------------------------------------------------
