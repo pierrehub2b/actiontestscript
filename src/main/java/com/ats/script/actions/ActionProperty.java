@@ -27,25 +27,22 @@ import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.Variable;
 import com.ats.script.Script;
 
-public class ActionProperty extends ActionExecuteElement {
+public class ActionProperty extends ActionReturnVariable {
 
 	public static final String SCRIPT_LABEL = "property";
 
 	private String name;
-	private Variable variable;
 
 	public ActionProperty() {}
 
-	public ActionProperty(Script script, boolean stop, ArrayList<String> options, String name, String varName, ArrayList<String> objectArray) {
-		super(script, stop, options, objectArray);
+	public ActionProperty(Script script, boolean stop, ArrayList<String> options, String name, Variable variable, ArrayList<String> objectArray) {
+		super(script, stop, options, objectArray, variable);
 		setName(name);
-		setVariable(script.getVariable(varName, true));
 	}
 
 	public ActionProperty(Script script, boolean stop, int maxTry, SearchedElement element, String name, Variable variable) {
-		super(script, stop, maxTry, element);
+		super(script, stop, maxTry, element, variable);
 		setName(name);
-		setVariable(variable);
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -54,7 +51,7 @@ public class ActionProperty extends ActionExecuteElement {
 
 	@Override
 	public String getJavaCode() {
-		return super.getJavaCode() + ", \"" + name + "\", " + variable.getName() + ")";
+		return super.getJavaCode() + ", \"" + name + "\", " + getVariable().getName() + ")";
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -79,7 +76,7 @@ public class ActionProperty extends ActionExecuteElement {
 				
 			}else {
 				status.setMessage(attributeValue);
-				variable.updateValue(attributeValue);
+				updateVariableValue(attributeValue);
 				
 				ts.getRecorder().update(0, status.getDuration(), name, attributeValue);
 			}
@@ -96,13 +93,5 @@ public class ActionProperty extends ActionExecuteElement {
 
 	public void setName(String value) {
 		this.name = value;
-	}
-
-	public Variable getVariable() {
-		return variable;
-	}
-
-	public void setVariable(Variable variable) {
-		this.variable = variable;
 	}
 }

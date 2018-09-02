@@ -23,37 +23,27 @@ import java.util.ArrayList;
 
 import com.ats.element.SearchedElement;
 import com.ats.executor.ActionTestScript;
-import com.ats.generator.parsers.ScriptParser;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.Variable;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
 
-public class ActionJavascript extends ActionExecuteElement {
+public class ActionJavascript extends ActionReturnVariable {
 
 	public static final String SCRIPT_LABEL = "javascript";
 
 	private CalculatedValue jsCode;
-	private Variable variable;
 
 	public ActionJavascript() {}
 
-	public ActionJavascript(ScriptLoader script, boolean stop, ArrayList<String> options, String code, ArrayList<String> objectArray) {
-		super(script, stop, options, objectArray);
-
-		String[] variableArray = code.split(ScriptParser.ATS_ASSIGN_SEPARATOR);
-
-		setJsCode(new CalculatedValue(script, variableArray[0].trim()));
-
-		if(variableArray.length == 2){
-			setVariable(script.getVariable(variableArray[1].trim(), true));
-		}
+	public ActionJavascript(ScriptLoader script, boolean stop, ArrayList<String> options, String code, Variable variable, ArrayList<String> objectArray) {
+		super(script, stop, options, objectArray, variable);
+		setJsCode(new CalculatedValue(script, code));
 	}
 
 	public ActionJavascript(Script script, boolean stop, int maxTry, SearchedElement element, CalculatedValue jsCode, Variable variable) {
-		super(script, stop, maxTry, element);
+		super(script, stop, maxTry, element, variable);
 		setJsCode(jsCode);
-		setVariable(variable);
 	}
 	
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -63,8 +53,8 @@ public class ActionJavascript extends ActionExecuteElement {
 	@Override
 	public String getJavaCode() {
 		String variableCode = "null";
-		if(variable != null) {
-			variableCode = variable.getName();
+		if(getVariable() != null) {
+			variableCode = getVariable().getName();
 		}
 		return super.getJavaCode() + ", " + jsCode.getJavaCode() + ", " + variableCode + ")";
 	}
@@ -81,8 +71,8 @@ public class ActionJavascript extends ActionExecuteElement {
 		Object result = getTestElement().executeScript(status, jsCode.getCalculated());
 		status.endDuration();
 		
-		if(variable != null && result != null) {
-			variable.updateValue(result.toString());
+		if(getVariable() != null && result != null) {
+			updateVariableValue(result.toString());
 		}
 
 		ts.getRecorder().updateScreen(0, status.getDuration(), jsCode.getCalculated());
@@ -98,13 +88,5 @@ public class ActionJavascript extends ActionExecuteElement {
 
 	public void setJsCode(CalculatedValue jsCode) {
 		this.jsCode = jsCode;
-	}
-
-	public Variable getVariable() {
-		return variable;
-	}
-
-	public void setVariable(Variable variable) {
-		this.variable = variable;
 	}
 }

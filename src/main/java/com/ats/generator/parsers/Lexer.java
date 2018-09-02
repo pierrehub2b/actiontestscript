@@ -32,6 +32,7 @@ import com.ats.generator.objects.mouse.Mouse;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.EnvironmentValue;
 import com.ats.generator.variables.ParameterValue;
+import com.ats.generator.variables.Variable;
 import com.ats.script.ProjectData;
 import com.ats.script.ScriptLoader;
 import com.ats.script.actions.Action;
@@ -233,8 +234,20 @@ public class Lexer {
 					//---------------------------------------------------------------------------
 					
 					}else if(ActionJavascript.SCRIPT_LABEL.equals(actionType)){
+						
+						String[] jsDataArray = dataOne.split(ScriptParser.ATS_ASSIGN_SEPARATOR);
 
-						action = new ActionJavascript(script, stopExec, options, dataOne, dataArray);
+						if(jsDataArray.length > 0) {
+
+							Variable variable = null;
+							String jsCode = jsDataArray[0].trim();
+							
+							if(jsDataArray.length > 1) {
+								variable = script.getVariable(jsDataArray[1].trim(), true);
+							}
+							
+							action = new ActionJavascript(script, stopExec, options, jsCode, variable, dataArray);
+						}
 
 					//---------------------------------------------------------------------------
 					// Property
@@ -244,9 +257,9 @@ public class Lexer {
 
 						String[] propertyArray = dataOne.split(ScriptParser.ATS_ASSIGN_SEPARATOR);
 
-						if(propertyArray.length == 2){
+						if(propertyArray.length > 1){
 							String propertyName = propertyArray[0].trim();
-							String variable = propertyArray[1].trim();
+							Variable variable = script.getVariable(propertyArray[1].trim(), true);
 							action = new ActionProperty(script, stopExec, options, propertyName, variable, dataArray);
 						}
 
