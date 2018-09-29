@@ -38,17 +38,8 @@ import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.recorder.IVisualRecorder;
 import com.ats.script.actions.ActionSelect;
-import com.ats.tools.Operators;
-import com.ats.tools.logger.MessageCode;
 
 public class TestElement{
-
-	public static Predicate<Integer> isOccurrencesMoreThan(Integer value) {return p -> p > value;}
-	public static Predicate<Integer> isOccurrencesLessThan(Integer value) {return p -> p < value;}
-	public static Predicate<Integer> isOccurrencesLessOrEqualThan(Integer value) {return p -> p <= value;}
-	public static Predicate<Integer> isOccurrencesMoreOrEqualThan(Integer value) {return p -> p >= value;}
-	public static Predicate<Integer> isOccurrencesDifferent(Integer value) {return p -> p != value;}
-	public static Predicate<Integer> isOccurrencesEqual(Integer value) {return p -> p == value;}
 	
 	private Channel channel;
 
@@ -69,9 +60,53 @@ public class TestElement{
 	private String searchedTag;
 	
 	protected IVisualRecorder recorder;
-	
-	public void dispose() {
 
+	public TestElement(Channel channel) {
+		this.channel = channel;
+		this.index = 0;
+		this.foundElements = new ArrayList<FoundElement>();
+		this.foundElements.add(new FoundElement(channel));
+		this.count = 1;
+		this.occurrences = p -> true;
+	}
+	
+	public TestElement(Channel channel, int maxTry) {
+		this.channel = channel;
+		this.maxTry = maxTry;
+	}
+	
+	public TestElement(FoundElement element, Channel currentChannel) {
+		this(currentChannel);
+		this.foundElements.add(element);
+		this.count = getElementsCount();
+	}
+
+	public TestElement(Channel channel, int maxTry, Predicate<Integer> occurrences) {
+		this(channel, maxTry);
+		this.occurrences = occurrences;
+	}
+
+	public TestElement(Channel channel, int maxTry, Predicate<Integer> occurrences, TestElement parent, String tag, List<CalculatedProperty> criterias) {
+
+		this(channel, maxTry, occurrences);
+		this.parent = parent;
+
+		initSearch(tag, criterias);
+	}
+
+	public TestElement(Channel channel, int maxTry, Predicate<Integer> occurrences, SearchedElement searchElement) {
+
+		this(channel, maxTry, occurrences);
+		this.index = searchElement.getIndex();
+
+		if(searchElement.getParent() != null){
+			this.parent = new TestElement(channel, maxTry, occurrences, searchElement.getParent());
+		}
+
+		initSearch(searchElement.getTag(), searchElement.getCriterias());
+	}
+		
+	public void dispose() {
 		channel = null;
 		recorder = null;
 		occurrences = null;
@@ -86,71 +121,6 @@ public class TestElement{
 		}
 	}
 
-	public TestElement(Channel channel) {
-		this.channel = channel;
-		this.index = 0;
-		this.foundElements = new ArrayList<FoundElement>();
-		this.foundElements.add(new FoundElement(channel));
-		this.count = 1;
-	}
-	
-	public TestElement(Channel channel, int maxTry) {
-		this.channel = channel;
-		this.maxTry = maxTry;
-	}
-	
-	public TestElement(FoundElement element, Channel currentChannel) {
-		this(currentChannel);
-		this.foundElements.add(element);
-		this.count = getElementsCount();
-	}
-
-	public TestElement(Channel channel, int maxTry, String operator, int expectedCount) {
-
-		this(channel, maxTry);
-
-		switch (operator) {
-		case Operators.DIFFERENT :
-			this.occurrences = isOccurrencesDifferent(expectedCount);
-			break;
-		case Operators.GREATER :
-			this.occurrences = isOccurrencesMoreThan(expectedCount);
-			break;
-		case Operators.GREATER_EQUALS :
-			this.occurrences = isOccurrencesMoreOrEqualThan(expectedCount);
-			break;
-		case Operators.LOWER :
-			this.occurrences = isOccurrencesLessThan(expectedCount);
-			break;
-		case Operators.LOWER_EQUALS :
-			this.occurrences = isOccurrencesLessOrEqualThan(expectedCount);
-			break;
-		default :
-			this.occurrences = isOccurrencesEqual(expectedCount);
-			break;
-		}
-	}
-
-	public TestElement(Channel channel, int maxTry, String operator, int expectedCount, TestElement parent, String tag, List<CalculatedProperty> criterias) {
-
-		this(channel, maxTry, operator, expectedCount);
-		this.parent = parent;
-
-		initSearch(tag, criterias);
-	}
-
-	public TestElement(Channel channel, int maxTry, String operator, int expectedCount, SearchedElement searchElement) {
-
-		this(channel, maxTry, operator, expectedCount);
-		this.index = searchElement.getIndex();
-
-		if(searchElement.getParent() != null){
-			this.parent = new TestElement(channel, maxTry, operator, expectedCount, searchElement.getParent());
-		}
-
-		initSearch(searchElement.getTag(), searchElement.getCriterias());
-	}
-
 	protected int getMaxTry() {
 		return maxTry;
 	}
@@ -159,7 +129,7 @@ public class TestElement{
 		return channel;
 	}
 
-	private void initSearch(String tag, List<CalculatedProperty> properties) {
+	public void initSearch(String tag, List<CalculatedProperty> properties) {
 
 		if(channel != null){
 
@@ -167,8 +137,6 @@ public class TestElement{
 			criterias = tag;
 
 			searchDuration = System.currentTimeMillis();
-
-			int trySearch = 0;
 
 			if(parent == null || (parent != null && parent.getCount() > 0)){
 
@@ -182,16 +150,7 @@ public class TestElement{
 					attributes.add(property.getName());
 				}
 
-				while (trySearch < maxTry) {
-					foundElements = channel.getDriverEngine().findElements(channel, this, tag, attributes, fullPredicate);
-					if(isValidated()) {
-						trySearch = maxTry;
-					}else {
-						channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "Searching element", maxTry - trySearch);
-						progressiveWait(trySearch);
-						trySearch++;
-					}
-				}
+				foundElements = channel.getDriverEngine().findElements(channel, this, tag, attributes, fullPredicate);
 			}
 
 			searchDuration = System.currentTimeMillis() - this.searchDuration;
@@ -204,17 +163,11 @@ public class TestElement{
 		}
 	}
 
-	private void progressiveWait(int current) {
-		channel.sleep(200 + current*50);
-	}
-
 	private int getElementsCount() {
-		if(index == 0) {
-			return foundElements.size();
-		}else if(foundElements.size() >= index){
+		if(index > 0 && foundElements.size() >= index) {
 			return 1;
-		}else {
-			return 0;
+		}else{
+			return foundElements.size();
 		}
 	}
 
@@ -247,14 +200,11 @@ public class TestElement{
 	}
 
 	public boolean isValidated() {
-		if(occurrences == null) {
-			return true;
-		}
 		return occurrences.test(getElementsCount());
 	}
 
 	public boolean isIframe() {
-		if(isValidated() && foundElements.size() > 0){
+		if(foundElements.size() > index){
 			return getFoundElement().isIframe();
 		}else{
 			return false;
@@ -420,30 +370,30 @@ public class TestElement{
 		}
 	}
 
-	public void click(ActionStatus status, Keys key) {
+	public void click(ActionStatus status, MouseDirection position, Keys key) {
 		channel.keyDown(key);
-		click(status, false);
+		click(status, position, false);
 		channel.keyUp(key);
 	}	
 
-	public void click(ActionStatus status, boolean hold) {
+	public void click(ActionStatus status, MouseDirection position, boolean hold) {
 
 		int tryLoop = maxTry;
-		mouseClick(status, hold);
+		mouseClick(status, position, hold);
 
 		while(tryLoop > 0 && !status.isPassed()) {
-			progressiveWait(tryLoop);
-			mouseClick(status, hold);
+			channel.progressiveWait(tryLoop);
+			mouseClick(status, position, hold);
 		}
 	}
 
-	private void mouseClick(ActionStatus status, boolean hold) {
+	private void mouseClick(ActionStatus status, MouseDirection position, boolean hold) {
 
 		status.setPassed(false);
 
 		try {
 
-			channel.mouseClick(getFoundElement(), hold);
+			channel.mouseClick(getFoundElement(), position, hold);
 			status.setPassed(true);
 
 			return;
@@ -462,8 +412,8 @@ public class TestElement{
 		}*/
 	}
 
-	public void drag(ActionStatus status) {
-		click(status, true);
+	public void drag(ActionStatus status, MouseDirection position) {
+		click(status, position, true);
 	}
 
 	public void drop(ActionStatus status) {
@@ -471,8 +421,8 @@ public class TestElement{
 		status.setPassed(true);
 	}
 
-	public void swipe(ActionStatus status, int hDirection, int vDirection) {
-		drag(status);
+	public void swipe(ActionStatus status, MouseDirection position, int hDirection, int vDirection) {
+		drag(status, position);
 		channel.moveByOffset(hDirection, vDirection);
 		drop(status);
 	}
@@ -485,8 +435,8 @@ public class TestElement{
 		}
 	}
 
-	public void wheelClick(ActionStatus status) {
-		channel.middleClick(status, this);
+	public void wheelClick(ActionStatus status, MouseDirection position) {
+		channel.middleClick(status, position, this);
 	}
 
 	public void doubleClick() {

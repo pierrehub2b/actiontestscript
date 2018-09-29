@@ -144,18 +144,18 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		final int maxTrySearch = DriverManager.ATS.getMaxTrySearch();
 		final int maxTryProperty = DriverManager.ATS.getMaxTryProperty();
-		
+
 		final int scriptTimeout = DriverManager.ATS.getScriptTimeOut();
 		final int pageLoadTimeout = DriverManager.ATS.getPageloadTimeOut();
 		final int watchdog = DriverManager.ATS.getWatchDogTimeOut();		
-		
+
 		cap.setCapability(CapabilityType.PROXY, DriverManager.ATS.getProxy().getValue());
 		cap.setCapability(CapabilityType.SUPPORTS_FINDING_BY_CSS, false);
 		cap.setCapability(CapabilityType.HAS_NATIVE_EVENTS, false);
 
 		int maxTry = 20;
 		String errorMessage = null;
-		
+
 		while(maxTry > 0) {
 			try{
 				driver = new RemoteWebDriver(driverProcess.getDriverServerUrl(), cap);
@@ -172,7 +172,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			status.setPassed(false);
 			status.setCode(ActionStatus.CHANNEL_START_ERROR);
 			status.setMessage(errorMessage);
-						
+
 			driverProcess.close();
 			return;
 		}
@@ -259,9 +259,11 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	public void waitAfterAction() {
 		actionWait();
 	}
-	
+
 	private Set<String> getWindowsHandle() {
-		driver.switchTo().defaultContent();
+		try {
+			driver.switchTo().defaultContent();
+		}catch(WebDriverException ex) {}
 		return driver.getWindowHandles();
 	}
 
@@ -395,7 +397,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	private boolean doubleCheckAttribute(String verify, FoundElement element, String attributeName) {
 		channel.sleep(getPropertyWait());
-		
+
 		final String current = getAttribute(element, attributeName);
 		return current != null && current.equals(verify);
 	}
@@ -473,7 +475,6 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 					initElementX, 
 					initElementY);
 		}
-
 		return null;
 	}
 
@@ -540,12 +541,21 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	@Override
-	public void mouseClick(FoundElement element, boolean hold) {
+	public void mouseClick(FoundElement element, MouseDirection position, boolean hold) {
+		
+		final Rectangle rect = element.getRectangle();
+		final int xOffset = getOffsetX(rect, position);
+		final int yOffset = getOffsetY(rect, position);
+			
+		Actions act = actions.moveToElement(element.getValue(), xOffset, yOffset);
 		if(hold) {
-			actions.clickAndHold(element.getValue()).perform();
+			act = act.clickAndHold();
+			//actions.clickAndHold(element.getValue()).perform();
 		}else {
-			actions.click(element.getValue()).perform();
+			act = act.click();
+			//actions.click(element.getValue()).perform();
 		}
+		act.build().perform();
 	}
 
 	@Override
@@ -740,7 +750,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	protected Object runJavaScript(ActionStatus status, String javaScript, Object ... params) {
-		
+
 		status.setPassed(true);
 		try {
 			return driver.executeAsyncScript(javaScript + ";arguments[arguments.length-1](result);", params);
@@ -751,7 +761,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			status.setCode(ActionStatus.JAVASCRIPT_ERROR);
 			status.setMessage(ex.getMessage());
 		}
-		
+
 		return null;
 	}
 
@@ -839,12 +849,12 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	@Override
-	public void middleClick(ActionStatus status, TestElement element) {
+	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {
 		runJavaScript(status, JS_MIDDLE_CLICK, element.getWebElement());
 	}
 
-	protected void middleClickSimulation(ActionStatus status, TestElement element) {
-		element.click(status, Keys.CONTROL);
+	protected void middleClickSimulation(ActionStatus status, MouseDirection position, TestElement element) {
+		element.click(status, position, Keys.CONTROL);
 	}
 
 	@Override
@@ -868,7 +878,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	@Override
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {
 		for(SendKeyData sequence : textActionList) {
-			actions.sendKeys(element.getWebElement(), sequence.getSequence()).perform();
+			element.getWebElement().sendKeys(sequence.getSequenceWithDigit());
 		}
 	}
 

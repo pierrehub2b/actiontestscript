@@ -28,8 +28,8 @@ public final class Operators {
 	public static final String GREATER = ">";
 
 	public static final String DIFFERENT = "<>";
-	public static final String LOWER_EQUALS = "<=";
-	public static final String GREATER_EQUALS = ">=";
+	public static final String LOWER_EQUAL = "<=";
+	public static final String GREATER_EQUAL = ">=";
 
 	private static final String REGEXP = "=~";
 
@@ -51,17 +51,15 @@ public final class Operators {
 		case DIFFERENT:
 			code += "DIFFERENT";
 			break;
-		case LOWER_EQUALS:
-			code += "LOWER_EQUALS";
+		case LOWER_EQUAL:
+			code += "LOWER_EQUAL";
 			break;
-		case GREATER_EQUALS:
-			code += "GREATER_EQUALS";
+		case GREATER_EQUAL:
+			code += "GREATER_EQUAL";
 			break;
 		default:
 			code += "EQUAL";
 		}
-
 		return code;
 	}
-
 }

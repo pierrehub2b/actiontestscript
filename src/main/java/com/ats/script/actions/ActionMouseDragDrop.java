@@ -49,7 +49,7 @@ public class ActionMouseDragDrop extends ActionMouse {
 		super.terminateExecution(ts);
 		
 		if(Mouse.DRAG.equals(getType())) {
-			getTestElement().drag(status);
+			getTestElement().drag(status, getPosition());
 		}else if(Mouse.DROP.equals(getType())) {
 			getTestElement().drop(status);
 		}

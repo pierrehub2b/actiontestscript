@@ -15,12 +15,13 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.script.actions;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,6 +33,7 @@ import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
 import com.ats.script.Script;
 import com.ats.tools.Operators;
+import com.ats.tools.logger.MessageCode;
 
 public class ActionExecuteElement extends ActionExecute {
 
@@ -93,7 +95,7 @@ public class ActionExecuteElement extends ActionExecute {
 
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
-
+	
 	public void execute(ActionTestScript ts, Channel channel, String operator, int value) {
 
 		super.execute(ts, channel);
@@ -103,17 +105,38 @@ public class ActionExecuteElement extends ActionExecute {
 			status.setPassed(false);
 			status.setCode(ActionStatus.CHANNEL_NOT_FOUND);
 			status.endDuration();
-			
+
 		}else {
 
 			if(testElement == null) {
 				if(searchElement == null) {
-					testElement = new TestElement(channel);
+					initElement(new TestElement(channel));
 				}else {
+					
+					int searchMaxTry = ts.getChannelManager().getMaxTry() + maxTry;
+					if(searchMaxTry < 1) {
+						searchMaxTry = 1;
+					}
+
 					if(searchElement.isDialog()) {
-						testElement = new TestElementDialog(channel, ts.getChannelManager().getMaxTry() + maxTry, searchElement);
+						initElement(new TestElementDialog(channel, searchMaxTry, searchElement));
 					}else {
-						testElement = new TestElement(channel, ts.getChannelManager().getMaxTry() + maxTry, operator, value, searchElement);
+
+						final Predicate<Integer> predicate = getPredicate(operator, value);
+						
+						int trySearch = 0;
+						while (trySearch < searchMaxTry) {
+							
+							initElement(new TestElement(channel, searchMaxTry, predicate, searchElement));
+							
+							if(testElement.isValidated()) {
+								trySearch = searchMaxTry;
+							}else {
+								trySearch++;
+								channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "Searching element", searchMaxTry - trySearch);
+								channel.progressiveWait(trySearch);
+							}
+						}
 					}
 				}
 
@@ -127,6 +150,22 @@ public class ActionExecuteElement extends ActionExecute {
 				terminateExecution(ts);
 			}
 		}
+	}
+	
+	private Predicate<Integer> getPredicate(String operator, int value) {
+		switch (operator) {
+		case Operators.DIFFERENT :
+			return p -> p != value;
+		case Operators.GREATER :
+			return p -> p > value;
+		case Operators.GREATER_EQUAL :
+			return p -> p >= value;
+		case Operators.LOWER :
+			return p -> p < value;
+		case Operators.LOWER_EQUAL :
+			return p -> p <= value;
+		}
+		return p -> p == value;
 	}
 
 	@Override
@@ -143,7 +182,7 @@ public class ActionExecuteElement extends ActionExecute {
 	public void terminateExecution(ActionTestScript ts) {
 
 		int error = 0;
-		
+
 		if(testElement.isValidated()) {
 			status.setPassed(true);
 		}else {
@@ -160,12 +199,12 @@ public class ActionExecuteElement extends ActionExecute {
 	public TestElement getTestElement() {
 		return testElement;
 	}
-
-	public void reinit() {
+	
+	public void initElement(TestElement element) {
 		if(testElement != null) {
 			testElement.dispose();
-			testElement = null;
 		}
+		testElement = element;
 	}
 
 	//--------------------------------------------------------

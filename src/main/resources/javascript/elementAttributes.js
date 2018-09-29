@@ -8,7 +8,7 @@ for(var i=0, len=element.attributes.length; i<len; i++){
 	}
 };
 
-textValue = element.innerText || element.textContent;
+textValue = element.textContent;
 if(textValue){
 	result['text'] = textValue.trim().replace(/\xA0/g," ").replace(/\s+/g," ");
 }

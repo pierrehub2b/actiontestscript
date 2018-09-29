@@ -53,6 +53,7 @@ public class Channel {
 
 	private ActionTestScript mainScript;
 
+	private int scrollUnit = DriverManager.ATS.getScrollUnit();
 	private TestBound dimension = DriverManager.ATS.getApplicationBound();
 	private TestBound subDimension;
 
@@ -302,6 +303,10 @@ public class Channel {
 	// Browser's secific parameters
 	//----------------------------------------------------------------------------------------------------------
 
+	public void progressiveWait(int value) {
+		sleep(200 + value*50);
+	}
+	
 	public void sleep(int ms){
 		mainScript.sleep(ms);
 	}
@@ -358,11 +363,11 @@ public class Channel {
 	//----------------------------------------------------------------------------------------------------------
 
 	public void scroll(FoundElement foundElement, int delta) {
-		engine.scroll(foundElement, delta);
+		engine.scroll(foundElement, delta*scrollUnit);
 	}
 
-	public void middleClick(ActionStatus status, TestElement element) {
-		engine.middleClick(status, element);
+	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {
+		engine.middleClick(status, position, element);
 	}
 
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position) {
@@ -370,8 +375,8 @@ public class Channel {
 		actionTerminated();
 	}
 
-	public void mouseClick(FoundElement element, boolean hold) {
-		engine.mouseClick(element, hold);
+	public void mouseClick(FoundElement element, MouseDirection position, boolean hold) {
+		engine.mouseClick(element, position, hold);
 		actionTerminated();
 	}
 

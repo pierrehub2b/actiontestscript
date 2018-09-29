@@ -39,6 +39,7 @@ import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.WebDriverEngine;
+import com.ats.generator.objects.MouseDirection;
 
 public class EdgeDriverEngine extends WebDriverEngine {
 
@@ -80,8 +81,8 @@ public class EdgeDriverEngine extends WebDriverEngine {
 	}
 	
 	@Override
-	public void middleClick(ActionStatus status, TestElement element) {
-		middleClickSimulation(status, element);
+	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {
+		middleClickSimulation(status, position, element);
 	}
 	
 	@Override
@@ -109,7 +110,7 @@ public class EdgeDriverEngine extends WebDriverEngine {
 		boolean enterKey = false;
 
 		for(SendKeyData sequence : textActionList) {
-			element.getWebElement().sendKeys(sequence.getSequence());
+			element.getWebElement().sendKeys(sequence.getSequenceWithDigit());
 			if(sequence.isEnterKey()) {
 				enterKey = true;
 			}

@@ -245,8 +245,10 @@ public class FoundElement{
 
 	public RemoteWebElement getRemoteWebElement(RemoteWebDriver driver) {
 		final RemoteWebElement element = new RemoteWebElement();
-		element.setId(id);
+		
 		element.setParent(driver);
+		element.setId(id);
+		
 		return element;
 	}
 

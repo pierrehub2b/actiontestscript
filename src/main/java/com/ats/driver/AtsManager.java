@@ -61,6 +61,8 @@ public class AtsManager {
 	private static final int MAX_TRY_SEARCH = 15;
 	private static final int MAX_TRY_PROPERTY = 10;
 	
+	private static final int SCROLL_UNIT = 100;
+	
 	//-----------------------------------------------------------------------------------------------------
 	//-----------------------------------------------------------------------------------------------------
 
@@ -72,6 +74,8 @@ public class AtsManager {
 
 	private double applicationX = APPLICATION_X;
 	private double applicationY = APPLICATION_Y;
+	
+	private int scrollUnit = SCROLL_UNIT;
 
 	private int scriptTimeOut = SCRIPT_TIMEOUT;
 	private int pageloadTimeOut = PAGELOAD_TIMEOUT;
@@ -429,5 +433,9 @@ public class AtsManager {
 	
 	public int getMaxTryProperty() {
 		return maxTryProperty;
+	}
+	
+	public int getScrollUnit() {
+		return scrollUnit;
 	}
 }

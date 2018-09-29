@@ -90,10 +90,11 @@ public class ActionText extends ActionExecuteElement {
 		}
 
 		status.startDuration();
+		MouseDirection md = new MouseDirection();
 
-		getTestElement().over(status, new MouseDirection());
+		getTestElement().over(status, md);
 		if(status.isPassed()) {
-			getTestElement().click(status, false);
+			getTestElement().click(status, md, false);
 			if(status.isPassed()) {
 				getTestElement().clearText(status);
 				if(status.isPassed()) {

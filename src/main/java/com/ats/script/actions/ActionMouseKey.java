@@ -90,16 +90,16 @@ public class ActionMouseKey extends ActionMouse {
 			ts.getRecorder().updateScreen(true);
 			
 			if(Mouse.WHEEL_CLICK.equals(getType())) {
-				getTestElement().wheelClick(status);
+				getTestElement().wheelClick(status, getPosition());
 			}else if(Mouse.RIGHT_CLICK.equals(getType())) {
 				getTestElement().rightClick();
 			}else if(Mouse.DOUBLE_CLICK.equals(getType())) {
 				getTestElement().doubleClick();
 			}else {
 				if(key != null) {
-					getTestElement().click(status, key);
+					getTestElement().click(status, getPosition(), key);
 				}else {
-					getTestElement().click(status, false);
+					getTestElement().click(status, getPosition(), false);
 				}
 			}
 			

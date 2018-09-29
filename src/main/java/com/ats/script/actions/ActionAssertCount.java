@@ -34,7 +34,7 @@ public class ActionAssertCount extends ActionExecuteElement {
 
 	public static final String SCRIPT_LABEL_COUNT = "check-count";
 
-	private final Pattern COUNT_PATTERN = Pattern.compile("(.*)(\\d+) ?(\\-?\\+?)");
+	private final Pattern COUNT_PATTERN = Pattern.compile("(.*)(\\d+) ?(\\-?\\+?=?)");
 
 	private int value = 1;
 	private String operator = Operators.EQUAL;
@@ -53,10 +53,10 @@ public class ActionAssertCount extends ActionExecuteElement {
 			if(m.groupCount() > 2) {
 				switch (m.group(3).trim()) {
 				case "+":
-					setOperator(Operators.GREATER_EQUALS);
+					setOperator(Operators.GREATER_EQUAL);
 					break;
 				case "-":
-					setOperator(Operators.LOWER_EQUALS);
+					setOperator(Operators.LOWER_EQUAL);
 					break;
 				case "!":
 					setOperator(Operators.DIFFERENT);

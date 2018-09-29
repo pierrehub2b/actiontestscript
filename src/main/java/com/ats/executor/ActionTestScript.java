@@ -487,7 +487,7 @@ public class ActionTestScript extends Script implements ITest{
 			execFinished(action.getStatus(), action.isStop());
 		}catch (StaleElementReferenceException ex) {
 			sleep(200);
-			action.reinit();
+			action.initElement(null);
 			exec(line, action);
 		}catch (Exception ex) {
 			sleep(200);

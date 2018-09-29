@@ -254,7 +254,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	}
 
 	@Override
-	public void middleClick(ActionStatus status, TestElement element) {
+	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {
 		getDesktopDriver().mouseMiddleClick();
 	}
 
@@ -277,7 +277,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	}
 
 	@Override
-	public void mouseClick(FoundElement element, boolean hold) {
+	public void mouseClick(FoundElement element, MouseDirection position, boolean hold) {
 		if(hold) {
 			getDesktopDriver().mouseDown();
 		}else {
@@ -319,7 +319,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	@Override
 	public void clearText(ActionStatus status, FoundElement element) {
 		mouseMoveToElement(status, element, new MouseDirection());
-		mouseClick(element, false);
+		mouseClick(element, null, false);
 		getDesktopDriver().clearText();
 	}
 	

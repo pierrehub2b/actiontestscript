@@ -46,6 +46,11 @@ public class TestElementDialog extends TestElement {
 		initSearch(searchElement.getCriterias());
 	}
 
+	@Override
+	public boolean isValidated() {
+		return alert != null;
+	}
+
 	public TestElementDialog(Channel channel, int maxTry, List<CalculatedProperty> criterias) {
 		super(channel, maxTry);
 		initSearch(criterias);
@@ -106,7 +111,7 @@ public class TestElementDialog extends TestElement {
 	}
 
 	@Override
-	public void click(ActionStatus status, boolean hold) {
+	public void click(ActionStatus status, MouseDirection position, boolean hold) {
 		if(alertAction != null) {
 			getChannel().sleep(waitBox);
 			if("accept".equals(alertAction)) {

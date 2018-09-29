@@ -22,6 +22,7 @@ package com.ats.executor.drivers.engines.browsers;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
 
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -37,6 +38,7 @@ import com.ats.driver.AtsManager;
 import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
+import com.ats.executor.SendKeyData;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
@@ -44,6 +46,7 @@ import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.WebDriverEngine;
 import com.ats.generator.objects.Cartesian;
+import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.MouseDirectionData;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -90,8 +93,8 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	}
 
 	@Override
-	protected int getDirectionValue(int value, MouseDirectionData direction, Cartesian cart1, Cartesian cart2) {
-		int offset = super.getDirectionValue(value, direction, cart1, cart2);
+	protected int getDirectionValue(int value, MouseDirectionData direction, Cartesian cart1, Cartesian cart2, Cartesian cart3) {
+		int offset = super.getDirectionValue(value, direction, cart1, cart2, cart3);
 		offset -= value/2;
 		return offset;
 	}
@@ -102,8 +105,15 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	}
 
 	@Override
-	public void middleClick(ActionStatus status, TestElement element) {
-		middleClickSimulation(status, element);
+	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {
+		for(SendKeyData sequence : textActionList) {
+			element.getWebElement().sendKeys(sequence.getSequenceChar());
+		}
+	}
+
+	@Override
+	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {
+		middleClickSimulation(status, position, element);
 	}
 
 	@Override

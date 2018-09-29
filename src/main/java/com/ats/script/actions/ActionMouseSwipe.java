@@ -85,7 +85,7 @@ public class ActionMouseSwipe extends ActionMouse {
 	public void terminateExecution(ActionTestScript ts) {
 		super.terminateExecution(ts);
 		
-		getTestElement().swipe(status, horizontalDirection, verticalDirection);
+		getTestElement().swipe(status, getPosition(), horizontalDirection, verticalDirection);
 		
 		status.endDuration();
 		ts.getRecorder().updateScreen(0, status.getDuration());

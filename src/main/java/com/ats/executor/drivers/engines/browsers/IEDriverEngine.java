@@ -60,11 +60,11 @@ public class IEDriverEngine extends WebDriverEngine {
 	}
 
 	@Override
-	public void mouseClick(FoundElement element, boolean hold) {
+	public void mouseClick(FoundElement element, MouseDirection position, boolean hold) {
 		if(hold) {
 			getDesktopDriver().mouseDown();
 		}else {
-			super.mouseClick(element, false);
+			super.mouseClick(element, position, false);
 		}
 	}
 	
@@ -81,7 +81,7 @@ public class IEDriverEngine extends WebDriverEngine {
 			}
 		}else {
 			for(SendKeyData sequence : textActionList) {
-				element.getWebElement().sendKeys(sequence.getSequence());
+				element.getWebElement().sendKeys(sequence.getSequenceWithDigit());
 			}
 		}
 	}

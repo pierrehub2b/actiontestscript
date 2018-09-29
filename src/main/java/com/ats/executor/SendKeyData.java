@@ -89,8 +89,20 @@ public class SendKeyData {
 		}
 		return Keys.NUMPAD0;
 	}
+		
+	public String getData() {
+		return data;
+	}	
 
-	public CharSequence getSequence() {
+	public boolean isEnterKey() {
+		return enterKey;
+	}
+
+	//---------------------------------------------------------------------------
+	// get sequence by driver type
+	//---------------------------------------------------------------------------
+	
+	public CharSequence getSequenceWithDigit() {
 
 		if(chord != null) {
 			return chord;
@@ -110,13 +122,21 @@ public class SendKeyData {
 		return sequence;
 	}	
 	
-	public String getData() {
-		return data;
-	}	
+	public CharSequence getSequenceChar() {
 
-	public boolean isEnterKey() {
-		return enterKey;
-	}
+		if(chord != null) {
+			return chord;
+		}
+
+		StringBuffer sequence = new StringBuffer();
+
+		for (int i = 0, n = data.length(); i < n; i++) {
+			char c = data.charAt(i);
+			sequence.append(c);
+		}
+
+		return sequence;
+	}	
 
 	public String getSequenceDesktop() {
 		return Base64.getEncoder().encodeToString(data.getBytes(StandardCharsets.UTF_8));
