@@ -19,7 +19,6 @@ under the License.
 
 package com.ats.script.actions;
 
-import com.ats.element.SearchedElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
@@ -31,14 +30,12 @@ public class ActionChannelStart extends ActionChannel {
 	public static final String SCRIPT_START_LABEL = SCRIPT_LABEL + "start";
 
 	private CalculatedValue application;
-	private SearchedElement rootElement;
 
 	public ActionChannelStart() {}
 	
-	public ActionChannelStart(Script script, String name, CalculatedValue value, SearchedElement rootElement) {
+	public ActionChannelStart(Script script, String name, CalculatedValue value) {
 		super(script, name);
 		setApplication(value);
-		setRootElement(rootElement);
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -56,14 +53,7 @@ public class ActionChannelStart extends ActionChannel {
 
 	@Override
 	public String getJavaCode() {
-		String code = super.getJavaCode() + "\"" + getName() + "\", " + application.getJavaCode() + ", ";
-		if(rootElement != null){
-			code += rootElement.getJavaCode();
-		}else {
-			code += "null";
-		}
-		
-		return code + ")";
+		return super.getJavaCode() + "\"" + getName() + "\", " + application.getJavaCode() + ")";
 	}
 
 	//--------------------------------------------------------
@@ -76,13 +66,5 @@ public class ActionChannelStart extends ActionChannel {
 
 	public void setApplication(CalculatedValue value) {
 		this.application = value;
-	}
-	
-	public SearchedElement getRootElement() {
-		return rootElement;
-	}
-
-	public void setRootElement(SearchedElement rootElement) {
-		this.rootElement = rootElement;
 	}
 }

@@ -141,7 +141,7 @@ public class TestElement{
 			if(parent == null || (parent != null && parent.getCount() > 0)){
 
 				ArrayList<String> attributes = new ArrayList<String>();
-				Predicate<AtsElement> fullPredicate = Objects::nonNull;
+				Predicate<AtsBaseElement> fullPredicate = Objects::nonNull;
 
 				for (CalculatedProperty property : properties){
 					criterias += "," + property.getName() + ":" + property.getValue().getCalculated();

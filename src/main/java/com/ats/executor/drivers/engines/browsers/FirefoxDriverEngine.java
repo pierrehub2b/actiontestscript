@@ -39,7 +39,6 @@ import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
-import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.DriverProcess;
@@ -83,13 +82,6 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	protected void switchToFrame(WebElement we) {
 		super.switchToFrame(we);
 		actionWait();
-	}
-
-	@Override
-	public TestBound[] getDimensions() {
-		TestBound[] dimension = super.getDimensions();
-		dimension[1].setY(dimension[1].getY() + 2);
-		return dimension;
 	}
 
 	@Override

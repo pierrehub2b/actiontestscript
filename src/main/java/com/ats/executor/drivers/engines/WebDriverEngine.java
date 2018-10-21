@@ -59,6 +59,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.RemoteWebElement;
 
 import com.ats.driver.AtsManager;
+import com.ats.element.AtsBaseElement;
 import com.ats.element.AtsElement;
 import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
@@ -107,8 +108,6 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	//-----------------------------------------------------------------------------------------------------------------------------
 
-	protected DesktopDriver desktopDriver;
-
 	protected Double initElementX = 0.0;
 	protected Double initElementY = 0.0;
 
@@ -130,10 +129,9 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			AtsManager ats,
 			int defaultWait) {
 
-		super(channel, browser, ats.getBrowserProperties(browser), defaultWait, 60);
+		super(channel, desktopDriver, browser, ats.getBrowserProperties(browser), defaultWait, 60);
 
 		this.driverProcess = driverProcess;
-		this.desktopDriver = desktopDriver;
 	}
 
 	protected DriverProcess getDriverProcess() {
@@ -221,6 +219,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			if(window != null) {
 
 				channel.setApplicationData(
+						"windows",
 						applicationVersion,
 						driverVersion,
 						window.pid);
@@ -483,7 +482,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	//---------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public TestBound[] getDimensions() {
+	public void updateDimensions(Channel channel) {
 
 		switchWindow(currentWindow);
 
@@ -497,7 +496,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			subDimension.update(response.get(4), response.get(5), response.get(6), response.get(7));
 		}
 
-		return new TestBound[]{dimension, subDimension};
+		channel.setDimensions(dimension, subDimension);
 	}
 
 	@Override
@@ -795,7 +794,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	private double offsetIframeY = 0.0;
 
 	@Override
-	public ArrayList<FoundElement> findElements(Channel channel, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsElement> predicate) {
+	public ArrayList<FoundElement> findElements(Channel channel, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> predicate) {
 
 		if(tagName == null) {
 			tagName = "BODY";
@@ -888,5 +887,10 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		if(listWins.size() > currentWindow) {
 			driver.switchTo().window(listWins.get(currentWindow));
 		}
+	}
+
+	@Override
+	public void refreshElementMapLocation(Channel channel) {
+		getDesktopDriver().refreshElementMapLocation(channel);
 	}
 }

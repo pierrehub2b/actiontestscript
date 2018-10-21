@@ -26,12 +26,11 @@ import org.openqa.selenium.Alert;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
-import com.ats.element.AtsElement;
+import com.ats.element.AtsBaseElement;
 import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
-import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.generator.objects.BoundData;
@@ -47,9 +46,9 @@ public interface IDriverEngine{
 	public void closeWindow(ActionStatus status, int index);
 	public Object executeScript(ActionStatus status, String script, Object ... params);
 	public void goToUrl(ActionStatus status, String url);
-	public ArrayList<FoundElement> findElements(Channel channel, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsElement> searchPredicate);
+	public ArrayList<FoundElement> findElements(Channel channel, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> searchPredicate);
 	public void waitAfterAction();
-	public TestBound[] getDimensions();
+	public void updateDimensions(Channel channel);
 	public FoundElement getElementFromPoint(Double x, Double y);
 	public String getAttribute(FoundElement element, String attributeName, int maxTry);
 	public CalculatedProperty[] getAttributes(FoundElement element);
@@ -74,4 +73,5 @@ public interface IDriverEngine{
 	public void switchToDefaultContent();
 	public void setWindowToFront();
 	public void switchToFrameId(String id);
+	public void refreshElementMapLocation(Channel channel);
 }

@@ -31,6 +31,10 @@ import com.ats.executor.channels.Channel;
 
 public class FoundElement{
 
+	public final static String HTML = "html";
+	public final static String DESKTOP = "desktop";
+	public final static String MOBILE = "mobile";
+	
 	private String id;
 
 	private Double x = 0.0;
@@ -44,7 +48,7 @@ public class FoundElement{
 
 	private String tag;
 
-	private boolean desktop = false;
+	private String type = HTML;
 
 	private RemoteWebElement value;
 	private FoundElement parent;
@@ -85,7 +89,7 @@ public class FoundElement{
 
 	public FoundElement(AtsElement element, TestBound channelDimension) {
 
-		this.desktop = true;
+		this.type = DESKTOP;
 		this.visible = element.isVisible();
 		this.id = element.getId();
 
@@ -99,12 +103,33 @@ public class FoundElement{
 		this.x = this.screenX - channelDimension.getX();
 		this.y = this.screenY - channelDimension.getY();
 	}
+	
+	public FoundElement(AtsMobileElement element) {
+
+		this.type = MOBILE;
+		this.visible = true;
+		this.id = element.getId();
+
+		this.tag = element.getTag();
+		this.width = element.getWidth();
+		this.height = element.getHeight();
+
+		this.screenX = element.getX();
+		this.screenY = element.getY();
+
+		this.x = this.screenX;
+		this.y = this.screenY;
+	}
 
 	public FoundElement(Channel channel, ArrayList<AtsElement> elements, Double initElementX, Double initElementY) {
 		this(elements.remove(0), channel, initElementX, initElementY);
 		if(elements.size() > 0) {
 			setParent(new FoundElement(channel, elements, initElementX, initElementY));
 		}
+	}
+	
+	public boolean isDesktop() {
+		return DESKTOP.equals(type);
 	}
 	
 	//------------------------------------------------------------------------------------------------------------------------------
@@ -175,12 +200,12 @@ public class FoundElement{
 		this.visible = value;
 	}
 
-	public boolean isDesktop() {
-		return desktop;
+	public String getType() {
+		return type;
 	}
 
-	public void setDesktop(boolean b) {
-		this.desktop = b;
+	public void setType(String type) {
+		this.type = type;
 	}
 
 	public FoundElement getParent() {

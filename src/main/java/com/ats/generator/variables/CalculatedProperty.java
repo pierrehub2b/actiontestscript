@@ -24,7 +24,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import com.ats.element.AtsElement;
+import com.ats.element.AtsBaseElement;
 import com.ats.executor.ActionTestScript;
 import com.ats.script.Script;
 import com.ats.tools.Operators;
@@ -81,7 +81,7 @@ public class CalculatedProperty implements Comparable<CalculatedProperty>{
 		return ActionTestScript.JAVA_PROPERTY_FUNCTION_NAME + "(" + isRegexp() + ", \"" + name + "\", " + value.getJavaCode() + ")";
 	}
 
-	public Predicate<AtsElement> getPredicate(Predicate<AtsElement> predicate){
+	public Predicate<AtsBaseElement> getPredicate(Predicate<AtsBaseElement> predicate){
 		if(isRegexp()) {
 			return predicate.and(p -> matchRegexp(p.getAttribute(name)));
 		}else {

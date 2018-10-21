@@ -9,22 +9,15 @@ import org.openqa.selenium.remote.RemoteWebElement;
 import com.ats.executor.drivers.desktop.DesktopData;
 
 @SuppressWarnings("unchecked")
-public class AtsElement {
+public class AtsElement extends AtsBaseElement {
 
 	private static final String IFRAME = "IFRAME";
 	private static final String FRAME = "FRAME";
 
 	private RemoteWebElement element;
-	private String id;
-	private String tag;
-	private boolean numeric;
-	private Double width;
-	private Double height;
-	private Double x;
-	private Double y;
+	protected boolean numeric;
 	private Double screenX;
 	private Double screenY;
-	private Map<String, String> attributes;
 
 	private boolean visible = true;
 
@@ -63,54 +56,6 @@ public class AtsElement {
 		return screenY;
 	}
 
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public String getTag() {
-		return tag;
-	}
-
-	public void setTag(String tag) {
-		this.tag = tag;
-	}
-
-	public Double getX() {
-		return x;
-	}
-
-	public void setX(Double x) {
-		this.x = x;
-	}
-
-	public Double getY() {
-		return y;
-	}
-
-	public void setY(Double y) {
-		this.y = y;
-	}
-
-	public Double getWidth() {
-		return width;
-	}
-
-	public void setWidth(Double width) {
-		this.width = width;
-	}
-
-	public Double getHeight() {
-		return height;
-	}
-
-	public void setHeight(Double height) {
-		this.height = height;
-	}
-
 	public boolean isVisible() {
 		return visible;
 	}
@@ -135,14 +80,6 @@ public class AtsElement {
 		if(attributes != null) {
 			this.attributes = attributes.parallelStream().collect(Collectors.toMap(s -> s.getName(), s -> s.getValue()));
 		}
-	}
-
-	//----------------------------------------------------------------------------------------
-	// Predicate search
-	//----------------------------------------------------------------------------------------
-
-	public String getAttribute(String key) {
-		return attributes.get(key);
 	}
 
 	//----------------------------------------------------------------------------------------

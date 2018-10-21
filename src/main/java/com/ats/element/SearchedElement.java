@@ -33,13 +33,15 @@ import com.ats.script.Script;
 
 public class SearchedElement {
 
+	public static final String WILD_CHAR = "*";
+	
 	private static final String DIALOG = "DIALOG";
 	private static final String DESKTOP = "DESK-";
 	
 	private static final Pattern OBJECT_PATTERN = Pattern.compile("(.*)\\[(.*)\\]", Pattern.CASE_INSENSITIVE);
 	private static final Pattern OBJECT_INDEX_PATTERN = Pattern.compile("\\s*?index\\((\\d+)\\)\\s*?");
 
-	private String tag = "*";
+	private String tag = WILD_CHAR;
 	private SearchedElement parent;
 	private int index = 0;
 	private List<CalculatedProperty> criterias;

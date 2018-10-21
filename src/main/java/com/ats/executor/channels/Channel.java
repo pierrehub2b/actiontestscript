@@ -59,9 +59,12 @@ public class Channel {
 
 	private String applicationVersion;
 	private String driverVersion;
+	private String os;
+	
+	private byte[] icon;
 
 	private ProcessHandle process = null;
-	private DesktopDriver desktopDriver;
+	//private DesktopDriver desktopDriver;
 
 	private int winHandle = -1;
 
@@ -85,8 +88,8 @@ public class Channel {
 		this.name = name;
 		this.current = true;
 
-		this.desktopDriver = new DesktopDriver(driverManager);
-		this.engine = driverManager.getDriverEngine(this, status, application, this.desktopDriver);
+		//this.desktopDriver = new DesktopDriver(driverManager);
+		this.engine = driverManager.getDriverEngine(this, status, application, new DesktopDriver(driverManager));
 
 		if(status.isPassed()) {
 			this.refreshLocation();
@@ -103,7 +106,7 @@ public class Channel {
 		if(winHandle > 0) {
 			return winHandle;
 		}else {
-			List<DesktopWindow> processWindows = desktopDriver.getWindowsByPid(getProcessId());
+			List<DesktopWindow> processWindows = getDesktopDriver().getWindowsByPid(getProcessId());
 			if(processWindows != null && processWindows.size() > 0) {
 				return processWindows.get(0).handle;
 			}
@@ -112,8 +115,7 @@ public class Channel {
 	}
 
 	public void refreshLocation(){
-		TestBound[] dimensions = engine.getDimensions();
-		setDimensions(dimensions[0], dimensions[1]);
+		engine.updateDimensions(this);
 	}
 
 	public void setDimensions(TestBound dim1, TestBound dim2) {
@@ -123,12 +125,12 @@ public class Channel {
 
 	public void refreshMapElementLocation(){
 		refreshLocation();
-		desktopDriver.refreshElementMapLocation(this);
+		engine.refreshElementMapLocation(this);
 	}
 
 	public void toFront(){
 		engine.setWindowToFront();
-		desktopDriver.setChannelToFront(getHandle());
+		getDesktopDriver().setChannelToFront(getHandle());
 	}
 
 	public byte[] getScreenShot(){
@@ -144,16 +146,22 @@ public class Channel {
 
 	private byte[] screenShot(TestBound dim) {
 		mainScript.sleep(50);
-		return desktopDriver.getScreenshotByte(dim.getX(), dim.getY(), dim.getWidth(), dim.getHeight());
+		return getDesktopDriver().getScreenshotByte(dim.getX(), dim.getY(), dim.getWidth(), dim.getHeight());
 	}
-
-	public void setApplicationData(String version, String dVersion, long pid) {
+	
+	public void setApplicationData(String os, String version, String dVersion, long pid) {
+		setApplicationData(os, version, dVersion, pid, new byte[0]);
+	}
+	
+	public void setApplicationData(String os, String version, String dVersion, long pid, byte[] icon) {
+		this.os = os;
 		this.applicationVersion = version;
 		this.driverVersion = dVersion;
 		Optional<ProcessHandle> procs = ProcessHandle.of(pid);
 		if(procs.isPresent()) {
 			this.process = procs.get();	
 		}
+		this.icon = icon;
 	}
 
 	public void setApplicationData(int handle) {
@@ -207,21 +215,25 @@ public class Channel {
 	public String getApplication() {
 		return engine.getApplication();
 	}
+	
 	public void setApplication(String url) {} // read only	
 
 	public String getApplicationPath() {
 		return engine.getApplicationPath();
 	}
+	
 	public void setApplicationPath(String url) {} // read only	
 
 	public String getDriverVersion() {
 		return driverVersion;
 	}
+	
 	public void setDriverVersion(String url) {} // read only	
 
 	public boolean isDesktop() {
 		return engine instanceof DesktopDriverEngine;
 	}
+	
 	public void setDesktop(boolean value) {} // read only
 
 	public String getName() {
@@ -250,7 +262,23 @@ public class Channel {
 	public void setApplicationVersion(String applicationVersion) {
 		this.applicationVersion = applicationVersion;
 	}
+	
+	public String getOs() {
+		return os;
+	}
 
+	public void setOs(String os) {
+		this.os = os;
+	}
+	
+	public byte[] getIcon() {
+		return icon;
+	}
+	
+	public void setIcon(byte[] value) {
+		this.icon = value;
+	}
+	
 	//----------------------------------------------------------------------------------------------------------------------
 	//----------------------------------------------------------------------------------------------------------------------
 

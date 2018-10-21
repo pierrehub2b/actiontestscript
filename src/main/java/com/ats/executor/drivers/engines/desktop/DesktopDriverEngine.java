@@ -28,6 +28,9 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.function.Predicate;
 
+import javax.swing.Icon;
+import javax.swing.filechooser.FileSystemView;
+
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
@@ -36,6 +39,7 @@ import org.openqa.selenium.WebElement;
 
 import com.ats.driver.ApplicationProperties;
 import com.ats.driver.AtsManager;
+import com.ats.element.AtsBaseElement;
 import com.ats.element.AtsElement;
 import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
@@ -61,7 +65,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	private String osName;
 
 	public DesktopDriverEngine(Channel channel, String application, DesktopDriver desktopDriver, ApplicationProperties applicationProperties, int defaultWait) {
-		super(channel, application, applicationProperties, DEFAULT_WAIT, 0);
+		super(channel, desktopDriver, application, applicationProperties, DEFAULT_WAIT, 0);
 		desktopDriver.setEngine(this);
 	}
 	
@@ -137,7 +141,9 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 				}
 			}
 
-			channel.setApplicationData(appVersion, driverVersion, applicationProcess.pid());
+			Icon icon = FileSystemView.getFileSystemView().getSystemIcon(exeFile);
+			
+			channel.setApplicationData("windows", appVersion, driverVersion, applicationProcess.pid());
 
 			int maxTry = 30;
 			while(maxTry > 0){
@@ -210,24 +216,21 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	}
 	
 	@Override
-	public ArrayList<FoundElement> findElements(Channel channel, TestElement testElement, String tag, ArrayList<String> attributes, Predicate<AtsElement> predicate) {
+	public ArrayList<FoundElement> findElements(Channel channel, TestElement testElement, String tag, ArrayList<String> attributes, Predicate<AtsBaseElement> predicate) {
 		return getDesktopDriver().findElements(channel, testElement, tag, attributes, predicate);
 	}
 
 	@Override
-	public TestBound[] getDimensions() {
+	public void updateDimensions(Channel cnl) {
 
 		DesktopWindow win = getDesktopDriver().getWindowByHandle(channel.getHandle());
 		if(win != null){
-			return new TestBound[]{new TestBound(
+			cnl.setDimensions(new TestBound(
 					win.getX(),
 					win.getY(),
 					win.getWidth(),
-					win.getHeight()), 
-					channel.getSubDimension()};
-
+					win.getHeight()), channel.getSubDimension());
 		}
-		return new TestBound[]{channel.getDimension(), channel.getSubDimension()};
 	}
 
 	@Override
@@ -328,6 +331,11 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 		for(SendKeyData sequence : textActionList) {
 			getDesktopDriver().sendKeys(sequence.getSequenceDesktop());
 		}
+	}
+	
+	@Override
+	public void refreshElementMapLocation(Channel channel) {
+		getDesktopDriver().refreshElementMapLocation(channel);
 	}
 	
 	@Override

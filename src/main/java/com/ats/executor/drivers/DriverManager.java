@@ -26,6 +26,7 @@ import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.IDriverEngine;
+import com.ats.executor.drivers.engines.MobileDriverEngine;
 import com.ats.executor.drivers.engines.browsers.ChromeDriverEngine;
 import com.ats.executor.drivers.engines.browsers.EdgeDriverEngine;
 import com.ats.executor.drivers.engines.browsers.FirefoxDriverEngine;
@@ -33,6 +34,8 @@ import com.ats.executor.drivers.engines.browsers.IEDriverEngine;
 import com.ats.executor.drivers.engines.browsers.OperaDriverEngine;
 import com.ats.executor.drivers.engines.desktop.DesktopDriverEngine;
 import com.ats.executor.drivers.engines.desktop.ExplorerDriverEngine;
+import com.ats.executor.drivers.engines.mobiles.AndroidDriverEngine;
+import com.ats.executor.drivers.engines.mobiles.IOSDriverEngine;
 import com.ats.tools.Utils;
 
 public class DriverManager {
@@ -52,6 +55,7 @@ public class DriverManager {
 	public static final String FIREFOX_DRIVER_FILE_NAME = "geckodriver.exe";
 
 	public static final String DESKTOP_EXPLORER = "explorer";
+	public static final String MOBILE = "mobile";
 	
 	private DriverProcess desktopDriver;
 	private DriverProcess chromeDriver;
@@ -62,6 +66,8 @@ public class DriverManager {
 	
 	public static AtsManager ATS = new AtsManager();
 	private String windowsBuildVersion;
+	
+	private MobileDriverEngine mobileDriverEngine;
 	
 	public String getDriverFolderPath() {
 		return ATS.getDriversFolderPath().toFile().getAbsolutePath();
@@ -134,7 +140,12 @@ public class DriverManager {
 		case DESKTOP_EXPLORER :
 			return new ExplorerDriverEngine(channel, status, desktopDriver, ATS);
 		default :
-			return new DesktopDriverEngine(channel, status, application, desktopDriver, ATS);
+			if(application.startsWith(MOBILE + "://")) {
+				mobileDriverEngine = new MobileDriverEngine(channel, status, application, desktopDriver, ATS);
+				return mobileDriverEngine;
+			}else {
+				return new DesktopDriverEngine(channel, status, application, desktopDriver, ATS);
+			}
 		}
 	}
 	
@@ -172,7 +183,7 @@ public class DriverManager {
 		}
 		return operaDriver;
 	}
-
+	
 	public void tearDown(){
 		
 		if(desktopDriver != null){
@@ -197,6 +208,10 @@ public class DriverManager {
 		
 		if(ieDriver != null){
 			ieDriver.close();
+		}
+		
+		if(mobileDriverEngine != null){
+			mobileDriverEngine.tearDown();
 		}
 	}
 }

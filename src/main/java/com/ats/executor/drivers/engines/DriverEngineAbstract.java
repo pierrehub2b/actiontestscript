@@ -27,6 +27,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 import com.ats.driver.ApplicationProperties;
 import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.MouseDirection;
@@ -35,7 +36,10 @@ import com.ats.generator.objects.MouseDirectionData;
 public abstract class DriverEngineAbstract {
 	
 	protected Channel channel;
+	
 	protected RemoteWebDriver driver;
+	protected DesktopDriver desktopDriver;
+		
 	protected String application;
 	protected String applicationPath;
 	
@@ -44,8 +48,10 @@ public abstract class DriverEngineAbstract {
 	private int actionWait = -1;
 	private int propertyWait = -1;
 
-	public DriverEngineAbstract(Channel channel, String application, ApplicationProperties props, int defaultWait, int defaultCheck){
+	public DriverEngineAbstract(Channel channel, DesktopDriver desktopDriver, String application, ApplicationProperties props, int defaultWait, int defaultCheck){
+		
 		this.channel = channel;
+		this.desktopDriver = desktopDriver;
 		this.application = application;
 		
 		if(props != null) {
@@ -61,6 +67,10 @@ public abstract class DriverEngineAbstract {
 		if(propertyWait == -1) {
 			propertyWait = defaultCheck;
 		}
+	}
+	
+	public DesktopDriver getDesktopDriver() {
+		return desktopDriver;
 	}
 	
 	public void setDriver(RemoteWebDriver driver) {

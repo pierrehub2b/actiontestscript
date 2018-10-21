@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.generator.parsers;
 
@@ -25,7 +25,6 @@ import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.ats.element.SearchedElement;
 import com.ats.generator.GeneratorReport;
 import com.ats.generator.events.ScriptProcessedNotifier;
 import com.ats.generator.objects.mouse.Mouse;
@@ -146,23 +145,23 @@ public class Lexer {
 				//---------------------------------------------------------------------------
 				// Mouse over
 				//---------------------------------------------------------------------------
-				
+
 				if(Mouse.OVER.equals(actionType)){
 
 					action = new ActionMouse(script, Mouse.OVER, stopExec, options, dataArray);
 
-				//---------------------------------------------------------------------------
-				// Drag Drop
-				//---------------------------------------------------------------------------
-				
+					//---------------------------------------------------------------------------
+					// Drag Drop
+					//---------------------------------------------------------------------------
+
 				}else if(Mouse.DRAG.equals(actionType) || Mouse.DROP.equals(actionType)){
 
 					action = new ActionMouseDragDrop(script, actionType, stopExec, options, dataArray);
 
-				//---------------------------------------------------------------------------
-				// Mouse button
-				//---------------------------------------------------------------------------
-				
+					//---------------------------------------------------------------------------
+					// Mouse button
+					//---------------------------------------------------------------------------
+
 				}else if(actionType.startsWith(Mouse.CLICK)){
 
 					action = new ActionMouseKey(script, actionType, stopExec, options, dataArray);
@@ -182,7 +181,7 @@ public class Lexer {
 					//---------------------------------------------------------------------------
 					// Channel
 					//---------------------------------------------------------------------------
-					
+
 					if(ActionChannelSwitch.SCRIPT_SWITCH_LABEL.equals(actionType)){	
 
 						action = new ActionChannelSwitch(script, dataOne);
@@ -190,27 +189,21 @@ public class Lexer {
 					}else if(ActionChannelStart.SCRIPT_START_LABEL.equals(actionType)){
 
 						if(dataArray.size() > 0){
-
-							CalculatedValue appPath = new CalculatedValue(script, dataArray.remove(0).trim());
-							SearchedElement rootElement = null;
-							if(dataArray.size() > 0) {
-								rootElement = new SearchedElement(script, dataArray);
-							}
-
-							action = new ActionChannelStart(script, dataOne, appPath, rootElement);
+							CalculatedValue appData = new CalculatedValue(script, dataArray.remove(0).trim());
+							action = new ActionChannelStart(script, dataOne, appData);
 						}
 
-					//---------------------------------------------------------------------------
-					// Text
-					//---------------------------------------------------------------------------
-					
+						//---------------------------------------------------------------------------
+						// Text
+						//---------------------------------------------------------------------------
+
 					}else if(ActionText.SCRIPT_LABEL.equals(actionType)){
 
 						action = new ActionText(script, actionType, stopExec, options, dataOne, dataArray);
 
-					//---------------------------------------------------------------------------
-					// Window
-					//---------------------------------------------------------------------------
+						//---------------------------------------------------------------------------
+						// Window
+						//---------------------------------------------------------------------------
 
 					}else if(actionType.startsWith(ActionWindow.SCRIPT_LABEL)){
 
@@ -229,30 +222,30 @@ public class Lexer {
 							}
 						}
 
-					//---------------------------------------------------------------------------
-					// Javascript
-					//---------------------------------------------------------------------------
-					
+						//---------------------------------------------------------------------------
+						// Javascript
+						//---------------------------------------------------------------------------
+
 					}else if(ActionJavascript.SCRIPT_LABEL.equals(actionType)){
-						
+
 						String[] jsDataArray = dataOne.split(ScriptParser.ATS_ASSIGN_SEPARATOR);
 
 						if(jsDataArray.length > 0) {
 
 							Variable variable = null;
 							String jsCode = jsDataArray[0].trim();
-							
+
 							if(jsDataArray.length > 1) {
 								variable = script.getVariable(jsDataArray[1].trim(), true);
 							}
-							
+
 							action = new ActionJavascript(script, stopExec, options, jsCode, variable, dataArray);
 						}
 
-					//---------------------------------------------------------------------------
-					// Property
-					//---------------------------------------------------------------------------
-					
+						//---------------------------------------------------------------------------
+						// Property
+						//---------------------------------------------------------------------------
+
 					}else if(ActionProperty.SCRIPT_LABEL.equals(actionType)){
 
 						String[] propertyArray = dataOne.split(ScriptParser.ATS_ASSIGN_SEPARATOR);
@@ -263,18 +256,18 @@ public class Lexer {
 							action = new ActionProperty(script, stopExec, options, propertyName, variable, dataArray);
 						}
 
-					//---------------------------------------------------------------------------
-					// Select
-					//---------------------------------------------------------------------------
-					
+						//---------------------------------------------------------------------------
+						// Select
+						//---------------------------------------------------------------------------
+
 					}else if(ActionSelect.SCRIPT_LABEL_SELECT.equals(actionType) || ActionSelect.SCRIPT_LABEL_DESELECT.equals(actionType)){
 
 						action = new ActionSelect(script, actionType, stopExec, options, dataOne, dataArray);
 
-					//---------------------------------------------------------------------------
-					// Callscript
-					//---------------------------------------------------------------------------
-					
+						//---------------------------------------------------------------------------
+						// Callscript
+						//---------------------------------------------------------------------------
+
 					}else if(ActionCallscript.SCRIPT_LABEL.equals(actionType)){
 
 						String[] parameters = null;
@@ -290,7 +283,7 @@ public class Lexer {
 						if (matcher.find()){
 							dataOne = matcher.group(1).trim();
 							String parametersData = matcher.group(2);
-							
+
 							Matcher mv = ParameterValue.PARAMETER_PATTERN.matcher(parametersData);
 							while (mv.find()) {
 								ParameterValue sp = new ParameterValue(mv);
@@ -308,10 +301,10 @@ public class Lexer {
 
 						action = new ActionCallscript(script, dataOne, parameters, returnValues);
 
-					//---------------------------------------------------------------------------
-					// Comments
-					//---------------------------------------------------------------------------
-					
+						//---------------------------------------------------------------------------
+						// Comments
+						//---------------------------------------------------------------------------
+
 					}else if(ActionComment.SCRIPT_LABEL.equals(actionType)){
 
 						String textData = "";
@@ -320,18 +313,18 @@ public class Lexer {
 						}
 						action = new ActionComment(script, dataOne, textData);
 
-					//---------------------------------------------------------------------------
-					// Goto url
-					//---------------------------------------------------------------------------
-					
+						//---------------------------------------------------------------------------
+						// Goto url
+						//---------------------------------------------------------------------------
+
 					}else if(ActionGotoUrl.SCRIPT_LABEL.equals(actionType)){
 
-						action = new ActionGotoUrl(script, stopExec, new CalculatedValue(script, dataOne));
+						action = new ActionGotoUrl(script, stopExec, dataOne);
 
-					//---------------------------------------------------------------------------
-					// Mouse scroll
-					//---------------------------------------------------------------------------
-					
+						//---------------------------------------------------------------------------
+						// Mouse scroll
+						//---------------------------------------------------------------------------
+
 					}else if(ActionMouseScroll.SCRIPT_LABEL.equals(actionType)){
 
 						int scrollValue = 0;
@@ -345,10 +338,10 @@ public class Lexer {
 
 						action = new ActionMouseSwipe(script, actionType, dataOne, stopExec, options, dataArray);
 
-					//---------------------------------------------------------------------------
-					// Assertions
-					//---------------------------------------------------------------------------
-					
+						//---------------------------------------------------------------------------
+						// Assertions
+						//---------------------------------------------------------------------------
+
 					}else if(ActionAssertCount.SCRIPT_LABEL_COUNT.equals(actionType)){
 
 						action = new ActionAssertCount(script, stopExec, options, dataArray, dataOne);

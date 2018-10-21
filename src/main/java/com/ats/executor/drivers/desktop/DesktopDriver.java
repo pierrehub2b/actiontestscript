@@ -34,8 +34,10 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
+import com.ats.element.AtsBaseElement;
 import com.ats.element.AtsElement;
 import com.ats.element.FoundElement;
+import com.ats.element.SearchedElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.TestBound;
@@ -259,7 +261,7 @@ public class DesktopDriver extends RemoteWebDriver {
 
 	public List<FoundElement> getWebElementsListByHandle(TestBound channelDimension, int handle) {
 
-		final DesktopResponse resp = sendRequestCommand(CommandType.Element, ElementType.Find, handle, "*");
+		final DesktopResponse resp = sendRequestCommand(CommandType.Element, ElementType.Find, handle, SearchedElement.WILD_CHAR);
 
 		if(resp != null && resp.elements != null) {
 			return resp.elements.stream().map(e -> new FoundElement(e, channelDimension)).collect(Collectors.toCollection(ArrayList::new));
@@ -402,7 +404,7 @@ public class DesktopDriver extends RemoteWebDriver {
 		return listAttributes.toArray(new CalculatedProperty[listAttributes.size()]);
 	}
 
-	public ArrayList<FoundElement> findElements(Channel channel, TestElement testElement, String tag, ArrayList<String> attributes, Predicate<AtsElement> predicate) {
+	public ArrayList<FoundElement> findElements(Channel channel, TestElement testElement, String tag, ArrayList<String> attributes, Predicate<AtsBaseElement> predicate) {
 
 		DesktopResponse response = null;
 

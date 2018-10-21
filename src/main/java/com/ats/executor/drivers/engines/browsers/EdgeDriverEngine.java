@@ -29,7 +29,7 @@ import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.remote.CapabilityType;
 
 import com.ats.driver.AtsManager;
-import com.ats.element.AtsElement;
+import com.ats.element.AtsBaseElement;
 import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
@@ -122,7 +122,7 @@ public class EdgeDriverEngine extends WebDriverEngine {
 	}
 	
 	@Override
-	public ArrayList<FoundElement> findElements(Channel channel, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsElement> predicate) {
+	public ArrayList<FoundElement> findElements(Channel channel, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> predicate) {
 		int maxTry = 40;
 		while(!((Boolean)runJavaScript(JS_WAIT_READYSTATE)) && maxTry > 0) {
 			channel.sleep(200);
