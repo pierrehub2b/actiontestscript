@@ -62,6 +62,7 @@ public class Channel {
 	private String os;
 	
 	private byte[] icon;
+	private String screenServer;
 
 	private ProcessHandle process = null;
 	//private DesktopDriver desktopDriver;
@@ -150,10 +151,10 @@ public class Channel {
 	}
 	
 	public void setApplicationData(String os, String version, String dVersion, long pid) {
-		setApplicationData(os, version, dVersion, pid, new byte[0]);
+		setApplicationData(os, version, dVersion, pid, new byte[0], "");
 	}
 	
-	public void setApplicationData(String os, String version, String dVersion, long pid, byte[] icon) {
+	public void setApplicationData(String os, String version, String dVersion, long pid, byte[] icon, String screenServer) {
 		this.os = os;
 		this.applicationVersion = version;
 		this.driverVersion = dVersion;
@@ -162,6 +163,7 @@ public class Channel {
 			this.process = procs.get();	
 		}
 		this.icon = icon;
+		this.screenServer = screenServer;
 	}
 
 	public void setApplicationData(int handle) {
@@ -277,6 +279,14 @@ public class Channel {
 	
 	public void setIcon(byte[] value) {
 		this.icon = value;
+	}
+	
+	public String getScreenServer() {
+		return screenServer;
+	}
+	
+	public void setScreenServer(String value) {
+		this.screenServer = value;
 	}
 	
 	//----------------------------------------------------------------------------------------------------------------------

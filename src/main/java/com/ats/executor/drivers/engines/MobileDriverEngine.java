@@ -63,7 +63,6 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	private final static String STOP = "stop";
 	private final static String SWITCH = "switch";
 	private final static String CAPTURE = "capture";
-	private final static String ELEMENTS = "elements";
 	private final static String RELOAD = "reload";
 	private final static String TAP = "tap";
 	private final static String INPUT = "input";
@@ -82,7 +81,9 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 		String[] appData = application.split("/");
 		if(appData.length > 1) {
 			
-			this.applicationPath = "http://" + appData[0];
+			String endPoint = appData[0];
+			
+			this.applicationPath = "http://" + endPoint;
 			this.application = appData[1];
 						
 			JsonObject response = executeRequest(DRIVER, START);
@@ -99,6 +100,8 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 
 			final double deviceWidth = response.get("deviceWidth").getAsDouble();
 			final double deviceHeight = response.get("deviceHeight").getAsDouble();
+			
+			final int screenCapturePort = response.get("screenCapturePort").getAsInt();
 
 			channel.setDimensions(new TestBound(0D, 0D, deviceWidth, deviceHeight), new TestBound(channelX, channelY, channelWidth, channelHeight));
 			
@@ -112,7 +115,9 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 				}catch(Exception e) {}
 			}
 			
-			channel.setApplicationData(os, systemName, driverVersion, -1, icon);
+			String[] endPointData = endPoint.split(":");
+			
+			channel.setApplicationData(os, systemName, driverVersion, -1, icon, endPointData[0] + ":" + screenCapturePort);
 						
 			refreshElementMapLocation(channel);
 		}
@@ -120,7 +125,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 
 	@Override
 	public void refreshElementMapLocation(Channel channel) {
-		rootElement = gson.fromJson(executeRequest(CAPTURE, ELEMENTS, RELOAD), AtsMobileElement.class);
+		rootElement = gson.fromJson(executeRequest(CAPTURE, RELOAD), AtsMobileElement.class);
 	}
 
 	@Override
