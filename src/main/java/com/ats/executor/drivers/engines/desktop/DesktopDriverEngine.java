@@ -40,7 +40,6 @@ import org.openqa.selenium.WebElement;
 import com.ats.driver.ApplicationProperties;
 import com.ats.driver.AtsManager;
 import com.ats.element.AtsBaseElement;
-import com.ats.element.AtsElement;
 import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;

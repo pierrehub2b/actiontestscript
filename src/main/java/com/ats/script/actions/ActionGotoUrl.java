@@ -36,9 +36,9 @@ public class ActionGotoUrl extends ActionExecute {
 
 	public ActionGotoUrl() {}
 
-	public ActionGotoUrl(Script script, boolean stop, String url) {
+	public ActionGotoUrl(Script script, boolean stop, CalculatedValue url) {
 		super(script, stop);
-		setUrl(new CalculatedValue(script, url));
+		setUrl(url);
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

@@ -58,7 +58,7 @@ import com.google.gson.JsonParser;
 public class MobileDriverEngine extends DriverEngineAbstract implements IDriverEngine{
 
 	private final static String DRIVER = "driver";
-	private final static String CHANNEL = "channel";
+	private final static String APP = "app";
 	private final static String START = "start";
 	private final static String STOP = "stop";
 	private final static String SWITCH = "switch";
@@ -66,7 +66,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	private final static String RELOAD = "reload";
 	private final static String TAP = "tap";
 	private final static String INPUT = "input";
-	
+
 	private JsonParser parser = new JsonParser();
 	private Gson gson = new Gson();
 
@@ -80,12 +80,12 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 
 		String[] appData = application.split("/");
 		if(appData.length > 1) {
-			
+
 			String endPoint = appData[0];
-			
+
 			this.applicationPath = "http://" + endPoint;
 			this.application = appData[1];
-						
+
 			JsonObject response = executeRequest(DRIVER, START);
 
 			final String systemName = response.get("systemName").getAsString();
@@ -100,26 +100,37 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 
 			final double deviceWidth = response.get("deviceWidth").getAsDouble();
 			final double deviceHeight = response.get("deviceHeight").getAsDouble();
-			
+
 			final int screenCapturePort = response.get("screenCapturePort").getAsInt();
 
 			channel.setDimensions(new TestBound(0D, 0D, deviceWidth, deviceHeight), new TestBound(channelX, channelY, channelWidth, channelHeight));
-			
-			response = executeRequest(CHANNEL, START, this.application);
-			
-			final String base64 = response.get("icon").getAsString();
-			byte[] icon = new byte[0];
-			if(base64.length() > 0) {
-				try {
-					icon = Base64.getDecoder().decode(base64);
-				}catch(Exception e) {}
+
+			response = executeRequest(APP, START, this.application);
+			if(response != null) {
+				if(response.get("status").getAsInt() == 0) {
+					final String base64 = response.get("icon").getAsString();
+					byte[] icon = new byte[0];
+					if(base64.length() > 0) {
+						try {
+							icon = Base64.getDecoder().decode(base64);
+						}catch(Exception e) {}
+					}
+
+					String[] endPointData = endPoint.split(":");
+
+					channel.setApplicationData(os, systemName, driverVersion, -1, icon, endPointData[0] + ":" + screenCapturePort);
+
+					refreshElementMapLocation(channel);
+				}else {
+					status.setCode(ActionStatus.CHANNEL_START_ERROR);
+					status.setMessage(response.get("status").getAsString());
+					status.setPassed(false);
+				}
+			}else {
+				status.setCode(ActionStatus.CHANNEL_START_ERROR);
+				status.setMessage("unable to connect to : " + this.application);
+				status.setPassed(false);
 			}
-			
-			String[] endPointData = endPoint.split(":");
-			
-			channel.setApplicationData(os, systemName, driverVersion, -1, icon, endPointData[0] + ":" + screenCapturePort);
-						
-			refreshElementMapLocation(channel);
 		}
 	}
 
@@ -129,8 +140,31 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	}
 
 	@Override
+	public void mouseClick(FoundElement element, MouseDirection position, boolean hold) {
+
+		final Rectangle rect = element.getRectangle();
+		final int mouseX = (int)(getOffsetX(rect, position));
+		final int mouseY = (int)(getOffsetY(rect, position));
+
+		executeRequest(TAP, element.getElementId(), mouseX+"", mouseY+"");
+	}
+
+	@Override
+	public void close() {
+		executeRequest(APP, STOP, application);
+	}
+
+	public void tearDown() {
+		executeRequest(DRIVER, STOP);
+	}
+
+
+	private AtsMobileElement capturedRoot;
+
+	@Override
 	public FoundElement getElementFromPoint(Double x, Double y) {
-		return getElementFromPoint(rootElement, x, y).getFoundElement();
+		capturedRoot = gson.fromJson(executeRequest(CAPTURE, RELOAD), AtsMobileElement.class);
+		return getElementFromPoint(capturedRoot, x, y).getFoundElement();
 	}
 
 	private AtsMobileElement getElementFromPoint(AtsMobileElement element, Double x, Double y) {
@@ -148,27 +182,8 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	}
 
 	@Override
-	public void mouseClick(FoundElement element, MouseDirection position, boolean hold) {
-
-		final Rectangle rect = element.getRectangle();
-		final int mouseX = (int)(getOffsetX(rect, position));
-		final int mouseY = (int)(getOffsetY(rect, position));
-
-		executeRequest(TAP, element.getElementId(), mouseX+"", mouseY+"");
-	}
-
-	@Override
-	public void close() {
-		executeRequest(CHANNEL, STOP, application);
-	}
-	
-	public void tearDown() {
-		executeRequest(DRIVER, STOP);
-	}
-
-	@Override
 	public void loadParents(FoundElement element) {
-		final AtsMobileElement atsElement = getElementById(element.getId());
+		final AtsMobileElement atsElement = getCapturedElementById(element.getId());
 		if(atsElement != null) {
 			FoundElement currentParent = null;
 			AtsMobileElement parent = atsElement.getParent();
@@ -190,13 +205,20 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 
 	@Override
 	public CalculatedProperty[] getAttributes(FoundElement element) {
-		final AtsMobileElement atsElement = getElementById(element.getId());
+		final AtsMobileElement atsElement = getCapturedElementById(element.getId());
 		if(atsElement != null) {
 			return atsElement.getMobileAttributes();
 		}
 		return new CalculatedProperty[0];
 	}
-	
+
+	private AtsMobileElement getCapturedElementById(String id) {
+		return getElementById(capturedRoot, id);
+	}
+
+
+
+
 	@Override
 	public String getAttribute(FoundElement element, String attributeName, int maxTry) {
 		final AtsMobileElement atsElement = getElementById(element.getId());
@@ -205,10 +227,10 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 		}
 		return null;
 	}
-	
+
 	@Override
 	public ArrayList<FoundElement> findElements(Channel channel, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> searchPredicate) {
-		
+
 		final List<AtsMobileElement> list = new ArrayList<AtsMobileElement>();
 		if(testObject.getParent() == null) {
 			refreshElementMapLocation(channel);
@@ -216,21 +238,21 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 		}else {
 			loadElementsByTag(getElementById(testObject.getParent().getWebElementId()), tagName, list);
 		}
-						
+
 		return list.parallelStream().filter(searchPredicate).map(e -> new FoundElement(e)).collect(Collectors.toCollection(ArrayList::new));
 	}
-	
+
 	private void loadElementsByTag(AtsMobileElement root, String tag, List<AtsMobileElement> list) {
-		
+
 		if(root.checkTag(tag)) {
 			list.add(root);
 		}
-		
+
 		for(AtsMobileElement child : root.getChildren()) {
 			loadElementsByTag(child, tag, list);
 		}
 	}
-	
+
 	@Override
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {
 		for(SendKeyData sequence : textActionList) {
@@ -363,7 +385,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 
 	@Override
 	public void setWindowToFront() {
-		executeRequest(CHANNEL, SWITCH, application);
+		executeRequest(APP, SWITCH, application);
 	}
 
 	@Override

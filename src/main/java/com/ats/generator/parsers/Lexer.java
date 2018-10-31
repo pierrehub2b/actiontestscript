@@ -319,7 +319,7 @@ public class Lexer {
 
 					}else if(ActionGotoUrl.SCRIPT_LABEL.equals(actionType)){
 
-						action = new ActionGotoUrl(script, stopExec, dataOne);
+						action = new ActionGotoUrl(script, stopExec, new CalculatedValue(script, dataOne));
 
 						//---------------------------------------------------------------------------
 						// Mouse scroll

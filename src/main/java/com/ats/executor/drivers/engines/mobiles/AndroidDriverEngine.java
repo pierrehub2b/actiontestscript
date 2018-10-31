@@ -22,7 +22,6 @@ package com.ats.executor.drivers.engines.mobiles;
 import com.ats.driver.AtsManager;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
-import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.MobileDriverEngine;
 
