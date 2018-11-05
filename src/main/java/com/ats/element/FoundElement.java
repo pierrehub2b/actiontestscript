@@ -54,6 +54,7 @@ public class FoundElement{
 	private FoundElement parent;
 	private boolean visible = true;
 	private boolean numeric = false;
+	private boolean clickable = true;
 
 	//------------------------------------------------------------------------------------------------------------------------------
 	// contructors
@@ -113,6 +114,8 @@ public class FoundElement{
 		this.tag = element.getTag();
 		this.width = element.getWidth();
 		this.height = element.getHeight();
+		
+		this.clickable = element.isClickable();
 
 		this.screenX = element.getX();
 		this.screenY = element.getY();
@@ -192,6 +195,14 @@ public class FoundElement{
 	// Getter and setter for serialization
 	//----------------------------------------------------------------------------------------------------------------------
 
+	public boolean isClickable() {
+		return clickable;
+	}
+
+	public void setClickable(boolean value){
+		this.clickable = value;
+	}
+	
 	public boolean isVisible() {
 		return visible;
 	}

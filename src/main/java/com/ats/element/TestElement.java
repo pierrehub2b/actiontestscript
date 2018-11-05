@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
@@ -384,32 +383,12 @@ public class TestElement{
 		while(tryLoop > 0 && !status.isPassed()) {
 			channel.progressiveWait(tryLoop);
 			mouseClick(status, position, hold);
+			tryLoop--;
 		}
 	}
 
 	private void mouseClick(ActionStatus status, MouseDirection position, boolean hold) {
-
-		status.setPassed(false);
-
-		try {
-
-			channel.mouseClick(getFoundElement(), position, hold);
-			status.setPassed(true);
-
-			return;
-
-		}catch(ElementNotVisibleException e0) {	
-
-			status.setCode(ActionStatus.OBJECT_NOT_VISIBLE);
-			mouseWheel(0);
-
-		}/*catch(WebDriverException e0) {	
-			if(e0.getMessage().contains("is not clickable") || e0.getMessage().contains("Element is obscured")) {
-				status.setCode(ActionStatus.OBJECT_NOT_INTERACTABLE);
-			}
-		}catch (Exception e) {
-			status.setMessage(e.getMessage());
-		}*/
+		channel.mouseClick(status, getFoundElement(), position, hold);
 	}
 
 	public void drag(ActionStatus status, MouseDirection position) {
@@ -421,9 +400,9 @@ public class TestElement{
 		status.setPassed(true);
 	}
 
-	public void swipe(ActionStatus status, MouseDirection position, int hDirection, int vDirection) {
+	public void swipe(ActionStatus status, MouseDirection position, MouseDirection direction) {
 		drag(status, position);
-		channel.moveByOffset(hDirection, vDirection);
+		channel.moveByOffset(direction.getHorizontalDirection(), direction.getVerticalDirection());
 		drop(status);
 	}
 

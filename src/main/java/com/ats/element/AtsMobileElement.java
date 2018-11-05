@@ -13,7 +13,7 @@ public class AtsMobileElement extends AtsBaseElement {
 	private static final String TEXT = "text";
 	private static final String ROOT = "root";
 
-	private int index;
+	private boolean clickable = false;
 
 	private AtsMobileElement parent;
 	private AtsMobileElement[] children;
@@ -24,6 +24,14 @@ public class AtsMobileElement extends AtsBaseElement {
 			rect = new Rectangle(x.intValue(), y.intValue(), width.intValue(), height.intValue());
 		}
 		return rect;
+	}
+		
+	public boolean isClickable() {
+		return clickable;
+	}
+
+	public void setClickable(boolean clickable) {
+		this.clickable = clickable;
 	}
 
 	private String getText() {

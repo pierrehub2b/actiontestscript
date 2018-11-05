@@ -15,14 +15,16 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.script.actions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import com.ats.element.SearchedElement;
 import com.ats.executor.ActionTestScript;
+import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.mouse.MouseSwipe;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
@@ -31,50 +33,27 @@ public class ActionMouseSwipe extends ActionMouse {
 
 	public static final String SCRIPT_LABEL = "swipe";
 
-	private final String HORIZONTAL = "horizontal";
-	private final String VERTICAL = "vertical";
-
-	private int verticalDirection = 0;
-	private int horizontalDirection = 0;
+	private MouseDirection direction;
 
 	public ActionMouseSwipe(){}
 
 	public ActionMouseSwipe(ScriptLoader script, String type, String direction, boolean stop, ArrayList<String> options, ArrayList<String> objectArray) {
 		super(script, type, stop, options, objectArray);
-
-		String[] data = direction.split(",");
-		for(String value : data) {
-			String[] directionData = value.split("=");
-			if(directionData.length > 1) {
-
-				if(directionData[0].toLowerCase().contains(HORIZONTAL)) {
-					try{
-						this.setHorizontalDirection(Integer.parseInt(directionData[1].trim()));
-					}catch (NumberFormatException e){}
-				}
-
-				if(directionData[0].toLowerCase().contains(VERTICAL)) {
-					try{
-						this.setVerticalDirection(Integer.parseInt(directionData[1].trim()));
-					}catch (NumberFormatException e){}
-				}
-			}
-		}
+		this.direction = new MouseDirection(new ArrayList<String>(Arrays.asList(direction.split(","))), false);
 	}
 
 	public ActionMouseSwipe(Script script, boolean stop, int maxTry, SearchedElement element, MouseSwipe mouse) {
 		super(script, stop, maxTry, element, mouse);
-		this.setHorizontalDirection(mouse.getHdir());
-		this.setVerticalDirection(mouse.getVdir());
+		this.setDirection(mouse.getDirection());
 	}
-	
+
 	//---------------------------------------------------------------------------------------------------------------------------------
 	// Code Generator
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
 	public String getJavaCode() {
-		setSpareCode(horizontalDirection + ", " + verticalDirection);
+		setSpareCode(direction.getDirectionJavaCode());
 		return super.getJavaCode();
 	}
 
@@ -84,8 +63,8 @@ public class ActionMouseSwipe extends ActionMouse {
 	@Override
 	public void terminateExecution(ActionTestScript ts) {
 		super.terminateExecution(ts);
-		
-		getTestElement().swipe(status, getPosition(), horizontalDirection, verticalDirection);
+
+		getTestElement().swipe(status, getPosition(), direction);
 		
 		status.endDuration();
 		ts.getRecorder().updateScreen(0, status.getDuration());
@@ -95,19 +74,11 @@ public class ActionMouseSwipe extends ActionMouse {
 	// getters and setters for serialization
 	//--------------------------------------------------------
 
-	public int getVerticalDirection() {
-		return verticalDirection;
+	public MouseDirection getDirection() {
+		return direction;
 	}
 
-	public void setVerticalDirection(int verticalDirection) {
-		this.verticalDirection = verticalDirection;
-	}
-
-	public int getHorizontalDirection() {
-		return horizontalDirection;
-	}
-
-	public void setHorizontalDirection(int horizontalDirection) {
-		this.horizontalDirection = horizontalDirection;
+	public void setDirection(MouseDirection value) {
+		this.direction = value;
 	}
 }

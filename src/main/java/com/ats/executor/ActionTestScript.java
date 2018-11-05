@@ -447,15 +447,13 @@ public class ActionTestScript extends Script implements ITest{
 		return new MouseScroll(scroll);
 	}
 
-	public MouseSwipe ms(int hdir, int vdir, MouseDirectionData hpos, MouseDirectionData vpos) {
+	public MouseSwipe ms(MouseDirectionData hdir, MouseDirectionData vdir, MouseDirectionData hpos, MouseDirectionData vpos) {
 		return new MouseSwipe(hdir, vdir, hpos, vpos);
 	}
-
-	public MouseSwipe ms(int hdir, int vdir) {
+	
+	public MouseSwipe ms(MouseDirectionData hdir, MouseDirectionData vdir) {
 		return new MouseSwipe(hdir, vdir);
 	}
-
-	//---------------------------------------------------------------------------------------------
 
 	//----------------------------------------------------------------------------------------------------------
 	// Actions

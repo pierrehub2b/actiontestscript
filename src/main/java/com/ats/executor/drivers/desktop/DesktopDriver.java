@@ -335,11 +335,11 @@ public class DesktopDriver extends RemoteWebDriver {
 	}
 
 	public void moveWindow(Channel channel, Point point) {
-		sendRequestCommand(CommandType.Window, WindowType.Move, channel.getHandle(), point.x, point.y);
+		sendRequestCommand(CommandType.Window, WindowType.Move, channel.getHandle(this), point.x, point.y);
 	}
 
 	public void resizeWindow(Channel channel, Dimension size) {
-		sendRequestCommand(CommandType.Window, WindowType.Resize, channel.getHandle(), size.width, size.height);
+		sendRequestCommand(CommandType.Window, WindowType.Resize, channel.getHandle(this), size.width, size.height);
 	}
 
 	public void closeAllWindows(Long pid) {
@@ -347,11 +347,11 @@ public class DesktopDriver extends RemoteWebDriver {
 	}
 
 	public void switchTo(Channel channel, int index) {
-		sendRequestCommand(CommandType.Window, WindowType.Switch, channel.getHandle());
+		sendRequestCommand(CommandType.Window, WindowType.Switch, channel.getHandle(this));
 	}
 
 	public void closeWindow(Channel channel, int index) {
-		sendRequestCommand(CommandType.Window, WindowType.Close, channel.getHandle());
+		sendRequestCommand(CommandType.Window, WindowType.Close, channel.getHandle(this));
 	}
 
 	public void closeWindow(int handle) {
@@ -416,9 +416,9 @@ public class DesktopDriver extends RemoteWebDriver {
 			}
 		}else{
 			if(attributes.isEmpty()) {
-				response = sendRequestCommand(CommandType.Element, ElementType.Find, channel.getHandle(), tag);
+				response = sendRequestCommand(CommandType.Element, ElementType.Find, channel.getHandle(this), tag);
 			}else {
-				response = sendRequestCommand(CommandType.Element, ElementType.Find, channel.getHandle(), tag, String.join(DESKTOP_REQUEST_SEPARATOR, attributes));
+				response = sendRequestCommand(CommandType.Element, ElementType.Find, channel.getHandle(this), tag, String.join(DESKTOP_REQUEST_SEPARATOR, attributes));
 			}
 		}
 
@@ -445,7 +445,7 @@ public class DesktopDriver extends RemoteWebDriver {
 
 		public LoadMapElement(Channel channel, DesktopDriver driver) {
 			this.channelDimension = channel.getDimension();
-			this.handle = channel.getHandle();
+			this.handle = channel.getHandle(driver);
 			this.driver = driver;
 		}
 

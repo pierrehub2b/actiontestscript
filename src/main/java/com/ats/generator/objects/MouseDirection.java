@@ -20,6 +20,7 @@ under the License.
 package com.ats.generator.objects;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,12 +36,16 @@ public class MouseDirection {
 
 	public MouseDirection() {}
 	
-	public MouseDirection(ArrayList<String> options) {
+	public MouseDirection(ArrayList<String> options, boolean canBeEmpty) {
 		Iterator<String> itr = options.iterator();
 		while (itr.hasNext()){
 			if(addPosition(itr.next())){
 				itr.remove();
 			}
+		}
+		
+		if(!canBeEmpty && this.horizontalPos == null && this.verticalPos == null) {
+			this.setHorizontalPos(new MouseDirectionData(Cartesian.RIGHT, 20));
 		}
 	}
 
@@ -67,17 +72,27 @@ public class MouseDirection {
 		
 		return false;
 	}
+	
+	public int getHorizontalDirection() {
+		if(horizontalPos != null) {
+			return horizontalPos.getHorizontalDirection();
+		}
+		return 0;
+	}
+	
+	public int getVerticalDirection() {
+		if(verticalPos != null) {
+			return verticalPos.getVerticalDirection();
+		}
+		return 0;
+	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
 	// Code Generator
 	//---------------------------------------------------------------------------------------------------------------------------------
 
-	public String getJavaCode() {
-		
+	private String getJavaCode(ArrayList<String> codeData) {
 		if(horizontalPos != null || verticalPos != null) {
-			
-			ArrayList<String> codeData = new ArrayList<String>();
-
 			if(horizontalPos != null){
 				codeData.add(ActionTestScript.JAVA_POS_FUNCTION_NAME + "(" + horizontalPos.getJavaCode() + ")");
 			}else {
@@ -89,11 +104,17 @@ public class MouseDirection {
 			}else {
 				codeData.add("null");
 			}
-
-			return ", " + String.join(", ", codeData);
+			return String.join(", ", codeData);
 		}
-		
 		return "";
+	}
+	
+	public String getPositionJavaCode() {
+		return getJavaCode(new ArrayList<String>(Arrays.asList(new String[]{""})));
+	}
+	
+	public String getDirectionJavaCode() {
+		return getJavaCode(new ArrayList<String>());
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------

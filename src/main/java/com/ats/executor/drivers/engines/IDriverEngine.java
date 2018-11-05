@@ -62,7 +62,7 @@ public interface IDriverEngine{
 	public void clearText(ActionStatus status, FoundElement foundElement);
 	public void setWindowBound(BoundData x, BoundData y, BoundData width, BoundData height);
 	public void forceScrollElement(FoundElement value);
-	public void mouseClick(FoundElement element, MouseDirection position, boolean hold);
+	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, boolean hold);
 	public void keyDown(Keys key);
 	public void keyUp(Keys key);
 	public void drop();

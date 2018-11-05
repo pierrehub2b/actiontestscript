@@ -28,9 +28,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.function.Predicate;
 
-import javax.swing.Icon;
-import javax.swing.filechooser.FileSystemView;
-
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
@@ -139,14 +136,12 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 					osName = data.getValue();
 				}
 			}
-
-			Icon icon = FileSystemView.getFileSystemView().getSystemIcon(exeFile);
 			
 			channel.setApplicationData("windows", appVersion, driverVersion, applicationProcess.pid());
 
 			int maxTry = 30;
 			while(maxTry > 0){
-				if(channel.getHandle() > 0) {
+				if(channel.getHandle(desktopDriver) > 0) {
 					maxTry = 0;
 				}else {
 					channel.sleep(200);
@@ -222,7 +217,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	@Override
 	public void updateDimensions(Channel cnl) {
 
-		DesktopWindow win = getDesktopDriver().getWindowByHandle(channel.getHandle());
+		DesktopWindow win = getDesktopDriver().getWindowByHandle(channel.getHandle(desktopDriver));
 		if(win != null){
 			cnl.setDimensions(new TestBound(
 					win.getX(),
@@ -279,7 +274,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	}
 
 	@Override
-	public void mouseClick(FoundElement element, MouseDirection position, boolean hold) {
+	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, boolean hold) {
 		if(hold) {
 			getDesktopDriver().mouseDown();
 		}else {
@@ -321,7 +316,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	@Override
 	public void clearText(ActionStatus status, FoundElement element) {
 		mouseMoveToElement(status, element, new MouseDirection());
-		mouseClick(element, null, false);
+		mouseClick(status, element, null, false);
 		getDesktopDriver().clearText();
 	}
 	

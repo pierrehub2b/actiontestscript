@@ -38,7 +38,7 @@ public class ActionMouse extends ActionExecuteElement {
 
 	public ActionMouse(ScriptLoader script, boolean stop, ArrayList<String> options, ArrayList<String> objectArray) {
 		super(script, stop, options, objectArray);
-		setPosition(new MouseDirection(options));
+		setPosition(new MouseDirection(options, true));
 		setType("undefined");
 	}
 	
@@ -79,7 +79,7 @@ public class ActionMouse extends ActionExecuteElement {
 
 	@Override
 	public String getJavaCode() {
-		return super.getJavaCode() + ", " + ActionTestScript.JAVA_MOUSE_FUNCTION_NAME + "(" + getMouseType() + "" + spareCode + position.getJavaCode() + "))";
+		return super.getJavaCode() + ", " + ActionTestScript.JAVA_MOUSE_FUNCTION_NAME + "(" + getMouseType() + spareCode + position.getPositionJavaCode() + "))";
 	}
 
 	private static final String MOUSE_CLASS = Mouse.class.getSimpleName() + ".";

@@ -60,11 +60,11 @@ public class IEDriverEngine extends WebDriverEngine {
 	}
 
 	@Override
-	public void mouseClick(FoundElement element, MouseDirection position, boolean hold) {
+	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, boolean hold) {
 		if(hold) {
 			getDesktopDriver().mouseDown();
 		}else {
-			super.mouseClick(element, position, false);
+			super.mouseClick(status, element, position, false);
 		}
 	}
 	

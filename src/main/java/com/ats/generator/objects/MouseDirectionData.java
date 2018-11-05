@@ -43,12 +43,29 @@ public class MouseDirectionData {
 		this.setValue(value);
 	}
 	
+	public int getHorizontalDirection() {
+		if(Cartesian.RIGHT.equals(type)) {
+			return value;
+		}else if(Cartesian.LEFT.equals(type)) {
+			return -value;
+		}
+		return 0;
+	}
+	
+	public int getVerticalDirection() {
+		if(Cartesian.BOTTOM.equals(type)) {
+			return value;
+		}else if(Cartesian.TOP.equals(type)) {
+			return -value;
+		}
+		return 0;
+	}
+	
 	//---------------------------------------------------------------------------------------------------------------------------------
 	// Code Generator
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	public String getJavaCode() {
-		
 		if(value == 0 && (Cartesian.MIDDLE.equals(type) || Cartesian.CENTER.equals(type))){
 			return "";
 		}
@@ -64,7 +81,6 @@ public class MouseDirectionData {
 	}
 
 	public void setName(String value) {
-		
 		this.type = Cartesian.valueOf(value.toUpperCase());
 	}
 

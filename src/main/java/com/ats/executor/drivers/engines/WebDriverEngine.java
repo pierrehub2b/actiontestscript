@@ -44,6 +44,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.NoSuchElementException;
@@ -540,21 +541,30 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	@Override
-	public void mouseClick(FoundElement element, MouseDirection position, boolean hold) {
-		
+	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, boolean hold) {
+
 		final Rectangle rect = element.getRectangle();
 		final int xOffset = getOffsetX(rect, position);
 		final int yOffset = getOffsetY(rect, position);
+
+		try {
+			Actions act = actions.moveToElement(element.getValue(), xOffset, yOffset);
+			if(hold) {
+				act = act.clickAndHold();
+			}else {
+				act = act.click();
+			}
+			act.build().perform();
+
+			status.setPassed(true);
 			
-		Actions act = actions.moveToElement(element.getValue(), xOffset, yOffset);
-		if(hold) {
-			act = act.clickAndHold();
-			//actions.clickAndHold(element.getValue()).perform();
-		}else {
-			act = act.click();
-			//actions.click(element.getValue()).perform();
+		}catch(ElementNotVisibleException e0) {	
+			status.setPassed(false);
+			status.setCode(ActionStatus.OBJECT_NOT_VISIBLE);
+		}catch (Exception e) {
+			status.setPassed(false);
+			status.setMessage(e.getMessage());
 		}
-		act.build().perform();
 	}
 
 	@Override

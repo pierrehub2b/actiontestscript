@@ -19,37 +19,27 @@ under the License.
 
 package com.ats.generator.objects.mouse;
 
+import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.MouseDirectionData;
 
 public class MouseSwipe extends Mouse {
 
-	private int hdir;
-	private int vdir;
+	private MouseDirection direction;
 	
-	public MouseSwipe(int hdir, int vdir) {
-		setHdir(hdir);
-		setVdir(vdir);
+	public MouseSwipe(MouseDirectionData dir1, MouseDirectionData dir2) {
+		setDirection(new MouseDirection(dir1, dir2));
 	}
-
-	public MouseSwipe(int hdir, int vdir, MouseDirectionData hpos, MouseDirectionData vpos) {
+	
+	public MouseSwipe(MouseDirectionData dir1, MouseDirectionData dir2, MouseDirectionData hpos, MouseDirectionData vpos) {
 		super(hpos, vpos);
-		setHdir(hdir);
-		setVdir(vdir);
+		setDirection(new MouseDirection(dir1, dir2));
 	}
 	
-	public int getHdir() {
-		return hdir;
+	public MouseDirection getDirection() {
+		return direction;
 	}
 
-	public void setHdir(int hdir) {
-		this.hdir = hdir;
-	}
-
-	public int getVdir() {
-		return vdir;
-	}
-
-	public void setVdir(int vdir) {
-		this.vdir = vdir;
+	public void setDirection(MouseDirection value) {
+		this.direction = value;
 	}
 }

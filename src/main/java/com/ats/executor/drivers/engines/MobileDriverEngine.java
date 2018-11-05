@@ -40,6 +40,7 @@ import com.ats.driver.AtsManager;
 import com.ats.element.AtsBaseElement;
 import com.ats.element.AtsMobileElement;
 import com.ats.element.FoundElement;
+import com.ats.element.MobileTestElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
@@ -66,11 +67,15 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	private final static String RELOAD = "reload";
 	private final static String TAP = "tap";
 	private final static String INPUT = "input";
+	private final static String SWIPE = "swipe";
 
 	private JsonParser parser = new JsonParser();
 	private Gson gson = new Gson();
 
 	private AtsMobileElement rootElement;
+	private AtsMobileElement capturedElement;
+	
+	private MobileTestElement testElement;
 
 	public MobileDriverEngine(Channel channel, ActionStatus status, String application, DesktopDriver desktopDriver, AtsManager ats) {
 
@@ -140,16 +145,6 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	}
 
 	@Override
-	public void mouseClick(FoundElement element, MouseDirection position, boolean hold) {
-
-		final Rectangle rect = element.getRectangle();
-		final int mouseX = (int)(getOffsetX(rect, position));
-		final int mouseY = (int)(getOffsetY(rect, position));
-
-		executeRequest(TAP, element.getElementId(), mouseX+"", mouseY+"");
-	}
-
-	@Override
 	public void close() {
 		executeRequest(APP, STOP, application);
 	}
@@ -158,13 +153,10 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 		executeRequest(DRIVER, STOP);
 	}
 
-
-	private AtsMobileElement capturedRoot;
-
 	@Override
 	public FoundElement getElementFromPoint(Double x, Double y) {
-		capturedRoot = gson.fromJson(executeRequest(CAPTURE, RELOAD), AtsMobileElement.class);
-		return getElementFromPoint(capturedRoot, x, y).getFoundElement();
+		capturedElement = gson.fromJson(executeRequest(CAPTURE, RELOAD), AtsMobileElement.class);
+		return getElementFromPoint(capturedElement, x, y).getFoundElement();
 	}
 
 	private AtsMobileElement getElementFromPoint(AtsMobileElement element, Double x, Double y) {
@@ -213,11 +205,8 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	}
 
 	private AtsMobileElement getCapturedElementById(String id) {
-		return getElementById(capturedRoot, id);
+		return getElementById(capturedElement, id);
 	}
-
-
-
 
 	@Override
 	public String getAttribute(FoundElement element, String attributeName, int maxTry) {
@@ -253,6 +242,27 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 		}
 	}
 
+	//-------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, boolean hold) {
+
+		final Rectangle rect = element.getRectangle();
+		final int mouseX = (int)(getOffsetX(rect, position));
+		final int mouseY = (int)(getOffsetY(rect, position));
+		
+		if(hold) {
+			testElement = new MobileTestElement(element.getElementId(), mouseX, mouseY);
+		}else {
+			executeRequest(TAP, element.getElementId(), mouseX + "", mouseY + "");
+		}
+	}	
+
+	@Override
+	public void moveByOffset(int hDirection, int vDirection) {
+		executeRequest(SWIPE, testElement.getId(), testElement.getOffsetX() + "", testElement.getOffsetY() + "" + hDirection + "", + vDirection + "");
+	}
+	
 	@Override
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {
 		for(SendKeyData sequence : textActionList) {
@@ -279,8 +289,6 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 		// TODO Auto-generated method stub
 
 	}
-
-
 
 	@Override
 	public void waitAfterAction() {
@@ -354,12 +362,6 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	}
 
 	@Override
-	public void moveByOffset(int hDirection, int vDirection) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public void doubleClick() {
 		// TODO Auto-generated method stub
 
@@ -423,12 +425,12 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 
 	protected JsonObject executeRequest(String ... parameters) {
 
-		String requestParameters = "/" + String.join("/", parameters);
+		final String requestParameters = "/" + String.join("/", parameters);
 		try {
-			URL url = new URL(applicationPath + requestParameters);
-			HttpURLConnection con = (HttpURLConnection) url.openConnection();
+			final URL url = new URL(applicationPath + requestParameters);
+			final HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
-			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8));
+			final BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8));
 
 			if(in != null) {
 				String inputLine;
@@ -438,8 +440,8 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 					response.append(inputLine);
 				} in .close();
 
-				String responseData = response.toString();
-				JsonElement jsonResponse = parser.parse(responseData);
+				final String responseData = response.toString();
+				final JsonElement jsonResponse = parser.parse(responseData);
 
 				return jsonResponse.getAsJsonObject();
 			}

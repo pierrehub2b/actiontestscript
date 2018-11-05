@@ -65,7 +65,6 @@ public class Channel {
 	private String screenServer;
 
 	private ProcessHandle process = null;
-	//private DesktopDriver desktopDriver;
 
 	private int winHandle = -1;
 
@@ -89,7 +88,6 @@ public class Channel {
 		this.name = name;
 		this.current = true;
 
-		//this.desktopDriver = new DesktopDriver(driverManager);
 		this.engine = driverManager.getDriverEngine(this, status, application, new DesktopDriver(driverManager));
 
 		if(status.isPassed()) {
@@ -103,11 +101,11 @@ public class Channel {
 		return engine.getDesktopDriver();
 	}
 
-	public int getHandle() {
+	public int getHandle(DesktopDriver ddriver) {
 		if(winHandle > 0) {
 			return winHandle;
 		}else {
-			List<DesktopWindow> processWindows = getDesktopDriver().getWindowsByPid(getProcessId());
+			List<DesktopWindow> processWindows = ddriver.getWindowsByPid(getProcessId());
 			if(processWindows != null && processWindows.size() > 0) {
 				return processWindows.get(0).handle;
 			}
@@ -131,7 +129,7 @@ public class Channel {
 
 	public void toFront(){
 		engine.setWindowToFront();
-		getDesktopDriver().setChannelToFront(getHandle());
+		getDesktopDriver().setChannelToFront(getHandle(engine.getDesktopDriver()));
 	}
 
 	public byte[] getScreenShot(){
@@ -413,8 +411,8 @@ public class Channel {
 		actionTerminated();
 	}
 
-	public void mouseClick(FoundElement element, MouseDirection position, boolean hold) {
-		engine.mouseClick(element, position, hold);
+	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, boolean hold) {
+		engine.mouseClick(status, element, position, hold);
 		actionTerminated();
 	}
 
