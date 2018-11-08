@@ -20,14 +20,19 @@ under the License.
 package com.ats.script;
 
 import java.io.File;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.ats.executor.channels.Channel;
 import com.ats.generator.variables.CalculatedValue;
+import com.ats.generator.variables.RandomStringValue;
 import com.ats.generator.variables.Variable;
 import com.ats.generator.variables.transform.DateTransformer;
 import com.ats.generator.variables.transform.TimeTransformer;
@@ -198,6 +203,26 @@ public class Script {
 	//-------------------------------------------------------------------------------------------------
 	// variable calculation
 	//-------------------------------------------------------------------------------------------------
+	
+	public String getRandomStringValue(int len, String letterCase) {
+		
+		String baseString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		if(RandomStringValue.LOW_KEY.equals(letterCase)) {
+			baseString = baseString.toLowerCase();
+		}else if(!RandomStringValue.UPP_KEY.equals(letterCase)) {
+			baseString += baseString.toLowerCase();
+		}
+		
+		List<Character> temp = baseString.chars()
+	            .mapToObj(i -> (char)i)
+	            .collect(Collectors.toList());
+		
+	    Collections.shuffle(temp, new SecureRandom());
+	    return temp.stream()
+	            .map(Object::toString)
+	            .limit(len)
+	            .collect(Collectors.joining());
+	}
 	
 	public String getParameterValue(int index, String defaultValue) {
 		if(parameters.size() > index) {

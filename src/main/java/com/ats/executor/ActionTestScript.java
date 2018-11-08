@@ -330,6 +330,17 @@ public class ActionTestScript extends Script implements ITest{
 
 	//---------------------------------------------------------------------------------------------
 
+	public static final String JAVA_RNDSTRING_FUNCTION_NAME = "rds";
+	public String rds(int len) {
+		return getRandomStringValue(len, null);
+	}
+
+	public String rds(int len, String upp) {
+		return getRandomStringValue(len, upp);
+	}
+	
+	//---------------------------------------------------------------------------------------------
+
 	public static final String JAVA_ENV_FUNCTION_NAME = "sv";
 	public String sv(String name) {
 		return getEnvironmentValue(name, "");

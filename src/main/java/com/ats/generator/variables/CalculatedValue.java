@@ -148,6 +148,15 @@ public class CalculatedValue{
 					javaCode = javaCode.replace(replace, "\", " + "Keys." + value + ", \"");
 				}
 			}
+			
+			mv = RandomStringValue.RND_PATTERN.matcher(dataValue);
+			while (mv.find()) {
+				
+				final RandomStringValue rds = new RandomStringValue(mv);
+				dataValue = dataValue.replace(rds.getReplace(), script.getRandomStringValue(rds.getValue(), rds.getDefaultValue()));
+				
+				javaCode = javaCode.replace(rds.getReplace(), "\", " + ActionTestScript.JAVA_RNDSTRING_FUNCTION_NAME + rds.getCode() + ", \"");
+			}
 
 			this.setCalculated(dataValue);
 		}

@@ -65,6 +65,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	private final static String SWITCH = "switch";
 	private final static String CAPTURE = "capture";
 	private final static String RELOAD = "reload";
+	private final static String ELEMENT = "element";
 	private final static String TAP = "tap";
 	private final static String INPUT = "input";
 	private final static String SWIPE = "swipe";
@@ -254,19 +255,19 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 		if(hold) {
 			testElement = new MobileTestElement(element.getElementId(), mouseX, mouseY);
 		}else {
-			executeRequest(TAP, element.getElementId(), mouseX + "", mouseY + "");
+			executeRequest(ELEMENT, element.getElementId(), TAP, mouseX + "", mouseY + "");
 		}
 	}	
 
 	@Override
 	public void moveByOffset(int hDirection, int vDirection) {
-		executeRequest(SWIPE, testElement.getId(), testElement.getOffsetX() + "", testElement.getOffsetY() + "" + hDirection + "", + vDirection + "");
+		executeRequest(ELEMENT, testElement.getId(), SWIPE, testElement.getOffsetX() + "", testElement.getOffsetY() + "", hDirection + "", + vDirection + "");
 	}
 	
 	@Override
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {
 		for(SendKeyData sequence : textActionList) {
-			executeRequest(INPUT, element.getFoundElement().getId(), sequence.getSequenceDesktop());
+			executeRequest(ELEMENT, element.getFoundElement().getId(), INPUT, sequence.getSequenceDesktop());
 		}
 	}
 

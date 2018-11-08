@@ -8,7 +8,7 @@ public class BaseValue {
 	protected String codeValue;
 	
 	private String replace;
-	private String defaultValue;
+	protected String defaultValue;
 	
 	public BaseValue(Matcher m) {
 		replace = m.group(0);
