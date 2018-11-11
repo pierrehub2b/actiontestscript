@@ -369,4 +369,9 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	@Override
 	public void switchToFrameId(String id) {}
 
+	@Override
+	public String getSource() {
+		return "";
+	}
+
 }

@@ -426,13 +426,12 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 
 	protected JsonObject executeRequest(String ... parameters) {
 
-		final String requestParameters = "/" + String.join("/", parameters);
 		try {
-			final URL url = new URL(applicationPath + requestParameters);
+			final URL url = new URL(applicationPath + "/" + String.join("/", parameters));
 			final HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
 			final BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8));
-
+			
 			if(in != null) {
 				String inputLine;
 				StringBuffer response = new StringBuffer();
@@ -446,11 +445,16 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 
 				return jsonResponse.getAsJsonObject();
 			}
-
+			
 		} catch (Exception e) {
 
 		}
 
 		return new JsonObject();
+	}
+
+	@Override
+	public String getSource() {
+		return "";
 	}
 }

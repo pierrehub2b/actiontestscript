@@ -903,4 +903,9 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	public void refreshElementMapLocation(Channel channel) {
 		getDesktopDriver().refreshElementMapLocation(channel);
 	}
+
+	@Override
+	public String getSource() {
+		return driver.getPageSource();
+	}
 }

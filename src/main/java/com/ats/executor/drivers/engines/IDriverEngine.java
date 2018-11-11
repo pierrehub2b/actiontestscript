@@ -74,4 +74,5 @@ public interface IDriverEngine{
 	public void setWindowToFront();
 	public void switchToFrameId(String id);
 	public void refreshElementMapLocation(Channel channel);
+	public String getSource();
 }

@@ -135,6 +135,10 @@ public class Channel {
 	public byte[] getScreenShot(){
 		return screenShot(dimension);
 	}
+	
+	public String getSource(){
+		return engine.getSource();
+	}
 
 	public byte[] getScreenShot(TestBound dim) {
 		dim.setX(dim.getX()+dimension.getX());

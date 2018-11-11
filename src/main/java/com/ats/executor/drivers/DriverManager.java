@@ -34,8 +34,6 @@ import com.ats.executor.drivers.engines.browsers.IEDriverEngine;
 import com.ats.executor.drivers.engines.browsers.OperaDriverEngine;
 import com.ats.executor.drivers.engines.desktop.DesktopDriverEngine;
 import com.ats.executor.drivers.engines.desktop.ExplorerDriverEngine;
-import com.ats.executor.drivers.engines.mobiles.AndroidDriverEngine;
-import com.ats.executor.drivers.engines.mobiles.IOSDriverEngine;
 import com.ats.tools.Utils;
 
 public class DriverManager {
