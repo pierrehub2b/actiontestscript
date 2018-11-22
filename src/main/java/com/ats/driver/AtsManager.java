@@ -346,7 +346,48 @@ public class AtsManager {
 							}
 						}
 					}
+					
+					final NodeList mobileApps = doc.getElementsByTagName("mobileApp");
+					if(mobileApps != null && mobileApps.getLength() > 0) {
+						for (int temp = 0; temp < mobileApps.getLength(); temp++) {
+							Node app = mobileApps.item(temp);
+							if (app.getNodeType() == Node.ELEMENT_NODE) {
+								Element mobileApp = (Element) app;
+								if(mobileApp.hasChildNodes() && mobileApp.getChildNodes().getLength() > 1) {
+									NodeList nodeList = mobileApp.getElementsByTagName("name");
+									if(nodeList != null && nodeList.getLength() > 0) {
+										if(nodeList.item(0).getChildNodes().getLength() > 0) {
+											String name = nodeList.item(0).getChildNodes().item(0).getNodeValue();
+											String url = "";
+											String wait = null;
 
+											nodeList = mobileApp.getElementsByTagName("url");
+											if(nodeList != null && nodeList.getLength() > 0) {
+												if(nodeList.item(0).getChildNodes().getLength() > 0) {
+													url = nodeList.item(0).getChildNodes().item(0).getNodeValue();
+												}
+											}
+											
+											nodeList = mobileApp.getElementsByTagName("waitAction");
+											if(nodeList != null && nodeList.getLength() > 0) {
+												if(nodeList.item(0).getChildNodes().getLength() > 0) {
+													wait = nodeList.item(0).getChildNodes().item(0).getNodeValue();
+												}
+											}
+																						
+											int waitValue = -1;
+											try {
+												waitValue = Integer.parseInt(wait);
+											}catch(NumberFormatException e){}
+											
+											applicationsList.add(new ApplicationProperties(name, url, waitValue, -1));
+										}
+									}
+								}
+							}
+						}
+					}
+					
 				} catch (ParserConfigurationException e) {
 
 				} catch (SAXException e) {
