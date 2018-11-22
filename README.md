@@ -181,6 +181,13 @@ Here is an example of global ATS configuration file (*.atsProperties* file in AT
 			<path>C:\Program Files\FileZilla FTP Client\filezilla.exe</path>
 		</application>
 	</applications>
+	<mobile>
+		<mobileApp>
+			<name>settings</name>
+			<url>http://192.168.0.5:8080/settings</url>
+			<waitAction>100</waitAction>
+		</mobileApp>
+	</mobile>
 </execute>
 ```
 * You can define the proxy used by browsers during execution of the test.
