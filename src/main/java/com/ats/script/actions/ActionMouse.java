@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.script.actions;
 
@@ -41,13 +41,13 @@ public class ActionMouse extends ActionExecuteElement {
 		setPosition(new MouseDirection(options, true));
 		setType("undefined");
 	}
-	
+
 	public ActionMouse(Script script, boolean stop, int maxTry, SearchedElement element, Mouse mouse) {
 		super(script, stop, maxTry, element);
 		setPosition(mouse.getPosition());
 		setType(mouse.getType());
 	}
-	
+
 	public ActionMouse(ScriptLoader script, String type, boolean stop, ArrayList<String> options, ArrayList<String> objectArray) {
 		this(script, stop, options, objectArray);
 		setType(type);
@@ -60,12 +60,13 @@ public class ActionMouse extends ActionExecuteElement {
 	public void terminateExecution(ActionTestScript ts) {
 
 		super.terminateExecution(ts);
+		if(status.isPassed()) {
+			status.startDuration();
+			getTestElement().over(status, position);
 
-		status.startDuration();
-		getTestElement().over(status, position);
-		
-		status.endDuration();
-		ts.getRecorder().updateScreen(0, status.getDuration(), getType(), position);
+			status.endDuration();
+			ts.getRecorder().updateScreen(0, status.getDuration(), getType(), position);
+		}
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

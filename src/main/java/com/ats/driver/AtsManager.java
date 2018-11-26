@@ -86,7 +86,6 @@ public class AtsManager {
 
 	private AtsProxy proxy;
 
-	private List<ApplicationProperties> browsersList = new ArrayList<ApplicationProperties>();
 	private List<ApplicationProperties> applicationsList = new ArrayList<ApplicationProperties>();
 
 	public static String getVersion() {
@@ -179,8 +178,7 @@ public class AtsManager {
 													check = nodeList.item(0).getChildNodes().item(0).getNodeValue();
 												}
 											}
-											
-											addBrowserProperties(name, path, wait, check);
+											addApplicationProperties(ApplicationProperties.BROWSER_TYPE, name, path, wait, check);
 										}
 									}
 								}
@@ -333,13 +331,8 @@ public class AtsManager {
 													wait = nodeList.item(0).getChildNodes().item(0).getNodeValue();
 												}
 											}
-																						
-											int waitValue = -1;
-											try {
-												waitValue = Integer.parseInt(wait);
-											}catch(NumberFormatException e){}
-											
-											applicationsList.add(new ApplicationProperties(name, path, waitValue, -1));
+																							
+											addApplicationProperties(ApplicationProperties.DESKTOP_TYPE, name, path, wait, "");
 										}
 									}
 								}
@@ -347,7 +340,7 @@ public class AtsManager {
 						}
 					}
 					
-					final NodeList mobileApps = doc.getElementsByTagName("mobileApp");
+					final NodeList mobileApps = doc.getElementsByTagName("mobile");
 					if(mobileApps != null && mobileApps.getLength() > 0) {
 						for (int temp = 0; temp < mobileApps.getLength(); temp++) {
 							Node app = mobileApps.item(temp);
@@ -374,13 +367,8 @@ public class AtsManager {
 													wait = nodeList.item(0).getChildNodes().item(0).getNodeValue();
 												}
 											}
-																						
-											int waitValue = -1;
-											try {
-												waitValue = Integer.parseInt(wait);
-											}catch(NumberFormatException e){}
 											
-											applicationsList.add(new ApplicationProperties(name, url, waitValue, -1));
+											addApplicationProperties(ApplicationProperties.MOBILE_TYPE, name, url, wait, "");
 										}
 									}
 								}
@@ -402,7 +390,7 @@ public class AtsManager {
 		return new Properties();
 	}
 
-	private void addBrowserProperties(String name, String path, String wait, String check) {
+	private void addApplicationProperties(int type, String name, String path, String wait, String check) {
 		int waitValue = -1;
 		try {
 			waitValue = Integer.parseInt(wait);
@@ -413,7 +401,7 @@ public class AtsManager {
 			checkProperty = Integer.parseInt(check);
 		}catch(NumberFormatException e){}
 
-		browsersList.add(new ApplicationProperties(name, path, waitValue, checkProperty));
+		applicationsList.add(new ApplicationProperties(type, name, path, waitValue, checkProperty));
 	}
 
 	//------------------------------------------------------------------------------------------------------------------
@@ -423,16 +411,6 @@ public class AtsManager {
 	public ApplicationProperties getApplicationProperties(String name) {
 		for (int i=0; i < this.applicationsList.size(); i++) {
 			final ApplicationProperties properties = this.applicationsList.get(i);
-			if (name.equals(properties.getName())){
-				return properties;
-			}
-		}
-		return null;
-	}
-
-	public ApplicationProperties getBrowserProperties(String name) {
-		for (int i=0; i < this.browsersList.size(); i++) {
-			final ApplicationProperties properties = this.browsersList.get(i);
 			if (name.equals(properties.getName())){
 				return properties;
 			}

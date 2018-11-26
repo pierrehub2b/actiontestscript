@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
+import com.ats.driver.ApplicationProperties;
 import com.ats.driver.AtsManager;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
@@ -19,8 +20,8 @@ public class ExplorerDriverEngine extends DesktopDriverEngine {
 	private Desktop desktop;
 	private DesktopWindow window;
 
-	public ExplorerDriverEngine(Channel channel, ActionStatus status, DesktopDriver desktopDriver, AtsManager ats) {
-		super(channel, DriverManager.DESKTOP_EXPLORER, desktopDriver, ats.getApplicationProperties(DriverManager.DESKTOP_EXPLORER), DEFAULT_WAIT);
+	public ExplorerDriverEngine(Channel channel, ActionStatus status, DesktopDriver desktopDriver, ApplicationProperties props) {
+		super(channel, DriverManager.DESKTOP_EXPLORER, desktopDriver, props, DEFAULT_WAIT);
 
 		String folderName = "";
 

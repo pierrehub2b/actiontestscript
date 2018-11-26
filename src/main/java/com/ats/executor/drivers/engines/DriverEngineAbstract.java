@@ -57,7 +57,7 @@ public abstract class DriverEngineAbstract {
 		if(props != null) {
 			actionWait = props.getWait();
 			propertyWait = props.getCheck();
-			applicationPath = props.getPath();
+			applicationPath = props.getUri();
 		}
 		
 		if(actionWait == -1) {

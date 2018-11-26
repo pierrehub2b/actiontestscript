@@ -129,7 +129,7 @@ public class ScriptParser {
 					String nextData = dataArray.remove(0).trim();
 					if((m = Transformer.TRANSFORM_PATTERN.matcher(nextData)) != null && m.find()){
 
-						transformer = Transformer.createTransformer(getDataGroup(m, 1), getDataGroup(m, 2).split(","));
+						transformer = Transformer.createTransformer(getDataGroup(m, 1), getDataGroup(m, 2));
 
 						if(dataArray.size() > 0){
 							value = dataArray.remove(0).trim();

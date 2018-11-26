@@ -14,6 +14,8 @@ public class Main {
 
 	public static void main(String[] argsx) throws ParserConfigurationException, TransformerException, InterruptedException, IOException {
 
+		System.out.println(System.getProperty("user.home"));
+		
 		/*try {
 			//Utils.loadCsvData("file:///D:\\agilitestWorkspace\\ats_test\\src\\assets\\data\\FichierCSVtest.csv");
 			Utils.loadCsvData("https://www.caipture.com/demo/browsers.csv");

@@ -40,7 +40,11 @@ public final class StartHtmlPage {
 			int watchdog) {
 
 		if(driverVersion == null) {
-			driverVersion = "N/A";
+			driverVersion = "--";
+		}
+		
+		if(browserVersion == null) {
+			browserVersion = "--";
 		}
 
 		StringBuilder htmlContent = new StringBuilder();

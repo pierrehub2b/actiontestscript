@@ -25,6 +25,8 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.openqa.selenium.StaleElementReferenceException;
+
 import com.ats.element.SearchedElement;
 import com.ats.element.TestElement;
 import com.ats.element.TestElementDialog;
@@ -95,7 +97,7 @@ public class ActionExecuteElement extends ActionExecute {
 
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
-	
+
 	public void execute(ActionTestScript ts, Channel channel, String operator, int value) {
 
 		super.execute(ts, channel);
@@ -112,7 +114,7 @@ public class ActionExecuteElement extends ActionExecute {
 				if(searchElement == null) {
 					initElement(new TestElement(channel));
 				}else {
-					
+
 					int searchMaxTry = ts.getChannelManager().getMaxTry() + maxTry;
 					if(searchMaxTry < 1) {
 						searchMaxTry = 1;
@@ -123,12 +125,12 @@ public class ActionExecuteElement extends ActionExecute {
 					}else {
 
 						final Predicate<Integer> predicate = getPredicate(operator, value);
-						
+
 						int trySearch = 0;
 						while (trySearch < searchMaxTry) {
-							
+
 							initElement(new TestElement(channel, searchMaxTry, predicate, searchElement));
-							
+
 							if(testElement.isValidated()) {
 								trySearch = searchMaxTry;
 							}else {
@@ -151,7 +153,7 @@ public class ActionExecuteElement extends ActionExecute {
 			}
 		}
 	}
-	
+
 	private Predicate<Integer> getPredicate(String operator, int value) {
 		switch (operator) {
 		case Operators.DIFFERENT :
@@ -170,7 +172,14 @@ public class ActionExecuteElement extends ActionExecute {
 
 	@Override
 	public void execute(ActionTestScript ts, Channel channel) {
-		execute(ts, channel, Operators.GREATER, 0);
+		try {
+			execute(ts, channel, Operators.GREATER, 0);
+		}catch (StaleElementReferenceException ex) {
+			channel.sleep(200);
+
+			initElement(null);
+			execute(ts, channel);
+		}
 	}	
 
 	private void asyncExec(ActionTestScript ts) {
@@ -199,7 +208,7 @@ public class ActionExecuteElement extends ActionExecute {
 	public TestElement getTestElement() {
 		return testElement;
 	}
-	
+
 	public void initElement(TestElement element) {
 		if(testElement != null) {
 			testElement.dispose();

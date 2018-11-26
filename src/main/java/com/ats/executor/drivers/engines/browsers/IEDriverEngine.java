@@ -24,6 +24,7 @@ import java.util.ArrayList;
 
 import org.openqa.selenium.ie.InternetExplorerOptions;
 
+import com.ats.driver.ApplicationProperties;
 import com.ats.driver.AtsManager;
 import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
@@ -39,8 +40,8 @@ public class IEDriverEngine extends WebDriverEngine {
 
 	private final static int DEFAULT_WAIT = 150;
 
-	public IEDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
-		super(channel, "ie", driverProcess, windowsDriver, ats, DEFAULT_WAIT);
+	public IEDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
+		super(channel, "ie", driverProcess, windowsDriver, props, DEFAULT_WAIT);
 
 		InternetExplorerOptions ieOptions = new InternetExplorerOptions();
 		ieOptions.introduceFlakinessByIgnoringSecurityDomains();

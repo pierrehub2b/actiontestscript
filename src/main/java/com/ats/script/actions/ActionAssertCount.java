@@ -34,7 +34,7 @@ public class ActionAssertCount extends ActionExecuteElement {
 
 	public static final String SCRIPT_LABEL_COUNT = "check-count";
 
-	private final Pattern COUNT_PATTERN = Pattern.compile("(.*)(\\d+) ?(\\-?\\+?=?)");
+	private final Pattern COUNT_PATTERN = Pattern.compile("(\\d+) ?(\\-?\\+?=?)");
 
 	private int value = 1;
 	private String operator = Operators.EQUAL;
@@ -46,12 +46,13 @@ public class ActionAssertCount extends ActionExecuteElement {
 
 		Matcher m = COUNT_PATTERN.matcher(data);
 		if(m.matches()) {
+			
 			try {
-				setValue(Integer.parseInt(m.group(2).trim())); 
+				setValue(Integer.parseInt(m.group(1).trim())); 
 			}catch(NumberFormatException e) {}
 
-			if(m.groupCount() > 2) {
-				switch (m.group(3).trim()) {
+			if(m.groupCount() > 1) {
+				switch (m.group(2).trim()) {
 				case "+":
 					setOperator(Operators.GREATER_EQUAL);
 					break;

@@ -21,24 +21,43 @@ package com.ats.driver;
 
 public class ApplicationProperties {
 	
+	public static int BROWSER_TYPE = 0;
+	public static int DESKTOP_TYPE = 1;
+	public static int MOBILE_TYPE = 2;
+	
+	private int type = BROWSER_TYPE;
+	
 	private String name;
-	private String path;
+	private String uri;
 	private int wait;
 	private int check;
 	
-	public ApplicationProperties(String name, String path, int wait, int check) {
+	public ApplicationProperties(int type, String name, String uri, int wait, int check) {
+		this.type = type;
 		this.name = name;
-		this.path = path;
+		this.uri = uri;
 		this.wait = wait;
 		this.check = check;
+	}
+	
+	public boolean isWeb() {
+		return type == BROWSER_TYPE;
+	}
+	
+	public boolean isDesktop() {
+		return type == DESKTOP_TYPE;
+	}
+	
+	public boolean isMobile() {
+		return type == MOBILE_TYPE;
 	}
 	
 	public String getName() {
 		return name;
 	}
 
-	public String getPath() {
-		return path;
+	public String getUri() {
+		return uri;
 	}
 	
 	public int getWait() {

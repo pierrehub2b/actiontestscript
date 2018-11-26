@@ -21,6 +21,7 @@ package com.ats.executor.drivers.engines;
 
 import java.awt.Rectangle;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
@@ -59,7 +60,7 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.RemoteWebElement;
 
-import com.ats.driver.AtsManager;
+import com.ats.driver.ApplicationProperties;
 import com.ats.element.AtsBaseElement;
 import com.ats.element.AtsElement;
 import com.ats.element.FoundElement;
@@ -77,6 +78,7 @@ import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.actions.ActionGotoUrl;
 import com.ats.tools.ResourceContent;
 import com.ats.tools.StartHtmlPage;
+import com.ats.tools.Utils;
 
 @SuppressWarnings("unchecked")
 public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngine {
@@ -113,6 +115,8 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	protected Double initElementY = 0.0;
 
 	private DriverProcess driverProcess;
+	
+	protected File worksDirectory;
 
 	protected Actions actions;
 
@@ -127,11 +131,15 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			String browser, 
 			DriverProcess driverProcess, 
 			DesktopDriver desktopDriver,
-			AtsManager ats,
+			ApplicationProperties props,
 			int defaultWait) {
 
-		super(channel, desktopDriver, browser, ats.getBrowserProperties(browser), defaultWait, 60);
+		super(channel, desktopDriver, browser, props, defaultWait, 60);
 
+		try {
+			worksDirectory = Files.createTempDirectory("ats_" + browser).toFile();
+		} catch (IOException e) {}
+				
 		this.driverProcess = driverProcess;
 	}
 
@@ -188,7 +196,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			System.err.println(ex.getMessage());
 		}
 
-		String applicationVersion = "N/A";
+		String applicationVersion = null;
 		String driverVersion = null;
 
 		Map<String, ?> infos = driver.getCapabilities().asMap();
@@ -201,6 +209,8 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 				if(driverVersion != null) {
 					driverVersion = driverVersion.replaceFirst("\\(.*\\)", "").trim();
 				}
+			}else if("moz:geckodriverVersion".equals(entry.getKey())) {
+				driverVersion = entry.getValue().toString();
 			}
 		}
 
@@ -518,6 +528,10 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 				}
 			}
 		}
+		
+		try {
+			Utils.deleteRecursive(worksDirectory);
+		} catch (FileNotFoundException e) {}
 	}
 
 	//-----------------------------------------------------------------------------------------------------------------------------------
@@ -558,6 +572,8 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 			status.setPassed(true);
 			
+		}catch(StaleElementReferenceException e1) {
+			throw e1;
 		}catch(ElementNotVisibleException e0) {	
 			status.setPassed(false);
 			status.setCode(ActionStatus.OBJECT_NOT_VISIBLE);

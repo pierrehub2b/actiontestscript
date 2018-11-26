@@ -28,7 +28,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.remote.CapabilityType;
 
-import com.ats.driver.AtsManager;
+import com.ats.driver.ApplicationProperties;
 import com.ats.element.AtsBaseElement;
 import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
@@ -45,8 +45,8 @@ public class EdgeDriverEngine extends WebDriverEngine {
 
 	private final static int DEFAULT_WAIT = 150;
 
-	public EdgeDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
-		super(channel, DriverManager.EDGE_BROWSER, driverProcess, windowsDriver, ats, DEFAULT_WAIT);
+	public EdgeDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
+		super(channel, DriverManager.EDGE_BROWSER, driverProcess, windowsDriver, props, DEFAULT_WAIT);
 		
 		this.searchElementScript = JS_WAIT_BEFORE_SEARCH + JS_SEARCH_ELEMENT;
 		this.autoScrollElement = JS_AUTO_SCROLL_CALC;

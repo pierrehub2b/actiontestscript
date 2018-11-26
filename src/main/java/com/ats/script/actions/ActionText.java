@@ -84,26 +84,28 @@ public class ActionText extends ActionExecuteElement {
 
 		super.terminateExecution(ts);
 
-		String dataText = "";
-		if(text != null){
-			dataText = text.getCalculated();
-		}
-
-		status.startDuration();
-		MouseDirection md = new MouseDirection();
-
-		getTestElement().over(status, md);
 		if(status.isPassed()) {
-			getTestElement().click(status, md, false);
+			String dataText = "";
+			if(text != null){
+				dataText = text.getCalculated();
+			}
+
+			status.startDuration();
+			MouseDirection md = new MouseDirection();
+
+			getTestElement().over(status, md);
 			if(status.isPassed()) {
-				getTestElement().clearText(status);
+				getTestElement().click(status, md, false);
 				if(status.isPassed()) {
-					
-					ts.getRecorder().updateScreen(true);
-					getTestElement().sendText(status, text);
-					
-					status.endDuration();
-					ts.getRecorder().updateScreen(0, status.getDuration(), dataText);
+					getTestElement().clearText(status);
+					if(status.isPassed()) {
+
+						ts.getRecorder().updateScreen(true);
+						getTestElement().sendText(status, text);
+
+						status.endDuration();
+						ts.getRecorder().updateScreen(0, status.getDuration(), dataText);
+					}
 				}
 			}
 		}

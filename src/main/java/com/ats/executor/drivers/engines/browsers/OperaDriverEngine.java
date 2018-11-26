@@ -19,11 +19,9 @@ under the License.
 
 package com.ats.executor.drivers.engines.browsers;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.openqa.selenium.opera.OperaOptions;
 
+import com.ats.driver.ApplicationProperties;
 import com.ats.driver.AtsManager;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
@@ -36,23 +34,20 @@ public class OperaDriverEngine extends WebDriverEngine {
 
 	private final static int DEFAULT_WAIT = 130;
 	
-	public OperaDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
-		super(channel, DriverManager.OPERA_BROWSER, driverProcess, windowsDriver, ats, DEFAULT_WAIT);
+	public OperaDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
+		super(channel, DriverManager.OPERA_BROWSER, driverProcess, windowsDriver, props, DEFAULT_WAIT);
 				
 		initElementX = 20.0;
 		
-		List<String> args = new ArrayList<String>();
-
-		args.add("--disable-infobars");
-		args.add("--disable-notifications");
-		args.add("--no-default-browser-check");
-		args.add("--disable-web-security");
-		args.add("--allow-running-insecure-content");
-		args.add("test-type");
-		
 		OperaOptions options = new OperaOptions();
 		options.setCapability("opera.log.level", "SEVERE");
-		options.addArguments(args);
+		options.addArguments("test-type");
+		options.addArguments("--disable-infobars");
+		options.addArguments("--disable-notifications");
+		options.addArguments("--no-default-browser-check");
+		options.addArguments("--allow-file-access-from-files");
+		options.addArguments("--disable-web-security");
+		options.addArguments("--allow-running-insecure-content");
 				
 		if(applicationPath != null) {
 			options.setBinary(applicationPath);

@@ -19,7 +19,7 @@ under the License.
 
 package com.ats.executor.drivers.engines.mobiles;
 
-import com.ats.driver.AtsManager;
+import com.ats.driver.ApplicationProperties;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.desktop.DesktopDriver;
@@ -27,7 +27,7 @@ import com.ats.executor.drivers.engines.MobileDriverEngine;
 
 public class AndroidDriverEngine extends MobileDriverEngine {
 
-	public AndroidDriverEngine(Channel channel, ActionStatus status, String application, DesktopDriver desktopDriver, AtsManager aTS) {
-		super(channel, status, application, desktopDriver, aTS);
+	public AndroidDriverEngine(Channel channel, ActionStatus status, String application, DesktopDriver desktopDriver, ApplicationProperties props) {
+		super(channel, status, application, desktopDriver, props);
 	}
 }

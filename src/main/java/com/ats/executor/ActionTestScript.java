@@ -25,7 +25,6 @@ import java.io.File;
 import java.util.logging.Level;
 
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.testng.ITest;
 import org.testng.ITestContext;
 import org.testng.SkipException;
@@ -491,16 +490,8 @@ public class ActionTestScript extends Script implements ITest{
 
 	public void exec(int line, ActionExecuteElement action){
 		atsCodeLine = line;
-		try {
-			exec(action);
-			execFinished(action.getStatus(), action.isStop());
-		}catch (StaleElementReferenceException ex) {
-			sleep(200);
-			action.initElement(null);
-			exec(line, action);
-		}catch (Exception ex) {
-			sleep(200);
-		}
+		exec(action);
+		execFinished(action.getStatus(), action.isStop());
 	}
 
 	private void execFinished(ActionStatus status, boolean stop) {

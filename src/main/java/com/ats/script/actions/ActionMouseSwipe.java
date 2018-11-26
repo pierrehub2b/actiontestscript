@@ -24,6 +24,7 @@ import java.util.Arrays;
 
 import com.ats.element.SearchedElement;
 import com.ats.executor.ActionTestScript;
+import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.mouse.MouseSwipe;
 import com.ats.script.Script;
@@ -59,15 +60,17 @@ public class ActionMouseSwipe extends ActionMouse {
 
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
-
+	
 	@Override
 	public void terminateExecution(ActionTestScript ts) {
 		super.terminateExecution(ts);
 
-		getTestElement().swipe(status, getPosition(), direction);
-		
-		status.endDuration();
-		ts.getRecorder().updateScreen(0, status.getDuration());
+		if(status.isPassed()) {
+			getTestElement().swipe(status, getPosition(), direction);
+
+			status.endDuration();
+			ts.getRecorder().updateScreen(0, status.getDuration());
+		}
 	}
 
 	//--------------------------------------------------------

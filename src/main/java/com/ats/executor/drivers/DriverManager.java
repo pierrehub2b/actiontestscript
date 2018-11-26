@@ -21,6 +21,7 @@ package com.ats.executor.drivers;
 
 import java.util.function.Predicate;
 
+import com.ats.driver.ApplicationProperties;
 import com.ats.driver.AtsManager;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
@@ -124,25 +125,28 @@ public class DriverManager {
 	}
 	
 	public IDriverEngine getDriverEngine(Channel channel, ActionStatus status, String application, DesktopDriver desktopDriver) {
+		
+		ApplicationProperties props = ATS.getApplicationProperties(application);
+		
 		switch(application.toLowerCase()) {
 		case CHROME_BROWSER :
-			return new ChromeDriverEngine(channel, status, getChromeDriver(), desktopDriver, ATS);
+			return new ChromeDriverEngine(channel, status, getChromeDriver(), desktopDriver, props);
 		case EDGE_BROWSER :
-			return new EdgeDriverEngine(channel, status, getEdgeDriver(), desktopDriver, ATS);
+			return new EdgeDriverEngine(channel, status, getEdgeDriver(), desktopDriver, props);
 		case OPERA_BROWSER :
-			return new OperaDriverEngine(channel, status, getOperaDriver(), desktopDriver, ATS);
+			return new OperaDriverEngine(channel, status, getOperaDriver(), desktopDriver, props);
 		case FIREFOX_BROWSER :
-			return new FirefoxDriverEngine(channel, status, getFirefoxDriver(), desktopDriver, ATS);
+			return new FirefoxDriverEngine(channel, status, getFirefoxDriver(), desktopDriver, props);
 		case IE_BROWSER :
-			return new IEDriverEngine(channel, status, getIEDriver(), desktopDriver, ATS);
+			return new IEDriverEngine(channel, status, getIEDriver(), desktopDriver, props);
 		case DESKTOP_EXPLORER :
-			return new ExplorerDriverEngine(channel, status, desktopDriver, ATS);
+			return new ExplorerDriverEngine(channel, status, desktopDriver, props);
 		default :
-			if(application.startsWith(MOBILE + "://")) {
-				mobileDriverEngine = new MobileDriverEngine(channel, status, application, desktopDriver, ATS);
+			if(application.startsWith(MOBILE + "://") || (props != null && props.isMobile())) {
+				mobileDriverEngine = new MobileDriverEngine(channel, status, application, desktopDriver, props);
 				return mobileDriverEngine;
 			}else {
-				return new DesktopDriverEngine(channel, status, application, desktopDriver, ATS);
+				return new DesktopDriverEngine(channel, status, application, desktopDriver, props);
 			}
 		}
 	}

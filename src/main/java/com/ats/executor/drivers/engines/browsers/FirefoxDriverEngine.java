@@ -34,6 +34,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebElement;
 
+import com.ats.driver.ApplicationProperties;
 import com.ats.driver.AtsManager;
 import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
@@ -54,16 +55,18 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 
 	private final static int DEFAULT_WAIT = 150;
 
-	public FirefoxDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, AtsManager ats) {
-		super(channel, DriverManager.FIREFOX_BROWSER, driverProcess, windowsDriver, ats, DEFAULT_WAIT);
+	public FirefoxDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
+		super(channel, DriverManager.FIREFOX_BROWSER, driverProcess, windowsDriver, props, DEFAULT_WAIT);
 
 		this.autoScrollElement = JS_AUTO_SCROLL_MOZ;
 
 		FirefoxOptions options = new FirefoxOptions();
-		options.setCapability("marionnette ","true");
-		options.setCapability("acceptSslCerts ","true");
-		options.setCapability("acceptInsecureCerts ","true");
+		options.setCapability("marionnette ",true);
+		options.setCapability("acceptSslCerts ",true);
+		options.setCapability("acceptInsecureCerts ",true);
 		options.setPageLoadStrategy(PageLoadStrategy.NORMAL);
+		
+		options.setCapability("security.fileuri.strict_origin_policy", false);
 
 		if(applicationPath != null) {
 			options.setBinary(applicationPath);

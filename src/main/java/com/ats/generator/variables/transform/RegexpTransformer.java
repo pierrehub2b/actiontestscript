@@ -38,11 +38,17 @@ public class RegexpTransformer extends Transformer {
 		setGroup(group);
 	}
 
-	public RegexpTransformer(String ... data) {
-		if(data.length > 1){
-			setPattern(data[0].trim());
-			setGroup(getInt(data[1].trim()));
-		}
+	public RegexpTransformer(String data) {
+		
+		int lastComa = data.lastIndexOf(",");
+		
+		try {
+			setGroup(getInt(data.substring(lastComa + 1).trim()));
+		}catch (IndexOutOfBoundsException e) {}
+		
+		try {
+			setPattern(data.substring(0, lastComa).trim());
+		}catch (IndexOutOfBoundsException e) {}
 	}
 
 	@Override

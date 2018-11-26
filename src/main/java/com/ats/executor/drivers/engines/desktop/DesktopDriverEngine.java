@@ -60,14 +60,14 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	private String osVersion;
 	private String osName;
 
-	public DesktopDriverEngine(Channel channel, String application, DesktopDriver desktopDriver, ApplicationProperties applicationProperties, int defaultWait) {
-		super(channel, desktopDriver, application, applicationProperties, DEFAULT_WAIT, 0);
+	public DesktopDriverEngine(Channel channel, String application, DesktopDriver desktopDriver, ApplicationProperties props, int defaultWait) {
+		super(channel, desktopDriver, application, props, DEFAULT_WAIT, 0);
 		desktopDriver.setEngine(this);
 	}
 	
-	public DesktopDriverEngine(Channel channel, ActionStatus status, String application, DesktopDriver desktopDriver, AtsManager ats) {
+	public DesktopDriverEngine(Channel channel, ActionStatus status, String application, DesktopDriver desktopDriver, ApplicationProperties props) {
 
-		this(channel, application, desktopDriver, ats.getApplicationProperties(application), DEFAULT_WAIT);
+		this(channel, application, desktopDriver, props, DEFAULT_WAIT);
 
 		int firstSpace = application.indexOf(" ");
 		String applicationArguments = "";

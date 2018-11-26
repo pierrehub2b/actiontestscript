@@ -38,16 +38,16 @@ public abstract class Transformer {
 		}
 	}
 
-	public static Transformer createTransformer(String type, String ... data) {
+	public static Transformer createTransformer(String type, String data) {
 		switch(type) {
 			case REGEXP:
 				return new RegexpTransformer(data);
 			case DATE:
-				return new DateTransformer(data);
+				return new DateTransformer(data.split(","));
 			case TIME:
-				return new TimeTransformer(data);
+				return new TimeTransformer(data.split(","));
 			case NUMERIC:
-				return new NumericTransformer(data);
+				return new NumericTransformer(data.split(","));
 			default:
 				return null;
 		}

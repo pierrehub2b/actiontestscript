@@ -36,7 +36,7 @@ import org.openqa.selenium.Alert;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
-import com.ats.driver.AtsManager;
+import com.ats.driver.ApplicationProperties;
 import com.ats.element.AtsBaseElement;
 import com.ats.element.AtsMobileElement;
 import com.ats.element.FoundElement;
@@ -46,7 +46,6 @@ import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
-import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.MouseDirection;
@@ -64,33 +63,41 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	private final static String STOP = "stop";
 	private final static String SWITCH = "switch";
 	private final static String CAPTURE = "capture";
-	private final static String RELOAD = "reload";
 	private final static String ELEMENT = "element";
 	private final static String TAP = "tap";
 	private final static String INPUT = "input";
 	private final static String SWIPE = "swipe";
+	
+	private final static String ROOT = "root";
 
 	private JsonParser parser = new JsonParser();
 	private Gson gson = new Gson();
 
 	private AtsMobileElement rootElement;
 	private AtsMobileElement capturedElement;
-	
+
 	private MobileTestElement testElement;
 
-	public MobileDriverEngine(Channel channel, ActionStatus status, String application, DesktopDriver desktopDriver, AtsManager ats) {
+	public MobileDriverEngine(Channel channel, ActionStatus status, String app, DesktopDriver desktopDriver, ApplicationProperties props) {
 
-		super(channel, desktopDriver, application, ats.getBrowserProperties(application), 0, 60);
+		super(channel, desktopDriver, app, props, 0, 60);
 
-		application = application.replace(DriverManager.MOBILE + "://", "");
+		if(applicationPath == null) {
+			applicationPath = app;
+		}
 
-		String[] appData = application.split("/");
+		int start = applicationPath.indexOf("://");
+		if(start > -1) {
+			applicationPath = applicationPath.substring(start + 3);
+		}
+
+		String[] appData = applicationPath.split("/");
 		if(appData.length > 1) {
 
 			String endPoint = appData[0];
 
-			this.applicationPath = "http://" + endPoint;
-			this.application = appData[1];
+			applicationPath = "http://" + endPoint;
+			application = appData[1];
 
 			JsonObject response = executeRequest(DRIVER, START);
 
@@ -111,7 +118,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 
 			channel.setDimensions(new TestBound(0D, 0D, deviceWidth, deviceHeight), new TestBound(channelX, channelY, channelWidth, channelHeight));
 
-			response = executeRequest(APP, START, this.application);
+			response = executeRequest(APP, START, application);
 			if(response != null) {
 				if(response.get("status").getAsInt() == 0) {
 					final String base64 = response.get("icon").getAsString();
@@ -142,7 +149,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 
 	@Override
 	public void refreshElementMapLocation(Channel channel) {
-		rootElement = gson.fromJson(executeRequest(CAPTURE, RELOAD), AtsMobileElement.class);
+		rootElement = gson.fromJson(executeRequest(CAPTURE), AtsMobileElement.class);
 	}
 
 	@Override
@@ -156,7 +163,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 
 	@Override
 	public FoundElement getElementFromPoint(Double x, Double y) {
-		capturedElement = gson.fromJson(executeRequest(CAPTURE, RELOAD), AtsMobileElement.class);
+		capturedElement = gson.fromJson(executeRequest(CAPTURE), AtsMobileElement.class);
 		return getElementFromPoint(capturedElement, x, y).getFoundElement();
 	}
 
@@ -222,12 +229,16 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	public ArrayList<FoundElement> findElements(Channel channel, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> searchPredicate) {
 
 		final List<AtsMobileElement> list = new ArrayList<AtsMobileElement>();
-		if(testObject.getParent() == null) {
-			refreshElementMapLocation(channel);
-			loadElementsByTag(rootElement, tagName, list);
-		}else {
-			loadElementsByTag(getElementById(testObject.getParent().getWebElementId()), tagName, list);
-		}
+		//if(ROOT.equals(tagName)) {
+		//	list.add(rootElement);
+		//}else {
+			if(testObject.getParent() == null) {
+				refreshElementMapLocation(channel);
+				loadElementsByTag(rootElement, tagName, list);
+			}else {
+				loadElementsByTag(getElementById(testObject.getParent().getWebElementId()), tagName, list);
+			}
+		//}
 
 		return list.parallelStream().filter(searchPredicate).map(e -> new FoundElement(e)).collect(Collectors.toCollection(ArrayList::new));
 	}
@@ -251,7 +262,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 		final Rectangle rect = element.getRectangle();
 		final int mouseX = (int)(getOffsetX(rect, position));
 		final int mouseY = (int)(getOffsetY(rect, position));
-		
+
 		if(hold) {
 			testElement = new MobileTestElement(element.getElementId(), mouseX, mouseY);
 		}else {
@@ -263,7 +274,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	public void moveByOffset(int hDirection, int vDirection) {
 		executeRequest(ELEMENT, testElement.getId(), SWIPE, testElement.getOffsetX() + "", testElement.getOffsetY() + "", hDirection + "", + vDirection + "");
 	}
-	
+
 	@Override
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {
 		for(SendKeyData sequence : textActionList) {
@@ -431,7 +442,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 			final HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
 			final BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8));
-			
+
 			if(in != null) {
 				String inputLine;
 				StringBuffer response = new StringBuffer();
@@ -445,7 +456,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 
 				return jsonResponse.getAsJsonObject();
 			}
-			
+
 		} catch (Exception e) {
 
 		}
