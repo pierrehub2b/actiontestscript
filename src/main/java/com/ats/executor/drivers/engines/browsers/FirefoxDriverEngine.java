@@ -35,7 +35,6 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebElement;
 
 import com.ats.driver.ApplicationProperties;
-import com.ats.driver.AtsManager;
 import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;

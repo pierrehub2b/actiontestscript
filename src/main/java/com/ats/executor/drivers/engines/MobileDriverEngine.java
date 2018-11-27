@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.remote.RemoteWebElement;
 
 import com.ats.driver.ApplicationProperties;
 import com.ats.element.AtsBaseElement;
@@ -67,8 +68,6 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	private final static String TAP = "tap";
 	private final static String INPUT = "input";
 	private final static String SWIPE = "swipe";
-	
-	private final static String ROOT = "root";
 
 	private JsonParser parser = new JsonParser();
 	private Gson gson = new Gson();
@@ -229,16 +228,13 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	public ArrayList<FoundElement> findElements(Channel channel, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> searchPredicate) {
 
 		final List<AtsMobileElement> list = new ArrayList<AtsMobileElement>();
-		//if(ROOT.equals(tagName)) {
-		//	list.add(rootElement);
-		//}else {
-			if(testObject.getParent() == null) {
-				refreshElementMapLocation(channel);
-				loadElementsByTag(rootElement, tagName, list);
-			}else {
-				loadElementsByTag(getElementById(testObject.getParent().getWebElementId()), tagName, list);
-			}
-		//}
+
+		if(testObject.getParent() == null) {
+			refreshElementMapLocation(channel);
+			loadElementsByTag(rootElement, tagName, list);
+		}else {
+			loadElementsByTag(getElementById(testObject.getParent().getWebElementId()), tagName, list);
+		}
 
 		return list.parallelStream().filter(searchPredicate).map(e -> new FoundElement(e)).collect(Collectors.toCollection(ArrayList::new));
 	}
@@ -283,6 +279,19 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	}
 
 	@Override
+	public WebElement getRootElement() {
+
+		refreshElementMapLocation(channel);
+
+		RemoteWebElement elem = new RemoteWebElement();
+		elem.setId(rootElement.getId());
+
+		return elem;
+	}
+
+	//----------------------------------------------------------------------------------------------------------------------------------------------
+
+	@Override
 	public void switchWindow(int index) {
 	}
 
@@ -299,13 +308,11 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	@Override
 	public void goToUrl(ActionStatus status, String url) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void waitAfterAction() {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -316,73 +323,56 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	@Override
 	public void scroll(FoundElement foundElement, int delta) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {
 		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public WebElement getRootElement() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void clearText(ActionStatus status, FoundElement foundElement) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void setWindowBound(BoundData x, BoundData y, BoundData width, BoundData height) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void forceScrollElement(FoundElement value) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void keyDown(Keys key) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void keyUp(Keys key) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void drop() {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void doubleClick() {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void rightClick() {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -394,7 +384,6 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	@Override
 	public void switchToDefaultContent() {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -405,7 +394,6 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	@Override
 	public void switchToFrameId(String id) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override

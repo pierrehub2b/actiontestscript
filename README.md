@@ -109,7 +109,13 @@ java -cp [ats-distribution-path]\libs/*;libs/* com.ats.generator.Generator -comp
 Generated and copied classes from *target/generated* folder will be compiled into *target/classes* folder and all files.
 Contents of folder *src/assets/* will be copied into the *target/classes* folder.
 
-Tests are ready to be launched with TestNG.
+Tests are ready to be launched with TestNG but you have to first create and define a TestNG suite xml file, in this file you can define groups, package or scripts you want to include or exclude from execution.
+Here the command line to launch tests defined in 'suite.xml' file :
+
+```
+cd [path-to-your-ats-project]
+java -cp [ats-distribution-path]\libs/*;libs/*;target/classes org.testng.TestNG src/exec/suite.xml
+```
 
 **Or**
 

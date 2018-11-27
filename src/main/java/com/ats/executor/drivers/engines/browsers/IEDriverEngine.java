@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import org.openqa.selenium.ie.InternetExplorerOptions;
 
 import com.ats.driver.ApplicationProperties;
-import com.ats.driver.AtsManager;
 import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;

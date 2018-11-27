@@ -24,7 +24,6 @@ import java.util.Arrays;
 
 import com.ats.element.SearchedElement;
 import com.ats.executor.ActionTestScript;
-import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.mouse.MouseSwipe;
 import com.ats.script.Script;

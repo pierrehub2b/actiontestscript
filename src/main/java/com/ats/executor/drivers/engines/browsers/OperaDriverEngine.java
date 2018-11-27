@@ -22,7 +22,6 @@ package com.ats.executor.drivers.engines.browsers;
 import org.openqa.selenium.opera.OperaOptions;
 
 import com.ats.driver.ApplicationProperties;
-import com.ats.driver.AtsManager;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
