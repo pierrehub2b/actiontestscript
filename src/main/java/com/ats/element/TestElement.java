@@ -32,6 +32,7 @@ import org.openqa.selenium.support.ui.Select;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.engines.IDriverEngine;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
@@ -40,7 +41,8 @@ import com.ats.script.actions.ActionSelect;
 
 public class TestElement{
 	
-	private Channel channel;
+	protected Channel channel;
+	protected IDriverEngine engine;
 
 	private Predicate<Integer> occurrences;
 
@@ -49,7 +51,7 @@ public class TestElement{
 	private long searchDuration = 0;
 	private long totalSearchDuration = 0;
 
-	private TestElement parent;
+	protected TestElement parent;
 	private ArrayList<FoundElement> foundElements = new ArrayList<FoundElement>();
 
 	private int maxTry = 20;
@@ -59,6 +61,8 @@ public class TestElement{
 	private String searchedTag;
 	
 	protected IVisualRecorder recorder;
+	
+	private boolean sysComp = false;
 
 	public TestElement(Channel channel) {
 		this.channel = channel;
@@ -84,29 +88,27 @@ public class TestElement{
 		this(channel, maxTry);
 		this.occurrences = occurrences;
 	}
-
-	public TestElement(Channel channel, int maxTry, Predicate<Integer> occurrences, TestElement parent, String tag, List<CalculatedProperty> criterias) {
-
-		this(channel, maxTry, occurrences);
-		this.parent = parent;
-
-		initSearch(tag, criterias);
+	
+	public TestElement(Channel channel, int maxTry, Predicate<Integer> predicate, int index) {
+		this(channel, maxTry, predicate);
+		this.index = index;
 	}
 
-	public TestElement(Channel channel, int maxTry, Predicate<Integer> occurrences, SearchedElement searchElement) {
+	public TestElement(Channel channel, int maxTry, Predicate<Integer> predicate, SearchedElement searchElement) {
 
-		this(channel, maxTry, occurrences);
-		this.index = searchElement.getIndex();
+		this(channel, maxTry, predicate, searchElement.getIndex());
 
 		if(searchElement.getParent() != null){
-			this.parent = new TestElement(channel, maxTry, occurrences, searchElement.getParent());
+			this.parent = new TestElement(channel, maxTry, predicate, searchElement.getParent());
 		}
 
-		initSearch(searchElement.getTag(), searchElement.getCriterias());
+		this.engine = channel.getDriverEngine();
+		startSearch(false, searchElement.getTag(), searchElement.getCriterias());
 	}
-		
+
 	public void dispose() {
 		channel = null;
+		engine = null;
 		recorder = null;
 		occurrences = null;
 
@@ -119,6 +121,10 @@ public class TestElement{
 			foundElements.remove(0).dispose();
 		}
 	}
+	
+	public boolean isSysComp() {
+		return sysComp;
+	}
 
 	protected int getMaxTry() {
 		return maxTry;
@@ -128,8 +134,10 @@ public class TestElement{
 		return channel;
 	}
 
-	public void initSearch(String tag, List<CalculatedProperty> properties) {
+	protected void startSearch(boolean sysComp, String tag, List<CalculatedProperty> properties) {
 
+		this.sysComp = sysComp;
+		
 		if(channel != null){
 
 			searchedTag = tag;
@@ -148,8 +156,8 @@ public class TestElement{
 
 					attributes.add(property.getName());
 				}
-
-				foundElements = channel.getDriverEngine().findElements(channel, this, tag, attributes, fullPredicate);
+								
+				foundElements = engine.findElements(channel, sysComp, this, tag, attributes, fullPredicate);
 			}
 
 			searchDuration = System.currentTimeMillis() - this.searchDuration;
@@ -212,6 +220,11 @@ public class TestElement{
 
 	public String getSearchedTag() {
 		return searchedTag;
+	}
+	
+	protected void setDialogBox() {
+		this.searchedTag = "AlertBox";
+		this.criterias = "";
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------
@@ -302,11 +315,12 @@ public class TestElement{
 	//-------------------------------------------------------------------------------------------------------------------
 
 	public void sendText(ActionStatus status, CalculatedValue text) {
-		channel.sendTextData(status, this, text.getCalculatedText());
+		engine.sendTextData(status, this, text.getCalculatedText());
+		channel.actionTerminated();
 	}
 
 	public void clearText(ActionStatus status) {
-		channel.clearText(status, getFoundElement());
+		engine.clearText(status, getFoundElement());
 	}
 
 	//-------------------------------------------------------------------------------------------------------------------
@@ -361,7 +375,7 @@ public class TestElement{
 
 	public void over(ActionStatus status, MouseDirection position) {
 		if(isValidated()){
-			channel.mouseMoveToElement(status, getFoundElement(), position);
+			engine.mouseMoveToElement(status, getFoundElement(), position);
 		}else{
 			status.setPassed(false);
 			status.setCode(ActionStatus.OBJECT_NOT_FOUND);
@@ -370,9 +384,9 @@ public class TestElement{
 	}
 
 	public void click(ActionStatus status, MouseDirection position, Keys key) {
-		channel.keyDown(key);
+		engine.keyDown(key);
 		click(status, position, false);
-		channel.keyUp(key);
+		engine.keyUp(key);
 	}	
 
 	public void click(ActionStatus status, MouseDirection position, boolean hold) {
@@ -388,7 +402,8 @@ public class TestElement{
 	}
 
 	private void mouseClick(ActionStatus status, MouseDirection position, boolean hold) {
-		channel.mouseClick(status, getFoundElement(), position, hold);
+		engine.mouseClick(status, getFoundElement(), position, hold);
+		channel.actionTerminated();
 	}
 
 	public void drag(ActionStatus status, MouseDirection position) {
@@ -396,34 +411,34 @@ public class TestElement{
 	}
 
 	public void drop(ActionStatus status) {
-		channel.drop();
+		engine.drop();
 		status.setPassed(true);
 	}
 
 	public void swipe(ActionStatus status, MouseDirection position, MouseDirection direction) {
 		drag(status, position);
-		channel.moveByOffset(direction.getHorizontalDirection(), direction.getVerticalDirection());
+		engine.moveByOffset(direction.getHorizontalDirection(), direction.getVerticalDirection());
 		drop(status);
 	}
 
 	public void mouseWheel(int delta) {
 		if(delta == 0) {
-			channel.forceScrollElement(getFoundElement());
+			engine.forceScrollElement(getFoundElement());
 		}else {
-			channel.scroll(getFoundElement(), delta);
+			engine.scroll(getFoundElement(), delta);
 		}
 	}
 
 	public void wheelClick(ActionStatus status, MouseDirection position) {
-		channel.middleClick(status, position, this);
+		engine.middleClick(status, position, this);
 	}
 
 	public void doubleClick() {
-		channel.doubleClick();
+		engine.doubleClick();
 	}
 
 	public void rightClick() {
-		channel.rightClick();
+		engine.rightClick();
 	}
 
 	//-------------------------------------------------------------------------------------------------------------------
@@ -431,24 +446,23 @@ public class TestElement{
 	//-------------------------------------------------------------------------------------------------------------------
 
 	public String getAttribute(String name){
-
 		if(isValidated()){
-			return channel.getAttribute(getFoundElement(), name, maxTry);
+			return engine.getAttribute(getFoundElement(), name, maxTry);
 		}
 		return null;
 	}
 
 	public CalculatedProperty[] getAttributes() {
-		return channel.getAttributes(getFoundElement());
+		return engine.getAttributes(getFoundElement());
 	}
 
 	public CalculatedProperty[] getCssAttributes() {
-		return channel.getCssAttributes(getFoundElement());
+		return engine.getCssAttributes(getFoundElement());
 	}
 
 	public Object executeScript(ActionStatus status, String script) {
 		if(isValidated()){
-			return channel.executeScript(status, "arguments[0]." + script, getWebElement());
+			return engine.executeScript(status, "arguments[0]." + script, getWebElement());
 		}else{
 			status.setPassed(false);
 			status.setCode(ActionStatus.OBJECT_NOT_FOUND);

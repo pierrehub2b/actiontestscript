@@ -39,8 +39,9 @@ public class ActionWindowSwitch extends ActionWindow {
 	}
 	
 	@Override
-	public void execute(ActionTestScript ts, Channel channel) {
-		super.execute(ts, channel);
+	public void execute(ActionTestScript ts) {
+		super.execute(ts);
+		final Channel channel = ts.getCurrentChannel();
 		
 		if(channel != null){
 			channel.switchWindow(getNum());

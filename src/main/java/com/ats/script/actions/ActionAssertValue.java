@@ -24,7 +24,6 @@ import java.util.regex.Pattern;
 
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
-import com.ats.executor.channels.Channel;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
@@ -32,7 +31,7 @@ import com.ats.tools.Operators;
 
 public class ActionAssertValue extends ActionExecute {
 
-	public static final String SCRIPT_LABEL_VALUE = "check-value";
+	public static final String SCRIPT_LABEL = "check-value";
 
 	private CalculatedValue value1;
 	private CalculatedValue value2;
@@ -79,9 +78,9 @@ public class ActionAssertValue extends ActionExecute {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void execute(ActionTestScript ts, Channel channel) {
+	public void execute(ActionTestScript ts) {
 		
-		super.execute(ts, channel);
+		super.execute(ts);
 		
 		String value2Label = value2.getCalculated();
 		

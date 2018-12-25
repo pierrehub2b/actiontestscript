@@ -35,6 +35,9 @@ import com.ats.generator.objects.MouseDirectionData;
 
 public abstract class DriverEngineAbstract {
 	
+	protected static String BODY = "BODY";
+	protected static String SYSCOMP = "SYSCOMP";
+	
 	protected Channel channel;
 	
 	protected RemoteWebDriver driver;
@@ -48,9 +51,17 @@ public abstract class DriverEngineAbstract {
 	private int actionWait = -1;
 	private int propertyWait = -1;
 
+	public DriverEngineAbstract(Channel channel) {
+		this.channel = channel;
+	}
+	
+	public DriverEngineAbstract(Channel channel, ApplicationProperties props) {
+		this(channel);
+	}
+	
 	public DriverEngineAbstract(Channel channel, DesktopDriver desktopDriver, String application, ApplicationProperties props, int defaultWait, int defaultCheck){
 		
-		this.channel = channel;
+		this(channel);
 		this.desktopDriver = desktopDriver;
 		this.application = application;
 		
@@ -68,7 +79,7 @@ public abstract class DriverEngineAbstract {
 			propertyWait = defaultCheck;
 		}
 	}
-	
+		
 	public DesktopDriver getDesktopDriver() {
 		return desktopDriver;
 	}

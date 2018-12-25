@@ -34,7 +34,7 @@ import com.ats.generator.variables.ParameterValue;
 import com.ats.generator.variables.Variable;
 import com.ats.script.ProjectData;
 import com.ats.script.ScriptLoader;
-import com.ats.script.actions.Action;
+import com.ats.script.actions.ActionApi;
 import com.ats.script.actions.ActionAssertCount;
 import com.ats.script.actions.ActionAssertProperty;
 import com.ats.script.actions.ActionAssertValue;
@@ -117,252 +117,241 @@ public class Lexer {
 	// Steps creation
 	//---------------------------------------------------------------------------------------------------------------
 
-	public Action createAction(ScriptLoader script, String data, boolean actionDisabled){
+	public void createAction(ScriptLoader script, String data, boolean disabled){
 
-		Action action = null;
-		Matcher matcher = null;
-
-		ArrayList<String> dataArray = new ArrayList<String>(Arrays.asList(data.split(ScriptParser.ATS_SEPARATOR)));
+		final ArrayList<String> dataArray = new ArrayList<String>(Arrays.asList(data.split(ScriptParser.ATS_SEPARATOR)));
 
 		if(dataArray.size() > 0){
 
-			String actionType = dataArray.remove(0);
+			String actionType = dataArray.remove(0).trim().toLowerCase();
 
-			if(actionType != null){
+			ArrayList<String> options = new ArrayList<String>();
+			boolean stopExec = true;
 
-				actionType = actionType.trim().toLowerCase();
+			Matcher matcher = actionPattern.matcher(actionType);
+			if (matcher.find()){
+				actionType = matcher.group(1).trim();
+				options = new ArrayList<>(Arrays.asList(matcher.group(2).split(",")));
+				stopExec = !options.remove(ActionExecute.NO_FAIL_LABEL);
+			}
 
-				ArrayList<String> options = new ArrayList<String>();
-				boolean stopExec = true;
+			//---------------------------------------------------------------------------
+			// Mouse over
+			//---------------------------------------------------------------------------
 
-				matcher = actionPattern.matcher(actionType);
-				if (matcher.find()){
-					actionType = matcher.group(1).trim();
-					options = new ArrayList<>(Arrays.asList(matcher.group(2).split(",")));
-					stopExec = !options.remove(ActionExecute.NO_FAIL_LABEL);
+			if(Mouse.OVER.equals(actionType)){
+
+				script.addAction(new ActionMouse(script, Mouse.OVER, stopExec, options, dataArray), disabled);
+
+				//---------------------------------------------------------------------------
+				// Drag Drop
+				//---------------------------------------------------------------------------
+
+			}else if(Mouse.DRAG.equals(actionType) || Mouse.DROP.equals(actionType)){
+
+				script.addAction(new ActionMouseDragDrop(script, actionType, stopExec, options, dataArray), disabled);
+
+				//---------------------------------------------------------------------------
+				// Mouse button
+				//---------------------------------------------------------------------------
+
+			}else if(actionType.startsWith(Mouse.CLICK)){
+
+				script.addAction(new ActionMouseKey(script, actionType, stopExec, options, dataArray), disabled);
+
+			}else if(ActionChannelClose.SCRIPT_CLOSE_LABEL.equals(actionType)){
+
+				if(dataArray.size() > 0) {
+					script.addAction(new ActionChannelClose(script, dataArray.remove(0).trim()), disabled);
+				}else {
+					script.addAction(new ActionChannelClose(script), disabled);
 				}
 
+			}else if(dataArray.size() > 0){
+
+				String dataOne = dataArray.remove(0).trim();
+
 				//---------------------------------------------------------------------------
-				// Mouse over
+				// Channel
 				//---------------------------------------------------------------------------
 
-				if(Mouse.OVER.equals(actionType)){
+				if(ActionChannelSwitch.SCRIPT_SWITCH_LABEL.equals(actionType)){	
 
-					action = new ActionMouse(script, Mouse.OVER, stopExec, options, dataArray);
+					script.addAction(new ActionChannelSwitch(script, dataOne), disabled);
 
-					//---------------------------------------------------------------------------
-					// Drag Drop
-					//---------------------------------------------------------------------------
+				}else if(ActionChannelStart.SCRIPT_START_LABEL.equals(actionType)){
 
-				}else if(Mouse.DRAG.equals(actionType) || Mouse.DROP.equals(actionType)){
-
-					action = new ActionMouseDragDrop(script, actionType, stopExec, options, dataArray);
-
-					//---------------------------------------------------------------------------
-					// Mouse button
-					//---------------------------------------------------------------------------
-
-				}else if(actionType.startsWith(Mouse.CLICK)){
-
-					action = new ActionMouseKey(script, actionType, stopExec, options, dataArray);
-
-				}else if(ActionChannelClose.SCRIPT_CLOSE_LABEL.equals(actionType)){
-
-					if(dataArray.size() > 0) {
-						action = new ActionChannelClose(script, dataArray.remove(0).trim());
-					}else {
-						action = new ActionChannelClose(script);
+					if(dataArray.size() > 0){
+						script.addAction(new ActionChannelStart(script, dataOne, new CalculatedValue(script, dataArray.remove(0).trim())), disabled);
 					}
 
-				}else if(dataArray.size() > 0){
-
-					String dataOne = dataArray.remove(0).trim();
-
 					//---------------------------------------------------------------------------
-					// Channel
+					// Text
 					//---------------------------------------------------------------------------
 
-					if(ActionChannelSwitch.SCRIPT_SWITCH_LABEL.equals(actionType)){	
+				}else if(ActionText.SCRIPT_LABEL.equals(actionType)){
 
-						action = new ActionChannelSwitch(script, dataOne);
+					script.addAction(new ActionText(script, actionType, stopExec, options, dataOne, dataArray), disabled);
 
-					}else if(ActionChannelStart.SCRIPT_START_LABEL.equals(actionType)){
+					//---------------------------------------------------------------------------
+					// Window
+					//---------------------------------------------------------------------------
 
-						if(dataArray.size() > 0){
-							CalculatedValue appData = new CalculatedValue(script, dataArray.remove(0).trim());
-							action = new ActionChannelStart(script, dataOne, appData);
-						}
+				}else if(actionType.startsWith(ActionWindow.SCRIPT_LABEL)){
 
-						//---------------------------------------------------------------------------
-						// Text
-						//---------------------------------------------------------------------------
+					if(ActionWindowResize.SCRIPT_RESIZE_LABEL.equals(actionType)){
+						script.addAction(new ActionWindowResize(script, dataOne), disabled);													
+					}else {
+						int num = 0;
+						try {
+							num = Integer.parseInt(dataOne);
+						}catch(NumberFormatException e) {}
 
-					}else if(ActionText.SCRIPT_LABEL.equals(actionType)){
-
-						action = new ActionText(script, actionType, stopExec, options, dataOne, dataArray);
-
-						//---------------------------------------------------------------------------
-						// Window
-						//---------------------------------------------------------------------------
-
-					}else if(actionType.startsWith(ActionWindow.SCRIPT_LABEL)){
-
-						if(ActionWindowResize.SCRIPT_RESIZE_LABEL.equals(actionType)){
-							action = new ActionWindowResize(script, dataOne);													
+						if(ActionWindowSwitch.SCRIPT_SWITCH_LABEL.equals(actionType)){
+							script.addAction(new ActionWindowSwitch(script, num), disabled);
 						}else {
-							int num = 0;
-							try {
-								num = Integer.parseInt(dataOne);
-							}catch(NumberFormatException e) {}
+							script.addAction(new ActionWindowClose(script, num), disabled);
+						}
+					}
 
-							if(ActionWindowSwitch.SCRIPT_SWITCH_LABEL.equals(actionType)){
-								action = new ActionWindowSwitch(script, num);
-							}else {
-								action = new ActionWindowClose(script, num);
-							}
+					//---------------------------------------------------------------------------
+					// Javascript
+					//---------------------------------------------------------------------------
+
+				}else if(ActionJavascript.SCRIPT_LABEL.equals(actionType)){
+
+					final String[] jsDataArray = dataOne.split(ScriptParser.ATS_ASSIGN_SEPARATOR);
+
+					if(jsDataArray.length > 0) {
+
+						Variable variable = null;
+						final String jsCode = jsDataArray[0].trim();
+
+						if(jsDataArray.length > 1) {
+							variable = script.getVariable(jsDataArray[1].trim(), true);
 						}
 
-						//---------------------------------------------------------------------------
-						// Javascript
-						//---------------------------------------------------------------------------
+						script.addAction(new ActionJavascript(script, stopExec, options, jsCode, variable, dataArray), disabled);
+					}
 
-					}else if(ActionJavascript.SCRIPT_LABEL.equals(actionType)){
+					//---------------------------------------------------------------------------
+					// Property
+					//---------------------------------------------------------------------------
 
-						String[] jsDataArray = dataOne.split(ScriptParser.ATS_ASSIGN_SEPARATOR);
+				}else if(ActionProperty.SCRIPT_LABEL.equals(actionType)){
 
-						if(jsDataArray.length > 0) {
+					final String[] propertyArray = dataOne.split(ScriptParser.ATS_ASSIGN_SEPARATOR);
 
-							Variable variable = null;
-							String jsCode = jsDataArray[0].trim();
+					if(propertyArray.length > 1){
+						final String propertyName = propertyArray[0].trim();
+						final Variable variable = script.getVariable(propertyArray[1].trim(), true);
+						script.addAction(new ActionProperty(script, stopExec, options, propertyName, variable, dataArray), disabled);
+					}
 
-							if(jsDataArray.length > 1) {
-								variable = script.getVariable(jsDataArray[1].trim(), true);
-							}
+					//---------------------------------------------------------------------------
+					// Select
+					//---------------------------------------------------------------------------
 
-							action = new ActionJavascript(script, stopExec, options, jsCode, variable, dataArray);
+				}else if(ActionSelect.SCRIPT_LABEL_SELECT.equals(actionType) || ActionSelect.SCRIPT_LABEL_DESELECT.equals(actionType)){
+
+					script.addAction(new ActionSelect(script, actionType, stopExec, options, dataOne, dataArray), disabled);
+
+					//---------------------------------------------------------------------------
+					// Callscript
+					//---------------------------------------------------------------------------
+
+				}else if(ActionCallscript.SCRIPT_LABEL.equals(actionType)){
+
+					String[] parameters = null;
+					String[] returnValues = null;
+
+					if(dataOne.contains(ScriptParser.ATS_ASSIGN_SEPARATOR)) {
+						final String[] callscriptData = dataOne.split(ScriptParser.ATS_ASSIGN_SEPARATOR);
+						dataOne = callscriptData[0].trim();
+						returnValues = callscriptData[1].split(",");
+					}
+
+					matcher = actionPattern.matcher(dataOne);
+					if (matcher.find()){
+						dataOne = matcher.group(1).trim();
+						String parametersData = matcher.group(2);
+
+						Matcher mv = ParameterValue.PARAMETER_PATTERN.matcher(parametersData);
+						while (mv.find()) {
+							ParameterValue sp = new ParameterValue(mv);
+							parametersData = parametersData.replace(sp.getReplace(), sp.getNoComma());
 						}
 
-						//---------------------------------------------------------------------------
-						// Property
-						//---------------------------------------------------------------------------
-
-					}else if(ActionProperty.SCRIPT_LABEL.equals(actionType)){
-
-						String[] propertyArray = dataOne.split(ScriptParser.ATS_ASSIGN_SEPARATOR);
-
-						if(propertyArray.length > 1){
-							String propertyName = propertyArray[0].trim();
-							Variable variable = script.getVariable(propertyArray[1].trim(), true);
-							action = new ActionProperty(script, stopExec, options, propertyName, variable, dataArray);
+						mv = EnvironmentValue.ENV_PATTERN.matcher(parametersData);
+						while (mv.find()) {
+							final EnvironmentValue sp = new EnvironmentValue(mv);
+							parametersData = parametersData.replace(sp.getReplace(), sp.getNoComma());
 						}
 
-						//---------------------------------------------------------------------------
-						// Select
-						//---------------------------------------------------------------------------
+						parameters = parametersData.split(",");
+					}			
 
-					}else if(ActionSelect.SCRIPT_LABEL_SELECT.equals(actionType) || ActionSelect.SCRIPT_LABEL_DESELECT.equals(actionType)){
+					script.addAction(new ActionCallscript(script, dataOne, parameters, returnValues), disabled);
 
-						action = new ActionSelect(script, actionType, stopExec, options, dataOne, dataArray);
+					//---------------------------------------------------------------------------
+					// Comments
+					//---------------------------------------------------------------------------
 
-						//---------------------------------------------------------------------------
-						// Callscript
-						//---------------------------------------------------------------------------
+				}else if(ActionComment.SCRIPT_LABEL.equals(actionType)){
 
-					}else if(ActionCallscript.SCRIPT_LABEL.equals(actionType)){
+					String textData = "";
+					if(dataArray.size() > 0){
+						textData = dataArray.remove(0).trim();
+					}
+					script.addAction(new ActionComment(script, dataOne, textData), disabled);
 
-						String[] parameters = null;
-						String[] returnValues = null;
+					//---------------------------------------------------------------------------
+					// Goto url
+					//---------------------------------------------------------------------------
 
-						if(dataOne.contains(ScriptParser.ATS_ASSIGN_SEPARATOR)) {
-							String[] callscriptData = dataOne.split(ScriptParser.ATS_ASSIGN_SEPARATOR);
-							dataOne = callscriptData[0].trim();
-							returnValues = callscriptData[1].split(",");
-						}
+				}else if(ActionGotoUrl.SCRIPT_LABEL.equals(actionType)){
 
-						matcher = actionPattern.matcher(dataOne);
-						if (matcher.find()){
-							dataOne = matcher.group(1).trim();
-							String parametersData = matcher.group(2);
+					script.addAction(new ActionGotoUrl(script, stopExec, new CalculatedValue(script, dataOne)), disabled);
 
-							Matcher mv = ParameterValue.PARAMETER_PATTERN.matcher(parametersData);
-							while (mv.find()) {
-								ParameterValue sp = new ParameterValue(mv);
-								parametersData = parametersData.replace(sp.getReplace(), sp.getNoComma());
-							}
+					//---------------------------------------------------------------------------
+					// Mouse scroll
+					//---------------------------------------------------------------------------
 
-							mv = EnvironmentValue.ENV_PATTERN.matcher(parametersData);
-							while (mv.find()) {
-								EnvironmentValue sp = new EnvironmentValue(mv);
-								parametersData = parametersData.replace(sp.getReplace(), sp.getNoComma());
-							}
+				}else if(ActionMouseScroll.SCRIPT_LABEL.equals(actionType)){
 
-							parameters = parametersData.split(",");
-						}			
+					int scrollValue = 0;
+					try{
+						scrollValue = Integer.parseInt(dataOne);
+					}catch (NumberFormatException e) {}
 
-						action = new ActionCallscript(script, dataOne, parameters, returnValues);
+					script.addAction(new ActionMouseScroll(script, scrollValue, stopExec, options, dataArray), disabled);
 
-						//---------------------------------------------------------------------------
-						// Comments
-						//---------------------------------------------------------------------------
+				}else if(ActionMouseSwipe.SCRIPT_LABEL.equals(actionType)){
 
-					}else if(ActionComment.SCRIPT_LABEL.equals(actionType)){
+					script.addAction(new ActionMouseSwipe(script, actionType, dataOne, stopExec, options, dataArray), disabled);
 
-						String textData = "";
-						if(dataArray.size() > 0){
-							textData = dataArray.remove(0).trim();
-						}
-						action = new ActionComment(script, dataOne, textData);
+					//---------------------------------------------------------------------------
+					// Assertions
+					//---------------------------------------------------------------------------
 
-						//---------------------------------------------------------------------------
-						// Goto url
-						//---------------------------------------------------------------------------
+				}else if(ActionAssertCount.SCRIPT_LABEL.equals(actionType)){
 
-					}else if(ActionGotoUrl.SCRIPT_LABEL.equals(actionType)){
+					script.addAction(new ActionAssertCount(script, stopExec, options, dataArray, dataOne), disabled);
 
-						action = new ActionGotoUrl(script, stopExec, new CalculatedValue(script, dataOne));
+				}else if(ActionAssertProperty.SCRIPT_LABEL.equals(actionType)){
 
-						//---------------------------------------------------------------------------
-						// Mouse scroll
-						//---------------------------------------------------------------------------
+					script.addAction(new ActionAssertProperty(script, stopExec, options, dataArray, dataOne), disabled);
 
-					}else if(ActionMouseScroll.SCRIPT_LABEL.equals(actionType)){
+				}else if(ActionAssertValue.SCRIPT_LABEL.equals(actionType)){
 
-						int scrollValue = 0;
-						try{
-							scrollValue = Integer.parseInt(dataOne);
-						}catch (NumberFormatException e) {}
+					script.addAction(new ActionAssertValue(script, stopExec, dataOne.trim()), disabled);
 
-						action = new ActionMouseScroll(script, scrollValue, stopExec, options, dataArray);
-
-					}else if(ActionMouseSwipe.SCRIPT_LABEL.equals(actionType)){
-
-						action = new ActionMouseSwipe(script, actionType, dataOne, stopExec, options, dataArray);
-
-						//---------------------------------------------------------------------------
-						// Assertions
-						//---------------------------------------------------------------------------
-
-					}else if(ActionAssertCount.SCRIPT_LABEL_COUNT.equals(actionType)){
-
-						action = new ActionAssertCount(script, stopExec, options, dataArray, dataOne);
-
-					}else if(ActionAssertProperty.SCRIPT_LABEL_PROPERTY.equals(actionType)){
-
-						action = new ActionAssertProperty(script, stopExec, options, dataArray, dataOne);
-
-					}else if(ActionAssertValue.SCRIPT_LABEL_VALUE.equals(actionType)){
-
-						action = new ActionAssertValue(script, stopExec, dataOne.trim());
-
+				}else if(ActionApi.SCRIPT_LABEL.equals(actionType)){
+					if(dataArray.size() > 0){
+						script.addAction(new ActionApi(script, dataOne, dataArray.remove(0).trim()), disabled);
 					}
 				}
 			}
 		}
-
-		if(action != null){
-			action.setDisabled(actionDisabled);
-		}
-
-		return action;
 	}
 }

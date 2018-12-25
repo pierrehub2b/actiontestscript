@@ -22,6 +22,7 @@ package com.ats.executor;
 import static org.testng.Assert.fail;
 
 import java.io.File;
+import java.util.List;
 import java.util.logging.Level;
 
 import org.openqa.selenium.Keys;
@@ -116,7 +117,7 @@ public class ActionTestScript extends Script implements ITest{
 
 	@BeforeClass(alwaysRun=true)
 	public void beforeAtsTest(ITestContext ctx) {
-		
+
 		final TestRunner runner = (TestRunner) ctx;
 		setTestName(this.getClass().getName());
 
@@ -127,7 +128,7 @@ public class ActionTestScript extends Script implements ITest{
 
 		}else {
 
-			setTestParameters(runner.getTest().getAllParameters());
+			setTestExecutionVariables(runner.getTest().getAllParameters());
 
 			//-----------------------------------------------------------
 			// check report output specified
@@ -211,7 +212,8 @@ public class ActionTestScript extends Script implements ITest{
 		return topScript;
 	}
 
-	public void initCalledScript(ActionTestScript script, String[] parameters, Variable[] variables) {
+	public void initCalledScript(ActionTestScript script, String[] parameters, List<Variable> variables) {
+		
 		this.topScript = script;
 		this.channelManager = script.getChannelManager();
 
@@ -222,6 +224,8 @@ public class ActionTestScript extends Script implements ITest{
 		if(variables != null) {
 			setVariables(variables);
 		}
+		
+		setTestExecutionVariables(script.getTestExecutionVariables());
 	}
 
 	public ChannelManager getChannelManager() {
@@ -245,49 +249,49 @@ public class ActionTestScript extends Script implements ITest{
 	// Generated methods
 	//----------------------------------------------------------------------------------------------------------
 
-	public static final String JAVA_VAR_FUNCTION_NAME = "va";
-	public Variable va(String name, CalculatedValue value){
+	public static final String JAVA_VAR_FUNCTION_NAME = "var";
+	public Variable var(String name, CalculatedValue value){
 		return createVariable(name, value, null);
 	}
 
-	public Variable va(String name){
+	public Variable var(String name){
 		return createVariable(name, new CalculatedValue(""), null);
 	}
 
-	public Variable va(String name, Transformer transformer){
+	public Variable var(String name, Transformer transformer){
 		return createVariable(name, new CalculatedValue(""), transformer);
 	}
 
-	public Variable va(String name, CalculatedValue value, Transformer transformer){
+	public Variable var(String name, CalculatedValue value, Transformer transformer){
 		return createVariable(name, value, transformer);
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_VALUE_FUNCTION_NAME = "cv";
-	public CalculatedValue cv(Object ... data) {
+	public static final String JAVA_VALUE_FUNCTION_NAME = "clv";
+	public CalculatedValue clv(Object ... data) {
 		return new CalculatedValue(this, data);
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_PARAM_FUNCTION_NAME = "pm";
-	public String pm(int index) {
+	public static final String JAVA_PARAM_FUNCTION_NAME = "prm";
+	public String prm(int index) {
 		return getParameterValue(index, "");
 	}
 
-	public String pm(int index, String defaultValue) {
+	public String prm(int index, String defaultValue) {
 		return getParameterValue(index, defaultValue);
 	}
 
-	public CalculatedValue[] pm(CalculatedValue ... values) {
+	public CalculatedValue[] prm(CalculatedValue ... values) {
 		return values;
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_RETURNS_FUNCTION_NAME = "rt";
-	public void rt(CalculatedValue ... values) {
+	public static final String JAVA_RETURNS_FUNCTION_NAME = "rtn";
+	public void rtn(CalculatedValue ... values) {
 
 		int i = 0;
 		returnValues = new String[values.length];
@@ -300,7 +304,7 @@ public class ActionTestScript extends Script implements ITest{
 		updateVariables();
 	}
 
-	public void rt(String ... values) {
+	public void rtn(String ... values) {
 
 		int i = 0;
 		returnValues = new String[values.length];
@@ -314,15 +318,14 @@ public class ActionTestScript extends Script implements ITest{
 	}
 
 	private void updateVariables() {
-		Variable[] variables = getVariables();
+		List<Variable> variables = getVariables();
 
 		int index = 0;
 		for(String value : returnValues) {
-			if(variables.length < index + 1) {
+			if(variables.size() < index + 1) {
 				break;
 			}
-
-			variables[index].updateValue(value);
+			variables.get(index).updateValue(value);
 			index++;
 		}
 	}
@@ -337,22 +340,22 @@ public class ActionTestScript extends Script implements ITest{
 	public String rds(int len, String upp) {
 		return getRandomStringValue(len, upp);
 	}
-	
+
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_ENV_FUNCTION_NAME = "sv";
-	public String sv(String name) {
+	public static final String JAVA_ENV_FUNCTION_NAME = "env";
+	public String env(String name) {
 		return getEnvironmentValue(name, "");
 	}
 
-	public String sv(String name, String defaultValue) {
+	public String env(String name, String defaultValue) {
 		return getEnvironmentValue(name, defaultValue);
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_PROPERTY_FUNCTION_NAME = "pf";
-	public CalculatedProperty pf(boolean isRegexp, String name, CalculatedValue value){
+	public static final String JAVA_PROPERTY_FUNCTION_NAME = "prp";
+	public CalculatedProperty prp(boolean isRegexp, String name, CalculatedValue value){
 		return new CalculatedProperty(isRegexp, name, value);
 	}
 
@@ -365,103 +368,103 @@ public class ActionTestScript extends Script implements ITest{
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_TODAY_FUNCTION_NAME = "td";
-	public String td() {
+	public static final String JAVA_TODAY_FUNCTION_NAME = "tod";
+	public String tod() {
 		return getTodayValue();
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_NOW_FUNCTION_NAME = "nw";
-	public String nw() {
+	public static final String JAVA_NOW_FUNCTION_NAME = "now";
+	public String now() {
 		return getNowValue();
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_ELEMENT_FUNCTION_NAME = "el";
-	public SearchedElement el(SearchedElement parent, int index, String tagName, CalculatedProperty ... properties) {
+	public static final String JAVA_ELEMENT_FUNCTION_NAME = "elm";
+	public SearchedElement elm(SearchedElement parent, int index, String tagName, CalculatedProperty ... properties) {
 		return new SearchedElement(parent, index, tagName, properties);
 	}
 
-	public SearchedElement el(int index, String tagName, CalculatedProperty ... properties) {
+	public SearchedElement elm(int index, String tagName, CalculatedProperty ... properties) {
 		return new SearchedElement(null, index, tagName, properties);
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_ROOT_FUNCTION_NAME = "rt";
-	public SearchedElement rt() {
+	public static final String JAVA_ROOT_FUNCTION_NAME = "roo";
+	public SearchedElement roo() {
 		return null;
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_REGEX_FUNCTION_NAME = "rx";
-	public RegexpTransformer rx(String patt, int group) {
+	public static final String JAVA_REGEX_FUNCTION_NAME = "rgx";
+	public RegexpTransformer rgx(String patt, int group) {
 		return new RegexpTransformer(patt, group);
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_DATE_FUNCTION_NAME = "dt";
-	public DateTransformer dt(String ... data) {
+	public static final String JAVA_DATE_FUNCTION_NAME = "dat";
+	public DateTransformer dat(String ... data) {
 		return new DateTransformer(data);
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_TIME_FUNCTION_NAME = "tm";
-	public TimeTransformer tm(String ... data) {
+	public static final String JAVA_TIME_FUNCTION_NAME = "tim";
+	public TimeTransformer tim(String ... data) {
 		return new TimeTransformer(data);
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_NUMERIC_FUNCTION_NAME = "nm";
-	public NumericTransformer nm(int dp, String ... data) {
+	public static final String JAVA_NUMERIC_FUNCTION_NAME = "nam";
+	public NumericTransformer nam(int dp, String ... data) {
 		return new NumericTransformer(dp, data);
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_POS_FUNCTION_NAME = "md";
-	public MouseDirectionData md(Cartesian cart, int value) {
+	public static final String JAVA_POS_FUNCTION_NAME = "pos";
+	public MouseDirectionData pos(Cartesian cart, int value) {
 		return new MouseDirectionData(cart, value);
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_MOUSE_FUNCTION_NAME = "ms";
-	public Mouse ms(String type) {
+	public static final String JAVA_MOUSE_FUNCTION_NAME = "mse";
+	public Mouse mse(String type) {
 		return new Mouse(type);
 	}
 
-	public Mouse ms(String type, MouseDirectionData hpos, MouseDirectionData vpos) {
+	public Mouse mse(String type, MouseDirectionData hpos, MouseDirectionData vpos) {
 		return new Mouse(type, hpos, vpos);
 	}
 
-	public MouseKey ms(String type, Keys key, MouseDirectionData hpos, MouseDirectionData vpos) {
+	public MouseKey mse(String type, Keys key, MouseDirectionData hpos, MouseDirectionData vpos) {
 		return new MouseKey(type, key, hpos, vpos);
 	}
 
-	public MouseKey ms(String type, Keys key) {
+	public MouseKey mse(String type, Keys key) {
 		return new MouseKey(type, key);
 	}
 
-	public MouseScroll ms(int scroll, MouseDirectionData hpos, MouseDirectionData vpos) {
+	public MouseScroll mse(int scroll, MouseDirectionData hpos, MouseDirectionData vpos) {
 		return new MouseScroll(scroll, hpos, vpos);
 	}
 
-	public MouseScroll ms(int scroll) {
+	public MouseScroll mse(int scroll) {
 		return new MouseScroll(scroll);
 	}
 
-	public MouseSwipe ms(MouseDirectionData hdir, MouseDirectionData vdir, MouseDirectionData hpos, MouseDirectionData vpos) {
+	public MouseSwipe mse(MouseDirectionData hdir, MouseDirectionData vdir, MouseDirectionData hpos, MouseDirectionData vpos) {
 		return new MouseSwipe(hdir, vdir, hpos, vpos);
 	}
-	
-	public MouseSwipe ms(MouseDirectionData hdir, MouseDirectionData vdir) {
+
+	public MouseSwipe mse(MouseDirectionData hdir, MouseDirectionData vdir) {
 		return new MouseSwipe(hdir, vdir);
 	}
 
@@ -473,7 +476,7 @@ public class ActionTestScript extends Script implements ITest{
 
 	public static final String JAVA_EXECUTE_FUNCTION_NAME = "exec";
 	public void exec(Action action){
-		action.execute(this, getCurrentChannel());
+		action.execute(this);
 	}
 
 	public void exec(int line, Action action){

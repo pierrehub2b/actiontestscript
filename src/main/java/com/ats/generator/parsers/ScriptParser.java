@@ -116,11 +116,12 @@ public class ScriptParser {
 
 		}else if((m = VARIABLE_PATTERN.matcher(data)) != null && m.find()){
 
-			ArrayList<String> dataArray = new ArrayList<String>(Arrays.asList(getDataGroup(m, 1).split(ScriptParser.ATS_SEPARATOR)));
+			final ArrayList<String> dataArray = new ArrayList<String>(Arrays.asList(getDataGroup(m, 1).split(ScriptParser.ATS_SEPARATOR)));
 
 			if(dataArray.size() > 0){
 
 				String name = dataArray.remove(0).trim();
+				
 				String value = "";
 				Transformer transformer = null;
 
@@ -151,7 +152,6 @@ public class ScriptParser {
 			for(int i=0; i < returnsData.length; i++){
 				returns[i] = new CalculatedValue(script, returnsData[i].trim());
 			}
-
 			script.setReturns(returns);
 
 		}else{
@@ -161,7 +161,7 @@ public class ScriptParser {
 				data = data.substring(2);
 				actionDisabled = true;
 			}
-			script.addAction(lexer.createAction(script, data, actionDisabled));
+			lexer.createAction(script, data, actionDisabled);
 		}
 	}
 }

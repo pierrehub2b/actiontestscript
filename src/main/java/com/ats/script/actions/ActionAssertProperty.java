@@ -30,7 +30,7 @@ import com.ats.script.ScriptLoader;
 
 public class ActionAssertProperty extends ActionExecuteElement {
 
-	public static final String SCRIPT_LABEL_PROPERTY = "check-property";
+	public static final String SCRIPT_LABEL = "check-property";
 
 	private CalculatedProperty value;
 

@@ -24,6 +24,7 @@ public class ApplicationProperties {
 	public static int BROWSER_TYPE = 0;
 	public static int DESKTOP_TYPE = 1;
 	public static int MOBILE_TYPE = 2;
+	public static int API_TYPE = 3;
 	
 	private int type = BROWSER_TYPE;
 	
@@ -50,6 +51,10 @@ public class ApplicationProperties {
 	
 	public boolean isMobile() {
 		return type == MOBILE_TYPE;
+	}
+	
+	public boolean isApi() {
+		return type == API_TYPE;
 	}
 	
 	public String getName() {

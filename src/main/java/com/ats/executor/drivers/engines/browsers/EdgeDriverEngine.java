@@ -122,13 +122,13 @@ public class EdgeDriverEngine extends WebDriverEngine {
 	}
 	
 	@Override
-	public ArrayList<FoundElement> findElements(Channel channel, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> predicate) {
+	public ArrayList<FoundElement> findElements(Channel channel, boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> predicate) {
 		int maxTry = 40;
 		while(!((Boolean)runJavaScript(JS_WAIT_READYSTATE)) && maxTry > 0) {
 			channel.sleep(200);
 			maxTry--;
 		}
-		return super.findElements(channel, testObject, tagName, attributes, predicate);
+		return super.findElements(channel, sysComp, testObject, tagName, attributes, predicate);
 	}
 
 	@Override

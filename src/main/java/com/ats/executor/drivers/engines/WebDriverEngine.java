@@ -73,8 +73,10 @@ import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.desktop.DesktopWindow;
+import com.ats.executor.drivers.engines.desktop.DesktopDriverEngine;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
+import com.ats.script.actions.ActionApi;
 import com.ats.script.actions.ActionGotoUrl;
 import com.ats.tools.ResourceContent;
 import com.ats.tools.StartHtmlPage;
@@ -115,7 +117,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	protected Double initElementY = 0.0;
 
 	private DriverProcess driverProcess;
-	
+
 	protected File worksDirectory;
 
 	protected Actions actions;
@@ -139,7 +141,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		try {
 			worksDirectory = Files.createTempDirectory("ats_" + browser).toFile();
 		} catch (IOException e) {}
-				
+
 		this.driverProcess = driverProcess;
 	}
 
@@ -223,20 +225,17 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			driver.get(tempHtml.toURI().toString());
 		} catch (IOException e) {}
 
-
 		maxTry = 10;
 		while(maxTry > 0) {
 			final DesktopWindow window = desktopDriver.getWindowByTitle(titleUid);
 			if(window != null) {
-
+				desktopDriver.setEngine(new DesktopDriverEngine(channel, window));
 				channel.setApplicationData(
 						"windows",
 						applicationVersion,
 						driverVersion,
 						window.pid);
-
 				maxTry = 0;
-
 			}else {
 				channel.sleep(300);
 				maxTry--;
@@ -311,12 +310,10 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	@Override
-	public FoundElement getElementFromPoint(Double x, Double y){
+	public FoundElement getElementFromPoint(Boolean syscomp, Double x, Double y){
 
-		if(x < channel.getSubDimension().getX() || y < channel.getSubDimension().getY()) {
-
+		if(syscomp) {
 			return desktopDriver.getElementFromPoint(x, y);
-
 		}else {
 
 			switchToDefaultContent();
@@ -528,7 +525,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 				}
 			}
 		}
-		
+
 		try {
 			Utils.deleteRecursive(worksDirectory);
 		} catch (FileNotFoundException e) {}
@@ -571,7 +568,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			act.build().perform();
 
 			status.setPassed(true);
-			
+
 		}catch(StaleElementReferenceException e1) {
 			throw e1;
 		}catch(ElementNotVisibleException e0) {	
@@ -820,10 +817,10 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	private double offsetIframeY = 0.0;
 
 	@Override
-	public ArrayList<FoundElement> findElements(Channel channel, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> predicate) {
+	public ArrayList<FoundElement> findElements(Channel channel, boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> predicate) {
 
 		if(tagName == null) {
-			tagName = "BODY";
+			tagName = BODY;
 		}
 
 		WebElement startElement = null;
@@ -868,9 +865,9 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			final double elmY = initElementY + offsetIframeY;
 
 			return elements.parallelStream().filter(predicate).map(e -> new FoundElement(e, channel, elmX, elmY)).collect(Collectors.toCollection(ArrayList::new));
-		}else {
-			return new ArrayList<FoundElement>();
 		}
+
+		return new ArrayList<FoundElement>();
 	}
 
 	@Override
@@ -908,11 +905,12 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	@Override
-	public void setWindowToFront() {
+	public boolean setWindowToFront() {
 		final List<String> listWins = new ArrayList<>(getWindowsHandle());
 		if(listWins.size() > currentWindow) {
 			driver.switchTo().window(listWins.get(currentWindow));
 		}
+		return true;
 	}
 
 	@Override
@@ -924,4 +922,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	public String getSource() {
 		return driver.getPageSource();
 	}
+	
+	@Override
+	public void api(ActionStatus status, ActionApi api) {}
 }

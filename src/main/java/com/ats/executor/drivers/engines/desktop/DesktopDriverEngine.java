@@ -49,21 +49,29 @@ import com.ats.executor.drivers.engines.DriverEngineAbstract;
 import com.ats.executor.drivers.engines.IDriverEngine;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
+import com.ats.script.actions.ActionApi;
 
 public class DesktopDriverEngine extends DriverEngineAbstract implements IDriverEngine {
 
 	private final static int DEFAULT_WAIT = 100;
 
 	private Process applicationProcess = null;
-	
+
 	private String osVersion;
 	private String osName;
+
+	private DesktopWindow mainWindow;
+
+	public DesktopDriverEngine(Channel channel, DesktopWindow window) {
+		super(channel);
+		this.mainWindow = window;
+	}
 
 	public DesktopDriverEngine(Channel channel, String application, DesktopDriver desktopDriver, ApplicationProperties props, int defaultWait) {
 		super(channel, desktopDriver, application, props, DEFAULT_WAIT, 0);
 		desktopDriver.setEngine(this);
 	}
-	
+
 	public DesktopDriverEngine(Channel channel, ActionStatus status, String application, DesktopDriver desktopDriver, ApplicationProperties props) {
 
 		this(channel, application, desktopDriver, props, DEFAULT_WAIT);
@@ -72,7 +80,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 		String applicationArguments = "";
 
 		ArrayList<String> args = new ArrayList<String>();
-		
+
 		if(firstSpace > 0){
 			applicationArguments = application.substring(firstSpace);
 			application = application.substring(0, firstSpace);
@@ -107,16 +115,16 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 
 			final Runtime runtime = Runtime.getRuntime();
 			try{
-				
+
 				applicationProcess = runtime.exec(args.toArray(new String[args.size()]));
 				status.setPassed(true);
-				
+
 			} catch (IOException e) {
-				
+
 				status.setCode(ActionStatus.CHANNEL_START_ERROR);
 				status.setMessage(e.getMessage());
 				status.setPassed(false);
-				
+
 				return;
 			}
 
@@ -135,7 +143,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 					osName = data.getValue();
 				}
 			}
-			
+
 			channel.setApplicationData("windows", appVersion, driverVersion, applicationProcess.pid());
 
 			int maxTry = 30;
@@ -152,7 +160,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 			desktopDriver.resizeWindow(channel, channel.getDimension().getSize());
 		}
 	}
-	
+
 	public String getOsVersion() {
 		return osVersion;
 	}
@@ -160,7 +168,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	public String getOsName() {
 		return osName;
 	}
-	
+
 	//---------------------------------------------------------------------------------------------------------------------
 	// 
 	//---------------------------------------------------------------------------------------------------------------------
@@ -169,7 +177,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	public void waitAfterAction() {
 		actionWait();
 	}
-	
+
 	@Override
 	public DesktopDriver getDesktopDriver() {
 		return (DesktopDriver)driver;
@@ -204,13 +212,23 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	//---------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public FoundElement getElementFromPoint(Double x, Double y){
+	public FoundElement getElementFromPoint(Boolean syscomp, Double x, Double y){
 		return getDesktopDriver().getElementFromPoint(x, y);
 	}
-	
+
 	@Override
-	public ArrayList<FoundElement> findElements(Channel channel, TestElement testElement, String tag, ArrayList<String> attributes, Predicate<AtsBaseElement> predicate) {
-		return getDesktopDriver().findElements(channel, testElement, tag, attributes, predicate);
+	public ArrayList<FoundElement> findElements(Channel channel, boolean sysComp, TestElement testElement, String tag, ArrayList<String> attributes, Predicate<AtsBaseElement> predicate) {
+		if(sysComp) {
+			if(SYSCOMP.equals(tag.toUpperCase())) {
+				ArrayList<FoundElement> win = new ArrayList<FoundElement>();
+				win.add(new FoundElement(mainWindow));
+				return win;
+			}else {
+				return getDesktopDriver().findElements(channel, testElement, tag, attributes, predicate);
+			}
+		}else {
+			return getDesktopDriver().findElements(channel, testElement, tag, attributes, predicate);
+		}
 	}
 
 	@Override
@@ -280,7 +298,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 			getDesktopDriver().mouseClick();
 		}
 	}
-	
+
 	@Override
 	public void drop() {
 		getDesktopDriver().mouseRelease();
@@ -311,35 +329,36 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	protected void setSize(Dimension size) {
 		getDesktopDriver().resizeWindow(channel, size);
 	}
-		
+
 	@Override
 	public void clearText(ActionStatus status, FoundElement element) {
 		mouseMoveToElement(status, element, new MouseDirection());
 		mouseClick(status, element, null, false);
 		getDesktopDriver().clearText();
 	}
-	
+
 	@Override
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {
 		for(SendKeyData sequence : textActionList) {
 			getDesktopDriver().sendKeys(sequence.getSequenceDesktop());
 		}
 	}
-	
+
 	@Override
 	public void refreshElementMapLocation(Channel channel) {
 		getDesktopDriver().refreshElementMapLocation(channel);
 	}
-	
+
 	@Override
-	public void setWindowToFront() {
+	public boolean setWindowToFront() {
 		//no window order management implemented for the moment
+		return true;
 	}
 
 	//--------------------------------------------------
 	//do nothing with followings methods for the moment ....
 	//--------------------------------------------------
-	
+
 	@Override
 	public Object executeScript(ActionStatus status, String script, Object... params) {
 		status.setPassed(true);
@@ -348,7 +367,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 
 	@Override
 	public void goToUrl(ActionStatus status, String url) {} // open default browser ?
-	
+
 	@Override
 	public WebElement getRootElement() {
 		return null;
@@ -356,7 +375,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 
 	@Override
 	public void forceScrollElement(FoundElement value) {}
-	
+
 	@Override
 	public Alert switchToAlert() {
 		return null;
@@ -372,5 +391,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	public String getSource() {
 		return "";
 	}
-
+	
+	@Override
+	public void api(ActionStatus status, ActionApi api) {}
 }

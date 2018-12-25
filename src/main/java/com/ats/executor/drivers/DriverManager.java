@@ -26,6 +26,7 @@ import com.ats.driver.AtsManager;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.desktop.DesktopDriver;
+import com.ats.executor.drivers.engines.ApiDriverEngine;
 import com.ats.executor.drivers.engines.IDriverEngine;
 import com.ats.executor.drivers.engines.MobileDriverEngine;
 import com.ats.executor.drivers.engines.browsers.ChromeDriverEngine;
@@ -55,6 +56,8 @@ public class DriverManager {
 
 	public static final String DESKTOP_EXPLORER = "explorer";
 	public static final String MOBILE = "mobile";
+	public static final String HTTP = "http";
+	public static final String HTTPS = "https";
 	
 	private DriverProcess desktopDriver;
 	private DriverProcess chromeDriver;
@@ -145,6 +148,8 @@ public class DriverManager {
 			if(application.startsWith(MOBILE + "://") || (props != null && props.isMobile())) {
 				mobileDriverEngine = new MobileDriverEngine(channel, status, application, desktopDriver, props);
 				return mobileDriverEngine;
+			}else if(application.startsWith(HTTP + "://") || application.startsWith(HTTPS + "://") || (props != null && props.isApi())) {
+				return new ApiDriverEngine(channel, status, application, props);
 			}else {
 				return new DesktopDriverEngine(channel, status, application, desktopDriver, props);
 			}

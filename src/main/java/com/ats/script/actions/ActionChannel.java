@@ -20,7 +20,6 @@ under the License.
 package com.ats.script.actions;
 
 import com.ats.executor.ActionTestScript;
-import com.ats.executor.channels.Channel;
 import com.ats.script.Script;
 
 public class ActionChannel extends Action{
@@ -37,8 +36,8 @@ public class ActionChannel extends Action{
 	}
 
 	@Override
-	public void execute(ActionTestScript ts, Channel channel) {
-		super.execute(ts, channel);
+	public void execute(ActionTestScript ts) {
+		super.execute(ts);
 	}
 
 	//--------------------------------------------------------

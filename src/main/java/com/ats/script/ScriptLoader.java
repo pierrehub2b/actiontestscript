@@ -28,7 +28,9 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Stream;
 
 import com.ats.executor.ActionTestScript;
@@ -62,7 +64,7 @@ public class ScriptLoader extends Script {
 		if(ATS_EXTENSION.equals(type)){
 
 			this.setParameters(new String[0]);
-			this.setVariables(new Variable[0]);
+			this.setVariables(new ArrayList<Variable>());
 
 			this.actions = new ArrayList<Action>();
 			this.parser = new ScriptParser(lexer);
@@ -95,11 +97,12 @@ public class ScriptLoader extends Script {
 		}
 	}
 
-	public void addAction(Action data){
-		if(data != null){
+	public void addAction(Action data, boolean disabled){
+		//if(data != null){
+			data.setDisabled(disabled);
 			data.setLine(actions.size());
 			actions.add(data);
-		}
+		//}
 	}
 
 	public void parseGroups(String data) {
@@ -143,15 +146,15 @@ public class ScriptLoader extends Script {
 			// variables 
 			//-------------------------------------------------------------------------------------------------
 
-			StringBuilder variableCode = new StringBuilder("");
-			Variable[] variables = getVariables();
-			Arrays.sort(variables);
+			final StringBuilder variableCode = new StringBuilder("");
+			final List<Variable> variables = getVariables();
+			Collections.sort(variables);
 
 			for(Variable variable : variables){
 				variableCode.append(codeLine(variable.getJavaCode()));
 			}
 
-			StringBuilder code = new StringBuilder(header.getJavaCode());
+			final StringBuilder code = new StringBuilder(header.getJavaCode());
 
 			code.append("\r\n\r\n\t\t//------------------------------------------------------------------------\r\n");
 			code.append("\t\t// Variables\r\n");
@@ -167,7 +170,7 @@ public class ScriptLoader extends Script {
 			code.append("\t\t// Actions\r\n");
 			code.append("\t\t//------------------------------------------------------------------------\r\n");
 
-			StringBuilder actionCode = new StringBuilder("");
+			final StringBuilder actionCode = new StringBuilder("");
 			for(Action action : actions){
 				String lineCode = action.getJavaCode();
 				if(lineCode != null && !action.isDisabled()){

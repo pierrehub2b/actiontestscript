@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.ats.executor.channels.Channel;
@@ -41,6 +42,7 @@ import com.ats.tools.logger.ExecutionLogger;
 
 public class Script {
 
+	public static final Pattern OBJECT_PATTERN = Pattern.compile("(.*)\\[(.*)\\]", Pattern.CASE_INSENSITIVE);
 	public final static String DEFAULT_CHARSET = "UTF-8";
 
 	public final static String ATS_EXTENSION = "ats";
@@ -50,10 +52,10 @@ public class Script {
 	public final static String ATS_VISUAL_FOLDER = "visual";
 	
 	private ArrayList<String> parameters = new ArrayList<String>();
-	private ArrayList<Variable> variables = new ArrayList<Variable>();
+	private List<Variable> variables = new ArrayList<Variable>();
 	private ArrayList<CalculatedValue> returns;
 	
-	private Map<String, String> testParameters;
+	private Map<String, String> testExecutionVariables;
 	
 	private File projectAtsFolder;
 		
@@ -105,20 +107,24 @@ public class Script {
 		} catch (InterruptedException e) {}
 	}
 	
-	protected void setTestParameters(Map<String, String> params) {
-		this.testParameters = params;
+	protected void setTestExecutionVariables(Map<String, String> params) {
+		this.testExecutionVariables = params;
+	}
+	
+	protected Map<String, String> getTestExecutionVariables() {
+		return testExecutionVariables;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	//  getters and setters for serialization
 	//-------------------------------------------------------------------------------------------------
 
-	public Variable[] getVariables() {
-		return variables.toArray(new Variable[variables.size()]);
+	public List<Variable> getVariables() {
+		return variables;
 	}
 
-	public void setVariables(Variable[] data) {
-		this.variables = new ArrayList<Variable>(Arrays.asList(data));
+	public void setVariables(List<Variable> data) {
+		this.variables = data;
 	}
 
 	public String[] getParameters() {
@@ -234,13 +240,14 @@ public class Script {
 	public String getEnvironmentValue(String name, String defaultValue) {
 	
 		String value = null;
-		if(testParameters != null) {
-			value = testParameters.get(name);
+
+		if(testExecutionVariables != null) {
+			value = testExecutionVariables.get(name);
 			if(value != null) {
 				return value;
 			}
 		}
-
+		
 		value = System.getenv(name);
 		if(value != null) {
 			return value;

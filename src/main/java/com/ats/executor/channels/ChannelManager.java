@@ -67,7 +67,7 @@ public class ChannelManager {
 		currentChannel = channel;
 		mainScript.setCurrentChannel(channel);
 	}
-	
+
 	private void noChannel() {
 		currentChannel = null;
 		mainScript.setCurrentChannel(null);
@@ -92,15 +92,17 @@ public class ChannelManager {
 		if(getChannel(name) == null){
 			final Channel newChannel = new Channel(status, mainScript, driverManager, name, app);
 
-			channelsList.add(newChannel);
-			setCurrentChannel(newChannel);
-			sendInfo("Start channel with application", app);
+			if(status.isPassed()) {
+				channelsList.add(newChannel);
+				setCurrentChannel(newChannel);
+				sendInfo("Start channel with application", app);
 
-			status.setData(getChannelsList());
-			status.setChannel(newChannel);
-			status.endDuration();
-			
-			mainScript.getRecorder().createVisualAction(action, status.getDuration(), name, app);
+				status.setData(getChannelsList());
+				status.setChannel(newChannel);
+				status.endDuration();
+
+				mainScript.getRecorder().createVisualAction(action, status.getDuration(), name, app);
+			}
 		}
 	}
 
@@ -123,7 +125,6 @@ public class ChannelManager {
 
 						status.setData(getChannelsList());
 						status.setChannel(cnl);
-						//mainScript.getRecorder().setChannel(cnl);
 					}
 				}
 			}
@@ -182,11 +183,11 @@ public class ChannelManager {
 	private void sendInfo(String type) {
 		mainScript.sendInfo(type, "");
 	}
-	
+
 	private void sendInfo(String type, String message) {
 		mainScript.sendInfo(type, " -> " + message);
 	}
-	
+
 	//----------------------------------------------------------------------------------------------------------------------
 	//----------------------------------------------------------------------------------------------------------------------
 

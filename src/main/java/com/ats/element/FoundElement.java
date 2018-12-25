@@ -28,6 +28,7 @@ import org.openqa.selenium.remote.RemoteWebElement;
 
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.desktop.DesktopWindow;
 
 public class FoundElement{
 
@@ -74,6 +75,13 @@ public class FoundElement{
 		this.width = element.getWidth();
 		this.height = element.getHeight();
 		this.numeric = element.isNumeric();
+	}
+	
+	public FoundElement(DesktopWindow win) {
+		this.id = win.getId();
+		this.tag = win.getTag();
+		this.width = win.getWidth();
+		this.height = win.getHeight();
 	}
 
 	public FoundElement(AtsElement element, Channel channel, Double offsetX, Double offsetY) {

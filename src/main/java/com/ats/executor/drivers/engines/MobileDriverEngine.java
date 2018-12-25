@@ -51,6 +51,7 @@ import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
+import com.ats.script.actions.ActionApi;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -161,23 +162,35 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	}
 
 	@Override
-	public FoundElement getElementFromPoint(Double x, Double y) {
+	public FoundElement getElementFromPoint(Boolean syscomp, Double x, Double y) {
 		capturedElement = gson.fromJson(executeRequest(CAPTURE), AtsMobileElement.class);
-		return getElementFromPoint(capturedElement, x, y).getFoundElement();
-	}
-
-	private AtsMobileElement getElementFromPoint(AtsMobileElement element, Double x, Double y) {
-
+		
+		ArrayList<AtsMobileElement> listElements = new ArrayList<AtsMobileElement>();
+		
+		loadList(capturedElement, listElements);
+		
 		final int mouseX = (int)(channel.getSubDimension().getX() + x);
 		final int mouseY = (int)(channel.getSubDimension().getY() + y);
 
-		for (int i=element.getChildren().length-1; i>=0; i--) {
-			AtsMobileElement child = element.getChildren()[i];
-			if(child.getRect().contains(new Point(mouseX, mouseY))){
-				return getElementFromPoint(child, x, y);
+		AtsMobileElement element = capturedElement;
+		
+		for (int i=0; i<listElements.size(); i++) {
+			AtsMobileElement child = listElements.get(i);
+			if(child.getRect().contains(new Point(mouseX, mouseY)) && element.getRect().contains(child.getRect())){
+				element = child;
 			}
 		}
-		return element;
+	
+		return element.getFoundElement();
+	}
+	
+	private void loadList(AtsMobileElement element, ArrayList<AtsMobileElement> list) {
+		for (int i=0; i<element.getChildren().length; i++) {
+			AtsMobileElement child = element.getChildren()[i];
+			
+			list.add(child);
+			loadList(child, list);
+		}
 	}
 
 	@Override
@@ -225,7 +238,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	}
 
 	@Override
-	public ArrayList<FoundElement> findElements(Channel channel, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> searchPredicate) {
+	public ArrayList<FoundElement> findElements(Channel channel, boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> searchPredicate) {
 
 		final List<AtsMobileElement> list = new ArrayList<AtsMobileElement>();
 
@@ -288,117 +301,86 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 
 		return elem;
 	}
+	
+	@Override
+	public CalculatedProperty[] getCssAttributes(FoundElement element) {
+		return new CalculatedProperty[0];
+	}
 
 	//----------------------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void switchWindow(int index) {
-	}
+	public void api(ActionStatus status, ActionApi api) {}
+	
+	@Override
+	public void switchWindow(int index) {}
 
 	@Override
-	public void closeWindow(ActionStatus status, int index) {
-	}
+	public void closeWindow(ActionStatus status, int index) {}
 
 	@Override
 	public Object executeScript(ActionStatus status, String script, Object... params) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void goToUrl(ActionStatus status, String url) {
-		// TODO Auto-generated method stub
-	}
+	public void goToUrl(ActionStatus status, String url) {}
 
 	@Override
-	public void waitAfterAction() {
-		// TODO Auto-generated method stub
-	}
+	public void waitAfterAction() {}
 
 	@Override
-	public CalculatedProperty[] getCssAttributes(FoundElement element) {
-		return null;
-	}
+	public void scroll(FoundElement foundElement, int delta) {}
 
 	@Override
-	public void scroll(FoundElement foundElement, int delta) {
-		// TODO Auto-generated method stub
-	}
+	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {}
 
 	@Override
-	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {
-		// TODO Auto-generated method stub
-	}
+	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position) {}
 
 	@Override
-	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position) {
-		// TODO Auto-generated method stub
-	}
+	public void clearText(ActionStatus status, FoundElement foundElement) {}
 
 	@Override
-	public void clearText(ActionStatus status, FoundElement foundElement) {
-		// TODO Auto-generated method stub
-	}
+	public void setWindowBound(BoundData x, BoundData y, BoundData width, BoundData height) {}
 
 	@Override
-	public void setWindowBound(BoundData x, BoundData y, BoundData width, BoundData height) {
-		// TODO Auto-generated method stub
-	}
+	public void forceScrollElement(FoundElement value) {}
 
 	@Override
-	public void forceScrollElement(FoundElement value) {
-		// TODO Auto-generated method stub
-	}
+	public void keyDown(Keys key) {}
 
 	@Override
-	public void keyDown(Keys key) {
-		// TODO Auto-generated method stub
-	}
+	public void keyUp(Keys key) {}
 
 	@Override
-	public void keyUp(Keys key) {
-		// TODO Auto-generated method stub
-	}
+	public void drop() {}
 
 	@Override
-	public void drop() {
-		// TODO Auto-generated method stub
-	}
+	public void doubleClick() {}
 
 	@Override
-	public void doubleClick() {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void rightClick() {
-		// TODO Auto-generated method stub
-	}
+	public void rightClick() {}
 
 	@Override
 	public Alert switchToAlert() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void switchToDefaultContent() {
-		// TODO Auto-generated method stub
-	}
+	public void switchToDefaultContent() {}
 
 	@Override
-	public void setWindowToFront() {
+	public boolean setWindowToFront() {
 		executeRequest(APP, SWITCH, application);
+		return true;
 	}
 
 	@Override
-	public void switchToFrameId(String id) {
-		// TODO Auto-generated method stub
-	}
+	public void switchToFrameId(String id) {}
 
 	@Override
-	public void updateDimensions(Channel cnl) {
-	}
+	public void updateDimensions(Channel cnl) {}
 
 	//----------------------------------------------------------------------------------------------------------------------------------------
 	//----------------------------------------------------------------------------------------------------------------------------------------

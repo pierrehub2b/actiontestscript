@@ -19,6 +19,7 @@ under the License.
 
 package com.ats.element;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.openqa.selenium.Alert;
@@ -62,6 +63,8 @@ public class TestElementDialog extends TestElement {
 
 	private void initSearch(List<CalculatedProperty> properties) {
 
+		this.setDialogBox();
+		
 		if(properties.size() > 0) {
 			alertAction = properties.get(0).getValue().getCalculated();
 		}
@@ -72,12 +75,17 @@ public class TestElementDialog extends TestElement {
 			try {
 				alert = getChannel().switchToAlert();
 				getChannel().sleep(waitBox);
-				setCount(1);
+				
+				final ArrayList<FoundElement> elements = new ArrayList<FoundElement>();
+				elements.add(new FoundElement());
+				setFoundElements(elements);
+				
 			}catch(NoAlertPresentException ex) {
 				getChannel().sleep(200);
 				tryLoop--;
 			}
 		}
+
 	}
 	
 	@Override
@@ -128,7 +136,6 @@ public class TestElementDialog extends TestElement {
 
 	@Override
 	public CalculatedProperty[] getAttributes() {
-		CalculatedProperty prop = new CalculatedProperty("text", alert.getText());
-		return new CalculatedProperty[] {prop};
+		return new CalculatedProperty[] {new CalculatedProperty("text", alert.getText())};
 	}
 }

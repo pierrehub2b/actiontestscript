@@ -36,6 +36,7 @@ import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
+import com.ats.script.actions.ActionApi;
 
 public interface IDriverEngine{
 	public void close();
@@ -46,10 +47,10 @@ public interface IDriverEngine{
 	public void closeWindow(ActionStatus status, int index);
 	public Object executeScript(ActionStatus status, String script, Object ... params);
 	public void goToUrl(ActionStatus status, String url);
-	public ArrayList<FoundElement> findElements(Channel channel, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> searchPredicate);
+	public ArrayList<FoundElement> findElements(Channel channel, boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> searchPredicate);
 	public void waitAfterAction();
 	public void updateDimensions(Channel channel);
-	public FoundElement getElementFromPoint(Double x, Double y);
+	public FoundElement getElementFromPoint(Boolean syscomp, Double x, Double y);
 	public String getAttribute(FoundElement element, String attributeName, int maxTry);
 	public CalculatedProperty[] getAttributes(FoundElement element);
 	public CalculatedProperty[] getCssAttributes(FoundElement element);
@@ -71,8 +72,9 @@ public interface IDriverEngine{
 	public void rightClick();
 	public Alert switchToAlert();
 	public void switchToDefaultContent();
-	public void setWindowToFront();
+	public boolean setWindowToFront();
 	public void switchToFrameId(String id);
 	public void refreshElementMapLocation(Channel channel);
 	public String getSource();
+	public void api(ActionStatus status, ActionApi api);
 }

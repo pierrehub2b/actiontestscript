@@ -21,7 +21,6 @@ package com.ats.script.actions;
 
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
-import com.ats.executor.channels.Channel;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
@@ -69,11 +68,11 @@ public class ActionComment extends Action {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void execute(ActionTestScript ts, Channel channel) {
+	public void execute(ActionTestScript ts) {
 		status = new ActionStatus(ts.getCurrentChannel());
 		if(ts.getCurrentChannel() != null) {
 			if(STEP_TYPE.equals(type)) {
-				super.execute(ts, channel);
+				super.execute(ts);
 				status.endDuration();
 				ts.getRecorder().update(type, comment.getCalculated());
 			}

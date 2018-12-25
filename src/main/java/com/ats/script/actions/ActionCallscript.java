@@ -27,12 +27,13 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.ats.executor.ActionTestScript;
-import com.ats.executor.channels.Channel;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.Variable;
 import com.ats.script.Script;
@@ -53,8 +54,8 @@ public class ActionCallscript extends Action {
 
 	private String name;
 
-	private Variable[] variables;
-	private CalculatedValue[] parameters;
+	private List<Variable> variables;
+	private List<CalculatedValue> parameters;
 	private int loop = 1;
 	private String csvFilePath = null;
 
@@ -85,18 +86,16 @@ public class ActionCallscript extends Action {
 						paramsValues.add(new CalculatedValue(script, param.trim()));
 					}
 				}
-				setParameters(paramsValues.toArray(new CalculatedValue[paramsValues.size()]));
+				setParameters(paramsValues);
 			}
 		}
 
 		if(returnValue != null && returnValue.length > 0 && this.loop == 1){
-			setVariables(new Variable[returnValue.length]);
-
-			int index = 0;
+			ArrayList<Variable> variableValues = new ArrayList<Variable>();
 			for (String varName : returnValue ){
-				this.variables[index] = script.getVariable(varName.trim(), true);
-				index++;
+				variableValues.add(script.getVariable(varName.trim(), true));
 			}
+			setVariables(variableValues);
 		}
 	}
 
@@ -107,18 +106,18 @@ public class ActionCallscript extends Action {
 
 	public ActionCallscript(Script script, String name, CalculatedValue[] parameters) {
 		this(script, name);
-		setParameters(parameters);
+		setParameters(new ArrayList<CalculatedValue>(Arrays.asList(parameters)));
 	}
 
 	public ActionCallscript(Script script, String name, Variable ... variables) {
 		this(script, name);
-		setVariables(variables);
+		setVariables(new ArrayList<Variable>(Arrays.asList(variables)));
 	}
 
 	public ActionCallscript(Script script, String name, CalculatedValue[] parameters, Variable ... variables) {
 		this(script, name);
-		setParameters(parameters);
-		setVariables(variables);
+		setParameters(new ArrayList<CalculatedValue>(Arrays.asList(parameters)));
+		setVariables(new ArrayList<Variable>(Arrays.asList(variables)));
 	}
 
 	public ActionCallscript(Script script, String name, String csvFilePath) {
@@ -188,9 +187,9 @@ public class ActionCallscript extends Action {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void execute(ActionTestScript ts, Channel channel) {
+	public void execute(ActionTestScript ts) {
 		
-		super.execute(channel);
+		super.execute(ts.getCurrentChannel());
 
 		try {
 
@@ -268,7 +267,7 @@ public class ActionCallscript extends Action {
 	private String[] getCalculatedParameters() {
 		if(parameters != null) {
 			int index = 0;
-			String[] calculatedParameters = new String[parameters.length];
+			String[] calculatedParameters = new String[parameters.size()];
 			for(CalculatedValue calc : parameters) {
 				calculatedParameters[index] = calc.getCalculated();
 				index++;
@@ -290,11 +289,11 @@ public class ActionCallscript extends Action {
 		this.name = name;
 	}
 
-	public Variable[] getVariables() {
+	public List<Variable> getVariables() {
 		return variables;
 	}
 
-	public void setVariables(Variable[] value) {
+	public void setVariables(List<Variable> value) {
 		this.variables = value;
 		if(value != null) {
 			this.csvFilePath = null;
@@ -302,11 +301,11 @@ public class ActionCallscript extends Action {
 		}
 	}
 
-	public CalculatedValue[] getParameters() {
+	public List<CalculatedValue> getParameters() {
 		return parameters;
 	}
 
-	public void setParameters(CalculatedValue[] value) {
+	public void setParameters(List<CalculatedValue> value) {
 		this.parameters = value;
 		if(value != null) {
 			this.csvFilePath = null;

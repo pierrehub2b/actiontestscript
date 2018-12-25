@@ -30,6 +30,7 @@ import org.openqa.selenium.StaleElementReferenceException;
 import com.ats.element.SearchedElement;
 import com.ats.element.TestElement;
 import com.ats.element.TestElementDialog;
+import com.ats.element.TestElementSystem;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
@@ -98,9 +99,10 @@ public class ActionExecuteElement extends ActionExecute {
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
 
-	public void execute(ActionTestScript ts, Channel channel, String operator, int value) {
+	public void execute(ActionTestScript ts, String operator, int value) {
 
-		super.execute(ts, channel);
+		super.execute(ts);
+		final Channel channel = ts.getCurrentChannel();
 
 		if(channel == null) {
 
@@ -112,7 +114,7 @@ public class ActionExecuteElement extends ActionExecute {
 
 			if(testElement == null) {
 				if(searchElement == null) {
-					initElement(new TestElement(channel));
+					setTestElement(new TestElement(channel));
 				}else {
 
 					int searchMaxTry = ts.getChannelManager().getMaxTry() + maxTry;
@@ -121,22 +123,37 @@ public class ActionExecuteElement extends ActionExecute {
 					}
 
 					if(searchElement.isDialog()) {
-						initElement(new TestElementDialog(channel, searchMaxTry, searchElement));
+						setTestElement(new TestElementDialog(channel, searchMaxTry, searchElement));
 					}else {
 
 						final Predicate<Integer> predicate = getPredicate(operator, value);
-
 						int trySearch = 0;
-						while (trySearch < searchMaxTry) {
 
-							initElement(new TestElement(channel, searchMaxTry, predicate, searchElement));
+						if(searchElement.isSysComp()){
+							while (trySearch < searchMaxTry) {
 
-							if(testElement.isValidated()) {
-								trySearch = searchMaxTry;
-							}else {
-								trySearch++;
-								channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "Searching element", searchMaxTry - trySearch);
-								channel.progressiveWait(trySearch);
+								setTestElement(new TestElementSystem(channel, searchMaxTry, predicate, searchElement));
+
+								if(testElement.isValidated()) {
+									trySearch = searchMaxTry;
+								}else {
+									trySearch++;
+									channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "Searching element", searchMaxTry - trySearch);
+									channel.progressiveWait(trySearch);
+								}
+							}
+						}else {
+							while (trySearch < searchMaxTry) {
+
+								setTestElement(new TestElement(channel, searchMaxTry, predicate, searchElement));
+
+								if(testElement.isValidated()) {
+									trySearch = searchMaxTry;
+								}else {
+									trySearch++;
+									channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "Searching element", searchMaxTry - trySearch);
+									channel.progressiveWait(trySearch);
+								}
 							}
 						}
 					}
@@ -171,14 +188,14 @@ public class ActionExecuteElement extends ActionExecute {
 	}
 
 	@Override
-	public void execute(ActionTestScript ts, Channel channel) {
+	public void execute(ActionTestScript ts) {
 		try {
-			execute(ts, channel, Operators.GREATER, 0);
+			execute(ts, Operators.GREATER, 0);
 		}catch (StaleElementReferenceException ex) {
-			channel.sleep(200);
+			ts.getCurrentChannel().sleep(200);
 
-			initElement(null);
-			execute(ts, channel);
+			setTestElement(null);
+			execute(ts);
 		}
 	}	
 
@@ -209,7 +226,7 @@ public class ActionExecuteElement extends ActionExecute {
 		return testElement;
 	}
 
-	public void initElement(TestElement element) {
+	private void setTestElement(TestElement element) {
 		if(testElement != null) {
 			testElement.dispose();
 		}

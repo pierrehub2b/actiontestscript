@@ -36,9 +36,8 @@ public class SearchedElement {
 	public static final String WILD_CHAR = "*";
 	
 	private static final String DIALOG = "DIALOG";
-	private static final String DESKTOP = "DESK-";
+	private static final String SYSCOMP = "SYSCOMP";
 	
-	private static final Pattern OBJECT_PATTERN = Pattern.compile("(.*)\\[(.*)\\]", Pattern.CASE_INSENSITIVE);
 	private static final Pattern OBJECT_INDEX_PATTERN = Pattern.compile("\\s*?index\\((\\d+)\\)\\s*?");
 
 	private String tag = WILD_CHAR;
@@ -54,7 +53,7 @@ public class SearchedElement {
 
 		setCriterias(new ArrayList<CalculatedProperty>());
 		
-		Matcher objectMatcher = OBJECT_PATTERN.matcher(value);
+		Matcher objectMatcher = Script.OBJECT_PATTERN.matcher(value);
 
 		if (objectMatcher.find()) {
 
@@ -107,8 +106,11 @@ public class SearchedElement {
 		return DIALOG.equals(tag.toUpperCase());
 	}
 	
-	public boolean isDesktop() {
-		return tag != null && tag.toUpperCase().startsWith(DESKTOP);
+	public boolean isSysComp() {
+		if(parent != null) {
+			return parent.isSysComp();
+		}
+		return SYSCOMP.equals(tag.toUpperCase());
 	}
 
 	private void addCriteria(Script script, String data){
@@ -124,8 +126,9 @@ public class SearchedElement {
 
 	public String getJavaCode() {
 
-		StringBuilder codeBuilder = new StringBuilder(ActionTestScript.JAVA_ELEMENT_FUNCTION_NAME + "(");
-
+		StringBuilder codeBuilder = new StringBuilder(ActionTestScript.JAVA_ELEMENT_FUNCTION_NAME);
+		codeBuilder.append("(");
+		
 		if(parent != null){
 			codeBuilder.append(parent.getJavaCode());
 			codeBuilder.append(", ");

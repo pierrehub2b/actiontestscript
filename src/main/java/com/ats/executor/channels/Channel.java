@@ -19,19 +19,16 @@ under the License.
 
 package com.ats.executor.channels;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.openqa.selenium.Alert;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
 import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
-import com.ats.executor.SendKeyData;
 import com.ats.executor.TestBound;
 import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.desktop.DesktopDriver;
@@ -43,6 +40,7 @@ import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.ScriptHeader;
+import com.ats.script.actions.ActionApi;
 
 public class Channel {
 
@@ -101,11 +99,11 @@ public class Channel {
 		return engine.getDesktopDriver();
 	}
 
-	public int getHandle(DesktopDriver ddriver) {
+	public int getHandle(DesktopDriver drv) {
 		if(winHandle > 0) {
 			return winHandle;
 		}else {
-			List<DesktopWindow> processWindows = ddriver.getWindowsByPid(getProcessId());
+			List<DesktopWindow> processWindows = drv.getWindowsByPid(getProcessId());
 			if(processWindows != null && processWindows.size() > 0) {
 				return processWindows.get(0).handle;
 			}
@@ -128,8 +126,9 @@ public class Channel {
 	}
 
 	public void toFront(){
-		engine.setWindowToFront();
-		getDesktopDriver().setChannelToFront(getHandle(engine.getDesktopDriver()));
+		if(engine.setWindowToFront()) {
+			getDesktopDriver().setChannelToFront(getHandle(engine.getDesktopDriver()));
+		}
 	}
 
 	public byte[] getScreenShot(){
@@ -182,8 +181,8 @@ public class Channel {
 	// Elements
 	//----------------------------------------------------------------------------------------------------------------------
 
-	public FoundElement getElementFromPoint(Double x, Double y){
-		return engine.getElementFromPoint(x, y);
+	public FoundElement getElementFromPoint(Boolean syscomp, Double x, Double y){
+		return engine.getElementFromPoint(syscomp, x, y);
 	}
 
 	public void loadParents(FoundElement hoverElement) {
@@ -390,6 +389,10 @@ public class Channel {
 	public void navigate(ActionStatus status, String url) {
 		engine.goToUrl(status, url);
 	}
+	
+	public void api(ActionStatus status, ActionApi api) {
+		engine.api(status, api);
+	}
 
 	public IDriverEngine getDesktopDriverEngine() {
 		return getDesktopDriver().getEngine();
@@ -406,55 +409,9 @@ public class Channel {
 		engine.scroll(foundElement, delta*scrollUnit);
 	}
 
-	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {
-		engine.middleClick(status, position, element);
-	}
-
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position) {
 		engine.mouseMoveToElement(status, foundElement, position);
 		actionTerminated();
-	}
-
-	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, boolean hold) {
-		engine.mouseClick(status, element, position, hold);
-		actionTerminated();
-	}
-
-	public void clearText(ActionStatus status, FoundElement element) {
-		engine.clearText(status, element);
-	}
-
-	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {
-		engine.sendTextData(status, element, textActionList);
-		actionTerminated();
-	}
-
-	public void forceScrollElement(FoundElement foundElement) {
-		engine.forceScrollElement(foundElement);
-	}
-
-	public void keyDown(Keys key) {
-		engine.keyDown(key);
-	}
-
-	public void keyUp(Keys key) {
-		engine.keyUp(key);
-	}
-
-	public void drop() {
-		engine.drop();
-	}
-
-	public void moveByOffset(int hDirection, int vDirection) {
-		engine.moveByOffset(hDirection, vDirection);
-	}
-
-	public void doubleClick() {
-		engine.doubleClick();
-	}
-
-	public void rightClick() {
-		engine.rightClick();
 	}
 
 	//----------------------------------------------------------------------------------------------------------

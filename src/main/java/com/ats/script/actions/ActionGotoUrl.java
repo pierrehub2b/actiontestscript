@@ -20,7 +20,6 @@ under the License.
 package com.ats.script.actions;
 
 import com.ats.executor.ActionTestScript;
-import com.ats.executor.channels.Channel;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
 
@@ -54,8 +53,8 @@ public class ActionGotoUrl extends ActionExecute {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void execute(ActionTestScript ts, Channel channel) {
-		super.execute(ts, channel);
+	public void execute(ActionTestScript ts) {
+		super.execute(ts);
 		
 		final String urlString = url.getCalculated();
 

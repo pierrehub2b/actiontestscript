@@ -20,7 +20,6 @@ under the License.
 package com.ats.script.actions;
 
 import com.ats.executor.ActionTestScript;
-import com.ats.executor.channels.Channel;
 import com.ats.script.Script;
 
 public class ActionChannelSwitch extends ActionChannel {
@@ -37,8 +36,8 @@ public class ActionChannelSwitch extends ActionChannel {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void execute(ActionTestScript ts, Channel channel) {
-		super.execute(ts, channel);
+	public void execute(ActionTestScript ts) {
+		super.execute(ts);
 
 		ts.getRecorder().update(getName());
 		ts.getChannelManager().switchChannel(status, getName());

@@ -48,8 +48,8 @@ public class Action {
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
 
-	public void execute(ActionTestScript ts, Channel channel){
-		execute(channel);
+	public void execute(ActionTestScript ts){
+		execute(ts.getCurrentChannel());
 		ts.getRecorder().createVisualAction(this);
 	}
 	

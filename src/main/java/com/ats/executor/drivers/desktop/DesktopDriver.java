@@ -274,14 +274,14 @@ public class DesktopDriver extends RemoteWebDriver {
 		new Thread(new LoadMapElement(channel, this)).start();
 	}
 
-	public void setElementMapLocation(List<FoundElement> data) {
-		this.elementMapLocation = data;
+	public void setElementMapLocation(List<FoundElement> list) {
+		this.elementMapLocation = list;
 	}
 
 	public FoundElement getElementFromPoint(Double x, Double y) {
 		FoundElement hoverElement = null;
-		if (this.elementMapLocation != null) {
-			for (FoundElement testElement : this.elementMapLocation) {
+		if (elementMapLocation != null) {
+			for (FoundElement testElement : elementMapLocation) {
 				if(testElement != null && testElement.isVisible()){
 					if (hoverElement == null) {
 						hoverElement = testElement;
@@ -305,7 +305,6 @@ public class DesktopDriver extends RemoteWebDriver {
 	}
 
 	public List<DesktopWindow> getWindowsByPid(Long pid) {
-
 		final DesktopResponse resp = sendRequestCommand(CommandType.Window, WindowType.List, pid);
 		if(resp.windows != null) {
 			return resp.windows;
@@ -503,12 +502,17 @@ public class DesktopDriver extends RemoteWebDriver {
 		final int numElements = element.getFoundElements().size();
 
 		if(numElements > 0) {
-			TestBound bound = element.getFoundElements().get(0).getTestBound();
+			final TestBound bound = element.getFoundElements().get(0).getTestBound();
 
 			x = bound.getX();
 			y = bound.getY();
 			w = bound.getWidth();
 			h = bound.getHeight();
+			
+			if(element.isSysComp()) {
+				x += 8;
+				y += 8;
+			}
 		}
 
 		String savedCriterias = element.getCriterias();
