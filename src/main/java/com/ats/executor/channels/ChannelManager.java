@@ -93,6 +93,11 @@ public class ChannelManager {
 			final Channel newChannel = new Channel(status, mainScript, driverManager, name, app);
 
 			if(status.isPassed()) {
+				
+				for(Channel cn : channelsList) {
+					cn.clearData();
+				}
+								
 				channelsList.add(newChannel);
 				setCurrentChannel(newChannel);
 				sendInfo("Start channel with application", app);

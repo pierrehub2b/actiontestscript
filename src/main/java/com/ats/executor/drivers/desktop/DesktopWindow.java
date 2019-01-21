@@ -28,4 +28,8 @@ public class DesktopWindow extends AtsElement {
 	public DesktopWindow() {
 		super();
 	}
+	
+	public Integer getHandle() {
+		return handle;
+	}
 }

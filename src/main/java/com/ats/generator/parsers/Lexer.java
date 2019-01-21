@@ -167,6 +167,10 @@ public class Lexer {
 					script.addAction(new ActionChannelClose(script), disabled);
 				}
 
+			}else if(actionType.startsWith(ActionApi.SCRIPT_LABEL)){
+				
+				script.addAction(new ActionApi(script, actionType, dataArray), disabled);
+				
 			}else if(dataArray.size() > 0){
 
 				String dataOne = dataArray.remove(0).trim();
@@ -346,10 +350,6 @@ public class Lexer {
 
 					script.addAction(new ActionAssertValue(script, stopExec, dataOne.trim()), disabled);
 
-				}else if(ActionApi.SCRIPT_LABEL.equals(actionType)){
-					if(dataArray.size() > 0){
-						script.addAction(new ActionApi(script, dataOne, dataArray.remove(0).trim()), disabled);
-					}
 				}
 			}
 		}

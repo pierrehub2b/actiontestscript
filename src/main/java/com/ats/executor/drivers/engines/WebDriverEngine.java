@@ -555,18 +555,15 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, boolean hold) {
 
 		final Rectangle rect = element.getRectangle();
-		final int xOffset = getOffsetX(rect, position);
-		final int yOffset = getOffsetY(rect, position);
 
 		try {
-			Actions act = actions.moveToElement(element.getValue(), xOffset, yOffset);
+			
+			final Actions act = actions.moveToElement(element.getValue(), getOffsetX(rect, position), getOffsetY(rect, position));
 			if(hold) {
-				act = act.clickAndHold();
+				act.clickAndHold().build().perform();
 			}else {
-				act = act.click();
+				act.click().build().perform();
 			}
-			act.build().perform();
-
 			status.setPassed(true);
 
 		}catch(StaleElementReferenceException e1) {
@@ -711,12 +708,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			list.addAll(getWindowsHandle());
 		}catch(WebDriverException e) {}
 
-		if(list.size() == 1) {
-
-			closeLastWindow(status);
-
-		}else {
-
+		if(list.size() > 1) {
 			if(index < list.size()) {
 				closeWindowHandler(list.get(index));
 				index--;
@@ -725,7 +717,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			if(index < 0) {
 				index = 0;
 			}
-
+			
 			currentWindow = index;
 			switchToWindowHandle(list.get(index));
 		}
@@ -906,9 +898,9 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	@Override
 	public boolean setWindowToFront() {
-		final List<String> listWins = new ArrayList<>(getWindowsHandle());
-		if(listWins.size() > currentWindow) {
-			driver.switchTo().window(listWins.get(currentWindow));
+		final List<String> wins = getWindowsHandle().stream().collect(Collectors.toList());
+		if(wins.size() > currentWindow) {
+			driver.switchTo().window(wins.get(currentWindow));
 		}
 		return true;
 	}

@@ -31,6 +31,7 @@ import org.testng.ITestContext;
 import org.testng.SkipException;
 import org.testng.TestRunner;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeSuite;
@@ -182,10 +183,10 @@ public class ActionTestScript extends Script implements ITest{
 		tearDown();
 	}
 
-	/*@AfterMethod(alwaysRun=true)
+	@AfterMethod(alwaysRun=true)
 	public void cleanup(){
 		tearDown();
-	}*/
+	}
 
 	@Override
 	public String getTestName() {
@@ -368,103 +369,103 @@ public class ActionTestScript extends Script implements ITest{
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_TODAY_FUNCTION_NAME = "tod";
-	public String tod() {
+	public static final String JAVA_TODAY_FUNCTION_NAME = "td";
+	public String td() {
 		return getTodayValue();
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_NOW_FUNCTION_NAME = "now";
-	public String now() {
+	public static final String JAVA_NOW_FUNCTION_NAME = "nw";
+	public String nw() {
 		return getNowValue();
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_ELEMENT_FUNCTION_NAME = "elm";
-	public SearchedElement elm(SearchedElement parent, int index, String tagName, CalculatedProperty ... properties) {
+	public static final String JAVA_ELEMENT_FUNCTION_NAME = "el";
+	public SearchedElement el(SearchedElement parent, int index, String tagName, CalculatedProperty ... properties) {
 		return new SearchedElement(parent, index, tagName, properties);
 	}
 
-	public SearchedElement elm(int index, String tagName, CalculatedProperty ... properties) {
+	public SearchedElement el(int index, String tagName, CalculatedProperty ... properties) {
 		return new SearchedElement(null, index, tagName, properties);
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_ROOT_FUNCTION_NAME = "roo";
-	public SearchedElement roo() {
+	public static final String JAVA_ROOT_FUNCTION_NAME = "ro";
+	public SearchedElement ro() {
 		return null;
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_REGEX_FUNCTION_NAME = "rgx";
-	public RegexpTransformer rgx(String patt, int group) {
+	public static final String JAVA_REGEX_FUNCTION_NAME = "rx";
+	public RegexpTransformer rx(String patt, int group) {
 		return new RegexpTransformer(patt, group);
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_DATE_FUNCTION_NAME = "dat";
-	public DateTransformer dat(String ... data) {
+	public static final String JAVA_DATE_FUNCTION_NAME = "dt";
+	public DateTransformer dt(String ... data) {
 		return new DateTransformer(data);
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_TIME_FUNCTION_NAME = "tim";
-	public TimeTransformer tim(String ... data) {
+	public static final String JAVA_TIME_FUNCTION_NAME = "tm";
+	public TimeTransformer tm(String ... data) {
 		return new TimeTransformer(data);
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_NUMERIC_FUNCTION_NAME = "nam";
-	public NumericTransformer nam(int dp, String ... data) {
-		return new NumericTransformer(dp, data);
+	public static final String JAVA_NUMERIC_FUNCTION_NAME = "nm";
+	public NumericTransformer nm(int dp, boolean comma) {
+		return new NumericTransformer(dp, comma);
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_POS_FUNCTION_NAME = "pos";
-	public MouseDirectionData pos(Cartesian cart, int value) {
+	public static final String JAVA_POS_FUNCTION_NAME = "ps";
+	public MouseDirectionData ps(Cartesian cart, int value) {
 		return new MouseDirectionData(cart, value);
 	}
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_MOUSE_FUNCTION_NAME = "mse";
-	public Mouse mse(String type) {
+	public static final String JAVA_MOUSE_FUNCTION_NAME = "ms";
+	public Mouse ms(String type) {
 		return new Mouse(type);
 	}
 
-	public Mouse mse(String type, MouseDirectionData hpos, MouseDirectionData vpos) {
+	public Mouse ms(String type, MouseDirectionData hpos, MouseDirectionData vpos) {
 		return new Mouse(type, hpos, vpos);
 	}
 
-	public MouseKey mse(String type, Keys key, MouseDirectionData hpos, MouseDirectionData vpos) {
+	public MouseKey ms(String type, Keys key, MouseDirectionData hpos, MouseDirectionData vpos) {
 		return new MouseKey(type, key, hpos, vpos);
 	}
 
-	public MouseKey mse(String type, Keys key) {
+	public MouseKey ms(String type, Keys key) {
 		return new MouseKey(type, key);
 	}
 
-	public MouseScroll mse(int scroll, MouseDirectionData hpos, MouseDirectionData vpos) {
+	public MouseScroll ms(int scroll, MouseDirectionData hpos, MouseDirectionData vpos) {
 		return new MouseScroll(scroll, hpos, vpos);
 	}
 
-	public MouseScroll mse(int scroll) {
+	public MouseScroll ms(int scroll) {
 		return new MouseScroll(scroll);
 	}
 
-	public MouseSwipe mse(MouseDirectionData hdir, MouseDirectionData vdir, MouseDirectionData hpos, MouseDirectionData vpos) {
+	public MouseSwipe ms(MouseDirectionData hdir, MouseDirectionData vdir, MouseDirectionData hpos, MouseDirectionData vpos) {
 		return new MouseSwipe(hdir, vdir, hpos, vpos);
 	}
 
-	public MouseSwipe mse(MouseDirectionData hdir, MouseDirectionData vdir) {
+	public MouseSwipe ms(MouseDirectionData hdir, MouseDirectionData vdir) {
 		return new MouseSwipe(hdir, vdir);
 	}
 

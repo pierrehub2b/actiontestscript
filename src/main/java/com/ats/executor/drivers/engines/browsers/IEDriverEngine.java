@@ -21,7 +21,10 @@ package com.ats.executor.drivers.engines.browsers;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.List;
 
+import org.openqa.selenium.ElementNotVisibleException;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.ie.InternetExplorerOptions;
 
 import com.ats.driver.ApplicationProperties;
@@ -32,10 +35,13 @@ import com.ats.executor.SendKeyData;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
+import com.ats.executor.drivers.desktop.DesktopWindow;
 import com.ats.executor.drivers.engines.WebDriverEngine;
 import com.ats.generator.objects.MouseDirection;
 
 public class IEDriverEngine extends WebDriverEngine {
+
+	protected static final String IE_MIDDLE_CLICK = "var evt=document.createEvent(\"MouseEvents\"),result={};evt.initMouseEvent(\"click\",true,true,window,1,0,0,0,0,false,false,false,false,1,null);arguments[0].dispatchEvent(evt);";
 
 	private final static int DEFAULT_WAIT = 150;
 
@@ -51,7 +57,7 @@ public class IEDriverEngine extends WebDriverEngine {
 
 	@Override
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position) {
-		
+
 		Rectangle rect = foundElement.getRectangle();
 
 		getDesktopDriver().mouseMove(
@@ -64,15 +70,34 @@ public class IEDriverEngine extends WebDriverEngine {
 		if(hold) {
 			getDesktopDriver().mouseDown();
 		}else {
-			super.mouseClick(status, element, position, false);
+
+			final Rectangle rect = element.getRectangle();
+
+			try {
+				actions.moveToElement(element.getValue(), getOffsetX(rect, position), getOffsetY(rect, position)).click().build().perform();
+				status.setPassed(true);
+			}catch(StaleElementReferenceException e1) {
+				throw e1;
+			}catch(ElementNotVisibleException e0) {	
+				status.setPassed(false);
+				status.setCode(ActionStatus.OBJECT_NOT_VISIBLE);
+			}catch (Exception e) {
+				status.setPassed(false);
+				status.setMessage(e.getMessage());
+			}
 		}
 	}
-	
+
+	@Override
+	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {
+		runJavaScript(status, IE_MIDDLE_CLICK, element.getWebElement());
+	}
+
 	@Override
 	public void drop() {
 		getDesktopDriver().mouseRelease();
 	}
-	
+
 	@Override
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {
 		if(element.isNumeric()) {
@@ -83,6 +108,27 @@ public class IEDriverEngine extends WebDriverEngine {
 			for(SendKeyData sequence : textActionList) {
 				element.getWebElement().sendKeys(sequence.getSequenceWithDigit());
 			}
+		}
+	}
+	
+	@Override
+	public boolean setWindowToFront() {
+		int index = currentWindow;
+		currentWindow = -1;
+		
+		switchWindow(index);
+		refreshElementMapLocation(channel);
+		return false;
+	}
+	
+	@Override
+	public void switchWindow(int index) {
+		if(currentWindow != index) {
+			List<DesktopWindow> wins = getDesktopDriver().getWindowsByPid(channel.getProcessId());
+			if(wins.size() > index) {
+				getDesktopDriver().setChannelToFront(wins.get(index).handle);
+			}
+			super.switchWindow(index);
 		}
 	}
 }

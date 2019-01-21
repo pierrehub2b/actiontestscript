@@ -26,6 +26,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.RemoteWebElement;
 
+import com.ats.element.api.AtsApiElement;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.desktop.DesktopWindow;
@@ -35,6 +36,7 @@ public class FoundElement{
 	public final static String HTML = "html";
 	public final static String DESKTOP = "desktop";
 	public final static String MOBILE = "mobile";
+	public final static String API = "api";
 	
 	private String id;
 
@@ -130,6 +132,14 @@ public class FoundElement{
 
 		this.x = this.screenX;
 		this.y = this.screenY;
+	}
+	
+	public FoundElement(AtsApiElement element) {
+		this.type = API;
+		this.visible = true;
+		this.id = element.getId();
+		this.tag = element.getTag();
+		this.clickable = false;
 	}
 
 	public FoundElement(Channel channel, ArrayList<AtsElement> elements, Double initElementX, Double initElementY) {

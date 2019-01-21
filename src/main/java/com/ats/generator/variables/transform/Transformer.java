@@ -47,7 +47,7 @@ public abstract class Transformer {
 			case TIME:
 				return new TimeTransformer(data.split(","));
 			case NUMERIC:
-				return new NumericTransformer(data.split(","));
+				return new NumericTransformer(data);
 			default:
 				return null;
 		}

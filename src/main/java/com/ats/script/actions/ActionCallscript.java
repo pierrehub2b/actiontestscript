@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.script.actions;
 
@@ -38,6 +38,7 @@ import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.Variable;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
+import com.ats.tools.AtsClassLoader;
 import com.ats.tools.Utils;
 import com.ats.tools.logger.MessageCode;
 
@@ -52,7 +53,9 @@ public class ActionCallscript extends Action {
 	private static final String HTTP_PROTOCOLE = "http://";
 	private static final String HTTPS_PROTOCOLE = "https://";
 
-	private String name;
+	private final AtsClassLoader classLoader = new AtsClassLoader();
+
+	private CalculatedValue name;
 
 	private List<Variable> variables;
 	private List<CalculatedValue> parameters;
@@ -64,7 +67,7 @@ public class ActionCallscript extends Action {
 	public ActionCallscript(ScriptLoader script, String name, String[] parameters, String[] returnValue) {
 
 		super(script);
-		setName(name);
+		setName(new CalculatedValue(script, name));
 
 		if(parameters != null && parameters.length > 0) {
 
@@ -74,9 +77,9 @@ public class ActionCallscript extends Action {
 			}else {
 				ArrayList<CalculatedValue> paramsValues = new ArrayList<CalculatedValue>();
 				for(String param : parameters){
-					
+
 					param = param.replaceAll("\n", ",");
-					
+
 					Matcher match = LOOP_REGEXP.matcher(param);
 					if(match.find()){
 						try{
@@ -99,38 +102,38 @@ public class ActionCallscript extends Action {
 		}
 	}
 
-	public ActionCallscript(Script script, String name) {
+	public ActionCallscript(Script script, CalculatedValue name) {
 		super(script);
 		setName(name);
 	}
 
-	public ActionCallscript(Script script, String name, CalculatedValue[] parameters) {
+	public ActionCallscript(Script script, CalculatedValue name, CalculatedValue[] parameters) {
 		this(script, name);
 		setParameters(new ArrayList<CalculatedValue>(Arrays.asList(parameters)));
 	}
 
-	public ActionCallscript(Script script, String name, Variable ... variables) {
+	public ActionCallscript(Script script, CalculatedValue name, Variable ... variables) {
 		this(script, name);
 		setVariables(new ArrayList<Variable>(Arrays.asList(variables)));
 	}
 
-	public ActionCallscript(Script script, String name, CalculatedValue[] parameters, Variable ... variables) {
+	public ActionCallscript(Script script, CalculatedValue name, CalculatedValue[] parameters, Variable ... variables) {
 		this(script, name);
 		setParameters(new ArrayList<CalculatedValue>(Arrays.asList(parameters)));
 		setVariables(new ArrayList<Variable>(Arrays.asList(variables)));
 	}
 
-	public ActionCallscript(Script script, String name, String csvFilePath) {
+	public ActionCallscript(Script script, CalculatedValue name, String csvFilePath) {
 		this(script, name);
 		setCsvFilePath(csvFilePath);
 	}
 
-	public ActionCallscript(Script script, String name, CalculatedValue[] parameters, int loop) {
+	public ActionCallscript(Script script, CalculatedValue name, CalculatedValue[] parameters, int loop) {
 		this(script, name, parameters);
 		setLoop(loop);
 	}
 
-	public ActionCallscript(Script script, String name, int loop) {
+	public ActionCallscript(Script script, CalculatedValue name, int loop) {
 		this(script, name);
 		setLoop(loop);
 	}
@@ -143,9 +146,7 @@ public class ActionCallscript extends Action {
 	public String getJavaCode() {
 
 		StringBuilder codeBuilder = new StringBuilder(super.getJavaCode());
-		codeBuilder.append("\"");
-		codeBuilder.append(name);
-		codeBuilder.append("\"");
+		codeBuilder.append(name.getJavaCode());
 
 		if(csvFilePath != null) {
 			codeBuilder.append(", \"");
@@ -185,80 +186,84 @@ public class ActionCallscript extends Action {
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void execute(ActionTestScript ts) {
-		
+
 		super.execute(ts.getCurrentChannel());
 
-		try {
+		//Class<ActionTestScript> clazz = (Class<ActionTestScript>) Class.forName(name.getCalculated()); // old way still working
+		Class<ActionTestScript> clazz = classLoader.findClass(name.getCalculated());
 
-			Class<ActionTestScript> clazz = (Class<ActionTestScript>) Class.forName(name);
-			ActionTestScript ats = clazz.getDeclaredConstructor().newInstance();
-
-			if(csvFilePath != null) {
-
-				URL csvUrl = null;
-
-				if(csvFilePath.startsWith(ASSETS_PROTOCOLE)) {
-					csvUrl = getClass().getClassLoader().getResource(csvFilePath.replace(ASSETS_PROTOCOLE, ""));
-				}else {
-					try {
-						csvUrl = new URL(csvFilePath);
-					} catch (MalformedURLException e) {}
-				}
-
-				if(csvUrl == null) {
-					status.setPassed(false);
-					status.setMessage("CSV file not found : " + csvFilePath);
-					return;
-				}
-				
-				try {
-					
-					ArrayList<String[]> data = Utils.loadCsvData(csvUrl);
-					
-					for (String[] param : data) {
-						ts.getTopScript().sendInfo("Call subscript -> ", name);
-
-						ats.initCalledScript(ts.getTopScript(), param, null);
-						Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
-						testMain.invoke(ats);
-					}
-
-				} catch (IOException e) {
-					status.setPassed(false);
-					status.setMessage("CSV file IO error : " + csvFilePath + " -> " + e.getMessage());
-				}
-
-			}else {
-				ats.initCalledScript(ts.getTopScript(), getCalculatedParameters(), variables);
-				Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
-				for (int i=0; i<loop; i++) {
-					ts.getTopScript().sendInfo("call subscript -> ", name);
-					testMain.invoke(ats);
-				}
-				
-				status.setData(ats.getReturnValues());
-			}
-
-		} catch (ClassNotFoundException e) {
+		if(clazz == null) {
 
 			status.setPassed(false);
 			status.setCode(MessageCode.SCRIPT_NOT_FOUND);
-			status.setMessage("ATS script not found : '" + name + "'");
+			status.setMessage("ATS script not found : '" + name.getCalculated() + "' (letter case ?)\n");
 
-		} catch (InstantiationException e) {
-		} catch (IllegalAccessException e) {
-		} catch (IllegalArgumentException e) {
-		} catch (InvocationTargetException e) {
+		}else {
 
-			if(e.getTargetException() instanceof AssertionError) {
-				fail(e.getCause().getMessage());
+			try {
+
+				ActionTestScript ats = clazz.getDeclaredConstructor().newInstance();
+
+				if(csvFilePath != null) {
+
+					URL csvUrl = null;
+
+					if(csvFilePath.startsWith(ASSETS_PROTOCOLE)) {
+						csvUrl = getClass().getClassLoader().getResource(csvFilePath.replace(ASSETS_PROTOCOLE, ""));
+					}else {
+						try {
+							csvUrl = new URL(csvFilePath);
+						} catch (MalformedURLException e) {}
+					}
+
+					if(csvUrl == null) {
+						status.setPassed(false);
+						status.setMessage("CSV file not found : " + csvFilePath);
+						return;
+					}
+
+					try {
+
+						ArrayList<String[]> data = Utils.loadCsvData(csvUrl);
+
+						for (String[] param : data) {
+							ts.getTopScript().sendInfo("Call subscript -> ", name.getCalculated());
+
+							ats.initCalledScript(ts.getTopScript(), param, null);
+							Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
+							testMain.invoke(ats);
+						}
+
+					} catch (IOException e) {
+						status.setPassed(false);
+						status.setMessage("CSV file IO error : " + csvFilePath + " -> " + e.getMessage());
+					}
+
+				}else {
+					ats.initCalledScript(ts.getTopScript(), getCalculatedParameters(), variables);
+					Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
+					for (int i=0; i<loop; i++) {
+						ts.getTopScript().sendInfo("call subscript -> ", name.getCalculated());
+						testMain.invoke(ats);
+					}
+
+					status.setData(ats.getReturnValues());
+				}
+
+			} catch (InstantiationException e) {
+			} catch (IllegalAccessException e) {
+			} catch (IllegalArgumentException e) {
+			} catch (InvocationTargetException e) {
+
+				if(e.getTargetException() instanceof AssertionError) {
+					fail(e.getCause().getMessage());
+				}
+
+			} catch (NoSuchMethodException e) {
+			} catch (SecurityException e) {
 			}
-
-		} catch (NoSuchMethodException e) {
-		} catch (SecurityException e) {
 		}
 		
 		status.endDuration();
@@ -281,11 +286,11 @@ public class ActionCallscript extends Action {
 	// getters and setters for serialization
 	//--------------------------------------------------------
 
-	public String getName() {
+	public CalculatedValue getName() {
 		return name;
 	}
 
-	public void setName(String name) {
+	public void setName(CalculatedValue name) {
 		this.name = name;
 	}
 

@@ -1,18 +1,37 @@
+/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+*/
+
 package com.ats.executor.drivers.engines;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.function.Predicate;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -35,11 +54,12 @@ import com.ats.executor.drivers.engines.webservices.SoapApiExecutor;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.actions.ActionApi;
+import com.google.common.base.Charsets;
+import com.google.common.io.ByteStreams;
 
 public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngine{
-	
+
 	private AbstractApiExecutor executor;
-	private String source;
 
 	public ApiDriverEngine(Channel channel, ActionStatus status, String path, ApplicationProperties props) {
 		super(channel, props);
@@ -48,79 +68,97 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			applicationPath = path;
 		}
 
-		RequestConfig requestConfig = RequestConfig.custom()
-				.setConnectTimeout(3500)
-				.setConnectionRequestTimeout(3500)
-				.setSocketTimeout(3500).build();
+		String wsContent = null;
+		File wsContentFile = null;
 
-		CloseableHttpClient httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
+		try {
 
-		if(applicationPath.toLowerCase().endsWith("wsdl")) {
+			RequestConfig requestConfig = RequestConfig.custom()
+					.setConnectTimeout(20000)
+					.setConnectionRequestTimeout(10000)
+					.setSocketTimeout(5000).build();
 
-			this.application = "SOAP";
+			CloseableHttpClient httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
 
 			final HttpGet request = new HttpGet(applicationPath);
+			final HttpResponse response = httpClient.execute(request);
 
-			try {
-				final HttpResponse response = httpClient.execute(request);
+			if(response.getStatusLine().getStatusCode() == 200) {
 
-				if(response.getStatusLine().getStatusCode() == 200) {
+				final BufferedInputStream buff = new BufferedInputStream(response.getEntity().getContent());
+				wsContent = new String(ByteStreams.toByteArray(buff), Charsets.UTF_8).trim();
+				buff.close();
 
-					final HttpEntity entity = response.getEntity();
+				wsContentFile = File.createTempFile("atsWs_", ".txt");
+				wsContentFile.deleteOnExit();
 
-					BufferedInputStream bis = new BufferedInputStream(entity.getContent());
+				final Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(wsContentFile), Charsets.UTF_8));
+				writer.write(wsContent);
+				writer.flush();
+				writer.close();
 
-					File wsdlFile = File.createTempFile("atsWsdl_", ".wsdl");
-					wsdlFile.deleteOnExit();
-
-					BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(wsdlFile));
-					int inByte;
-					while((inByte = bis.read()) != -1) bos.write(inByte);
-					bis.close();
-					bos.close();
-					
-					executor = new SoapApiExecutor(wsdlFile, applicationPath);
-
-				}else {
-					status.setCode(ActionStatus.CHANNEL_START_ERROR);
-					status.setMessage("Wsdl file does not exists");
-					status.setPassed(false);
-				}
-
-			} catch (ClientProtocolException e) {
+			}else {
 				status.setCode(ActionStatus.CHANNEL_START_ERROR);
-				status.setMessage(e.getMessage());
-				status.setPassed(false);
-			} catch (IOException e) {
-				status.setCode(ActionStatus.CHANNEL_START_ERROR);
-				status.setMessage(e.getMessage());
-				status.setPassed(false);
-			} catch (SAXException e) {
-				status.setCode(ActionStatus.CHANNEL_START_ERROR);
-				status.setMessage("Wsdl parse failed : " + e.getMessage());
-				status.setPassed(false);
-			} catch (ParserConfigurationException e) {
-				status.setCode(ActionStatus.CHANNEL_START_ERROR);
-				status.setMessage("Wsdl parse configuration error : " + e.getMessage());
+				status.setMessage("Service not reachable");
 				status.setPassed(false);
 			}
 
-		}else {
-			this.application = "REST";
+		} catch (IOException e) {
+			status.setCode(ActionStatus.CHANNEL_START_ERROR);
+			status.setMessage(e.getMessage());
+			status.setPassed(false);
+		}
 
-			executor = new RestApiExecutor(httpClient, applicationPath);
+		if(wsContent != null) {
+			if(wsContent.endsWith("definitions>")) {
+				this.application = ActionApi.SOAP.toUpperCase();
+				try {
+					executor = new SoapApiExecutor(wsContentFile, applicationPath);
+					channel.setApplicationData(application, ((SoapApiExecutor)executor).getOperations());
+				} catch (SAXException | IOException | ParserConfigurationException e) {
+					status.setCode(ActionStatus.CHANNEL_START_ERROR);
+					status.setMessage(e.getMessage());
+					status.setPassed(false);
+				}
+			}else {
+				this.application = ActionApi.REST.toUpperCase();
+				executor = new RestApiExecutor(applicationPath);
+				channel.setApplicationData(application);
+			}
+		}else {
+			status.setCode(ActionStatus.CHANNEL_START_ERROR);
+			status.setMessage("service is not responding");
+			status.setPassed(false);
 		}
 	}
 
 	@Override
 	public void api(ActionStatus status, ActionApi api) {
-		source = executor.execute(status, api);
+		executor.execute(status, api);
+	}
+
+	@Override
+	public String getSource() {
+		return executor.getSource();
 	}
 	
 	@Override
-	public String getSource() {
-		return source;
+	public ArrayList<FoundElement> findElements(Channel channel, boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> searchPredicate) {
+		return executor.findElements(channel, sysComp, testObject, tagName, attributes, searchPredicate);
 	}
+	
+	@Override
+	public String getAttribute(FoundElement element, String attributeName, int maxTry) {
+		return executor.getElementAttribute(element.getId(), attributeName, maxTry);
+	}
+	
+	@Override
+	public CalculatedProperty[] getAttributes(FoundElement element) {
+		return executor.getElementAttributes(element.getId());
+	}
+	
+	@Override
+	public void refreshElementMapLocation(Channel channel) {}
 
 	@Override
 	public boolean setWindowToFront() {
@@ -135,26 +173,6 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	@Override
 	public void close() {
 		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public ArrayList<FoundElement> findElements(Channel channel, boolean sysComp, TestElement testObject,
-			String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> searchPredicate) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getAttribute(FoundElement element, String attributeName, int maxTry) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public CalculatedProperty[] getAttributes(FoundElement element) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
@@ -168,12 +186,6 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		// TODO Auto-generated method stub
 
 	}	
-
-	@Override
-	public void refreshElementMapLocation(Channel channel) {
-		// TODO Auto-generated method stub
-
-	}
 
 	@Override
 	public WebElement getRootElement() {

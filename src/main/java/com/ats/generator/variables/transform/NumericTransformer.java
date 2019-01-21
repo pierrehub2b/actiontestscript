@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.generator.variables.transform;
 
@@ -28,45 +28,39 @@ import com.ats.executor.ActionTestScript;
 
 public class NumericTransformer extends Transformer {
 
-	private static DecimalFormatSymbols decimalSymbols = DecimalFormatSymbols.getInstance();
 	private DecimalFormat formatter = new DecimalFormat();
-	
+
 	private int decimal = -1;
-	private String pattern;
+	private boolean comma = false;
 
 	public NumericTransformer() {} // Needed for serialization
 
 	public NumericTransformer(int dp) {
 		setDecimal(dp);
+		setComma(false);
 	}
 
-	public NumericTransformer(int dp, String ... data) {
+	public NumericTransformer(int dp, boolean useComma) {
 		setDecimal(dp);
-		if(data.length > 0){
-			setPattern(data[0]);
-		}
+		setComma(useComma);
 	}
 
-	public NumericTransformer(String ... data) {
-		if(data.length > 0){
-			setDecimal(getInt(data[0].replace("dp", "").trim()));
-			if(data.length > 1){
-				setPattern(data[1]);
-			}
+	public NumericTransformer(String data) {
+		if(data.contains(",")) {
+			data = data.replace(",", "");
+			setComma(true);
 		}
+		setDecimal(getInt(data.replace("dp", "").trim()));
 	}
 
 	@Override
 	public String getJavaCode() {
-		return ActionTestScript.JAVA_NUMERIC_FUNCTION_NAME + "(" + decimal + ")";
+		return ActionTestScript.JAVA_NUMERIC_FUNCTION_NAME + "(" + decimal + ", " + comma + ")";
 	}
 
 	@Override
 	public String format(String data) {
 
-	    decimalSymbols.setDecimalSeparator('.');
-		formatter.setDecimalFormatSymbols(decimalSymbols);
-				
 		if(decimal > -1) {
 			data = "round(" + data + "," + decimal + ")";
 			formatter.setMinimumFractionDigits(decimal);
@@ -92,11 +86,20 @@ public class NumericTransformer extends Transformer {
 		this.decimal = decimal;
 	}
 
-	public String getPattern() {
-		return pattern;
+	public boolean getComma() {
+		return comma;
 	}
 
-	public void setPattern(String pattern) {
-		this.pattern = pattern;
+	public void setComma(boolean value) {
+		
+		this.comma = value;
+		
+		final DecimalFormatSymbols decimalSymbols = DecimalFormatSymbols.getInstance();
+		if(value) {
+			decimalSymbols.setDecimalSeparator(',');
+		}else {
+			decimalSymbols.setDecimalSeparator('.');
+		}
+		this.formatter.setDecimalFormatSymbols(decimalSymbols);
 	}
 }

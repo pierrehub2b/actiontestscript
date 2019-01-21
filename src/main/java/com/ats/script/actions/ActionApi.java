@@ -19,21 +19,29 @@ under the License.
 
 package com.ats.script.actions;
 
-import java.util.regex.Matcher;
+import java.util.ArrayList;
 
+import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
 
 public class ActionApi extends Action {
+	
+	public static final String SCRIPT_LABEL = "api-";
+	private static final int SCRIPT_LABEL_LENGTH = SCRIPT_LABEL.length();
 
-	public static final String SCRIPT_LABEL = "api";
-
-	public static final String GET = "GET";
-	public static final String POST = "POST";
-	public static final String PUT = "PUT";
-	public static final String DELETE = "DELETE";
-	public static final String SOAP = "SOAP";
+	public static final String GET = "get";
+	public static final String POST = "post";
+	public static final String PUT = "put";
+	public static final String PATCH = "patch";
+	public static final String DELETE = "delete";
+	
+	public static final String SOAP = "soap";
+	public static final String REST = "rest";
+	
+	public static final String SCRIPT_LABEL_GET = SCRIPT_LABEL + GET;
+	public static final String SCRIPT_LABEL_DELETE = SCRIPT_LABEL + DELETE;
 
 	private CalculatedValue method;
 	private CalculatedValue data;
@@ -42,20 +50,21 @@ public class ActionApi extends Action {
 
 	public ActionApi() {}
 
-	public ActionApi(Script script, String method, String parameters) {
+	public ActionApi(Script script, String type, ArrayList<String> parameters) {
 		super(script);
 
-		this.method = new CalculatedValue(script, method);
-
-		final Matcher objectMatcher = Script.OBJECT_PATTERN.matcher(parameters);
-
-		if (objectMatcher.find()) {
-			if(objectMatcher.groupCount() >= 1){
-				setType(objectMatcher.group(1).trim());
-				if(objectMatcher.groupCount() >= 2){
-					setData(new CalculatedValue(script, objectMatcher.group(2)));
-				}
+		setType(type.substring(SCRIPT_LABEL_LENGTH));
+		
+		if(parameters.size() > 0) {
+			setMethod(new CalculatedValue(script, parameters.get(0).trim()));
+			if(parameters.size() > 1) {
+				setData(new CalculatedValue(script, parameters.get(1).trim()));
+			}else {
+				setData(new CalculatedValue(script, ""));
 			}
+		}else {
+			setMethod(new CalculatedValue(script, ""));
+			setData(new CalculatedValue(script, ""));
 		}
 	}
 
@@ -92,9 +101,9 @@ public class ActionApi extends Action {
 
 	@Override
 	public void execute(ActionTestScript ts) {
-		super.execute(ts);
 
 		if(ts.getCurrentChannel() != null){
+			setStatus(new ActionStatus(ts.getCurrentChannel()));
 			ts.getCurrentChannel().api(status, this);
 		}
 
@@ -118,7 +127,12 @@ public class ActionApi extends Action {
 	}
 
 	public void setType(String type) {
-		this.type = type.toUpperCase();
+		type = type.toLowerCase();
+		if(POST.equals(type) || PUT.equals(type) || DELETE.equals(type) || SOAP.equals(type) || PATCH.equals(type)) {
+			this.type = type;
+		}else {
+			this.type = GET;
+		}
 	}
 
 	public CalculatedValue getData() {

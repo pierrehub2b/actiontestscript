@@ -19,12 +19,14 @@ under the License.
 
 package com.ats.executor.channels;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.WebElement;
 
+import com.ats.driver.AtsManager;
 import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
@@ -41,6 +43,7 @@ import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.ScriptHeader;
 import com.ats.script.actions.ActionApi;
+import com.ats.tools.ResourceContent;
 
 public class Channel {
 
@@ -61,6 +64,7 @@ public class Channel {
 	
 	private byte[] icon;
 	private String screenServer;
+	private ArrayList<String> operations = new ArrayList<String>();
 
 	private ProcessHandle process = null;
 
@@ -103,10 +107,14 @@ public class Channel {
 		if(winHandle > 0) {
 			return winHandle;
 		}else {
-			List<DesktopWindow> processWindows = drv.getWindowsByPid(getProcessId());
-			if(processWindows != null && processWindows.size() > 0) {
-				return processWindows.get(0).handle;
-			}
+			return getHandle(drv, 0);
+		}
+	}
+	
+	public int getHandle(DesktopDriver drv, int index) {
+		List<DesktopWindow> processWindows = drv.getWindowsByPid(getProcessId());
+		if(processWindows != null && processWindows.size() > index) {
+			return processWindows.get(index).handle;
 		}
 		return -1;
 	}
@@ -155,6 +163,17 @@ public class Channel {
 		setApplicationData(os, version, dVersion, pid, new byte[0], "");
 	}
 	
+	public void setApplicationData(String os) {
+		this.os = os;
+		this.icon = ResourceContent.getAtsByteLogo();
+		this.driverVersion = AtsManager.getVersion();
+	}
+	
+	public void setApplicationData(String os, ArrayList<String> operations) {
+		this.setApplicationData(os);
+		this.operations = operations;
+	}
+	
 	public void setApplicationData(String os, String version, String dVersion, long pid, byte[] icon, String screenServer) {
 		this.os = os;
 		this.applicationVersion = version;
@@ -175,6 +194,11 @@ public class Channel {
 
 	public void switchToFrame(String id) {
 		engine.switchToFrameId(id);
+	}
+	
+	public void clearData() {
+		icon = null;
+		operations.clear();
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------
@@ -215,6 +239,14 @@ public class Channel {
 	// Getter and setter for serialization
 	//----------------------------------------------------------------------------------------------------------------------
 
+	public ArrayList<String> getOperations() {
+		return operations;
+	}
+
+	public void setOperations(ArrayList<String> operations) {
+		this.operations = operations;
+	}
+	
 	public String getApplication() {
 		return engine.getApplication();
 	}

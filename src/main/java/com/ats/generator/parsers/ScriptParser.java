@@ -120,14 +120,14 @@ public class ScriptParser {
 
 			if(dataArray.size() > 0){
 
-				String name = dataArray.remove(0).trim();
+				final String name = dataArray.remove(0).trim();
 				
 				String value = "";
 				Transformer transformer = null;
 
 				if(dataArray.size() > 0) {
 
-					String nextData = dataArray.remove(0).trim();
+					final String nextData = dataArray.remove(0).trim();
 					if((m = Transformer.TRANSFORM_PATTERN.matcher(nextData)) != null && m.find()){
 
 						transformer = Transformer.createTransformer(getDataGroup(m, 1), getDataGroup(m, 2));
@@ -146,7 +146,7 @@ public class ScriptParser {
 
 		}else if((m = RETURN_PATTERN.matcher(data)) != null && m.find()){
 
-			String[] returnsData = getDataGroup(m, 1).split(ATS_SEPARATOR);
+			final String[] returnsData = getDataGroup(m, 1).split(ATS_SEPARATOR);
 			CalculatedValue[] returns = new CalculatedValue[returnsData.length];
 
 			for(int i=0; i < returnsData.length; i++){

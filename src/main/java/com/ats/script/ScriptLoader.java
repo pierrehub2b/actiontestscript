@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.script;
 
@@ -98,11 +98,9 @@ public class ScriptLoader extends Script {
 	}
 
 	public void addAction(Action data, boolean disabled){
-		//if(data != null){
-			data.setDisabled(disabled);
-			data.setLine(actions.size());
-			actions.add(data);
-		//}
+		data.setDisabled(disabled);
+		data.setLine(actions.size());
+		actions.add(data);
 	}
 
 	public void parseGroups(String data) {
@@ -215,7 +213,7 @@ public class ScriptLoader extends Script {
 	public void setId(String data) {
 		header.setId(data);
 	}
-	
+
 	public void setDescription(String data) {
 		header.setDescription(data);
 	}
@@ -243,7 +241,6 @@ public class ScriptLoader extends Script {
 	public void setHeader(ScriptHeader header) {
 		this.header = header;
 	}
-
 
 	public Action[] getActions() {
 		return actions.toArray(new Action[actions.size()]);

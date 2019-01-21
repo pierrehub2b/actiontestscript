@@ -1,3 +1,22 @@
+/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+*/
+
 package com.ats.executor.drivers.engines.webservices;
 
 import java.io.BufferedReader;
@@ -7,14 +26,18 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.URLConnection;
-import java.util.HashSet;
-import java.util.Set;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -24,36 +47,40 @@ import com.ats.script.actions.ActionApi;
 
 public class SoapApiExecutor extends AbstractApiExecutor {
 
-	private static final String SOAP_ENVELOPE_OPEN = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:web=\"#NAMESPACE#\">";
-	private static final String SOAP_BODY_OPEN = "<soapenv:Body>";
-	private static final String SOAP_ACTION_OPEN = "<web:#ACTION# soapenv:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">";
-	private static final String SOAP_ACTION_CLOSE = "</web:#ACTION#>";
-	private static final String SOAP_BODY_CLOSE = "</soapenv:Body>";
-	private static final String SOAP_ENVELOPE_CLOSE = "</soapenv:Envelope>";
+	private static final String SOAP_ENVELOPE_OPEN = "<Envelope xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\">";
+	private static final String SOAP_BODY_OPEN = "<Body>";
+	private static final String SOAP_ACTION_OPEN = "<#ACTION# xmlns=\"#NAMESPACE#\">";
+	private static final String SOAP_ACTION_CLOSE = "</#ACTION#>";
+	private static final String SOAP_BODY_CLOSE = "</Body>";
+	private static final String SOAP_ENVELOPE_CLOSE = "</Envelope>";
 
 	private String nameSpace;
 	private String soapXmlMessage;
-	private Set<String> operations;
+	private Map<String, String> operations;
 
 	public SoapApiExecutor(File wsdlFile, String wsUrl) throws SAXException, IOException, ParserConfigurationException {
-		super(wsUrl);
-
+		this.setUri(wsUrl);
 		this.loadDataFromWSDL(wsdlFile, wsUrl);
 
-		StringBuilder builder = new StringBuilder(SOAP_ENVELOPE_OPEN).append(SOAP_BODY_OPEN).append(SOAP_ACTION_OPEN).append("#ACTIONDATA#").append(SOAP_ACTION_CLOSE).append(SOAP_BODY_CLOSE).append(SOAP_ENVELOPE_CLOSE);
+		final StringBuilder builder = new StringBuilder(SOAP_ENVELOPE_OPEN).append(SOAP_BODY_OPEN).append(SOAP_ACTION_OPEN).append("#ACTIONDATA#").append(SOAP_ACTION_CLOSE).append(SOAP_BODY_CLOSE).append(SOAP_ENVELOPE_CLOSE);
 		this.soapXmlMessage = builder.toString().replace("#NAMESPACE#", nameSpace);
 	}
 
+	public ArrayList<String> getOperations() {
+		return new ArrayList<String>(operations.keySet());
+	}
+	
 	@Override
-	public String execute(ActionStatus status, ActionApi api) {
+	public void execute(ActionStatus status, ActionApi api) {
 
+		super.execute(status, api);
+		
 		final String action = api.getMethod().getCalculated();
-		String xmlInput = soapXmlMessage.replaceAll("#ACTION#", action).replace("#ACTIONDATA#", api.getData().getCalculated());
+		final String xmlInput = soapXmlMessage.replaceAll("#ACTION#", action).replace("#ACTIONDATA#", api.getData().getCalculated());
 
 		try {
 
-			URLConnection connection = uri.toURL().openConnection();
-			HttpURLConnection httpConn = (HttpURLConnection)connection;
+			HttpURLConnection httpConn = (HttpURLConnection)uri.toURL().openConnection();
 			ByteArrayOutputStream bout = new ByteArrayOutputStream();
 
 			byte[] buffer = new byte[xmlInput.length()];
@@ -63,7 +90,7 @@ public class SoapApiExecutor extends AbstractApiExecutor {
 
 			httpConn.setRequestProperty("Content-Length", String.valueOf(b.length));
 			httpConn.setRequestProperty("Content-Type", "text/xml; charset=utf-8");
-			httpConn.setRequestProperty("SOAPAction", action);
+			httpConn.setRequestProperty("SOAPAction", operations.get(action));
 			httpConn.setRequestMethod("POST");
 			httpConn.setDoOutput(true);
 			httpConn.setDoInput(true);
@@ -73,11 +100,14 @@ public class SoapApiExecutor extends AbstractApiExecutor {
 			out.close();
 
 			InputStreamReader isr = null;
+			String responseType = "";
 			if (httpConn.getResponseCode() == 200) {
 				isr = new InputStreamReader(httpConn.getInputStream());
+				responseType = httpConn.getContentType();
 			} else {
-				isr = new InputStreamReader(httpConn.getErrorStream());
 				
+				isr = new InputStreamReader(httpConn.getErrorStream());
+
 				status.setCode(ActionStatus.WEB_DRIVER_ERROR);
 				status.setMessage("Execute soap action error");
 				status.setPassed(false);
@@ -93,11 +123,13 @@ public class SoapApiExecutor extends AbstractApiExecutor {
 
 			in.close();
 
-			return builder.toString();
+			parseResponse(responseType, builder.toString());
 
-		}catch(IOException e) {}
-
-		return null;
+		}catch(IOException e) {
+			status.setCode(ActionStatus.WEB_DRIVER_ERROR);
+			status.setMessage("Execute soap action error : " + e.getMessage());
+			status.setPassed(false);
+		}
 	}
 
 	private void loadDataFromWSDL(File wsdlFile, String wsdlPath) throws SAXException, IOException, ParserConfigurationException {
@@ -105,15 +137,15 @@ public class SoapApiExecutor extends AbstractApiExecutor {
 		String tagPrefix = null;
 		String location = null;
 		NodeList nd = null;
-		operations = new HashSet<String>(); 
-		
+		operations = new HashMap<String, String>(); 
+
 		NodeList nodeListOfOperations = null;
 		String attr ="http://www.w3.org/2001/XMLSchema";
-	
+
 		Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(wsdlFile);
 		NodeList allNodesOfDocumnet = document.getChildNodes();
 
-		for(int index = 0;index<allNodesOfDocumnet.getLength();index++){
+		for(int index = 0; index<allNodesOfDocumnet.getLength(); index++){
 			if( document.getFirstChild().getNodeName().equalsIgnoreCase("#comment")){
 				document.removeChild(document.getFirstChild());
 			}    
@@ -165,10 +197,25 @@ public class SoapApiExecutor extends AbstractApiExecutor {
 			}else if (document.getElementsByTagName(str4).getLength()>0) {
 				nodeListOfOperations =document.getElementsByTagName(str4);
 			}
-			
+
 			for (int i = 0; i < nodeListOfOperations.getLength(); i++) {
 				final Node operation = nodeListOfOperations.item(i);
-				operations.add(operation.getAttributes().getNamedItem("name").getNodeValue()); 
+				final String operationName = operation.getAttributes().getNamedItem("name").getNodeValue();
+				String operationAction = operationName;
+
+				if(operation.getChildNodes() != null) {
+					for(int j= 0; j<operation.getChildNodes().getLength(); j++) {
+						NamedNodeMap attributes = operation.getChildNodes().item(j).getAttributes();
+						if(attributes != null) {
+							Node action = attributes.getNamedItem("soapAction");
+							if(action != null) {
+								operationAction = action.getNodeValue();
+								break;
+							}
+						}
+					}
+				}
+				operations.put(operationName, operationAction);
 			}
 		}   
 
@@ -185,9 +232,38 @@ public class SoapApiExecutor extends AbstractApiExecutor {
 
 				NodeList nodeList  = documentForOperation.getElementsByTagName(str4);
 				for (int i = 0; i < nodeList.getLength(); i++) {
-					operations.add(nodeList.item(i).getAttributes().getNamedItem("name").getNodeValue()); 
+					final Node operation = nodeList.item(i);
+					
+					final String operationName = operation.getAttributes().getNamedItem("name").getNodeValue();
+					String operationAction = operationName;
+
+					if(operation.getChildNodes() != null) {
+						for(int j= 0; j<operation.getChildNodes().getLength(); j++) {
+							NamedNodeMap attributes = operation.getChildNodes().item(j).getAttributes();
+							if(attributes != null) {
+								Node action = attributes.getNamedItem("soapAction");
+								if(action != null) {
+									operationAction = action.getNodeValue();
+									break;
+								}
+							}
+						}
+					}
+					operations.put(operationName, operationAction);
 				}
 			}
-		}     
+		} 
+		
+		if((document.getElementsByTagName("soap:address").getLength()>0)){
+			NodeList addresses = document.getElementsByTagName("soap:address");
+			if(addresses.getLength() > 0) {
+				Node addressLocation = addresses.item(0).getAttributes().getNamedItem("location");
+				if(addressLocation != null) {
+					try {
+						this.uri = new URI(addressLocation.getNodeValue());
+					} catch (DOMException | URISyntaxException e) {}
+				}
+			}
+		}
 	}
 }

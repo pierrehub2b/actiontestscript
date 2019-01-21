@@ -6,7 +6,7 @@
 	<groupId>com.actiontestscript</groupId>
 	<artifactId>ats-automated-testing</artifactId>
 
-	<version>1.3.8</version>
+	<version>1.3.9</version>
 	<packaging>jar</packaging>
 
 	<name>ats-automated-testing</name>
@@ -58,7 +58,6 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>10</java.version>
-
 		<!-- libraries versions -->
 		<apache.felix.version>2.3.7</apache.felix.version>
 		<lib.amf.serializer.version>2.2.0</lib.amf.serializer.version>

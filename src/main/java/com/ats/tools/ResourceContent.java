@@ -45,7 +45,7 @@ public class ResourceContent {
 		searchElementsJavaScript = getScript("searchElements");
 
 		tick24Icon = getIcon("tick", 24);
-		atsLogo = Base64.getEncoder().encodeToString(getLogo());
+		atsLogo = Base64.getEncoder().encodeToString(getAtsByteLogo());
 		pageStyle = getData("jsStyle");		
 	}
 
@@ -70,7 +70,7 @@ public class ResourceContent {
 		}
 	}
 
-	private static byte[] getLogo(){
+	public static byte[] getAtsByteLogo(){
 		try {
 			return Resources.toByteArray(ResourceContent.class.getResource("/icon/ats_power.png"));
 		} catch (IOException e1) {

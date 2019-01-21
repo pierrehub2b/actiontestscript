@@ -6,10 +6,10 @@ public class AtsBaseElement {
 	
 	protected String id;
 	protected String tag;
-	protected Double width;
-	protected Double height;
-	protected Double x;
-	protected Double y;
+	protected Double width = 0.0;
+	protected Double height = 0.0;
+	protected Double x = 0.0;
+	protected Double y = 0.0;
 	protected Map<String, String> attributes;
 	
 	public String getId() {
@@ -66,5 +66,9 @@ public class AtsBaseElement {
 
 	public String getAttribute(String key) {
 		return attributes.get(key);
+	}
+	
+	public Map<String, String> getAttributesMap() {
+		return attributes;
 	}
 }

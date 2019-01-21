@@ -15,9 +15,9 @@ public class AtsElement extends AtsBaseElement {
 	private static final String FRAME = "FRAME";
 
 	private RemoteWebElement element;
-	protected boolean numeric;
-	private Double screenX;
-	private Double screenY;
+	protected boolean numeric = false;
+	private Double screenX = 0.0;
+	private Double screenY = 0.0;
 
 	private boolean visible = true;
 
