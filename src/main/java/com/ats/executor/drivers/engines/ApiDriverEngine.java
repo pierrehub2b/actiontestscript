@@ -48,6 +48,7 @@ import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
 import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.webservices.AbstractApiExecutor;
 import com.ats.executor.drivers.engines.webservices.RestApiExecutor;
 import com.ats.executor.drivers.engines.webservices.SoapApiExecutor;
@@ -61,8 +62,8 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	private AbstractApiExecutor executor;
 
-	public ApiDriverEngine(Channel channel, ActionStatus status, String path, ApplicationProperties props) {
-		super(channel, props);
+	public ApiDriverEngine(Channel channel, ActionStatus status, String path, DesktopDriver desktopDriver, ApplicationProperties props) {
+		super(channel, desktopDriver, props);
 
 		if(applicationPath == null) {
 			applicationPath = path;
@@ -78,12 +79,10 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 					.setConnectionRequestTimeout(10000)
 					.setSocketTimeout(5000).build();
 
-			CloseableHttpClient httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
+			final CloseableHttpClient httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
+			final HttpResponse response = httpClient.execute(new HttpGet(applicationPath));
 
-			final HttpGet request = new HttpGet(applicationPath);
-			final HttpResponse response = httpClient.execute(request);
-
-			if(response.getStatusLine().getStatusCode() == 200) {
+			if(response.getStatusLine().getStatusCode() >= 200 && response.getStatusLine().getStatusCode() < 300) {
 
 				final BufferedInputStream buff = new BufferedInputStream(response.getEntity().getContent());
 				wsContent = new String(ByteStreams.toByteArray(buff), Charsets.UTF_8).trim();

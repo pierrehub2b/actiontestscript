@@ -1,19 +1,96 @@
 package actiontestscript;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
+import org.apache.http.Consts;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
+
+import com.ats.executor.drivers.desktop.DesktopResponse;
+import com.ats.executor.drivers.desktop.DesktopData;
+import com.ats.executor.drivers.desktop.DesktopDriver.CommandType;
+import com.ats.executor.drivers.desktop.DesktopDriver.RecordType;
 import com.ats.tools.Utils;
+import com.ats.tools.logger.NullExecutionLogger;
+import com.exadel.flamingo.flex.messaging.amf.io.AMF3Deserializer;
+import com.exadel.flamingo.flex.messaging.amf.io.AMF3Serializer;
 
 public class Main {
 
 	public static void main(String[] argsx) throws ParserConfigurationException, TransformerException, InterruptedException, IOException {
 
+		
+final CloseableHttpClient downloadClient = HttpClients.createDefault();
+		
+/*DesktopData obj = new DesktopData();
+obj.setName("oo");
+obj.setValue("rr");
+
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		AMF3Serializer data = new AMF3Serializer(baos);
+		data.writeObject(obj);*/
+		
+		final HttpPost request = new HttpPost(
+				new StringBuilder("http://localhost:9988")
+				.append("/")
+				.append(2)
+				.append("/")
+				.append(2)
+				.append("/")
+				.append(123456)
+				.toString());
+
+		List<NameValuePair> params = new ArrayList<NameValuePair>();
+		params.add(new BasicNameValuePair("id", "&é''((-èè_ç_èç"));
+
+		request.setEntity(new StringEntity("&é'('(-'(-è(-è-èàà)\nhgjhghjsss&&&ééé\ng&&&&&\"fffgh0@@_", ContentType.create("application/x-www-form-urlencoded", Consts.UTF_8)));
+		
+		
+
+		try {
+
+			final HttpResponse response = downloadClient.execute(request);
+			
+			final AMF3Deserializer amf3 = new AMF3Deserializer(response.getEntity().getContent());
+			final DesktopResponse desktopResponse = (DesktopResponse) amf3.readObject();
+
+			amf3.close();
+
+
+		} catch (IOException e) {
+
+		}
+		
+		
+		
+		
+		
+		//Utils.createXmlReport(Paths.get("D:\\agilitestWorkspace\\ats_test\\test-output\\suite"), "inputs.HtmlInputs", new NullExecutionLogger());
+		
+		System.exit(0);
 		System.out.println(System.getProperty("user.home"));
 		
 		/*try {
@@ -92,6 +169,6 @@ public class Main {
 		    System.out.println(s);
 		}
 
-		Utils.createXmlReport(Paths.get("D:\\agilitestWorkspace\\ats_test\\target\\report\\subscripts"), "subscripts.CheckoutForm");
+		//Utils.createXmlReport(Paths.get("D:\\agilitestWorkspace\\ats_test\\target\\report\\subscripts"), "subscripts.CheckoutForm");
 	}
 }

@@ -23,7 +23,6 @@ import java.awt.Rectangle;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -40,9 +39,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.ElementNotVisibleException;
@@ -254,10 +250,6 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	@Override
 	public DesktopDriver getDesktopDriver() {
 		return desktopDriver;
-	}
-
-	protected void closeDriver() {
-		driverProcess.close();
 	}
 
 	protected Channel getChannel() {
@@ -724,25 +716,8 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	private void closeLastWindow(ActionStatus status) {
-
-		final CloseableHttpClient httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
-		final HttpDelete request = new HttpDelete(driverSession + "/window");
-		request.addHeader("content-type", "application/json");
-
-		try {
-			httpClient.execute(request);
-		} catch (SocketTimeoutException e) {
-
-		} catch (IOException e) {
-
-		} finally {
-			try {
-				httpClient.close();
-			} catch (IOException e) {}
-		}
-
-		closeDriver();
 		channel.lastWindowClosed(status);
+		driver.quit();
 	}
 
 	//-----------------------------------------------------------------------------------------------------------------------------------

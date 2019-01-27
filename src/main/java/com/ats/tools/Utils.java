@@ -65,6 +65,7 @@ import com.ats.executor.ActionStatus;
 import com.ats.recorder.VisualAction;
 import com.ats.recorder.VisualImage;
 import com.ats.recorder.VisualReport;
+import com.ats.tools.logger.IExecutionLogger;
 import com.exadel.flamingo.flex.messaging.amf.io.AMF3Deserializer;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonPrimitive;
@@ -106,6 +107,22 @@ public class Utils {
 		}
 		return ret && path.delete();
 	}
+
+	public static void deleteRecursiveFiles(File f) throws FileNotFoundException{
+		if (!f.exists()) throw new FileNotFoundException(f.getAbsolutePath());
+		if (f.isDirectory()){
+			for (final File f0 : f.listFiles()){
+				if(f0.isDirectory()) {
+					deleteRecursiveFiles(f0);
+					if(f0.listFiles().length == 0) {
+						f0.delete();
+					}
+				}else if(f0.isFile()) {
+					f0.delete();
+				}
+			}
+		}
+	}	
 
 	public static void deleteRecursiveJavaFiles(File f) throws FileNotFoundException{
 		if (!f.exists()) throw new FileNotFoundException(f.getAbsolutePath());
@@ -270,15 +287,17 @@ public class Utils {
 	//-------------------------------------------------------------------------------------------------------------------------------------------
 	//  XML report
 	//-------------------------------------------------------------------------------------------------------------------------------------------
-
-	public static void createXmlReport(Path output, String qualifiedName) {
+	
+	public static void createXmlReport(Path output, String qualifiedName, IExecutionLogger logger) {
 
 		final File atsvFile = output.resolve(qualifiedName + ".atsv").toFile();
 
 		if(atsvFile.exists()) {
 
-			final ArrayList<VisualImage> imagesList = new ArrayList<VisualImage>();
 			final File xmlFolder = output.resolve(qualifiedName + "_xml").toFile();
+			logger.sendInfo("Create XML report -> ", xmlFolder.getAbsolutePath());
+			
+			final ArrayList<VisualImage> imagesList = new ArrayList<VisualImage>();
 			final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 
 			try {
@@ -292,11 +311,14 @@ public class Utils {
 
 				final DocumentBuilder builder = factory.newDocumentBuilder();
 				final Document document= builder.newDocument();
-
+				
+				FileInputStream fis = null;
+				AMF3Deserializer amf3 = null;
+				
 				try {
 
-					final FileInputStream fis = new FileInputStream(atsvFile);
-					final AMF3Deserializer amf3 = new AMF3Deserializer(fis);
+					fis = new FileInputStream(atsvFile);
+					amf3 = new AMF3Deserializer(fis);
 
 					final Element atsRoot = document.createElement("ats");
 					document.appendChild(atsRoot);
@@ -450,24 +472,32 @@ public class Utils {
 						va.addImage(xmlFolerPath, imagesList);
 					}
 
-					amf3.close();
-					fis.close();
-
+				} catch (FileNotFoundException e0) {
 				} catch (IOException e1) {
-
+				}finally {
+					try {
+						if(fis != null) {
+							fis.close();
+						}
+					} catch (IOException e) {}
 				}
 
 				imagesList.parallelStream().forEach(im -> im.save());
 
 				final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 				try {
-					final Transformer transformer = transformerFactory.newTransformer();
+					
+					Transformer transformer = transformerFactory.newTransformer();
 					transformer.transform(new DOMSource(document), new StreamResult(xmlFolder.toPath().resolve("actions.xml").toFile()));
-				} catch (TransformerConfigurationException e) {
-				} catch (TransformerException e) {
+					
+				} catch (TransformerConfigurationException e2) {
+					logger.sendError("XML report config error ->", e2.getMessage());
+				} catch (TransformerException e3) {
+					logger.sendError("XML report transform error ->", e3.getMessage());
 				}
 
-			} catch (ParserConfigurationException e2) {
+			} catch (ParserConfigurationException e4) {
+				logger.sendError("XML report parser error ->", e4.getMessage());
 			}
 		}
 	}

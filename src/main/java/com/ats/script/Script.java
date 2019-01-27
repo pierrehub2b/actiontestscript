@@ -48,6 +48,7 @@ public class Script {
 	public final static String ATS_EXTENSION = "ats";
 	public final static String ATS_FILE_EXTENSION = "." + ATS_EXTENSION;
 	public final static String ATS_VISUAL_EXTENSION = "atsv";
+	public final static String ATS_VISUAL_FILE_EXTENSION = "." + ATS_VISUAL_EXTENSION;
 
 	public final static String ATS_VISUAL_FOLDER = "visual";
 	

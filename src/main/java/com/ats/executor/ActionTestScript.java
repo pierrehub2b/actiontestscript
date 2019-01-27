@@ -119,16 +119,17 @@ public class ActionTestScript extends Script implements ITest{
 	@BeforeClass(alwaysRun=true)
 	public void beforeAtsTest(ITestContext ctx) {
 
+		final ExecutionLogger mainLogger = new ExecutionLogger(System.out, ctx.getSuite().getXmlSuite().getVerbose());
+		setLogger(mainLogger);
+		
 		final TestRunner runner = (TestRunner) ctx;
 		setTestName(this.getClass().getName());
 
-		String checkMode = runner.getTest().getParameter("check.mode");
-		if("true".equals(checkMode)) {
-
+		if("true".equals(runner.getTest().getParameter("check.mode"))) {
 			throw new SkipException("check mode : " + testName);
-
 		}else {
 
+			sendInfo("Starting script", " -> " + testName);
 			setTestExecutionVariables(runner.getTest().getAllParameters());
 
 			//-----------------------------------------------------------
@@ -144,23 +145,21 @@ public class ActionTestScript extends Script implements ITest{
 
 			if(visualQuality > 0 || xml) {
 
+				final ScriptHeader header = getHeader();
+				header.setName(getTestName());
+				header.setAtsVersion(AtsManager.getVersion());
+
 				final File output = new File(runner.getOutputDirectory());
 				if(!output.exists()) {
 					output.mkdirs();
 				}
 
-				final ScriptHeader header = getHeader();
-				header.setName(getTestName());
-				header.setAtsVersion(AtsManager.getVersion());
-				setRecorder(new VisualRecorder(output, header, visualQuality, xml));
+				setRecorder(new VisualRecorder(output, header, xml, visualQuality, mainLogger));
 			}
 
 			//-----------------------------------------------------------
 			//-----------------------------------------------------------
-
-			setLogger(new ExecutionLogger(System.out, ctx.getSuite().getXmlSuite().getVerbose()));
-			sendInfo("Starting script", " -> " + testName);
-
+			
 			Runtime.getRuntime().addShutdownHook(new Thread() {
 				@Override
 				public void run() {
@@ -185,6 +184,7 @@ public class ActionTestScript extends Script implements ITest{
 
 	@AfterMethod(alwaysRun=true)
 	public void cleanup(){
+		stopRecorder();
 		tearDown();
 	}
 
@@ -214,7 +214,7 @@ public class ActionTestScript extends Script implements ITest{
 	}
 
 	public void initCalledScript(ActionTestScript script, String[] parameters, List<Variable> variables) {
-		
+
 		this.topScript = script;
 		this.channelManager = script.getChannelManager();
 
@@ -225,7 +225,7 @@ public class ActionTestScript extends Script implements ITest{
 		if(variables != null) {
 			setVariables(variables);
 		}
-		
+
 		setTestExecutionVariables(script.getTestExecutionVariables());
 	}
 
@@ -532,7 +532,7 @@ public class ActionTestScript extends Script implements ITest{
 	}
 
 	public void startRecorder(ScriptHeader info, int quality, boolean xml) {
-		topScript.setRecorder(new VisualRecorder(info, projectData, quality, xml));
+		topScript.setRecorder(new VisualRecorder(info, projectData, xml, quality));
 	}
 
 	public void stopRecorder() {

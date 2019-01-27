@@ -19,6 +19,7 @@ under the License.
 
 package com.ats.executor.channels;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -44,6 +45,7 @@ import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.ScriptHeader;
 import com.ats.script.actions.ActionApi;
 import com.ats.tools.ResourceContent;
+import com.ats.tools.logger.IExecutionLogger;
 
 public class Channel {
 
@@ -450,12 +452,16 @@ public class Channel {
 	// Visual reporting
 	//----------------------------------------------------------------------------------------------------------
 
-	public void startVisualRecord(String outputPath, ScriptHeader script, int quality, long started) {
-		getDesktopDriver().startVisualRecord(this, outputPath, script, quality, started);
+	public void startVisualRecord(ScriptHeader script, int quality, long started) {
+		getDesktopDriver().startVisualRecord(this, script, quality, started);
 	}
 
 	public void stopVisualRecord() {
 		getDesktopDriver().stopVisualRecord();
+	}
+	
+	public void saveVisualReportFile(Path path, String fileName, IExecutionLogger logger) {
+		getDesktopDriver().saveVisualReportFile(path.resolve(fileName), logger);
 	}
 
 	public void createVisualAction(String actionName, int scriptLine, long timeline) {

@@ -9,9 +9,13 @@ import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.script.ProjectData;
+import com.ats.script.Script;
 import com.ats.script.ScriptHeader;
 import com.ats.script.actions.Action;
 import com.ats.tools.Utils;
+import com.ats.tools.logger.ExecutionLogger;
+import com.ats.tools.logger.IExecutionLogger;
+import com.ats.tools.logger.NullExecutionLogger;
 
 public class VisualRecorder implements IVisualRecorder {
 
@@ -23,25 +27,31 @@ public class VisualRecorder implements IVisualRecorder {
 	private boolean xml = false;
 	
 	private long started;
+	
+	private IExecutionLogger logger;
 
-	public VisualRecorder(ScriptHeader header, ProjectData project, int quality, boolean xml) {
+	public VisualRecorder(ScriptHeader header, ProjectData project, boolean xml, int quality) {
 
+		this.logger = new NullExecutionLogger();
+		
 		Path output = project.getReportFolder().resolve(header.getPackagePath());
 		output.toFile().mkdirs();
 
-		initAndStart(output, header, quality, xml);
+		initAndStart(output, header, xml, quality);
 	}
 
-	public VisualRecorder(File outputFolder, ScriptHeader header, int quality, boolean xml) {
-
+	public VisualRecorder(File outputFolder, ScriptHeader header, boolean xml, int quality, ExecutionLogger logger) {
+		
+		this.logger = logger;
+		
 		Path output = outputFolder.toPath();
-		initAndStart(output, header, quality, xml);
+		initAndStart(output, header, xml, quality);
 	}
 
 	//--------------------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------------------
 
-	private void initAndStart(Path output, ScriptHeader header, int quality, boolean xml) {
+	private void initAndStart(Path output, ScriptHeader header, boolean xml, int quality) {
 		this.outputPath = output.toFile().getAbsolutePath();
 		this.scriptHeader = header;
 		this.xml = xml;
@@ -59,16 +69,20 @@ public class VisualRecorder implements IVisualRecorder {
 	@Override
 	public void terminate() {
 		if(channel != null) {
+			final Path path = Paths.get(outputPath);
+			
 			channel.stopVisualRecord();
+			channel.saveVisualReportFile(path, scriptHeader.getQualifiedName() + Script.ATS_VISUAL_FILE_EXTENSION, logger);
+			
 			if(xml) {
-				Utils.createXmlReport(Paths.get(outputPath), scriptHeader.getQualifiedName());
+				Utils.createXmlReport(path, scriptHeader.getQualifiedName(), logger);
 			}
 		}
 	}
 	
 	private void setChannel(Channel channel) {
 		if(this.channel == null) {
-			channel.startVisualRecord(outputPath, scriptHeader, visualQuality, started);
+			channel.startVisualRecord(scriptHeader, visualQuality, started);
 		}
 		this.channel = channel;
 	}
@@ -77,6 +91,7 @@ public class VisualRecorder implements IVisualRecorder {
 	public void createVisualAction(Action action, long duration, String name, String app) {
 		setChannel(action.getStatus().getChannel());
 		channel.createVisualAction(action.getClass().getName(), action.getLine(), System.currentTimeMillis() - started - duration);
+		channel.sleep(100);
 		update(0, duration, name, app);
 	}
 	

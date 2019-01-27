@@ -21,6 +21,7 @@ package com.ats.script;
 
 import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -89,6 +90,10 @@ public class ScriptHeader {
 		}catch(Exception e) {}
 		
 		return "";
+	}
+	
+	public File getTestReportFolder(Path path) {
+		return projectData.getReportFolder().toFile();
 	}
 
 	public File getReportFolder() {

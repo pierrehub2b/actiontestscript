@@ -23,9 +23,9 @@ import java.io.PrintStream;
 
 import com.ats.executor.channels.Channel;
 
-public class ExecutionLogger {
+public class ExecutionLogger implements IExecutionLogger {
 
-	private final static String NO_CHANNEL = "NO_CHANNEL";
+	private final static String NO_CHANNEL = " || ";
 
 	private PrintStream printOut;
 	private String channelName = NO_CHANNEL;
@@ -46,7 +46,7 @@ public class ExecutionLogger {
 		if(channel == null) {
 			this.channelName = NO_CHANNEL;
 		}else {
-			this.channelName = channel.getName();
+			this.channelName = " | " + "channel '" + channel.getName() + "' | ";
 		}
 	}
 
@@ -70,19 +70,22 @@ public class ExecutionLogger {
 		}
 	}
 
+	@Override
 	public void sendInfo(String message, String value) {
 		print("INFO", message + value);
 	}
 
+	@Override
 	public void sendWarning(String message, String value) {
 		print("WARNING", message + value);
 	}
 
+	@Override
 	public void sendError(String message, String value) {
 		print("ERROR",  message + value);
 	}
 
 	private void print(String type, String data) {
-		printOut.println("[ATS-" + type + "] | " + "channel '" + channelName + "' | " + data);
+		printOut.println("[ATS-" + type + "]" + channelName + data);
 	}
 }

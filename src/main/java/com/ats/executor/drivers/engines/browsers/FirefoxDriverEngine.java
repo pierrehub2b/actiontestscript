@@ -196,7 +196,6 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 
 		} catch (SocketTimeoutException e) {
 
-			closeDriver();
 			throw new WebDriverException("Geckodriver hangup issue after mouse move action (try to raise up 'actionWait' value in ATS properties for firefox)");
 
 		} catch (IOException e) {

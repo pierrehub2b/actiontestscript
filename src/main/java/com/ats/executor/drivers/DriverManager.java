@@ -149,7 +149,7 @@ public class DriverManager {
 				mobileDriverEngine = new MobileDriverEngine(channel, status, application, desktopDriver, props);
 				return mobileDriverEngine;
 			}else if(application.startsWith(HTTP + "://") || application.startsWith(HTTPS + "://") || (props != null && props.isApi())) {
-				return new ApiDriverEngine(channel, status, application, props);
+				return new ApiDriverEngine(channel, status, application, desktopDriver, props);
 			}else {
 				return new DesktopDriverEngine(channel, status, application, desktopDriver, props);
 			}
@@ -192,33 +192,40 @@ public class DriverManager {
 	}
 	
 	public void tearDown(){
-		
-		if(desktopDriver != null){
-			desktopDriver.close();
-		}
 
 		if(chromeDriver != null){
 			chromeDriver.close();
+			chromeDriver = null;
 		}
 		
 		if(edgeDriver != null){
 			edgeDriver.close();
+			edgeDriver = null;
 		}
 		
 		if(operaDriver != null){
 			operaDriver.close();
+			operaDriver = null;
 		}
 		
 		if(firefoxDriver != null){
 			firefoxDriver.close();
+			firefoxDriver = null;
 		}
 		
 		if(ieDriver != null){
 			ieDriver.close();
+			ieDriver = null;
 		}
 		
 		if(mobileDriverEngine != null){
 			mobileDriverEngine.tearDown();
+			mobileDriverEngine = null;
+		}
+				
+		if(desktopDriver != null){
+			desktopDriver.close();
+			desktopDriver = null;
 		}
 	}
 }

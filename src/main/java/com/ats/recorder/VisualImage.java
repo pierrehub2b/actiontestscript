@@ -18,13 +18,13 @@ public class VisualImage {
 
 	private byte[] data;
 	private String type;
-	
+
 	private boolean drawBound = false;
 	private int x;
 	private int y;
 	private int w;
 	private int h;
-	
+
 	private File file;
 
 	public VisualImage(Path folder, String name, String type, byte[] data) {
@@ -43,27 +43,29 @@ public class VisualImage {
 	}
 
 	public void save() {
-		try {
-			if(drawBound) {
+		if(data != null) {
+			try {
+				if(drawBound) {
 
-				final BufferedImage buffImage = ImageIO.read(new ByteArrayInputStream(data));
-				final Graphics2D g2d = buffImage.createGraphics();
+					final BufferedImage buffImage = ImageIO.read(new ByteArrayInputStream(data));
+					final Graphics2D g2d = buffImage.createGraphics();
 
-				g2d.setColor(Color.MAGENTA);
-				g2d.setStroke(new BasicStroke(3));
-				g2d.drawRect(x, y, w, h);
-				g2d.dispose();
+					g2d.setColor(Color.MAGENTA);
+					g2d.setStroke(new BasicStroke(3));
+					g2d.drawRect(x, y, w, h);
+					g2d.dispose();
 
-				ImageIO.write(buffImage, type, file);
+					ImageIO.write(buffImage, type, file);
 
-			}else {
-				FileOutputStream fos = new FileOutputStream(file);
-				fos.write(data);
-				fos.close();
+				}else {
+					FileOutputStream fos = new FileOutputStream(file);
+					fos.write(data);
+					fos.close();
+				}
+
+			} catch (IOException e1) {
+				e1.printStackTrace();
 			}
-
-		} catch (IOException e1) {
-			e1.printStackTrace();
 		}
 	}
 }

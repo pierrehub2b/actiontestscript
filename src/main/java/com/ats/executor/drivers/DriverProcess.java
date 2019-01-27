@@ -21,6 +21,7 @@ package com.ats.executor.drivers;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.ProcessBuilder.Redirect;
 import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.URL;
@@ -53,9 +54,11 @@ public class DriverProcess {
 
 			ProcessBuilder builder = new ProcessBuilder(arguments);
 			builder.redirectErrorStream(true);
+			builder.redirectInput(Redirect.INHERIT);
 
 			try {
 				process = builder.start();
+				Runtime.getRuntime().addShutdownHook(new Thread(process::destroy));
 			} catch (IOException e1) {
 				e1.printStackTrace();
 				started = false;
