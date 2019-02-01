@@ -165,16 +165,24 @@ public class Channel {
 		setApplicationData(os, version, dVersion, pid, new byte[0], "");
 	}
 	
+	//--------------------------------------------------------------------------------------------------
+	// Api webservices init
+	//--------------------------------------------------------------------------------------------------
+	
 	public void setApplicationData(String os) {
 		this.os = os;
 		this.icon = ResourceContent.getAtsByteLogo();
 		this.driverVersion = AtsManager.getVersion();
+		this.dimension = new TestBound(0D, 0D, 1D, 1D);
 	}
 	
 	public void setApplicationData(String os, ArrayList<String> operations) {
 		this.setApplicationData(os);
 		this.operations = operations;
 	}
+	
+	//--------------------------------------------------------------------------------------------------
+	//--------------------------------------------------------------------------------------------------
 	
 	public void setApplicationData(String os, String version, String dVersion, long pid, byte[] icon, String screenServer) {
 		this.os = os;

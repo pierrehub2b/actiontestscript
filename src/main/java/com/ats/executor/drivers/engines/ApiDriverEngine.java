@@ -110,7 +110,7 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		if(wsContent != null) {
 			if(wsContent.endsWith("definitions>")) {
-				this.application = ActionApi.SOAP.toUpperCase();
+				application = ActionApi.SOAP.toUpperCase();
 				try {
 					executor = new SoapApiExecutor(wsContentFile, applicationPath);
 					channel.setApplicationData(application, ((SoapApiExecutor)executor).getOperations());
@@ -120,7 +120,7 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 					status.setPassed(false);
 				}
 			}else {
-				this.application = ActionApi.REST.toUpperCase();
+				application = ActionApi.REST.toUpperCase();
 				executor = new RestApiExecutor(applicationPath);
 				channel.setApplicationData(application);
 			}
