@@ -1,14 +1,10 @@
-var parent = arguments[0].parentNode, result = [];
+var parent = arguments[0], result = [], iframeOnly = false;
 
 while (parent != null){
 	addElement(parent);
-	
-	if(parent.nodeName == 'BODY'){
+	if (parent.nodeName == 'BODY' || parent.nodeName == 'HTML' || parent.nodeName == '#document' || iframeOnly){
+		iframeOnly = true;
 		parent = parent.ownerDocument.defaultView.frameElement;
-		while(parent != null){
-			addElement(parent);
-			parent = parent.ownerDocument.defaultView.frameElement;
-		}
 	}else{
 		parent = parent.parentElement;
 	}

@@ -65,6 +65,8 @@ public class RestApiExecutor extends AbstractApiExecutor {
 	public void execute(ActionStatus status, ActionApi api) {
 
 		super.execute(status, api);
+		
+		addHeader("Accept", "application/json");
 
 		final URI fullUri = uri.resolve(api.getMethod().getCalculated());
 		String parameters = api.getData().getCalculated().trim();
@@ -76,11 +78,11 @@ public class RestApiExecutor extends AbstractApiExecutor {
 			request = new HttpPost(fullUri);
 			
 			if((parameters.startsWith("[") && parameters.endsWith("]")) || (parameters.startsWith("{") && parameters.endsWith("}"))){
-				request.addHeader("Content-Type", "application/json");
+				addHeader("Content-Type", "application/json");
 			}else if(parameters.startsWith("<") && parameters.endsWith(">")){
-				request.addHeader("Content-Type", "application/xml");
+				addHeader("Content-Type", "application/xml");
 			}else {
-				request.addHeader("Content-Type", "application/x-www-form-urlencoded");
+				addHeader("Content-Type", "application/x-www-form-urlencoded");
 			}
 			((HttpPost)request).setEntity(new ByteArrayEntity(api.getData().getCalculated().getBytes(StandardCharsets.UTF_8)));
 
@@ -100,11 +102,11 @@ public class RestApiExecutor extends AbstractApiExecutor {
 			request = new HttpPut(fullUri);
 			
 			if((parameters.startsWith("[") && parameters.endsWith("]")) || (parameters.startsWith("{") && parameters.endsWith("}"))){
-				request.addHeader("Content-Type", "application/json");
+				addHeader("Content-Type", "application/json");
 			}else if(parameters.startsWith("<") && parameters.endsWith(">")){
-				request.addHeader("Content-Type", "application/xml");
+				addHeader("Content-Type", "application/xml");
 			}else {
-				request.addHeader("Content-Type", "application/x-www-form-urlencoded");
+				addHeader("Content-Type", "application/x-www-form-urlencoded");
 			}
 			((HttpPut)request).setEntity(new ByteArrayEntity(api.getData().getCalculated().getBytes(StandardCharsets.UTF_8)));
 			
@@ -114,11 +116,11 @@ public class RestApiExecutor extends AbstractApiExecutor {
 			request = new HttpPatch(fullUri);
 			
 			if((parameters.startsWith("[") && parameters.endsWith("]")) || (parameters.startsWith("{") && parameters.endsWith("}"))){
-				request.addHeader("Content-Type", "application/json");
+				addHeader("Content-Type", "application/json");
 			}else if(parameters.startsWith("<") && parameters.endsWith(">")){
-				request.addHeader("Content-Type", "application/xml");
+				addHeader("Content-Type", "application/xml");
 			}else {
-				request.addHeader("Content-Type", "application/x-www-form-urlencoded");
+				addHeader("Content-Type", "application/x-www-form-urlencoded");
 			}
 			((HttpPatch)request).setEntity(new ByteArrayEntity(api.getData().getCalculated().getBytes(StandardCharsets.UTF_8)));
 			
@@ -135,7 +137,7 @@ public class RestApiExecutor extends AbstractApiExecutor {
 			break;
 		}
 
-		request.addHeader("Accept", "application/json");
+		headerProperties.forEach((k,v) -> request.addHeader(k, v));
 
 		try {
 			final HttpResponse response = httpClient.execute(request);

@@ -67,19 +67,27 @@ public class DriverManager {
 	private DriverProcess ieDriver;
 	
 	public static AtsManager ATS = new AtsManager();
-	private String windowsBuildVersion;
-	
+
 	private MobileDriverEngine mobileDriverEngine;
+	
+	private String windowsBuildVersion;
+	private String osName;
+	private String osVersion;
 	
 	public String getDriverFolderPath() {
 		return ATS.getDriversFolderPath().toFile().getAbsolutePath();
 	}
 	
-	private String getWindowsBuildVersion() {
-		if(windowsBuildVersion == null) {
-			windowsBuildVersion = Utils.getWindowsBuildVersion();
-		}
-		return windowsBuildVersion;
+	public void setWindowsBuildVersion(String value) {
+		windowsBuildVersion = value;
+	}
+	
+	public void setOsName(String value) {
+		osName = value;
+	}
+	
+	public void setOsVersion(String value) {
+		osVersion = value;
 	}
 	
 	//--------------------------------------------------------------------------------------------------------------
@@ -165,6 +173,7 @@ public class DriverManager {
 
 	public DriverProcess getChromeDriver() {
 		if(chromeDriver == null){
+			Utils.clearDriverFolder(CHROME_BROWSER);
 			chromeDriver = new DriverProcess(this, ATS.getDriversFolderPath(), CHROME_DRIVER_FILE_NAME, null);
 		}
 		return chromeDriver;
@@ -179,13 +188,14 @@ public class DriverManager {
 		
 	public DriverProcess getEdgeDriver() {
 		if(edgeDriver == null || !edgeDriver.isStarted()){
-			edgeDriver = new DriverProcess(this, ATS.getDriversFolderPath(), EDGE_DRIVER_FILE_NAME + "-" + getWindowsBuildVersion() + ".exe", null);
+			edgeDriver = new DriverProcess(this, ATS.getDriversFolderPath(), EDGE_DRIVER_FILE_NAME + "-" + windowsBuildVersion + ".exe", null);
 		}
 		return edgeDriver;
 	}
 
 	public DriverProcess getOperaDriver() {
 		if(operaDriver == null){
+			Utils.clearDriverFolder(OPERA_BROWSER);
 			operaDriver = new DriverProcess(this, ATS.getDriversFolderPath(), OPERA_DRIVER_FILE_NAME, null);
 		}
 		return operaDriver;

@@ -57,9 +57,6 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 
 	private Process applicationProcess = null;
 
-	private String osVersion;
-	private String osName;
-
 	private DesktopWindow mainWindow;
 
 	public DesktopDriverEngine(Channel channel, DesktopWindow window) {
@@ -128,23 +125,19 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 				return;
 			}
 
-			String driverVersion = "N/A";
 			String appVersion = "N/A";
+			String appBuildVersion = "N/A";
 
-			final ArrayList<DesktopData> capabilities = desktopDriver.getVersion(applicationPath);
-			for (DesktopData data : capabilities) {
-				if("DriverVersion".equals(data.getName())) {
-					driverVersion = data.getValue();
+			final ArrayList<DesktopData> appInfo = desktopDriver.getVersion(applicationPath);
+			for (DesktopData data : appInfo) {
+				if("ApplicationBuildVersion".equals(data.getName())) {
+					appBuildVersion = data.getValue();
 				}else if("ApplicationVersion".equals(data.getName())) {
 					appVersion = data.getValue();
-				}else if("BuildNumber".equals(data.getName())) {
-					osVersion = data.getValue();
-				}else if("Caption".equals(data.getName())) {
-					osName = data.getValue();
 				}
 			}
 
-			channel.setApplicationData("windows", appVersion, driverVersion, applicationProcess.pid());
+			channel.setApplicationData("windows", appVersion + " build(" + appBuildVersion + ")", desktopDriver.getDriverVersion(), applicationProcess.pid());
 
 			int maxTry = 30;
 			while(maxTry > 0){
@@ -159,14 +152,6 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 			desktopDriver.moveWindow(channel, channel.getDimension().getPoint());
 			desktopDriver.resizeWindow(channel, channel.getDimension().getSize());
 		}
-	}
-
-	public String getOsVersion() {
-		return osVersion;
-	}
-
-	public String getOsName() {
-		return osName;
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------
@@ -246,10 +231,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 
 	@Override
 	public void close() {
-		getDesktopDriver().closeAllWindows(channel.getProcessId());
-		if(applicationProcess != null) {
-			applicationProcess.destroyForcibly();
-		}
+		getDesktopDriver().closeProcess(channel.getProcessId());
 	}
 
 	@Override

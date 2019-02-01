@@ -21,7 +21,6 @@ package com.ats.tools;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,6 +38,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageOutputStream;
@@ -96,6 +99,52 @@ public class Utils {
 	//-------------------------------------------------------------------------------------------------------------------------------------------
 	//  Files utils
 	//-------------------------------------------------------------------------------------------------------------------------------------------
+
+	private static final ExecutorService DELETE_SERVICE = Executors.newSingleThreadExecutor();
+	private static final String ATS_DRIVER_FOLDER = ".AtsDrivers";
+
+	public static File createDriverFolder(String name) {
+
+		final File worksDirectory = new File(
+				(new StringBuilder(System.getProperty("user.home")).
+						append(File.separator).
+						append(ATS_DRIVER_FOLDER).
+						append(File.separator).
+						append(name).
+						append(File.separator).
+						append(UUID.randomUUID().toString())).toString());
+
+		worksDirectory.mkdirs();
+
+		return worksDirectory;
+	}
+
+	public static void clearDriverFolder(String name) {
+
+		final File driverProfileDir = new File(
+				new StringBuilder(System.getProperty("user.home")).
+				append(File.separator).
+				append(ATS_DRIVER_FOLDER).
+				append(File.separator).
+				append(name).toString());
+
+		if(driverProfileDir.exists()) {
+			Arrays.stream(driverProfileDir.listFiles(File::isDirectory)).parallel().forEach(f -> deleteFile(f));
+		}
+	}
+
+	private static void deleteFile(final File file) {
+		if (file != null) {
+			DELETE_SERVICE.submit(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						deleteRecursive(file);
+					} catch (FileNotFoundException e) {}
+				}
+			});
+		}
+	}
 
 	public static boolean deleteRecursive(File path) throws FileNotFoundException{
 		if (!path.exists()) throw new FileNotFoundException(path.getAbsolutePath());
@@ -229,34 +278,6 @@ public class Utils {
 	}
 
 	//-------------------------------------------------------------------------------------------------------------------------------------------
-	//  Windows utils
-	//-------------------------------------------------------------------------------------------------------------------------------------------
-
-	public static String getWindowsBuildVersion(){
-
-		String buildNumber = "";
-		try {
-			final Process p = Runtime.getRuntime().exec("wmic os get BuildNumber");
-			final BufferedReader output = new BufferedReader(new InputStreamReader(p.getInputStream()));
-
-			String line;
-			while ((line = output.readLine()) != null) {
-				line = line.trim();
-				if(line.length() > 0 && !("BuildNumber".equals(line))){
-					buildNumber = line;
-					break;
-				}
-			}
-			output.close();
-			p.destroy();
-
-		} catch (IOException e) {
-		}
-
-		return buildNumber;
-	}
-
-	//-------------------------------------------------------------------------------------------------------------------------------------------
 	//  CSV utils
 	//-------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -287,7 +308,7 @@ public class Utils {
 	//-------------------------------------------------------------------------------------------------------------------------------------------
 	//  XML report
 	//-------------------------------------------------------------------------------------------------------------------------------------------
-	
+
 	public static void createXmlReport(Path output, String qualifiedName, IExecutionLogger logger) {
 
 		final File atsvFile = output.resolve(qualifiedName + ".atsv").toFile();
@@ -296,7 +317,7 @@ public class Utils {
 
 			final File xmlFolder = output.resolve(qualifiedName + "_xml").toFile();
 			logger.sendInfo("Create XML report -> ", xmlFolder.getAbsolutePath());
-			
+
 			final ArrayList<VisualImage> imagesList = new ArrayList<VisualImage>();
 			final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 
@@ -311,10 +332,10 @@ public class Utils {
 
 				final DocumentBuilder builder = factory.newDocumentBuilder();
 				final Document document= builder.newDocument();
-				
+
 				FileInputStream fis = null;
 				AMF3Deserializer amf3 = null;
-				
+
 				try {
 
 					fis = new FileInputStream(atsvFile);
@@ -329,7 +350,7 @@ public class Utils {
 
 					final VisualReport report = (VisualReport) amf3.readObject();
 					final Element script = document.createElement("script");
-					
+
 					atsRoot.appendChild(script);
 
 					script.setAttribute("id", report.getId());					
@@ -486,10 +507,10 @@ public class Utils {
 
 				final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 				try {
-					
+
 					Transformer transformer = transformerFactory.newTransformer();
 					transformer.transform(new DOMSource(document), new StreamResult(xmlFolder.toPath().resolve("actions.xml").toFile()));
-					
+
 				} catch (TransformerConfigurationException e2) {
 					logger.sendError("XML report config error ->", e2.getMessage());
 				} catch (TransformerException e3) {

@@ -37,9 +37,12 @@ public class ActionMouseScroll extends ActionMouse {
 
 	public ActionMouseScroll(){}
 
-	public ActionMouseScroll(ScriptLoader script, int value, boolean stop, ArrayList<String> options, ArrayList<String> elementArray) {
+	public ActionMouseScroll(ScriptLoader script, String value, boolean stop, ArrayList<String> options, ArrayList<String> elementArray) {
 		super(script, stop, options, elementArray);
-		setValue(value);
+		
+		try{
+			setValue(Integer.parseInt(value));
+		}catch (NumberFormatException e) {}
 	}
 
 	public ActionMouseScroll(Script script, boolean stop, int maxTry, SearchedElement element, MouseScroll mouse) {

@@ -20,6 +20,7 @@ under the License.
 package com.ats.executor.channels;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
@@ -138,55 +139,34 @@ public class ChannelManager {
 		status.setPassed(found);
 		status.endDuration();
 	}
-
-	public void closeChannel(ActionStatus status, String name){
-
+	
+	public void closeChannel(ActionStatus status, String channelName){
+		Optional<Channel> cn = channelsList.stream().filter(c -> c.getName().equals(channelName)).findFirst();
+		if(cn.isPresent()) {
+			cn.get().close(status);
+		}
+	}
+	
+	public void channelClosed(ActionStatus status, Channel channel){
 		status.startDuration();
-
-		if(name.length() > 0) {
-
-			Channel closeChannel = null;
-
-			for(Channel channel : channelsList){
-				if(channel.getName().equals(name)){
-					closeChannel = channel;
-					break;
-				}
+		if(channelsList.remove(channel)) {
+			sendInfo("Close channel ", channel.getName());
+			
+			if(channelsList.size() > 0){
+				final Channel current = channelsList.get(0);
+				setCurrentChannel(current);
+				status.setChannel(current);
+			}else{
+				noChannel();
 			}
 
-			if(closeChannel != null) {
-
-				channelsList.remove(closeChannel);
-				closeChannel.close();
-
-				sendInfo("Close channel");
-
-				if(channelsList.size() > 0){
-					final Channel current = channelsList.get(0);
-					setCurrentChannel(current);
-					status.setChannel(current);
-				}else{
-					noChannel();
-				}
-
-				status.setPassed(true);
-				status.setData(getChannelsList());
-
-			}else {
-				status.setPassed(false);
-				status.setMessage("Channel named '" + name + "' has not be found !");
-			}
-
+			status.setPassed(true);
+			status.setData(getChannelsList());
 		}else {
 			status.setPassed(false);
-			status.setMessage("Channel name cannot be empty !");
+			status.setMessage("Channel '" + channel.getName() + "' not found !");
 		}
-
 		status.endDuration();
-	}
-
-	private void sendInfo(String type) {
-		mainScript.sendInfo(type, "");
 	}
 
 	private void sendInfo(String type, String message) {

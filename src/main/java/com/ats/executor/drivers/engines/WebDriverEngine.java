@@ -21,7 +21,6 @@ package com.ats.executor.drivers.engines;
 
 import java.awt.Rectangle;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -76,7 +75,6 @@ import com.ats.script.actions.ActionApi;
 import com.ats.script.actions.ActionGotoUrl;
 import com.ats.tools.ResourceContent;
 import com.ats.tools.StartHtmlPage;
-import com.ats.tools.Utils;
 
 @SuppressWarnings("unchecked")
 public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngine {
@@ -114,8 +112,6 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	private DriverProcess driverProcess;
 
-	protected File worksDirectory;
-
 	protected Actions actions;
 
 	protected java.net.URI driverSession;
@@ -133,10 +129,6 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			int defaultWait) {
 
 		super(channel, desktopDriver, browser, props, defaultWait, 60);
-
-		try {
-			worksDirectory = Files.createTempDirectory("ats_" + browser).toFile();
-		} catch (IOException e) {}
 
 		this.driverProcess = driverProcess;
 	}
@@ -239,9 +231,9 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		}
 
 		requestConfig = RequestConfig.custom()
-				.setConnectTimeout(3500)
-				.setConnectionRequestTimeout(3500)
-				.setSocketTimeout(3500).build();
+				.setConnectTimeout(5000)
+				.setConnectionRequestTimeout(5000)
+				.setSocketTimeout(10000).build();
 		try {
 			driverSession = new URI(driverProcess.getDriverServerUrl() + "/session/" + driver.getSessionId().toString());
 		} catch (URISyntaxException e) {}
@@ -509,18 +501,10 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			}catch(WebDriverException e) {}
 
 			while(list.size() > 0) {
-				final String winHandler = list.remove(list.size()-1);
-				if(list.size() == 0) {
-					closeLastWindow(new ActionStatus(channel));
-				}else {
-					closeWindowHandler(winHandler);
-				}
+				closeWindowHandler(list.remove(list.size()-1));
 			}
+			getDriverProcess().close();
 		}
-
-		try {
-			Utils.deleteRecursive(worksDirectory);
-		} catch (FileNotFoundException e) {}
 	}
 
 	//-----------------------------------------------------------------------------------------------------------------------------------
@@ -688,6 +672,10 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	private void closeWindowHandler(String windowHandle) {
 		switchToWindowHandle(windowHandle);
+		closeCurrentWindow();
+	}
+	
+	protected void closeCurrentWindow() {
 		driver.close();
 		channel.sleep(200);
 	}
@@ -715,11 +703,6 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		}
 	}
 
-	private void closeLastWindow(ActionStatus status) {
-		channel.lastWindowClosed(status);
-		driver.quit();
-	}
-
 	//-----------------------------------------------------------------------------------------------------------------------------------
 	//
 	//-----------------------------------------------------------------------------------------------------------------------------------
@@ -735,7 +718,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	//TODO remove this default method and add actionstatus
 	protected Object runJavaScript(String javaScript, Object ... params) {
-		return runJavaScript(new ActionStatus(channel), javaScript, params);
+		return runJavaScript(channel.newActionStatus(), javaScript, params);
 	}
 
 	protected Object runJavaScript(ActionStatus status, String javaScript, Object ... params) {

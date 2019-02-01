@@ -58,15 +58,15 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		super(channel, DriverManager.FIREFOX_BROWSER, driverProcess, windowsDriver, props, DEFAULT_WAIT);
 
 		this.autoScrollElement = JS_AUTO_SCROLL_MOZ;
-
+		
 		FirefoxOptions options = new FirefoxOptions();
 		options.setCapability("marionnette ",true);
 		options.setCapability("acceptSslCerts ",true);
 		options.setCapability("acceptInsecureCerts ",true);
+		options.setCapability("security.fileuri.strict_origin_policy", false);
+		
 		options.setPageLoadStrategy(PageLoadStrategy.NORMAL);
 		
-		options.setCapability("security.fileuri.strict_origin_policy", false);
-
 		if(applicationPath != null) {
 			options.setBinary(applicationPath);
 		}
@@ -175,7 +175,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 
 		return postData;
 	}
-
+	
 	private void executeAction(JsonObject action) {
 
 		StringEntity postDataEntity = null;

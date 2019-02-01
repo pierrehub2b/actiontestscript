@@ -19,7 +19,8 @@ under the License.
 
 package com.ats.script.actions;
 
-import com.ats.executor.ActionStatus;
+import java.util.ArrayList;
+
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
@@ -38,12 +39,18 @@ public class ActionComment extends Action {
 
 	public ActionComment() {}
 
-	public ActionComment(ScriptLoader script, String type, String text) {
+	public ActionComment(ScriptLoader script, String type, ArrayList<String> dataArray) {
 		super(script);
 		if(type.equals(LOG_TYPE) || type.equals(SCRIPT_TYPE)){
 			setType(type);
 		}
-		setComment(new CalculatedValue(script, text));
+		
+		String data = "";
+		if(dataArray.size() > 0){
+			data = dataArray.remove(0).trim();
+		}
+		
+		setComment(new CalculatedValue(script, data));
 	}
 
 	public ActionComment(Script script, String type, CalculatedValue value) {
@@ -69,7 +76,7 @@ public class ActionComment extends Action {
 
 	@Override
 	public void execute(ActionTestScript ts) {
-		status = new ActionStatus(ts.getCurrentChannel());
+		status = ts.getCurrentChannel().newActionStatus();
 		if(ts.getCurrentChannel() != null) {
 			if(STEP_TYPE.equals(type)) {
 				super.execute(ts);

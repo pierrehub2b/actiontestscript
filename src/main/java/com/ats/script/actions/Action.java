@@ -54,7 +54,7 @@ public class Action {
 	}
 	
 	public void execute(Channel channel){
-		setStatus(new ActionStatus(channel));
+		setStatus(channel.newActionStatus());
 	}
 
 	//--------------------------------------------------------

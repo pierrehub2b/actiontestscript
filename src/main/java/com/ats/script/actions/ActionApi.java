@@ -20,14 +20,17 @@ under the License.
 package com.ats.script.actions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.StringJoiner;
 
-import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
+import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
 
 public class ActionApi extends Action {
-	
+
 	public static final String SCRIPT_LABEL = "api-";
 	private static final int SCRIPT_LABEL_LENGTH = SCRIPT_LABEL.length();
 
@@ -36,43 +39,48 @@ public class ActionApi extends Action {
 	public static final String PUT = "put";
 	public static final String PATCH = "patch";
 	public static final String DELETE = "delete";
-	
+
 	public static final String SOAP = "soap";
 	public static final String REST = "rest";
-	
+
 	public static final String SCRIPT_LABEL_GET = SCRIPT_LABEL + GET;
 	public static final String SCRIPT_LABEL_DELETE = SCRIPT_LABEL + DELETE;
 
 	private CalculatedValue method;
 	private CalculatedValue data;
 
+	private List<CalculatedProperty> header;
+
 	private String type = GET;
 
 	public ActionApi() {}
 
-	public ActionApi(Script script, String type, ArrayList<String> parameters) {
+	public ActionApi(Script script, String type, String method, String headerData, ArrayList<String> data) {
 		super(script);
 
 		setType(type.substring(SCRIPT_LABEL_LENGTH));
-		
-		if(parameters.size() > 0) {
-			setMethod(new CalculatedValue(script, parameters.get(0).trim()));
-			if(parameters.size() > 1) {
-				setData(new CalculatedValue(script, parameters.get(1).trim()));
-			}else {
-				setData(new CalculatedValue(script, ""));
-			}
-		}else {
-			setMethod(new CalculatedValue(script, ""));
-			setData(new CalculatedValue(script, ""));
+		setMethod(new CalculatedValue(script, method));
+
+		header = new ArrayList<CalculatedProperty>();
+		if(headerData.length() > 0) {
+			Arrays.stream(headerData.split(",")).forEach(s -> header.add(new CalculatedProperty(script, s)));
 		}
+
+		if(data.size() > 0) {
+			setData(new CalculatedValue(script, data.get(0).trim()));
+		}		
 	}
 
 	public ActionApi(Script script, String type, CalculatedValue method, CalculatedValue data) {
+		this(script, type, method, data, new CalculatedProperty[0]);
+	}
+
+	public ActionApi(Script script, String type, CalculatedValue method, CalculatedValue data, CalculatedProperty ... headerData) {
 		super(script);
 		setType(type);
 		setMethod(method);
 		setData(data);
+		setHeader(new ArrayList<CalculatedProperty>(Arrays.asList(headerData)));
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -92,6 +100,18 @@ public class ActionApi extends Action {
 			codeBuilder.append("[0]");
 		}
 
+		if(header != null && header.size() > 0){
+
+			codeBuilder.append(", ");
+
+			StringJoiner joiner = new StringJoiner(", ");
+			for (CalculatedProperty head : header){
+				joiner.add(head.getJavaCode());
+			}
+
+			codeBuilder.append(joiner.toString());
+		}
+
 		codeBuilder.append(")");
 		return codeBuilder.toString();
 	}
@@ -101,18 +121,24 @@ public class ActionApi extends Action {
 
 	@Override
 	public void execute(ActionTestScript ts) {
-
 		if(ts.getCurrentChannel() != null){
-			setStatus(new ActionStatus(ts.getCurrentChannel()));
+			setStatus(ts.getCurrentChannel().newActionStatus());
 			ts.getCurrentChannel().api(status, this);
 		}
-
 		status.endDuration();
 	}
 
 	//--------------------------------------------------------
 	// getters and setters for serialization
 	//--------------------------------------------------------
+
+	public List<CalculatedProperty> getHeader() {
+		return header;
+	}
+
+	public void setHeader(List<CalculatedProperty> data) {
+		this.header = data;
+	}
 
 	public CalculatedValue getMethod() {
 		return method;

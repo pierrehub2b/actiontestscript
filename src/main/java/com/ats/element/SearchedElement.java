@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.CalculatedProperty;
@@ -49,11 +48,10 @@ public class SearchedElement {
 
 	public SearchedElement(Script script, ArrayList<String> elements) {
 
-		String value = elements.remove(0);
-
-		setCriterias(new ArrayList<CalculatedProperty>());
+		final String value = elements.remove(0);
+		final Matcher objectMatcher = Script.OBJECT_PATTERN.matcher(value);
 		
-		Matcher objectMatcher = Script.OBJECT_PATTERN.matcher(value);
+		setCriterias(new ArrayList<CalculatedProperty>());
 
 		if (objectMatcher.find()) {
 
@@ -62,8 +60,7 @@ public class SearchedElement {
 				setTag(objectMatcher.group(1).trim());
 
 				if(objectMatcher.groupCount() >= 2){
-					Stream<String> stream1 = Arrays.stream(objectMatcher.group(2).split(","));
-					stream1.forEach(s -> addCriteria(script, s));
+					Arrays.stream(objectMatcher.group(2).split(",")).forEach(s -> addCriteria(script, s));
 				}
 				
 			}else{

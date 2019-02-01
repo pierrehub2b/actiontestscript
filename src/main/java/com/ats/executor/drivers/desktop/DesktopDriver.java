@@ -73,6 +73,8 @@ public class DesktopDriver extends RemoteWebDriver {
 	private String driverUrl;
 	private RequestConfig requestConfig;
 	private CloseableHttpClient httpClient;
+	
+	private String driverVersion;
 
 	public DesktopDriver() {}
 
@@ -88,7 +90,19 @@ public class DesktopDriver extends RemoteWebDriver {
 				.setSocketTimeout(20*000).build();
 
 		httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
-
+		
+		final ArrayList<DesktopData> osInfo = getOsInfo();
+		for (DesktopData data : osInfo) {
+			if("BuildNumber".equals(data.getName())) {
+				driverManager.setWindowsBuildVersion(data.getValue());
+			}else if("Name".equals(data.getName())) {
+				driverManager.setOsName(data.getValue());
+			}else if("Version".equals(data.getName())) {
+				driverManager.setOsVersion(data.getValue());
+			}else if("DriverVersion".equals(data.getName())) {
+				driverVersion = data.getValue();
+			}
+		}
 	}
 
 	public void setEngine(DesktopDriverEngine engine) {
@@ -98,6 +112,10 @@ public class DesktopDriver extends RemoteWebDriver {
 
 	public DesktopDriverEngine getEngine() {
 		return engine;
+	}
+	
+	public String getDriverVersion() {
+		return driverVersion;
 	}
 
 	//------------------------------------------------------------------------------------------------------------
@@ -125,7 +143,8 @@ public class DesktopDriver extends RemoteWebDriver {
 	public enum DriverType
 	{
 		Capabilities (0),
-		Application (1);
+		Application (1),
+		Process (2);
 
 		private final int type;
 		DriverType(int value){
@@ -182,8 +201,7 @@ public class DesktopDriver extends RemoteWebDriver {
 		ToFront (5),
 		Switch (6),
 		Close (7),
-		CloseAll (8),
-		Url (9);
+		Url (8);
 
 		private final int type;
 		WindowType(int value){
@@ -242,6 +260,10 @@ public class DesktopDriver extends RemoteWebDriver {
 
 	public int getDriverPort() {
 		return driverPort;
+	}
+	
+	public void closeProcess(long processId) {
+		sendRequestCommand(CommandType.Driver, DriverType.Process, processId);
 	}
 
 	public void clearText() {
@@ -341,6 +363,10 @@ public class DesktopDriver extends RemoteWebDriver {
 		return hoverElement;
 	}
 
+	public ArrayList<DesktopData> getOsInfo() {
+		return sendRequestCommand(CommandType.Driver, DriverType.Capabilities).capabilities;
+	}
+	
 	public ArrayList<DesktopData> getVersion(String appPath) {
 		return sendRequestCommand(CommandType.Driver, DriverType.Application, appPath).capabilities;
 	}
@@ -380,10 +406,6 @@ public class DesktopDriver extends RemoteWebDriver {
 
 	public void resizeWindow(Channel channel, Dimension size) {
 		sendRequestCommand(CommandType.Window, WindowType.Resize, channel.getHandle(this), size.width, size.height);
-	}
-
-	public void closeAllWindows(Long pid) {
-		sendRequestCommand(CommandType.Window, WindowType.CloseAll, pid);
 	}
 
 	public void switchTo(Channel channel, int index) {

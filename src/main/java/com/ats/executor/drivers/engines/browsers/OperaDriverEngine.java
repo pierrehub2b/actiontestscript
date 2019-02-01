@@ -28,6 +28,7 @@ import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.WebDriverEngine;
+import com.ats.tools.Utils;
 
 public class OperaDriverEngine extends WebDriverEngine {
 
@@ -47,6 +48,7 @@ public class OperaDriverEngine extends WebDriverEngine {
 		options.addArguments("--allow-file-access-from-files");
 		options.addArguments("--disable-web-security");
 		options.addArguments("--allow-running-insecure-content");
+		options.addArguments("--user-data-dir=" + Utils.createDriverFolder(DriverManager.OPERA_BROWSER));
 				
 		if(applicationPath != null) {
 			options.setBinary(applicationPath);

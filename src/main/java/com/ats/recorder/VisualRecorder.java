@@ -5,7 +5,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import com.ats.element.TestElement;
-import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.script.ProjectData;
@@ -144,7 +143,7 @@ public class VisualRecorder implements IVisualRecorder {
 
 	@Override
 	public void updateScreen(TestElement element) {
-		channel.mouseMoveToElement(new ActionStatus(channel), element.getFoundElement(), new MouseDirection());
+		channel.mouseMoveToElement(channel.newActionStatus(), element.getFoundElement(), new MouseDirection());
 		channel.updateVisualAction(element);
 	}
 	

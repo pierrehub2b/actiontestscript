@@ -22,7 +22,6 @@ package com.ats.executor.channels;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.WebElement;
@@ -68,11 +67,8 @@ public class Channel {
 	private String screenServer;
 	private ArrayList<String> operations = new ArrayList<String>();
 
-	private ProcessHandle process = null;
-
 	private int winHandle = -1;
-
-	private boolean closing = false;
+	private long processId;
 
 	//----------------------------------------------------------------------------------------------------------------------
 	// Constructor
@@ -99,6 +95,10 @@ public class Channel {
 		}else {
 			this.mainScript.sendLog(ActionStatus.CHANNEL_START_ERROR, status.getMessage());
 		}
+	}
+	
+	public ActionStatus newActionStatus() {
+		return new ActionStatus(this);
 	}
 
 	public DesktopDriver getDesktopDriver() {
@@ -180,10 +180,7 @@ public class Channel {
 		this.os = os;
 		this.applicationVersion = version;
 		this.driverVersion = dVersion;
-		Optional<ProcessHandle> procs = ProcessHandle.of(pid);
-		if(procs.isPresent()) {
-			this.process = procs.get();	
-		}
+		this.processId = pid;
 		this.icon = icon;
 		this.screenServer = screenServer;
 	}
@@ -339,11 +336,7 @@ public class Channel {
 	}
 
 	public Long getProcessId() {
-		if(process != null) {
-			return process.pid();
-		}else {
-			return -1L;
-		}
+		return processId;
 	}
 
 	public TestBound getSubDimension(){
@@ -358,18 +351,12 @@ public class Channel {
 	//----------------------------------------------------------------------------------------------------------------------
 
 	public void close(){
-		closing = true;
-		engine.close();
-		if(process != null) {
-			process.descendants().forEach(p -> p.destroy());
-			process.destroy();
-		}
+		close(newActionStatus());
 	}
-
-	public void lastWindowClosed(ActionStatus status) {
-		if(!closing) {
-			mainScript.getChannelManager().closeChannel(status, name);
-		}
+	
+	public void close(ActionStatus status){
+		engine.close();
+		mainScript.getChannelManager().channelClosed(status, this);
 	}
 
 	//----------------------------------------------------------------------------------------------------------

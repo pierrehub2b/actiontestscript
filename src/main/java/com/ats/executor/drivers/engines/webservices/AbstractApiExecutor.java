@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.executor.drivers.engines.webservices;
 
@@ -82,6 +82,8 @@ public abstract class AbstractApiExecutor implements IApiDriverExecutor {
 
 	private ArrayList<AtsApiElement> atsElements;
 
+	protected Map<String, String> headerProperties;
+
 	protected void setUri(String value) {
 		try {
 			this.uri = new URI(value);
@@ -93,11 +95,22 @@ public abstract class AbstractApiExecutor implements IApiDriverExecutor {
 		source = "";
 		type = TEXT_TYPE;
 		lastAction = action;
+
+		headerProperties = new HashMap<String, String>();
+		for (CalculatedProperty property : action.getHeader()) {
+			headerProperties.put(property.getName(), property.getValue().getCalculated());
+		}
+	}
+
+	protected void addHeader(String key, String value) {
+		if(!headerProperties.containsKey(key)) {
+			headerProperties.put(key, value);
+		}
 	}
 
 	private void refresh(Channel channel) {
 		if(lastAction != null) {
-			execute(new ActionStatus(channel), lastAction);
+			execute(channel.newActionStatus(), lastAction);
 		}
 	}
 
