@@ -70,7 +70,7 @@ public class ActionApi extends Action {
 			setData(new CalculatedValue(script, data.get(0).trim()));
 		}		
 	}
-
+	
 	public ActionApi(Script script, String type, CalculatedValue method, CalculatedValue data) {
 		this(script, type, method, data, new CalculatedProperty[0]);
 	}
@@ -95,9 +95,7 @@ public class ActionApi extends Action {
 		if(data != null){
 			codeBuilder.append(data.getJavaCode());
 		}else {
-			codeBuilder.append("new ");
-			codeBuilder.append(CalculatedValue.class.getName());
-			codeBuilder.append("[0]");
+			codeBuilder.append("null");
 		}
 
 		if(header != null && header.size() > 0){
