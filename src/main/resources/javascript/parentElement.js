@@ -1,12 +1,12 @@
-var parent = arguments[0], result = [], iframeOnly = false;
+var elem=arguments[0].parentElement,result=[],ifrm=false;
 
-while (parent != null){
-	addElement(parent);
-	if (parent.nodeName == 'BODY' || parent.nodeName == 'HTML' || parent.nodeName == '#document' || iframeOnly){
-		iframeOnly = true;
-		parent = parent.ownerDocument.defaultView.frameElement;
+while (elem != null){
+	addElement(elem);
+	if (elem.nodeName == 'BODY' || elem.nodeName == 'HTML' || elem.nodeName == '#document' || ifrm){
+		ifrm = true;
+		elem = elem.ownerDocument.defaultView.frameElement;
 	}else{
-		parent = parent.parentElement;
+		elem = elem.parentElement;
 	}
 };
 

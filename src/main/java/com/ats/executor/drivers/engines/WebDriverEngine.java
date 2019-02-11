@@ -450,9 +450,9 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	private CalculatedProperty[] getAttributesList(RemoteWebElement element, String script) {
-		final Map<String, String> result = (Map<String, String>) runJavaScript(script, element);
+		final Map<String, Object> result = (Map<String, Object>) runJavaScript(script, element);
 		if(result != null){
-			return result.entrySet().stream().parallel().map(e -> new CalculatedProperty(e.getKey(), e.getValue())).toArray(c -> new CalculatedProperty[c]);
+			return result.entrySet().stream().parallel().filter(e -> !(e.getValue() instanceof Map)).map(e -> new CalculatedProperty(e.getKey(), e.getValue().toString())).toArray(c -> new CalculatedProperty[c]);
 		}
 		return null;
 	}

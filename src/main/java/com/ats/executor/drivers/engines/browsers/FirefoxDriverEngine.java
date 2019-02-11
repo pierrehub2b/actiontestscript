@@ -64,7 +64,8 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		options.setCapability("acceptSslCerts ",true);
 		options.setCapability("acceptInsecureCerts ",true);
 		options.setCapability("security.fileuri.strict_origin_policy", false);
-		
+		options.setCapability("app.update.disabledForTesting", true);
+				
 		options.setPageLoadStrategy(PageLoadStrategy.NORMAL);
 		
 		if(applicationPath != null) {
@@ -114,6 +115,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	protected void move(FoundElement element, int offsetX, int offsetY) {
 
 		forceScrollElement(element);
+		channel.sleep(100);
 
 		JsonArray actionList = new JsonArray();
 		actionList.add(getMoveAction(((RemoteWebElement)element.getValue()).getId(), offsetX, offsetY));

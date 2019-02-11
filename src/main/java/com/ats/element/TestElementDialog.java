@@ -34,9 +34,11 @@ import com.ats.generator.variables.CalculatedValue;
 public class TestElementDialog extends TestElement {
 	
 	private static final int waitBox = 500;
+	private static final String ACCEPT = "accept";
+	private static final String DISMISS = "dismiss";
 
 	private Alert alert = null;
-	private String alertAction = null;
+	private String alertAction = ACCEPT;
 
 	public TestElementDialog(Channel channel) {
 		super(channel);
@@ -66,7 +68,10 @@ public class TestElementDialog extends TestElement {
 		this.setDialogBox();
 		
 		if(properties.size() > 0) {
-			alertAction = properties.get(0).getValue().getCalculated();
+			alertAction = properties.get(0).getValue().getData();
+			if(!ACCEPT.equals(alertAction) && !DISMISS.equals(alertAction)) {
+				alertAction = ACCEPT;
+			}
 		}
 
 		int tryLoop = getMaxTry();
@@ -122,10 +127,10 @@ public class TestElementDialog extends TestElement {
 	public void click(ActionStatus status, MouseDirection position, boolean hold) {
 		if(alertAction != null) {
 			getChannel().sleep(waitBox);
-			if("accept".equals(alertAction)) {
-				alert.accept();
-			}else {
+			if(DISMISS.equals(alertAction)) {
 				alert.dismiss();
+			}else {
+				alert.accept();
 			}
 			getChannel().sleep(waitBox);
 			getChannel().switchToDefaultContent();
