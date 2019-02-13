@@ -40,7 +40,7 @@ import com.ats.recorder.IVisualRecorder;
 import com.ats.script.actions.ActionSelect;
 
 public class TestElement{
-	
+
 	protected Channel channel;
 	protected IDriverEngine engine;
 
@@ -59,9 +59,9 @@ public class TestElement{
 
 	private String criterias;
 	private String searchedTag;
-	
+
 	protected IVisualRecorder recorder;
-	
+
 	private boolean sysComp = false;
 
 	public TestElement(Channel channel) {
@@ -72,12 +72,12 @@ public class TestElement{
 		this.count = 1;
 		this.occurrences = p -> true;
 	}
-	
+
 	public TestElement(Channel channel, int maxTry) {
 		this.channel = channel;
 		this.maxTry = maxTry;
 	}
-	
+
 	public TestElement(FoundElement element, Channel currentChannel) {
 		this(currentChannel);
 		this.foundElements.add(element);
@@ -88,7 +88,7 @@ public class TestElement{
 		this(channel, maxTry);
 		this.occurrences = occurrences;
 	}
-	
+
 	public TestElement(Channel channel, int maxTry, Predicate<Integer> predicate, int index) {
 		this(channel, maxTry, predicate);
 		this.index = index;
@@ -121,7 +121,7 @@ public class TestElement{
 			foundElements.remove(0).dispose();
 		}
 	}
-	
+
 	public boolean isSysComp() {
 		return sysComp;
 	}
@@ -137,7 +137,7 @@ public class TestElement{
 	protected void startSearch(boolean sysComp, String tag, List<CalculatedProperty> properties) {
 
 		this.sysComp = sysComp;
-		
+
 		if(channel != null){
 
 			searchedTag = tag;
@@ -156,7 +156,7 @@ public class TestElement{
 
 					attributes.add(property.getName());
 				}
-								
+
 				foundElements = engine.findElements(channel, sysComp, this, tag, attributes, fullPredicate);
 			}
 
@@ -189,7 +189,7 @@ public class TestElement{
 	public FoundElement getFoundElement() {
 		return foundElements.get(index); 
 	}
-	
+
 	public boolean isNumeric() {
 		return getFoundElement().isNumeric();
 	}
@@ -221,7 +221,7 @@ public class TestElement{
 	public String getSearchedTag() {
 		return searchedTag;
 	}
-	
+
 	protected void setDialogBox() {
 		this.searchedTag = "AlertBox";
 		this.criterias = "";
@@ -313,6 +313,32 @@ public class TestElement{
 	//-------------------------------------------------------------------------------------------------------------------
 	// Text ...
 	//-------------------------------------------------------------------------------------------------------------------
+
+	public void enterText(ActionStatus status, CalculatedValue text, IVisualRecorder recorder) {
+		
+		final MouseDirection md = new MouseDirection();
+		
+		over(status, md);
+		if(status.isPassed()) {
+			click(status, md, false);
+			if(status.isPassed()) {
+				clearText(status);
+				if(status.isPassed()) {
+
+					recorder.updateScreen(true);
+					sendText(status, text);
+
+					status.endDuration();
+
+					if("password".equals(getAttribute("type"))) {
+						recorder.updateScreen(0, status.getDuration(), "xxxxxxx");
+					}else {
+						recorder.updateScreen(0, status.getDuration(), text.getCalculated());
+					}
+				}
+			}
+		}
+	}
 
 	public void sendText(ActionStatus status, CalculatedValue text) {
 		engine.sendTextData(status, this, text.getCalculatedText());
@@ -476,13 +502,13 @@ public class TestElement{
 		recorder.update(error, duration, this);
 		channel.actionTerminated();
 	}
-	
+
 	public void terminateExecution(ActionTestScript script, int error, Long duration, String value, String data) {
 		recorder = script.getRecorder();
 		recorder.update(error, duration, value, data, this);
 		channel.actionTerminated();
 	}
-	
+
 	public void updateScreen() {
 		recorder.updateScreen(this);
 	}

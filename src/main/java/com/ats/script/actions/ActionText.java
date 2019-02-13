@@ -85,31 +85,8 @@ public class ActionText extends ActionExecuteElement {
 		super.terminateExecution(ts);
 
 		if(status.isPassed()) {
-
 			status.startDuration();
-			final MouseDirection md = new MouseDirection();
-			final boolean isPassword = "password".equals(getTestElement().getAttribute("type"));
-
-			getTestElement().over(status, md);
-			if(status.isPassed()) {
-				getTestElement().click(status, md, false);
-				if(status.isPassed()) {
-					getTestElement().clearText(status);
-					if(status.isPassed()) {
-						
-						ts.getRecorder().updateScreen(true);
-						getTestElement().sendText(status, text);
-
-						status.endDuration();
-						
-						if(isPassword) {
-							ts.getRecorder().updateScreen(0, status.getDuration(), "xxxxxxx");
-						}else {
-							ts.getRecorder().updateScreen(0, status.getDuration(), text.getCalculated());
-						}
-					}
-				}
-			}
+			getTestElement().enterText(status, text, ts.getRecorder());
 		}
 	}
 

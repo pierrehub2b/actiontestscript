@@ -73,7 +73,7 @@ public class DesktopDriver extends RemoteWebDriver {
 	private String driverUrl;
 	private RequestConfig requestConfig;
 	private CloseableHttpClient httpClient;
-	
+
 	private String driverVersion;
 
 	public DesktopDriver() {}
@@ -90,7 +90,7 @@ public class DesktopDriver extends RemoteWebDriver {
 				.setSocketTimeout(20*000).build();
 
 		httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
-		
+
 		final ArrayList<DesktopData> osInfo = getOsInfo();
 		for (DesktopData data : osInfo) {
 			if("BuildNumber".equals(data.getName())) {
@@ -113,7 +113,7 @@ public class DesktopDriver extends RemoteWebDriver {
 	public DesktopDriverEngine getEngine() {
 		return engine;
 	}
-	
+
 	public String getDriverVersion() {
 		return driverVersion;
 	}
@@ -139,7 +139,7 @@ public class DesktopDriver extends RemoteWebDriver {
 		@Override
 		public String toString(){ return this.type + ""; }
 	};
-	
+
 	public enum DriverType
 	{
 		Capabilities (0),
@@ -261,7 +261,7 @@ public class DesktopDriver extends RemoteWebDriver {
 	public int getDriverPort() {
 		return driverPort;
 	}
-	
+
 	public void closeProcess(long processId) {
 		sendRequestCommand(CommandType.Driver, DriverType.Process, processId);
 	}
@@ -366,7 +366,7 @@ public class DesktopDriver extends RemoteWebDriver {
 	public ArrayList<DesktopData> getOsInfo() {
 		return sendRequestCommand(CommandType.Driver, DriverType.Capabilities).capabilities;
 	}
-	
+
 	public ArrayList<DesktopData> getVersion(String appPath) {
 		return sendRequestCommand(CommandType.Driver, DriverType.Application, appPath).capabilities;
 	}
@@ -423,9 +423,13 @@ public class DesktopDriver extends RemoteWebDriver {
 	public void gotoUrl(ActionStatus status, int handle, String url) {
 		final DesktopResponse resp = sendRequestCommand(CommandType.Window, WindowType.Url, handle, url);
 		if(resp != null) {
-			status.setCode(resp.errorCode);
 			status.setData(url);
-			status.setMessage(resp.errorMessage);
+			if(resp.errorCode < 0) {
+				status.setPassed(false);
+				status.setMessage(resp.errorMessage);
+			}else {
+				status.setPassed(true);
+			}
 		}
 	}
 
@@ -470,18 +474,19 @@ public class DesktopDriver extends RemoteWebDriver {
 
 		DesktopResponse response = null;
 
+		Object[] params = new Object[attributes.size() + 2];
+		params[1] = tag;
+
+		for (int counter = 0; counter < attributes.size(); counter++) { 		      
+			params[counter+2] = attributes.get(counter); 		
+		}   
+
 		if(testElement.getParent() != null){
-			if(attributes.isEmpty()) {
-				response = sendRequestCommand(CommandType.Element, ElementType.Childs, testElement.getParent().getWebElementId(), tag);
-			}else {
-				response = sendRequestCommand(CommandType.Element, ElementType.Childs, testElement.getParent().getWebElementId(), tag, String.join("/", attributes));
-			}
+			params[0] = testElement.getParent().getWebElementId();
+			response = sendRequestCommand(CommandType.Element, ElementType.Childs, params);
 		}else{
-			if(attributes.isEmpty()) {
-				response = sendRequestCommand(CommandType.Element, ElementType.Find, channel.getHandle(this), tag);
-			}else {
-				response = sendRequestCommand(CommandType.Element, ElementType.Find, channel.getHandle(this), tag, String.join("/", attributes));
-			}
+			params[0] = channel.getHandle(this);
+			response = sendRequestCommand(CommandType.Element, ElementType.Find, params);
 		}
 
 		if(response.elements != null) {
@@ -607,7 +612,7 @@ public class DesktopDriver extends RemoteWebDriver {
 		}
 
 		sendRequestCommand(CommandType.Record, RecordType.Position, hdirName, hdirValue, vdirName, vdirValue);
-		
+
 	}
 
 	//---------------------------------------------------------------------------------------
@@ -622,14 +627,14 @@ public class DesktopDriver extends RemoteWebDriver {
 				.append("/")
 				.append(subType)
 				.toString());
-		
+
 		StringJoiner joiner = new StringJoiner("\n");
 		for (Object obj : data) {
 			joiner.add(obj.toString());
 		}
 
 		request.setEntity(new StringEntity(joiner.toString(), ContentType.create("application/x-www-form-urlencoded", Consts.UTF_8)));
-		
+
 		try {
 
 			final HttpResponse response = httpClient.execute(request);
@@ -648,7 +653,7 @@ public class DesktopDriver extends RemoteWebDriver {
 	public void saveVisualReportFile(Path path, IExecutionLogger logger) {
 
 		final CloseableHttpClient downloadClient = HttpClients.createDefault();
-		
+
 		final HttpGet request = new HttpGet(
 				new StringBuilder(driverUrl)
 				.append("/")

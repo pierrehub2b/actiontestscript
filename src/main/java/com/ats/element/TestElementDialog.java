@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.element;
 
@@ -30,9 +30,10 @@ import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
+import com.ats.recorder.IVisualRecorder;
 
 public class TestElementDialog extends TestElement {
-	
+
 	private static final int waitBox = 500;
 	private static final String ACCEPT = "accept";
 	private static final String DISMISS = "dismiss";
@@ -66,7 +67,7 @@ public class TestElementDialog extends TestElement {
 	private void initSearch(List<CalculatedProperty> properties) {
 
 		this.setDialogBox();
-		
+
 		if(properties.size() > 0) {
 			alertAction = properties.get(0).getValue().getData();
 			if(!ACCEPT.equals(alertAction) && !DISMISS.equals(alertAction)) {
@@ -75,16 +76,16 @@ public class TestElementDialog extends TestElement {
 		}
 
 		int tryLoop = getMaxTry();
-		
+
 		while (alert == null && tryLoop > 0) {
 			try {
 				alert = getChannel().switchToAlert();
 				getChannel().sleep(waitBox);
-				
+
 				final ArrayList<FoundElement> elements = new ArrayList<FoundElement>();
 				elements.add(new FoundElement());
 				setFoundElements(elements);
-				
+
 			}catch(NoAlertPresentException ex) {
 				getChannel().sleep(200);
 				tryLoop--;
@@ -92,25 +93,36 @@ public class TestElementDialog extends TestElement {
 		}
 
 	}
-	
+
 	@Override
 	public void updateScreen() {
 		recorder.updateScreen(true);
 	}
-	
+
 	@Override
 	public FoundElement getFoundElement() {
 		return null;
 	}
-	
+
 	@Override
 	public void over(ActionStatus status, MouseDirection position) {
 	}
-	
+
+	@Override
+	public void enterText(ActionStatus status, CalculatedValue text, IVisualRecorder recorder) {
+
+		recorder.updateScreen(true);
+		
+		sendText(status, text);
+		status.endDuration();
+		
+		recorder.updateScreen(0, status.getDuration(), text.getCalculated());
+	}
+
 	@Override
 	public void clearText(ActionStatus status) {
 	}
-	
+
 	@Override
 	public void sendText(ActionStatus status, CalculatedValue text) {
 		getChannel().sleep(waitBox);
