@@ -26,7 +26,6 @@ import java.util.regex.Pattern;
 
 import com.ats.element.SearchedElement;
 import com.ats.executor.ActionTestScript;
-import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
@@ -34,9 +33,7 @@ import com.ats.script.ScriptLoader;
 public class ActionText extends ActionExecuteElement {
 
 	public static final String SCRIPT_LABEL = "keyboard";
-
 	public static final Pattern INSERT_PATTERN = Pattern.compile("insert\\((\\d+)\\)", Pattern.CASE_INSENSITIVE);
-	//public static final Pattern KEY_REGEXP = Pattern.compile("\\$key\\s?\\((\\w+)\\-?([^\\)]*)?\\)");
 
 	private CalculatedValue text;
 

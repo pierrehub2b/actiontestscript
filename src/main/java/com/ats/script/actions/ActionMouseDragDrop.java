@@ -48,9 +48,11 @@ public class ActionMouseDragDrop extends ActionMouse {
 		super.terminateExecution(ts);
 		if(status.isPassed()) {
 			if(Mouse.DRAG.equals(getType())) {
+				ts.startDrag();
 				getTestElement().drag(status, getPosition());
 			}else if(Mouse.DROP.equals(getType())) {
-				getTestElement().drop(status);
+				getTestElement().drop(status, getPosition(), ts.isDesktopDragDrop());
+				ts.endDrag();
 			}
 			status.updateDuration(System.currentTimeMillis());
 		}

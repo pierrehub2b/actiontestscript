@@ -105,7 +105,7 @@ public class TestElementDialog extends TestElement {
 	}
 
 	@Override
-	public void over(ActionStatus status, MouseDirection position) {
+	public void over(ActionStatus status, MouseDirection position, boolean desktopDragDrop) {
 	}
 
 	@Override
@@ -136,7 +136,7 @@ public class TestElementDialog extends TestElement {
 	}
 
 	@Override
-	public void click(ActionStatus status, MouseDirection position, boolean hold) {
+	public void click(ActionStatus status, MouseDirection position) {
 		if(alertAction != null) {
 			getChannel().sleep(waitBox);
 			if(DISMISS.equals(alertAction)) {

@@ -26,6 +26,7 @@ import org.openqa.selenium.Point;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import com.ats.driver.ApplicationProperties;
+import com.ats.element.FoundElement;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.generator.objects.BoundData;
@@ -169,6 +170,13 @@ public abstract class DriverEngineAbstract {
 
 			setPosition(new Point(newX, newY));
 		}
+	}
+	
+	protected void desktopMoveToElement(FoundElement foundElement, MouseDirection position, int offsetX, int offsetY) {
+		Rectangle rect = foundElement.getRectangle();
+		getDesktopDriver().mouseMove(
+				getOffsetX(rect, position) + foundElement.getScreenX().intValue() + offsetX,
+				getOffsetY(rect, position) + foundElement.getScreenY().intValue() + offsetY);
 	}
 
 	protected void setPosition(Point pt) {} // no action by default

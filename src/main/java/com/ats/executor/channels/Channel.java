@@ -439,7 +439,7 @@ public class Channel {
 	}
 
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position) {
-		engine.mouseMoveToElement(status, foundElement, position);
+		engine.mouseMoveToElement(status, foundElement, position, false);
 		actionTerminated();
 	}
 

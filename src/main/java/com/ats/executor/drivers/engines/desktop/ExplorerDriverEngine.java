@@ -60,9 +60,6 @@ public class ExplorerDriverEngine extends DesktopDriverEngine {
 
 	@Override
 	public void goToUrl(ActionStatus status, String url) {
-		if(!url.startsWith("file://")) {
-			url = "file://" + url;
-		}
 		getDesktopDriver().gotoUrl(status, window.handle, url);
 	}
 

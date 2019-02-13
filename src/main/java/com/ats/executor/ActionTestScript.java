@@ -515,6 +515,24 @@ public class ActionTestScript extends Script implements ITest{
 	}
 
 	//-----------------------------------------------------------------------------------------------------------
+	//  - Drag drop management
+	//-----------------------------------------------------------------------------------------------------------
+
+	private boolean dragWithDesktop = false;
+	
+	public void startDrag() {
+		topScript.dragWithDesktop = getCurrentChannel().isDesktop();
+	}
+	
+	public boolean isDesktopDragDrop() {
+		return topScript.dragWithDesktop;
+	}
+	
+	public void endDrag() {
+		topScript.dragWithDesktop = false;
+	}
+	
+	//-----------------------------------------------------------------------------------------------------------
 	//  - Animation recorder
 	//-----------------------------------------------------------------------------------------------------------
 

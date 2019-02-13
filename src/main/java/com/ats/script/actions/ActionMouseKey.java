@@ -99,7 +99,7 @@ public class ActionMouseKey extends ActionMouse {
 				if(key != null) {
 					getTestElement().click(status, getPosition(), key);
 				}else {
-					getTestElement().click(status, getPosition(), false);
+					getTestElement().click(status, getPosition());
 				}
 			}
 			

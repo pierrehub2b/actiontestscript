@@ -56,35 +56,31 @@ public class IEDriverEngine extends WebDriverEngine {
 	}
 
 	@Override
-	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position) {
-
-		Rectangle rect = foundElement.getRectangle();
-
-		getDesktopDriver().mouseMove(
-				getOffsetX(rect, position) + foundElement.getScreenX().intValue(),
-				getOffsetY(rect, position) + foundElement.getScreenY().intValue() - 9);
+	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean desktopDragDrop) {
+		desktopMoveToElement(foundElement, position,0 ,-9);
 	}
 
 	@Override
-	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, boolean hold) {
-		if(hold) {
-			getDesktopDriver().mouseDown();
-		}else {
+	public void drag(ActionStatus status, FoundElement element, MouseDirection position) {
+		getDesktopDriver().mouseDown();
+	}
 
-			final Rectangle rect = element.getRectangle();
+	@Override
+	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position) {
 
-			try {
-				actions.moveToElement(element.getValue(), getOffsetX(rect, position), getOffsetY(rect, position)).click().build().perform();
-				status.setPassed(true);
-			}catch(StaleElementReferenceException e1) {
-				throw e1;
-			}catch(ElementNotVisibleException e0) {	
-				status.setPassed(false);
-				status.setCode(ActionStatus.OBJECT_NOT_VISIBLE);
-			}catch (Exception e) {
-				status.setPassed(false);
-				status.setMessage(e.getMessage());
-			}
+		final Rectangle rect = element.getRectangle();
+
+		try {
+			actions.moveToElement(element.getValue(), getOffsetX(rect, position), getOffsetY(rect, position)).click().build().perform();
+			status.setPassed(true);
+		}catch(StaleElementReferenceException e1) {
+			throw e1;
+		}catch(ElementNotVisibleException e0) {	
+			status.setPassed(false);
+			status.setCode(ActionStatus.OBJECT_NOT_VISIBLE);
+		}catch (Exception e) {
+			status.setPassed(false);
+			status.setMessage(e.getMessage());
 		}
 	}
 
@@ -94,7 +90,7 @@ public class IEDriverEngine extends WebDriverEngine {
 	}
 
 	@Override
-	public void drop() {
+	public void drop(MouseDirection md, boolean desktopDriver) {
 		getDesktopDriver().mouseRelease();
 	}
 
@@ -110,17 +106,17 @@ public class IEDriverEngine extends WebDriverEngine {
 			}
 		}
 	}
-	
+
 	@Override
 	public boolean setWindowToFront() {
 		int index = currentWindow;
 		currentWindow = -1;
-		
+
 		switchWindow(index);
 		refreshElementMapLocation(channel);
 		return false;
 	}
-	
+
 	@Override
 	public void switchWindow(int index) {
 		if(currentWindow != index) {

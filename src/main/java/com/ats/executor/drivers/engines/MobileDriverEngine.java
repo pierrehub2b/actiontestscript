@@ -266,18 +266,16 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	//-------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, boolean hold) {
-
+	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position) {
 		final Rectangle rect = element.getRectangle();
-		final int mouseX = (int)(getOffsetX(rect, position));
-		final int mouseY = (int)(getOffsetY(rect, position));
-
-		if(hold) {
-			testElement = new MobileTestElement(element.getElementId(), mouseX, mouseY);
-		}else {
-			executeRequest(ELEMENT, element.getElementId(), TAP, mouseX + "", mouseY + "");
-		}
+		executeRequest(ELEMENT, element.getElementId(), TAP, (int)(getOffsetX(rect, position)) + "", (int)(getOffsetY(rect, position)) + "");
 	}	
+	
+	@Override
+	public void drag(ActionStatus status, FoundElement element, MouseDirection position) {
+		final Rectangle rect = element.getRectangle();
+		testElement = new MobileTestElement(element.getElementId(), (int)(getOffsetX(rect, position)), (int)(getOffsetY(rect, position)));
+	}
 
 	@Override
 	public void moveByOffset(int hDirection, int vDirection) {
@@ -336,7 +334,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {}
 
 	@Override
-	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position) {}
+	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean desktopDragDrop) {}
 
 	@Override
 	public void clearText(ActionStatus status, FoundElement foundElement) {}
@@ -354,7 +352,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	public void keyUp(Keys key) {}
 
 	@Override
-	public void drop() {}
+	public void drop(MouseDirection md, boolean desktopDriver) {}
 
 	@Override
 	public void doubleClick() {}

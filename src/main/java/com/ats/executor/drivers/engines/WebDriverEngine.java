@@ -512,14 +512,17 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	//-----------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position) {
+	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean desktopDragDrop) {
+		if(desktopDragDrop) {
+			desktopMoveToElement(foundElement, position,0 ,0);
+		}else {
+			final Rectangle rect = foundElement.getRectangle();
+			move(foundElement, getOffsetX(rect, position), getOffsetY(rect, position));
 
-		final Rectangle rect = foundElement.getRectangle();
-		move(foundElement, getOffsetX(rect, position), getOffsetY(rect, position));
-
-		final ArrayList<Double> newPosition =  (ArrayList<Double>) runJavaScript(status, JS_ELEMENT_BOUNDING, foundElement.getValue());
-		if(newPosition.size() > 1) {
-			foundElement.updatePosition(newPosition.get(0), newPosition.get(1), channel, 0.0, 0.0);
+			final ArrayList<Double> newPosition =  (ArrayList<Double>) runJavaScript(status, JS_ELEMENT_BOUNDING, foundElement.getValue());
+			if(newPosition.size() > 1) {
+				foundElement.updatePosition(newPosition.get(0), newPosition.get(1), channel, 0.0, 0.0);
+			}
 		}
 	}
 
@@ -528,18 +531,36 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	@Override
-	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, boolean hold) {
+	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position) {
 
 		final Rectangle rect = element.getRectangle();
 
 		try {
-			
+
 			final Actions act = actions.moveToElement(element.getValue(), getOffsetX(rect, position), getOffsetY(rect, position));
-			if(hold) {
-				act.clickAndHold().build().perform();
-			}else {
-				act.click().build().perform();
-			}
+			act.click().build().perform();
+			status.setPassed(true);
+
+		}catch(StaleElementReferenceException e1) {
+			throw e1;
+		}catch(ElementNotVisibleException e0) {	
+			status.setPassed(false);
+			status.setCode(ActionStatus.OBJECT_NOT_VISIBLE);
+		}catch (Exception e) {
+			status.setPassed(false);
+			status.setMessage(e.getMessage());
+		}
+	}
+	
+	@Override
+	public void drag(ActionStatus status, FoundElement element, MouseDirection position) {
+
+		final Rectangle rect = element.getRectangle();
+
+		try {
+
+			final Actions act = actions.moveToElement(element.getValue(), getOffsetX(rect, position), getOffsetY(rect, position));
+			act.clickAndHold().build().perform();
 			status.setPassed(true);
 
 		}catch(StaleElementReferenceException e1) {
@@ -564,8 +585,12 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	@Override
-	public void drop() {
-		actions.release().perform();
+	public void drop(MouseDirection md, boolean desktopDragDrop) {
+		if(desktopDragDrop) {
+			getDesktopDriver().mouseRelease();
+		}else {
+			actions.release().perform();
+		}
 	}
 
 	@Override
@@ -674,7 +699,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		switchToWindowHandle(windowHandle);
 		closeCurrentWindow();
 	}
-	
+
 	protected void closeCurrentWindow() {
 		driver.close();
 		channel.sleep(200);
@@ -697,7 +722,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			if(index < 0) {
 				index = 0;
 			}
-			
+
 			currentWindow = index;
 			switchToWindowHandle(list.get(index));
 		}
@@ -872,7 +897,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	public String getSource() {
 		return driver.getPageSource();
 	}
-	
+
 	@Override
 	public void api(ActionStatus status, ActionApi api) {}
 }

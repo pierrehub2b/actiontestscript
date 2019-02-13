@@ -86,6 +86,11 @@ public class MouseDirection {
 		}
 		return 0;
 	}
+	
+	public void updateForDrag() {
+		setHorizontalPos(null);
+		setVerticalPos(new MouseDirectionData(Cartesian.BOTTOM, -20));
+	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
 	// Code Generator

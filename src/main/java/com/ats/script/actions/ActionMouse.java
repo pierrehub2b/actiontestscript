@@ -58,11 +58,11 @@ public class ActionMouse extends ActionExecuteElement {
 
 	@Override
 	public void terminateExecution(ActionTestScript ts) {
-
 		super.terminateExecution(ts);
 		if(status.isPassed()) {
+			
 			status.startDuration();
-			getTestElement().over(status, position);
+			getTestElement().over(status, position, ts.isDesktopDragDrop());
 
 			status.endDuration();
 			ts.getRecorder().updateScreen(0, status.getDuration(), getType(), position);

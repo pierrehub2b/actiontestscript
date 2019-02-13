@@ -265,7 +265,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	}
 
 	@Override
-	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position) {
+	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean desktopDragDrop) {
 		final Rectangle rect = foundElement.getRectangle();
 		getDesktopDriver().mouseMove(
 				getOffsetX(rect, position) + foundElement.getScreenX().intValue(), 
@@ -273,16 +273,19 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	}
 
 	@Override
-	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, boolean hold) {
-		if(hold) {
-			getDesktopDriver().mouseDown();
-		}else {
-			getDesktopDriver().mouseClick();
-		}
+	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position) {
+		getDesktopDriver().mouseClick();
+	}
+	
+	@Override
+	public void drag(ActionStatus status, FoundElement element, MouseDirection md) {
+		getDesktopDriver().mouseDown();
+		md.updateForDrag();
+		mouseMoveToElement(status, element, md, true);
 	}
 
 	@Override
-	public void drop() {
+	public void drop(MouseDirection md, boolean desktopDriver) {
 		getDesktopDriver().mouseRelease();
 	}
 
@@ -314,8 +317,8 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 
 	@Override
 	public void clearText(ActionStatus status, FoundElement element) {
-		mouseMoveToElement(status, element, new MouseDirection());
-		mouseClick(status, element, null, false);
+		mouseMoveToElement(status, element, new MouseDirection(), false);
+		mouseClick(status, element, null);
 		getDesktopDriver().clearText();
 	}
 

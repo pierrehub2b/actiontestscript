@@ -225,7 +225,7 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {}
 
 	@Override
-	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position) {}
+	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean desktopDragDrop) {}
 
 	@Override
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {}
@@ -237,8 +237,11 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	public void forceScrollElement(FoundElement value) {}
 
 	@Override
-	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, boolean hold) {}
+	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position) {}
 
+	@Override
+	public void drag(ActionStatus status, FoundElement element, MouseDirection position) {}
+	
 	@Override
 	public void keyDown(Keys key) {}
 
@@ -246,7 +249,7 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	public void keyUp(Keys key) {}
 
 	@Override
-	public void drop() {}
+	public void drop(MouseDirection md, boolean desktopDriver) {}
 
 	@Override
 	public void moveByOffset(int hDirection, int vDirection) {}

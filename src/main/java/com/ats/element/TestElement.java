@@ -318,19 +318,21 @@ public class TestElement{
 		
 		final MouseDirection md = new MouseDirection();
 		
-		over(status, md);
+		over(status, md, false);
 		if(status.isPassed()) {
-			click(status, md, false);
+			click(status, md);
 			if(status.isPassed()) {
 				clearText(status);
 				if(status.isPassed()) {
 
+					final boolean isPassword = "password".equals(getAttribute("type"));
+					
 					recorder.updateScreen(true);
 					sendText(status, text);
 
 					status.endDuration();
 
-					if("password".equals(getAttribute("type"))) {
+					if(isPassword) {
 						recorder.updateScreen(0, status.getDuration(), "xxxxxxx");
 					}else {
 						recorder.updateScreen(0, status.getDuration(), text.getCalculated());
@@ -399,9 +401,9 @@ public class TestElement{
 	// Mouse ...
 	//-------------------------------------------------------------------------------------------------------------------
 
-	public void over(ActionStatus status, MouseDirection position) {
+	public void over(ActionStatus status, MouseDirection position, boolean desktopDragDrop) {
 		if(isValidated()){
-			engine.mouseMoveToElement(status, getFoundElement(), position);
+			engine.mouseMoveToElement(status, getFoundElement(), position, desktopDragDrop);
 		}else{
 			status.setPassed(false);
 			status.setCode(ActionStatus.OBJECT_NOT_FOUND);
@@ -411,40 +413,41 @@ public class TestElement{
 
 	public void click(ActionStatus status, MouseDirection position, Keys key) {
 		engine.keyDown(key);
-		click(status, position, false);
+		click(status, position);
 		engine.keyUp(key);
 	}	
 
-	public void click(ActionStatus status, MouseDirection position, boolean hold) {
+	public void click(ActionStatus status, MouseDirection position) {
 
 		int tryLoop = maxTry;
-		mouseClick(status, position, hold);
+		mouseClick(status, position);
 
 		while(tryLoop > 0 && !status.isPassed()) {
 			channel.progressiveWait(tryLoop);
-			mouseClick(status, position, hold);
+			mouseClick(status, position);
 			tryLoop--;
 		}
 	}
 
-	private void mouseClick(ActionStatus status, MouseDirection position, boolean hold) {
-		engine.mouseClick(status, getFoundElement(), position, hold);
+	private void mouseClick(ActionStatus status, MouseDirection position) {
+		engine.mouseClick(status, getFoundElement(), position);
 		channel.actionTerminated();
 	}
 
 	public void drag(ActionStatus status, MouseDirection position) {
-		click(status, position, true);
+		engine.drag(status, getFoundElement(), position);
+		channel.actionTerminated();
 	}
 
-	public void drop(ActionStatus status) {
-		engine.drop();
+	public void drop(ActionStatus status, MouseDirection md, boolean desktopDragDrop) {
+		engine.drop(md, desktopDragDrop);
 		status.setPassed(true);
 	}
 
 	public void swipe(ActionStatus status, MouseDirection position, MouseDirection direction) {
 		drag(status, position);
 		engine.moveByOffset(direction.getHorizontalDirection(), direction.getVerticalDirection());
-		drop(status);
+		drop(status, null, false);
 	}
 
 	public void mouseWheel(int delta) {
