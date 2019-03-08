@@ -198,7 +198,7 @@ public class ActionCallscript extends Action {
 
 			status.setPassed(false);
 			status.setCode(MessageCode.SCRIPT_NOT_FOUND);
-			status.setMessage("ATS script not found : '" + name.getCalculated() + "' (letter case ?)\n");
+			status.setMessage("ATS script not found : '" + name.getCalculated() + "' (maybe a letter case issue ?)\n");
 
 		}else {
 

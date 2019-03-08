@@ -32,13 +32,15 @@ public class ApplicationProperties {
 	private String uri;
 	private int wait;
 	private int check;
+	private String lang;
 	
-	public ApplicationProperties(int type, String name, String uri, int wait, int check) {
+	public ApplicationProperties(int type, String name, String uri, int wait, int check, String lang) {
 		this.type = type;
 		this.name = name;
 		this.uri = uri;
 		this.wait = wait;
 		this.check = check;
+		this.lang = lang;
 	}
 	
 	public boolean isWeb() {
@@ -71,5 +73,9 @@ public class ApplicationProperties {
 	
 	public int getCheck() {
 		return check;
+	}
+	
+	public String getLang() {
+		return lang;
 	}
 }

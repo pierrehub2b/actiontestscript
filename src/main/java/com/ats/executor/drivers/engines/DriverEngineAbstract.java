@@ -46,6 +46,7 @@ public abstract class DriverEngineAbstract {
 		
 	protected String application;
 	protected String applicationPath;
+	protected String lang;
 	
 	protected int currentWindow = 0;
 	
@@ -71,6 +72,7 @@ public abstract class DriverEngineAbstract {
 			actionWait = props.getWait();
 			propertyWait = props.getCheck();
 			applicationPath = props.getUri();
+			lang = props.getLang();
 		}
 		
 		if(actionWait == -1) {
@@ -84,6 +86,10 @@ public abstract class DriverEngineAbstract {
 		
 	public DesktopDriver getDesktopDriver() {
 		return desktopDriver;
+	}
+	
+	public int getCurrentWindow() {
+		return currentWindow;
 	}
 	
 	public void setDriver(RemoteWebDriver driver) {

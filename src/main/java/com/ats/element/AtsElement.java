@@ -18,6 +18,9 @@ public class AtsElement extends AtsBaseElement {
 	protected boolean numeric = false;
 	private Double screenX = 0.0;
 	private Double screenY = 0.0;
+	
+	private Double boundX = 0.0;
+	private Double boundY = 0.0;
 
 	private boolean visible = true;
 
@@ -32,16 +35,15 @@ public class AtsElement extends AtsBaseElement {
 		this.element = (RemoteWebElement) data.get(0);
 		this.tag = data.get(1).toString();
 		this.numeric = (boolean) data.get(2);
-		this.width = (Double) data.get(3);
-		this.height = (Double) data.get(4);
-		this.x = (Double) data.get(5);
-		this.y = (Double) data.get(6);
-		this.screenX = (Double) data.get(7);
-		this.screenY = (Double) data.get(8);
-		
-		if(data.size() > 9) {
-			this.attributes = (Map<String, String>) data.get(9);
-		}
+		this.boundX = (Double) data.get(3);
+		this.boundY = (Double) data.get(4);
+		this.width = (Double) data.get(5);
+		this.height = (Double) data.get(6);
+		this.x = (Double) data.get(7);
+		this.y = (Double) data.get(8);
+		this.screenX = (Double) data.get(9);
+		this.screenY = (Double) data.get(10);
+		this.attributes = (Map<String, String>) data.get(11);
 	}
 
 	public RemoteWebElement getElement() {
@@ -66,6 +68,22 @@ public class AtsElement extends AtsBaseElement {
 	
 	public boolean isNumeric() {
 		return numeric;
+	}
+	
+	public Double getBoundX() {
+		return boundX;
+	}
+
+	public void setBoundX(Double boundX) {
+		this.boundX = boundX;
+	}
+
+	public Double getBoundY() {
+		return boundY;
+	}
+
+	public void setBoundY(Double boundY) {
+		this.boundY = boundY;
 	}
 
 	//----------------------------------------------------------------------------------------

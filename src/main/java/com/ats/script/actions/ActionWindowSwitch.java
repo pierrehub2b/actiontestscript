@@ -19,7 +19,6 @@ under the License.
 
 package com.ats.script.actions;
 
-import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
 import com.ats.script.Script;
 
@@ -27,28 +26,34 @@ public class ActionWindowSwitch extends ActionWindow {
 
 	public static final String SCRIPT_SWITCH_LABEL = SCRIPT_LABEL + "switch";
 	
+	private int num;
+	
 	public ActionWindowSwitch() {}
 
 	public ActionWindowSwitch(Script script, int num) {
-		super(script, num);
+		super(script);
+		setNum(num);
 	}
 	
 	@Override
 	public String getJavaCode() {
-		return super.getJavaCode() + getNum() + ")";
+		return super.getJavaCode() + ", " + getNum() + ")";
 	}
 	
 	@Override
-	public void execute(ActionTestScript ts) {
-		super.execute(ts);
-		final Channel channel = ts.getCurrentChannel();
-		
-		if(channel != null){
-			channel.switchWindow(getNum());
-			status.setPassed(true);
-		}
-		
-		status.endDuration();
-		ts.getRecorder().updateScreen(0, status.getDuration());
+	public void exec(Channel channel) {
+		channel.switchWindow(getNum());
+	}
+	
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------
+
+	public int getNum() {
+		return num;
+	}
+
+	public void setNum(int num) {
+		this.num = num;
 	}
 }

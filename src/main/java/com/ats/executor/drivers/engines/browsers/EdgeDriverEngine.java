@@ -20,7 +20,6 @@ under the License.
 package com.ats.executor.drivers.engines.browsers;
 
 import java.util.ArrayList;
-import java.util.function.Predicate;
 
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
@@ -29,8 +28,6 @@ import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.remote.CapabilityType;
 
 import com.ats.driver.ApplicationProperties;
-import com.ats.element.AtsBaseElement;
-import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
@@ -74,21 +71,15 @@ public class EdgeDriverEngine extends WebDriverEngine {
 	}
 
 	@Override
-	public void closeWindow(ActionStatus status, int index) {
+	public void closeWindow(ActionStatus status) {
 		actionWait();
-		super.closeWindow(status, index);
+		super.closeWindow(status);
 		actionWait();
 	}
 	
 	@Override
 	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {
 		middleClickSimulation(status, position, element);
-	}
-	
-	@Override
-	protected void move(FoundElement element, int offsetX, int offsetY) {
-		forceScrollElement(element);
-		super.move(element, offsetX, offsetY);
 	}
 
 	@Override
@@ -119,16 +110,6 @@ public class EdgeDriverEngine extends WebDriverEngine {
 		if(enterKey) {
 			actionWait();
 		}
-	}
-	
-	@Override
-	public ArrayList<FoundElement> findElements(Channel channel, boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> predicate) {
-		int maxTry = 40;
-		while(!((Boolean)runJavaScript(JS_WAIT_READYSTATE)) && maxTry > 0) {
-			channel.sleep(200);
-			maxTry--;
-		}
-		return super.findElements(channel, sysComp, testObject, tagName, attributes, predicate);
 	}
 
 	@Override

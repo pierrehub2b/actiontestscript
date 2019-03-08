@@ -14,8 +14,8 @@ const elts = parent.getElementsByTagName(tag);
 const eltsLength = elts.length;
 
 var addElement = function (e, a){
-	let rec = e.getBoundingClientRect();
-	result[result.length] = [e, e.tagName, e.getAttribute('inputmode')=='numeric', rec.width+0.0001, rec.height+0.0001, rec.left+0.0001, rec.top+0.0001, screenOffsetX, screenOffsetY, a];
+	let r = e.getBoundingClientRect();
+	result[result.length] = [e, e.tagName, e.getAttribute('inputmode')=='numeric', r.x+0.0001, r.y+0.0001, r.width+0.0001, r.height+0.0001, r.left+0.0001, r.top+0.0001, screenOffsetX, screenOffsetY, a];
 };
 
 if(attributesLen == 0){

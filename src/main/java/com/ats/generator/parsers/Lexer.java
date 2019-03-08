@@ -55,8 +55,8 @@ import com.ats.script.actions.ActionProperty;
 import com.ats.script.actions.ActionSelect;
 import com.ats.script.actions.ActionText;
 import com.ats.script.actions.ActionWindow;
-import com.ats.script.actions.ActionWindowClose;
 import com.ats.script.actions.ActionWindowResize;
+import com.ats.script.actions.ActionWindowState;
 import com.ats.script.actions.ActionWindowSwitch;
 
 public class Lexer {
@@ -220,6 +220,10 @@ public class Lexer {
 					//-----------------------
 
 					script.addAction(new ActionWindowResize(script, dataOne), disabled);
+					
+				}else if(ActionWindowState.SCRIPT_STATE_LABEL.equals(actionType)){
+					
+					script.addAction(new ActionWindowState(script, dataOne), disabled);
 
 				}else if(actionType.startsWith(ActionWindow.SCRIPT_LABEL)){
 
@@ -231,11 +235,11 @@ public class Lexer {
 					try {
 						num = Integer.parseInt(dataOne);
 					}catch(NumberFormatException e) {}
+					
+					script.addAction(new ActionWindowSwitch(script, num), disabled);
 
-					if(ActionWindowSwitch.SCRIPT_SWITCH_LABEL.equals(actionType)){
-						script.addAction(new ActionWindowSwitch(script, num), disabled);
-					}else {
-						script.addAction(new ActionWindowClose(script, num), disabled);
+					if(ActionWindowState.SCRIPT_CLOSE_LABEL.equals(actionType)){
+						script.addAction(new ActionWindowState(script, ActionWindowState.CLOSE), disabled);
 					}
 
 				}else if(ActionJavascript.SCRIPT_LABEL.equals(actionType)){

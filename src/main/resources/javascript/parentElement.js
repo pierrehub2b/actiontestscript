@@ -12,9 +12,9 @@ while (elem != null){
 
 function addElement(e){
 	try{
-		let rec = e.getBoundingClientRect();
-		result[result.length] = [e, e.tagName, e.getAttribute('inputmode')=='numeric', rec.width+0.0001, rec.height+0.0001, rec.left+0.0001, rec.top+0.0001, 0.0001, 0.0001];
+		let r = e.getBoundingClientRect();
+		result[result.length] = [e, e.tagName, e.getAttribute('inputmode')=='numeric', r.x+0.0001, r.y+0.0001, r.width+0.0001, r.height+0.0001, r.left+0.0001, r.top+0.0001, 0.0001, 0.0001, {}];
 	}catch(error){
-		result[result.length] = [e, '', false, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001];
+		result[result.length] = [e, '', false, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, {}];
 	}
 }

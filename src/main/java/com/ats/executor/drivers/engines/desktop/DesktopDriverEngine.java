@@ -202,7 +202,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	}
 
 	@Override
-	public ArrayList<FoundElement> findElements(Channel channel, boolean sysComp, TestElement testElement, String tag, ArrayList<String> attributes, Predicate<AtsBaseElement> predicate) {
+	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testElement, String tag, ArrayList<String> attributes, Predicate<AtsBaseElement> predicate) {
 		if(sysComp) {
 			if(SYSCOMP.equals(tag.toUpperCase())) {
 				ArrayList<FoundElement> win = new ArrayList<FoundElement>();
@@ -217,11 +217,11 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	}
 
 	@Override
-	public void updateDimensions(Channel cnl) {
+	public void updateDimensions() {
 
 		DesktopWindow win = getDesktopDriver().getWindowByHandle(channel.getHandle(desktopDriver));
 		if(win != null){
-			cnl.setDimensions(new TestBound(
+			channel.setDimensions(new TestBound(
 					win.getX(),
 					win.getY(),
 					win.getWidth(),
@@ -240,8 +240,8 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	}
 
 	@Override
-	public void closeWindow(ActionStatus status, int index) {
-		getDesktopDriver().closeWindow(channel, index);
+	public void closeWindow(ActionStatus status) {
+		getDesktopDriver().closeWindow(channel);
 	}
 
 	@Override
@@ -330,7 +330,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	}
 
 	@Override
-	public void refreshElementMapLocation(Channel channel) {
+	public void refreshElementMapLocation() {
 		getDesktopDriver().refreshElementMapLocation(channel);
 	}
 
@@ -359,7 +359,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	}
 
 	@Override
-	public void forceScrollElement(FoundElement value) {}
+	public void scrollOnMove(FoundElement value) {}
 
 	@Override
 	public Alert switchToAlert() {

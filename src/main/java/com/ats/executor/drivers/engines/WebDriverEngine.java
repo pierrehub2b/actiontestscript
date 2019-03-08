@@ -39,6 +39,7 @@ import java.util.stream.Stream;
 
 import org.apache.http.client.config.RequestConfig;
 import org.openqa.selenium.Alert;
+import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.Keys;
@@ -75,6 +76,7 @@ import com.ats.script.actions.ActionApi;
 import com.ats.script.actions.ActionGotoUrl;
 import com.ats.tools.ResourceContent;
 import com.ats.tools.StartHtmlPage;
+import com.google.gson.Gson;
 
 @SuppressWarnings("unchecked")
 public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngine {
@@ -85,16 +87,18 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	// Javascript static code
 	//-----------------------------------------------------------------------------------------------------------------------------
 
-	protected static final String JS_WAIT_READYSTATE = "var result=window.document.readyState=='complete';";
+	//protected static final String JS_WAIT_READYSTATE = "var result=window.document.readyState=='complete';";
 	protected static final String JS_WAIT_BEFORE_SEARCH = "var interval=setInterval(function(){if(window.document.readyState==='complete'){clearInterval(interval);done();}},200);";
 
 	protected static final String JS_AUTO_SCROLL = "var e=arguments[0];e.scrollIntoView();var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
 	protected static final String JS_AUTO_SCROLL_CALC = "var e=arguments[0];var r=e.getBoundingClientRect();var top=r.top + window.pageYOffset;window.scrollTo(0, top-(window.innerHeight / 2));r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
 	protected static final String JS_AUTO_SCROLL_MOZ = "var e=arguments[0];e.scrollIntoView({behavior:'auto',block:'center',inline:'center'});var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
 
+	protected static final String JS_SCROLL_IF_NEEDED = "var e=arguments[0], result=[];var r=e.getBoundingClientRect();if(r.top < 0 || r.left < 0 || r.bottom > (window.innerHeight || document.documentElement.clientHeight) || r.right > (window.innerWidth || document.documentElement.clientWidth)) {e.scrollIntoView({behavior:'auto',block:'center',inline:'center'});r=e.getBoundingClientRect();result=[r.left+0.0001, r.top+0.0001];}";
+	
 	protected static final String JS_ELEMENT_SCROLL = "var e=arguments[0];var d=arguments[1];e.scrollTop += d;var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
 	protected static final String JS_WINDOW_SCROLL = "window.scrollBy(0,arguments[0]);var result=[0.0001, 0.0001]";
-	protected static final String JS_ELEMENT_DATA = "var result=null;var e=document.elementFromPoint(arguments[0],arguments[1]);if(e){var r=e.getBoundingClientRect();result=[e, e.tagName, e.getAttribute('inputmode')=='numeric', r.width+0.0001, r.height+0.0001, r.left+0.0001, r.top+0.0001, 0.0001, 0.0001];};";
+	protected static final String JS_ELEMENT_DATA = "var result=null;var e=document.elementFromPoint(arguments[0],arguments[1]);if(e){var r=e.getBoundingClientRect();result=[e, e.tagName, e.getAttribute('inputmode')=='numeric', r.x+0.0001, r.y+0.0001, r.width+0.0001, r.height+0.0001, r.left+0.0001, r.top+0.0001, 0.0001, 0.0001, {}];};";
 	protected static final String JS_ELEMENT_BOUNDING = "var rect=arguments[0].getBoundingClientRect();var result=[rect.left+0.0001, rect.top+0.0001];";
 	protected static final String JS_MIDDLE_CLICK = "var evt=new MouseEvent('click', {bubbles: true,cancelable: true,view: window, button: 1}),result={};arguments[0].dispatchEvent(evt);";
 	protected static final String JS_ELEMENT_CSS = "var result={};var o=getComputedStyle(arguments[0]);for(var i=0, len=o.length; i < len; i++){result[o[i]]=o.getPropertyValue(o[i]);};";
@@ -267,29 +271,28 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	@Override
 	public void scroll(FoundElement element, int delta) {
 		if(element != null && element.getTag() != null) {
-			String code = null;
+			
+			ArrayList<Double> newPosition;
 			if(delta == 0) {
-				code = JS_ELEMENT_AUTOSCROLL;
+				newPosition =  (ArrayList<Double>) runJavaScript(autoScrollElement, element.getValue());
 			}else {
-				code = JS_ELEMENT_SCROLL;
+				newPosition =  (ArrayList<Double>) runJavaScript(JS_ELEMENT_SCROLL, element.getValue(), delta);
 			}
-
-			final ArrayList<Double> newPosition =  (ArrayList<Double>) runJavaScript(code, element.getValue(), delta);
-
+			
 			if(newPosition.size() > 1) {
 				element.updatePosition(newPosition.get(0), newPosition.get(1), channel, 0.0, 0.0);
 			}
-
 		}else {
 			runJavaScript(JS_WINDOW_SCROLL, delta);
 		}
 	}
 
 	@Override
-	public void forceScrollElement(FoundElement element) {
-		final ArrayList<Double> newPosition = (ArrayList<Double>) runJavaScript(autoScrollElement, element.getValue());
+	public void scrollOnMove(FoundElement element) {
+		final ArrayList<Double> newPosition = (ArrayList<Double>) runJavaScript(JS_SCROLL_IF_NEEDED, element.getValue());
 		if(newPosition != null && newPosition.size() > 1) {
 			element.updatePosition(newPosition.get(0), newPosition.get(1), channel, 0.0, 0.0);
+			channel.sleep(30);
 		}
 	}
 
@@ -362,7 +365,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	private WebElement getBody() {
 		try {
-			return driver.findElementByXPath("//body");
+			return driver.findElement(By.tagName("body"));
 		}catch(NoSuchElementException ex) {
 			channel.sleep(200);
 			return null;
@@ -474,7 +477,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	//---------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void updateDimensions(Channel channel) {
+	public void updateDimensions() {
 
 		switchWindow(currentWindow);
 
@@ -512,17 +515,13 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	//-----------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean desktopDragDrop) {
-		if(desktopDragDrop) {
+	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean withDesktop) {
+		if(withDesktop) {
 			desktopMoveToElement(foundElement, position,0 ,0);
 		}else {
+			scrollOnMove(foundElement);
 			final Rectangle rect = foundElement.getRectangle();
 			move(foundElement, getOffsetX(rect, position), getOffsetY(rect, position));
-
-			final ArrayList<Double> newPosition =  (ArrayList<Double>) runJavaScript(status, JS_ELEMENT_BOUNDING, foundElement.getValue());
-			if(newPosition.size() > 1) {
-				foundElement.updatePosition(newPosition.get(0), newPosition.get(1), channel, 0.0, 0.0);
-			}
 		}
 	}
 
@@ -532,15 +531,11 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	@Override
 	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position) {
-
+		
 		final Rectangle rect = element.getRectangle();
-
 		try {
-
-			final Actions act = actions.moveToElement(element.getValue(), getOffsetX(rect, position), getOffsetY(rect, position));
-			act.click().build().perform();
+			click(element, getOffsetX(rect, position), getOffsetY(rect, position));
 			status.setPassed(true);
-
 		}catch(StaleElementReferenceException e1) {
 			throw e1;
 		}catch(ElementNotVisibleException e0) {	
@@ -550,6 +545,10 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			status.setPassed(false);
 			status.setMessage(e.getMessage());
 		}
+	}
+	
+	protected void click(FoundElement element, int offsetX, int offsetY) {
+		actions.moveToElement(element.getValue(), offsetX, offsetY).click(element.getValue()).build().perform();
 	}
 	
 	@Override
@@ -678,6 +677,9 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 					switchToFirstWindow(wins);
 				}	
 			}
+			
+			channel.cleanWinHandle();
+			
 		}else {
 			switchToDefaultContent();
 		}
@@ -706,25 +708,19 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	@Override
-	public void closeWindow(ActionStatus status, int index) {
-
+	public void closeWindow(ActionStatus status) {
+				
 		final ArrayList<String> list = new ArrayList<String>();
 		try {
 			list.addAll(getWindowsHandle());
 		}catch(WebDriverException e) {}
 
 		if(list.size() > 1) {
-			if(index < list.size()) {
-				closeWindowHandler(list.get(index));
-				index--;
+			if(currentWindow < list.size()) {
+				closeWindowHandler(list.get(currentWindow));
+				currentWindow = 0;
 			}
-
-			if(index < 0) {
-				index = 0;
-			}
-
-			currentWindow = index;
-			switchToWindowHandle(list.get(index));
+			switchToWindowHandle(list.get(0));
 		}
 	}
 
@@ -792,7 +788,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	private double offsetIframeY = 0.0;
 
 	@Override
-	public ArrayList<FoundElement> findElements(Channel channel, boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> predicate) {
+	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> predicate) {
 
 		if(tagName == null) {
 			tagName = BODY;
@@ -874,6 +870,9 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	@Override
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {
+		status.setMessage(new Gson().toJson(
+				executeScript(status, "result={size:window.getComputedStyle(arguments[0], null).getPropertyValue('font-size'), family:window.getComputedStyle(arguments[0], null).getPropertyValue('font-family'), weight:window.getComputedStyle(arguments[0], null).getPropertyValue('font-weight')};", element.getWebElement())));
+		
 		for(SendKeyData sequence : textActionList) {
 			element.getWebElement().sendKeys(sequence.getSequenceWithDigit());
 		}
@@ -889,7 +888,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	@Override
-	public void refreshElementMapLocation(Channel channel) {
+	public void refreshElementMapLocation() {
 		getDesktopDriver().refreshElementMapLocation(channel);
 	}
 
@@ -900,4 +899,5 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	@Override
 	public void api(ActionStatus status, ActionApi api) {}
+
 }

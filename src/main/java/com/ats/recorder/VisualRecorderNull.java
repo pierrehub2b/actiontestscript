@@ -73,4 +73,8 @@ public class VisualRecorderNull implements IVisualRecorder {
 	@Override
 	public void updateScreen(TestElement element) {
 	}
+
+	@Override
+	public void updateTextScreen(int error, long duration, String value, String data) {
+	}
 }

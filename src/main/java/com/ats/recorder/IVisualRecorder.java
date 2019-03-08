@@ -10,7 +10,8 @@ public interface IVisualRecorder {
 	public void createVisualAction(Action action, long duration, String name, String app);
 	public void updateScreen(boolean ref);
 	public void updateScreen(int error, long duration);
-	public void updateScreen(int error, long duration, String calculated);
+	public void updateScreen(int error, long duration, String value);
+	public void updateTextScreen(int error, long duration, String value, String data);
 	public void updateScreen(int error, long duration, String type, MouseDirection position);
 	public void updateScreen(TestElement element);
 	public void update(String value);

@@ -49,6 +49,11 @@ public class VisualAction {
 	private int line;
 	private String value = "";
 	private String data = "";
+	
+	private double cpu;
+	private double ram;
+	private double netSent;
+	private double netReceived;
 
 	private VisualElement element;
 
@@ -211,5 +216,37 @@ public class VisualAction {
 
 	public String getImageFileName() {
 		return index + "." + imageType;
+	}
+	
+	public double getCpu() {
+		return cpu;
+	}
+
+	public void setCpu(double cpu) {
+		this.cpu = cpu;
+	}
+	
+	public double getRam() {
+		return ram;
+	}
+
+	public void setRam(double ram) {
+		this.ram = ram;
+	}
+	
+	public double getNetSent() {
+		return netSent;
+	}
+
+	public void setNetSent(double netSent) {
+		this.netSent = netSent;
+	}
+
+	public double getNetReceived() {
+		return netReceived;
+	}
+
+	public void setNetReceived(double netReceived) {
+		this.netReceived = netReceived;
 	}
 }

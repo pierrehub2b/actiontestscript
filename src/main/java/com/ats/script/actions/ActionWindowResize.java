@@ -19,7 +19,6 @@ under the License.
 
 package com.ats.script.actions;
 
-import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.BoundData;
 import com.ats.script.Script;
@@ -41,14 +40,13 @@ public class ActionWindowResize extends ActionWindow {
 	public ActionWindowResize() {}
 
 	public ActionWindowResize(Script script, String size) {
-		super(script, -1);
+		super(script);
 		String[] sizeData = size.split(",");
 
 		for(String data : sizeData) {
 			String[] dataValue = data.split("=");
 			if(dataValue.length == 2) {
 				switch (dataValue[0].trim().toLowerCase()) {
-
 				case X:
 					x = getBoundData(dataValue[1].trim());
 					break;
@@ -75,7 +73,7 @@ public class ActionWindowResize extends ActionWindow {
 	}
 
 	public ActionWindowResize(Script script, Integer x, Integer y, Integer width, Integer height) {
-		super(script, -1);
+		super(script);
 		setX(getBoundDataValue(x));
 		setY(getBoundDataValue(y));
 		setWidth(getBoundDataValue(width));
@@ -98,20 +96,12 @@ public class ActionWindowResize extends ActionWindow {
 
 	@Override
 	public String getJavaCode() {
-		return super.getJavaCode() + getBoundDataJavaCode(x) + ", " + getBoundDataJavaCode(y) + ", " + getBoundDataJavaCode(width) + ", " + getBoundDataJavaCode(height) + ")";
+		return super.getJavaCode() + ", " + getBoundDataJavaCode(x) + ", " + getBoundDataJavaCode(y) + ", " + getBoundDataJavaCode(width) + ", " + getBoundDataJavaCode(height) + ")";
 	}
-
+	
 	@Override
-	public void execute(ActionTestScript ts) {
-		super.execute(ts);
-		final Channel channel = ts.getCurrentChannel();
-		
-		if(channel != null){
-			channel.setWindowBound(x, y, width, height);
-		}
-
-		status.endDuration();
-		ts.getRecorder().updateScreen(0, status.getDuration());
+	public void exec(Channel channel) {
+		channel.setWindowBound(x, y, width, height);
 	}
 
 	//--------------------------------------------------------

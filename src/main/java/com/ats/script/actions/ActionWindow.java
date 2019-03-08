@@ -19,30 +19,41 @@ under the License.
 
 package com.ats.script.actions;
 
+import com.ats.executor.ActionTestScript;
+import com.ats.executor.channels.Channel;
 import com.ats.script.Script;
 
 public class ActionWindow extends Action {
 
 	public static final String SCRIPT_LABEL = "window-";
 
-	private int num;
-	
 	public ActionWindow() {}
 
-	public ActionWindow(Script script, int num) {
+	public ActionWindow(Script script) {
 		super(script);
-		setNum(num);
 	}
 
-	//--------------------------------------------------------
-	// getters and setters for serialization
-	//--------------------------------------------------------
-
-	public int getNum() {
-		return num;
+	@Override
+	public String getJavaCode() {
+		return "new " + this.getClass().getSimpleName() + "(this";
 	}
-
-	public void setNum(int num) {
-		this.num = num;
+	
+	@Override
+	public void execute(ActionTestScript ts) {
+		super.execute(ts);
+		final Channel channel = ts.getCurrentChannel();
+		
+		if(channel != null){
+			exec(channel);
+		}else {
+			status.setPassed(false);
+		}
+		
+		status.endDuration();
+		ts.getRecorder().updateScreen(0, status.getDuration());
+	}
+	
+	protected void exec(Channel channel) {
+		
 	}
 }

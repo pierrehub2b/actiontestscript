@@ -393,41 +393,24 @@ public class Utils {
 						final Element action = document.createElement("action");
 						action.setAttribute("index", va.getIndex() + "");
 						action.setAttribute("type", va.getType());
-						actions.appendChild(action);
+						
+						action.appendChild(document.createElement("line")).setTextContent(va.getLine() + "");
+						action.appendChild(document.createElement("timeLine")).setTextContent(va.getTimeLine() + "");
+						action.appendChild(document.createElement("cpu")).setTextContent(va.getCpu() + "");
+						action.appendChild(document.createElement("ram")).setTextContent(va.getRam() + "");
+						action.appendChild(document.createElement("netReceived")).setTextContent(va.getNetReceived() + "");
+						action.appendChild(document.createElement("netSent")).setTextContent(va.getNetSent() + "");
+						action.appendChild(document.createElement("error")).setTextContent(va.getError() + "");
+						action.appendChild(document.createElement("duration")).setTextContent(va.getDuration() + "");
+						action.appendChild(document.createElement("passed")).setTextContent((va.getError() == 0) + "");
+						action.appendChild(document.createElement("value")).setTextContent(va.getValue());
+						action.appendChild(document.createElement("data")).setTextContent(va.getData());
 
-						Element line = document.createElement("line");
-						line.setTextContent(va.getLine()+"");
-						action.appendChild(line);
-
-						Element timeLine = document.createElement("timeLine");
-						timeLine.setTextContent(va.getTimeLine() + "");
-						action.appendChild(timeLine);
-
-						Element error = document.createElement("error");
-						error.setTextContent(va.getError() + "");
-						action.appendChild(error);
-
-						Element duration = document.createElement("duration");
-						duration.setTextContent(va.getDuration() + "");
-						action.appendChild(duration);
-
-						Element passed = document.createElement("passed");
-						passed.setTextContent((va.getError() == 0) + "");
-						action.appendChild(passed);
-
-						Element value = document.createElement("value");
-						value.setTextContent(va.getValue());
-						action.appendChild(value);
-
-						Element data = document.createElement("data");
-						data.setTextContent(va.getData());
-						action.appendChild(data);
-
-						Element image = document.createElement("img");
-						image.setAttribute("src", va.getImageFileName());
-						image.setAttribute("width", va.getChannelBound().getWidth().intValue() + "");
-						image.setAttribute("height", va.getChannelBound().getHeight().intValue() + "");
-						action.appendChild(image);
+						Element elem = document.createElement("img");
+						elem.setAttribute("src", va.getImageFileName());
+						elem.setAttribute("width", va.getChannelBound().getWidth().intValue() + "");
+						elem.setAttribute("height", va.getChannelBound().getHeight().intValue() + "");
+						action.appendChild(elem);
 
 						Element channel = document.createElement("channel");
 						channel.setAttribute("name", va.getChannelName());
@@ -488,7 +471,9 @@ public class Utils {
 
 							element.appendChild(elementBound);
 							action.appendChild(element);
-						}								
+						}
+						
+						actions.appendChild(action);
 
 						va.addImage(xmlFolerPath, imagesList);
 					}

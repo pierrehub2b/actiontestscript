@@ -50,6 +50,10 @@ public class ChromeDriverEngine extends WebDriverEngine {
 		options.addArguments("--disable-notifications");
 		options.addArguments("--disable-web-security");
 		options.addArguments("--user-data-dir=" + Utils.createDriverFolder(DriverManager.CHROME_BROWSER));
+		
+		if(lang != null) {
+			options.addArguments("--lang=" + lang);
+		}
 
 		if(applicationPath != null) {
 			options.setBinary(applicationPath);

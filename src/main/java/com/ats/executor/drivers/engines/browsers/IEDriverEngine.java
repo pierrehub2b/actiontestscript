@@ -19,12 +19,8 @@ under the License.
 
 package com.ats.executor.drivers.engines.browsers;
 
-import java.awt.Rectangle;
 import java.util.ArrayList;
-import java.util.List;
 
-import org.openqa.selenium.ElementNotVisibleException;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.ie.InternetExplorerOptions;
 
 import com.ats.driver.ApplicationProperties;
@@ -35,7 +31,6 @@ import com.ats.executor.SendKeyData;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
-import com.ats.executor.drivers.desktop.DesktopWindow;
 import com.ats.executor.drivers.engines.WebDriverEngine;
 import com.ats.generator.objects.MouseDirection;
 
@@ -66,25 +61,6 @@ public class IEDriverEngine extends WebDriverEngine {
 	}
 
 	@Override
-	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position) {
-
-		final Rectangle rect = element.getRectangle();
-
-		try {
-			actions.moveToElement(element.getValue(), getOffsetX(rect, position), getOffsetY(rect, position)).click().build().perform();
-			status.setPassed(true);
-		}catch(StaleElementReferenceException e1) {
-			throw e1;
-		}catch(ElementNotVisibleException e0) {	
-			status.setPassed(false);
-			status.setCode(ActionStatus.OBJECT_NOT_VISIBLE);
-		}catch (Exception e) {
-			status.setPassed(false);
-			status.setMessage(e.getMessage());
-		}
-	}
-
-	@Override
 	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {
 		runJavaScript(status, IE_MIDDLE_CLICK, element.getWebElement());
 	}
@@ -104,27 +80,6 @@ public class IEDriverEngine extends WebDriverEngine {
 			for(SendKeyData sequence : textActionList) {
 				element.getWebElement().sendKeys(sequence.getSequenceWithDigit());
 			}
-		}
-	}
-
-	@Override
-	public boolean setWindowToFront() {
-		int index = currentWindow;
-		currentWindow = -1;
-
-		switchWindow(index);
-		refreshElementMapLocation(channel);
-		return false;
-	}
-
-	@Override
-	public void switchWindow(int index) {
-		if(currentWindow != index) {
-			List<DesktopWindow> wins = getDesktopDriver().getWindowsByPid(channel.getProcessId());
-			if(wins.size() > index) {
-				getDesktopDriver().setChannelToFront(wins.get(index).handle);
-			}
-			super.switchWindow(index);
 		}
 	}
 }

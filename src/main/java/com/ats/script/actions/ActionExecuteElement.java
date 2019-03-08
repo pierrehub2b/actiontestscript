@@ -30,6 +30,7 @@ import org.openqa.selenium.StaleElementReferenceException;
 import com.ats.element.SearchedElement;
 import com.ats.element.TestElement;
 import com.ats.element.TestElementDialog;
+import com.ats.element.TestElementRoot;
 import com.ats.element.TestElementSystem;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
@@ -110,64 +111,62 @@ public class ActionExecuteElement extends ActionExecute {
 			status.setCode(ActionStatus.CHANNEL_NOT_FOUND);
 			status.endDuration();
 
-		}else {
+		}else if(testElement == null) {
+			
+			if(searchElement == null) {
+				setTestElement(new TestElementRoot(channel));
+			}else {
 
-			if(testElement == null) {
-				if(searchElement == null) {
-					setTestElement(new TestElement(channel));
+				int searchMaxTry = ts.getChannelManager().getMaxTry() + maxTry;
+				if(searchMaxTry < 1) {
+					searchMaxTry = 1;
+				}
+
+				if(searchElement.isDialog()) {
+					setTestElement(new TestElementDialog(channel, searchMaxTry, searchElement));
 				}else {
 
-					int searchMaxTry = ts.getChannelManager().getMaxTry() + maxTry;
-					if(searchMaxTry < 1) {
-						searchMaxTry = 1;
-					}
+					final Predicate<Integer> predicate = getPredicate(operator, value);
+					int trySearch = 0;
 
-					if(searchElement.isDialog()) {
-						setTestElement(new TestElementDialog(channel, searchMaxTry, searchElement));
-					}else {
+					if(searchElement.isSysComp()){
+						while (trySearch < searchMaxTry) {
 
-						final Predicate<Integer> predicate = getPredicate(operator, value);
-						int trySearch = 0;
+							setTestElement(new TestElementSystem(channel, searchMaxTry, predicate, searchElement));
 
-						if(searchElement.isSysComp()){
-							while (trySearch < searchMaxTry) {
-
-								setTestElement(new TestElementSystem(channel, searchMaxTry, predicate, searchElement));
-
-								if(testElement.isValidated()) {
-									trySearch = searchMaxTry;
-								}else {
-									trySearch++;
-									channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "Searching element", searchMaxTry - trySearch);
-									channel.progressiveWait(trySearch);
-								}
+							if(testElement.isValidated()) {
+								trySearch = searchMaxTry;
+							}else {
+								trySearch++;
+								channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "Searching element", searchMaxTry - trySearch);
+								channel.progressiveWait(trySearch);
 							}
-						}else {
-							while (trySearch < searchMaxTry) {
+						}
+					}else {
+						while (trySearch < searchMaxTry) {
 
-								setTestElement(new TestElement(channel, searchMaxTry, predicate, searchElement));
+							setTestElement(new TestElement(channel, searchMaxTry, predicate, searchElement));
 
-								if(testElement.isValidated()) {
-									trySearch = searchMaxTry;
-								}else {
-									trySearch++;
-									channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "Searching element", searchMaxTry - trySearch);
-									channel.progressiveWait(trySearch);
-								}
+							if(testElement.isValidated()) {
+								trySearch = searchMaxTry;
+							}else {
+								trySearch++;
+								channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "Searching element", searchMaxTry - trySearch);
+								channel.progressiveWait(trySearch);
 							}
 						}
 					}
 				}
-
-				status.setElement(testElement);
-				status.setSearchDuration(testElement.getTotalSearchDuration());
-				status.setData(testElement.getCount());
-
-				asyncExec(ts);
-
-			}else {
-				terminateExecution(ts);
 			}
+
+			status.setElement(testElement);
+			status.setSearchDuration(testElement.getTotalSearchDuration());
+			status.setData(testElement.getCount());
+
+			asyncExec(ts);
+
+		}else {
+			terminateExecution(ts);
 		}
 	}
 

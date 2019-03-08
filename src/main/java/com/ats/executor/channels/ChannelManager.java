@@ -66,7 +66,8 @@ public class ChannelManager {
 			cnl.setCurrent(cnl == channel);
 		}
 		currentChannel = channel;
-		mainScript.setCurrentChannel(channel);
+		//mainScript.setCurrentChannel(channel);
+		channel.setCurrent(true);
 	}
 
 	private void noChannel() {
@@ -98,7 +99,7 @@ public class ChannelManager {
 				for(Channel cn : channelsList) {
 					cn.clearData();
 				}
-								
+				
 				channelsList.add(newChannel);
 				setCurrentChannel(newChannel);
 				sendInfo("Start channel with application", app);

@@ -57,8 +57,8 @@ public class TestElement{
 	private int maxTry = 20;
 	private int index;
 
-	private String criterias;
-	private String searchedTag;
+	private String criterias = "";
+	private String searchedTag = "";
 
 	protected IVisualRecorder recorder;
 
@@ -71,6 +71,7 @@ public class TestElement{
 		this.foundElements.add(new FoundElement(channel));
 		this.count = 1;
 		this.occurrences = p -> true;
+		this.engine = channel.getDriverEngine();
 	}
 
 	public TestElement(Channel channel, int maxTry) {
@@ -157,7 +158,7 @@ public class TestElement{
 					attributes.add(property.getName());
 				}
 
-				foundElements = engine.findElements(channel, sysComp, this, tag, attributes, fullPredicate);
+				foundElements = engine.findElements(sysComp, this, tag, attributes, fullPredicate);
 			}
 
 			searchDuration = System.currentTimeMillis() - this.searchDuration;
@@ -325,18 +326,16 @@ public class TestElement{
 				clearText(status);
 				if(status.isPassed()) {
 
-					final boolean isPassword = "password".equals(getAttribute("type"));
-					
+					String enteredText = "xxxxxxxxxx";
+					if(!"password".equals(getAttribute("type"))) {
+						enteredText = text.getCalculated();
+					}
+										
 					recorder.updateScreen(true);
 					sendText(status, text);
 
 					status.endDuration();
-
-					if(isPassword) {
-						recorder.updateScreen(0, status.getDuration(), "xxxxxxx");
-					}else {
-						recorder.updateScreen(0, status.getDuration(), text.getCalculated());
-					}
+					recorder.updateTextScreen(0, status.getDuration(), enteredText, status.getMessage());
 				}
 			}
 		}
@@ -451,11 +450,7 @@ public class TestElement{
 	}
 
 	public void mouseWheel(int delta) {
-		if(delta == 0) {
-			engine.forceScrollElement(getFoundElement());
-		}else {
-			engine.scroll(getFoundElement(), delta);
-		}
+		engine.scroll(getFoundElement(), delta);
 	}
 
 	public void wheelClick(ActionStatus status, MouseDirection position) {

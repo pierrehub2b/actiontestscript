@@ -152,6 +152,7 @@ public class AtsManager {
 											String path = null;
 											String wait = null;
 											String check = null;
+											String lang = null;
 
 											nodeList = browserElement.getElementsByTagName("path");
 											if(nodeList != null && nodeList.getLength() > 0) {
@@ -165,6 +166,13 @@ public class AtsManager {
 												}
 											}
 
+											nodeList = browserElement.getElementsByTagName("lang");
+											if(nodeList != null && nodeList.getLength() > 0) {
+												if(nodeList.item(0).getChildNodes().getLength() > 0) {
+													lang = nodeList.item(0).getChildNodes().item(0).getNodeValue();
+												}
+											}
+											
 											nodeList = browserElement.getElementsByTagName("waitAction");
 											if(nodeList != null && nodeList.getLength() > 0) {
 												if(nodeList.item(0).getChildNodes().getLength() > 0) {
@@ -178,7 +186,7 @@ public class AtsManager {
 													check = nodeList.item(0).getChildNodes().item(0).getNodeValue();
 												}
 											}
-											addApplicationProperties(ApplicationProperties.BROWSER_TYPE, name, path, wait, check);
+											addApplicationProperties(ApplicationProperties.BROWSER_TYPE, name, path, wait, check, lang);
 										}
 									}
 								}
@@ -332,7 +340,7 @@ public class AtsManager {
 												}
 											}
 																							
-											addApplicationProperties(ApplicationProperties.DESKTOP_TYPE, name, path, wait, "");
+											addApplicationProperties(ApplicationProperties.DESKTOP_TYPE, name, path, wait, "", null);
 										}
 									}
 								}
@@ -368,7 +376,7 @@ public class AtsManager {
 												}
 											}
 											
-											addApplicationProperties(ApplicationProperties.MOBILE_TYPE, name, url, wait, "");
+											addApplicationProperties(ApplicationProperties.MOBILE_TYPE, name, url, wait, "", null);
 										}
 									}
 								}
@@ -390,7 +398,7 @@ public class AtsManager {
 		return new Properties();
 	}
 
-	private void addApplicationProperties(int type, String name, String path, String wait, String check) {
+	private void addApplicationProperties(int type, String name, String path, String wait, String check, String lang) {
 		int waitValue = -1;
 		try {
 			waitValue = Integer.parseInt(wait);
@@ -401,7 +409,7 @@ public class AtsManager {
 			checkProperty = Integer.parseInt(check);
 		}catch(NumberFormatException e){}
 
-		applicationsList.add(new ApplicationProperties(type, name, path, waitValue, checkProperty));
+		applicationsList.add(new ApplicationProperties(type, name, path, waitValue, checkProperty, lang));
 	}
 
 	//------------------------------------------------------------------------------------------------------------------

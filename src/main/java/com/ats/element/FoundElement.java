@@ -45,6 +45,9 @@ public class FoundElement{
 
 	private Double screenX = 0.0;
 	private Double screenY = 0.0;
+	
+	private Double boundX = 0.0;
+	private Double boundY = 0.0;
 
 	private Double width = 0.0;
 	private Double height = 0.0;
@@ -96,6 +99,8 @@ public class FoundElement{
 		this.updatePosition(elemX, elemY, channel, offsetX, offsetY);
 		this.screenX = element.getScreenX() + elemX;
 		this.screenY = element.getScreenY() + elemY;
+		this.boundX = element.getBoundX();
+		this.boundY = element.getBoundY();
 	}
 
 	public FoundElement(AtsElement element, TestBound channelDimension) {
@@ -181,10 +186,6 @@ public class FoundElement{
 
 	public WebElement getValue(){
 		return value;
-	}
-
-	public String getElementId() {
-		return id;
 	}
 
 	public void activate(RemoteWebDriver remoteWebDriver) {
@@ -291,6 +292,22 @@ public class FoundElement{
 
 	public void setTag(String tag) {
 		this.tag = tag;
+	}
+	
+	public Double getBoundX() {
+		return boundX;
+	}
+
+	public void setBoundX(Double boundX) {
+		this.boundX = boundX;
+	}
+
+	public Double getBoundY() {
+		return boundY;
+	}
+
+	public void setBoundY(Double boundY) {
+		this.boundY = boundY;
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------

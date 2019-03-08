@@ -50,6 +50,10 @@ public class OperaDriverEngine extends WebDriverEngine {
 		options.addArguments("--allow-running-insecure-content");
 		options.addArguments("--user-data-dir=" + Utils.createDriverFolder(DriverManager.OPERA_BROWSER));
 				
+		if(lang != null) {
+			options.addArguments("--lang=" + lang);
+		}
+		
 		if(applicationPath != null) {
 			options.setBinary(applicationPath);
 		}

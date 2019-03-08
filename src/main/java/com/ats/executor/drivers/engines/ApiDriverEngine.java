@@ -142,7 +142,7 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 	
 	@Override
-	public ArrayList<FoundElement> findElements(Channel channel, boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> searchPredicate) {
+	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> searchPredicate) {
 		return executor.findElements(channel, sysComp, testObject, tagName, attributes, searchPredicate);
 	}
 	
@@ -157,7 +157,7 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 	
 	@Override
-	public void refreshElementMapLocation(Channel channel) {}
+	public void refreshElementMapLocation() {}
 
 	@Override
 	public boolean setWindowToFront() {
@@ -198,7 +198,7 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	public void waitAfterAction() {}
 
 	@Override
-	public void updateDimensions(Channel channel) {}
+	public void updateDimensions() {}
 
 	@Override
 	public FoundElement getElementFromPoint(Boolean syscomp, Double x, Double y) {
@@ -210,7 +210,7 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	@Override
-	public void closeWindow(ActionStatus status, int index) {
+	public void closeWindow(ActionStatus status) {
 	}
 
 	@Override
@@ -234,7 +234,7 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	public void clearText(ActionStatus status, FoundElement foundElement) {}
 
 	@Override
-	public void forceScrollElement(FoundElement value) {}
+	public void scrollOnMove(FoundElement value) {}
 
 	@Override
 	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position) {}

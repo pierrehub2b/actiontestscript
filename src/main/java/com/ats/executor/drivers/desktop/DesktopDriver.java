@@ -55,7 +55,6 @@ import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.engines.desktop.DesktopDriverEngine;
-import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.ScriptHeader;
@@ -202,7 +201,9 @@ public class DesktopDriver extends RemoteWebDriver {
 		ToFront (5),
 		Switch (6),
 		Close (7),
-		Url (8);
+		Url (8),
+		Keys(9),
+		State(10);
 
 		private final int type;
 		WindowType(int value){
@@ -397,8 +398,12 @@ public class DesktopDriver extends RemoteWebDriver {
 		return null;
 	}
 
-	public void setChannelToFront(int handle) {
-		sendRequestCommand(CommandType.Window, WindowType.ToFront, handle);
+	public void setChannelToFront(int handle, long pid) {
+		sendRequestCommand(CommandType.Window, WindowType.ToFront, handle, pid);
+	}
+	
+	public void rootKeys(int handle, String keys) {
+		sendRequestCommand(CommandType.Window, WindowType.Keys, handle, keys);
 	}
 
 	public void moveWindow(Channel channel, Point point) {
@@ -413,12 +418,16 @@ public class DesktopDriver extends RemoteWebDriver {
 		sendRequestCommand(CommandType.Window, WindowType.Switch, channel.getHandle(this, index));
 	}
 
-	public void closeWindow(Channel channel, int index) {
-		sendRequestCommand(CommandType.Window, WindowType.Close, channel.getHandle(this));
+	public void closeWindow(Channel channel) {
+		closeWindow(channel.getHandle(this));
 	}
 
 	public void closeWindow(int handle) {
 		sendRequestCommand(CommandType.Window, WindowType.Close, handle);
+	}
+	
+	public void windowState(ActionStatus status, Channel channel, String state) {
+		sendRequestCommand(CommandType.Window, WindowType.State, channel.getHandle(this), state);
 	}
 
 	public void gotoUrl(ActionStatus status, int handle, String url) {
@@ -571,10 +580,15 @@ public class DesktopDriver extends RemoteWebDriver {
 		final int numElements = element.getFoundElements().size();
 
 		if(numElements > 0) {
-			final TestBound bound = element.getFoundElements().get(0).getTestBound();
+			final FoundElement elem = element.getFoundElements().get(0);
+			final TestBound bound = elem.getTestBound();
 
 			x = bound.getX();
 			y = bound.getY();
+			
+			//x = elem.getBoundX();
+			//y = elem.getBoundY();
+			
 			w = bound.getWidth();
 			h = bound.getHeight();
 

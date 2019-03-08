@@ -133,7 +133,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 
 					channel.setApplicationData(os, systemName, driverVersion, -1, icon, endPointData[0] + ":" + screenCapturePort);
 
-					refreshElementMapLocation(channel);
+					refreshElementMapLocation();
 				}else {
 					status.setCode(ActionStatus.CHANNEL_START_ERROR);
 					status.setMessage(response.get("status").getAsString());
@@ -148,7 +148,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	}
 
 	@Override
-	public void refreshElementMapLocation(Channel channel) {
+	public void refreshElementMapLocation() {
 		rootElement = gson.fromJson(executeRequest(CAPTURE), AtsMobileElement.class);
 	}
 
@@ -238,12 +238,12 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	}
 
 	@Override
-	public ArrayList<FoundElement> findElements(Channel channel, boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> searchPredicate) {
+	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> searchPredicate) {
 
 		final List<AtsMobileElement> list = new ArrayList<AtsMobileElement>();
 
 		if(testObject.getParent() == null) {
-			refreshElementMapLocation(channel);
+			refreshElementMapLocation();
 			loadElementsByTag(rootElement, tagName, list);
 		}else {
 			loadElementsByTag(getElementById(testObject.getParent().getWebElementId()), tagName, list);
@@ -268,13 +268,13 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	@Override
 	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position) {
 		final Rectangle rect = element.getRectangle();
-		executeRequest(ELEMENT, element.getElementId(), TAP, (int)(getOffsetX(rect, position)) + "", (int)(getOffsetY(rect, position)) + "");
+		executeRequest(ELEMENT, element.getId(), TAP, (int)(getOffsetX(rect, position)) + "", (int)(getOffsetY(rect, position)) + "");
 	}	
 	
 	@Override
 	public void drag(ActionStatus status, FoundElement element, MouseDirection position) {
 		final Rectangle rect = element.getRectangle();
-		testElement = new MobileTestElement(element.getElementId(), (int)(getOffsetX(rect, position)), (int)(getOffsetY(rect, position)));
+		testElement = new MobileTestElement(element.getId(), (int)(getOffsetX(rect, position)), (int)(getOffsetY(rect, position)));
 	}
 
 	@Override
@@ -292,7 +292,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	@Override
 	public WebElement getRootElement() {
 
-		refreshElementMapLocation(channel);
+		refreshElementMapLocation();
 
 		RemoteWebElement elem = new RemoteWebElement();
 		elem.setId(rootElement.getId());
@@ -314,7 +314,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	public void switchWindow(int index) {}
 
 	@Override
-	public void closeWindow(ActionStatus status, int index) {}
+	public void closeWindow(ActionStatus status) {}
 
 	@Override
 	public Object executeScript(ActionStatus status, String script, Object... params) {
@@ -343,7 +343,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	public void setWindowBound(BoundData x, BoundData y, BoundData width, BoundData height) {}
 
 	@Override
-	public void forceScrollElement(FoundElement value) {}
+	public void scrollOnMove(FoundElement value) {}
 
 	@Override
 	public void keyDown(Keys key) {}
@@ -378,7 +378,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	public void switchToFrameId(String id) {}
 
 	@Override
-	public void updateDimensions(Channel cnl) {}
+	public void updateDimensions() {}
 
 	//----------------------------------------------------------------------------------------------------------------------------------------
 	//----------------------------------------------------------------------------------------------------------------------------------------

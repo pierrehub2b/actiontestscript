@@ -32,7 +32,6 @@ import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.remote.RemoteWebElement;
 
 import com.ats.driver.ApplicationProperties;
 import com.ats.element.FoundElement;
@@ -52,7 +51,7 @@ import com.google.gson.JsonObject;
 
 public class FirefoxDriverEngine extends WebDriverEngine {
 
-	private final static int DEFAULT_WAIT = 150;
+	private final static int DEFAULT_WAIT = 250;
 
 	public FirefoxDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
 		super(channel, DriverManager.FIREFOX_BROWSER, driverProcess, windowsDriver, props, DEFAULT_WAIT);
@@ -60,17 +59,24 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		this.autoScrollElement = JS_AUTO_SCROLL_MOZ;
 		
 		FirefoxOptions options = new FirefoxOptions();
-		options.setCapability("marionnette ",true);
-		options.setCapability("acceptSslCerts ",true);
-		options.setCapability("acceptInsecureCerts ",true);
+		options.setCapability("marionnette ", true);
+		//options.setCapability("nativeEvents", false);
+		options.setCapability("acceptSslCerts ", true);
+		options.setCapability("acceptInsecureCerts ", true);
 		options.setCapability("security.fileuri.strict_origin_policy", false);
 		options.setCapability("app.update.disabledForTesting", true);
-				
-		options.setPageLoadStrategy(PageLoadStrategy.NORMAL);
+						
+		options.setPageLoadStrategy(PageLoadStrategy.NONE);
 		
 		if(applicationPath != null) {
 			options.setBinary(applicationPath);
 		}
+		
+		//FirefoxProfile atsProfile = new FirefoxProfile (Utils.createDriverFolder(DriverManager.FIREFOX_BROWSER));  
+		//ProfilesIni profile = new ProfilesIni();
+		//FirefoxProfile atsProfile = profile.getProfile("atsProfile");
+		//atsProfile.setPreference("intl.accept_languages", "fr");
+		//options.setProfile(atsProfile);
 
 		launchDriver(status, options);
 	}
@@ -113,39 +119,52 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 
 	@Override
 	protected void move(FoundElement element, int offsetX, int offsetY) {
-
-		forceScrollElement(element);
-		channel.sleep(100);
-
+		
+		//-----------------------------------------------------------------------------------------------------
+		// I don't know why, but we have to do that to make click action reliable with Firefox and geckodriver
+		//-----------------------------------------------------------------------------------------------------
+		element.getValue().getTagName();
+		element.getValue().getRect();
+		//--------------------------------------------------------------------------------------------
+		
+		final JsonObject origin = getElementOrigin(element.getId());
+		
 		JsonArray actionList = new JsonArray();
-		actionList.add(getMoveAction(((RemoteWebElement)element.getValue()).getId(), offsetX, offsetY));
-
+		actionList.add(getMoveAction(origin, offsetX, offsetY));
+		executeAction(getElementAction(actionList));
+	}
+	
+	@Override
+	protected void click(FoundElement element, int offsetX, int offsetY) {
+				
+		move(element, offsetX, offsetY);
+		channel.sleep(30);
+				
+		final JsonObject origin = getElementOrigin(element.getId());
+		
+		JsonArray actionList = new JsonArray();
+		actionList.add(getMouseClickAction(origin, "pointerDown"));
+		actionList.add(getMouseClickAction(origin, "pointerUp"));
+				
 		executeAction(getElementAction(actionList));
 	}
 
-	/*@Override
-	protected void click() {
-		JsonArray actionList = new JsonArray();
-		actionList.add(getMouseClickAction("pointerDown"));
-		actionList.add(getMouseClickAction("pointerUp"));
-
-		executeAction(getElementAction(actionList));
-	}
-
-	private JsonObject getMouseClickAction(String type) {
+	private JsonObject getMouseClickAction(JsonObject origin, String type) {
 		JsonObject action = new JsonObject();
+		action.addProperty("duration", 20);
 		action.addProperty("type", type);
 		action.addProperty("button", 0);
+		action.add("origin", origin);
 		return action;
-	}*/
+	}
 
-	private JsonObject getMoveAction(String elemId, int offsetX, int offsetY) {
+	private JsonObject getMoveAction(JsonObject origin, int offsetX, int offsetY) {
 		JsonObject action = new JsonObject();
-		action.addProperty("duration", 200);
+		action.addProperty("duration", 150);
 		action.addProperty("x", offsetX);
 		action.addProperty("y", offsetY);
 		action.addProperty("type", "pointerMove");
-		action.add("origin", getElementOrigin(elemId));
+		action.add("origin", origin);
 		return action;
 	}
 
