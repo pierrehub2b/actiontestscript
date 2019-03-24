@@ -37,7 +37,7 @@ public class FoundElement{
 	public final static String DESKTOP = "desktop";
 	public final static String MOBILE = "mobile";
 	public final static String API = "api";
-	
+
 	private String id;
 
 	private Double x = 0.0;
@@ -45,7 +45,7 @@ public class FoundElement{
 
 	private Double screenX = 0.0;
 	private Double screenY = 0.0;
-	
+
 	private Double boundX = 0.0;
 	private Double boundY = 0.0;
 
@@ -65,7 +65,7 @@ public class FoundElement{
 	//------------------------------------------------------------------------------------------------------------------------------
 	// contructors
 	//------------------------------------------------------------------------------------------------------------------------------
-	
+
 	public FoundElement() {}
 
 	public FoundElement(Channel channel) {
@@ -81,7 +81,7 @@ public class FoundElement{
 		this.height = element.getHeight();
 		this.numeric = element.isNumeric();
 	}
-	
+
 	public FoundElement(DesktopWindow win) {
 		this.id = win.getId();
 		this.tag = win.getTag();
@@ -119,7 +119,7 @@ public class FoundElement{
 		this.x = this.screenX - channelDimension.getX();
 		this.y = this.screenY - channelDimension.getY();
 	}
-	
+
 	public FoundElement(AtsMobileElement element) {
 
 		this.type = MOBILE;
@@ -129,7 +129,7 @@ public class FoundElement{
 		this.tag = element.getTag();
 		this.width = element.getWidth();
 		this.height = element.getHeight();
-		
+
 		this.clickable = element.isClickable();
 
 		this.screenX = element.getX();
@@ -138,7 +138,7 @@ public class FoundElement{
 		this.x = this.screenX;
 		this.y = this.screenY;
 	}
-	
+
 	public FoundElement(AtsApiElement element) {
 		this.type = API;
 		this.visible = true;
@@ -153,11 +153,11 @@ public class FoundElement{
 			setParent(new FoundElement(channel, elements, initElementX, initElementY));
 		}
 	}
-	
+
 	public boolean isDesktop() {
 		return DESKTOP.equals(type);
 	}
-	
+
 	//------------------------------------------------------------------------------------------------------------------------------
 	// end of contructors
 	//------------------------------------------------------------------------------------------------------------------------------
@@ -177,7 +177,9 @@ public class FoundElement{
 
 	private void setRemoteWebElement(RemoteWebElement rwe){
 		this.value = rwe;
-		this.id = rwe.getId();
+		if(rwe != null) {
+			this.id = rwe.getId();
+		}
 	}
 
 	public boolean isIframe(){
@@ -205,11 +207,11 @@ public class FoundElement{
 	public Double getScreenY() {
 		return screenY;
 	}
-	
+
 	public boolean isNumeric() {
 		return numeric;
 	}
-	
+
 	//----------------------------------------------------------------------------------------------------------------------
 	// Getter and setter for serialization
 	//----------------------------------------------------------------------------------------------------------------------
@@ -221,7 +223,7 @@ public class FoundElement{
 	public void setClickable(boolean value){
 		this.clickable = value;
 	}
-	
+
 	public boolean isVisible() {
 		return visible;
 	}
@@ -293,7 +295,7 @@ public class FoundElement{
 	public void setTag(String tag) {
 		this.tag = tag;
 	}
-	
+
 	public Double getBoundX() {
 		return boundX;
 	}
@@ -316,10 +318,10 @@ public class FoundElement{
 
 	public RemoteWebElement getRemoteWebElement(RemoteWebDriver driver) {
 		final RemoteWebElement element = new RemoteWebElement();
-		
+
 		element.setParent(driver);
 		element.setId(id);
-		
+
 		return element;
 	}
 

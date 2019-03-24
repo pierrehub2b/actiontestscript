@@ -25,7 +25,9 @@ import java.util.Base64;
 import org.openqa.selenium.Keys;
 
 public class SendKeyData {
-
+	
+	public static final String EMPTY_DATA = "&empty;";
+	
 	private static final String KEY_DOWN_SHIFT = "SHIFT";
 	private static final String KEY_DOWN_ALT = "ALT";
 	private static final String KEY_DOWN_CONTROL = "CONTROL";
@@ -140,5 +142,13 @@ public class SendKeyData {
 
 	public String getSequenceDesktop() {
 		return Base64.getEncoder().encodeToString(data.getBytes(StandardCharsets.UTF_8));
+	}
+	
+	public String getMobileSequence() {
+		if(data.length() == 0) {
+			return EMPTY_DATA;
+		}else {
+			return getSequenceDesktop();
+		}
 	}
 }

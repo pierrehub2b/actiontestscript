@@ -38,8 +38,11 @@ import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.actions.ActionApi;
 
 public interface IDriverEngine{
-	public void close();
+	
 	public DesktopDriver getDesktopDriver();
+	public WebElement getRootElement();
+	public void close();
+
 	public String getApplication();
 	public String getApplicationPath();
 	public void switchWindow(int index);
@@ -56,20 +59,24 @@ public interface IDriverEngine{
 	public void loadParents(FoundElement hoverElement);
 	public void scroll(FoundElement foundElement, int delta);
 	public void scrollOnMove(FoundElement value);
-	public void middleClick(ActionStatus status, MouseDirection position, TestElement element);
-	public WebElement getRootElement();
-	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean desktopDragDrop);
+
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList);
 	public void clearText(ActionStatus status, FoundElement foundElement);
 	public void setWindowBound(BoundData x, BoundData y, BoundData width, BoundData height);
+	
+	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean desktopDragDrop);
 	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position);
+	public void doubleClick();
+	public void rightClick();
+	public void middleClick(ActionStatus status, MouseDirection position, TestElement element);
+	public void buttonClick(String id);
+	
 	public void drag(ActionStatus status, FoundElement element, MouseDirection position);
 	public void drop(MouseDirection md, boolean desktopDragDrop);
 	public void keyDown(Keys key);
 	public void keyUp(Keys key);
 	public void moveByOffset(int hDirection, int vDirection);
-	public void doubleClick();
-	public void rightClick();
+
 	public Alert switchToAlert();
 	public void switchToDefaultContent();
 	public boolean setWindowToFront();

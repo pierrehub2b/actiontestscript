@@ -270,4 +270,7 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	@Override
 	public void switchToFrameId(String id) {}
+
+	@Override
+	public void buttonClick(String id) {}
 }

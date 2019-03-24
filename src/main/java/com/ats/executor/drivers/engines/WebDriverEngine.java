@@ -900,4 +900,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	@Override
 	public void api(ActionStatus status, ActionApi api) {}
 
+	@Override
+	public void buttonClick(String id) {}
+
 }

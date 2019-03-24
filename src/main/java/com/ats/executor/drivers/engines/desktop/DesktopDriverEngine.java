@@ -27,6 +27,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.Dimension;
@@ -53,9 +54,8 @@ import com.ats.script.actions.ActionApi;
 
 public class DesktopDriverEngine extends DriverEngineAbstract implements IDriverEngine {
 
+	private final static String PROCESS_PROTOCOL = "process://";
 	private final static int DEFAULT_WAIT = 100;
-
-	private Process applicationProcess = null;
 
 	private DesktopWindow mainWindow;
 
@@ -73,84 +73,125 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 
 		this(channel, application, desktopDriver, props, DEFAULT_WAIT);
 
-		int firstSpace = application.indexOf(" ");
-		String applicationArguments = "";
+		long processId = -1;
 
-		ArrayList<String> args = new ArrayList<String>();
+		if(application.startsWith(PROCESS_PROTOCOL)) {
 
-		if(firstSpace > 0){
-			applicationArguments = application.substring(firstSpace);
-			application = application.substring(0, firstSpace);
-			args.add(applicationArguments);
-		}
+			final Pattern procPattern = Pattern.compile(application.substring(PROCESS_PROTOCOL.length()));
 
-		URI fileUri = null;
-		File exeFile = null;
+			processId = getProcessId(procPattern);
+			int maxTry = 20;
 
-		if(applicationPath != null) {
-			exeFile = new File(applicationPath);
-			if(exeFile.exists() && exeFile.isFile()) {
-				fileUri = exeFile.toURI();
+			while (processId < 0 && maxTry > 0) {
+				processId = getProcessId(procPattern);
+				channel.sleep(200);
+				maxTry--;
 			}
-		}
 
-		if(fileUri == null) {
-			try {
-				fileUri = new URI(application);
-				exeFile = new File(fileUri);
-			} catch (URISyntaxException | IllegalArgumentException e1) {}
-		}
-
-		if(exeFile == null) {//last chance to find exe file ....
-			exeFile = new File(application);
-		}
-
-		if(exeFile != null && exeFile.exists() && exeFile.isFile()){
-
-			applicationPath = exeFile.getAbsolutePath();
-			args.add(0, applicationPath);
-
-			final Runtime runtime = Runtime.getRuntime();
-			try{
-
-				applicationProcess = runtime.exec(args.toArray(new String[args.size()]));
-				status.setPassed(true);
-
-			} catch (IOException e) {
-
+			if(processId < 0) {
 				status.setCode(ActionStatus.CHANNEL_START_ERROR);
-				status.setMessage(e.getMessage());
+				status.setMessage("unable to attach process with command like - > " + procPattern.pattern());
+				status.setPassed(false);
+				return;
+			}
+
+		}else {
+
+			int firstSpace = application.indexOf(" ");
+			String applicationArguments = "";
+
+			ArrayList<String> args = new ArrayList<String>();
+
+			if(firstSpace > 0){
+				applicationArguments = application.substring(firstSpace);
+				application = application.substring(0, firstSpace);
+				args.add(applicationArguments);
+			}
+
+			URI fileUri = null;
+			File exeFile = null;
+
+			if(applicationPath != null) {
+				exeFile = new File(applicationPath);
+				if(exeFile.exists() && exeFile.isFile()) {
+					fileUri = exeFile.toURI();
+				}
+			}
+
+			if(fileUri == null) {
+				try {
+					fileUri = new URI(application);
+					exeFile = new File(fileUri);
+				} catch (URISyntaxException | IllegalArgumentException e1) {}
+			}
+
+			if(exeFile == null) {//last chance to find exe file ....
+				exeFile = new File(application);
+			}
+
+			if(exeFile != null && exeFile.exists() && exeFile.isFile()){
+
+				applicationPath = exeFile.getAbsolutePath();
+				args.add(0, applicationPath);
+
+				final Runtime runtime = Runtime.getRuntime();
+				try{
+
+					Process applicationProcess = runtime.exec(args.toArray(new String[args.size()]));
+					status.setPassed(true);
+					processId = applicationProcess.pid();
+
+				} catch (IOException e) {
+
+					status.setCode(ActionStatus.CHANNEL_START_ERROR);
+					status.setMessage(e.getMessage());
+					status.setPassed(false);
+
+					return;
+				}
+			}else {
+				status.setCode(ActionStatus.CHANNEL_START_ERROR);
+				status.setMessage("app file path not found -> " + application);
 				status.setPassed(false);
 
 				return;
 			}
+		}
+		String appVersion = "N/A";
+		String appBuildVersion = "N/A";
 
-			String appVersion = "N/A";
-			String appBuildVersion = "N/A";
-
-			final ArrayList<DesktopData> appInfo = desktopDriver.getVersion(applicationPath);
-			for (DesktopData data : appInfo) {
-				if("ApplicationBuildVersion".equals(data.getName())) {
-					appBuildVersion = data.getValue();
-				}else if("ApplicationVersion".equals(data.getName())) {
-					appVersion = data.getValue();
-				}
+		final ArrayList<DesktopData> appInfo = desktopDriver.getVersion(applicationPath);
+		for (DesktopData data : appInfo) {
+			if("ApplicationBuildVersion".equals(data.getName())) {
+				appBuildVersion = data.getValue();
+			}else if("ApplicationVersion".equals(data.getName())) {
+				appVersion = data.getValue();
 			}
+		}
 
-			channel.setApplicationData("windows", appVersion + " build(" + appBuildVersion + ")", desktopDriver.getDriverVersion(), applicationProcess.pid());
+		channel.setApplicationData("windows", appVersion + " build(" + appBuildVersion + ")", desktopDriver.getDriverVersion(), processId);
 
-			int maxTry = 30;
-			while(maxTry > 0){
-				if(channel.getHandle(desktopDriver) > 0) {
-					maxTry = 0;
-				}else {
-					channel.sleep(200);
-					maxTry--;
-				}
+		int maxTry = 30;
+		while(maxTry > 0){
+			if(channel.getHandle(desktopDriver) > 0) {
+				maxTry = 0;
+			}else {
+				channel.sleep(200);
+				maxTry--;
 			}
+		}
 
-			desktopDriver.moveWindow(channel, channel.getDimension().getPoint());
-			desktopDriver.resizeWindow(channel, channel.getDimension().getSize());
+		desktopDriver.moveWindow(channel, channel.getDimension().getPoint());
+		desktopDriver.resizeWindow(channel, channel.getDimension().getSize());
+	}
+
+	private long getProcessId(Pattern procPattern) {
+		try {
+			ProcessHandle proc = ProcessHandle.allProcesses().filter(p -> p.info().command().isPresent() && procPattern.matcher(p.info().command().get()).matches()).findFirst().get();
+			applicationPath = proc.info().command().get();
+			return proc.pid();
+		}catch(Exception e) {
+			return -1;
 		}
 	}
 
@@ -276,7 +317,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position) {
 		getDesktopDriver().mouseClick();
 	}
-	
+
 	@Override
 	public void drag(ActionStatus status, FoundElement element, MouseDirection md) {
 		getDesktopDriver().mouseDown();
@@ -376,7 +417,10 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	public String getSource() {
 		return "";
 	}
-	
+
 	@Override
 	public void api(ActionStatus status, ActionApi api) {}
+
+	@Override
+	public void buttonClick(String id) {}
 }

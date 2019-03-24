@@ -353,8 +353,13 @@ public class Utils {
 
 					atsRoot.appendChild(script);
 
-					script.setAttribute("id", report.getId());					
-					script.setAttribute("name", report.getName());
+					script.setAttribute("testId", report.getId());					
+					script.setAttribute("testName", report.getName());
+					
+					script.setAttribute("cpuSpeed", report.getCpuSpeed() + "");
+					script.setAttribute("cpuCount", report.getCpuCount() + "");
+					script.setAttribute("totalMemory", report.getTotalMemory() + "");		
+					script.setAttribute("osInfo", report.getOsInfo());	
 
 					Element description = document.createElement("description");
 					description.setTextContent(report.getDescription());

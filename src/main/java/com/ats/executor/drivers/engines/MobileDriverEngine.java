@@ -69,6 +69,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	private final static String TAP = "tap";
 	private final static String INPUT = "input";
 	private final static String SWIPE = "swipe";
+	private final static String BUTTON = "button";
 
 	private JsonParser parser = new JsonParser();
 	private Gson gson = new Gson();
@@ -101,48 +102,55 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 
 			JsonObject response = executeRequest(DRIVER, START);
 
-			final String systemName = response.get("systemName").getAsString();
-			final String os = response.get("os").getAsString();
-			final String driverVersion = response.get("driverVersion").getAsString();
+			if(response == null) {
+				status.setCode(ActionStatus.CHANNEL_START_ERROR);
+				status.setMessage("unable to connect to : " + applicationPath);
+				status.setPassed(false);
+			}else {
 
-			final double channelWidth = response.get("channelWidth").getAsDouble();
-			final double channelHeight = response.get("channelHeight").getAsDouble();
+				final String systemName = response.get("systemName").getAsString();
+				final String os = response.get("os").getAsString();
+				final String driverVersion = response.get("driverVersion").getAsString();
 
-			final double channelX = response.get("channelX").getAsDouble();
-			final double channelY = response.get("channelY").getAsDouble();
+				final double channelWidth = response.get("channelWidth").getAsDouble();
+				final double channelHeight = response.get("channelHeight").getAsDouble();
 
-			final double deviceWidth = response.get("deviceWidth").getAsDouble();
-			final double deviceHeight = response.get("deviceHeight").getAsDouble();
+				final double channelX = response.get("channelX").getAsDouble();
+				final double channelY = response.get("channelY").getAsDouble();
 
-			final int screenCapturePort = response.get("screenCapturePort").getAsInt();
+				final double deviceWidth = response.get("deviceWidth").getAsDouble();
+				final double deviceHeight = response.get("deviceHeight").getAsDouble();
 
-			channel.setDimensions(new TestBound(0D, 0D, deviceWidth, deviceHeight), new TestBound(channelX, channelY, channelWidth, channelHeight));
+				final int screenCapturePort = response.get("screenCapturePort").getAsInt();
 
-			response = executeRequest(APP, START, application);
-			if(response != null) {
-				if(response.get("status").getAsInt() == 0) {
-					final String base64 = response.get("icon").getAsString();
-					byte[] icon = new byte[0];
-					if(base64.length() > 0) {
-						try {
-							icon = Base64.getDecoder().decode(base64);
-						}catch(Exception e) {}
+				channel.setDimensions(new TestBound(0D, 0D, deviceWidth, deviceHeight), new TestBound(channelX, channelY, channelWidth, channelHeight));
+
+				response = executeRequest(APP, START, application);
+				if(response != null) {
+					if(response.get("status").getAsInt() == 0) {
+						final String base64 = response.get("icon").getAsString();
+						byte[] icon = new byte[0];
+						if(base64.length() > 0) {
+							try {
+								icon = Base64.getDecoder().decode(base64);
+							}catch(Exception e) {}
+						}
+
+						String[] endPointData = endPoint.split(":");
+
+						channel.setApplicationData(os, systemName, driverVersion, -1, icon, endPointData[0] + ":" + screenCapturePort);
+
+						refreshElementMapLocation();
+					}else {
+						status.setCode(ActionStatus.CHANNEL_START_ERROR);
+						status.setMessage(response.get("status").getAsString());
+						status.setPassed(false);
 					}
-
-					String[] endPointData = endPoint.split(":");
-
-					channel.setApplicationData(os, systemName, driverVersion, -1, icon, endPointData[0] + ":" + screenCapturePort);
-
-					refreshElementMapLocation();
 				}else {
 					status.setCode(ActionStatus.CHANNEL_START_ERROR);
-					status.setMessage(response.get("status").getAsString());
+					status.setMessage("unable to connect to : " + this.application);
 					status.setPassed(false);
 				}
-			}else {
-				status.setCode(ActionStatus.CHANNEL_START_ERROR);
-				status.setMessage("unable to connect to : " + this.application);
-				status.setPassed(false);
 			}
 		}
 	}
@@ -164,30 +172,30 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	@Override
 	public FoundElement getElementFromPoint(Boolean syscomp, Double x, Double y) {
 		capturedElement = gson.fromJson(executeRequest(CAPTURE), AtsMobileElement.class);
-		
+
 		ArrayList<AtsMobileElement> listElements = new ArrayList<AtsMobileElement>();
-		
+
 		loadList(capturedElement, listElements);
-		
+
 		final int mouseX = (int)(channel.getSubDimension().getX() + x);
 		final int mouseY = (int)(channel.getSubDimension().getY() + y);
 
 		AtsMobileElement element = capturedElement;
-		
+
 		for (int i=0; i<listElements.size(); i++) {
 			AtsMobileElement child = listElements.get(i);
 			if(child.getRect().contains(new Point(mouseX, mouseY)) && element.getRect().contains(child.getRect())){
 				element = child;
 			}
 		}
-	
+
 		return element.getFoundElement();
 	}
-	
+
 	private void loadList(AtsMobileElement element, ArrayList<AtsMobileElement> list) {
 		for (int i=0; i<element.getChildren().length; i++) {
 			AtsMobileElement child = element.getChildren()[i];
-			
+
 			list.add(child);
 			loadList(child, list);
 		}
@@ -266,11 +274,16 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	//-------------------------------------------------------------------------------------------------------------
 
 	@Override
+	public void buttonClick(String type) {
+		executeRequest(BUTTON, type);
+	}
+
+	@Override
 	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position) {
 		final Rectangle rect = element.getRectangle();
 		executeRequest(ELEMENT, element.getId(), TAP, (int)(getOffsetX(rect, position)) + "", (int)(getOffsetY(rect, position)) + "");
 	}	
-	
+
 	@Override
 	public void drag(ActionStatus status, FoundElement element, MouseDirection position) {
 		final Rectangle rect = element.getRectangle();
@@ -285,7 +298,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	@Override
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {
 		for(SendKeyData sequence : textActionList) {
-			executeRequest(ELEMENT, element.getFoundElement().getId(), INPUT, sequence.getSequenceDesktop());
+			executeRequest(ELEMENT, element.getFoundElement().getId(), INPUT, sequence.getMobileSequence());
 		}
 	}
 
@@ -299,17 +312,22 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 
 		return elem;
 	}
-	
+
 	@Override
 	public CalculatedProperty[] getCssAttributes(FoundElement element) {
 		return new CalculatedProperty[0];
+	}
+
+	@Override
+	public void clearText(ActionStatus status, FoundElement element) {
+		executeRequest(ELEMENT, element.getId(), INPUT, SendKeyData.EMPTY_DATA);
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
 	public void api(ActionStatus status, ActionApi api) {}
-	
+
 	@Override
 	public void switchWindow(int index) {}
 
@@ -335,9 +353,6 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 
 	@Override
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean desktopDragDrop) {}
-
-	@Override
-	public void clearText(ActionStatus status, FoundElement foundElement) {}
 
 	@Override
 	public void setWindowBound(BoundData x, BoundData y, BoundData width, BoundData height) {}

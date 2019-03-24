@@ -32,6 +32,7 @@ import com.ats.element.TestElement;
 import com.ats.element.TestElementDialog;
 import com.ats.element.TestElementRoot;
 import com.ats.element.TestElementSystem;
+import com.ats.element.TestElementSystemButton;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
@@ -124,6 +125,8 @@ public class ActionExecuteElement extends ActionExecute {
 
 				if(searchElement.isDialog()) {
 					setTestElement(new TestElementDialog(channel, searchMaxTry, searchElement));
+				}else if(searchElement.isSysButton()) {	
+					setTestElement(new TestElementSystemButton(channel, searchElement));
 				}else {
 
 					final Predicate<Integer> predicate = getPredicate(operator, value);

@@ -36,6 +36,7 @@ public class SearchedElement {
 	
 	private static final String DIALOG = "DIALOG";
 	private static final String SYSCOMP = "SYSCOMP";
+	private static final String SYSBUTTON = "SYSBUTTON";
 	
 	private static final Pattern OBJECT_INDEX_PATTERN = Pattern.compile("\\s*?index\\((\\d+)\\)\\s*?");
 
@@ -101,6 +102,10 @@ public class SearchedElement {
 	
 	public boolean isDialog() {
 		return DIALOG.equals(tag.toUpperCase());
+	}
+	
+	public boolean isSysButton() {
+		return SYSBUTTON.equals(tag.toUpperCase());
 	}
 	
 	public boolean isSysComp() {

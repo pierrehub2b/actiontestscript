@@ -10,6 +10,10 @@ public class VisualReport extends VisualAction{
 	private String started;
 	private String groups;
 	private int quality;
+	private long totalMemory;
+	private long cpuSpeed;
+	private int cpuCount;
+	private String osInfo;
 	
 	public VisualReport() {
 		super();
@@ -62,5 +66,29 @@ public class VisualReport extends VisualAction{
 	}
 	public void setQuality(int quality) {
 		this.quality = quality;
+	}
+	public long getTotalMemory() {
+		return totalMemory;
+	}
+	public void setTotalMemory(long totalMemory) {
+		this.totalMemory = totalMemory;
+	}
+	public long getCpuSpeed() {
+		return cpuSpeed;
+	}
+	public void setCpuSpeed(long cpuSpeed) {
+		this.cpuSpeed = cpuSpeed;
+	}
+	public int getCpuCount() {
+		return cpuCount;
+	}
+	public void setCpuCount(int cpuCount) {
+		this.cpuCount = cpuCount;
+	}
+	public String getOsInfo() {
+		return osInfo;
+	}
+	public void setOsInfo(String osInfo) {
+		this.osInfo = osInfo;
 	}
 }
