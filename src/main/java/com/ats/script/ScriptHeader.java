@@ -44,6 +44,8 @@ import com.ats.tools.Operators;
 
 public class ScriptHeader {
 
+	public static final String ATS_PROJECT_GAV_VAR = "ATS_PROJECT_GAV";
+	
 	private ProjectData projectData;
 
 	private String path = "";
@@ -199,6 +201,8 @@ public class ScriptHeader {
 			, "\t* Generated at : <b>" + DateFormat.getDateTimeInstance().format(new Date()) + "</b>"
 			, "\t*/"
 			, ""
+			, "\tprivate String " + ATS_PROJECT_GAV_VAR + " = \"#PROJECT_GAV#\";"
+			, ""
 			, "\t@Override"
 			, "\tprotected " + ScriptHeader.class.getSimpleName() + " getHeader(){"
 			, "\t\treturn new ScriptHeader("
@@ -213,7 +217,7 @@ public class ScriptHeader {
 			, "\tpublic void " + ActionTestScript.MAIN_TEST_FUNCTION + "(){"
 			);
 
-	public String getJavaCode() {
+	public String getJavaCode(String projectGav) {
 
 		String code = javaCode.replaceAll("#CLASS_NAME#", name);
 		code = code.replace("#SCRIPT_ID#", StringEscapeUtils.escapeJava(id));
@@ -223,6 +227,7 @@ public class ScriptHeader {
 		code = code.replace("#GROUP_DATA#", getGroupCode());
 		code = code.replace("#ATS_VERSION#", atsVersion);
 		code = code.replace("#GROUP_DESCRIPTION#", getDataGroups());
+		code = code.replace("#PROJECT_GAV#", projectGav);
 
 		if(packageName.length() > 0) {
 			code = "package " + packageName + ";\r\n" + code;

@@ -23,15 +23,22 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.apache.http.Consts;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
@@ -78,6 +85,9 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	private AtsMobileElement capturedElement;
 
 	private MobileTestElement testElement;
+	
+	private RequestConfig requestConfig;
+	private CloseableHttpClient httpClient;
 
 	public MobileDriverEngine(Channel channel, ActionStatus status, String app, DesktopDriver desktopDriver, ApplicationProperties props) {
 
@@ -95,10 +105,19 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 		String[] appData = applicationPath.split("/");
 		if(appData.length > 1) {
 
-			String endPoint = appData[0];
+			final String endPoint = appData[0];
+			final String application = appData[1];
 
 			applicationPath = "http://" + endPoint;
-			application = appData[1];
+			channel.setApplication(application);
+			//application = appData[1];
+			
+			requestConfig = RequestConfig.custom()
+					.setConnectTimeout(10*000)
+					.setConnectionRequestTimeout(10*000)
+					.setSocketTimeout(20*000).build();
+
+			//httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
 
 			JsonObject response = executeRequest(DRIVER, START);
 
@@ -136,9 +155,10 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 							}catch(Exception e) {}
 						}
 
-						String[] endPointData = endPoint.split(":");
-
-						channel.setApplicationData(os, systemName, driverVersion, -1, icon, endPointData[0] + ":" + screenCapturePort);
+						final String[] endPointData = endPoint.split(":");
+						final String version = response.get("version").getAsString();
+						
+						channel.setApplicationData(os + ":" + systemName, version, driverVersion, -1, icon, endPointData[0] + ":" + screenCapturePort);
 
 						refreshElementMapLocation();
 					}else {
@@ -148,7 +168,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 					}
 				}else {
 					status.setCode(ActionStatus.CHANNEL_START_ERROR);
-					status.setMessage("unable to connect to : " + this.application);
+					status.setMessage("unable to connect to : " + application);
 					status.setPassed(false);
 				}
 			}
@@ -162,7 +182,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 
 	@Override
 	public void close() {
-		executeRequest(APP, STOP, application);
+		executeRequest(APP, STOP, channel.getApplication());
 	}
 
 	public void tearDown() {
@@ -203,7 +223,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 
 	@Override
 	public void loadParents(FoundElement element) {
-		final AtsMobileElement atsElement = getCapturedElementById(element.getId());
+		final AtsMobileElement atsElement = getCapturedElementById(element.getId(), false);
 		if(atsElement != null) {
 			FoundElement currentParent = null;
 			AtsMobileElement parent = atsElement.getParent();
@@ -224,16 +244,20 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	}
 
 	@Override
-	public CalculatedProperty[] getAttributes(FoundElement element) {
-		final AtsMobileElement atsElement = getCapturedElementById(element.getId());
+	public CalculatedProperty[] getAttributes(FoundElement element, boolean reload) {
+		final AtsMobileElement atsElement = getCapturedElementById(element.getId(), reload);
 		if(atsElement != null) {
 			return atsElement.getMobileAttributes();
 		}
 		return new CalculatedProperty[0];
 	}
 
-	private AtsMobileElement getCapturedElementById(String id) {
-		return getElementById(capturedElement, id);
+	private AtsMobileElement getCapturedElementById(String id, boolean reload) {
+		if(!reload && capturedElement != null) {
+			return getElementById(capturedElement, id);
+		}else {
+			return getElementById(rootElement, id);
+		}
 	}
 
 	@Override
@@ -385,7 +409,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 
 	@Override
 	public boolean setWindowToFront() {
-		executeRequest(APP, SWITCH, application);
+		executeRequest(APP, SWITCH, channel.getApplication());
 		return true;
 	}
 
@@ -418,13 +442,29 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 		return null;
 	}
 
-	protected JsonObject executeRequest(String ... parameters) {
+	protected JsonObject executeRequest(String type, String ... data) {
 
+		JsonObject result = new JsonObject();
+		
+		final HttpPost request = new HttpPost(
+				new StringBuilder(applicationPath)
+				.append("/")
+				.append(type)
+				.toString());
+
+		StringJoiner joiner = new StringJoiner("\n");
+		for (Object obj : data) {
+			joiner.add(obj.toString());
+		}
+
+		request.setEntity(new StringEntity(joiner.toString(), ContentType.create("application/x-www-form-urlencoded", Consts.UTF_8)));
+			
 		try {
-			final URL url = new URL(applicationPath + "/" + String.join("/", parameters));
-			final HttpURLConnection con = (HttpURLConnection) url.openConnection();
-
-			final BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8));
+			
+			httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
+			
+			final HttpResponse httpResponse = httpClient.execute(request);
+			final BufferedReader in = new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent(), StandardCharsets.UTF_8));
 
 			if(in != null) {
 				String inputLine;
@@ -437,14 +477,16 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 				final String responseData = response.toString();
 				final JsonElement jsonResponse = parser.parse(responseData);
 
-				return jsonResponse.getAsJsonObject();
+				result = jsonResponse.getAsJsonObject();
 			}
 
+			httpClient.close();
+			
 		} catch (Exception e) {
 
 		}
 
-		return new JsonObject();
+		return result;
 	}
 
 	@Override

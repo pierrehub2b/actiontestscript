@@ -129,6 +129,8 @@ public class ActionTestScript extends Script implements ITest{
 			throw new SkipException("check mode : " + testName);
 		}else {
 
+			final ScriptHeader header = getHeader();
+			
 			sendInfo("Starting script", " -> " + testName);
 			setTestExecutionVariables(runner.getTest().getAllParameters());
 
@@ -144,8 +146,7 @@ public class ActionTestScript extends Script implements ITest{
 			boolean xml = "true".equals(getEnvironmentValue("xml.report", "").toLowerCase());
 
 			if(visualQuality > 0 || xml) {
-
-				final ScriptHeader header = getHeader();
+				
 				header.setName(getTestName());
 				header.setAtsVersion(AtsManager.getVersion());
 

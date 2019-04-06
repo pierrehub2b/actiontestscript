@@ -220,7 +220,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	}
 
 	@Override
-	public CalculatedProperty[] getAttributes(FoundElement element){
+	public CalculatedProperty[] getAttributes(FoundElement element, boolean reload){
 		return getAttributes(element.getId());
 	}
 

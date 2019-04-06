@@ -57,7 +57,7 @@ import com.ats.script.actions.ActionApi;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
-public abstract class AbstractApiExecutor implements IApiDriverExecutor {
+public abstract class ApiExecutor implements IApiDriverExecutor {
 
 	private final Pattern xmlPattern = Pattern.compile("<\\?xml (?:(?!>).)*>");
 	private final Pattern xmlPropertyPattern = Pattern.compile(".*:");
@@ -83,6 +83,14 @@ public abstract class AbstractApiExecutor implements IApiDriverExecutor {
 	private ArrayList<AtsApiElement> atsElements;
 
 	protected Map<String, String> headerProperties;
+	
+	protected String authentication;
+	protected String authenticationValue;
+	
+	public ApiExecutor(String authentication, String authenticationValue) {
+		this.authentication = authentication;
+		this.authenticationValue = authenticationValue;
+	}
 
 	protected void setUri(String value) {
 		try {
@@ -97,6 +105,10 @@ public abstract class AbstractApiExecutor implements IApiDriverExecutor {
 		lastAction = action;
 
 		headerProperties = new HashMap<String, String>();
+		if(authentication != null && authenticationValue != null) {
+			headerProperties.put("Authorization", authentication + " " + authenticationValue);
+		}
+				
 		for (CalculatedProperty property : action.getHeader()) {
 			headerProperties.put(property.getName(), property.getValue().getCalculated());
 		}

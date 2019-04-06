@@ -135,9 +135,10 @@ public class DriverManager {
 		}
 	}
 	
-	public IDriverEngine getDriverEngine(Channel channel, ActionStatus status, String application, DesktopDriver desktopDriver) {
+	public IDriverEngine getDriverEngine(Channel channel, ActionStatus status, DesktopDriver desktopDriver) {
 		
-		ApplicationProperties props = ATS.getApplicationProperties(application);
+		final String application = channel.getApplication();
+		final ApplicationProperties props = ATS.getApplicationProperties(application);
 		
 		switch(application.toLowerCase()) {
 		case CHROME_BROWSER :

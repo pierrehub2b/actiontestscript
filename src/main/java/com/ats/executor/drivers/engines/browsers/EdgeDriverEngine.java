@@ -46,7 +46,7 @@ public class EdgeDriverEngine extends WebDriverEngine {
 		super(channel, DriverManager.EDGE_BROWSER, driverProcess, windowsDriver, props, DEFAULT_WAIT);
 		
 		this.searchElementScript = JS_WAIT_BEFORE_SEARCH + JS_SEARCH_ELEMENT;
-		this.autoScrollElement = JS_AUTO_SCROLL_CALC;
+		this.autoScrollElement = JS_SCROLL_IF_NEEDED;//JS_AUTO_SCROLL_CALC;
 		
 		EdgeOptions options = new EdgeOptions();
 		options.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);

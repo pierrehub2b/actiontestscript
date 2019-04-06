@@ -17,10 +17,33 @@ specific language governing permissions and limitations
 under the License.
 */
 
-package com.ats.tools.logger;
+package com.ats.driver;
 
-public interface IExecutionLogger {
-	public void sendInfo(String message, String value);
-	public void sendError(String message, String value);
-	public void sendWarning(String message, String value);
+import org.openqa.selenium.Proxy;
+
+public class NeoloadRecorder {
+
+	private String host;
+	private int port;
+
+	public NeoloadRecorder(String host, int port) {
+		this.host = host;
+		this.port = port;
+	}
+
+	public Proxy getProxy() {
+
+		final Proxy proxy = new Proxy();
+		final String proxyAddress = host + ":" + port;
+		proxy.setHttpProxy(proxyAddress).setFtpProxy(proxyAddress).setSslProxy(proxyAddress);
+		
+		return proxy;
+	}
+
+	public String getHost() {
+		return host;
+	}
+	public int getPort() {
+		return port;
+	}
 }

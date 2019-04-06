@@ -148,7 +148,7 @@ public class SendKeyData {
 		if(data.length() == 0) {
 			return EMPTY_DATA;
 		}else {
-			return getSequenceDesktop();
+			return data;
 		}
 	}
 }

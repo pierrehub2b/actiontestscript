@@ -44,7 +44,7 @@ public abstract class DriverEngineAbstract {
 	protected RemoteWebDriver driver;
 	protected DesktopDriver desktopDriver;
 		
-	protected String application;
+	//protected String application;
 	protected String applicationPath;
 	protected String lang;
 	
@@ -66,7 +66,7 @@ public abstract class DriverEngineAbstract {
 		
 		this(channel);
 		this.desktopDriver = desktopDriver;
-		this.application = application;
+		//this.application = application;
 		
 		if(props != null) {
 			actionWait = props.getWait();
@@ -96,9 +96,9 @@ public abstract class DriverEngineAbstract {
 		this.driver = driver;
 	}
 
-	public String getApplication() {
-		return application;
-	}
+	//public String getApplication() {
+	//	return application;
+	//}
 	
 	public String getApplicationPath() {
 		return applicationPath;

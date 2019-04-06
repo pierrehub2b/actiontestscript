@@ -20,7 +20,6 @@ under the License.
 package com.ats.executor.drivers.engines.webservices;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -28,6 +27,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
@@ -41,13 +41,15 @@ import org.apache.http.util.EntityUtils;
 import com.ats.executor.ActionStatus;
 import com.ats.script.actions.ActionApi;
 
-public class RestApiExecutor extends AbstractApiExecutor {
+public class RestApiExecutor extends ApiExecutor {
 
 	private HttpRequestBase request;
 	private CloseableHttpClient httpClient;
 
-	public RestApiExecutor(String wsUrl) {
+	public RestApiExecutor(String authentication, String authenticationValue, String wsUrl) {
 
+		super(authentication, authenticationValue);
+		
 		if(!wsUrl.endsWith("/")) {
 			wsUrl += "/";
 		}
@@ -60,81 +62,54 @@ public class RestApiExecutor extends AbstractApiExecutor {
 
 		httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
 	}
+	
+	private String getContentType(String value) {
+		value = value.trim();
+		if((value.startsWith("[") && value.endsWith("]")) || (value.startsWith("{") && value.endsWith("}"))){
+			return "application/json";
+		}else if(value.startsWith("<") && value.endsWith(">")){
+			return "application/xml";
+		}
+		return "application/x-www-form-urlencoded";
+	}
 
 	@Override
-	public void execute(ActionStatus status, ActionApi api) {
+	public void execute(ActionStatus status, final ActionApi api) {
 
 		super.execute(status, api);
 		
 		addHeader("Accept", "application/json");
 
-		final URI fullUri = uri.resolve(api.getMethod().getCalculated());
-		String parameters = api.getData().getCalculated().trim();
-
-		switch (api.getType()) {
-
-		case ActionApi.POST:
-			
-			request = new HttpPost(fullUri);
-			
-			if((parameters.startsWith("[") && parameters.endsWith("]")) || (parameters.startsWith("{") && parameters.endsWith("}"))){
-				addHeader("Content-Type", "application/json");
-			}else if(parameters.startsWith("<") && parameters.endsWith(">")){
-				addHeader("Content-Type", "application/xml");
-			}else {
-				addHeader("Content-Type", "application/x-www-form-urlencoded");
-			}
-			((HttpPost)request).setEntity(new ByteArrayEntity(api.getData().getCalculated().getBytes(StandardCharsets.UTF_8)));
-
-			break;
-		case ActionApi.DELETE:
+		String fullUri = uri.resolve(api.getMethod().getCalculated()).toString();
+		String parameters = "";
+		if(api.getData() != null) {
+			parameters = api.getData().getCalculated();
+		}
+		
+		final String apiType = api.getType().toUpperCase();
+		if(ActionApi.GET.equals(apiType) || ActionApi.DELETE.equals(apiType)) {
 			
 			if(parameters.length() > 0) {
-				parameters = URLEncoder.encode(parameters, StandardCharsets.UTF_8);
-				request = new HttpDelete(fullUri.resolve(parameters));
-			}else {
-				request = new HttpDelete(fullUri);
+				parameters = "/" + URLEncoder.encode(parameters, StandardCharsets.UTF_8);
 			}
 			
-			break;
-		case ActionApi.PUT:
-			
-			request = new HttpPut(fullUri);
-			
-			if((parameters.startsWith("[") && parameters.endsWith("]")) || (parameters.startsWith("{") && parameters.endsWith("}"))){
-				addHeader("Content-Type", "application/json");
-			}else if(parameters.startsWith("<") && parameters.endsWith(">")){
-				addHeader("Content-Type", "application/xml");
+			if(ActionApi.GET.equals(apiType)) {
+				request = new HttpGet(fullUri + parameters);
 			}else {
-				addHeader("Content-Type", "application/x-www-form-urlencoded");
-			}
-			((HttpPut)request).setEntity(new ByteArrayEntity(api.getData().getCalculated().getBytes(StandardCharsets.UTF_8)));
-			
-			break;
-		case ActionApi.PATCH:
-			
-			request = new HttpPatch(fullUri);
-			
-			if((parameters.startsWith("[") && parameters.endsWith("]")) || (parameters.startsWith("{") && parameters.endsWith("}"))){
-				addHeader("Content-Type", "application/json");
-			}else if(parameters.startsWith("<") && parameters.endsWith(">")){
-				addHeader("Content-Type", "application/xml");
-			}else {
-				addHeader("Content-Type", "application/x-www-form-urlencoded");
-			}
-			((HttpPatch)request).setEntity(new ByteArrayEntity(api.getData().getCalculated().getBytes(StandardCharsets.UTF_8)));
-			
-			break;
-		default:
-
-			if(parameters.length() > 0) {
-				parameters = URLEncoder.encode(parameters, StandardCharsets.UTF_8);
-				request = new HttpGet(fullUri.resolve(parameters));
-			}else {
-				request = new HttpGet(fullUri);
+				request = new HttpDelete(fullUri + parameters);
 			}
 			
-			break;
+		}else {
+			addHeader("Content-Type", getContentType(parameters));
+			
+			if(ActionApi.PATCH.equals(apiType)) {
+				request = new HttpPatch(fullUri);
+			}else if(ActionApi.PUT.equals(apiType)) {
+				request = new HttpPut(fullUri);
+			}else {
+				request = new HttpPost(fullUri);
+			}
+			((HttpEntityEnclosingRequestBase)request).setEntity(new ByteArrayEntity(parameters.getBytes(StandardCharsets.UTF_8)));
 		}
 
 		headerProperties.forEach((k,v) -> request.addHeader(k, v));

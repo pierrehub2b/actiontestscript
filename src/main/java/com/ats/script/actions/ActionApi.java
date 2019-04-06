@@ -34,14 +34,14 @@ public class ActionApi extends Action {
 	public static final String SCRIPT_LABEL = "api-";
 	private static final int SCRIPT_LABEL_LENGTH = SCRIPT_LABEL.length();
 
-	public static final String GET = "get";
-	public static final String POST = "post";
-	public static final String PUT = "put";
-	public static final String PATCH = "patch";
-	public static final String DELETE = "delete";
+	public static final String GET = "GET";
+	public static final String POST = "POST";
+	public static final String PUT = "PUT";
+	public static final String PATCH = "PATCH";
+	public static final String DELETE = "DELETE";
 
-	public static final String SOAP = "soap";
-	public static final String REST = "rest";
+	public static final String SOAP = "SOAP";
+	public static final String REST = "REST";
 
 	public static final String SCRIPT_LABEL_GET = SCRIPT_LABEL + GET;
 	public static final String SCRIPT_LABEL_DELETE = SCRIPT_LABEL + DELETE;
@@ -68,7 +68,7 @@ public class ActionApi extends Action {
 
 		if(data.size() > 0) {
 			setData(new CalculatedValue(script, data.get(0).trim()));
-		}		
+		}
 	}
 	
 	public ActionApi(Script script, String type, CalculatedValue method, CalculatedValue data) {
@@ -151,9 +151,8 @@ public class ActionApi extends Action {
 	}
 
 	public void setType(String type) {
-		type = type.toLowerCase();
-		if(POST.equals(type) || PUT.equals(type) || DELETE.equals(type) || SOAP.equals(type) || PATCH.equals(type)) {
-			this.type = type;
+		if(POST.equalsIgnoreCase(type) || PUT.equalsIgnoreCase(type) || DELETE.equalsIgnoreCase(type) || SOAP.equalsIgnoreCase(type) || PATCH.equalsIgnoreCase(type)) {
+			this.type = type.toUpperCase();
 		}else {
 			this.type = GET;
 		}

@@ -43,7 +43,7 @@ public interface IDriverEngine{
 	public WebElement getRootElement();
 	public void close();
 
-	public String getApplication();
+	//public String getApplication();
 	public String getApplicationPath();
 	public void switchWindow(int index);
 	public void closeWindow(ActionStatus status);
@@ -54,7 +54,7 @@ public interface IDriverEngine{
 	public void updateDimensions();
 	public FoundElement getElementFromPoint(Boolean syscomp, Double x, Double y);
 	public String getAttribute(FoundElement element, String attributeName, int maxTry);
-	public CalculatedProperty[] getAttributes(FoundElement element);
+	public CalculatedProperty[] getAttributes(FoundElement element, boolean reload);
 	public CalculatedProperty[] getCssAttributes(FoundElement element);
 	public void loadParents(FoundElement hoverElement);
 	public void scroll(FoundElement foundElement, int delta);

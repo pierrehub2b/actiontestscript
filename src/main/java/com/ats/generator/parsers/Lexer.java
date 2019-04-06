@@ -39,6 +39,7 @@ import com.ats.script.actions.ActionAssertCount;
 import com.ats.script.actions.ActionAssertProperty;
 import com.ats.script.actions.ActionAssertValue;
 import com.ats.script.actions.ActionCallscript;
+import com.ats.script.actions.ActionChannel;
 import com.ats.script.actions.ActionChannelClose;
 import com.ats.script.actions.ActionChannelStart;
 import com.ats.script.actions.ActionChannelSwitch;
@@ -186,7 +187,7 @@ public class Lexer {
 					//-----------------------
 
 					if(dataArray.size() > 0){
-						script.addAction(new ActionChannelStart(script, dataOne, new CalculatedValue(script, dataArray.remove(0).trim())), disabled);
+						script.addAction(new ActionChannelStart(script, dataOne, new CalculatedValue(script, dataArray.remove(0).trim()), dataArray, options.contains(ActionChannel.SCRIPT_NEOLOAD)), disabled);
 					}
 
 				}else if(ActionText.SCRIPT_LABEL.equals(actionType)){

@@ -28,8 +28,6 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
-import com.ats.executor.channels.Channel;
-
 public class DriverProcess {
 
 	private int port = 4444;

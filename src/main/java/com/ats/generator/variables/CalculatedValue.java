@@ -31,6 +31,7 @@ import com.ats.executor.SendKeyData;
 import com.ats.generator.variables.transform.DateTransformer;
 import com.ats.generator.variables.transform.TimeTransformer;
 import com.ats.script.Script;
+import com.ats.script.ScriptHeader;
 import com.ats.tools.Utils;
 
 public class CalculatedValue{
@@ -38,6 +39,7 @@ public class CalculatedValue{
 	private static final Pattern TODAY_PATTERN = Pattern.compile("\\$today", Pattern.CASE_INSENSITIVE);
 	private static final Pattern NOW_PATTERN = Pattern.compile("\\$now", Pattern.CASE_INSENSITIVE);
 	private static final Pattern UUID_PATTERN = Pattern.compile("\\$uuid", Pattern.CASE_INSENSITIVE);
+	private static final Pattern PGAV_PATTERN = Pattern.compile("\\$pgav", Pattern.CASE_INSENSITIVE);
 	
 	public static final Pattern KEY_REGEXP = Pattern.compile("\\$key\\s?\\((\\w+)\\-?([^\\)]*)?\\)");
 
@@ -133,6 +135,15 @@ public class CalculatedValue{
 				dataValue = dataValue.replace(replace, UUID.randomUUID().toString());
 				
 				javaCode = javaCode.replace(replace, "\", " + ActionTestScript.JAVA_UUID_FUNCTION_NAME + "(), \"");
+			}
+			
+			mv = PGAV_PATTERN.matcher(dataValue);
+			while (mv.find()) {
+
+				final String replace = mv.group(0);
+				dataValue = dataValue.replace(replace, UUID.randomUUID().toString());
+				
+				javaCode = javaCode.replace(replace, "\", " + ScriptHeader.ATS_PROJECT_GAV_VAR + ", \"");
 			}
 
 			mv = KEY_REGEXP.matcher(dataValue);

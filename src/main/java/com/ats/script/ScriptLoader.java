@@ -48,6 +48,8 @@ public class ScriptLoader extends Script {
 	private String javaCode = null;
 	private Charset charset;
 	private ArrayList<Action> actions;
+	
+	private String projectGav = "";
 
 	public ScriptLoader(){}
 
@@ -60,6 +62,8 @@ public class ScriptLoader extends Script {
 		this.setHeader(new ScriptHeader(projectData, file));
 		this.setAtsFolder(projectData.getAtsSourceFolder().toFile());
 		this.setCharset(charset);
+		
+		this.projectGav = projectData.getGav();
 
 		if(ATS_EXTENSION.equals(type)){
 
@@ -111,7 +115,7 @@ public class ScriptLoader extends Script {
 	// Java Code Generator
 	//---------------------------------------------------------------------------------------------------------------------------------
 
-	public String getJavaCode(){
+	public String getJavaCode(String projectGav){
 
 		if(javaCode != null) {
 
@@ -152,7 +156,7 @@ public class ScriptLoader extends Script {
 				variableCode.append(codeLine(variable.getJavaCode()));
 			}
 
-			final StringBuilder code = new StringBuilder(header.getJavaCode());
+			final StringBuilder code = new StringBuilder(header.getJavaCode(projectGav));
 
 			code.append("\r\n\r\n\t\t//------------------------------------------------------------------------\r\n");
 			code.append("\t\t// Variables\r\n");
@@ -194,7 +198,7 @@ public class ScriptLoader extends Script {
 
 	public final static byte[] UTF8_BOM = {(byte)0xEF, (byte)0xBB, (byte)0xBF};
 
-	public void generateJavaFile(){
+	public void generateJavaFile(String projectGav){
 		if(header.getJavaDestinationFolder() != null){
 
 			final File javaFile = header.getJavaFile();
@@ -202,7 +206,7 @@ public class ScriptLoader extends Script {
 				javaFile.getParentFile().mkdirs();
 
 				final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter( new FileOutputStream(javaFile, false), charset));
-				writer.write(getJavaCode());
+				writer.write(getJavaCode(projectGav));
 				writer.close();
 
 			} catch (IOException e) {
@@ -249,6 +253,11 @@ public class ScriptLoader extends Script {
 	public void setActions(Action[] data) {
 		this.actions = new ArrayList<Action>(Arrays.asList(data));
 	}	
+	
+	public String getProjectGav() {
+		return projectGav;
+	}
+	public void setProjectGav(String value) {} // read only
 
 	//-------------------------------------------------------------------------------------------------
 	//  transient getters and setters

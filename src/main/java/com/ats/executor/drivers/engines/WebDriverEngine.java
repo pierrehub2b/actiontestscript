@@ -90,9 +90,9 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	//protected static final String JS_WAIT_READYSTATE = "var result=window.document.readyState=='complete';";
 	protected static final String JS_WAIT_BEFORE_SEARCH = "var interval=setInterval(function(){if(window.document.readyState==='complete'){clearInterval(interval);done();}},200);";
 
-	protected static final String JS_AUTO_SCROLL = "var e=arguments[0];e.scrollIntoView();var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
-	protected static final String JS_AUTO_SCROLL_CALC = "var e=arguments[0];var r=e.getBoundingClientRect();var top=r.top + window.pageYOffset;window.scrollTo(0, top-(window.innerHeight / 2));r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
-	protected static final String JS_AUTO_SCROLL_MOZ = "var e=arguments[0];e.scrollIntoView({behavior:'auto',block:'center',inline:'center'});var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
+	//protected static final String JS_AUTO_SCROLL = "var e=arguments[0];e.scrollIntoView();var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
+	//protected static final String JS_AUTO_SCROLL_CALC = "var e=arguments[0];var r=e.getBoundingClientRect();var top=r.top + window.pageYOffset;window.scrollTo(0, top-(window.innerHeight / 2));r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
+	//protected static final String JS_AUTO_SCROLL_MOZ = "var e=arguments[0];e.scrollIntoView({behavior:'auto',block:'center',inline:'center'});var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
 
 	protected static final String JS_SCROLL_IF_NEEDED = "var e=arguments[0], result=[];var r=e.getBoundingClientRect();if(r.top < 0 || r.left < 0 || r.bottom > (window.innerHeight || document.documentElement.clientHeight) || r.right > (window.innerWidth || document.documentElement.clientWidth)) {e.scrollIntoView({behavior:'auto',block:'center',inline:'center'});r=e.getBoundingClientRect();result=[r.left+0.0001, r.top+0.0001];}";
 	
@@ -122,7 +122,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	protected RequestConfig requestConfig;
 
 	protected String searchElementScript = JS_SEARCH_ELEMENT;
-	protected String autoScrollElement = JS_AUTO_SCROLL;
+	protected String autoScrollElement = JS_SCROLL_IF_NEEDED;//JS_AUTO_SCROLL;
 
 	public WebDriverEngine(
 			Channel channel, 
@@ -149,8 +149,14 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		final int scriptTimeout = DriverManager.ATS.getScriptTimeOut();
 		final int pageLoadTimeout = DriverManager.ATS.getPageloadTimeOut();
 		final int watchdog = DriverManager.ATS.getWatchDogTimeOut();		
-
-		cap.setCapability(CapabilityType.PROXY, DriverManager.ATS.getProxy().getValue());
+		
+		/*if(channel.isNeoload() && DriverManager.ATS.getNeoloadRecorder() != null) {
+			cap.setCapability(CapabilityType.PROXY, DriverManager.ATS.getNeoloadRecorder().getProxy());
+		}else {
+			channel.setNeoload(false);
+			cap.setCapability(CapabilityType.PROXY, DriverManager.ATS.getProxy().getValue());
+		}*/
+		
 		cap.setCapability(CapabilityType.SUPPORTS_FINDING_BY_CSS, false);
 		cap.setCapability(CapabilityType.HAS_NATIVE_EVENTS, false);
 
@@ -213,7 +219,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			final File tempHtml = File.createTempFile("ats_", ".html");
 			tempHtml.deleteOnExit();
 
-			Files.write(tempHtml.toPath(), StartHtmlPage.getAtsBrowserContent(titleUid, application, applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait(), getPropertyWait(), maxTrySearch, maxTryProperty, scriptTimeout, pageLoadTimeout, watchdog));
+			Files.write(tempHtml.toPath(), StartHtmlPage.getAtsBrowserContent(titleUid, channel.getApplication(), applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait(), getPropertyWait(), maxTrySearch, maxTryProperty, scriptTimeout, pageLoadTimeout, watchdog));
 			driver.get(tempHtml.toURI().toString());
 		} catch (IOException e) {}
 
@@ -403,7 +409,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		if(result == null) {
 
-			for (CalculatedProperty calc : getAttributes(element)) {
+			for (CalculatedProperty calc : getAttributes(element, false)) {
 				if(attributeName.equals(calc.getName())) {
 					return calc.getValue().getCalculated();
 				}
@@ -431,7 +437,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	@Override
-	public CalculatedProperty[] getAttributes(FoundElement element){
+	public CalculatedProperty[] getAttributes(FoundElement element, boolean reload){
 		if(element.isDesktop()){
 			return desktopDriver.getElementAttributes(element.getId());
 		}else {

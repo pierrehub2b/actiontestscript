@@ -200,6 +200,10 @@ public class ProjectData {
 	public File getJavaFile(String qualifiedPath) {
 		return getJavaDestinationFolder().resolve(qualifiedPath).toFile();
 	}
+	
+	public String getGav() {
+		return domain + "." + name + "(" + version + ")";
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	//  getters and setters for serialization

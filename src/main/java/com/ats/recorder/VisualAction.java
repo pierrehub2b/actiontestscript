@@ -22,7 +22,6 @@ package com.ats.recorder;
 import java.beans.Transient;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
@@ -71,11 +70,11 @@ public class VisualAction {
 		this.timeLine = System.currentTimeMillis();
 	}
 
-	public void addImageFrame(byte[] newScreen) {
+	/*public void addImageFrame(byte[] newScreen) {
 		if(!Arrays.equals(images.get(images.size()-1), newScreen)){
 			images.add(newScreen);
 		}
-	}
+	}*/
 
 	//--------------------------------------------------------
 	// getters and setters for serialization

@@ -49,7 +49,7 @@ import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.desktop.DesktopDriver;
-import com.ats.executor.drivers.engines.webservices.AbstractApiExecutor;
+import com.ats.executor.drivers.engines.webservices.ApiExecutor;
 import com.ats.executor.drivers.engines.webservices.RestApiExecutor;
 import com.ats.executor.drivers.engines.webservices.SoapApiExecutor;
 import com.ats.generator.objects.MouseDirection;
@@ -60,7 +60,8 @@ import com.google.common.io.ByteStreams;
 
 public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngine{
 
-	private AbstractApiExecutor executor;
+	private final static String API = "API";
+	private ApiExecutor executor;
 
 	public ApiDriverEngine(Channel channel, ActionStatus status, String path, DesktopDriver desktopDriver, ApplicationProperties props) {
 		super(channel, desktopDriver, props);
@@ -110,19 +111,17 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		if(wsContent != null) {
 			if(wsContent.endsWith("definitions>")) {
-				application = ActionApi.SOAP.toUpperCase();
 				try {
-					executor = new SoapApiExecutor(wsContentFile, applicationPath);
-					channel.setApplicationData(application, ((SoapApiExecutor)executor).getOperations());
+					executor = new SoapApiExecutor(channel.getAuthentication(), channel.getAuthenticationValue(), wsContentFile, applicationPath);
+					channel.setApplicationData(API, ActionApi.SOAP, ((SoapApiExecutor)executor).getOperations());
 				} catch (SAXException | IOException | ParserConfigurationException e) {
 					status.setCode(ActionStatus.CHANNEL_START_ERROR);
 					status.setMessage(e.getMessage());
 					status.setPassed(false);
 				}
 			}else {
-				application = ActionApi.REST.toUpperCase();
-				executor = new RestApiExecutor(applicationPath);
-				channel.setApplicationData(application);
+				channel.setApplicationData(API, ActionApi.REST);
+				executor = new RestApiExecutor(channel.getAuthentication(), channel.getAuthenticationValue(), applicationPath);
 			}
 		}else {
 			status.setCode(ActionStatus.CHANNEL_START_ERROR);
@@ -152,7 +151,7 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 	
 	@Override
-	public CalculatedProperty[] getAttributes(FoundElement element) {
+	public CalculatedProperty[] getAttributes(FoundElement element, boolean reload) {
 		return executor.getElementAttributes(element.getId());
 	}
 	
@@ -166,29 +165,23 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	@Override
 	public void goToUrl(ActionStatus status, String url) {
-		// TODO Auto-generated method stub
 	}
 
 	@Override
 	public void close() {
-		// TODO Auto-generated method stub
 	}
 
 	@Override
 	public CalculatedProperty[] getCssAttributes(FoundElement element) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public void loadParents(FoundElement hoverElement) {
-		// TODO Auto-generated method stub
-
 	}	
 
 	@Override
 	public WebElement getRootElement() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

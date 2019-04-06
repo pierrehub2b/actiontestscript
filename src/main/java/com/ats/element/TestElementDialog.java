@@ -152,7 +152,7 @@ public class TestElementDialog extends TestElement {
 	}
 
 	@Override
-	public CalculatedProperty[] getAttributes() {
+	public CalculatedProperty[] getAttributes(boolean reload) {
 		return new CalculatedProperty[] {new CalculatedProperty("text", alert.getText())};
 	}
 }

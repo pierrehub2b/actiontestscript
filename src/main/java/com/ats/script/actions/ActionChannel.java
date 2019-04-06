@@ -25,14 +25,21 @@ import com.ats.script.Script;
 public class ActionChannel extends Action{
 
 	public static final String SCRIPT_LABEL = "channel-";
+	public static final String SCRIPT_NEOLOAD = "neoload";
 
 	private String name = "";
+	private boolean neoload = false;
 
 	public ActionChannel() {}
 
 	public ActionChannel(Script script, String name) {
 		super(script);
 		setName(name);
+	}
+	
+	public ActionChannel(Script script, String name, boolean neoload) {
+		this(script, name);
+		setNeoload(neoload);
 	}
 
 	@Override
@@ -48,7 +55,15 @@ public class ActionChannel extends Action{
 		return name;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setName(String value) {
+		this.name = value;
+	}
+
+	public boolean isNeoload() {
+		return neoload;
+	}
+
+	public void setNeoload(boolean value) {
+		this.neoload = value;
 	}
 }

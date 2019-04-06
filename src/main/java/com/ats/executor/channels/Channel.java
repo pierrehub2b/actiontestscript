@@ -43,6 +43,7 @@ import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.ScriptHeader;
 import com.ats.script.actions.ActionApi;
+import com.ats.script.actions.ActionChannelStart;
 import com.ats.tools.ResourceContent;
 import com.ats.tools.logger.IExecutionLogger;
 
@@ -50,7 +51,8 @@ public class Channel {
 
 	private IDriverEngine engine;
 
-	private String name;
+	private ActionChannelStart action;
+	private String application;
 	private boolean current = false;
 
 	private ActionTestScript mainScript;
@@ -78,17 +80,16 @@ public class Channel {
 			ActionStatus status,
 			ActionTestScript script,
 			DriverManager driverManager, 
-			String name, 
-			String application) {
+			ActionChannelStart action) {
 
 		status.setChannel(this);
 
 		this.mainScript = script;
-
-		this.name = name;
 		this.current = true;
-
-		this.engine = driverManager.getDriverEngine(this, status, application, new DesktopDriver(driverManager));
+		this.action = action;
+		this.application = action.getApplication().getCalculated();
+		
+		this.engine = driverManager.getDriverEngine(this, status, new DesktopDriver(driverManager));
 
 		if(status.isPassed()) {
 			this.refreshLocation();
@@ -174,6 +175,10 @@ public class Channel {
 		setApplicationData(os, version, dVersion, pid, new byte[0], "");
 	}
 	
+	public String getAuthenticationValue() {
+		return action.getAuthenticationValue();
+	}
+	
 	//--------------------------------------------------------------------------------------------------
 	// Api webservices init
 	//--------------------------------------------------------------------------------------------------
@@ -185,8 +190,9 @@ public class Channel {
 		this.dimension = new TestBound(0D, 0D, 1D, 1D);
 	}
 	
-	public void setApplicationData(String os, ArrayList<String> operations) {
-		this.setApplicationData(os);
+	public void setApplicationData(String os, String type, ArrayList<String> operations) {
+		this.os = os;
+		this.application = type;
 		this.operations = operations;
 	}
 	
@@ -200,6 +206,11 @@ public class Channel {
 		this.processId = pid;
 		this.icon = icon;
 		this.screenServer = screenServer;
+	}
+	
+	public void setApplicationData(String os, String serviceType) {
+		this.os = os;
+		this.application = serviceType;
 	}
 
 	public void setApplicationData(int handle) {
@@ -236,7 +247,7 @@ public class Channel {
 	}
 
 	public CalculatedProperty[] getAttributes(FoundElement element){
-		return engine.getAttributes(element);
+		return engine.getAttributes(element, false);
 	}
 
 	public String getAttribute(FoundElement element, String attributeName, int maxTry){
@@ -264,36 +275,45 @@ public class Channel {
 	}
 	
 	public String getApplication() {
-		return engine.getApplication();
+		return application;
 	}
 	
-	public void setApplication(String url) {} // read only	
+	public void setApplication(String value) {
+		this.application = value;
+	}
 
 	public String getApplicationPath() {
 		return engine.getApplicationPath();
 	}
-	
 	public void setApplicationPath(String url) {} // read only	
 
 	public String getDriverVersion() {
 		return driverVersion;
 	}
-	
 	public void setDriverVersion(String url) {} // read only	
 
 	public boolean isDesktop() {
 		return engine instanceof DesktopDriverEngine;
 	}
-	
 	public void setDesktop(boolean value) {} // read only
 
 	public String getName() {
-		return name;
+		return action.getName();
 	}
-
-	public void setName(String name) {
-		this.name = name;
+	public void setName(String name) {} // read only
+	
+	public String getAuthentication() {
+		if(action.getAuthentication() != null && action.getAuthenticationValue() != null && action.getAuthentication().length() > 0 && action.getAuthenticationValue().length() > 0) {
+			return action.getAuthentication();
+		}
+		return "";
 	}
+	public void setAuthentication(String value) {} // read only
+	
+	public boolean isNeoload() {
+		return action.isNeoload();
+	}
+	public void setNeoload(boolean neoload) {} // read only
 
 	public boolean isCurrent() {
 		return current;
@@ -338,9 +358,6 @@ public class Channel {
 	public void setScreenServer(String value) {
 		this.screenServer = value;
 	}
-	
-	//----------------------------------------------------------------------------------------------------------------------
-	//----------------------------------------------------------------------------------------------------------------------
 
 	public TestBound getDimension() {
 		return dimension;
@@ -510,4 +527,6 @@ public class Channel {
 		getDesktopDriver().updateVisualStatus(error, duration);
 		getDesktopDriver().updateVisualData(value, data);
 	}
+	
+	
 }

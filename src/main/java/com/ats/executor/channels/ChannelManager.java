@@ -90,9 +90,14 @@ public class ChannelManager {
 		return null;// Channel with name : does not exists or has been closed
 	}
 
-	public void startChannel(ActionStatus status, ActionChannelStart action, String name, String app){
+	public void startChannel(ActionStatus status, ActionChannelStart action){
+		
+		final String name = action.getName();
+
 		if(getChannel(name) == null){
-			final Channel newChannel = new Channel(status, mainScript, driverManager, name, app);
+			
+			final String app = action.getApplication().getCalculated();
+			final Channel newChannel = new Channel(status, mainScript, driverManager, action);
 
 			if(status.isPassed()) {
 				

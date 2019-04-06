@@ -476,8 +476,8 @@ public class TestElement{
 		return null;
 	}
 
-	public CalculatedProperty[] getAttributes() {
-		return engine.getAttributes(getFoundElement());
+	public CalculatedProperty[] getAttributes(boolean reload) {
+		return engine.getAttributes(getFoundElement(), reload);
 	}
 
 	public CalculatedProperty[] getCssAttributes() {

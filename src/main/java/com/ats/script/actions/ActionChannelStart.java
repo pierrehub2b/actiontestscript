@@ -19,6 +19,9 @@ under the License.
 
 package com.ats.script.actions;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.CalculatedValue;
@@ -29,12 +32,24 @@ public class ActionChannelStart extends ActionChannel {
 	public static final String SCRIPT_START_LABEL = SCRIPT_LABEL + "start";
 
 	private CalculatedValue application;
-
-	public ActionChannelStart() {}
+	private String authentication = "";
+	private String authenticationValue = "";
 	
-	public ActionChannelStart(Script script, String name, CalculatedValue value) {
-		super(script, name);
+	public ActionChannelStart() {
+		super();
+	}
+	
+	public ActionChannelStart(Script script, String name, CalculatedValue value, ArrayList<String> dataArray, boolean neoload) {
+		super(script, name, neoload);
 		setApplication(value);
+		if(dataArray.size() >1) {
+			setAuthentication(dataArray.get(0).trim());
+			setAuthenticationValue(dataArray.get(1).trim());
+		}
+	}
+	
+	public ActionChannelStart(Script script, String name, CalculatedValue value, boolean neoload, String authType, String authValue) {
+		this(script, name, value, new ArrayList<String>(Arrays.asList(authType, authValue)), neoload);
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -43,7 +58,7 @@ public class ActionChannelStart extends ActionChannel {
 	@Override
 	public void execute(ActionTestScript ts) {
 		setStatus(new ActionStatus(ts.getCurrentChannel()));
-		ts.getChannelManager().startChannel(status, this, getName(), application.getCalculated());
+		ts.getChannelManager().startChannel(status, this);
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -52,7 +67,7 @@ public class ActionChannelStart extends ActionChannel {
 
 	@Override
 	public String getJavaCode() {
-		return super.getJavaCode() + "\"" + getName() + "\", " + application.getJavaCode() + ")";
+		return super.getJavaCode() + "\"" + getName() + "\", " + application.getJavaCode() + ", " + isNeoload() + ", \"" + authentication + "\", \"" + authenticationValue + "\")";
 	}
 
 	//--------------------------------------------------------
@@ -65,5 +80,21 @@ public class ActionChannelStart extends ActionChannel {
 
 	public void setApplication(CalculatedValue value) {
 		this.application = value;
+	}
+
+	public String getAuthentication() {
+		return authentication;
+	}
+
+	public void setAuthentication(String value) {
+		this.authentication = value;
+	}
+
+	public String getAuthenticationValue() {
+		return authenticationValue;
+	}
+
+	public void setAuthenticationValue(String value) {
+		this.authenticationValue = value;
 	}
 }

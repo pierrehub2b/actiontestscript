@@ -45,7 +45,7 @@ import org.xml.sax.SAXException;
 import com.ats.executor.ActionStatus;
 import com.ats.script.actions.ActionApi;
 
-public class SoapApiExecutor extends AbstractApiExecutor {
+public class SoapApiExecutor extends ApiExecutor {
 
 	private static final String SOAP_ENVELOPE_OPEN = "<Envelope xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\">";
 	private static final String SOAP_BODY_OPEN = "<Body>";
@@ -58,7 +58,10 @@ public class SoapApiExecutor extends AbstractApiExecutor {
 	private String soapXmlMessage;
 	private Map<String, String> operations;
 
-	public SoapApiExecutor(File wsdlFile, String wsUrl) throws SAXException, IOException, ParserConfigurationException {
+	public SoapApiExecutor(String authentication, String authenticationValue, File wsdlFile, String wsUrl) throws SAXException, IOException, ParserConfigurationException {
+		
+		super(authentication, authenticationValue);
+		
 		this.setUri(wsUrl);
 		this.loadDataFromWSDL(wsdlFile, wsUrl);
 

@@ -56,7 +56,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	public FirefoxDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
 		super(channel, DriverManager.FIREFOX_BROWSER, driverProcess, windowsDriver, props, DEFAULT_WAIT);
 
-		this.autoScrollElement = JS_AUTO_SCROLL_MOZ;
+		this.autoScrollElement = JS_SCROLL_IF_NEEDED;//JS_AUTO_SCROLL_MOZ;
 		
 		FirefoxOptions options = new FirefoxOptions();
 		options.setCapability("marionnette ", true);

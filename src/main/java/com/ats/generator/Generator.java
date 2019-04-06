@@ -158,7 +158,7 @@ public class Generator implements ScriptProcessedEvent{
 
 	private void loadScript(File f){
 		final ScriptLoader sc = lexer.loadScript(f, new ScriptProcessedNotifier(this));
-		sc.generateJavaFile();
+		sc.generateJavaFile(projectData.getGav());
 	}
 
 	@Override

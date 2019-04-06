@@ -85,6 +85,7 @@ public class AtsManager {
 	private int maxTryProperty = MAX_TRY_PROPERTY;
 
 	private AtsProxy proxy;
+	private NeoloadRecorder neoloadRecorder;
 
 	private List<ApplicationProperties> applicationsList = new ArrayList<ApplicationProperties>();
 
@@ -306,6 +307,29 @@ public class AtsManager {
 							}
 						}
 					}
+					
+					final NodeList neoloadNode = doc.getElementsByTagName("neoload-recorder");
+					if(neoloadNode != null && neoloadNode.getLength() > 0) {
+						
+						String host = null;
+						int port = 0;
+						
+						NodeList data = ((Element)proxyNode.item(0)).getElementsByTagName("host");
+						if(data != null && data.getLength() > 0) {
+							host = data.item(0).getChildNodes().item(0).getNodeValue();
+						}
+						
+						data = ((Element)proxyNode.item(0)).getElementsByTagName("port");
+						if(data != null && data.getLength() > 0) {
+							try {
+								port = Integer.parseInt(data.item(0).getChildNodes().item(0).getNodeValue());
+							}catch(NumberFormatException e){}
+						}
+						
+						if(host != null && port > 0) {
+							neoloadRecorder = new NeoloadRecorder(host, port);
+						}
+					}
 
 					final NodeList applications = doc.getElementsByTagName("application");
 					if(applications != null && applications.getLength() > 0) {
@@ -428,6 +452,10 @@ public class AtsManager {
 
 	public AtsProxy getProxy() {
 		return proxy;
+	}
+
+	public NeoloadRecorder getNeoloadRecorder() {
+		return neoloadRecorder;
 	}
 
 	public int getScriptTimeOut() {
