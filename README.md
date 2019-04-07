@@ -190,10 +190,17 @@ Here is an example of global ATS configuration file (*.atsProperties* file in AT
 	<mobiles>
 		<mobile>
 			<name>settings</name>
-			<url>http://192.168.0.5:8080/settings</url>
+			<endpoint>192.168.0.6:8080</endpoint>
+			<package>com.prod.bca</package>
 			<waitAction>100</waitAction>
 		</mobile>
 	</mobiles>
+	<apis>
+		<api>
+			<name>fakerest</name>
+			<url>https://fakerestapi.azurewebsites.net</url>
+		</api>
+	</apis>
 </execute>
 ```
 * You can define the proxy used by browsers during execution of the test.

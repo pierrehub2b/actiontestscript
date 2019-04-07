@@ -386,6 +386,49 @@ public class AtsManager {
 											String url = "";
 											String wait = null;
 
+											nodeList = mobileApp.getElementsByTagName("endpoint");
+											if(nodeList != null && nodeList.getLength() > 0) {
+												if(nodeList.item(0).getChildNodes().getLength() > 0) {
+													url = nodeList.item(0).getChildNodes().item(0).getNodeValue();
+												}
+											}
+											
+											nodeList = mobileApp.getElementsByTagName("package");
+											if(nodeList != null && nodeList.getLength() > 0) {
+												if(nodeList.item(0).getChildNodes().getLength() > 0) {
+													url += "/" + nodeList.item(0).getChildNodes().item(0).getNodeValue();
+												}
+											}
+											
+											nodeList = mobileApp.getElementsByTagName("waitAction");
+											if(nodeList != null && nodeList.getLength() > 0) {
+												if(nodeList.item(0).getChildNodes().getLength() > 0) {
+													wait = nodeList.item(0).getChildNodes().item(0).getNodeValue();
+												}
+											}
+											
+											addApplicationProperties(ApplicationProperties.MOBILE_TYPE, name, url, wait, "", null);
+										}
+									}
+								}
+							}
+						}
+					}
+					
+					final NodeList apiApps = doc.getElementsByTagName("api");
+					if(apiApps != null && apiApps.getLength() > 0) {
+						for (int temp = 0; temp < apiApps.getLength(); temp++) {
+							Node app = apiApps.item(temp);
+							if (app.getNodeType() == Node.ELEMENT_NODE) {
+								Element mobileApp = (Element) app;
+								if(mobileApp.hasChildNodes() && mobileApp.getChildNodes().getLength() > 1) {
+									NodeList nodeList = mobileApp.getElementsByTagName("name");
+									if(nodeList != null && nodeList.getLength() > 0) {
+										if(nodeList.item(0).getChildNodes().getLength() > 0) {
+											String name = nodeList.item(0).getChildNodes().item(0).getNodeValue();
+											String url = "";
+											String wait = null;
+
 											nodeList = mobileApp.getElementsByTagName("url");
 											if(nodeList != null && nodeList.getLength() > 0) {
 												if(nodeList.item(0).getChildNodes().getLength() > 0) {
@@ -400,7 +443,7 @@ public class AtsManager {
 												}
 											}
 											
-											addApplicationProperties(ApplicationProperties.MOBILE_TYPE, name, url, wait, "", null);
+											addApplicationProperties(ApplicationProperties.API_TYPE, name, url, wait, "", null);
 										}
 									}
 								}

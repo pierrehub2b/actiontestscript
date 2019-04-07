@@ -64,7 +64,8 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	private ApiExecutor executor;
 
 	public ApiDriverEngine(Channel channel, ActionStatus status, String path, DesktopDriver desktopDriver, ApplicationProperties props) {
-		super(channel, desktopDriver, props);
+		
+		super(channel, desktopDriver, path, props, 0, 60);
 
 		if(applicationPath == null) {
 			applicationPath = path;
