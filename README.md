@@ -191,7 +191,7 @@ Here is an example of global ATS configuration file (*.atsProperties* file in AT
 		<mobile>
 			<name>settings</name>
 			<endpoint>192.168.0.6:8080</endpoint>
-			<package>com.prod.bca</package>
+			<package>settings</package>
 			<waitAction>100</waitAction>
 		</mobile>
 	</mobiles>
