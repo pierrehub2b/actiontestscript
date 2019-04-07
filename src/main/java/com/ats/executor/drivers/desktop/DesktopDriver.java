@@ -545,8 +545,8 @@ public class DesktopDriver extends RemoteWebDriver {
 		return resp.image;
 	}
 
-	public void startVisualRecord(Channel channel, ScriptHeader script, int quality, long started) {
-		sendRequestCommand(CommandType.Record, RecordType.Start, script.getId(), script.getQualifiedName(), script.getDescription(), script.getAuthor(), script.getJoinedGroups(), script.getPrerequisite(), quality, started);
+	public DesktopResponse startVisualRecord(Channel channel, ScriptHeader script, int quality, long started) {
+		return sendRequestCommand(CommandType.Record, RecordType.Start, script.getId(), script.getQualifiedName(), script.getDescription(), script.getAuthor(), script.getJoinedGroups(), script.getPrerequisite(), quality, started);
 	}
 
 	public void createVisualAction(Channel channel, String actionType, int scriptLine, long timeline) {

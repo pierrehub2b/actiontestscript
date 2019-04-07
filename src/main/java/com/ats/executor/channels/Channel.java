@@ -34,6 +34,7 @@ import com.ats.executor.ActionTestScript;
 import com.ats.executor.TestBound;
 import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.desktop.DesktopDriver;
+import com.ats.executor.drivers.desktop.DesktopResponse;
 import com.ats.executor.drivers.desktop.DesktopWindow;
 import com.ats.executor.drivers.engines.IDriverEngine;
 import com.ats.executor.drivers.engines.desktop.DesktopDriverEngine;
@@ -478,8 +479,8 @@ public class Channel {
 	// Visual reporting
 	//----------------------------------------------------------------------------------------------------------
 
-	public void startVisualRecord(ScriptHeader script, int quality, long started) {
-		getDesktopDriver().startVisualRecord(this, script, quality, started);
+	public DesktopResponse startVisualRecord(ScriptHeader script, int quality, long started) {
+		return getDesktopDriver().startVisualRecord(this, script, quality, started);
 	}
 
 	public void stopVisualRecord() {

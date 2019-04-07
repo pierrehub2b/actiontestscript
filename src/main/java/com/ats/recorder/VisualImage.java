@@ -62,7 +62,7 @@ public class VisualImage {
 	}
 
 	public void save() {
-		if(data != null) {
+		if(data != null && data.length > 0) {
 			try {
 				if(drawBound) {
 

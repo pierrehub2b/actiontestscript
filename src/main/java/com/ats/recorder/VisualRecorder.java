@@ -25,6 +25,7 @@ import java.nio.file.Paths;
 
 import com.ats.element.TestElement;
 import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.desktop.DesktopResponse;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.script.ProjectData;
 import com.ats.script.Script;
@@ -100,7 +101,10 @@ public class VisualRecorder implements IVisualRecorder {
 	
 	private void setChannel(Channel channel) {
 		if(this.channel == null) {
-			channel.startVisualRecord(scriptHeader, visualQuality, started);
+			final DesktopResponse resp = channel.startVisualRecord(scriptHeader, visualQuality, started);
+			if(resp.errorCode < 0) {
+				channel.sendLog(resp.errorCode, "Unable to start visual recording", resp.errorMessage);
+			}
 		}
 		this.channel = channel;
 	}
