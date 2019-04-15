@@ -226,7 +226,7 @@ Proxy types available are *'system'*, *'auto'*, *'direct'* and *'manual'*, if *'
   - **[waitProperty]** : wait for double check attributes value (in millisec.) 
 * You can add options to the browsers driver
 * You can define application name and path of installed applications on the host machine
-* You can define a chromium like browser in the available browsers list. In order to use a chromium like browser you have to define *'name'*, *'driver'* and *'path'* attributes of the browser element. The *'driver'* attribute is the driver file *(without extension)* in the ATS drivers folder, and path is the executable file of the chromium browser :
+* You can define a chromium like browser in the available browsers list. In order to use a chromium like browser you have to define *'name'*, *'driver'* and *'path'* attributes of the browser element. The *'driver'* attribute is the driver file *(without extension)* in the ATS drivers folder and the *'path'* attribute is the executable file of the chromium browser :
 ```
 <browser>
 	<name>chromium</name>
@@ -234,7 +234,7 @@ Proxy types available are *'system'*, *'auto'*, *'direct'* and *'manual'*, if *'
 	<path>C:\Program\chromium\chrome.exe</path>
 </browser>
 ```
-* You can define a Neoload recorder to record and design workbench project with Neoload. ATS Neoload actions will enable Neoload user path recording and send commands to execute some design actions in Neoload project. In order to enable Neoload recording you have to define Neoload proxy and service parameters :
+* You can define a Neoload configuration to record and design load testing project with Neoload. ATS Neoload actions will enable Neoload UserPath recording and send commands to execute some design actions in a Neoload project. In order to enable Neoload recording you have to define Neoload proxy and service parameters :
 ```
 <neoload>
 	<recorder>
@@ -276,6 +276,7 @@ comment : Add comment to script
 
 ## Thirdparty components
 
+* [Neoload](https://www.neotys.com/) - Load testing platform
 * [Selenium](https://www.seleniumhq.org/) - The testing framework used
 * [TestNG](http://testng.org/doc/) - Test runner
 
