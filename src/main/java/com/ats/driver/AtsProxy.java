@@ -15,10 +15,11 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.driver;
 
+import org.apache.http.HttpHost;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.Proxy.ProxyType;
 
@@ -35,6 +36,17 @@ public class AtsProxy {
 
 	public AtsProxy(String type) {
 		this.type = type;
+	}
+	
+	public AtsProxy(String host, String port) {
+		this.type = MANUAL;
+		this.host = host;
+		
+		try {
+			this.port = Integer.parseInt(port);
+		}catch(NumberFormatException e) {
+			this.port = 8080;
+		}
 	}
 
 	public AtsProxy(String type, String host, int port) {
@@ -76,10 +88,17 @@ public class AtsProxy {
 		return proxy;
 	}
 
+	public HttpHost getHttpHost() {
+		if(MANUAL.equals(type)){
+			return new HttpHost(host, port);
+		}
+		return null;
+	}
+
 	/*public JsonObject getGeckoProxy() {
 
 		JsonObject json = new JsonObject();
-		
+
 		if(MANUAL.equals(type)) {
 
 			json.addProperty("proxyType", "MANUAL");

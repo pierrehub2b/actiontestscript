@@ -395,13 +395,6 @@ public class ActionTestScript extends Script implements ITest{
 
 	//---------------------------------------------------------------------------------------------
 
-	public static final String JAVA_ROOT_FUNCTION_NAME = "ro";
-	public SearchedElement ro() {
-		return null;
-	}
-
-	//---------------------------------------------------------------------------------------------
-
 	public static final String JAVA_REGEX_FUNCTION_NAME = "rx";
 	public RegexpTransformer rx(String patt, int group) {
 		return new RegexpTransformer(patt, group);

@@ -41,7 +41,7 @@ public class ActionText extends ActionExecuteElement {
 
 	public ActionText() {}
 
-	public ActionText(ScriptLoader script, String type, boolean stop, ArrayList<String> options, String text, ArrayList<String> objectArray) {
+	public ActionText(ScriptLoader script, boolean stop, ArrayList<String> options, String text, ArrayList<String> objectArray) {
 		super(script, stop, options, objectArray);
 		this.text = new CalculatedValue(script, text);
 

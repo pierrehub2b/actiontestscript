@@ -28,17 +28,28 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
+import com.ats.tools.Utils;
+
 public class DriverProcess {
 
+	private String name;
+	
 	private int port = 4444;
 	private Process process;
 	private DriverManager manager;
 	
 	private boolean started = true;
+	
+	private String error;
 
-	public DriverProcess(DriverManager manager, Path driverFolderPath, String driverFileName, String[] args) {
+	public DriverProcess(String name, DriverManager manager, Path driverFolderPath, String driverFileName, String[] args) {
 
+		this.name = name;
 		this.manager = manager;
+		
+		if(DriverManager.CHROME_BROWSER.equals(name) || DriverManager.OPERA_BROWSER.equals(name)) {
+			Utils.clearDriverFolder(name);
+		}
 
 		File driverFile = driverFolderPath.resolve(driverFileName).toFile();
 
@@ -60,10 +71,11 @@ public class DriverProcess {
 				process = builder.start();
 				Runtime.getRuntime().addShutdownHook(new Thread(process::destroy));
 			} catch (IOException e1) {
-				e1.printStackTrace();
+				error = e1.getMessage();
 				started = false;
 			}
 		}else{
+			error = "Driver file '" + driverFile.getAbsolutePath() + "' not found !";
 			started = false;
 		}
 	}
@@ -71,6 +83,14 @@ public class DriverProcess {
 	//--------------------------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------------------------
 
+	public String getName() {
+		return name;
+	}
+	
+	public String getError() {
+		return error;
+	}
+	
 	public boolean isStarted() {
 		return started;
 	}

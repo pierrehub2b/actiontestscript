@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.executor.drivers.engines.webservices;
 
@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -35,6 +37,7 @@ import java.util.Map;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.http.HttpHost;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -58,10 +61,16 @@ public class SoapApiExecutor extends ApiExecutor {
 	private String soapXmlMessage;
 	private Map<String, String> operations;
 
-	public SoapApiExecutor(String authentication, String authenticationValue, File wsdlFile, String wsUrl) throws SAXException, IOException, ParserConfigurationException {
-		
-		super(authentication, authenticationValue);
-		
+	private Proxy proxy;
+
+	public SoapApiExecutor(HttpHost proxy, int timeout, String authentication, String authenticationValue, File wsdlFile, String wsUrl) throws SAXException, IOException, ParserConfigurationException {
+
+		super(timeout, authentication, authenticationValue);
+
+		if(proxy != null) {
+			this.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy.getHostName(), proxy.getPort()));
+		}
+
 		this.setUri(wsUrl);
 		this.loadDataFromWSDL(wsdlFile, wsUrl);
 
@@ -72,18 +81,25 @@ public class SoapApiExecutor extends ApiExecutor {
 	public ArrayList<String> getOperations() {
 		return new ArrayList<String>(operations.keySet());
 	}
-	
+
 	@Override
 	public void execute(ActionStatus status, ActionApi api) {
 
 		super.execute(status, api);
-		
+
 		final String action = api.getMethod().getCalculated();
 		final String xmlInput = soapXmlMessage.replaceAll("#ACTION#", action).replace("#ACTIONDATA#", api.getData().getCalculated());
 
 		try {
 
-			HttpURLConnection httpConn = (HttpURLConnection)uri.toURL().openConnection();
+			HttpURLConnection httpConn;
+			if(proxy != null) {
+				httpConn = (HttpURLConnection)uri.toURL().openConnection(proxy);
+			}else {
+				httpConn = (HttpURLConnection)uri.toURL().openConnection();
+			}
+			httpConn.setConnectTimeout(timeout); 
+			
 			ByteArrayOutputStream bout = new ByteArrayOutputStream();
 
 			byte[] buffer = new byte[xmlInput.length()];
@@ -108,7 +124,7 @@ public class SoapApiExecutor extends ApiExecutor {
 				isr = new InputStreamReader(httpConn.getInputStream());
 				responseType = httpConn.getContentType();
 			} else {
-				
+
 				isr = new InputStreamReader(httpConn.getErrorStream());
 
 				status.setCode(ActionStatus.WEB_DRIVER_ERROR);
@@ -236,7 +252,7 @@ public class SoapApiExecutor extends ApiExecutor {
 				NodeList nodeList  = documentForOperation.getElementsByTagName(str4);
 				for (int i = 0; i < nodeList.getLength(); i++) {
 					final Node operation = nodeList.item(i);
-					
+
 					final String operationName = operation.getAttributes().getNamedItem("name").getNodeValue();
 					String operationAction = operationName;
 
@@ -256,7 +272,7 @@ public class SoapApiExecutor extends ApiExecutor {
 				}
 			}
 		} 
-		
+
 		if((document.getElementsByTagName("soap:address").getLength()>0)){
 			NodeList addresses = document.getElementsByTagName("soap:address");
 			if(addresses.getLength() > 0) {

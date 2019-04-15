@@ -143,7 +143,7 @@ public class CalculatedValue{
 				final String replace = mv.group(0);
 				dataValue = dataValue.replace(replace, UUID.randomUUID().toString());
 				
-				javaCode = javaCode.replace(replace, "\", " + ScriptHeader.ATS_PROJECT_GAV_VAR + ", \"");
+				javaCode = javaCode.replace(replace, "\", " + ScriptHeader.ATS_PROJECT_GAV_FUNC + ", \"");
 			}
 
 			mv = KEY_REGEXP.matcher(dataValue);

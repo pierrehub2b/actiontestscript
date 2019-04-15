@@ -27,10 +27,6 @@ public class ActionChannelClose extends ActionChannel {
 	public static final String SCRIPT_CLOSE_LABEL = SCRIPT_LABEL + "close";
 	
 	public ActionChannelClose() {}
-
-	public ActionChannelClose(Script script) {
-		super(script, "");
-	}
 	
 	public ActionChannelClose(Script script, String name) {
 		super(script, name);

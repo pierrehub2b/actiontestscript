@@ -39,7 +39,6 @@ import com.ats.script.actions.ActionAssertCount;
 import com.ats.script.actions.ActionAssertProperty;
 import com.ats.script.actions.ActionAssertValue;
 import com.ats.script.actions.ActionCallscript;
-import com.ats.script.actions.ActionChannel;
 import com.ats.script.actions.ActionChannelClose;
 import com.ats.script.actions.ActionChannelStart;
 import com.ats.script.actions.ActionChannelSwitch;
@@ -59,6 +58,11 @@ import com.ats.script.actions.ActionWindow;
 import com.ats.script.actions.ActionWindowResize;
 import com.ats.script.actions.ActionWindowState;
 import com.ats.script.actions.ActionWindowSwitch;
+import com.ats.script.actions.neoload.ActionNeoload;
+import com.ats.script.actions.neoload.ActionNeoloadContainer;
+import com.ats.script.actions.neoload.ActionNeoloadRecord;
+import com.ats.script.actions.neoload.ActionNeoloadStart;
+import com.ats.script.actions.neoload.ActionNeoloadStop;
 
 public class Lexer {
 
@@ -122,13 +126,15 @@ public class Lexer {
 
 			String actionType = dataArray.remove(0).trim().toLowerCase();
 
+			String optionsFlat = "";
 			ArrayList<String> options = new ArrayList<String>();
 			boolean stopExec = true;
 
 			Matcher matcher = ACTION_PATTERN.matcher(actionType);
 			if (matcher.find()){
 				actionType = matcher.group(1).trim();
-				options = new ArrayList<>(Arrays.asList(matcher.group(2).split(",")));
+				optionsFlat = matcher.group(2).trim();
+				options = new ArrayList<>(Arrays.asList(optionsFlat.split(",")));
 				stopExec = !options.remove(ActionExecute.NO_FAIL_LABEL);
 			}
 
@@ -162,10 +168,37 @@ public class Lexer {
 				// Channel close action
 				//-----------------------
 
+				String cname = "";
 				if(dataArray.size() > 0) {
-					script.addAction(new ActionChannelClose(script, dataArray.remove(0).trim()), disabled);
+					cname = dataArray.remove(0).trim();
+				}				
+				script.addAction(new ActionChannelClose(script, cname), disabled);
+
+			}else if(ActionNeoloadStart.SCRIPT_LABEL.equals(actionType) || ActionNeoloadStop.SCRIPT_LABEL.equals(actionType)){
+
+				//-------------------------------
+				// Neoload start and stop actions
+				//-------------------------------
+
+				String userData = null;
+				if(dataArray.size() > 0) {
+					userData = dataArray.remove(0).trim();
+				}
+
+				optionsFlat = optionsFlat.toLowerCase();
+				
+				if(ActionNeoloadStart.SCRIPT_LABEL.equals(actionType)) {
+					script.addAction(new ActionNeoloadStart(script, optionsFlat, userData), disabled);
 				}else {
-					script.addAction(new ActionChannelClose(script), disabled);
+					String userOptions = "";
+					if(userData != null) {
+						matcher = ACTION_PATTERN.matcher(userData);
+						if (matcher.find()){
+							userData = matcher.group(1).trim();
+							userOptions = matcher.group(2).trim().toLowerCase();
+						}
+					}
+					script.addAction(new ActionNeoloadStop(script, optionsFlat, userData, userOptions), disabled);
 				}
 
 			}else if(dataArray.size() > 0){
@@ -187,7 +220,7 @@ public class Lexer {
 					//-----------------------
 
 					if(dataArray.size() > 0){
-						script.addAction(new ActionChannelStart(script, dataOne, new CalculatedValue(script, dataArray.remove(0).trim()), dataArray, options.contains(ActionChannel.SCRIPT_NEOLOAD)), disabled);
+						script.addAction(new ActionChannelStart(script, dataOne, new CalculatedValue(script, dataArray.remove(0).trim()), dataArray, options.contains(ActionNeoload.SCRIPT_NEOLOAD_LABEL)), disabled);
 					}
 
 				}else if(ActionText.SCRIPT_LABEL.equals(actionType)){
@@ -196,7 +229,7 @@ public class Lexer {
 					// Text action
 					//-----------------------
 
-					script.addAction(new ActionText(script, actionType, stopExec, options, dataOne, dataArray), disabled);
+					script.addAction(new ActionText(script, stopExec, options, dataOne, dataArray), disabled);
 
 				}else if(actionType.startsWith(ActionApi.SCRIPT_LABEL)){
 
@@ -205,13 +238,12 @@ public class Lexer {
 					//-----------------------
 
 					String headerData = "";
-					
+
 					matcher = ACTION_PATTERN.matcher(dataOne);
 					if (matcher.find()){
 						dataOne = matcher.group(1).trim();
 						headerData = matcher.group(2).trim();
 					}
-					
 					script.addAction(new ActionApi(script, actionType, dataOne, headerData, dataArray), disabled);
 
 				}else if(ActionWindowResize.SCRIPT_RESIZE_LABEL.equals(actionType)){
@@ -221,9 +253,9 @@ public class Lexer {
 					//-----------------------
 
 					script.addAction(new ActionWindowResize(script, dataOne), disabled);
-					
+
 				}else if(ActionWindowState.SCRIPT_STATE_LABEL.equals(actionType)){
-					
+
 					script.addAction(new ActionWindowState(script, dataOne), disabled);
 
 				}else if(actionType.startsWith(ActionWindow.SCRIPT_LABEL)){
@@ -236,7 +268,7 @@ public class Lexer {
 					try {
 						num = Integer.parseInt(dataOne);
 					}catch(NumberFormatException e) {}
-					
+
 					script.addAction(new ActionWindowSwitch(script, num), disabled);
 
 					if(ActionWindowState.SCRIPT_CLOSE_LABEL.equals(actionType)){
@@ -356,7 +388,7 @@ public class Lexer {
 					// Assert count action
 					//-----------------------
 
-					script.addAction(new ActionAssertCount(script, stopExec, options, dataArray, dataOne), disabled);
+					script.addAction(new ActionAssertCount(script, stopExec, options, dataOne, dataArray), disabled);
 
 				}else if(ActionAssertProperty.SCRIPT_LABEL.equals(actionType)){
 
@@ -364,7 +396,7 @@ public class Lexer {
 					// Assert property action
 					//-----------------------
 
-					script.addAction(new ActionAssertProperty(script, stopExec, options, dataArray, dataOne), disabled);
+					script.addAction(new ActionAssertProperty(script, stopExec, options, dataOne, dataArray), disabled);
 
 				}else if(ActionAssertValue.SCRIPT_LABEL.equals(actionType)){
 
@@ -372,7 +404,25 @@ public class Lexer {
 					// Assert value action
 					//-----------------------
 
-					script.addAction(new ActionAssertValue(script, stopExec, dataOne.trim()), disabled);
+					script.addAction(new ActionAssertValue(script, stopExec, dataOne), disabled);
+
+				}else if(ActionNeoloadContainer.SCRIPT_LABEL.equals(actionType)){
+
+					//--------------------------
+					// Neoload container action
+					//--------------------------
+
+					if(dataOne.length() > 0){
+						script.addAction(new ActionNeoloadContainer(script, dataOne), disabled);
+					}
+
+				}else if(ActionNeoloadRecord.SCRIPT_LABEL.equals(actionType)){
+
+					//--------------------------
+					// Neoload record actions
+					//--------------------------
+
+					script.addAction(new ActionNeoloadRecord(script, dataOne), disabled);
 
 				}
 			}

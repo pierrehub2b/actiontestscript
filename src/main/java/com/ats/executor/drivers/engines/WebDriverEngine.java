@@ -57,6 +57,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.RemoteWebElement;
 
 import com.ats.driver.ApplicationProperties;
+import com.ats.driver.AtsManager;
 import com.ats.element.AtsBaseElement;
 import com.ats.element.AtsElement;
 import com.ats.element.FoundElement;
@@ -143,19 +144,21 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	protected void launchDriver(ActionStatus status, MutableCapabilities cap) {
 
-		final int maxTrySearch = DriverManager.ATS.getMaxTrySearch();
-		final int maxTryProperty = DriverManager.ATS.getMaxTryProperty();
+		final AtsManager ats = DriverManager.ATS;
+		final int maxTrySearch = ats.getMaxTrySearch();
+		final int maxTryProperty = ats.getMaxTryProperty();
 
-		final int scriptTimeout = DriverManager.ATS.getScriptTimeOut();
-		final int pageLoadTimeout = DriverManager.ATS.getPageloadTimeOut();
-		final int watchdog = DriverManager.ATS.getWatchDogTimeOut();		
+		final int scriptTimeout = ats.getScriptTimeOut();
+		final int pageLoadTimeout = ats.getPageloadTimeOut();
+		final int watchdog = ats.getWatchDogTimeOut();		
 		
-		/*if(channel.isNeoload() && DriverManager.ATS.getNeoloadRecorder() != null) {
-			cap.setCapability(CapabilityType.PROXY, DriverManager.ATS.getNeoloadRecorder().getProxy());
+		if(channel.isNeoload()) {
+			channel.setNeoloadDesignApi(ats.getNeoloadDesignApi());
+			cap.setCapability(CapabilityType.PROXY, ats.getNeoloadProxy());
 		}else {
 			channel.setNeoload(false);
-			cap.setCapability(CapabilityType.PROXY, DriverManager.ATS.getProxy().getValue());
-		}*/
+			cap.setCapability(CapabilityType.PROXY, ats.getProxy());
+		}
 		
 		cap.setCapability(CapabilityType.SUPPORTS_FINDING_BY_CSS, false);
 		cap.setCapability(CapabilityType.HAS_NATIVE_EVENTS, false);
@@ -487,8 +490,8 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		switchWindow(currentWindow);
 
-		TestBound dimension = new TestBound();
-		TestBound subDimension = new TestBound();
+		final TestBound dimension = new TestBound();
+		final TestBound subDimension = new TestBound();
 
 		final ArrayList<Double> response = (ArrayList<Double>) runJavaScript(JS_DOCUMENT_SIZE);
 

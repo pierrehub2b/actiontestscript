@@ -25,7 +25,6 @@ import com.ats.script.Script;
 public class ActionChannel extends Action{
 
 	public static final String SCRIPT_LABEL = "channel-";
-	public static final String SCRIPT_NEOLOAD = "neoload";
 
 	private String name = "";
 	private boolean neoload = false;

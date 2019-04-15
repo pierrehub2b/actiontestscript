@@ -32,6 +32,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.http.HttpHost;
+import org.openqa.selenium.Proxy;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -57,12 +59,13 @@ public class AtsManager {
 	private static final int SCRIPT_TIMEOUT = 60;
 	private static final int PAGELOAD_TIMEOUT = 120;
 	private static final int WATCHDOG_TIMEOUT = 200;
+	private static final int WEBSERVICE_TIMEOUT = 20;
 
 	private static final int MAX_TRY_SEARCH = 15;
 	private static final int MAX_TRY_PROPERTY = 10;
-	
+
 	private static final int SCROLL_UNIT = 100;
-	
+
 	//-----------------------------------------------------------------------------------------------------
 	//-----------------------------------------------------------------------------------------------------
 
@@ -74,18 +77,22 @@ public class AtsManager {
 
 	private double applicationX = APPLICATION_X;
 	private double applicationY = APPLICATION_Y;
-	
+
 	private int scrollUnit = SCROLL_UNIT;
 
 	private int scriptTimeOut = SCRIPT_TIMEOUT;
 	private int pageloadTimeOut = PAGELOAD_TIMEOUT;
 	private int watchDogTimeOut = WATCHDOG_TIMEOUT;
+	
+	private int webServiceTimeOut = WEBSERVICE_TIMEOUT;
 
 	private int maxTrySearch = MAX_TRY_SEARCH;
 	private int maxTryProperty = MAX_TRY_PROPERTY;
 
 	private AtsProxy proxy;
-	private NeoloadRecorder neoloadRecorder;
+	private AtsProxy neoloadProxy;
+
+	private String neoloadDesignApi;
 
 	private List<ApplicationProperties> applicationsList = new ArrayList<ApplicationProperties>();
 
@@ -119,7 +126,7 @@ public class AtsManager {
 			ATS.logError("ATS folder not found -> " + atsHome);
 			System.exit(0);
 		}
-		
+
 		if(proxy == null) {
 			proxy = new AtsProxy(AtsProxy.SYSTEM);
 		}
@@ -130,7 +137,7 @@ public class AtsManager {
 		final File xmlFile = propertiesPath.toFile();
 		if(xmlFile.exists()) {
 			try {
-				
+
 				final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 
 				try {
@@ -139,10 +146,10 @@ public class AtsManager {
 
 					doc.getDocumentElement().normalize();
 
-					NodeList browsers = doc.getElementsByTagName("browser");
-					if(browsers != null && browsers.getLength() > 0) {
-						for (int temp = 0; temp < browsers.getLength(); temp++) {
-							Node browser = browsers.item(temp);
+					NodeList nl0 = doc.getElementsByTagName("browser");
+					if(nl0 != null && nl0.getLength() > 0) {
+						for (int temp = 0; temp < nl0.getLength(); temp++) {
+							Node browser = nl0.item(temp);
 							if (browser.getNodeType() == Node.ELEMENT_NODE) {
 								Element browserElement = (Element) browser;
 								if(browserElement.hasChildNodes() && browserElement.getChildNodes().getLength() > 1) {
@@ -154,16 +161,19 @@ public class AtsManager {
 											String wait = null;
 											String check = null;
 											String lang = null;
+											String driver = null;
 
 											nodeList = browserElement.getElementsByTagName("path");
 											if(nodeList != null && nodeList.getLength() > 0) {
 												if(nodeList.item(0).getChildNodes().getLength() > 0) {
 													path = nodeList.item(0).getChildNodes().item(0).getNodeValue();
+												}
+											}
 
-													final File checkFile = new File(path);
-													if(!checkFile.exists() || !checkFile.isFile()) {
-														path = null;
-													}
+											nodeList = browserElement.getElementsByTagName("driver");
+											if(nodeList != null && nodeList.getLength() > 0) {
+												if(nodeList.item(0).getChildNodes().getLength() > 0) {
+													driver = nodeList.item(0).getChildNodes().item(0).getNodeValue();
 												}
 											}
 
@@ -173,21 +183,21 @@ public class AtsManager {
 													lang = nodeList.item(0).getChildNodes().item(0).getNodeValue();
 												}
 											}
-											
+
 											nodeList = browserElement.getElementsByTagName("waitAction");
 											if(nodeList != null && nodeList.getLength() > 0) {
 												if(nodeList.item(0).getChildNodes().getLength() > 0) {
 													wait = nodeList.item(0).getChildNodes().item(0).getNodeValue();
 												}
 											}
-																					
+
 											nodeList = browserElement.getElementsByTagName("waitProperty");
 											if(nodeList != null && nodeList.getLength() > 0) {
 												if(nodeList.item(0).getChildNodes().getLength() > 0) {
 													check = nodeList.item(0).getChildNodes().item(0).getNodeValue();
 												}
 											}
-											addApplicationProperties(ApplicationProperties.BROWSER_TYPE, name, path, wait, check, lang);
+											addApplicationProperties(ApplicationProperties.BROWSER_TYPE, name, driver, path, wait, check, lang);
 										}
 									}
 								}
@@ -195,30 +205,30 @@ public class AtsManager {
 						}
 					}
 
-					NodeList boundNode = doc.getElementsByTagName("appBounding");
-					if(boundNode != null && boundNode.getLength() > 0) {
-						NodeList bound = ((Element)boundNode.item(0)).getElementsByTagName("width");
+					nl0 = doc.getElementsByTagName("appBounding");
+					if(nl0 != null && nl0.getLength() > 0) {
+						NodeList bound = ((Element)nl0.item(0)).getElementsByTagName("width");
 						if(bound != null && bound.getLength() > 0) {
 							try {
 								applicationWidth = Double.parseDouble(bound.item(0).getChildNodes().item(0).getNodeValue());
 							}catch(NumberFormatException e){}
 						}
 
-						bound = ((Element)boundNode.item(0)).getElementsByTagName("height");
+						bound = ((Element)nl0.item(0)).getElementsByTagName("height");
 						if(bound != null && bound.getLength() > 0) {
 							try {
 								applicationHeight = Double.parseDouble(bound.item(0).getChildNodes().item(0).getNodeValue());
 							}catch(NumberFormatException e){}
 						}
 
-						bound = ((Element)boundNode.item(0)).getElementsByTagName("x");
+						bound = ((Element)nl0.item(0)).getElementsByTagName("x");
 						if(bound != null && bound.getLength() > 0) {
 							try {
 								applicationX = Double.parseDouble(bound.item(0).getChildNodes().item(0).getNodeValue());
 							}catch(NumberFormatException e){}
 						}
 
-						bound = ((Element)boundNode.item(0)).getElementsByTagName("y");
+						bound = ((Element)nl0.item(0)).getElementsByTagName("y");
 						if(bound != null && bound.getLength() > 0) {
 							try {
 								applicationY = Double.parseDouble(bound.item(0).getChildNodes().item(0).getNodeValue());
@@ -226,115 +236,176 @@ public class AtsManager {
 						}
 					}
 
-					final NodeList timeOutNode = doc.getElementsByTagName("timeOut");
-					if(timeOutNode != null && timeOutNode.getLength() > 0) {
-						
-						NodeList timeOut = ((Element)timeOutNode.item(0)).getElementsByTagName("script");
+					nl0 = doc.getElementsByTagName("timeOut");
+					if(nl0 != null && nl0.getLength() > 0) {
+						NodeList timeOut = ((Element)nl0.item(0)).getElementsByTagName("script");
 						if(timeOut != null && timeOut.getLength() > 0) {
 							try {
 								scriptTimeOut = Integer.parseInt(timeOut.item(0).getChildNodes().item(0).getNodeValue());
 							}catch(NumberFormatException e){}
 						}
 
-						timeOut = ((Element)timeOutNode.item(0)).getElementsByTagName("pageLoad");
+						timeOut = ((Element)nl0.item(0)).getElementsByTagName("pageLoad");
 						if(timeOut != null && timeOut.getLength() > 0) {
 							try {
 								pageloadTimeOut = Integer.parseInt(timeOut.item(0).getChildNodes().item(0).getNodeValue());
 							}catch(NumberFormatException e){}
 						}
-						
-						timeOut = ((Element)timeOutNode.item(0)).getElementsByTagName("watchDog");
+
+						timeOut = ((Element)nl0.item(0)).getElementsByTagName("watchDog");
 						if(timeOut != null && timeOut.getLength() > 0) {
 							try {
 								watchDogTimeOut = Integer.parseInt(timeOut.item(0).getChildNodes().item(0).getNodeValue());
 							}catch(NumberFormatException e){}
 						}
+						
+						timeOut = ((Element)nl0.item(0)).getElementsByTagName("webService");
+						if(timeOut != null && timeOut.getLength() > 0) {
+							try {
+								webServiceTimeOut = Integer.parseInt(timeOut.item(0).getChildNodes().item(0).getNodeValue());
+							}catch(NumberFormatException e){}
+						}
 					}
 
-					final NodeList maxTryNodeList = doc.getElementsByTagName("maxTry");
-					if(maxTryNodeList != null && maxTryNodeList.getLength() > 0) {
-						NodeList maxTryNode = ((Element)maxTryNodeList.item(0)).getElementsByTagName("searchElement");
+					nl0 = doc.getElementsByTagName("maxTry");
+					if(nl0 != null && nl0.getLength() > 0) {
+						NodeList maxTryNode = ((Element)nl0.item(0)).getElementsByTagName("searchElement");
 						if(maxTryNode != null && maxTryNode.getLength() > 0) {
 							try {
 								maxTrySearch = Integer.parseInt(maxTryNode.item(0).getChildNodes().item(0).getNodeValue());
 							}catch(NumberFormatException e){}
 						}
-						
-						maxTryNode = ((Element)maxTryNodeList.item(0)).getElementsByTagName("getProperty");
+
+						maxTryNode = ((Element)nl0.item(0)).getElementsByTagName("getProperty");
 						if(maxTryNode != null && maxTryNode.getLength() > 0) {
 							try {
 								maxTryProperty = Integer.parseInt(maxTryNode.item(0).getChildNodes().item(0).getNodeValue());
 							}catch(NumberFormatException e){}
 						}
 					}
-					
-					final NodeList proxyNode = doc.getElementsByTagName("proxy");
-					if(proxyNode != null && proxyNode.getLength() > 0) {
-						
-						NodeList data = ((Element)proxyNode.item(0)).getElementsByTagName("type");
+
+					nl0 = doc.getElementsByTagName("proxy");
+					if(nl0 != null && nl0.getLength() > 0) {
+						NodeList data = ((Element)nl0.item(0)).getElementsByTagName("type");
 						if(data != null && data.getLength() > 0) {
-							
+
 							String type = data.item(0).getChildNodes().item(0).getNodeValue();
-							
+
 							if(AtsProxy.DIRECT.equals(type)) {
-								
+
 								proxy = new AtsProxy(AtsProxy.DIRECT);
-								
+
 							}else if(AtsProxy.AUTO.equals(type)) {
-								
+
 								proxy = new AtsProxy(AtsProxy.AUTO);
-								
+
 							}else if(AtsProxy.MANUAL.equals(type)) {
-								
+
 								String host = null;
 								int port = -1;
-								
-								data = ((Element)proxyNode.item(0)).getElementsByTagName("host");
+
+								data = ((Element)nl0.item(0)).getElementsByTagName("host");
 								if(data != null && data.getLength() > 0) {
 									host = data.item(0).getChildNodes().item(0).getNodeValue();
 								}
-								
-								data = ((Element)proxyNode.item(0)).getElementsByTagName("port");
+
+								data = ((Element)nl0.item(0)).getElementsByTagName("port");
 								if(data != null && data.getLength() > 0) {
 									try {
 										port = Integer.parseInt(data.item(0).getChildNodes().item(0).getNodeValue());
 									}catch(NumberFormatException e){}
 								}
-								
+
 								if(host != null && port > 0) {
 									proxy = new AtsProxy(AtsProxy.MANUAL, host, port);
 								}
 							}
 						}
 					}
-					
-					final NodeList neoloadNode = doc.getElementsByTagName("neoload-recorder");
-					if(neoloadNode != null && neoloadNode.getLength() > 0) {
-						
-						String host = null;
-						int port = 0;
-						
-						NodeList data = ((Element)proxyNode.item(0)).getElementsByTagName("host");
-						if(data != null && data.getLength() > 0) {
-							host = data.item(0).getChildNodes().item(0).getNodeValue();
-						}
-						
-						data = ((Element)proxyNode.item(0)).getElementsByTagName("port");
-						if(data != null && data.getLength() > 0) {
-							try {
-								port = Integer.parseInt(data.item(0).getChildNodes().item(0).getNodeValue());
-							}catch(NumberFormatException e){}
-						}
-						
-						if(host != null && port > 0) {
-							neoloadRecorder = new NeoloadRecorder(host, port);
+
+					nl0 = doc.getElementsByTagName("recorder");
+					if(nl0 != null && nl0.getLength() > 0) {
+						for (int temp = 0; temp < nl0.getLength(); temp++) {
+							Node recorder = nl0.item(temp);
+							if (recorder.getNodeType() == Node.ELEMENT_NODE) {
+								Element recorderElement = (Element) recorder;
+								if(recorderElement.hasChildNodes() && recorderElement.getChildNodes().getLength() > 1) {
+
+									String host = null;
+									NodeList nl = recorderElement.getElementsByTagName("host");
+									if(nl != null && nl.getLength() > 0) {
+										if(nl.item(0).getChildNodes().getLength() > 0) {
+											host = nl.item(0).getChildNodes().item(0).getNodeValue();
+										}
+									}
+
+
+									String port = null;
+									nl = recorderElement.getElementsByTagName("port");
+									if(nl != null && nl.getLength() > 0) {
+										if(nl.item(0).getChildNodes().getLength() > 0) {
+											port = nl.item(0).getChildNodes().item(0).getNodeValue();
+										}
+									}
+
+									if(host != null && port != null) {
+										neoloadProxy = new AtsProxy(host, port);
+									}
+								}
+							}
 						}
 					}
 
-					final NodeList applications = doc.getElementsByTagName("application");
-					if(applications != null && applications.getLength() > 0) {
-						for (int temp = 0; temp < applications.getLength(); temp++) {
-							Node application = applications.item(temp);
+					if(neoloadProxy != null) {
+						nl0 = doc.getElementsByTagName("design");
+						if(nl0 != null && nl0.getLength() > 0) {
+							for (int temp = 0; temp < nl0.getLength(); temp++) {
+								Node design = nl0.item(temp);
+								if (design.getNodeType() == Node.ELEMENT_NODE) {
+									Element designElement = (Element) design;
+									if(designElement.hasChildNodes() && designElement.getChildNodes().getLength() > 1) {
+
+										String api = null;
+										NodeList nl = designElement.getElementsByTagName("api");
+										if(nl != null && nl.getLength() > 0) {
+											if(nl.item(0).getChildNodes().getLength() > 0) {
+												api = nl.item(0).getChildNodes().item(0).getNodeValue();
+												if(!api.startsWith("/")) {
+													api = "/" + api;
+												}
+												if(!api.endsWith("/")) {
+													api = api + "/";
+												}
+											}
+										}
+
+
+										String port = null;
+										nl = designElement.getElementsByTagName("port");
+										if(nl != null && nl.getLength() > 0) {
+											if(nl.item(0).getChildNodes().getLength() > 0) {
+												port = nl.item(0).getChildNodes().item(0).getNodeValue();
+											}
+										}
+
+										if(api != null && port != null) {
+											try {
+												final int portValue = Integer.parseInt(port);
+												if(portValue > 0) {
+													neoloadDesignApi = "http://" + neoloadProxy.getHost() + ":" + portValue + api;
+												}
+											}catch (NumberFormatException e) {}
+										}
+									}
+								}
+							}
+						}
+					}
+
+					nl0 = doc.getElementsByTagName("application");
+					if(nl0 != null && nl0.getLength() > 0) {
+						for (int temp = 0; temp < nl0.getLength(); temp++) {
+							Node application = nl0.item(temp);
 							if (application.getNodeType() == Node.ELEMENT_NODE) {
 								Element applicationElement = (Element) application;
 								if(applicationElement.hasChildNodes() && applicationElement.getChildNodes().getLength() > 1) {
@@ -356,14 +427,14 @@ public class AtsManager {
 													}
 												}
 											}
-											
+
 											nodeList = applicationElement.getElementsByTagName("waitAction");
 											if(nodeList != null && nodeList.getLength() > 0) {
 												if(nodeList.item(0).getChildNodes().getLength() > 0) {
 													wait = nodeList.item(0).getChildNodes().item(0).getNodeValue();
 												}
 											}
-																							
+
 											addApplicationProperties(ApplicationProperties.DESKTOP_TYPE, name, path, wait, "", null);
 										}
 									}
@@ -371,11 +442,11 @@ public class AtsManager {
 							}
 						}
 					}
-					
-					final NodeList mobileApps = doc.getElementsByTagName("mobile");
-					if(mobileApps != null && mobileApps.getLength() > 0) {
-						for (int temp = 0; temp < mobileApps.getLength(); temp++) {
-							Node app = mobileApps.item(temp);
+
+					nl0 = doc.getElementsByTagName("mobile");
+					if(nl0 != null && nl0.getLength() > 0) {
+						for (int temp = 0; temp < nl0.getLength(); temp++) {
+							Node app = nl0.item(temp);
 							if (app.getNodeType() == Node.ELEMENT_NODE) {
 								Element mobileApp = (Element) app;
 								if(mobileApp.hasChildNodes() && mobileApp.getChildNodes().getLength() > 1) {
@@ -392,21 +463,21 @@ public class AtsManager {
 													url = nodeList.item(0).getChildNodes().item(0).getNodeValue();
 												}
 											}
-											
+
 											nodeList = mobileApp.getElementsByTagName("package");
 											if(nodeList != null && nodeList.getLength() > 0) {
 												if(nodeList.item(0).getChildNodes().getLength() > 0) {
 													url += "/" + nodeList.item(0).getChildNodes().item(0).getNodeValue();
 												}
 											}
-											
+
 											nodeList = mobileApp.getElementsByTagName("waitAction");
 											if(nodeList != null && nodeList.getLength() > 0) {
 												if(nodeList.item(0).getChildNodes().getLength() > 0) {
 													wait = nodeList.item(0).getChildNodes().item(0).getNodeValue();
 												}
 											}
-											
+
 											addApplicationProperties(ApplicationProperties.MOBILE_TYPE, name, url, wait, "", null);
 										}
 									}
@@ -414,11 +485,11 @@ public class AtsManager {
 							}
 						}
 					}
-					
-					final NodeList apiApps = doc.getElementsByTagName("api");
-					if(apiApps != null && apiApps.getLength() > 0) {
-						for (int temp = 0; temp < apiApps.getLength(); temp++) {
-							Node app = apiApps.item(temp);
+
+					nl0 = doc.getElementsByTagName("api");
+					if(nl0 != null && nl0.getLength() > 0) {
+						for (int temp = 0; temp < nl0.getLength(); temp++) {
+							Node app = nl0.item(temp);
 							if (app.getNodeType() == Node.ELEMENT_NODE) {
 								Element mobileApp = (Element) app;
 								if(mobileApp.hasChildNodes() && mobileApp.getChildNodes().getLength() > 1) {
@@ -435,14 +506,14 @@ public class AtsManager {
 													url = nodeList.item(0).getChildNodes().item(0).getNodeValue();
 												}
 											}
-											
+
 											nodeList = mobileApp.getElementsByTagName("waitAction");
 											if(nodeList != null && nodeList.getLength() > 0) {
 												if(nodeList.item(0).getChildNodes().getLength() > 0) {
 													wait = nodeList.item(0).getChildNodes().item(0).getNodeValue();
 												}
 											}
-											
+
 											addApplicationProperties(ApplicationProperties.API_TYPE, name, url, wait, "", null);
 										}
 									}
@@ -450,7 +521,7 @@ public class AtsManager {
 							}
 						}
 					}
-					
+
 				} catch (ParserConfigurationException e) {
 
 				} catch (SAXException e) {
@@ -466,17 +537,21 @@ public class AtsManager {
 	}
 
 	private void addApplicationProperties(int type, String name, String path, String wait, String check, String lang) {
+		addApplicationProperties(type, name, null, path, wait, check, lang);
+	}
+
+	private void addApplicationProperties(int type, String name, String driver, String path, String wait, String check, String lang) {
 		int waitValue = -1;
 		try {
 			waitValue = Integer.parseInt(wait);
 		}catch(NumberFormatException e){}
-		
+
 		int checkProperty = -1;
 		try {
 			checkProperty = Integer.parseInt(check);
 		}catch(NumberFormatException e){}
 
-		applicationsList.add(new ApplicationProperties(type, name, path, waitValue, checkProperty, lang));
+		applicationsList.add(new ApplicationProperties(type, name, driver, path, waitValue, checkProperty, lang));
 	}
 
 	//------------------------------------------------------------------------------------------------------------------
@@ -490,15 +565,7 @@ public class AtsManager {
 				return properties;
 			}
 		}
-		return null;
-	}
-
-	public AtsProxy getProxy() {
-		return proxy;
-	}
-
-	public NeoloadRecorder getNeoloadRecorder() {
-		return neoloadRecorder;
+		return new ApplicationProperties(name);
 	}
 
 	public int getScriptTimeOut() {
@@ -508,9 +575,13 @@ public class AtsManager {
 	public int getPageloadTimeOut() {
 		return pageloadTimeOut;
 	}
-	
+
 	public int getWatchDogTimeOut() {
 		return watchDogTimeOut;
+	}
+	
+	public int getWebServiceTimeOut() {
+		return webServiceTimeOut;
 	}
 
 	public TestBound getApplicationBound() {
@@ -528,12 +599,38 @@ public class AtsManager {
 	public int getMaxTrySearch() {
 		return maxTrySearch;
 	}
-	
+
 	public int getMaxTryProperty() {
 		return maxTryProperty;
 	}
-	
+
 	public int getScrollUnit() {
 		return scrollUnit;
+	}
+	
+	public String getNeoloadDesignApi() {
+		return neoloadDesignApi;
+	}
+
+	public HttpHost getNeoloadProxyHttpHost() {
+		if(neoloadProxy != null) {
+			return neoloadProxy.getHttpHost();
+		}
+		return getProxyHttpHost();
+	}
+
+	public HttpHost getProxyHttpHost() {
+		return proxy.getHttpHost();
+	}
+
+	public Proxy getNeoloadProxy() {
+		if(neoloadProxy != null) {
+			return neoloadProxy.getValue();
+		}
+		return getProxy();
+	}
+
+	public Proxy getProxy() {
+		return proxy.getValue();
 	}
 }

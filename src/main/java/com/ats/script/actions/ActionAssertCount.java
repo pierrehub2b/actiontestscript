@@ -40,7 +40,7 @@ public class ActionAssertCount extends ActionExecuteElement {
 
 	public ActionAssertCount() {}
 
-	public ActionAssertCount(ScriptLoader script, boolean stop, ArrayList<String> options, ArrayList<String> objectArray, String data) {
+	public ActionAssertCount(ScriptLoader script, boolean stop, ArrayList<String> options, String data, ArrayList<String> objectArray) {
 		super(script, stop, options, objectArray);
 
 		Matcher m = COUNT_PATTERN.matcher(data);

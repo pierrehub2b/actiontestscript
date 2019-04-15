@@ -90,8 +90,7 @@ public class ActionExecuteElement extends ActionExecute {
 		codeBuilder.append(", ");
 
 		if(searchElement == null){
-			codeBuilder.append(ActionTestScript.JAVA_ROOT_FUNCTION_NAME);
-			codeBuilder.append("()");
+			codeBuilder.append("null");
 		}else {
 			codeBuilder.append(searchElement.getJavaCode());
 		}

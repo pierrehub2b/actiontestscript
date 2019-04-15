@@ -24,6 +24,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.http.Header;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpDelete;
@@ -37,7 +38,7 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
-
+import org.apache.http.client.config.RequestConfig.Builder;
 import com.ats.executor.ActionStatus;
 import com.ats.script.actions.ActionApi;
 
@@ -46,21 +47,25 @@ public class RestApiExecutor extends ApiExecutor {
 	private HttpRequestBase request;
 	private CloseableHttpClient httpClient;
 
-	public RestApiExecutor(String authentication, String authenticationValue, String wsUrl) {
+	public RestApiExecutor(HttpHost proxy, int timeout, String authentication, String authenticationValue, String wsUrl) {
 
-		super(authentication, authenticationValue);
+		super(timeout, authentication, authenticationValue);
 		
 		if(!wsUrl.endsWith("/")) {
 			wsUrl += "/";
 		}
 		this.setUri(wsUrl);
 
-		RequestConfig requestConfig = RequestConfig.custom()
-				.setConnectTimeout(20000)
-				.setConnectionRequestTimeout(10000)
-				.setSocketTimeout(5000).build();
+		final Builder requestBuilder = RequestConfig.custom()
+				.setConnectTimeout(timeout)
+				.setConnectionRequestTimeout(timeout)
+				.setSocketTimeout(timeout);
+		
+		if(proxy != null) {
+			requestBuilder.setProxy(proxy);
+		}
 
-		httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
+		httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestBuilder.build()).build();
 	}
 	
 	private String getContentType(String value) {
@@ -77,8 +82,6 @@ public class RestApiExecutor extends ApiExecutor {
 	public void execute(ActionStatus status, final ActionApi api) {
 
 		super.execute(status, api);
-		
-		addHeader("Accept", "application/json");
 
 		String fullUri = uri.resolve(api.getMethod().getCalculated()).toString();
 		String parameters = "";
@@ -115,16 +118,23 @@ public class RestApiExecutor extends ApiExecutor {
 		headerProperties.forEach((k,v) -> request.addHeader(k, v));
 
 		try {
+			
 			final HttpResponse response = httpClient.execute(request);
-			final Header[] contentType = response.getHeaders("Content-Type");
-
-			if(contentType != null && contentType.length > 0) {
-				parseResponse(contentType[0].getValue(), EntityUtils.toString(response.getEntity()));
+			final int responseCode = response.getStatusLine().getStatusCode();
+			if(responseCode >= 200 && responseCode < 300) {
+				final Header[] contentType = response.getHeaders("Content-Type");
+				if(contentType != null && contentType.length > 0) {
+					parseResponse(contentType[0].getValue(), EntityUtils.toString(response.getEntity()));
+				}
+			}else {
+				status.setCode(ActionStatus.WEB_DRIVER_ERROR);
+				status.setMessage("REST response error : (code " + responseCode + ") " + response.getStatusLine().getReasonPhrase());
+				status.setPassed(false);
 			}
 
 		} catch (IOException e) {
 			status.setCode(ActionStatus.WEB_DRIVER_ERROR);
-			status.setMessage("Execute rest action error : " + e.getMessage());
+			status.setMessage("Execute REST action error : " + e.getMessage());
 			status.setPassed(false);
 		}
 	}

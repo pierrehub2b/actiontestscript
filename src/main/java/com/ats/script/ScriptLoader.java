@@ -123,77 +123,64 @@ public class ScriptLoader extends Script {
 
 		}else {
 
+			final StringBuilder code = new StringBuilder(header.getJavaCode(projectGav));
+
 			//-------------------------------------------------------------------------------------------------
-			// return values 
+			// variables 
+			//-------------------------------------------------------------------------------------------------
+			
+			code.append("\r\n\r\n\t\t//--------------\r\n\t\t// Variables ...\r\n\t\t//--------------\r\n");
+			
+			final List<Variable> variables = getVariables();
+			Collections.sort(variables);
+
+			for(Variable variable : variables){
+				code.append("\r\n\t\t");
+				code.append(variable.getJavaCode());
+				code.append(";");
+			}
+
+			//-------------------------------------------------------------------------------------------------
+			// actions 
 			//-------------------------------------------------------------------------------------------------
 
-			final StringBuilder returnValuesBuilder = new StringBuilder("");
+			code.append("\r\n\r\n\t\t//--------------\r\n\t\t// Actions   ...\r\n\t\t//--------------\r\n");
+
+			for(Action action : actions){
+				final String lineCode = action.getJavaCode();
+				if(lineCode != null && !action.isDisabled()){
+					code.append("\r\n\t\t");
+					code.append(ActionTestScript.JAVA_EXECUTE_FUNCTION_NAME);
+					code.append("(");code.append(action.getLine());code.append(",");
+					code.append(lineCode);
+					code.append(");");
+				}
+			}
+			
+			//-------------------------------------------------------------------------------------------------
+			// returns 
+			//-------------------------------------------------------------------------------------------------
+			
 			final CalculatedValue[] returnValues = getReturns();
-
 			if(returnValues != null) {
-				returnValuesBuilder.append("\r\n\r\n\t\t");
-				returnValuesBuilder.append(ActionTestScript.JAVA_RETURNS_FUNCTION_NAME);
-				returnValuesBuilder.append("(");
+				
+				code.append("\r\n\r\n\t\t//--------------\r\n\t\t// Returns   ...\r\n\t\t//--------------\r\n\r\n\t\t");
+				code.append(ActionTestScript.JAVA_RETURNS_FUNCTION_NAME);
+				code.append("(");
 
 				final ArrayList<String> returnValuesCode = new ArrayList<String>();
 				for(CalculatedValue ret : returnValues){
 					returnValuesCode.add(ret.getJavaCode());
 				}
 
-				returnValuesBuilder.append(String.join(", ", returnValuesCode));
-				returnValuesBuilder.append(");");
+				code.append(String.join(", ", returnValuesCode));
+				code.append(");");
 			}
-
-			//-------------------------------------------------------------------------------------------------
-			// variables 
-			//-------------------------------------------------------------------------------------------------
-
-			final StringBuilder variableCode = new StringBuilder("");
-			final List<Variable> variables = getVariables();
-			Collections.sort(variables);
-
-			for(Variable variable : variables){
-				variableCode.append(codeLine(variable.getJavaCode()));
-			}
-
-			final StringBuilder code = new StringBuilder(header.getJavaCode(projectGav));
-
-			code.append("\r\n\r\n\t\t//------------------------------------------------------------------------\r\n");
-			code.append("\t\t// Variables\r\n");
-			code.append("\t\t//------------------------------------------------------------------------\r\n");
-
-			code.append(variableCode);
-
-			//-------------------------------------------------------------------------------------------------
-			// actions 
-			//-------------------------------------------------------------------------------------------------
-
-			code.append("\r\n\r\n\t\t//------------------------------------------------------------------------\r\n");
-			code.append("\t\t// Actions\r\n");
-			code.append("\t\t//------------------------------------------------------------------------\r\n");
-
-			final StringBuilder actionCode = new StringBuilder("");
-			for(Action action : actions){
-				String lineCode = action.getJavaCode();
-				if(lineCode != null && !action.isDisabled()){
-					actionCode.append("\r\n\t\t");
-					actionCode.append(ActionTestScript.JAVA_EXECUTE_FUNCTION_NAME);
-					actionCode.append("(");actionCode.append(action.getLine());actionCode.append(",");
-					actionCode.append(lineCode);
-					actionCode.append(");");
-				}
-			}
-
-			code.append(actionCode);
-			code.append(returnValuesBuilder.toString());
+			
 			code.append("\r\n\t}\r\n}");
 
 			return code.toString();
 		}
-	}
-
-	private String codeLine(String code){
-		return "\r\n\t\t" + code + ";";
 	}
 
 	public final static byte[] UTF8_BOM = {(byte)0xEF, (byte)0xBB, (byte)0xBF};

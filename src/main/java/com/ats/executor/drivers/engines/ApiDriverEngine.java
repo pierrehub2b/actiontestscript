@@ -31,8 +31,10 @@ import java.util.function.Predicate;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.config.RequestConfig.Builder;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -48,6 +50,7 @@ import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
 import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.webservices.ApiExecutor;
 import com.ats.executor.drivers.engines.webservices.RestApiExecutor;
@@ -66,6 +69,17 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	public ApiDriverEngine(Channel channel, ActionStatus status, String path, DesktopDriver desktopDriver, ApplicationProperties props) {
 		
 		super(channel, desktopDriver, path, props, 0, 60);
+		
+		final int timeout = DriverManager.ATS.getWebServiceTimeOut() * 1000;
+		
+		HttpHost proxy = null;
+		if(channel.isNeoload()) {
+			channel.setNeoloadDesignApi(DriverManager.ATS.getNeoloadDesignApi());
+			proxy = DriverManager.ATS.getNeoloadProxyHttpHost();
+		}else {
+			channel.setNeoload(false);
+			proxy = DriverManager.ATS.getProxyHttpHost();
+		}
 
 		if(applicationPath == null) {
 			applicationPath = path;
@@ -76,12 +90,12 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		try {
 
-			RequestConfig requestConfig = RequestConfig.custom()
-					.setConnectTimeout(20000)
-					.setConnectionRequestTimeout(10000)
-					.setSocketTimeout(5000).build();
+			final Builder configBuilder = RequestConfig.custom()
+					.setConnectTimeout(timeout)
+					.setConnectionRequestTimeout(timeout)
+					.setSocketTimeout(timeout);
 
-			final CloseableHttpClient httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
+			final CloseableHttpClient httpClient = HttpClientBuilder.create().setDefaultRequestConfig(configBuilder.build()).build();
 			final HttpResponse response = httpClient.execute(new HttpGet(applicationPath));
 
 			if(response.getStatusLine().getStatusCode() >= 200 && response.getStatusLine().getStatusCode() < 300) {
@@ -113,7 +127,7 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		if(wsContent != null) {
 			if(wsContent.endsWith("definitions>")) {
 				try {
-					executor = new SoapApiExecutor(channel.getAuthentication(), channel.getAuthenticationValue(), wsContentFile, applicationPath);
+					executor = new SoapApiExecutor(proxy, timeout, channel.getAuthentication(), channel.getAuthenticationValue(), wsContentFile, applicationPath);
 					channel.setApplicationData(API, ActionApi.SOAP, ((SoapApiExecutor)executor).getOperations());
 				} catch (SAXException | IOException | ParserConfigurationException e) {
 					status.setCode(ActionStatus.CHANNEL_START_ERROR);
@@ -122,7 +136,7 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 				}
 			}else {
 				channel.setApplicationData(API, ActionApi.REST);
-				executor = new RestApiExecutor(channel.getAuthentication(), channel.getAuthenticationValue(), applicationPath);
+				executor = new RestApiExecutor(proxy, timeout, channel.getAuthentication(), channel.getAuthenticationValue(), applicationPath);
 			}
 		}else {
 			status.setCode(ActionStatus.CHANNEL_START_ERROR);

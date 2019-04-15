@@ -45,6 +45,8 @@ import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.ScriptHeader;
 import com.ats.script.actions.ActionApi;
 import com.ats.script.actions.ActionChannelStart;
+import com.ats.script.actions.neoload.ActionNeoload;
+import com.ats.script.actions.neoload.ActionNeoloadStop;
 import com.ats.tools.ResourceContent;
 import com.ats.tools.logger.IExecutionLogger;
 
@@ -52,7 +54,7 @@ public class Channel {
 
 	private IDriverEngine engine;
 
-	private ActionChannelStart action;
+	private ActionChannelStart actionStart;
 	private String application;
 	private boolean current = false;
 
@@ -65,13 +67,15 @@ public class Channel {
 	private String applicationVersion;
 	private String driverVersion;
 	private String os;
-	
+
 	private byte[] icon;
 	private String screenServer;
 	private ArrayList<String> operations = new ArrayList<String>();
 
 	private int winHandle = -1;
 	private long processId;
+
+	private String neoloadDesignApi;
 
 	//----------------------------------------------------------------------------------------------------------------------
 	// Constructor
@@ -87,18 +91,17 @@ public class Channel {
 
 		this.mainScript = script;
 		this.current = true;
-		this.action = action;
+		this.actionStart = action;
 		this.application = action.getApplication().getCalculated();
-		
 		this.engine = driverManager.getDriverEngine(this, status, new DesktopDriver(driverManager));
 
 		if(status.isPassed()) {
 			this.refreshLocation();
 		}else {
-			this.mainScript.sendLog(ActionStatus.CHANNEL_START_ERROR, status.getMessage());
+			status.setChannel(null);
 		}
 	}
-	
+
 	public ActionStatus newActionStatus() {
 		return new ActionStatus(this);
 	}
@@ -106,7 +109,7 @@ public class Channel {
 	public DesktopDriver getDesktopDriver() {
 		return engine.getDesktopDriver();
 	}
-	
+
 	public void cleanWinHandle() {
 		winHandle = -1;
 		toFront();
@@ -118,7 +121,7 @@ public class Channel {
 		}
 		return winHandle;
 	}
-	
+
 	public int getHandle(DesktopDriver drv, int index) {
 		List<DesktopWindow> processWindows = drv.getWindowsByPid(getProcessId());
 		if(processWindows != null && processWindows.size() > index) {
@@ -146,7 +149,7 @@ public class Channel {
 			getDesktopDriver().setChannelToFront(getHandle(getDesktopDriver()), processId);
 		}
 	}
-	
+
 	public void rootKeys(String keys){
 		getDesktopDriver().rootKeys(getHandle(getDesktopDriver()), keys);
 		actionTerminated();
@@ -155,7 +158,7 @@ public class Channel {
 	public byte[] getScreenShot(){
 		return screenShot(dimension);
 	}
-	
+
 	public String getSource(){
 		return engine.getSource();
 	}
@@ -171,35 +174,39 @@ public class Channel {
 		mainScript.sleep(50);
 		return getDesktopDriver().getScreenshotByte(dim.getX(), dim.getY(), dim.getWidth(), dim.getHeight());
 	}
-	
+
 	public void setApplicationData(String os, String version, String dVersion, long pid) {
 		setApplicationData(os, version, dVersion, pid, new byte[0], "");
 	}
-	
+
 	public String getAuthenticationValue() {
-		return action.getAuthenticationValue();
+		return actionStart.getAuthenticationValue();
 	}
-	
+
+	public void setNeoloadDesignApi(String value) {
+		this.neoloadDesignApi = value;
+	}
+
 	//--------------------------------------------------------------------------------------------------
 	// Api webservices init
 	//--------------------------------------------------------------------------------------------------
-	
+
 	public void setApplicationData(String os) {
 		this.os = os;
 		this.icon = ResourceContent.getAtsByteLogo();
 		this.driverVersion = AtsManager.getVersion();
 		this.dimension = new TestBound(0D, 0D, 1D, 1D);
 	}
-	
+
 	public void setApplicationData(String os, String type, ArrayList<String> operations) {
 		this.os = os;
 		this.application = type;
 		this.operations = operations;
 	}
-	
+
 	//--------------------------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------------------------
-	
+
 	public void setApplicationData(String os, String version, String dVersion, long pid, byte[] icon, String screenServer) {
 		this.os = os;
 		this.applicationVersion = version;
@@ -208,7 +215,7 @@ public class Channel {
 		this.icon = icon;
 		this.screenServer = screenServer;
 	}
-	
+
 	public void setApplicationData(String os, String serviceType) {
 		this.os = os;
 		this.application = serviceType;
@@ -223,7 +230,7 @@ public class Channel {
 	public void switchToFrame(String id) {
 		engine.switchToFrameId(id);
 	}
-	
+
 	public void clearData() {
 		icon = null;
 		operations.clear();
@@ -274,11 +281,11 @@ public class Channel {
 	public void setOperations(ArrayList<String> operations) {
 		this.operations = operations;
 	}
-	
+
 	public String getApplication() {
 		return application;
 	}
-	
+
 	public void setApplication(String value) {
 		this.application = value;
 	}
@@ -299,20 +306,20 @@ public class Channel {
 	public void setDesktop(boolean value) {} // read only
 
 	public String getName() {
-		return action.getName();
+		return actionStart.getName();
 	}
 	public void setName(String name) {} // read only
-	
+
 	public String getAuthentication() {
-		if(action.getAuthentication() != null && action.getAuthenticationValue() != null && action.getAuthentication().length() > 0 && action.getAuthenticationValue().length() > 0) {
-			return action.getAuthentication();
+		if(actionStart.getAuthentication() != null && actionStart.getAuthenticationValue() != null && actionStart.getAuthentication().length() > 0 && actionStart.getAuthenticationValue().length() > 0) {
+			return actionStart.getAuthentication();
 		}
 		return "";
 	}
 	public void setAuthentication(String value) {} // read only
-	
+
 	public boolean isNeoload() {
-		return action.isNeoload();
+		return actionStart.isNeoload();
 	}
 	public void setNeoload(boolean neoload) {} // read only
 
@@ -335,7 +342,7 @@ public class Channel {
 	public void setApplicationVersion(String applicationVersion) {
 		this.applicationVersion = applicationVersion;
 	}
-	
+
 	public String getOs() {
 		return os;
 	}
@@ -343,19 +350,19 @@ public class Channel {
 	public void setOs(String os) {
 		this.os = os;
 	}
-	
+
 	public byte[] getIcon() {
 		return icon;
 	}
-	
+
 	public void setIcon(byte[] value) {
 		this.icon = value;
 	}
-	
+
 	public String getScreenServer() {
 		return screenServer;
 	}
-	
+
 	public void setScreenServer(String value) {
 		this.screenServer = value;
 	}
@@ -389,8 +396,13 @@ public class Channel {
 	public void close(){
 		close(newActionStatus());
 	}
-	
+
 	public void close(ActionStatus status){
+
+		if(stopNeoloadRecord != null) {
+			neoloadAction(stopNeoloadRecord);
+		}
+
 		engine.close();
 		mainScript.getChannelManager().channelClosed(status, this);
 	}
@@ -402,7 +414,7 @@ public class Channel {
 	public void progressiveWait(int value) {
 		sleep(200 + value*50);
 	}
-	
+
 	public void sleep(int ms){
 		mainScript.sleep(ms);
 	}
@@ -430,7 +442,7 @@ public class Channel {
 	public void closeWindow(ActionStatus status){
 		engine.closeWindow(status);
 	}
-	
+
 	public void windowState(ActionStatus status, String state){
 		engine.getDesktopDriver().windowState(status, this, state);
 	}
@@ -450,7 +462,7 @@ public class Channel {
 	public void navigate(ActionStatus status, String url) {
 		engine.goToUrl(status, url);
 	}
-	
+
 	public void api(ActionStatus status, ActionApi api) {
 		engine.api(status, api);
 	}
@@ -476,6 +488,30 @@ public class Channel {
 	}
 
 	//----------------------------------------------------------------------------------------------------------
+	// Neoload
+	//----------------------------------------------------------------------------------------------------------
+
+	private ActionNeoloadStop stopNeoloadRecord = null;
+
+	public void neoloadAction(ActionNeoload action) {
+		action.execute(this);
+		if(isNeoload()) {
+			if(neoloadDesignApi != null) {
+				action.executeRequest(this, neoloadDesignApi);
+			}else {
+				action.getStatus().setPassed(false);
+				action.getStatus().setMessage("Neoload design API is not defined in .atsProperties !");
+			}
+		}else {
+			action.getStatus().setPassed(true);
+		}
+	}
+
+	public void setStopNeoloadRecord(ActionNeoloadStop value) {
+		this.stopNeoloadRecord = value;
+	}
+
+	//----------------------------------------------------------------------------------------------------------
 	// Visual reporting
 	//----------------------------------------------------------------------------------------------------------
 
@@ -486,7 +522,7 @@ public class Channel {
 	public void stopVisualRecord() {
 		getDesktopDriver().stopVisualRecord();
 	}
-	
+
 	public void saveVisualReportFile(Path path, String fileName, IExecutionLogger logger) {
 		getDesktopDriver().saveVisualReportFile(path.resolve(fileName), logger);
 	}
@@ -518,16 +554,14 @@ public class Channel {
 	public void updateVisualAction(int error, long duration) {
 		getDesktopDriver().updateVisualStatus(error, duration);
 	}
-	
+
 	public void updateVisualAction(int error, long duration, String value) {
 		getDesktopDriver().updateVisualStatus(error, duration);
 		getDesktopDriver().updateVisualValue(value);
 	}
-	
+
 	public void updateVisualAction(int error, long duration, String value, String data) {
 		getDesktopDriver().updateVisualStatus(error, duration);
 		getDesktopDriver().updateVisualData(value, data);
 	}
-	
-	
 }

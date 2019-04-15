@@ -157,6 +157,7 @@ Here is an example of global ATS configuration file (*.atsProperties* file in AT
 		<script>60</script>
 		<pageLoad>120</pageLoad>
 		<watchDog>180</watchDog>
+		<webService>20</webService>
 	</timeOut>
 	<browsers>
 		<browser>
@@ -218,13 +219,34 @@ Proxy types available are *'system'*, *'auto'*, *'direct'* and *'manual'*, if *'
 * **[timeOut -> script]** : javascript execution timeout (in sec.) for web application only
 * **[timeOut -> pageLoad]** : page load timeout (in sec.) for web application only
 * **[timeOut -> watchDog]** : action's execution timeout (in sec.) to prevent browser or application infinite hangup
+* **[timeOut -> webService]** : api REST or SOAP webservice requests execution timeout (in sec.)
 * For each browser used you can define following parameters :
   - **[path]** : the application binary file path
   - **[waitAction]** : wait after each actions (in millisec.)
   - **[waitProperty]** : wait for double check attributes value (in millisec.) 
 * You can add options to the browsers driver
 * You can define application name and path of installed applications on the host machine
-
+* You can define a chromium like browser in the available browsers list. In order to use a chromium like browser you have to define *'name'*, *'driver'* and *'path'* attributes of the browser element. The *'driver'* attribute is the driver file *(without extension)* in the ATS drivers folder, and path is the executable file of the chromium browser :
+```
+<browser>
+	<name>chromium</name>
+	<driver>chromiumdriver</driver>
+	<path>C:\Program\chromium\chrome.exe</path>
+</browser>
+```
+* You can define a Neoload recorder to record and design workbench project with Neoload. ATS Neoload actions will enable Neoload user path recording and send commands to execute some design actions in Neoload project. In order to enable Neoload recording you have to define Neoload proxy and service parameters :
+```
+<neoload>
+	<recorder>
+		<host>192.168.0.100</host>
+		<port>8090</port>
+	</recorder>
+	<design>
+		<api>Design/v1/Service.svc</api>
+		<port>7400</port>
+	</design>
+</neoload>
+```
 ## List of available ATS actions
 
 ```

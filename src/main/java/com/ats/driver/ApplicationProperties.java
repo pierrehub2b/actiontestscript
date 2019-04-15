@@ -19,6 +19,8 @@ under the License.
 
 package com.ats.driver;
 
+import com.ats.executor.drivers.DriverManager;
+
 public class ApplicationProperties {
 	
 	public static int BROWSER_TYPE = 0;
@@ -28,15 +30,21 @@ public class ApplicationProperties {
 	
 	private int type = BROWSER_TYPE;
 	
-	private String name;
+	private String name = DriverManager.CHROME_BROWSER;
+	private String driver;
 	private String uri;
-	private int wait;
-	private int check;
-	private String lang;
+	private int wait = -1;
+	private int check = -1;
+	private String lang = "en";
 	
-	public ApplicationProperties(int type, String name, String uri, int wait, int check, String lang) {
+	public ApplicationProperties(String name) {
+		this.name = name;
+	}
+	
+	public ApplicationProperties(int type, String name, String driver, String uri, int wait, int check, String lang) {
 		this.type = type;
 		this.name = name;
+		this.driver = driver;
 		this.uri = uri;
 		this.wait = wait;
 		this.check = check;
@@ -61,6 +69,10 @@ public class ApplicationProperties {
 	
 	public String getName() {
 		return name;
+	}
+	
+	public String getDriver() {
+		return driver;
 	}
 
 	public String getUri() {

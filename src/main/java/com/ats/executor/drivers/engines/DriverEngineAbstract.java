@@ -66,14 +66,11 @@ public abstract class DriverEngineAbstract {
 		
 		this(channel);
 		this.desktopDriver = desktopDriver;
-		//this.application = application;
 		
-		if(props != null) {
-			actionWait = props.getWait();
-			propertyWait = props.getCheck();
-			applicationPath = props.getUri();
-			lang = props.getLang();
-		}
+		actionWait = props.getWait();
+		propertyWait = props.getCheck();
+		applicationPath = props.getUri();
+		lang = props.getLang();
 		
 		if(actionWait == -1) {
 			actionWait = defaultWait;
