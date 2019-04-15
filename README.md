@@ -234,6 +234,7 @@ Proxy types available are *'system'*, *'auto'*, *'direct'* and *'manual'*, if *'
 	<path>C:\Program\chromium\chrome.exe</path>
 </browser>
 ```
+*(Chromium binaries files and Chromium driver for Windows can be found here : http://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html?prefix=Win_x64/650848/)*
 * You can define a Neoload configuration to record and design load testing project with Neoload. ATS Neoload actions will enable Neoload UserPath recording and send commands to execute some design actions in a Neoload project. In order to enable Neoload recording you have to define Neoload proxy and service parameters :
 ```
 <neoload>
