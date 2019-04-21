@@ -353,7 +353,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	public void api(ActionStatus status, ActionApi api) {}
 
 	@Override
-	public void switchWindow(int index) {}
+	public void switchWindow(ActionStatus status, int index) {}
 
 	@Override
 	public void closeWindow(ActionStatus status) {}
@@ -379,7 +379,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean desktopDragDrop) {}
 
 	@Override
-	public void setWindowBound(BoundData x, BoundData y, BoundData width, BoundData height) {}
+	public String setWindowBound(BoundData x, BoundData y, BoundData width, BoundData height) {return "";}
 
 	@Override
 	public void scrollOnMove(FoundElement value) {}
@@ -405,7 +405,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	}
 
 	@Override
-	public void switchToDefaultContent() {}
+	public boolean switchToDefaultContent() {return true;}
 
 	@Override
 	public boolean setWindowToFront() {
@@ -492,5 +492,9 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	@Override
 	public String getSource() {
 		return "";
+	}
+
+	@Override
+	public void windowState(ActionStatus status, Channel channel, String state) {
 	}
 }

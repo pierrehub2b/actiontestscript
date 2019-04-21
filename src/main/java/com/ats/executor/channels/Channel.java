@@ -110,7 +110,7 @@ public class Channel {
 		return engine.getDesktopDriver();
 	}
 
-	public void cleanWinHandle() {
+	public void cleanHandle() {
 		winHandle = -1;
 		toFront();
 	}
@@ -431,12 +431,17 @@ public class Channel {
 		return engine.getRootElement();
 	}
 
-	public void switchWindow(int index){
-		engine.switchWindow(index);
+	public void switchWindow(ActionStatus status, int index){
+		engine.switchWindow(status, index);
+		if(status.isPassed()) {
+			engine.updateDimensions();
+		}
 	}
 
-	public void setWindowBound(BoundData x, BoundData y, BoundData width, BoundData height) {
-		engine.setWindowBound(x, y, width, height);
+	public String setWindowBound(BoundData x, BoundData y, BoundData w, BoundData h) {
+		String bounds = engine.setWindowBound(x, y, w, h);
+		engine.updateDimensions();
+		return bounds;
 	}
 
 	public void closeWindow(ActionStatus status){
@@ -444,7 +449,7 @@ public class Channel {
 	}
 
 	public void windowState(ActionStatus status, String state){
-		engine.getDesktopDriver().windowState(status, this, state);
+		engine.windowState(status, this, state);
 	}
 
 	public Object executeScript(ActionStatus status, String script, Object ... params){

@@ -21,17 +21,23 @@ package com.ats.script.actions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.StringJoiner;
 
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
+import com.ats.script.actions.neoload.ActionNeoload;
 
 public class ActionChannelStart extends ActionChannel {
 
 	public static final String SCRIPT_START_LABEL = SCRIPT_LABEL + "start";
+	
+	public static final String BASIC_AUTHENTICATION = "Basic";
 
 	private CalculatedValue application;
+	
+	private boolean neoload = false;
 	private String authentication = "";
 	private String authenticationValue = "";
 	
@@ -39,17 +45,28 @@ public class ActionChannelStart extends ActionChannel {
 		super();
 	}
 	
-	public ActionChannelStart(Script script, String name, CalculatedValue value, ArrayList<String> dataArray, boolean neoload) {
-		super(script, name, neoload);
+	public ActionChannelStart(Script script, String name, ArrayList<String> options, CalculatedValue value, ArrayList<String> dataArray) {
+		super(script, name);
 		setApplication(value);
-		if(dataArray.size() >1) {
-			setAuthentication(dataArray.get(0).trim());
-			setAuthenticationValue(dataArray.get(1).trim());
+		
+		if(dataArray != null) {
+			options.addAll(dataArray);
+		}
+		options.forEach(o -> parseOptions(o.trim()));
+	}
+	
+	private void parseOptions(String value){
+		if(ActionNeoload.SCRIPT_NEOLOAD_LABEL.equalsIgnoreCase(value)) {
+			setNeoload(true);
+		}else if(BASIC_AUTHENTICATION.equalsIgnoreCase(value)){
+			setAuthentication(BASIC_AUTHENTICATION);
+		}else if(BASIC_AUTHENTICATION.equalsIgnoreCase(authentication)) {
+			setAuthenticationValue(value);
 		}
 	}
 	
-	public ActionChannelStart(Script script, String name, CalculatedValue value, boolean neoload, String authType, String authValue) {
-		this(script, name, value, new ArrayList<String>(Arrays.asList(authType, authValue)), neoload);
+	public ActionChannelStart(Script script, String name, CalculatedValue value, String options) {
+		this(script, name, new ArrayList<>(Arrays.asList(options.split(","))), value, null);
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -66,8 +83,28 @@ public class ActionChannelStart extends ActionChannel {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public String getJavaCode() {
-		return super.getJavaCode() + "\"" + getName() + "\", " + application.getJavaCode() + ", " + isNeoload() + ", \"" + authentication + "\", \"" + authenticationValue + "\")";
+	public StringBuilder getJavaCode() {
+		
+		StringBuilder codeBuilder = super.getJavaCode();
+		codeBuilder.append("\"")
+		.append(getName())
+		.append("\", ")
+		.append(application.getJavaCode())
+		.append(", ");
+				
+		StringJoiner optionsJoiner = new StringJoiner(", ", "\"", "\"");
+		if(neoload) {
+			optionsJoiner.add(ActionNeoload.SCRIPT_NEOLOAD_LABEL);
+		}
+		
+		if(authentication != null && authentication.length() > 0) {
+			optionsJoiner.add(authentication);
+			optionsJoiner.add(authenticationValue);
+		}
+		
+		codeBuilder.append(optionsJoiner.toString()).append(")");
+		
+		return codeBuilder;
 	}
 
 	//--------------------------------------------------------
@@ -96,5 +133,13 @@ public class ActionChannelStart extends ActionChannel {
 
 	public void setAuthenticationValue(String value) {
 		this.authenticationValue = value;
+	}
+	
+	public boolean isNeoload() {
+		return neoload;
+	}
+
+	public void setNeoload(boolean value) {
+		this.neoload = value;
 	}
 }

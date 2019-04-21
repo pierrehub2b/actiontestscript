@@ -56,12 +56,10 @@ public class ActionNeoloadRun extends ActionNeoload {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public String getJavaCode() {
+	public StringBuilder getJavaCode() {
 
-		StringBuilder codeBuilder = new StringBuilder(super.getJavaCode());
-		codeBuilder.append("\"");
-		codeBuilder.append(options);
-		codeBuilder.append("\", ");
+		StringBuilder codeBuilder = super.getJavaCode();
+		codeBuilder.append("\"").append(options).append("\", ");
 
 		if(user != null) {
 			codeBuilder.append(user.getJavaCode());
@@ -69,7 +67,7 @@ public class ActionNeoloadRun extends ActionNeoload {
 			codeBuilder.append("null");
 		}
 
-		return codeBuilder.toString();
+		return codeBuilder;
 	}
 
 	//--------------------------------------------------------

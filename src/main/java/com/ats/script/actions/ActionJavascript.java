@@ -51,12 +51,15 @@ public class ActionJavascript extends ActionReturnVariable {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public String getJavaCode() {
+	public StringBuilder getJavaCode() {
 		String variableCode = "null";
 		if(getVariable() != null) {
 			variableCode = getVariable().getName();
 		}
-		return super.getJavaCode() + ", " + jsCode.getJavaCode() + ", " + variableCode + ")";
+		
+		StringBuilder codeBuilder = super.getJavaCode();
+		codeBuilder.append(", ").append(jsCode.getJavaCode()).append(", ").append(variableCode).append(")");
+		return codeBuilder;
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

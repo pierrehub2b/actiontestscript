@@ -215,15 +215,15 @@ public class ScriptHeader {
 
 	public String getJavaCode(String projectGav) {
 
-		String code = javaCode.replaceAll("#CLASS_NAME#", name);
-		code = code.replace("#SCRIPT_ID#", StringEscapeUtils.escapeJava(id));
-		code = code.replace("#DESCRIPTION#", StringEscapeUtils.escapeJava(description));
-		code = code.replace("#PREREQUISITES#", StringEscapeUtils.escapeJava(prerequisite));
-		code = code.replace("#AUTHOR_NAME#", StringEscapeUtils.escapeJava(author));
-		code = code.replace("#GROUP_DATA#", getGroupCode());
-		code = code.replace("#ATS_VERSION#", atsVersion);
-		code = code.replace("#GROUP_DESCRIPTION#", getDataGroups());
-		code = code.replace("#PROJECT_GAV#", StringEscapeUtils.escapeJava(projectGav));
+		String code = javaCode.replaceAll("#CLASS_NAME#", name)
+		.replace("#SCRIPT_ID#", StringEscapeUtils.escapeJava(id))
+		.replace("#DESCRIPTION#", StringEscapeUtils.escapeJava(description))
+		.replace("#PREREQUISITES#", StringEscapeUtils.escapeJava(prerequisite))
+		.replace("#AUTHOR_NAME#", StringEscapeUtils.escapeJava(author))
+		.replace("#GROUP_DATA#", getGroupCode())
+		.replace("#ATS_VERSION#", atsVersion)
+		.replace("#GROUP_DESCRIPTION#", getDataGroups())
+		.replace("#PROJECT_GAV#", StringEscapeUtils.escapeJava(projectGav));
 
 		if(packageName.length() > 0) {
 			code = "package " + packageName + ";\r\n" + code;

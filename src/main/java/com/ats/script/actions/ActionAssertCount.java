@@ -77,8 +77,14 @@ public class ActionAssertCount extends ActionExecuteElement {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public String getJavaCode() {
-		return super.getJavaCode() + ", " + Operators.getJavaCode(operator) + ", " + value + ")";
+	public StringBuilder getJavaCode() {
+		StringBuilder codeBuilder = super.getJavaCode();
+		codeBuilder.append(", ")
+		.append(Operators.getJavaCode(operator))
+		.append(", ")
+		.append(value)
+		.append(")");
+		return codeBuilder;
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

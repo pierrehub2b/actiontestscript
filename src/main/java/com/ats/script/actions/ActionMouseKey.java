@@ -64,19 +64,17 @@ public class ActionMouseKey extends ActionMouse {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public String getJavaCode() {
+	public StringBuilder getJavaCode() {
 
-		String keyCode = "";
 		if(Keys.CONTROL.equals(key)){
-			keyCode = ", Keys.CONTROL";
+			setSpareCode(", Keys.CONTROL");
 		}else if(Keys.SHIFT.equals(key)){
-			keyCode = ", Keys.SHIFT";
+			setSpareCode(", Keys.SHIFT");
 		}else if(Keys.ALT.equals(key)){
-			keyCode = ", Keys.ALT";
+			setSpareCode(", Keys.ALT");
+		}else {
+			setSpareCode("");
 		}
-
-		setSpareCode(keyCode);
-
 		return super.getJavaCode();
 	}
 

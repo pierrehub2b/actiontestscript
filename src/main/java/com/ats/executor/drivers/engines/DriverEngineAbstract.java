@@ -44,7 +44,6 @@ public abstract class DriverEngineAbstract {
 	protected RemoteWebDriver driver;
 	protected DesktopDriver desktopDriver;
 		
-	//protected String application;
 	protected String applicationPath;
 	protected String lang;
 	
@@ -92,10 +91,6 @@ public abstract class DriverEngineAbstract {
 	public void setDriver(RemoteWebDriver driver) {
 		this.driver = driver;
 	}
-
-	//public String getApplication() {
-	//	return application;
-	//}
 	
 	public String getApplicationPath() {
 		return applicationPath;
@@ -144,35 +139,48 @@ public abstract class DriverEngineAbstract {
 		return getCartesianOffset(rect.height, position.getVerticalPos(), Cartesian.TOP, Cartesian.BOTTOM, Cartesian.MIDDLE);
 	}
 	
-	public void setWindowBound(BoundData x, BoundData y, BoundData width, BoundData height) {
+	public String setWindowBound(BoundData x, BoundData y, BoundData w, BoundData h) {
 
-		if(width != null || height != null){
-			int newWidth = channel.getDimension().getWidth().intValue();
-			if(width != null) {
-				newWidth = width.getValue();
+		int newX = 0;
+		int newY = 0;
+		int newWidth = 0;
+		int newHeight = 0;
+		
+		if(w != null || h != null){
+			
+			if(w != null) {
+				newWidth = w.getValue();
+			}else {
+				newWidth = channel.getDimension().getWidth().intValue();
 			}
-
-			int newHeight = channel.getDimension().getHeight().intValue();
-			if(height != null) {
-				newHeight = height.getValue();
+			
+			if(h != null) {
+				newHeight = h.getValue();
+			}else {
+				newHeight = channel.getDimension().getHeight().intValue();
 			}
 
 			setSize(new Dimension(newWidth, newHeight));
 		}
 
 		if(x != null || y != null){
-			int newX = channel.getDimension().getX().intValue();
+
 			if(x != null) {
 				newX = x.getValue();
+			}else {
+				newX = channel.getDimension().getX().intValue();
 			}
 
-			int newY = channel.getDimension().getY().intValue();
 			if(y != null) {
 				newY = y.getValue();
+			}else {
+				newY = channel.getDimension().getY().intValue();
 			}
 
 			setPosition(new Point(newX, newY));
 		}
+		
+		return newX + "," + newY + "," + newWidth + "," + newHeight;
 	}
 	
 	protected void desktopMoveToElement(FoundElement foundElement, MouseDirection position, int offsetX, int offsetY) {

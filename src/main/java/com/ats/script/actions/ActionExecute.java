@@ -39,8 +39,10 @@ public class ActionExecute extends Action {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public String getJavaCode() {
-		return super.getJavaCode() + stop + ", ";
+	public StringBuilder getJavaCode() {
+		StringBuilder codeBuilder = super.getJavaCode();
+		codeBuilder.append(stop).append(", ");
+		return codeBuilder;
 	}
 	
 	//--------------------------------------------------------

@@ -32,6 +32,8 @@ public class TestElementSystemButton extends TestElement {
 
 	private String id = "1";
 	
+	public TestElementSystemButton(){}
+	
 	public TestElementSystemButton(Channel channel, SearchedElement searchElement) {
 		super(channel);
 		if(searchElement.getCriterias().size() > 0) {

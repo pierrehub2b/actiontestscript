@@ -46,8 +46,10 @@ public class ActionNeoloadContainer extends ActionNeoload {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public String getJavaCode() {
-		return super.getJavaCode() + "\"" + name + "\")";
+	public StringBuilder getJavaCode() {
+		StringBuilder codeBuilder = super.getJavaCode();
+		codeBuilder.append("\"").append(name).append("\")");
+		return codeBuilder;
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

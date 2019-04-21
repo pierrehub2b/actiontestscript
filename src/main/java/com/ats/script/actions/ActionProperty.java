@@ -50,8 +50,14 @@ public class ActionProperty extends ActionReturnVariable {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public String getJavaCode() {
-		return super.getJavaCode() + ", \"" + name + "\", " + getVariable().getName() + ")";
+	public StringBuilder getJavaCode() {
+		StringBuilder codeBuilder = super.getJavaCode();
+		codeBuilder.append(", \"")
+		.append(name)
+		.append("\", ")
+		.append(getVariable().getName())
+		.append(")");
+		return codeBuilder;
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

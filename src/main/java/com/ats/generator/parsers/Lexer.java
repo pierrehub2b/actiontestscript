@@ -58,7 +58,6 @@ import com.ats.script.actions.ActionWindow;
 import com.ats.script.actions.ActionWindowResize;
 import com.ats.script.actions.ActionWindowState;
 import com.ats.script.actions.ActionWindowSwitch;
-import com.ats.script.actions.neoload.ActionNeoload;
 import com.ats.script.actions.neoload.ActionNeoloadContainer;
 import com.ats.script.actions.neoload.ActionNeoloadRecord;
 import com.ats.script.actions.neoload.ActionNeoloadStart;
@@ -126,9 +125,9 @@ public class Lexer {
 
 			String actionType = dataArray.remove(0).trim().toLowerCase();
 
-			String optionsFlat = "";
-			ArrayList<String> options = new ArrayList<String>();
-			boolean stopExec = true;
+			String optionsFlat;
+			ArrayList<String> options;
+			boolean stopExec;
 
 			Matcher matcher = ACTION_PATTERN.matcher(actionType);
 			if (matcher.find()){
@@ -136,6 +135,10 @@ public class Lexer {
 				optionsFlat = matcher.group(2).trim();
 				options = new ArrayList<>(Arrays.asList(optionsFlat.split(",")));
 				stopExec = !options.remove(ActionExecute.NO_FAIL_LABEL);
+			}else {
+				optionsFlat = "";
+				options = new ArrayList<String>();
+				stopExec = true;
 			}
 
 			if(Mouse.OVER.equals(actionType)){
@@ -220,7 +223,7 @@ public class Lexer {
 					//-----------------------
 
 					if(dataArray.size() > 0){
-						script.addAction(new ActionChannelStart(script, dataOne, new CalculatedValue(script, dataArray.remove(0).trim()), dataArray, options.contains(ActionNeoload.SCRIPT_NEOLOAD_LABEL)), disabled);
+						script.addAction(new ActionChannelStart(script, dataOne, options, new CalculatedValue(script, dataArray.remove(0).trim()), dataArray), disabled);
 					}
 
 				}else if(ActionText.SCRIPT_LABEL.equals(actionType)){

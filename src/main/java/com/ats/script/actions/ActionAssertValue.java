@@ -70,8 +70,15 @@ public class ActionAssertValue extends ActionExecute {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public String getJavaCode() {
-		return super.getJavaCode() + regexp + ", " + value1.getJavaCode() + ", " + value2.getJavaCode() + ")";
+	public StringBuilder getJavaCode() {
+		StringBuilder codeBuilder = super.getJavaCode();
+		codeBuilder.append(regexp)
+		.append(", ")
+		.append(value1.getJavaCode())
+		.append(", ")
+		.append(value2.getJavaCode())
+		.append(")");
+		return codeBuilder;
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

@@ -55,13 +55,16 @@ public class ActionNeoloadStart extends ActionNeoloadRun {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public String getJavaCode() {
+	public StringBuilder getJavaCode() {
 		if(init) {
 			setOptions(INIT);
 		}else {
 			setOptions("");
 		}
-		return super.getJavaCode() + ")";
+		
+		StringBuilder codeBuilder = super.getJavaCode();
+		codeBuilder.append(")");
+		return codeBuilder;
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

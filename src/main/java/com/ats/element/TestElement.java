@@ -64,6 +64,8 @@ public class TestElement{
 
 	private boolean sysComp = false;
 
+	public TestElement() {}
+	
 	public TestElement(Channel channel) {
 		this.channel = channel;
 		this.index = 0;

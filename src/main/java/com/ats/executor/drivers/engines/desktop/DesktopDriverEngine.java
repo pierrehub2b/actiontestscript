@@ -273,10 +273,11 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	@Override
 	public void close() {
 		getDesktopDriver().closeProcess(channel.getProcessId());
+		getDesktopDriver().closeDriver();
 	}
 
 	@Override
-	public void switchWindow(int index) {
+	public void switchWindow(ActionStatus status, int index) {
 		getDesktopDriver().switchTo(channel, index);
 	}
 
@@ -408,7 +409,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	}
 
 	@Override
-	public void switchToDefaultContent() {}
+	public boolean switchToDefaultContent() {return true;}
 
 	@Override
 	public void switchToFrameId(String id) {}
@@ -423,4 +424,9 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 
 	@Override
 	public void buttonClick(String id) {}
+
+	@Override
+	public void windowState(ActionStatus status, Channel channel, String state) {
+		getDesktopDriver().windowState(status, channel, state);
+	}
 }

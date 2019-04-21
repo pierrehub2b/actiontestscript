@@ -26,6 +26,8 @@ import com.ats.recorder.IVisualRecorder;
 
 public class TestElementRoot extends TestElement {
 
+	public TestElementRoot() {}
+	
 	public TestElementRoot(Channel channel) {
 		super(channel);
 		setCriterias("root");

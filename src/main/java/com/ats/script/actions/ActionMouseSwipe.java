@@ -52,7 +52,7 @@ public class ActionMouseSwipe extends ActionMouse {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public String getJavaCode() {
+	public StringBuilder getJavaCode() {
 		setSpareCode(direction.getDirectionJavaCode());
 		return super.getJavaCode();
 	}

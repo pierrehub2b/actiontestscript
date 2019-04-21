@@ -214,7 +214,7 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	@Override
-	public void switchWindow(int index) {
+	public void switchWindow(ActionStatus status, int index) {
 	}
 
 	@Override
@@ -274,11 +274,15 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	@Override
-	public void switchToDefaultContent() {}
+	public boolean switchToDefaultContent() {return true;}
 
 	@Override
 	public void switchToFrameId(String id) {}
 
 	@Override
 	public void buttonClick(String id) {}
+
+	@Override
+	public void windowState(ActionStatus status, Channel channel, String state) {
+	}
 }

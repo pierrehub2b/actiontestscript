@@ -143,44 +143,44 @@ public class ActionCallscript extends Action {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public String getJavaCode() {
+	public StringBuilder getJavaCode() {
 
-		StringBuilder codeBuilder = new StringBuilder(super.getJavaCode());
+		StringBuilder codeBuilder = super.getJavaCode();
 		codeBuilder.append(name.getJavaCode());
 
 		if(csvFilePath != null) {
-			codeBuilder.append(", \"");
-			codeBuilder.append(csvFilePath);
-			codeBuilder.append("\"");
+			codeBuilder.append(", \"")
+			.append(csvFilePath)
+			.append("\"");
 		}else {
 			if(parameters != null){
 				StringJoiner joiner = new StringJoiner(", ");
 				for (CalculatedValue value : parameters){
 					joiner.add(value.getJavaCode());
 				}
-				codeBuilder.append(", ");
-				codeBuilder.append(ActionTestScript.JAVA_PARAM_FUNCTION_NAME);
-				codeBuilder.append("(");
-				codeBuilder.append(joiner.toString());
-				codeBuilder.append(")");
+				codeBuilder.append(", ")
+				.append(ActionTestScript.JAVA_PARAM_FUNCTION_NAME)
+				.append("(")
+				.append(joiner.toString())
+				.append(")");
 			}
 
 			if(loop > 1) {
-				codeBuilder.append(", ");
-				codeBuilder.append(loop);
+				codeBuilder.append(", ")
+				.append(loop);
 			}else if(variables != null){
 				StringJoiner joiner = new StringJoiner(", ");
 				for (Variable variable : variables){
 					joiner.add(variable.getName());
 				}
-				codeBuilder.append(", ");
-				codeBuilder.append(joiner.toString());
+				codeBuilder.append(", ")
+				.append(joiner.toString());
 			}
 		}
 
 		codeBuilder.append(")");
 
-		return codeBuilder.toString();
+		return codeBuilder;
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

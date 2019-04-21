@@ -62,6 +62,8 @@ public class FoundElement{
 	private boolean numeric = false;
 	private boolean clickable = true;
 
+	private ArrayList<AtsElement> iframes;
+	
 	//------------------------------------------------------------------------------------------------------------------------------
 	// contructors
 	//------------------------------------------------------------------------------------------------------------------------------
@@ -88,11 +90,11 @@ public class FoundElement{
 		this.width = win.getWidth();
 		this.height = win.getHeight();
 	}
-
+	
 	public FoundElement(AtsElement element, Channel channel, Double offsetX, Double offsetY) {
 
 		this(element);
-
+		
 		final Double elemX = element.getX();
 		final Double elemY = element.getY();
 
@@ -101,6 +103,11 @@ public class FoundElement{
 		this.screenY = element.getScreenY() + elemY;
 		this.boundX = element.getBoundX();
 		this.boundY = element.getBoundY();
+	}
+
+	public FoundElement(AtsElement element, ArrayList<AtsElement> iframes, Channel channel, Double offsetX, Double offsetY) {
+		this(element, channel, offsetX, offsetY);
+		this.iframes = iframes;
 	}
 
 	public FoundElement(AtsElement element, TestBound channelDimension) {
@@ -146,16 +153,24 @@ public class FoundElement{
 		this.tag = element.getTag();
 		this.clickable = false;
 	}
-
-	public FoundElement(Channel channel, ArrayList<AtsElement> elements, Double initElementX, Double initElementY) {
-		this(elements.remove(0), channel, initElementX, initElementY);
+	
+	public FoundElement(Channel channel, ArrayList<AtsElement> iframes, ArrayList<AtsElement> elements, Double initElementX, Double initElementY) {
+		this(elements.remove(0), iframes, channel, initElementX, initElementY);
 		if(elements.size() > 0) {
-			setParent(new FoundElement(channel, elements, initElementX, initElementY));
+			setParent(new FoundElement(channel, iframes, elements, initElementX, initElementY));
+		}else if(iframes.size() > 0) {
+			elements.addAll(iframes);
+			iframes.clear();
+			setParent(new FoundElement(channel, iframes, elements, initElementX, initElementY));
 		}
 	}
 
 	public boolean isDesktop() {
 		return DESKTOP.equals(type);
+	}
+	
+	public ArrayList<AtsElement> getIframes(){
+		return iframes;
 	}
 
 	//------------------------------------------------------------------------------------------------------------------------------

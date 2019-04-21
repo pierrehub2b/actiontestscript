@@ -36,13 +36,14 @@ public class ActionWindowSwitch extends ActionWindow {
 	}
 	
 	@Override
-	public String getJavaCode() {
-		return super.getJavaCode() + ", " + getNum() + ")";
+	public StringBuilder getJavaCode() {
+		return super.getJavaCode().append(num).append(")");
 	}
 	
 	@Override
-	public void exec(Channel channel) {
-		channel.switchWindow(getNum());
+	public String exec(Channel channel) {
+		channel.switchWindow(status, num);
+		return num + "";
 	}
 	
 	//--------------------------------------------------------

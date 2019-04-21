@@ -65,11 +65,15 @@ public class ActionComment extends Action {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public String getJavaCode() {
-		if(SCRIPT_TYPE.equals(type)) {
-			return null;
-		}
-		return super.getJavaCode() + "\"" + type + "\", " + comment.getJavaCode() + ")";
+	public StringBuilder getJavaCode() {
+		StringBuilder codeBuilder = super.getJavaCode();
+		codeBuilder.append("\"").append(getType()).append("\", ").append(comment.getJavaCode()).append(")");
+		return codeBuilder;
+	}
+	
+	@Override
+	public boolean isScriptComment() {
+		return SCRIPT_TYPE.equals(type);
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

@@ -31,6 +31,7 @@ import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
+import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.MouseDirection;
@@ -45,7 +46,7 @@ public interface IDriverEngine{
 
 	//public String getApplication();
 	public String getApplicationPath();
-	public void switchWindow(int index);
+	public void switchWindow(ActionStatus status, int index);
 	public void closeWindow(ActionStatus status);
 	public Object executeScript(ActionStatus status, String script, Object ... params);
 	public void goToUrl(ActionStatus status, String url);
@@ -62,7 +63,7 @@ public interface IDriverEngine{
 
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList);
 	public void clearText(ActionStatus status, FoundElement foundElement);
-	public void setWindowBound(BoundData x, BoundData y, BoundData width, BoundData height);
+	public String setWindowBound(BoundData x, BoundData y, BoundData width, BoundData height);
 	
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean desktopDragDrop);
 	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position);
@@ -78,11 +79,12 @@ public interface IDriverEngine{
 	public void moveByOffset(int hDirection, int vDirection);
 
 	public Alert switchToAlert();
-	public void switchToDefaultContent();
+	public boolean switchToDefaultContent();
 	public boolean setWindowToFront();
 	public void switchToFrameId(String id);
 	public void refreshElementMapLocation();
 	public String getSource();
 	public void api(ActionStatus status, ActionApi api);
 	public int getCurrentWindow();
+	public void windowState(ActionStatus status, Channel channel, String state);
 }

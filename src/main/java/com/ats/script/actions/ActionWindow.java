@@ -32,28 +32,24 @@ public class ActionWindow extends Action {
 	public ActionWindow(Script script) {
 		super(script);
 	}
-
-	@Override
-	public String getJavaCode() {
-		return "new " + this.getClass().getSimpleName() + "(this";
-	}
 	
 	@Override
 	public void execute(ActionTestScript ts) {
 		super.execute(ts);
 		final Channel channel = ts.getCurrentChannel();
 		
+		String execResult = "";
 		if(channel != null){
-			exec(channel);
+			execResult = exec(channel);
 		}else {
 			status.setPassed(false);
 		}
 		
 		status.endDuration();
-		ts.getRecorder().updateScreen(0, status.getDuration());
+		ts.getRecorder().updateScreen(0, status.getDuration(), execResult);
 	}
 	
-	protected void exec(Channel channel) {
-		
+	protected String exec(Channel channel) {
+		return "";
 	}
 }

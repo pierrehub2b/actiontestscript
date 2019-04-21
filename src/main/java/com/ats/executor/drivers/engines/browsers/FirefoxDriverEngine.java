@@ -82,9 +82,12 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	}
 
 	@Override
-	protected void switchToWindowHandle(String handle) {
-		super.switchToWindowHandle(handle);
-		actionWait();
+	protected boolean switchToWindowHandle(String handle) {
+		if(super.switchToWindowHandle(handle)) {
+			actionWait();
+			return true;
+		}
+		return false;
 	}
 
 	@Override

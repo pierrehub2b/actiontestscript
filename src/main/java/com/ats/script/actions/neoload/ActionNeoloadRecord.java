@@ -47,8 +47,10 @@ public class ActionNeoloadRecord extends ActionNeoload {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public String getJavaCode() {
-		return super.getJavaCode() + getRecordType() + ")";
+	public StringBuilder getJavaCode() {
+		StringBuilder codeBuilder = super.getJavaCode();
+		codeBuilder.append(getRecordType()).append(")");
+		return codeBuilder;
 	}
 	
 	private String getRecordType() {

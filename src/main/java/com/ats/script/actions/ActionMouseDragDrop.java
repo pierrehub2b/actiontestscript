@@ -29,7 +29,6 @@ import com.ats.script.ScriptLoader;
 
 public class ActionMouseDragDrop extends ActionMouse {
 
-
 	public ActionMouseDragDrop() {}
 
 	public ActionMouseDragDrop(ScriptLoader script, String type, boolean stop, ArrayList<String> options, ArrayList<String> objectArray) {

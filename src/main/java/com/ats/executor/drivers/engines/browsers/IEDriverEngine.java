@@ -48,6 +48,12 @@ public class IEDriverEngine extends WebDriverEngine {
 		ieOptions.enablePersistentHovering();
 
 		launchDriver(status, ieOptions);
+		
+		if(!"11".equals(channel.getApplicationVersion())) {
+			status.setPassed(false);
+			status.setCode(ActionStatus.CHANNEL_START_ERROR);
+			status.setMessage("Cannot start channel with IE" + channel.getApplicationVersion() + " ! (Only IE11 is supported by ATS)");
+		}
 	}
 
 	@Override

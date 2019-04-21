@@ -56,7 +56,7 @@ public class MouseDirection {
 
 	public boolean addPosition(String value) {
 	  
-		Matcher match = MouseDirection.POSITION_REGEXP.matcher(value);
+		Matcher match = POSITION_REGEXP.matcher(value);
 		if(match.find()){
 			
 			String name = match.group(1);

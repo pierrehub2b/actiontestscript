@@ -55,7 +55,7 @@ public class ActionMouseScroll extends ActionMouse {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public String getJavaCode() {
+	public StringBuilder getJavaCode() {
 		setSpareCode(value + "");
 		return super.getJavaCode();
 	}

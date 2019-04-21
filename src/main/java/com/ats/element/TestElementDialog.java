@@ -41,6 +41,8 @@ public class TestElementDialog extends TestElement {
 	private Alert alert = null;
 	private String alertAction = ACCEPT;
 
+	public TestElementDialog() {}
+	
 	public TestElementDialog(Channel channel) {
 		super(channel);
 	}

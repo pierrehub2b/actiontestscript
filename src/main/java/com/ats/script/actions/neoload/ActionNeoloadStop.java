@@ -84,7 +84,7 @@ public class ActionNeoloadStop extends ActionNeoloadRun {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public String getJavaCode() {
+	public StringBuilder getJavaCode() {
 
 		StringJoiner joiner = new StringJoiner(", ");
 		if(searchFrameworkParameter) {
@@ -95,7 +95,7 @@ public class ActionNeoloadStop extends ActionNeoloadRun {
 		}
 		setOptions(joiner.toString());
 
-		StringBuilder codeBuilder = new StringBuilder(super.getJavaCode());
+		StringBuilder codeBuilder = super.getJavaCode();
 
 		joiner = new StringJoiner(", ");
 		if(threshold != 60) {
@@ -111,11 +111,9 @@ public class ActionNeoloadStop extends ActionNeoloadRun {
 			joiner.add(INCLUDE_VARIABLE);
 		}
 
-		codeBuilder.append(", \"");
-		codeBuilder.append(joiner.toString());
-		codeBuilder.append("\")");
+		codeBuilder.append(", \"").append(joiner.toString()).append("\")");
 
-		return codeBuilder.toString();
+		return codeBuilder;
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

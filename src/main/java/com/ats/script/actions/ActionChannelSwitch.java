@@ -48,7 +48,9 @@ public class ActionChannelSwitch extends ActionChannel {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public String getJavaCode() {
-		return super.getJavaCode() + "\"" + getName() + "\")";
+	public StringBuilder getJavaCode() {
+		StringBuilder codeBuilder = super.getJavaCode();
+		codeBuilder.append("\"").append(getName()).append("\")");
+		return codeBuilder;
 	}
 }

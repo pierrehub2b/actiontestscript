@@ -41,8 +41,20 @@ public class Action {
 	// Code Generator
 	//---------------------------------------------------------------------------------------------------------------------------------
 
-	public String getJavaCode(){
-		return "new " + this.getClass().getSimpleName() + "(this, ";
+	public StringBuilder getJavaCode(){
+		
+		StringBuilder codeBuilder = new StringBuilder(ActionTestScript.JAVA_EXECUTE_FUNCTION_NAME);
+		codeBuilder.append("(")
+		.append(getLine())
+		.append(",")
+		.append("new ")
+		.append(this.getClass().getSimpleName()).append("(this, ");
+		
+		return codeBuilder;
+	}
+	
+	public boolean isScriptComment() {
+		return false;
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

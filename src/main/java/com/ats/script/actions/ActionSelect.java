@@ -63,8 +63,14 @@ public class ActionSelect extends ActionExecuteElement {
 	//---------------------------------------------------------------------------------------------------------------------------------
 	
 	@Override
-	public String getJavaCode() {
-		return super.getJavaCode() + ", " + select + ", " + selectValue.getJavaCode() + ")";
+	public StringBuilder getJavaCode() {
+		StringBuilder codeBuilder = super.getJavaCode();
+		codeBuilder.append(", ")
+		.append(select)
+		.append(", ")
+		.append(selectValue.getJavaCode())
+		.append(")");
+		return codeBuilder;
 	}
 	
 	//---------------------------------------------------------------------------------------------------------------------------------

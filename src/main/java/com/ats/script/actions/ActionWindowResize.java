@@ -95,13 +95,19 @@ public class ActionWindowResize extends ActionWindow {
 	}
 
 	@Override
-	public String getJavaCode() {
-		return super.getJavaCode() + ", " + getBoundDataJavaCode(x) + ", " + getBoundDataJavaCode(y) + ", " + getBoundDataJavaCode(width) + ", " + getBoundDataJavaCode(height) + ")";
+	public StringBuilder getJavaCode() {
+		StringBuilder codeBuilder = super.getJavaCode();
+		codeBuilder.append(getBoundDataJavaCode(x))
+		.append(", ").append(getBoundDataJavaCode(y))
+		.append(", ").append(getBoundDataJavaCode(width))
+		.append(", ").append(getBoundDataJavaCode(height))
+		.append(")");
+		return codeBuilder;
 	}
 	
 	@Override
-	public void exec(Channel channel) {
-		channel.setWindowBound(x, y, width, height);
+	public String exec(Channel channel) {
+		return channel.setWindowBound(x, y, width, height);
 	}
 
 	//--------------------------------------------------------

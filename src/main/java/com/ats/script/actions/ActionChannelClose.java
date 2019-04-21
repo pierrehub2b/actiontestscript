@@ -48,10 +48,9 @@ public class ActionChannelClose extends ActionChannel {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public String getJavaCode() {
-		if(getName().length() > 0) {
-			return super.getJavaCode() + "\"" + getName() + "\")";
-		}
-		return "new " + this.getClass().getSimpleName() + "(this)";
+	public StringBuilder getJavaCode() {
+		StringBuilder codeBuilder = super.getJavaCode();
+		codeBuilder.append("\"").append(getName()).append("\")");
+		return codeBuilder;
 	}
 }

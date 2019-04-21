@@ -25,6 +25,8 @@ import com.ats.executor.channels.Channel;
 
 public class TestElementSystem extends TestElement {
 
+	public TestElementSystem(){}
+	
 	public TestElementSystem(Channel channel, int maxTry, Predicate<Integer> predicate, SearchedElement searchElement) {
 
 		super(channel, maxTry, predicate, searchElement.getIndex());

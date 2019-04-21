@@ -84,17 +84,16 @@ public class ActionExecuteElement extends ActionExecute {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public String getJavaCode() {
-		StringBuilder codeBuilder = new StringBuilder(super.getJavaCode());
-		codeBuilder.append(maxTry);
-		codeBuilder.append(", ");
+	public StringBuilder getJavaCode() {
+		StringBuilder codeBuilder = super.getJavaCode();
+		codeBuilder.append(maxTry).append(", ");
 
 		if(searchElement == null){
 			codeBuilder.append("null");
 		}else {
 			codeBuilder.append(searchElement.getJavaCode());
 		}
-		return codeBuilder.toString();
+		return codeBuilder;
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

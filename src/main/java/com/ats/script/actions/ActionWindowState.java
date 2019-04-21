@@ -42,12 +42,14 @@ public class ActionWindowState extends ActionWindow {
 	}
 
 	@Override
-	public String getJavaCode() {
-		return super.getJavaCode() + ", \"" + state + "\")";
+	public StringBuilder getJavaCode() {
+		StringBuilder codeBuilder = super.getJavaCode();
+		codeBuilder.append("\"").append(state).append("\")");
+		return codeBuilder;
 	}
 
 	@Override
-	public void exec(Channel channel) {
+	public String exec(Channel channel) {
 		if(CLOSE.equals(state)) {
 			channel.closeWindow(status);
 		}else {
@@ -56,6 +58,7 @@ public class ActionWindowState extends ActionWindow {
 				channel.getDriverEngine().updateDimensions();
 			}
 		}
+		return state;
 	}
 	
 	//--------------------------------------------------------

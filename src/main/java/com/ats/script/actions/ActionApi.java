@@ -88,9 +88,14 @@ public class ActionApi extends Action {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public String getJavaCode() {
+	public StringBuilder getJavaCode() {
 
-		StringBuilder codeBuilder = new StringBuilder(super.getJavaCode()).append("\"").append(type).append("\", ").append(method.getJavaCode()).append(", ");
+		StringBuilder codeBuilder = super.getJavaCode();
+		codeBuilder.append("\"")
+		.append(type)
+		.append("\", ")
+		.append(method.getJavaCode())
+		.append(", ");
 
 		if(data != null){
 			codeBuilder.append(data.getJavaCode());
@@ -111,7 +116,7 @@ public class ActionApi extends Action {
 		}
 
 		codeBuilder.append(")");
-		return codeBuilder.toString();
+		return codeBuilder;
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

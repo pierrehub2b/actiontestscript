@@ -135,9 +135,9 @@ public class ScriptLoader extends Script {
 			Collections.sort(variables);
 
 			for(Variable variable : variables){
-				code.append("\r\n\t\t");
-				code.append(variable.getJavaCode());
-				code.append(";");
+				code.append("\r\n\t\t")
+				.append(variable.getJavaCode())
+				.append(";");
 			}
 
 			//-------------------------------------------------------------------------------------------------
@@ -147,13 +147,8 @@ public class ScriptLoader extends Script {
 			code.append("\r\n\r\n\t\t//--------------\r\n\t\t// Actions   ...\r\n\t\t//--------------\r\n");
 
 			for(Action action : actions){
-				final String lineCode = action.getJavaCode();
-				if(lineCode != null && !action.isDisabled()){
-					code.append("\r\n\t\t");
-					code.append(ActionTestScript.JAVA_EXECUTE_FUNCTION_NAME);
-					code.append("(");code.append(action.getLine());code.append(",");
-					code.append(lineCode);
-					code.append(");");
+				if(!action.isDisabled() && !action.isScriptComment()){
+					code.append("\r\n\t\t").append(action.getJavaCode()).append(");");
 				}
 			}
 			
@@ -164,17 +159,16 @@ public class ScriptLoader extends Script {
 			final CalculatedValue[] returnValues = getReturns();
 			if(returnValues != null) {
 				
-				code.append("\r\n\r\n\t\t//--------------\r\n\t\t// Returns   ...\r\n\t\t//--------------\r\n\r\n\t\t");
-				code.append(ActionTestScript.JAVA_RETURNS_FUNCTION_NAME);
-				code.append("(");
+				code.append("\r\n\r\n\t\t//--------------\r\n\t\t// Returns   ...\r\n\t\t//--------------\r\n\r\n\t\t")
+				.append(ActionTestScript.JAVA_RETURNS_FUNCTION_NAME)
+				.append("(");
 
 				final ArrayList<String> returnValuesCode = new ArrayList<String>();
 				for(CalculatedValue ret : returnValues){
 					returnValuesCode.add(ret.getJavaCode());
 				}
 
-				code.append(String.join(", ", returnValuesCode));
-				code.append(");");
+				code.append(String.join(", ", returnValuesCode)).append(");");
 			}
 			
 			code.append("\r\n\t}\r\n}");

@@ -144,7 +144,8 @@ public class DesktopDriver extends RemoteWebDriver {
 	{
 		Capabilities (0),
 		Application (1),
-		Process (2);
+		Process (2),
+		Close (3);
 
 		private final int type;
 		DriverType(int value){
@@ -262,6 +263,10 @@ public class DesktopDriver extends RemoteWebDriver {
 
 	public int getDriverPort() {
 		return driverPort;
+	}
+	
+	public void closeDriver() {
+		sendRequestCommand(CommandType.Driver, DriverType.Close);
 	}
 
 	public void closeProcess(long processId) {
@@ -627,7 +632,6 @@ public class DesktopDriver extends RemoteWebDriver {
 		}
 
 		sendRequestCommand(CommandType.Record, RecordType.Position, hdirName, hdirValue, vdirName, vdirValue);
-
 	}
 
 	//---------------------------------------------------------------------------------------

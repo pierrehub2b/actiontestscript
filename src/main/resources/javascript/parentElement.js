@@ -1,13 +1,11 @@
-var elem=arguments[0].parentElement,result=[],ifrm=false;
+var elem=arguments[0].parentElement,result=[];
 
 while (elem != null){
 	addElement(elem);
-	if (elem.nodeName == 'BODY' || elem.nodeName == 'HTML' || elem.nodeName == '#document' || ifrm){
-		ifrm = true;
-		elem = elem.ownerDocument.defaultView.frameElement;
-	}else{
-		elem = elem.parentElement;
+	if(elem.parentElement == null || elem.parentElement.nodeName == 'BODY' || elem.parentElement.nodeName == 'HTML'){
+		break;
 	}
+	elem = elem.parentElement;
 };
 
 function addElement(e){

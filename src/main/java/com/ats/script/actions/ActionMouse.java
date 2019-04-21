@@ -79,8 +79,16 @@ public class ActionMouse extends ActionExecuteElement {
 	}
 
 	@Override
-	public String getJavaCode() {
-		return super.getJavaCode() + ", " + ActionTestScript.JAVA_MOUSE_FUNCTION_NAME + "(" + getMouseType() + spareCode + position.getPositionJavaCode() + "))";
+	public StringBuilder getJavaCode() {
+		StringBuilder codeBuilder = super.getJavaCode();
+		codeBuilder.append(", ")
+		.append(ActionTestScript.JAVA_MOUSE_FUNCTION_NAME)
+		.append("(")
+		.append(getMouseType())
+		.append(spareCode)
+		.append(position.getPositionJavaCode())
+		.append("))");
+		return codeBuilder;
 	}
 
 	private static final String MOUSE_CLASS = Mouse.class.getSimpleName() + ".";

@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.executor.drivers.engines.browsers;
 
@@ -44,10 +44,10 @@ public class EdgeDriverEngine extends WebDriverEngine {
 
 	public EdgeDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
 		super(channel, DriverManager.EDGE_BROWSER, driverProcess, windowsDriver, props, DEFAULT_WAIT);
-		
+
 		this.searchElementScript = JS_WAIT_BEFORE_SEARCH + JS_SEARCH_ELEMENT;
 		this.autoScrollElement = JS_SCROLL_IF_NEEDED;//JS_AUTO_SCROLL_CALC;
-		
+
 		EdgeOptions options = new EdgeOptions();
 		options.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
 		options.setCapability(CapabilityType.ACCEPT_INSECURE_CERTS, true);
@@ -76,17 +76,20 @@ public class EdgeDriverEngine extends WebDriverEngine {
 		super.closeWindow(status);
 		actionWait();
 	}
-	
+
 	@Override
 	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {
 		middleClickSimulation(status, position, element);
 	}
 
 	@Override
-	protected void switchToWindowHandle(String handle) {
+	protected boolean switchToWindowHandle(String handle) {
 		actionWait();
-		super.switchToWindowHandle(handle);
-		actionWait();
+		if(super.switchToWindowHandle(handle)) {
+			actionWait();
+			return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -106,7 +109,7 @@ public class EdgeDriverEngine extends WebDriverEngine {
 				enterKey = true;
 			}
 		}
-		
+
 		if(enterKey) {
 			actionWait();
 		}
