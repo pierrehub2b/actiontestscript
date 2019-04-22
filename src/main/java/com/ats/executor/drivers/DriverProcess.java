@@ -51,7 +51,7 @@ public class DriverProcess {
 			Utils.clearDriverFolder(name);
 		}
 
-		File driverFile = driverFolderPath.resolve(driverFileName).toFile();
+		final File driverFile = driverFolderPath.resolve(driverFileName).toFile();
 
 		if(driverFile.exists()){
 			
@@ -63,7 +63,7 @@ public class DriverProcess {
 				arguments = Stream.of(arguments, args).flatMap(Stream::of).toArray(String[]::new);
 			}
 
-			ProcessBuilder builder = new ProcessBuilder(arguments);
+			final ProcessBuilder builder = new ProcessBuilder(arguments);
 			builder.redirectErrorStream(true);
 			builder.redirectInput(Redirect.INHERIT);
 

@@ -157,6 +157,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 				return;
 			}
 		}
+		
 		String appVersion = "N/A";
 		String appBuildVersion = "N/A";
 

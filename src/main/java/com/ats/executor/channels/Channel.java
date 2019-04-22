@@ -87,18 +87,22 @@ public class Channel {
 			DriverManager driverManager, 
 			ActionChannelStart action) {
 
-		status.setChannel(this);
-
-		this.mainScript = script;
-		this.current = true;
-		this.actionStart = action;
-		this.application = action.getApplication().getCalculated();
-		this.engine = driverManager.getDriverEngine(this, status, new DesktopDriver(driverManager));
+		final DesktopDriver desktopDriver = new DesktopDriver(status, driverManager);
 
 		if(status.isPassed()) {
-			this.refreshLocation();
-		}else {
-			status.setChannel(null);
+			status.setChannel(this);
+
+			this.mainScript = script;
+			this.current = true;
+			this.actionStart = action;
+			this.application = action.getApplication().getCalculated();
+			this.engine = driverManager.getDriverEngine(this, status, desktopDriver);
+
+			if(status.isPassed()) {
+				this.refreshLocation();
+			}else {
+				status.setChannel(null);
+			}
 		}
 	}
 

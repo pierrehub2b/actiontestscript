@@ -67,24 +67,8 @@ public class DriverManager {
 
 	private MobileDriverEngine mobileDriverEngine;
 
-	private String windowsBuildVersion;
-	private String osName;
-	private String osVersion;
-
 	public String getDriverFolderPath() {
 		return ATS.getDriversFolderPath().toFile().getAbsolutePath();
-	}
-
-	public void setWindowsBuildVersion(String value) {
-		windowsBuildVersion = value;
-	}
-
-	public void setOsName(String value) {
-		osName = value;
-	}
-
-	public void setOsVersion(String value) {
-		osVersion = value;
 	}
 
 	//--------------------------------------------------------------------------------------------------------------
@@ -129,7 +113,7 @@ public class DriverManager {
 		if(CHROME_BROWSER.equals(appName)) {
 			return new ChromeDriverEngine(channel, status, getDriverProcess(CHROME_BROWSER, CHROME_DRIVER_FILE_NAME), desktopDriver, props);	
 		}else if(EDGE_BROWSER.equals(appName)) {
-			return new EdgeDriverEngine(channel, status, getDriverProcess(EDGE_BROWSER, EDGE_DRIVER_FILE_NAME + "-" + windowsBuildVersion + ".exe"), desktopDriver, props);
+			return new EdgeDriverEngine(channel, status, getDriverProcess(EDGE_BROWSER, EDGE_DRIVER_FILE_NAME + "-" + desktopDriver.getOsBuildVersion() + ".exe"), desktopDriver, props);
 		}else if(OPERA_BROWSER.equals(appName)) {
 			return new OperaDriverEngine(channel, status, getDriverProcess(OPERA_BROWSER, OPERA_DRIVER_FILE_NAME), desktopDriver, props);
 		}else if(FIREFOX_BROWSER.equals(appName)) {

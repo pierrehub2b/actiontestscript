@@ -75,33 +75,44 @@ public class DesktopDriver extends RemoteWebDriver {
 	private CloseableHttpClient httpClient;
 
 	private String driverVersion;
+	
+	private String osName;
+	private String osVersion;
+	private String osBuildVersion;
 
 	public DesktopDriver() {}
 
-	public DesktopDriver(DriverManager driverManager) {
+	public DesktopDriver(ActionStatus status, DriverManager driverManager) {
 
 		this.driverHost = driverManager.getDesktopDriver().getDriverServerUrl().getHost();
 		this.driverPort = driverManager.getDesktopDriver().getDriverServerUrl().getPort();
 		this.driverUrl = "http://" + getDriverHost() + ":" + getDriverPort();
 
-		requestConfig = RequestConfig.custom()
-				.setConnectTimeout(10*000)
-				.setConnectionRequestTimeout(10*000)
+		this.requestConfig = RequestConfig.custom()
+				.setConnectTimeout(20*000)
+				.setConnectionRequestTimeout(20*000)
 				.setSocketTimeout(20*000).build();
 
-		httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
-
-		final ArrayList<DesktopData> osInfo = getOsInfo();
-		for (DesktopData data : osInfo) {
-			if("BuildNumber".equals(data.getName())) {
-				driverManager.setWindowsBuildVersion(data.getValue());
-			}else if("Name".equals(data.getName())) {
-				driverManager.setOsName(data.getValue());
-			}else if("Version".equals(data.getName())) {
-				driverManager.setOsVersion(data.getValue());
-			}else if("DriverVersion".equals(data.getName())) {
-				driverVersion = data.getValue();
+		this.httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
+		
+		final DesktopResponse resp = sendRequestCommand(CommandType.Driver, DriverType.Capabilities);
+		if(resp != null) {
+			for (DesktopData data : resp.capabilities) {
+				if("BuildNumber".equals(data.getName())) {
+					this.osBuildVersion = data.getValue();
+				}else if("Name".equals(data.getName())) {
+					this.osName = data.getValue();
+				}else if("Version".equals(data.getName())) {
+					this.osVersion = data.getValue();
+				}else if("DriverVersion".equals(data.getName())) {
+					this.driverVersion = data.getValue();
+				}
 			}
+			status.setPassed(true);
+		}else {
+			status.setPassed(false);
+			status.setCode(ActionStatus.CHANNEL_START_ERROR);
+			status.setMessage("Unable to connect to desktop driver! Check DotNET and OS version ...");
 		}
 	}
 
@@ -116,6 +127,18 @@ public class DesktopDriver extends RemoteWebDriver {
 
 	public String getDriverVersion() {
 		return driverVersion;
+	}
+	
+	public String getOsBuildVersion() {
+		return osBuildVersion;
+	}
+	
+	public String getOsName() {
+		return osName;
+	}
+
+	public String getOsVersion() {
+		return osVersion;
 	}
 
 	//------------------------------------------------------------------------------------------------------------
@@ -264,7 +287,7 @@ public class DesktopDriver extends RemoteWebDriver {
 	public int getDriverPort() {
 		return driverPort;
 	}
-	
+
 	public void closeDriver() {
 		sendRequestCommand(CommandType.Driver, DriverType.Close);
 	}
@@ -370,12 +393,13 @@ public class DesktopDriver extends RemoteWebDriver {
 		return hoverElement;
 	}
 
-	public ArrayList<DesktopData> getOsInfo() {
-		return sendRequestCommand(CommandType.Driver, DriverType.Capabilities).capabilities;
-	}
-
 	public ArrayList<DesktopData> getVersion(String appPath) {
-		return sendRequestCommand(CommandType.Driver, DriverType.Application, appPath).capabilities;
+		final DesktopResponse resp = sendRequestCommand(CommandType.Driver, DriverType.Application, appPath);
+		if(resp != null) {
+			return resp.capabilities;
+		}else {
+			return new ArrayList<DesktopData>();
+		}
 	}
 
 	public List<DesktopWindow> getWindowsByPid(Long pid) {
@@ -406,7 +430,7 @@ public class DesktopDriver extends RemoteWebDriver {
 	public void setChannelToFront(int handle, long pid) {
 		sendRequestCommand(CommandType.Window, WindowType.ToFront, handle, pid);
 	}
-	
+
 	public void rootKeys(int handle, String keys) {
 		sendRequestCommand(CommandType.Window, WindowType.Keys, handle, keys);
 	}
@@ -430,7 +454,7 @@ public class DesktopDriver extends RemoteWebDriver {
 	public void closeWindow(int handle) {
 		sendRequestCommand(CommandType.Window, WindowType.Close, handle);
 	}
-	
+
 	public void windowState(ActionStatus status, Channel channel, String state) {
 		sendRequestCommand(CommandType.Window, WindowType.State, channel.getHandle(this), state);
 	}
@@ -590,10 +614,10 @@ public class DesktopDriver extends RemoteWebDriver {
 
 			x = bound.getX();
 			y = bound.getY();
-			
+
 			//x = elem.getBoundX();
 			//y = elem.getBoundY();
-			
+
 			w = bound.getWidth();
 			h = bound.getHeight();
 
