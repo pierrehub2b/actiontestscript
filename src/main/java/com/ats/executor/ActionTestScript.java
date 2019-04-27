@@ -112,15 +112,12 @@ public class ActionTestScript extends Script implements ITest{
 	@BeforeSuite(alwaysRun=true)
 	public void beforeSuite() {
 		System.out.println("----------------------------------------------");
-		System.out.println("    ATS script started (version " + AtsManager.getVersion() + ")");
-		System.out.println("----------------------------------------------\n");
+		System.out.println("    ATS execution started (version " + AtsManager.getVersion() + ")");
+		System.out.println("----------------------------------------------");
 	}
 
 	@BeforeClass(alwaysRun=true)
 	public void beforeAtsTest(ITestContext ctx) {
-
-		final ExecutionLogger mainLogger = new ExecutionLogger(System.out, ctx.getSuite().getXmlSuite().getVerbose());
-		setLogger(mainLogger);
 		
 		final TestRunner runner = (TestRunner) ctx;
 		setTestName(this.getClass().getName());
@@ -128,11 +125,13 @@ public class ActionTestScript extends Script implements ITest{
 		if("true".equals(runner.getTest().getParameter("check.mode"))) {
 			throw new SkipException("check mode : " + testName);
 		}else {
-
-			final ScriptHeader header = getHeader();
+		
+			setTestExecutionVariables(runner.getTest().getAllParameters());
+			
+			final ExecutionLogger mainLogger = new ExecutionLogger(System.out, getEnvironmentValue("ats.log.level", ""));
+			setLogger(mainLogger);
 			
 			sendInfo("Starting script", " -> " + testName);
-			setTestExecutionVariables(runner.getTest().getAllParameters());
 
 			//-----------------------------------------------------------
 			// check report output specified
@@ -146,6 +145,8 @@ public class ActionTestScript extends Script implements ITest{
 			boolean xml = "true".equals(getEnvironmentValue("xml.report", "").toLowerCase());
 
 			if(visualQuality > 0 || xml) {
+				
+				final ScriptHeader header = getHeader();
 				
 				header.setName(getTestName());
 				header.setAtsVersion(AtsManager.getVersion());

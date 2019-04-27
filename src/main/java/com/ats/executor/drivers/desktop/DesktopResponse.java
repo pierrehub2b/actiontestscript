@@ -24,17 +24,14 @@ import java.util.ArrayList;
 import com.ats.element.AtsElement;
 
 public class DesktopResponse {
-		
-	public ArrayList<DesktopData> capabilities = null;
-	
+			
 	public ArrayList<AtsElement> elements;
 	public ArrayList<DesktopWindow> windows;
-	public ArrayList<DesktopData> properties;
+	public ArrayList<DesktopData> data;
 
 	public int errorCode = 0;
 	public String errorMessage = null;
 	
-	public DesktopData data = null;
 	public byte[] image;
 
 }

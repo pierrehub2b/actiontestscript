@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -18,6 +19,8 @@ import javax.xml.transform.TransformerException;
 import org.apache.http.Consts;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -25,6 +28,7 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 
@@ -41,6 +45,50 @@ public class Main {
 
 	public static void main(String[] argsx) throws ParserConfigurationException, TransformerException, InterruptedException, IOException {
 
+		RequestConfig requestConfig = RequestConfig.custom()
+				.setConnectTimeout(20*000)
+				.setConnectionRequestTimeout(20*000)
+				.setSocketTimeout(20*000).build();
+
+		HttpClient httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
+		
+		
+		final HttpPost request = new HttpPost(
+				new StringBuilder("http://localhost:9988")
+				.append("/")
+				.append(1)
+				.append("/")
+				.append(1)
+				.toString());
+
+
+		StringJoiner joiner = new StringJoiner("\n");
+
+			joiner.add("0");
+			joiner.add("0");
+			joiner.add("100");
+			joiner.add("100");
+
+		request.setEntity(new StringEntity(joiner.toString(), ContentType.create("application/x-www-form-urlencoded", Consts.UTF_8)));
+
+		try {
+
+			final HttpResponse response = httpClient.execute(request);
+			final AMF3Deserializer amf3 = new AMF3Deserializer(response.getEntity().getContent());
+			final DesktopResponse desktopResponse = (DesktopResponse) amf3.readObject();
+
+			amf3.close();
+
+
+		} catch (IOException e) {
+
+		}
+		
+		
+		
+		System.exit(0);
+		
+		
 
 		Utils.createXmlReport(Paths.get("C:\\Users\\huber\\Desktop\\cimpa"), "check", new NullExecutionLogger());
 
@@ -59,7 +107,7 @@ obj.setValue("rr");
 		AMF3Serializer data = new AMF3Serializer(baos);
 		data.writeObject(obj);*/
 
-		final HttpPost request = new HttpPost(
+		/*final HttpPost request = new HttpPost(
 				new StringBuilder("http://localhost:9988")
 				.append("/")
 				.append(2)
@@ -88,7 +136,7 @@ obj.setValue("rr");
 
 		} catch (IOException e) {
 
-		}
+		}*/
 
 
 

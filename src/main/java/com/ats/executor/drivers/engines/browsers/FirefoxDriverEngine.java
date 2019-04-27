@@ -59,7 +59,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		this.autoScrollElement = JS_SCROLL_IF_NEEDED;//JS_AUTO_SCROLL_MOZ;
 		
 		FirefoxOptions options = new FirefoxOptions();
-		options.setCapability("marionnette ", true);
+		//options.setCapability("marionnette ", true);
 		//options.setCapability("nativeEvents", false);
 		options.setCapability("acceptSslCerts ", true);
 		options.setCapability("acceptInsecureCerts ", true);
@@ -134,7 +134,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		
 		JsonArray actionList = new JsonArray();
 		actionList.add(getMoveAction(origin, offsetX, offsetY));
-		executeAction(getElementAction(actionList));
+		executeRequestActions(getElementAction(actionList));
 	}
 	
 	@Override
@@ -149,7 +149,15 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		actionList.add(getMouseClickAction(origin, "pointerDown"));
 		actionList.add(getMouseClickAction(origin, "pointerUp"));
 				
-		executeAction(getElementAction(actionList));
+		executeRequestActions(getElementAction(actionList));
+	}
+
+	@Override
+	protected void loadUrl(String url) {
+		JsonObject parameters = new JsonObject();
+		parameters.addProperty("url", url);
+		
+		executeRequest(parameters, "url");
 	}
 
 	private JsonObject getMouseClickAction(JsonObject origin, String type) {
@@ -200,7 +208,11 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		return postData;
 	}
 	
-	private void executeAction(JsonObject action) {
+	private void executeRequestActions(JsonObject action) {
+		executeRequest(action, "actions");
+	}
+	
+	private void executeRequest(JsonObject action, String type) {
 
 		StringEntity postDataEntity = null;
 		try {
@@ -209,8 +221,8 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 			return;
 		}
 
-		CloseableHttpClient httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
-		HttpPost request = new HttpPost(driverSession + "/actions");
+		final CloseableHttpClient httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
+		final HttpPost request = new HttpPost(driverSession + "/" + type);
 		request.addHeader("content-type", "application/json");
 
 		try {

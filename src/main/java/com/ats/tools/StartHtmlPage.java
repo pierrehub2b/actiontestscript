@@ -21,6 +21,7 @@ package com.ats.tools;
 
 import com.ats.driver.AtsManager;
 import com.ats.executor.TestBound;
+import com.ats.executor.drivers.desktop.DesktopDriver;
 
 public final class StartHtmlPage {
 
@@ -37,7 +38,7 @@ public final class StartHtmlPage {
 			int maxTryProperty,
 			int scriptTimeout,
 			int pageLoadTimeout,
-			int watchdog) {
+			int watchdog, DesktopDriver desktopDriver) {
 
 		if(driverVersion == null) {
 			driverVersion = "--";
@@ -46,7 +47,7 @@ public final class StartHtmlPage {
 		if(browserVersion == null) {
 			browserVersion = "--";
 		}
-
+		
 		StringBuilder htmlContent = new StringBuilder();
 		htmlContent.append("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">");
 
@@ -67,8 +68,11 @@ public final class StartHtmlPage {
 		htmlContent.append("<p><strong>ActionTestScript version : </strong>");
 		htmlContent.append(AtsManager.getVersion());
 
-		htmlContent.append("<br><strong>Driver version : </strong>");
+		htmlContent.append("<br><strong>Browser driver version : </strong>");
 		htmlContent.append(driverVersion);
+		
+		htmlContent.append("<br><strong>Desktop driver version : </strong>");
+		htmlContent.append(desktopDriver.getDriverVersion());
 		
 		htmlContent.append("<br><strong>Search element max try : </strong>");
 		htmlContent.append(maxtry);
@@ -88,7 +92,7 @@ public final class StartHtmlPage {
 		htmlContent.append(watchdog);
 		htmlContent.append(" s");
 
-		htmlContent.append("</p></div><div class=\"alert note\" style=\"margin-left:30px;min-width: 240px;display: inline-block\"><p>");
+		htmlContent.append("</p></div><div class=\"alert note\" style=\"margin-left:30px;min-width: 360px;display: inline-block\"><p>");
 		htmlContent.append("<strong>Browser : </strong>");
 		htmlContent.append("<br><strong>  - Name : </strong>");
 		htmlContent.append(browserName);
@@ -116,7 +120,45 @@ public final class StartHtmlPage {
 		
 		htmlContent.append("<br><strong>  - Double check property : </strong>");
 		htmlContent.append(propertyWait);
-		htmlContent.append(" ms");
+		htmlContent.append(" ms");		
+		
+		htmlContent.append("</p></div><div class=\"alert warning\" style=\"margin-left:30px;min-width: 360px;display: inline-block\"><p>");
+		htmlContent.append("<strong>Operating System : </strong>");
+		htmlContent.append("<br><strong>  - Machine name : </strong>");
+		htmlContent.append(desktopDriver.getMachineName());
+		htmlContent.append("<br><strong>  - System name : </strong>");
+		htmlContent.append(desktopDriver.getOsName());
+		htmlContent.append("<br><strong>  - System version : </strong>");
+		htmlContent.append(desktopDriver.getOsVersion());
+		htmlContent.append("<br><strong>  - Build version : </strong>");
+		htmlContent.append(desktopDriver.getOsBuildVersion());
+		htmlContent.append("<br><strong>  - Country code : </strong>");
+		htmlContent.append(desktopDriver.getCountryCode());
+		htmlContent.append("<br><strong>  - DotNET version : </strong>");
+		htmlContent.append(desktopDriver.getDotNetVersion());
+
+		htmlContent.append("<br><strong>  - Resolution : </strong>");
+		htmlContent.append(desktopDriver.getScreenResolution());
+		
+		htmlContent.append("<br><strong>  - Processor name : </strong>");
+		htmlContent.append(desktopDriver.getCpuName());
+		htmlContent.append("<br><strong>  - Processor socket : </strong>");
+		htmlContent.append(desktopDriver.getCpuSocket());
+		htmlContent.append("<br><strong>  - Processor architecture : </strong>");
+		htmlContent.append(desktopDriver.getCpuArchitecture());
+		htmlContent.append("<br><strong>  - Processor max speed : </strong>");
+		htmlContent.append(desktopDriver.getCpuMaxClock());
+		htmlContent.append("<br><strong>  - Processor cores : </strong>");
+		htmlContent.append(desktopDriver.getCpuCores());
+		
+		htmlContent.append("<br><strong>  - Current drive letter : </strong>");
+		htmlContent.append(desktopDriver.getDriveLetter());
+		
+		htmlContent.append("<br><strong>  - Disk total size : </strong>");
+		htmlContent.append(desktopDriver.getDiskTotalSize());
+		
+		htmlContent.append("<br><strong>  - Disk free space : </strong>");
+		htmlContent.append(desktopDriver.getDiskFreeSpace());		
 
 		htmlContent.append("</p></div></div></body></html>");
 

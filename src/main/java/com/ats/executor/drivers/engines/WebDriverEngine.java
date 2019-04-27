@@ -165,7 +165,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		cap.setCapability(CapabilityType.SUPPORTS_FINDING_BY_CSS, false);
 		cap.setCapability(CapabilityType.HAS_NATIVE_EVENTS, false);
 
-		int maxTry = 20;
+		int maxTry = 10;
 		String errorMessage = null;
 
 		while(maxTry > 0) {
@@ -180,78 +180,78 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		if(driver != null) {
 			status.setPassed(true);
+
+			actions = new Actions(driver);
+
+			driver.manage().timeouts().setScriptTimeout(scriptTimeout, TimeUnit.SECONDS);
+			driver.manage().timeouts().pageLoadTimeout(pageLoadTimeout, TimeUnit.SECONDS);
+
+			try{
+				driver.manage().window().setSize(channel.getDimension().getSize());
+				driver.manage().window().setPosition(channel.getDimension().getPoint());
+			}catch(Exception ex){
+				System.err.println(ex.getMessage());
+			}
+
+			String applicationVersion = null;
+			String driverVersion = null;
+
+			Map<String, ?> infos = driver.getCapabilities().asMap();
+			for (Map.Entry<String, ?> entry : infos.entrySet()){
+				if("browserVersion".equals(entry.getKey()) || "version".equals(entry.getKey())){
+					applicationVersion = entry.getValue().toString();
+				}else if("chrome".equals(entry.getKey())) {
+					Map<String, String> chromeData = (Map<String, String>) entry.getValue();
+					driverVersion = chromeData.get("chromedriverVersion");
+					if(driverVersion != null) {
+						driverVersion = driverVersion.replaceFirst("\\(.*\\)", "").trim();
+					}
+				}else if("moz:geckodriverVersion".equals(entry.getKey())) {
+					driverVersion = entry.getValue().toString();
+				}
+			}
+
+			final String titleUid = UUID.randomUUID().toString();
+			try {
+				final File tempHtml = File.createTempFile("ats_", ".html");
+				tempHtml.deleteOnExit();
+
+				Files.write(tempHtml.toPath(), StartHtmlPage.getAtsBrowserContent(titleUid, channel.getApplication(), applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait(), getPropertyWait(), maxTrySearch, maxTryProperty, scriptTimeout, pageLoadTimeout, watchdog, getDesktopDriver()));
+				driver.get(tempHtml.toURI().toString());
+			} catch (IOException e) {}
+
+			maxTry = 10;
+			while(maxTry > 0) {
+				final DesktopWindow window = desktopDriver.getWindowByTitle(titleUid);
+				if(window != null) {
+					desktopDriver.setEngine(new DesktopDriverEngine(channel, window));
+					channel.setApplicationData(
+							"windows",
+							applicationVersion,
+							driverVersion,
+							window.pid);
+					maxTry = 0;
+				}else {
+					channel.sleep(300);
+					maxTry--;
+				}
+			}
+
+			requestConfig = RequestConfig.custom()
+					.setConnectTimeout(5000)
+					.setConnectionRequestTimeout(5000)
+					.setSocketTimeout(10000).build();
+			try {
+				driverSession = new URI(driverProcess.getDriverServerUrl() + "/session/" + driver.getSessionId().toString());
+			} catch (URISyntaxException e) {}
+
 		}else {
 			status.setPassed(false);
 			status.setCode(ActionStatus.CHANNEL_START_ERROR);
 			status.setMessage(errorMessage);
 
 			driverProcess.close();
-			return;
 		}
-
-		actions = new Actions(driver);
-
-		driver.manage().timeouts().setScriptTimeout(scriptTimeout, TimeUnit.SECONDS);
-		driver.manage().timeouts().pageLoadTimeout(pageLoadTimeout, TimeUnit.SECONDS);
-
-		try{
-			driver.manage().window().setSize(channel.getDimension().getSize());
-			driver.manage().window().setPosition(channel.getDimension().getPoint());
-		}catch(Exception ex){
-			System.err.println(ex.getMessage());
-		}
-
-		String applicationVersion = null;
-		String driverVersion = null;
-
-		Map<String, ?> infos = driver.getCapabilities().asMap();
-		for (Map.Entry<String, ?> entry : infos.entrySet()){
-			if("browserVersion".equals(entry.getKey()) || "version".equals(entry.getKey())){
-				applicationVersion = entry.getValue().toString();
-			}else if("chrome".equals(entry.getKey())) {
-				Map<String, String> chromeData = (Map<String, String>) entry.getValue();
-				driverVersion = chromeData.get("chromedriverVersion");
-				if(driverVersion != null) {
-					driverVersion = driverVersion.replaceFirst("\\(.*\\)", "").trim();
-				}
-			}else if("moz:geckodriverVersion".equals(entry.getKey())) {
-				driverVersion = entry.getValue().toString();
-			}
-		}
-
-		final String titleUid = UUID.randomUUID().toString();
-		try {
-			final File tempHtml = File.createTempFile("ats_", ".html");
-			tempHtml.deleteOnExit();
-
-			Files.write(tempHtml.toPath(), StartHtmlPage.getAtsBrowserContent(titleUid, channel.getApplication(), applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait(), getPropertyWait(), maxTrySearch, maxTryProperty, scriptTimeout, pageLoadTimeout, watchdog));
-			driver.get(tempHtml.toURI().toString());
-		} catch (IOException e) {}
-
-		maxTry = 10;
-		while(maxTry > 0) {
-			final DesktopWindow window = desktopDriver.getWindowByTitle(titleUid);
-			if(window != null) {
-				desktopDriver.setEngine(new DesktopDriverEngine(channel, window));
-				channel.setApplicationData(
-						"windows",
-						applicationVersion,
-						driverVersion,
-						window.pid);
-				maxTry = 0;
-			}else {
-				channel.sleep(300);
-				maxTry--;
-			}
-		}
-
-		requestConfig = RequestConfig.custom()
-				.setConnectTimeout(5000)
-				.setConnectionRequestTimeout(5000)
-				.setSocketTimeout(10000).build();
-		try {
-			driverSession = new URI(driverProcess.getDriverServerUrl() + "/session/" + driver.getSessionId().toString());
-		} catch (URISyntaxException e) {}
 	}
 
 	@Override
@@ -537,25 +537,25 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		if(withDesktop) {
 			desktopMoveToElement(foundElement, position,0 ,0);
 		}else {
-			
+
 			int maxTry = 10;
 			while(maxTry > 0) {
 				try {
-					
+
 					scrollAndMove(foundElement, position);
-					
+
 					status.setPassed(true);
 					status.setMessage("");
-					
+
 					maxTry = 0;
-					
+
 				}catch(WebDriverException e) {
 
 					channel.sleep(500);
-					
+
 					status.setPassed(false);
 					status.setMessage(e.getMessage());
-										
+
 					maxTry--;
 				}
 			}
@@ -564,7 +564,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	private void scrollAndMove(FoundElement foundElement, MouseDirection position) {
 		scrollOnMove(foundElement);
-		
+
 		final Rectangle rect = foundElement.getRectangle();
 		move(foundElement, getOffsetX(rect, position), getOffsetY(rect, position));
 	}
@@ -683,8 +683,9 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	protected boolean switchToWindowHandle(String handle) {
 		try {
+			channel.sleep(300);
 			driver.switchTo().window(handle);
-			channel.sleep(500);
+			channel.sleep(300);
 			return switchToDefaultContent();
 		}catch(NoSuchWindowException ex) {
 			return false;
@@ -699,7 +700,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		boolean switched = switchToWindowHandle(wins[index]);
 
 		while(!switched && maxTry > 0) {
-			channel.sleep(300);
+			channel.sleep(500);
 			wins = getWindowsHandle(index);
 			switched = switchToWindowHandle(wins[index]);
 		}
@@ -810,11 +811,10 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			driver.navigate().back();
 		}else {
 			switchToDefaultContent();
-
 			if(!url.startsWith("https://") && !url.startsWith("http://") && !url.startsWith("file://") ) {
 				url = "http://" + url;
 			}
-			driver.get(url);
+			loadUrl(url);
 		}
 
 		status.setPassed(true);
@@ -822,6 +822,10 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		status.setMessage(getCurrentUrl());
 
 		actionWait();
+	}
+	
+	protected void loadUrl(String url) {
+		driver.get(url);
 	}
 
 	private WebElement iframe = null;

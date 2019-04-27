@@ -54,6 +54,7 @@ import com.ats.executor.ActionStatus;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
+import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.engines.desktop.DesktopDriverEngine;
 import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
@@ -62,6 +63,8 @@ import com.ats.tools.logger.IExecutionLogger;
 import com.exadel.flamingo.flex.messaging.amf.io.AMF3Deserializer;
 
 public class DesktopDriver extends RemoteWebDriver {
+
+	private final static String USER_AGENT = "AtsDesktopDriver";
 
 	private List<FoundElement> elementMapLocation;
 
@@ -75,44 +78,105 @@ public class DesktopDriver extends RemoteWebDriver {
 	private CloseableHttpClient httpClient;
 
 	private String driverVersion;
-	
+
 	private String osName;
 	private String osVersion;
 	private String osBuildVersion;
+
+	private String countryCode;
+
+	private String machineName;
+
+	private String screenResolution;
+
+	private String driveLetter;
+
+	private String diskTotalSize;
+
+	private String diskFreeSpace;
+
+	private String cpuArchitecture;
+
+	private String cpuCores;
+
+	private String cpuName;
+	private String cpuSocket;
+
+	private String cpuMaxClock;
+
+	private String dotNetVersion;
 
 	public DesktopDriver() {}
 
 	public DesktopDriver(ActionStatus status, DriverManager driverManager) {
 
-		this.driverHost = driverManager.getDesktopDriver().getDriverServerUrl().getHost();
-		this.driverPort = driverManager.getDesktopDriver().getDriverServerUrl().getPort();
-		this.driverUrl = "http://" + getDriverHost() + ":" + getDriverPort();
+		final DriverProcess desktopDriverProcess = driverManager.getDesktopDriver(status);
 
-		this.requestConfig = RequestConfig.custom()
-				.setConnectTimeout(20*000)
-				.setConnectionRequestTimeout(20*000)
-				.setSocketTimeout(20*000).build();
+		if(status.isPassed()) {
+			
+			this.driverHost = desktopDriverProcess.getDriverServerUrl().getHost();
+			this.driverPort = desktopDriverProcess.getDriverServerUrl().getPort();
+			this.driverUrl = "http://" + getDriverHost() + ":" + getDriverPort();
 
-		this.httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
-		
-		final DesktopResponse resp = sendRequestCommand(CommandType.Driver, DriverType.Capabilities);
-		if(resp != null) {
-			for (DesktopData data : resp.capabilities) {
-				if("BuildNumber".equals(data.getName())) {
-					this.osBuildVersion = data.getValue();
-				}else if("Name".equals(data.getName())) {
-					this.osName = data.getValue();
-				}else if("Version".equals(data.getName())) {
-					this.osVersion = data.getValue();
-				}else if("DriverVersion".equals(data.getName())) {
-					this.driverVersion = data.getValue();
+			this.requestConfig = RequestConfig.custom()
+					.setConnectTimeout(20*000)
+					.setConnectionRequestTimeout(20*000)
+					.setSocketTimeout(20*000).build();
+
+			this.httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
+
+			final DesktopResponse resp = sendRequestCommand(CommandType.Driver, DriverType.Capabilities);
+			if(resp != null) {
+				for (DesktopData data : resp.data) {
+					if("BuildNumber".equals(data.getName())) {
+						this.osBuildVersion = data.getValue();
+					}else if("Name".equals(data.getName())) {
+						this.osName = data.getValue();
+					}else if("Version".equals(data.getName())) {
+						this.osVersion = data.getValue();
+					}else if("DriverVersion".equals(data.getName())) {
+						this.driverVersion = data.getValue();
+					}else if("CountryCode".equals(data.getName())) {
+						this.countryCode = data.getValue();
+					}else if("MachineName".equals(data.getName())) {
+						this.machineName = data.getValue();
+					}else if("ScreenResolution".equals(data.getName())) {
+						this.screenResolution = data.getValue();
+					}
+					else if("DriveLetter".equals(data.getName())) {
+						this.driveLetter = data.getValue();
+					}
+					else if("DiskTotalSize".equals(data.getName())) {
+						this.diskTotalSize = data.getValue();
+					}
+					else if("DiskFreeSpace".equals(data.getName())) {
+						this.diskFreeSpace = data.getValue();
+					}
+					else if("CpuSocket".equals(data.getName())) {
+						this.cpuSocket = data.getValue();
+					}
+					else if("CpuName".equals(data.getName())) {
+						this.cpuName = data.getValue();
+					}
+					else if("CpuArchitecture".equals(data.getName())) {
+						this.cpuArchitecture = data.getValue();
+					}
+					else if("CpuMaxClockSpeed".equals(data.getName())) {
+						this.cpuMaxClock = data.getValue();
+					}
+					else if("CpuCores".equals(data.getName())) {
+						this.cpuCores = data.getValue();
+					}
+					else if("DotNetVersion".equals(data.getName())) {
+						this.dotNetVersion = data.getValue();
+					}
 				}
+				status.setPassed(true);
+			}else {
+				status.setPassed(false);
+				status.setCode(ActionStatus.CHANNEL_START_ERROR);
+				status.setMessage("Unable to connect to desktop driver! Check DotNET and OS version ...");
 			}
-			status.setPassed(true);
-		}else {
-			status.setPassed(false);
-			status.setCode(ActionStatus.CHANNEL_START_ERROR);
-			status.setMessage("Unable to connect to desktop driver! Check DotNET and OS version ...");
 		}
 	}
 
@@ -128,11 +192,11 @@ public class DesktopDriver extends RemoteWebDriver {
 	public String getDriverVersion() {
 		return driverVersion;
 	}
-	
+
 	public String getOsBuildVersion() {
 		return osBuildVersion;
 	}
-	
+
 	public String getOsName() {
 		return osName;
 	}
@@ -141,6 +205,54 @@ public class DesktopDriver extends RemoteWebDriver {
 		return osVersion;
 	}
 
+	public String getCountryCode() {
+		return countryCode;
+	}
+
+	public String getMachineName() {
+		return machineName;
+	}
+
+	public String getScreenResolution() {
+		return screenResolution;
+	}
+
+	public String getDriveLetter() {
+		return driveLetter;
+	}
+
+	public String getDiskTotalSize() {
+		return diskTotalSize;
+	}
+
+	public String getDiskFreeSpace() {
+		return diskFreeSpace;
+	}
+
+	public String getCpuArchitecture() {
+		return cpuArchitecture;
+	}
+
+	public String getCpuCores() {
+		return cpuCores;
+	}
+
+	public String getCpuName() {
+		return cpuName;
+	}
+	
+	public String getCpuSocket() {
+		return cpuSocket;
+	}
+
+	public String getCpuMaxClock() {
+		return cpuMaxClock;
+	}	
+
+	public String getDotNetVersion() {
+		return dotNetVersion;
+	}
+	
 	//------------------------------------------------------------------------------------------------------------
 	// Enum types
 	//------------------------------------------------------------------------------------------------------------
@@ -396,7 +508,7 @@ public class DesktopDriver extends RemoteWebDriver {
 	public ArrayList<DesktopData> getVersion(String appPath) {
 		final DesktopResponse resp = sendRequestCommand(CommandType.Driver, DriverType.Application, appPath);
 		if(resp != null) {
-			return resp.capabilities;
+			return resp.data;
 		}else {
 			return new ArrayList<DesktopData>();
 		}
@@ -500,8 +612,8 @@ public class DesktopDriver extends RemoteWebDriver {
 		ArrayList<CalculatedProperty> listAttributes = new ArrayList<CalculatedProperty>();
 
 		DesktopResponse resp = sendRequestCommand(CommandType.Element, ElementType.Attributes, elementId);
-		if(resp.properties != null) {
-			for(DesktopData data : resp.properties) {
+		if(resp.data != null) {
+			for(DesktopData data : resp.data) {
 				listAttributes.add(new CalculatedProperty(data.getName(), data.getValue()));
 			}
 		}
@@ -537,8 +649,8 @@ public class DesktopDriver extends RemoteWebDriver {
 
 	public String getElementAttribute(String elementId, String attribute) {
 		final DesktopResponse resp = sendRequestCommand(CommandType.Element, ElementType.Attributes, elementId, attribute);
-		if(resp.data != null) {
-			return resp.data.getValue();
+		if(resp.data != null && resp.data.size() > 0) {
+			return resp.data.get(0).getValue();
 		}
 		return null;
 	}
@@ -671,6 +783,8 @@ public class DesktopDriver extends RemoteWebDriver {
 				.append(subType)
 				.toString());
 
+		request.setHeader("User-Agent", USER_AGENT);
+
 		StringJoiner joiner = new StringJoiner("\n");
 		for (Object obj : data) {
 			joiner.add(obj.toString());
@@ -704,6 +818,8 @@ public class DesktopDriver extends RemoteWebDriver {
 				.append("/")
 				.append(RecordType.Download)
 				.toString());
+
+		request.setHeader("User-Agent", USER_AGENT);
 
 		try {
 

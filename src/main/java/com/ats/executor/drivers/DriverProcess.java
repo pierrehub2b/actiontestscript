@@ -28,6 +28,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
+import com.ats.executor.ActionStatus;
 import com.ats.tools.Utils;
 
 public class DriverProcess {
@@ -37,13 +38,9 @@ public class DriverProcess {
 	private int port = 4444;
 	private Process process;
 	private DriverManager manager;
-	
-	private boolean started = true;
-	
-	private String error;
 
-	public DriverProcess(String name, DriverManager manager, Path driverFolderPath, String driverFileName, String[] args) {
-
+	public DriverProcess(ActionStatus status, String name, DriverManager manager, Path driverFolderPath, String driverFileName, String[] args) {
+		
 		this.name = name;
 		this.manager = manager;
 		
@@ -71,13 +68,15 @@ public class DriverProcess {
 				process = builder.start();
 				Runtime.getRuntime().addShutdownHook(new Thread(process::destroy));
 			} catch (IOException e1) {
-				error = e1.getMessage();
-				started = false;
+				status.setMessage(e1.getMessage());
+				status.setCode(ActionStatus.CHANNEL_START_ERROR);
 			}
 		}else{
-			error = "Driver file '" + driverFile.getAbsolutePath() + "' not found !";
-			started = false;
+			status.setMessage("Unable to launch driver process, driver file is missing : " + driverFile.getAbsolutePath());
+			status.setCode(ActionStatus.CHANNEL_START_ERROR);
 		}
+		
+		status.setPassed(process != null);
 	}
 	
 	//--------------------------------------------------------------------------------------------------
@@ -85,14 +84,6 @@ public class DriverProcess {
 
 	public String getName() {
 		return name;
-	}
-	
-	public String getError() {
-		return error;
-	}
-	
-	public boolean isStarted() {
-		return started;
 	}
 	
 	public int getPort() {

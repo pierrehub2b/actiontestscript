@@ -48,12 +48,13 @@ public class DriverManager {
 	public static final String OPERA_BROWSER = "opera";
 	public static final String SAFARI_BROWSER = "safari";
 
-	public static final String DESKTOP_DRIVER_FILE_NAME = "windowsdriver.exe";
-	public static final String CHROME_DRIVER_FILE_NAME = "chromedriver.exe";
-	public static final String IE_DRIVER_FILE_NAME = "IEDriverServer.exe";
+	public static final String DESKTOP_DRIVER_FILE_NAME = "windowsdriver";
+	public static final String CHROME_DRIVER_FILE_NAME = "chromedriver";
+	public static final String CHROMIUM_DRIVER_FILE_NAME = "chromiumdriver";
+	public static final String IE_DRIVER_FILE_NAME = "IEDriverServer";
 	public static final String EDGE_DRIVER_FILE_NAME = "MicrosoftWebDriver";
-	public static final String OPERA_DRIVER_FILE_NAME = "operadriver.exe";
-	public static final String FIREFOX_DRIVER_FILE_NAME = "geckodriver.exe";
+	public static final String OPERA_DRIVER_FILE_NAME = "operadriver";
+	public static final String FIREFOX_DRIVER_FILE_NAME = "geckodriver";
 
 	public static final String DESKTOP_EXPLORER = "explorer";
 	public static final String DESKTOP = "desktop";
@@ -95,8 +96,8 @@ public class DriverManager {
 
 	//--------------------------------------------------------------------------------------------------------------
 
-	public DriverProcess getDesktopDriver() {
-		return getDriverProcess(DESKTOP, DESKTOP_DRIVER_FILE_NAME);
+	public DriverProcess getDesktopDriver(ActionStatus status) {
+		return getDriverProcess(status, DESKTOP, getDriverName(null, DESKTOP_DRIVER_FILE_NAME));
 	}
 
 	public void processTerminated(DriverProcess dp) {
@@ -109,26 +110,51 @@ public class DriverManager {
 		final ApplicationProperties props = ATS.getApplicationProperties(application);
 
 		final String appName = props.getName().toLowerCase();
+		final String driverName = props.getDriver();
 
+		DriverProcess driverProcess;
+		
 		if(CHROME_BROWSER.equals(appName)) {
-			return new ChromeDriverEngine(channel, status, getDriverProcess(CHROME_BROWSER, CHROME_DRIVER_FILE_NAME), desktopDriver, props);	
+			driverProcess = getDriverProcess(status, appName, getDriverName(driverName, CHROME_DRIVER_FILE_NAME));
+			if(status.isPassed()) {
+				return new ChromeDriverEngine(channel, status, driverProcess, desktopDriver, props);	
+			}else {
+				return null;
+			}
 		}else if(EDGE_BROWSER.equals(appName)) {
-			return new EdgeDriverEngine(channel, status, getDriverProcess(EDGE_BROWSER, EDGE_DRIVER_FILE_NAME + "-" + desktopDriver.getOsBuildVersion() + ".exe"), desktopDriver, props);
+			driverProcess = getDriverProcess(status, appName, getDriverName(driverName, EDGE_DRIVER_FILE_NAME + "-" + desktopDriver.getOsBuildVersion()));
+			if(status.isPassed()) {
+				return new EdgeDriverEngine(channel, status, driverProcess, desktopDriver, props);	
+			}else {
+				return null;
+			}
 		}else if(OPERA_BROWSER.equals(appName)) {
-			return new OperaDriverEngine(channel, status, getDriverProcess(OPERA_BROWSER, OPERA_DRIVER_FILE_NAME), desktopDriver, props);
+			driverProcess = getDriverProcess(status, appName, getDriverName(driverName, OPERA_DRIVER_FILE_NAME));
+			if(status.isPassed()) {
+				return new OperaDriverEngine(channel, status, driverProcess, desktopDriver, props);	
+			}else {
+				return null;
+			}
 		}else if(FIREFOX_BROWSER.equals(appName)) {
-			return new FirefoxDriverEngine(channel, status, getDriverProcess(FIREFOX_BROWSER, FIREFOX_DRIVER_FILE_NAME), desktopDriver, props);
+			driverProcess = getDriverProcess(status, appName, getDriverName(driverName, FIREFOX_DRIVER_FILE_NAME));
+			if(status.isPassed()) {
+				return new FirefoxDriverEngine(channel, status, driverProcess, desktopDriver, props);	
+			}else {
+				return null;
+			}
 		}else if(IE_BROWSER.equals(appName)) {
-			return new IEDriverEngine(channel, status, getDriverProcess(IE_BROWSER, IE_DRIVER_FILE_NAME), desktopDriver, props);
+			driverProcess = getDriverProcess(status, appName, getDriverName(driverName, IE_DRIVER_FILE_NAME));
+			if(status.isPassed()) {
+				return new IEDriverEngine(channel, status, driverProcess, desktopDriver, props);	
+			}else {
+				return null;
+			}
 		}else if(CHROMIUM_BROWSER.equals(appName)) {
-			if(props.getDriver() != null && props.getUri() != null) {
-				final DriverProcess chromiumDriver = getDriverProcess(props.getName(), props.getDriver() + ".exe");
-				if(chromiumDriver.isStarted()) {
-					return new ChromiumDriverEngine(channel, status, props.getName(), chromiumDriver, desktopDriver, props);
+			if(driverName != null && props.getUri() != null) {
+				driverProcess = getDriverProcess(status, appName, getDriverName(driverName, null));
+				if(status.isPassed()) {
+					return new ChromiumDriverEngine(channel, status, props.getName(), driverProcess, desktopDriver, props);
 				}else {
-					status.setPassed(false);
-					status.setCode(ActionStatus.CHANNEL_START_ERROR);
-					status.setMessage("Cannot start Chromium driver : " + chromiumDriver.getError());
 					return null;
 				}
 			}else {
@@ -147,22 +173,31 @@ public class DriverManager {
 		return new DesktopDriverEngine(channel, status, application, desktopDriver, props);
 	}
 
-	private DriverProcess getDriverProcess(String name, String driverName) {
+	private String getDriverName(String driverName, String defaultName) {
+		if(driverName == null) {
+			driverName = defaultName;
+		}
+		return driverName + ".exe";
+	}
+
+	private DriverProcess getDriverProcess(ActionStatus status, String name, String driverName) {
 		for (DriverProcess proc : driversProcess) {
 			if(proc.getName().equals(name)) {
 				return proc;
 			}
 		}
 
-		final DriverProcess proc = new DriverProcess(name, this, ATS.getDriversFolderPath(), driverName, null);
-		if(proc.isStarted()) {
+		final DriverProcess proc = new DriverProcess(status, name, this, ATS.getDriversFolderPath(), driverName, null);
+		if(status.isPassed()) {
 			driversProcess.add(proc);
+			return proc;
 		}
-		return proc;
+
+		return null;
 	}
 
 	public void tearDown(){
-		
+
 		while(driversProcess.size() > 0) {
 			driversProcess.remove(0).close();
 		}

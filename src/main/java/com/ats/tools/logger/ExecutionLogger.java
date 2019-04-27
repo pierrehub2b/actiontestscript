@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.tools.logger;
 
@@ -25,20 +25,43 @@ import com.ats.executor.channels.Channel;
 
 public class ExecutionLogger implements IExecutionLogger {
 
+	private final static String ERROR_LEVEL = "error";
+	private final static String WARNING_LEVEL = "warning";
+	private final static String INFO_LEVEL = "info";
+	
+	public static final String ANSI_RESET = "\u001B[0m";
+	public static final String ANSI_RED = "\u001B[31m";
+	public static final String ANSI_GREEN = "\u001B[32m";
+	public static final String ANSI_YELLOW = "\u001B[33m";
+	public static final String ANSI_BLUE = "\u001B[34m";
+
 	private final static String NO_CHANNEL = " || ";
 
 	private PrintStream printOut;
 	private String channelName = NO_CHANNEL;
-	
+
+	private int level = 0;
+
 	public ExecutionLogger() {
 		this.printOut = new NullPrintStream();
 	}
 
-	public ExecutionLogger(PrintStream sysout, int level) {
-		if(level > 1) {
+	public ExecutionLogger(PrintStream sysout, String verbose) {
+
+		if(ERROR_LEVEL.equalsIgnoreCase(verbose)) {
+			level = 1;
+		}else if(INFO_LEVEL.equalsIgnoreCase(verbose)) {
+			level = 2;
+		}else if(WARNING_LEVEL.equalsIgnoreCase(verbose)) {
+			level = 3;
+		}		
+
+		if(level > 0) {
 			this.printOut = sysout;
+			sysout.println("[INFO] ATS log level -> " + verbose);
 		}else {
 			this.printOut = new NullPrintStream();
+			sysout.println("[INFO] ATS log disabled");
 		}
 	}
 
@@ -69,20 +92,26 @@ public class ExecutionLogger implements IExecutionLogger {
 			sendError(message, data);
 		}
 	}
-
+	
 	@Override
-	public void sendInfo(String message, String value) {
-		print("INFO", message + value);
+	public void sendWarning(String message, String value) {
+		if(level >= 3) {
+			print("WARNING", message + value);
+		}
 	}
 
 	@Override
-	public void sendWarning(String message, String value) {
-		print("WARNING", message + value);
+	public void sendInfo(String message, String value) {
+		if(level >= 2) {
+			print("INFO", message + value);
+		}
 	}
 
 	@Override
 	public void sendError(String message, String value) {
-		print("ERROR",  message + value);
+		if(level >= 1) {
+			print("ERROR",  message + value);
+		}
 	}
 
 	private void print(String type, String data) {

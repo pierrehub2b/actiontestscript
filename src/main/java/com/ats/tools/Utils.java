@@ -25,6 +25,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -484,32 +485,39 @@ public class Utils {
 					}
 
 				} catch (FileNotFoundException e0) {
+					logger.sendError("XML report stream error ->", e0.getMessage());
 				} catch (IOException e1) {
+					logger.sendError("XML report file error ->", e1.getMessage());
 				}finally {
 					try {
 						if(fis != null) {
 							fis.close();
 						}
-					} catch (IOException e) {}
+					} catch (IOException e) {
+						logger.sendError("XML report close stream error ->", e.getMessage());
+					}
 				}
 
 				imagesList.parallelStream().forEach(im -> im.save());
 
-				final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 				try {
 
-					Transformer transformer = transformerFactory.newTransformer();
-					transformer.transform(new DOMSource(document), new StreamResult(xmlFolder.toPath().resolve("actions.xml").toFile()));
+					final Transformer transformer = TransformerFactory.newInstance().newTransformer();
+					transformer.transform(new DOMSource(document), new StreamResult(new FileOutputStream(xmlFolder.toPath().resolve("actions.xml").toFile())));
 
 				} catch (TransformerConfigurationException e2) {
 					logger.sendError("XML report config error ->", e2.getMessage());
 				} catch (TransformerException e3) {
 					logger.sendError("XML report transform error ->", e3.getMessage());
+				} catch (FileNotFoundException e4) {
+					logger.sendError("XML report write file error ->", e4.getMessage());
 				}
 
 			} catch (ParserConfigurationException e4) {
 				logger.sendError("XML report parser error ->", e4.getMessage());
 			}
+			
+			logger.sendInfo("XML report generated in -> ", xmlFolder.getAbsolutePath());
 		}
 	}
 }
