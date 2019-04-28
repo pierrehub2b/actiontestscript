@@ -6,7 +6,7 @@
 	<groupId>com.actiontestscript</groupId>
 	<artifactId>ats-automated-testing</artifactId>
 
-	<version>1.4.5</version>
+	<version>1.4.6</version>
 	<packaging>jar</packaging>
 
 	<name>ats-automated-testing</name>
@@ -83,7 +83,6 @@
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
 			<version>${lib.testng.version}</version>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<artifactId>selenium-api</artifactId>
@@ -119,7 +118,6 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
 			<version>${lib.slf4j.version}</version>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mariuszgromada.math</groupId>
@@ -141,7 +139,6 @@
 			<artifactId>gson</artifactId>
 			<version>${lib.gson.version}</version>
 		</dependency>
-	
 	</dependencies>
 
 	<build>
@@ -155,7 +152,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<version>2.10</version>
+				<version>3.1.1</version>
 				<executions>
 					<execution>
 						<id>copy-dependencies</id>
@@ -164,10 +161,11 @@
 							<goal>copy-dependencies</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${project.build.directory}/alternateLocation</outputDirectory>
-							<overWriteReleases>false</overWriteReleases>
-							<overWriteSnapshots>false</overWriteSnapshots>
+							<outputDirectory>${project.build.directory}/dependencies</outputDirectory>
+							<overWriteReleases>true</overWriteReleases>
+							<overWriteSnapshots>true</overWriteSnapshots>
 							<overWriteIfNewer>true</overWriteIfNewer>
+							<useSubDirectoryPerScope>true</useSubDirectoryPerScope>
 						</configuration>
 					</execution>
 				</executions>
@@ -175,7 +173,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
+				<version>3.8.0</version>
 				<configuration>
 					<source>${java.version}</source>
 					<target>${java.version}</target>
@@ -190,7 +188,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>2.2.1</version>
+				<version>3.0.1</version>
 				<executions>
 					<execution>
 						<id>attach-sources</id>
@@ -203,7 +201,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.0.1</version>
+				<version>3.1.0</version>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>
@@ -216,7 +214,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-gpg-plugin</artifactId>
-				<version>1.5</version>
+				<version>1.6</version>
 				<executions>
 					<execution>
 						<id>sign-artifacts</id>
@@ -228,6 +226,7 @@
 				</executions>
 			</plugin>
 		</plugins>
+		
 		<pluginManagement>
 			<plugins>
 				<!--This plugin's configuration is used to store Eclipse m2e settings 
