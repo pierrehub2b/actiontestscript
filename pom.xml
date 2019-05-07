@@ -36,13 +36,8 @@
 		<url>https://github.com/pierrehub2b/actiontestscript.git</url>
 	</scm>
 
-	<repositories>
-		<repository>
-			<id>maven.atlassian.com</id>
-			<name>atlassian</name>
-			<url>https://maven.atlassian.com/3rdparty</url>
-		</repository>
-	</repositories>
+	<!-- <repositories> <repository> <id>maven.atlassian.com</id> <name>atlassian</name> 
+		<url>https://maven.atlassian.com/3rdparty</url> </repository> </repositories> -->
 
 	<distributionManagement>
 		<snapshotRepository>
@@ -104,10 +99,12 @@
 			<artifactId>ant</artifactId>
 			<version>${lib.apache.ant.version}</version>
 		</dependency>
+		<!-- <dependency> <groupId>com.exadel.flamingo.flex</groupId> <artifactId>amf-serializer</artifactId> 
+			<version>${lib.amf.serializer.version}</version> </dependency> -->
 		<dependency>
-			<groupId>com.exadel.flamingo.flex</groupId>
-			<artifactId>amf-serializer</artifactId>
-			<version>${lib.amf.serializer.version}</version>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+			<version>1.9.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -226,7 +223,7 @@
 				</executions>
 			</plugin>
 		</plugins>
-		
+
 		<pluginManagement>
 			<plugins>
 				<!--This plugin's configuration is used to store Eclipse m2e settings 
