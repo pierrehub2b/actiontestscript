@@ -36,8 +36,13 @@
 		<url>https://github.com/pierrehub2b/actiontestscript.git</url>
 	</scm>
 
-	<repositories> <repository> <id>maven.atlassian.com</id> <name>atlassian</name> 
-		<url>https://maven.atlassian.com/3rdparty</url> </repository> </repositories>
+	<repositories>
+		<repository>
+			<id>atlassian-public</id>
+			<name>atlassian</name> 
+			<url>https://packages.atlassian.com/mvn/maven-external/</url>
+		</repository>
+	</repositories>
 
 	<distributionManagement>
 		<snapshotRepository>
