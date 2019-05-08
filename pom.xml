@@ -36,8 +36,8 @@
 		<url>https://github.com/pierrehub2b/actiontestscript.git</url>
 	</scm>
 
-	<!-- <repositories> <repository> <id>maven.atlassian.com</id> <name>atlassian</name> 
-		<url>https://maven.atlassian.com/3rdparty</url> </repository> </repositories> -->
+	<repositories> <repository> <id>maven.atlassian.com</id> <name>atlassian</name> 
+		<url>https://maven.atlassian.com/3rdparty</url> </repository> </repositories>
 
 	<distributionManagement>
 		<snapshotRepository>
@@ -196,7 +196,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.1.0</version>
+				<version>3.0.0</version>
 				<configuration>
 					<source>8</source>
 				</configuration>
