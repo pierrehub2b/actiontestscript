@@ -99,12 +99,10 @@
 			<artifactId>ant</artifactId>
 			<version>${lib.apache.ant.version}</version>
 		</dependency>
-		<!-- <dependency> <groupId>com.exadel.flamingo.flex</groupId> <artifactId>amf-serializer</artifactId> 
-			<version>${lib.amf.serializer.version}</version> </dependency> -->
 		<dependency>
-			<groupId>commons-beanutils</groupId>
-			<artifactId>commons-beanutils</artifactId>
-			<version>1.9.3</version>
+			<groupId>com.exadel.flamingo.flex</groupId>
+			<artifactId>amf-serializer</artifactId>
+			<version>${lib.amf.serializer.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -137,7 +135,7 @@
 			<version>${lib.gson.version}</version>
 		</dependency>
 	</dependencies>
-
+	
 	<build>
 		<resources>
 			<resource>
@@ -199,6 +197,9 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>3.1.0</version>
+				<configuration>
+					<source>8</source>
+				</configuration>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>
