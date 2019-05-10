@@ -30,8 +30,8 @@ import com.ats.executor.ActionTestScript;
 import com.ats.executor.SendKeyData;
 import com.ats.generator.variables.transform.DateTransformer;
 import com.ats.generator.variables.transform.TimeTransformer;
+import com.ats.script.ProjectData;
 import com.ats.script.Script;
-import com.ats.script.ScriptHeader;
 import com.ats.tools.Utils;
 
 public class CalculatedValue{
@@ -42,6 +42,9 @@ public class CalculatedValue{
 	private static final Pattern PGAV_PATTERN = Pattern.compile("\\$pgav", Pattern.CASE_INSENSITIVE);
 	
 	public static final Pattern KEY_REGEXP = Pattern.compile("\\$key\\s?\\((\\w+)\\-?([^\\)]*)?\\)");
+	
+	public static final Pattern ASSET_PATTERN = Pattern.compile("\\$asset\\s*?\\(([^\\)]*)\\)", Pattern.CASE_INSENSITIVE);
+	public static final Pattern IMAGE_PATTERN = Pattern.compile("\\$image\\s*?\\(([^\\)]*)\\)", Pattern.CASE_INSENSITIVE);
 
 	//-----------------------------------------------------------------------------------------------------
 	// variable and parameter management
@@ -79,71 +82,55 @@ public class CalculatedValue{
 		this.setScript(script);
 		this.setData(dataValue);
 
-		this.javaCode = StringEscapeUtils.escapeJava(dataValue);
+		javaCode = StringEscapeUtils.escapeJava(dataValue);
 
 		if(dataValue.length() > 0){
 
 			Matcher mv = Variable.SCRIPT_PATTERN.matcher(dataValue);
 			while (mv.find()) {
-				
 				final String variableName = mv.group(1);
 				dataValue = dataValue.replace(mv.group(0), script.getVariableValue(variableName));
-				
 				javaCode = javaCode.replace(mv.group(0), "\", " + variableName + ", \"");
 			}
 
 			mv = ParameterValue.PARAMETER_PATTERN.matcher(dataValue);
 			while (mv.find()) {
-				
 				final ParameterValue sp = new ParameterValue(mv);
 				dataValue = dataValue.replace(sp.getReplace(), script.getParameterValue(sp.getValue(), sp.getDefaultValue()));
-				
 				javaCode = javaCode.replace(sp.getReplace(), "\", " + ActionTestScript.JAVA_PARAM_FUNCTION_NAME + sp.getCode() + ", \"");
 			}
 
 			mv = EnvironmentValue.ENV_PATTERN.matcher(dataValue);
 			while (mv.find()) {
-
 				final EnvironmentValue sp = new EnvironmentValue(mv);
 				dataValue = dataValue.replace(sp.getReplace(), script.getEnvironmentValue(sp.getValue(), sp.getDefaultValue()));
-				
 				javaCode = javaCode.replace(sp.getReplace(), "\", " + ActionTestScript.JAVA_ENV_FUNCTION_NAME + sp.getCode() + ", \"");
 			}
 
 			mv = TODAY_PATTERN.matcher(dataValue);
 			while (mv.find()) {
-				
 				final String replace = mv.group(0);
 				dataValue = dataValue.replace(replace, DateTransformer.getTodayValue());
-				
 				javaCode = javaCode.replace(replace, "\", " + ActionTestScript.JAVA_TODAY_FUNCTION_NAME + "(), \"");
 			}
 
 			mv = NOW_PATTERN.matcher(dataValue);
 			while (mv.find()) {
-				
 				final String replace = mv.group(0);
 				dataValue = dataValue.replace(replace, TimeTransformer.getNowValue());
-				
 				javaCode = javaCode.replace(replace, "\", " + ActionTestScript.JAVA_NOW_FUNCTION_NAME + "(), \"");
 			}
 
 			mv = UUID_PATTERN.matcher(dataValue);
 			while (mv.find()) {
-				
 				final String replace = mv.group(0);
 				dataValue = dataValue.replace(replace, UUID.randomUUID().toString());
-				
 				javaCode = javaCode.replace(replace, "\", " + ActionTestScript.JAVA_UUID_FUNCTION_NAME + "(), \"");
 			}
 			
 			mv = PGAV_PATTERN.matcher(dataValue);
 			while (mv.find()) {
-
-				final String replace = mv.group(0);
-				dataValue = dataValue.replace(replace, UUID.randomUUID().toString());
-				
-				javaCode = javaCode.replace(replace, "\", " + ScriptHeader.ATS_PROJECT_GAV_FUNC + ", \"");
+				javaCode = javaCode.replace(mv.group(0), "\", " + ActionTestScript.JAVA_GAV_FUNCTION_NAME + "(), \"");
 			}
 
 			mv = KEY_REGEXP.matcher(dataValue);
@@ -162,11 +149,19 @@ public class CalculatedValue{
 			
 			mv = RandomStringValue.RND_PATTERN.matcher(dataValue);
 			while (mv.find()) {
-				
 				final RandomStringValue rds = new RandomStringValue(mv);
 				dataValue = dataValue.replace(rds.getReplace(), script.getRandomStringValue(rds.getValue(), rds.getDefaultValue()));
-				
 				javaCode = javaCode.replace(rds.getReplace(), "\", " + ActionTestScript.JAVA_RNDSTRING_FUNCTION_NAME + rds.getCode() + ", \"");
+			}
+			
+			mv = IMAGE_PATTERN.matcher(dataValue);
+			while (mv.find()) {
+				javaCode = javaCode.replace(mv.group(0), ProjectData.getAssetsImageJavaCode(mv.group(1)));
+			}
+			
+			mv = ASSET_PATTERN.matcher(dataValue);
+			while (mv.find()) {
+				javaCode = javaCode.replace(mv.group(0), ProjectData.getAssetsJavaCode(mv.group(1)));
 			}
 
 			this.setCalculated(dataValue);

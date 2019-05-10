@@ -21,6 +21,7 @@ package com.ats.script.actions;
 
 import static org.testng.Assert.fail;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -36,6 +37,7 @@ import java.util.regex.Pattern;
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.Variable;
+import com.ats.script.ProjectData;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
 import com.ats.tools.AtsClassLoader;
@@ -211,7 +213,7 @@ public class ActionCallscript extends Action {
 					URL csvUrl = null;
 
 					if(csvFilePath.startsWith(ASSETS_PROTOCOLE)) {
-						csvUrl = getClass().getClassLoader().getResource(csvFilePath.replace(ASSETS_PROTOCOLE, ""));
+						csvUrl = getClass().getClassLoader().getResource(csvFilePath.replace(ASSETS_PROTOCOLE, ProjectData.ASSETS_FOLDER + File.separator));
 					}else {
 						try {
 							csvUrl = new URL(csvFilePath);

@@ -22,6 +22,7 @@ package com.ats.script;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Path;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -32,6 +33,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
+import com.ats.executor.ActionTestScript;
 import com.ats.generator.parsers.ScriptParser;
 import com.ats.tools.Utils;
 
@@ -44,6 +46,9 @@ public class ProjectData {
 	private static final String TARGET_FOLDER_REPORT = "report";
 
 	private static final String SRC_FOLDER = "src";
+	public static final String ASSETS_FOLDER = "assets";
+	public static final String RESOURCES_FOLDER = "resources";
+	public static final String IMAGES_FOLDER = "images";
 	private static final String SRC_FOLDER_MAIN = "main";
 	
 	private static final String SRC_FOLDER_ATS = "ats";
@@ -67,6 +72,18 @@ public class ProjectData {
 		}else {
 			return new ProjectData(sourceFolder);
 		}
+	}
+	
+	public static String getAssetsJavaCode(String path) {
+		final StringBuilder pathBuilder = new StringBuilder("\", ");
+		pathBuilder.append(ActionTestScript.JAVA_EMBEDED_FUNCTION_NAME).append("(\"").append(ASSETS_FOLDER).append("/").append(path).append("\"), \"");
+		return pathBuilder.toString();
+	}
+	
+	public static String getAssetsImageJavaCode(String path) {
+		final StringBuilder pathBuilder = new StringBuilder(RESOURCES_FOLDER);
+		pathBuilder.append("/").append(IMAGES_FOLDER).append("/").append(path);
+		return getAssetsJavaCode(pathBuilder.toString());
 	}
 
 	private static File checkLtfProjectFolder(File f){

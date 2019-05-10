@@ -45,8 +45,6 @@ import com.ats.tools.Operators;
 
 public class ScriptHeader {
 
-	public static final String ATS_PROJECT_GAV_FUNC= "getProjectGav()";
-	
 	private ProjectData projectData;
 
 	private String path = "";
@@ -197,7 +195,8 @@ public class ScriptHeader {
 			, "\t* Test Name : <b>#CLASS_NAME#</b>"
 			, "\t* Generated at : <b>" + DateFormat.getDateTimeInstance().format(new Date()) + "</b>"
 			, "\t*/"
-			, "\tprivate final String " + ATS_PROJECT_GAV_FUNC + "{return \"#PROJECT_GAV#\";}"
+			, "\t@Override"
+			, "\tpublic final String " + ActionTestScript.JAVA_GAV_FUNCTION_NAME + "(){return \"#PROJECT_GAV#\";}"
 			, ""
 			, "\t@Override"
 			, "\tprotected " + ScriptHeader.class.getSimpleName() + " getHeader(){"

@@ -463,6 +463,20 @@ public class ActionTestScript extends Script implements ITest{
 	public MouseSwipe ms(MouseDirectionData hdir, MouseDirectionData vdir) {
 		return new MouseSwipe(hdir, vdir);
 	}
+	
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_EMBEDED_FUNCTION_NAME = "emb";
+	public String emb(String relativePath) {
+		return getAssetsUrl(relativePath);
+	}
+	
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_GAV_FUNCTION_NAME = "gav";
+	public String gav() {
+		return "";
+	}
 
 	//----------------------------------------------------------------------------------------------------------
 	// Actions

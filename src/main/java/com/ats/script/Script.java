@@ -20,6 +20,7 @@ under the License.
 package com.ats.script;
 
 import java.io.File;
+import java.net.URL;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -268,6 +269,18 @@ public class Script {
 	public String getNowValue() {
 		return TimeTransformer.getNowValue();
 	}
+	
+	public String getAssetsUrl(String relativePath) {
+		final URL url = getClass().getClassLoader().getResource(relativePath);
+		if(url == null) {
+			return "";
+		}
+		return "file://" + url.getPath();
+	}
+	
+	//public String getProjectGav() {
+	//	return "";
+	//}
 
 	public void setReturnValues(String ... values) {
 
