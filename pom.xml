@@ -28,6 +28,13 @@
 			<organization>ActionTestScript</organization>
 			<organizationUrl>http://www.actiontestscript.com</organizationUrl>
 		</developer>
+		
+		<developer>
+			<name>Gabriel Gil</name>
+			<email>gabriel.gil@outlook.fr</email>
+			<organization>ActionTestScript</organization>
+			<organizationUrl>http://www.actiontestscript.com</organizationUrl>
+		</developer>
 	</developers>
 
 	<scm>
