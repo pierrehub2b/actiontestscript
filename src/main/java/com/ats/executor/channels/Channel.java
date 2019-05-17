@@ -225,7 +225,8 @@ public class Channel {
 		this.application = serviceType;
 	}
 
-	public void setApplicationData(int handle) {
+	public void setApplicationData(String os, int handle) {
+		this.os = os;
 		this.applicationVersion = "";
 		this.driverVersion = "";
 		this.winHandle = handle;

@@ -37,6 +37,7 @@ import com.ats.executor.drivers.engines.browsers.FirefoxDriverEngine;
 import com.ats.executor.drivers.engines.browsers.IEDriverEngine;
 import com.ats.executor.drivers.engines.browsers.OperaDriverEngine;
 import com.ats.executor.drivers.engines.desktop.DesktopDriverEngine;
+import com.ats.executor.drivers.engines.desktop.ExplorerDriverEngine;
 
 public class DriverManager {
 
@@ -168,6 +169,8 @@ public class DriverManager {
 			return mobileDriverEngine;			
 		}else if(props.isApi() || application.startsWith(HTTP + "://") || application.startsWith(HTTPS + "://")) {	
 			return new ApiDriverEngine(channel, status, application, desktopDriver, props);
+		}else if(DESKTOP_EXPLORER.equals(appName)) {
+			return new ExplorerDriverEngine(channel, status, desktopDriver, props);
 		}
 
 		return new DesktopDriverEngine(channel, status, application, desktopDriver, props);

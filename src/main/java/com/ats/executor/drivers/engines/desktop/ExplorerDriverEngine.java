@@ -63,7 +63,7 @@ public class ExplorerDriverEngine extends DesktopDriverEngine {
 			
 			if(window != null) {
 				
-				channel.setApplicationData(window.handle);
+				channel.setApplicationData(DriverManager.DESKTOP_EXPLORER, window.handle);
 				
 				desktopDriver.moveWindow(channel, channel.getDimension().getPoint());
 				desktopDriver.resizeWindow(channel, channel.getDimension().getSize());
