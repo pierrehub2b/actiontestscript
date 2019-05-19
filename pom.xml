@@ -23,17 +23,28 @@
 
 	<developers>
 		<developer>
+			<id>pierrehub2b</id>
 			<name>Pierre Huber</name>
 			<email>pierrehuber@yahoo.fr</email>
 			<organization>ActionTestScript</organization>
 			<organizationUrl>http://www.actiontestscript.com</organizationUrl>
+			<roles>
+				<role>architect</role>
+				<role>developer</role>
+			</roles>
+			<timezone>Europe/Paris</timezone>
 		</developer>
-		
+
 		<developer>
+			<id>ragelib</id>
 			<name>Gabriel Gil</name>
 			<email>gabriel.gil@outlook.fr</email>
 			<organization>ActionTestScript</organization>
 			<organizationUrl>http://www.actiontestscript.com</organizationUrl>
+			<roles>
+				<role>developer</role>
+			</roles>
+			<timezone>Europe/Paris</timezone>
 		</developer>
 	</developers>
 
@@ -46,7 +57,7 @@
 	<repositories>
 		<repository>
 			<id>atlassian-public</id>
-			<name>atlassian</name> 
+			<name>atlassian</name>
 			<url>https://packages.atlassian.com/mvn/maven-external/</url>
 		</repository>
 	</repositories>
@@ -147,7 +158,7 @@
 			<version>${lib.gson.version}</version>
 		</dependency>
 	</dependencies>
-	
+
 	<build>
 		<resources>
 			<resource>
