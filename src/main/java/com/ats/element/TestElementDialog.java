@@ -132,7 +132,7 @@ public class TestElementDialog extends TestElement {
 	}
 
 	@Override
-	public String getAttribute(String name) {
+	public String getAttribute(ActionStatus status, String name) {
 		getChannel().sleep(waitBox);
 		return alert.getText();
 	}

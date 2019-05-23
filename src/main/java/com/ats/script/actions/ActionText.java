@@ -80,9 +80,7 @@ public class ActionText extends ActionExecuteElement {
 
 	@Override
 	public void terminateExecution(ActionTestScript ts) {
-
 		super.terminateExecution(ts);
-
 		if(status.isPassed()) {
 			status.startDuration();
 			getTestElement().enterText(status, text, ts.getRecorder());

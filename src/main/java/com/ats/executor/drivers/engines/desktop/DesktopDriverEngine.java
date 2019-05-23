@@ -216,7 +216,7 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	}
 
 	@Override
-	public String getAttribute(FoundElement element, String attributeName, int maxTry) {
+	public String getAttribute(ActionStatus status, FoundElement element, String attributeName, int maxTry) {
 		return getDesktopDriver().getElementAttribute(element.getId(), attributeName);
 	}
 
@@ -241,6 +241,11 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	@Override
 	public FoundElement getElementFromPoint(Boolean syscomp, Double x, Double y){
 		return getDesktopDriver().getElementFromPoint(x, y);
+	}
+	
+	@Override
+	public FoundElement getElementFromRect(Boolean syscomp, Double x, Double y, Double w, Double h){
+		return getDesktopDriver().getElementFromRect(x, y, w, h);
 	}
 
 	@Override
@@ -285,11 +290,6 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	@Override
 	public void closeWindow(ActionStatus status) {
 		getDesktopDriver().closeWindow(channel);
-	}
-
-	@Override
-	public void scroll(FoundElement element, int delta) {
-		getDesktopDriver().mouseWheel(delta);
 	}
 
 	@Override
@@ -402,7 +402,17 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	}
 
 	@Override
-	public void scrollOnMove(FoundElement value) {}
+	public void scroll(FoundElement element) {}
+	
+	@Override
+	public void scroll(int delta) {
+		getDesktopDriver().mouseWheel(delta);
+	}
+	
+	@Override
+	public void scroll(FoundElement element, int delta) {
+		getDesktopDriver().mouseWheel(delta);
+	}
 
 	@Override
 	public Alert switchToAlert() {
@@ -429,5 +439,16 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 	@Override
 	public void windowState(ActionStatus status, Channel channel, String state) {
 		getDesktopDriver().windowState(status, channel, state);
+	}
+
+	@Override
+	public Object executeJavaScript(ActionStatus status, String script, TestElement element) {
+		status.setPassed(true);
+		return null;
+	}
+	@Override
+	public Object executeJavaScript(ActionStatus status, String script) {
+		status.setPassed(true);
+		return null;
 	}
 }

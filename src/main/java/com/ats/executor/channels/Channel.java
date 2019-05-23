@@ -248,6 +248,10 @@ public class Channel {
 	public FoundElement getElementFromPoint(Boolean syscomp, Double x, Double y){
 		return engine.getElementFromPoint(syscomp, x, y);
 	}
+	
+	public FoundElement getElementFromRect(Boolean syscomp, Double x, Double y, Double w, Double h){
+		return engine.getElementFromRect(syscomp, x, y, w, h);
+	}
 
 	public void loadParents(FoundElement hoverElement) {
 		if(hoverElement != null) {
@@ -263,8 +267,8 @@ public class Channel {
 		return engine.getAttributes(element, false);
 	}
 
-	public String getAttribute(FoundElement element, String attributeName, int maxTry){
-		return engine.getAttribute(element, attributeName, maxTry + DriverManager.ATS.getMaxTryProperty());
+	public String getAttribute(ActionStatus status, FoundElement element, String attributeName, int maxTry){
+		return engine.getAttribute(status, element, attributeName, maxTry + DriverManager.ATS.getMaxTryProperty());
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------

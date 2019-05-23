@@ -1,12 +1,11 @@
 const element = arguments[0];
 var attrib, textValue, result = {};
 
-for(var i=0, len=element.attributes.length; i<len; i++){
-	attrib = element.attributes[i];
+Array.prototype.slice.call(element.attributes).forEach(function(attrib) {
 	if(attrib.name != 'value'){
 		result[attrib.name] = attrib.value;
 	}
-};
+});
 
 textValue = element.textContent;
 if(textValue){

@@ -504,7 +504,30 @@ public class DesktopDriver extends RemoteWebDriver {
 		}
 		return hoverElement;
 	}
+	
+	public FoundElement getElementFromRect(Double x, Double y, Double w, Double h) {
+		FoundElement hoverElement = null;
+		if (elementMapLocation != null) {
+			for (FoundElement testElement : elementMapLocation) {
+				if(testElement != null && testElement.isVisible()){
+					if (hoverElement == null) {
+						hoverElement = testElement;
+						continue;
+					}
 
+					final Rectangle rect = testElement.getRectangle();
+
+					if (!rect.contains(x, y)
+							|| rect.getWidth() > w || rect.getHeight() > h
+							|| hoverElement.getWidth() <= testElement.getWidth() 
+							&& hoverElement.getHeight() <= testElement.getHeight()) continue;
+					hoverElement = testElement;
+				}
+			}
+		}
+		return hoverElement;
+	}
+	
 	public ArrayList<DesktopData> getVersion(String appPath) {
 		final DesktopResponse resp = sendRequestCommand(CommandType.Driver, DriverType.Application, appPath);
 		if(resp != null) {

@@ -94,7 +94,7 @@ public class TestElement{
 
 	public TestElement(Channel channel, int maxTry, Predicate<Integer> predicate, int index) {
 		this(channel, maxTry, predicate);
-		this.index = index;
+		this.setIndex(index);
 	}
 
 	public TestElement(Channel channel, int maxTry, Predicate<Integer> predicate, SearchedElement searchElement) {
@@ -166,18 +166,14 @@ public class TestElement{
 			searchDuration = System.currentTimeMillis() - this.searchDuration;
 			totalSearchDuration = getTotalDuration();
 			count = getElementsCount();
-
-			if(index > 0) {
-				index--;
-			}
 		}
 	}
 
 	private int getElementsCount() {
-		if(index > 0 && foundElements.size() >= index) {
-			return 1;
-		}else{
+		if(foundElements.size() > getStartOneIndex()){
 			return foundElements.size();
+		}else{
+			return 0;
 		}
 	}
 
@@ -190,7 +186,11 @@ public class TestElement{
 	}
 
 	public FoundElement getFoundElement() {
-		return foundElements.get(index); 
+		return foundElements.get(getStartOneIndex()); 
+	}
+	
+	public boolean isPassword() {
+		return getFoundElement().isPassword();
 	}
 
 	public boolean isNumeric() {
@@ -199,6 +199,10 @@ public class TestElement{
 
 	public WebElement getWebElement() {
 		return getFoundElement().getValue();
+	}
+	
+	public boolean isBody() {
+		return getFoundElement().getTag().equalsIgnoreCase("body");
 	}
 
 	public String getWebElementId() {
@@ -214,7 +218,7 @@ public class TestElement{
 	}
 
 	public boolean isIframe() {
-		if(foundElements.size() > index){
+		if(foundElements.size() > getStartOneIndex()){
 			return getFoundElement().isIframe();
 		}else{
 			return false;
@@ -228,6 +232,13 @@ public class TestElement{
 	protected void setDialogBox() {
 		this.searchedTag = "AlertBox";
 		this.criterias = "";
+	}
+	
+	private int getStartOneIndex() {
+		if(index > 1) {
+			return index-1;
+		}
+		return 0;
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------
@@ -328,11 +339,13 @@ public class TestElement{
 				clearText(status);
 				if(status.isPassed()) {
 
-					String enteredText = "xxxxxxxxxx";
-					if(!"password".equals(getAttribute("type"))) {
+					String enteredText = null;
+					if(isPassword()) {
+						enteredText = "xxxxxxxxxx";
+					}else {
 						enteredText = text.getCalculated();
 					}
-										
+
 					recorder.updateScreen(true);
 					sendText(status, text);
 
@@ -403,13 +416,7 @@ public class TestElement{
 	//-------------------------------------------------------------------------------------------------------------------
 
 	public void over(ActionStatus status, MouseDirection position, boolean desktopDragDrop) {
-		if(isValidated()){
-			engine.mouseMoveToElement(status, getFoundElement(), position, desktopDragDrop);
-		}else{
-			status.setPassed(false);
-			status.setCode(ActionStatus.OBJECT_NOT_FOUND);
-			status.setMessage("Element not found, cannot execute over action");
-		}
+		engine.mouseMoveToElement(status, getFoundElement(), position, desktopDragDrop);
 	}
 
 	public void click(ActionStatus status, MouseDirection position, Keys key) {
@@ -471,9 +478,9 @@ public class TestElement{
 	// Attributes
 	//-------------------------------------------------------------------------------------------------------------------
 
-	public String getAttribute(String name){
+	public String getAttribute(ActionStatus status, String name){
 		if(isValidated()){
-			return engine.getAttribute(getFoundElement(), name, maxTry);
+			return engine.getAttribute(status, getFoundElement(), name, maxTry);
 		}
 		return null;
 	}
@@ -488,7 +495,7 @@ public class TestElement{
 
 	public Object executeScript(ActionStatus status, String script) {
 		if(isValidated()){
-			return engine.executeScript(status, "arguments[0]." + script, getWebElement());
+			return engine.executeJavaScript(status, script, this);
 		}else{
 			status.setPassed(false);
 			status.setCode(ActionStatus.OBJECT_NOT_FOUND);

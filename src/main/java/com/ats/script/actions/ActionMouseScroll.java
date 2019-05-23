@@ -68,7 +68,6 @@ public class ActionMouseScroll extends ActionMouse {
 		super.terminateExecution(ts);
 		if(status.isPassed()) {
 			getTestElement().mouseWheel(value);
-
 			status.endDuration();
 			ts.getRecorder().updateScreen(0, status.getDuration(), value + "");
 		}

@@ -47,6 +47,7 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.NoSuchWindowException;
+import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.UnhandledAlertException;
@@ -101,7 +102,8 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	protected static final String JS_ELEMENT_SCROLL = "var e=arguments[0];var d=arguments[1];e.scrollTop += d;var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
 	protected static final String JS_WINDOW_SCROLL = "window.scrollBy(0,arguments[0]);var result=[0.0001, 0.0001]";
-	protected static final String JS_ELEMENT_DATA = "var result=null;var e=document.elementFromPoint(arguments[0],arguments[1]);if(e){var r=e.getBoundingClientRect();result=[e, e.tagName, e.getAttribute('inputmode')=='numeric', r.x+0.0001, r.y+0.0001, r.width+0.0001, r.height+0.0001, r.left+0.0001, r.top+0.0001, 0.0001, 0.0001, {}];};";
+	protected static final String JS_ELEMENT_FROM_POINT = "var result=null;var e=document.elementFromPoint(arguments[0],arguments[1]);if(e){var r=e.getBoundingClientRect();result=[e, e.tagName, e.getAttribute('inputmode')=='numeric', e.getAttribute('type')=='password', r.x+0.0001, r.y+0.0001, r.width+0.0001, r.height+0.0001, r.left+0.0001, r.top+0.0001, 0.0001, 0.0001, {}];};";
+	protected static final String JS_ELEMENT_FROM_RECT = "let r1={x:arguments[0],y:arguments[1],width:arguments[2],height:arguments[3]};var e=document.elementFromPoint(r1.x, r1.y),result=null;while(e != null){var r2=e.getBoundingClientRect();if(r2.x <= r1.x && r2.width >= r1.width && r2.y <= r1.y && r2.height >= r1.height){result=[e,e.tagName,e.getAttribute('inputmode')=='numeric',e.getAttribute('type')=='password',r2.x+0.0001,r2.y+0.0001,r2.width+0.0001,r2.height+0.0001,r2.left+0.0001,r2.top+0.0001,0.0001,0.0001,{}];e=null;}else{e=e.parentElement;}};";
 	protected static final String JS_ELEMENT_BOUNDING = "var rect=arguments[0].getBoundingClientRect();var result=[rect.left+0.0001, rect.top+0.0001];";
 	protected static final String JS_MIDDLE_CLICK = "var evt=new MouseEvent('click', {bubbles: true,cancelable: true,view: window, button: 1}),result={};arguments[0].dispatchEvent(evt);";
 	protected static final String JS_ELEMENT_CSS = "var result={};var o=getComputedStyle(arguments[0]);for(var i=0, len=o.length; i < len; i++){result[o[i]]=o.getPropertyValue(o[i]);};";
@@ -164,6 +166,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		cap.setCapability(CapabilityType.SUPPORTS_FINDING_BY_CSS, false);
 		cap.setCapability(CapabilityType.HAS_NATIVE_EVENTS, false);
+		cap.setCapability(CapabilityType.PAGE_LOAD_STRATEGY, PageLoadStrategy.NONE);
 
 		int maxTry = 10;
 		String errorMessage = null;
@@ -292,29 +295,34 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	//---------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void scroll(FoundElement element, int delta) {
-		if(element != null && element.getTag() != null) {
-
-			ArrayList<Double> newPosition;
-			if(delta == 0) {
-				newPosition =  (ArrayList<Double>) runJavaScript(autoScrollElement, element.getValue());
-			}else {
-				newPosition =  (ArrayList<Double>) runJavaScript(JS_ELEMENT_SCROLL, element.getValue(), delta);
-			}
-
-			if(newPosition.size() > 1) {
-				element.updatePosition(newPosition.get(0), newPosition.get(1), channel, 0.0, 0.0);
-			}
-		}else {
-			runJavaScript(JS_WINDOW_SCROLL, delta);
-		}
+	public void scroll(int delta) {
+		runJavaScript(JS_WINDOW_SCROLL, delta);
 	}
 
 	@Override
-	public void scrollOnMove(FoundElement element) {
+	public void scroll(FoundElement element, int delta) {
+		ArrayList<Double> newPosition;
+		if(delta == 0) {
+			newPosition =  (ArrayList<Double>) runJavaScript(autoScrollElement, element.getValue());
+		}else {
+			newPosition =  (ArrayList<Double>) runJavaScript(JS_ELEMENT_SCROLL, element.getValue(), delta);
+		}
+		updatePosition(newPosition, element);
+	}
+
+	@Override
+	public void scroll(FoundElement element) {
 		final ArrayList<Double> newPosition = (ArrayList<Double>) runJavaScript(JS_SCROLL_IF_NEEDED, element.getValue());
-		if(newPosition != null && newPosition.size() > 1) {
-			element.updatePosition(newPosition.get(0), newPosition.get(1), channel, 0.0, 0.0);
+		updatePosition(newPosition, element);
+	}
+	
+	//---------------------------------------------------------------------------------------------------------------------
+	// 
+	//---------------------------------------------------------------------------------------------------------------------
+	
+	private void updatePosition(ArrayList<Double> position, FoundElement element) {
+		if(position != null && position.size() > 1) {
+			element.updatePosition(position.get(0), position.get(1), channel, 0.0, 0.0);
 			channel.sleep(30);
 		}
 	}
@@ -337,7 +345,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	private FoundElement loadElement(ArrayList<AtsElement> iframes, Double x, Double y, Double offsetX, Double offsetY) {
 
-		final ArrayList<Object> objectData = (ArrayList<Object>)runJavaScript(JS_ELEMENT_DATA, x - offsetX, y - offsetY);
+		final ArrayList<Object> objectData = (ArrayList<Object>)runJavaScript(JS_ELEMENT_FROM_POINT, x - offsetX, y - offsetY);
 
 		if(objectData != null){
 
@@ -366,6 +374,52 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	@Override
+	public FoundElement getElementFromRect(Boolean syscomp, Double x, Double y, Double w, Double h){
+
+		if(syscomp) {
+			return desktopDriver.getElementFromRect(x, y, w, y);
+		}else {
+
+			switchToDefaultContent();
+
+			x -= channel.getSubDimension().getX();
+			y -= channel.getSubDimension().getY();
+
+			return loadElement(new ArrayList<AtsElement>(), x, y, w, h, initElementX, initElementY);
+		}
+	}
+
+	private FoundElement loadElement(ArrayList<AtsElement> iframes, Double x, Double y, Double w, Double h, Double offsetX, Double offsetY) {
+
+		final ArrayList<Object> objectData = (ArrayList<Object>)runJavaScript(JS_ELEMENT_FROM_RECT, x - offsetX, y - offsetY, w, h);
+
+		if(objectData != null){
+
+			final AtsElement element = new AtsElement(objectData);
+
+			if(element.isIframe()){
+
+				iframes.add(0, element);
+
+				FoundElement frm = new FoundElement(element);
+
+				switchToFrame(frm.getValue());
+
+				offsetX += element.getX();
+				offsetY += element.getY();
+
+				return loadElement(iframes, x, y, w, h, offsetX, offsetY);
+
+			} else {
+				return new FoundElement(element, iframes, channel, offsetX, offsetY);
+			}
+
+		} else {
+			return null;
+		}
+	}
+
+	@Override
 	public void loadParents(FoundElement hoverElement){
 		if(hoverElement.isDesktop()){
 			hoverElement.setParent(desktopDriver.getTestElementParent(hoverElement.getId(), channel));
@@ -373,6 +427,10 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			hoverElement.setParent(getTestElementParent(hoverElement));
 		}
 	}
+	
+	//---------------------------------------------------------------------------------------------------------------------
+	// 
+	//---------------------------------------------------------------------------------------------------------------------
 
 	@Override
 	public WebElement getRootElement() {
@@ -402,11 +460,11 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	@Override
-	public String getAttribute(FoundElement element, String attributeName, int maxTry) {
+	public String getAttribute(ActionStatus status, FoundElement element, String attributeName, int maxTry) {
 		int tryLoop = maxTry;
 		while (tryLoop > 0){
-			String result = getAttribute(element, attributeName);
-			if(result != null && doubleCheckAttribute(result, element, attributeName)) {
+			String result = getAttribute(status, element, attributeName);
+			if(result != null && doubleCheckAttribute(status, result, element, attributeName)) {
 				return result;
 			}
 			tryLoop--;
@@ -414,14 +472,14 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		return null;
 	}
 
-	private boolean doubleCheckAttribute(String verify, FoundElement element, String attributeName) {
+	private boolean doubleCheckAttribute(ActionStatus status, String verify, FoundElement element, String attributeName) {
 		channel.sleep(getPropertyWait());
 
-		final String current = getAttribute(element, attributeName);
+		final String current = getAttribute(status, element, attributeName);
 		return current != null && current.equals(verify);
 	}
 
-	private String getAttribute(FoundElement element, String attributeName) {
+	private String getAttribute(ActionStatus status, FoundElement element, String attributeName) {
 
 		final RemoteWebElement elem = getWebElement(element);
 		String result = elem.getAttribute(attributeName);
@@ -436,7 +494,12 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			result = getCssAttributeValueByName(element, attributeName);
 
 			if(result == null) {
-				channel.sleep(100);
+				final Object obj = executeJavaScript(status, attributeName);
+				if(obj == null) {
+					channel.sleep(100);
+				}else {
+					result = obj.toString();
+				}
 			}
 		}
 		return result;
@@ -478,9 +541,9 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	private CalculatedProperty[] getAttributesList(RemoteWebElement element, String script) {
-		final Map<String, Object> result = (Map<String, Object>) runJavaScript(script, element);
-		if(result != null){
-			return result.entrySet().stream().parallel().filter(e -> !(e.getValue() instanceof Map)).map(e -> new CalculatedProperty(e.getKey(), e.getValue().toString())).toArray(c -> new CalculatedProperty[c]);
+		final Object result = runJavaScript(script, element);
+		if(result != null && result instanceof Map){
+			return ((Map<String, Object>)result).entrySet().stream().parallel().filter(e -> !(e.getValue() instanceof Map)).map(e -> new CalculatedProperty(e.getKey(), e.getValue().toString())).toArray(c -> new CalculatedProperty[c]);
 		}
 		return null;
 	}
@@ -504,8 +567,6 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	@Override
 	public void updateDimensions() {
-
-		//switchWindow(currentWindow);
 
 		final TestBound dimension = new TestBound();
 		final TestBound subDimension = new TestBound();
@@ -562,11 +623,11 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		}
 	}
 
-	private void scrollAndMove(FoundElement foundElement, MouseDirection position) {
-		scrollOnMove(foundElement);
+	private void scrollAndMove(FoundElement element, MouseDirection position) {
+		scroll(element);
 
-		final Rectangle rect = foundElement.getRectangle();
-		move(foundElement, getOffsetX(rect, position), getOffsetY(rect, position));
+		final Rectangle rect = element.getRectangle();
+		move(element, getOffsetX(rect, position), getOffsetY(rect, position));
 	}
 
 	protected void move(FoundElement element, int offsetX, int offsetY) {
@@ -779,6 +840,32 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		return result;
 	}
 
+	@Override
+	public Object executeJavaScript(ActionStatus status, String javaScript) {
+		Object result = null;
+		status.setPassed(true);
+		try {
+			result = driver.executeAsyncScript("return " + javaScript);
+		}catch(StaleElementReferenceException ex) {
+			throw ex;
+		}catch(Exception ex) {
+			status.setPassed(false);
+			status.setCode(ActionStatus.JAVASCRIPT_ERROR);
+			status.setMessage(ex.getMessage());
+		}
+		return result;
+	}
+
+	@Override
+	public Object executeJavaScript(ActionStatus status, String javaScript, TestElement element) {
+
+		final Object result = runJavaScript(status, "var result=arguments[0]." + javaScript + ";", element.getWebElement());
+		if(status.isPassed() && result != null) {
+			status.setMessage(result.toString());
+		}
+		return result;
+	}
+
 	//TODO remove this default method and add actionstatus
 	protected Object runJavaScript(String javaScript, Object ... params) {
 		return runJavaScript(channel.newActionStatus(), javaScript, params);
@@ -799,6 +886,10 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		return null;
 	}
+	
+	//---------------------------------------------------------------------------------------------------------------------
+	// 
+	//---------------------------------------------------------------------------------------------------------------------
 
 	@Override
 	public void goToUrl(ActionStatus status, String url) {
@@ -823,7 +914,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		actionWait();
 	}
-	
+
 	protected void loadUrl(String url) {
 		driver.get(url);
 	}
@@ -907,6 +998,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	@Override
 	public void clearText(ActionStatus status, FoundElement element) {
 		executeScript(status, "arguments[0].value='';", element.getValue());
+		status.setMessage("");
 	}
 
 	@Override

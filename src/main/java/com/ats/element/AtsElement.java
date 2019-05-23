@@ -35,6 +35,7 @@ public class AtsElement extends AtsBaseElement {
 
 	private RemoteWebElement element;
 	protected boolean numeric = false;
+	protected boolean password = false;
 	private Double screenX = 0.0;
 	private Double screenY = 0.0;
 	
@@ -54,15 +55,16 @@ public class AtsElement extends AtsBaseElement {
 		this.element = (RemoteWebElement) data.get(0);
 		this.tag = data.get(1).toString();
 		this.numeric = (boolean) data.get(2);
-		this.boundX = (Double) data.get(3);
-		this.boundY = (Double) data.get(4);
-		this.width = (Double) data.get(5);
-		this.height = (Double) data.get(6);
-		this.x = (Double) data.get(7);
-		this.y = (Double) data.get(8);
-		this.screenX = (Double) data.get(9);
-		this.screenY = (Double) data.get(10);
-		this.attributes = (Map<String, String>) data.get(11);
+		this.password = (boolean) data.get(3);
+		this.boundX = (Double) data.get(4);
+		this.boundY = (Double) data.get(5);
+		this.width = (Double) data.get(6);
+		this.height = (Double) data.get(7);
+		this.x = (Double) data.get(8);
+		this.y = (Double) data.get(9);
+		this.screenX = (Double) data.get(10);
+		this.screenY = (Double) data.get(11);
+		this.attributes = (Map<String, String>) data.get(12);
 	}
 
 	public RemoteWebElement getElement() {
@@ -87,6 +89,10 @@ public class AtsElement extends AtsBaseElement {
 	
 	public boolean isNumeric() {
 		return numeric;
+	}
+	
+	public boolean isPassword() {
+		return password;
 	}
 	
 	public Double getBoundX() {

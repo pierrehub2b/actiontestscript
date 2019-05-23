@@ -69,7 +69,7 @@ public class ActionAssertProperty extends ActionExecuteElement {
 			
 			getTestElement().updateScreen();
 			
-			final String attributeValue = getTestElement().getAttribute(value.getName());
+			final String attributeValue = getTestElement().getAttribute(status, value.getName());
 			status.endDuration();		
 			
 			if(attributeValue == null) {

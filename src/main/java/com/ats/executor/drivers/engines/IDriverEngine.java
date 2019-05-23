@@ -44,22 +44,26 @@ public interface IDriverEngine{
 	public WebElement getRootElement();
 	public void close();
 
-	//public String getApplication();
 	public String getApplicationPath();
 	public void switchWindow(ActionStatus status, int index);
 	public void closeWindow(ActionStatus status);
 	public Object executeScript(ActionStatus status, String script, Object ... params);
+	public Object executeJavaScript(ActionStatus status, String script, TestElement element);
+	public Object executeJavaScript(ActionStatus status, String script);
 	public void goToUrl(ActionStatus status, String url);
 	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> searchPredicate);
 	public void waitAfterAction();
 	public void updateDimensions();
 	public FoundElement getElementFromPoint(Boolean syscomp, Double x, Double y);
-	public String getAttribute(FoundElement element, String attributeName, int maxTry);
+	public FoundElement getElementFromRect(Boolean syscomp, Double x, Double y, Double w, Double h);
+	public String getAttribute(ActionStatus status, FoundElement element, String attributeName, int maxTry);
 	public CalculatedProperty[] getAttributes(FoundElement element, boolean reload);
 	public CalculatedProperty[] getCssAttributes(FoundElement element);
 	public void loadParents(FoundElement hoverElement);
-	public void scroll(FoundElement foundElement, int delta);
-	public void scrollOnMove(FoundElement value);
+	
+	public void scroll(int delta);
+	public void scroll(FoundElement element);
+	public void scroll(FoundElement element, int delta);
 
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList);
 	public void clearText(ActionStatus status, FoundElement foundElement);

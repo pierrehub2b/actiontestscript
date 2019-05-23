@@ -73,7 +73,7 @@ public class TestElementSystemButton extends TestElement {
 	public void doubleClick() {}
 
 	@Override
-	public String getAttribute(String name) {
+	public String getAttribute(ActionStatus status, String name) {
 		return "";
 	}
 

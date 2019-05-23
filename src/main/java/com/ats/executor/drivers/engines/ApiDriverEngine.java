@@ -161,7 +161,7 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 	
 	@Override
-	public String getAttribute(FoundElement element, String attributeName, int maxTry) {
+	public String getAttribute(ActionStatus status, FoundElement element, String attributeName, int maxTry) {
 		return executor.getElementAttribute(element.getId(), attributeName, maxTry);
 	}
 	
@@ -212,6 +212,11 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	public FoundElement getElementFromPoint(Boolean syscomp, Double x, Double y) {
 		return null;
 	}
+	
+	@Override
+	public FoundElement getElementFromRect(Boolean syscomp, Double x, Double y, Double w, Double h) {
+		return null;
+	}
 
 	@Override
 	public void switchWindow(ActionStatus status, int index) {
@@ -227,7 +232,13 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	@Override
-	public void scroll(FoundElement foundElement, int delta) {}
+	public void scroll(FoundElement element) {}
+	
+	@Override
+	public void scroll(int value) {}
+	
+	@Override
+	public void scroll(FoundElement element, int delta) {}
 
 	@Override
 	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {}
@@ -240,9 +251,6 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	@Override
 	public void clearText(ActionStatus status, FoundElement foundElement) {}
-
-	@Override
-	public void scrollOnMove(FoundElement value) {}
 
 	@Override
 	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position) {}
@@ -284,5 +292,15 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	@Override
 	public void windowState(ActionStatus status, Channel channel, String state) {
+	}
+
+	@Override
+	public Object executeJavaScript(ActionStatus status, String script, TestElement element) {
+		return null;
+	}
+	
+	@Override
+	public Object executeJavaScript(ActionStatus status, String script) {
+		return null;
 	}
 }

@@ -21,6 +21,7 @@ package com.ats.element;
 
 import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
+import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.recorder.IVisualRecorder;
 
@@ -37,5 +38,20 @@ public class TestElementRoot extends TestElement {
 	public void enterText(ActionStatus status, CalculatedValue text, IVisualRecorder recorder) {
 		channel.rootKeys(text.getCalculated());
 		status.endDuration();
+	}
+
+	@Override
+	public Object executeScript(ActionStatus status, String script) {
+		return engine.executeJavaScript(status, script);
+	}
+
+	@Override
+	public void mouseWheel(int delta) {
+		engine.scroll(delta);
+	}
+
+	@Override
+	public void over(ActionStatus status, MouseDirection position, boolean desktopDragDrop) {
+		// do nothing, this is the root, no need to scroll over the root element
 	}
 }

@@ -28,7 +28,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxOptions;
@@ -59,14 +58,12 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		this.autoScrollElement = JS_SCROLL_IF_NEEDED;//JS_AUTO_SCROLL_MOZ;
 		
 		FirefoxOptions options = new FirefoxOptions();
-		//options.setCapability("marionnette ", true);
-		//options.setCapability("nativeEvents", false);
 		options.setCapability("acceptSslCerts ", true);
 		options.setCapability("acceptInsecureCerts ", true);
 		options.setCapability("security.fileuri.strict_origin_policy", false);
 		options.setCapability("app.update.disabledForTesting", true);
-						
-		options.setPageLoadStrategy(PageLoadStrategy.NONE);
+		//options.setCapability("marionnette ", true);
+		//options.setCapability("nativeEvents", false);
 		
 		if(applicationPath != null) {
 			options.setBinary(applicationPath);

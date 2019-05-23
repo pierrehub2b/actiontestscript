@@ -60,6 +60,7 @@ public class FoundElement{
 	private FoundElement parent;
 	private boolean visible = true;
 	private boolean numeric = false;
+	private boolean password = false;
 	private boolean clickable = true;
 
 	private ArrayList<AtsElement> iframes;
@@ -82,6 +83,7 @@ public class FoundElement{
 		this.width = element.getWidth();
 		this.height = element.getHeight();
 		this.numeric = element.isNumeric();
+		this.password = element.isPassword();
 	}
 
 	public FoundElement(DesktopWindow win) {
@@ -225,6 +227,10 @@ public class FoundElement{
 
 	public boolean isNumeric() {
 		return numeric;
+	}
+	
+	public boolean isPassword() {
+		return password;
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------

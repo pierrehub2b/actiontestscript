@@ -211,6 +211,29 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 
 		return element.getFoundElement();
 	}
+	
+	@Override
+	public FoundElement getElementFromRect(Boolean syscomp, Double x, Double y, Double w, Double h) {
+		capturedElement = gson.fromJson(executeRequest(CAPTURE), AtsMobileElement.class);
+
+		ArrayList<AtsMobileElement> listElements = new ArrayList<AtsMobileElement>();
+
+		loadList(capturedElement, listElements);
+
+		final int mouseX = (int)(channel.getSubDimension().getX() + x);
+		final int mouseY = (int)(channel.getSubDimension().getY() + y);
+
+		AtsMobileElement element = capturedElement;
+
+		for (int i=0; i<listElements.size(); i++) {
+			AtsMobileElement child = listElements.get(i);
+			if(child.getRect().contains(new Point(mouseX, mouseY)) && child.getRect().getWidth() <= w && child.getRect().getHeight() <= h  && element.getRect().contains(child.getRect())){
+				element = child;
+			}
+		}
+
+		return element.getFoundElement();
+	}
 
 	private void loadList(AtsMobileElement element, ArrayList<AtsMobileElement> list) {
 		for (int i=0; i<element.getChildren().length; i++) {
@@ -261,7 +284,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	}
 
 	@Override
-	public String getAttribute(FoundElement element, String attributeName, int maxTry) {
+	public String getAttribute(ActionStatus status, FoundElement element, String attributeName, int maxTry) {
 		final AtsMobileElement atsElement = getElementById(element.getId());
 		if(atsElement != null) {
 			return atsElement.getAttribute(attributeName);
@@ -370,7 +393,13 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	public void waitAfterAction() {}
 
 	@Override
-	public void scroll(FoundElement foundElement, int delta) {}
+	public void scroll(FoundElement element) {}
+	
+	@Override
+	public void scroll(int value) {}
+	
+	@Override
+	public void scroll(FoundElement element, int delta) {}
 
 	@Override
 	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {}
@@ -380,9 +409,6 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 
 	@Override
 	public String setWindowBound(BoundData x, BoundData y, BoundData width, BoundData height) {return "";}
-
-	@Override
-	public void scrollOnMove(FoundElement value) {}
 
 	@Override
 	public void keyDown(Keys key) {}
@@ -496,5 +522,14 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 
 	@Override
 	public void windowState(ActionStatus status, Channel channel, String state) {
+	}
+
+	@Override
+	public Object executeJavaScript(ActionStatus status, String script, TestElement element) {
+		return null;
+	}
+	@Override
+	public Object executeJavaScript(ActionStatus status, String script) {
+		return null;
 	}
 }
