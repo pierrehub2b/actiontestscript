@@ -66,7 +66,6 @@ import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
-import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.DriverProcess;
@@ -567,18 +566,11 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 	@Override
 	public void updateDimensions() {
-
-		final TestBound dimension = new TestBound();
-		final TestBound subDimension = new TestBound();
-
 		final ArrayList<Double> response = (ArrayList<Double>) runJavaScript(JS_DOCUMENT_SIZE);
-
-		if(response != null) {
-			dimension.update(response.get(0), response.get(1), response.get(2), response.get(3));
-			subDimension.update(response.get(4), response.get(5), response.get(6), response.get(7));
+		if(response != null && response.size() == 8) {
+			channel.getDimension().update(response.get(0), response.get(1), response.get(2), response.get(3));
+			channel.getSubDimension().update(response.get(4), response.get(5), response.get(6), response.get(7));
 		}
-
-		channel.setDimensions(dimension, subDimension);
 	}
 
 	@Override

@@ -26,8 +26,8 @@ public class TestBound {
 
 	private Double x = 0.0;
 	private Double y = 0.0;
-	private Double width = 0.0;
-	private Double height = 0.0;
+	private Double width = 100.0;
+	private Double height = 100.0;
 	
 	public TestBound() {}
 

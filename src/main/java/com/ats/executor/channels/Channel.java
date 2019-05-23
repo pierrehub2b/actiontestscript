@@ -62,7 +62,7 @@ public class Channel {
 
 	private int scrollUnit = DriverManager.ATS.getScrollUnit();
 	private TestBound dimension = DriverManager.ATS.getApplicationBound();
-	private TestBound subDimension;
+	private TestBound subDimension = new TestBound();
 
 	private String applicationVersion;
 	private String driverVersion;
