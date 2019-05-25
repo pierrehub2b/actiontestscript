@@ -102,7 +102,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	protected static final String JS_ELEMENT_SCROLL = "var e=arguments[0];var d=arguments[1];e.scrollTop += d;var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
 	protected static final String JS_WINDOW_SCROLL = "window.scrollBy(0,arguments[0]);var result=[0.0001, 0.0001]";
 	protected static final String JS_ELEMENT_FROM_POINT = "var result=null;var e=document.elementFromPoint(arguments[0],arguments[1]);if(e){var r=e.getBoundingClientRect();result=[e, e.tagName, e.getAttribute('inputmode')=='numeric', e.getAttribute('type')=='password', r.x+0.0001, r.y+0.0001, r.width+0.0001, r.height+0.0001, r.left+0.0001, r.top+0.0001, 0.0001, 0.0001, {}];};";
-	protected static final String JS_ELEMENT_FROM_RECT = "let r1={x:arguments[0],y:arguments[1],width:arguments[2],height:arguments[3]};var e=document.elementFromPoint(r1.x, r1.y),result=null;while(e != null){var r2=e.getBoundingClientRect();if(r2.x <= r1.x && r2.width >= r1.width && r2.y <= r1.y && r2.height >= r1.height){result=[e,e.tagName,e.getAttribute('inputmode')=='numeric',e.getAttribute('type')=='password',r2.x+0.0001,r2.y+0.0001,r2.width+0.0001,r2.height+0.0001,r2.left+0.0001,r2.top+0.0001,0.0001,0.0001,{}];e=null;}else{e=e.parentElement;}};";
+	protected static final String JS_ELEMENT_FROM_RECT = "let x1=arguments[0],y1=arguments[1],w=arguments[2],h=arguments[3];let x2=x1+w,y2=y1+h;var e=document.elementFromPoint(x1+(w/2), y1+(h/2)),result=null;while(e != null){var r=e.getBoundingClientRect();if(x1 >= r.x && x2 <= r.x+r.width && y1 >= r.y && y2 <= r.y+r.height){result=[e,e.tagName,e.getAttribute('inputmode')=='numeric',e.getAttribute('type')=='password',r.x+0.0001,r.y+0.0001,r.width+0.0001,r.height+0.0001,r.left+0.0001,r.top+0.0001,0.0001,0.0001,{}];e=null;}else{e=e.parentElement;}};";
 	protected static final String JS_ELEMENT_BOUNDING = "var rect=arguments[0].getBoundingClientRect();var result=[rect.left+0.0001, rect.top+0.0001];";
 	protected static final String JS_MIDDLE_CLICK = "var evt=new MouseEvent('click', {bubbles: true,cancelable: true,view: window, button: 1}),result={};arguments[0].dispatchEvent(evt);";
 	protected static final String JS_ELEMENT_CSS = "var result={};var o=getComputedStyle(arguments[0]);for(var i=0, len=o.length; i < len; i++){result[o[i]]=o.getPropertyValue(o[i]);};";
@@ -381,8 +381,8 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 			switchToDefaultContent();
 
-			x -= channel.getSubDimension().getX();
-			y -= channel.getSubDimension().getY();
+			x = x - channel.getSubDimension().getX() - channel.getDimension().getX();
+			y = y - channel.getSubDimension().getY() - channel.getDimension().getY();
 
 			return loadElement(new ArrayList<AtsElement>(), x, y, w, h, initElementX, initElementY);
 		}

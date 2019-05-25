@@ -142,6 +142,10 @@ public class Channel {
 		setDimension(dim1);
 		setSubDimension(dim2);
 	}
+	
+	public double getOffsetY() {
+		return dimension.getHeight() - subDimension.getHeight();
+	}
 
 	public void refreshMapElementLocation(){
 		refreshLocation();
