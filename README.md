@@ -235,7 +235,7 @@ Proxy types available are *'system'*, *'auto'*, *'direct'* and *'manual'*, if *'
 </browser>
 ```
 *Chromium binaries files and Chromium driver for Windows can be found here : http://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html?prefix=Win_x64/650848/*
-* ATS will automatically be updated with the last version of the supported browsers, in order to use another browser driver version you can define an executable driver name in the *<driver>* property of a named browser. If you want to use the version 73 of the chromedriver you have to download the right version of the driver, rename it, and copy it into the *'drivers'* folder :
+* ATS will automatically be updated with the last version of the supported browsers, in order to use another browser driver version you can define an executable driver name in the *'driver'* property of a named browser. If you want to use the version 73 of the chromedriver you have to download the right version of the driver, rename it, and copy it into the *'drivers'* folder :
 ```
 <browser>
 	<name>chrome</name>
