@@ -31,7 +31,7 @@ import com.ats.script.ProjectData;
 import com.ats.script.Script;
 import com.ats.script.ScriptHeader;
 import com.ats.script.actions.Action;
-import com.ats.tools.Utils;
+import com.ats.tools.XmlReport;
 import com.ats.tools.logger.ExecutionLogger;
 import com.ats.tools.logger.IExecutionLogger;
 import com.ats.tools.logger.NullExecutionLogger;
@@ -94,7 +94,7 @@ public class VisualRecorder implements IVisualRecorder {
 			channel.saveVisualReportFile(path, scriptHeader.getQualifiedName() + Script.ATS_VISUAL_FILE_EXTENSION, logger);
 			
 			if(xml) {
-				Utils.createXmlReport(path, scriptHeader.getQualifiedName(), logger);
+				XmlReport.createReport(path, scriptHeader.getQualifiedName(), logger);
 			}
 		}
 	}

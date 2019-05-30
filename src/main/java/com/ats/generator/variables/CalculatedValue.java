@@ -183,49 +183,7 @@ public class CalculatedValue{
 		
 		return ActionTestScript.JAVA_VALUE_FUNCTION_NAME + "(" + value + ")";
 	}
-
-	//--------------------------------------------------------
-	// getters and setters for serialization
-	//--------------------------------------------------------
-
-	public String getData() {
-		return data;
-	}
-
-	public void setData(String value) {
-		if(value == null){
-			value = "";
-		}
-		this.data = value;
-	}
-
-	public Script getScript() {
-		return script;
-	}
-
-	public void setScript(Script script) {
-		this.script = script;
-	}
-
-	public String getCalculated() {
-		if(calculated == null){
-			if(dataList != null) {
-				final StringBuilder builder = new StringBuilder("");
-				for(final Object obj : dataList) {
-					if (obj instanceof Variable) {
-						builder.append(((Variable) obj).getCalculatedValue());
-					}else {
-						builder.append(obj);
-					}
-				}
-				return builder.toString();
-			}else {
-				return data;
-			}
-		}
-		return calculated;
-	}
-	
+		
 	public ArrayList<SendKeyData> getCalculatedText(){
 
 		final ArrayList<SendKeyData> chainKeys = new ArrayList<SendKeyData>();
@@ -281,7 +239,49 @@ public class CalculatedValue{
 		}
 	}
 
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------
+
+	public String getCalculated() {
+		if(calculated == null){
+			if(dataList != null) {
+				final StringBuilder builder = new StringBuilder("");
+				for(final Object obj : dataList) {
+					if (obj instanceof Variable) {
+						builder.append(((Variable) obj).getCalculatedValue());
+					}else {
+						builder.append(obj);
+					}
+				}
+				return builder.toString();
+			}else {
+				return data;
+			}
+		}
+		return calculated;
+	}
+	
 	public void setCalculated(String value) {
 		this.calculated = value;
+	}
+	
+	public String getData() {
+		return data;
+	}
+
+	public void setData(String value) {
+		if(value == null){
+			value = "";
+		}
+		this.data = value;
+	}
+
+	public Script getScript() {
+		return script;
+	}
+
+	public void setScript(Script script) {
+		this.script = script;
 	}
 }

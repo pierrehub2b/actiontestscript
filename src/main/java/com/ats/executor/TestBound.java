@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.executor;
 
@@ -28,45 +28,42 @@ public class TestBound {
 	private Double y = 0.0;
 	private Double width = 100.0;
 	private Double height = 100.0;
-	
+
 	public TestBound() {}
 
 	public TestBound(Double x, Double y) {
-		this.x = x;
-		this.y = y;
+		setX(x);
+		setY(y);
 	}
-	
+
 	public TestBound(Double x, Double y, Double width, Double height) {
-		this.x = x;
-		this.y = y;
-		this.width = width;
-		this.height = height;
+		update(x, y, width, height);
+	}
+
+	public void update(Double x, Double y, Double width, Double height) {
+		setX(x);
+		setY(y);
+		setWidth(width);
+		setHeight(height);
 	}
 
 	public Point getPoint(){
 		return new Point(x.intValue(), y.intValue());
 	}
-	
+
 	public Dimension getSize(){
 		return new Dimension(width.intValue(), height.intValue());
 	}
-	
+
 	public boolean isCollision(TestBound dimension){
 		return getPoint().x == dimension.getPoint().x || getPoint().y == dimension.getPoint().y;
 	}
-	
+
 	public void updateLocation(Double x, Double y) {
 		this.x += x;
 		this.y += y;		
 	}
-	
-	public void update(Double x, Double y, Double width, Double height) {
-		this.x = x;
-		this.y = y;
-		this.width = width;
-		this.height = height;
-	}
-	
+
 	//----------------------------------------------------------------------------------------------------------------------
 	// Getter and setter for serialization
 	//----------------------------------------------------------------------------------------------------------------------
@@ -92,7 +89,9 @@ public class TestBound {
 	}
 
 	public void setWidth(Double width) {
-		this.width = width;
+		if(width > 0) {
+			this.width = width;
+		}
 	}
 
 	public Double getHeight() {
@@ -100,6 +99,8 @@ public class TestBound {
 	}
 
 	public void setHeight(Double height) {
-		this.height = height;
+		if(height > 0) {
+			this.height = height;
+		}
 	}
 }

@@ -78,7 +78,7 @@ import com.ats.script.actions.ActionApi;
 import com.ats.script.actions.ActionGotoUrl;
 import com.ats.script.actions.ActionWindowState;
 import com.ats.tools.ResourceContent;
-import com.ats.tools.StartHtmlPage;
+import com.ats.tools.Utils;
 import com.google.gson.Gson;
 
 @SuppressWarnings("unchecked")
@@ -218,7 +218,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 				final File tempHtml = File.createTempFile("ats_", ".html");
 				tempHtml.deleteOnExit();
 
-				Files.write(tempHtml.toPath(), StartHtmlPage.getAtsBrowserContent(titleUid, channel.getApplication(), applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait(), getPropertyWait(), maxTrySearch, maxTryProperty, scriptTimeout, pageLoadTimeout, watchdog, getDesktopDriver()));
+				Files.write(tempHtml.toPath(), Utils.getAtsBrowserContent(titleUid, channel.getApplication(), applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait(), getPropertyWait(), maxTrySearch, maxTryProperty, scriptTimeout, pageLoadTimeout, watchdog, getDesktopDriver()));
 				driver.get(tempHtml.toURI().toString());
 			} catch (IOException e) {}
 

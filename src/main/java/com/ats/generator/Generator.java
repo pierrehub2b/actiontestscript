@@ -69,16 +69,28 @@ public class Generator implements ScriptProcessedEvent{
 
 			final String targetFolderPath = projectData.getTargetFolderPath().toFile().getAbsolutePath();
 			
-			ATS.logInfo("Compile generated java files into folder -> " + targetFolderPath + "/classes");
+			ATS.logInfo("Compile generated java files into folder -> " + targetFolderPath + "/" + ProjectData.TARGET_FOLDER_CLASSES);
 			
 			StringBuilder xmlBuilder = new StringBuilder();
 			xmlBuilder.append("<project basedir=\"");
 			xmlBuilder.append(targetFolderPath);
 			xmlBuilder.append("\" default=\"compile\">");
-			xmlBuilder.append("<copy todir=\"classes\"><fileset dir=\"../src\" includes=\"assets/**\"/></copy>");
+			xmlBuilder.append("<copy todir=\"");
+			xmlBuilder.append(ProjectData.TARGET_FOLDER_CLASSES);
+			xmlBuilder.append("\"><fileset dir=\"../");
+			xmlBuilder.append(ProjectData.SRC_FOLDER);
+			xmlBuilder.append("\" includes=\"");
+			xmlBuilder.append(ProjectData.ASSETS_FOLDER);
+			xmlBuilder.append("/**\"/></copy>");
 			xmlBuilder.append("<property name=\"lib.dir\" value=\"lib\"/>");
-			xmlBuilder.append("<target name=\"compile\"><mkdir dir=\"classes\"/><javac includeantruntime=\"true\" srcdir=\"generated\" destdir=\"classes\"/></target></project>");
-
+			xmlBuilder.append("<target name=\"compile\"><mkdir dir=\"");
+			xmlBuilder.append(ProjectData.TARGET_FOLDER_CLASSES);
+			xmlBuilder.append("\"/><javac includeantruntime=\"true\" srcdir=\"");
+			xmlBuilder.append(ProjectData.TARGET_FOLDER_GENERATED);
+			xmlBuilder.append("\" destdir=\"");
+			xmlBuilder.append(ProjectData.TARGET_FOLDER_CLASSES);
+			xmlBuilder.append("\"/></target></project>");
+			
 			try {
 				File tempXml = File.createTempFile("ant_", ".xml");
 				tempXml.deleteOnExit();

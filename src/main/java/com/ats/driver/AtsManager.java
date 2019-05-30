@@ -379,7 +379,6 @@ public class AtsManager {
 											}
 										}
 
-
 										String port = null;
 										nl = designElement.getElementsByTagName("port");
 										if(nl != null && nl.getLength() > 0) {

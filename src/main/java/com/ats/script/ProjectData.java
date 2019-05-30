@@ -41,15 +41,17 @@ public class ProjectData {
 	private static final DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 
 	private static final String TARGET_FOLDER = "target";
-	private static final String TARGET_FOLDER_GENERATED = "generated";
 	private static final String TARGET_FOLDER_REPORT = "report";
+	
+	public static final String TARGET_FOLDER_GENERATED = "generated";
+	public static final String TARGET_FOLDER_CLASSES = "classes";
 
-	private static final String SRC_FOLDER = "src";
+	public static final String SRC_FOLDER = "src";
 	public static final String ASSETS_FOLDER = "assets";
 	public static final String RESOURCES_FOLDER = "resources";
 	public static final String IMAGES_FOLDER = "images";
-	private static final String SRC_FOLDER_MAIN = "main";
 	
+	private static final String SRC_FOLDER_MAIN = "main";
 	private static final String SRC_FOLDER_ATS = "ats";
 	private static final String SRC_FOLDER_JAVA = "java";
 
