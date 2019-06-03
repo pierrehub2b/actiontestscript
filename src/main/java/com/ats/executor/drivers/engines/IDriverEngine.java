@@ -36,6 +36,7 @@ import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
+import com.ats.graphic.TemplateMatchingSimple;
 import com.ats.script.actions.ActionApi;
 
 public interface IDriverEngine{
@@ -51,7 +52,10 @@ public interface IDriverEngine{
 	public Object executeJavaScript(ActionStatus status, String script, TestElement element);
 	public Object executeJavaScript(ActionStatus status, String script);
 	public void goToUrl(ActionStatus status, String url);
+	
 	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> searchPredicate);
+	public ArrayList<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template);
+	
 	public void waitAfterAction();
 	public void updateDimensions();
 	public FoundElement getElementFromPoint(Boolean syscomp, Double x, Double y);
@@ -91,4 +95,5 @@ public interface IDriverEngine{
 	public void api(ActionStatus status, ActionApi api);
 	public int getCurrentWindow();
 	public void windowState(ActionStatus status, Channel channel, String state);
+
 }

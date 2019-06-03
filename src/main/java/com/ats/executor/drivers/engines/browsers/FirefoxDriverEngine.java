@@ -20,8 +20,8 @@ under the License.
 package com.ats.executor.drivers.engines.browsers;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.SocketTimeoutException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 import org.apache.http.client.methods.HttpPost;
@@ -123,14 +123,15 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		//-----------------------------------------------------------------------------------------------------
 		// I don't know why, but we have to do that to make click action reliable with Firefox and geckodriver
 		//-----------------------------------------------------------------------------------------------------
+		
 		element.getValue().getTagName();
 		element.getValue().getRect();
+		
 		//--------------------------------------------------------------------------------------------
 		
-		final JsonObject origin = getElementOrigin(element.getId());
+		final JsonArray actionList = new JsonArray();
 		
-		JsonArray actionList = new JsonArray();
-		actionList.add(getMoveAction(origin, offsetX, offsetY));
+		actionList.add(getMoveAction(getElementOrigin(element.getId()), offsetX, offsetY));
 		executeRequestActions(getElementAction(actionList));
 	}
 	
@@ -142,7 +143,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 				
 		final JsonObject origin = getElementOrigin(element.getId());
 		
-		JsonArray actionList = new JsonArray();
+		final JsonArray actionList = new JsonArray();
 		actionList.add(getMouseClickAction(origin, "pointerDown"));
 		actionList.add(getMouseClickAction(origin, "pointerUp"));
 				
@@ -151,14 +152,14 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 
 	@Override
 	protected void loadUrl(String url) {
-		JsonObject parameters = new JsonObject();
+		final JsonObject parameters = new JsonObject();
 		parameters.addProperty("url", url);
 		
 		executeRequest(parameters, "url");
 	}
 
 	private JsonObject getMouseClickAction(JsonObject origin, String type) {
-		JsonObject action = new JsonObject();
+		final JsonObject action = new JsonObject();
 		action.addProperty("duration", 20);
 		action.addProperty("type", type);
 		action.addProperty("button", 0);
@@ -167,7 +168,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	}
 
 	private JsonObject getMoveAction(JsonObject origin, int offsetX, int offsetY) {
-		JsonObject action = new JsonObject();
+		final JsonObject action = new JsonObject();
 		action.addProperty("duration", 150);
 		action.addProperty("x", offsetX);
 		action.addProperty("y", offsetY);
@@ -177,7 +178,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	}
 
 	private JsonObject getElementOrigin(String elemId) {
-		JsonObject origin = new JsonObject();
+		final JsonObject origin = new JsonObject();
 		origin.addProperty("ELEMENT", elemId);
 		origin.addProperty(WEB_ELEMENT_REF, elemId);
 		return origin;
@@ -185,10 +186,10 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 
 	private JsonObject getElementAction(JsonArray actionList) {
 
-		JsonObject parameters = new JsonObject();
+		final JsonObject parameters = new JsonObject();
 		parameters.addProperty("pointerType", "mouse");
 
-		JsonObject actions = new JsonObject();
+		final JsonObject actions = new JsonObject();
 
 		actions.addProperty("id", "default mouse");
 		actions.addProperty("type", "pointer");
@@ -196,10 +197,10 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		actions.add("parameters", parameters);
 		actions.add("actions", actionList);
 
-		JsonArray chainedAction = new JsonArray();
+		final JsonArray chainedAction = new JsonArray();
 		chainedAction.add(actions);
 
-		JsonObject postData = new JsonObject();
+		final JsonObject postData = new JsonObject();
 		postData.add("actions", chainedAction);
 
 		return postData;
@@ -211,20 +212,14 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	
 	private void executeRequest(JsonObject action, String type) {
 
-		StringEntity postDataEntity = null;
-		try {
-			postDataEntity = new StringEntity(action.toString());
-		} catch (UnsupportedEncodingException e) {
-			return;
-		}
-
 		final CloseableHttpClient httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
 		final HttpPost request = new HttpPost(driverSession + "/" + type);
+		
 		request.addHeader("content-type", "application/json");
 
 		try {
 
-			request.setEntity(postDataEntity);
+			request.setEntity(new StringEntity(action.toString(), StandardCharsets.UTF_8));
 			httpClient.execute(request);
 
 		} catch (SocketTimeoutException e) {

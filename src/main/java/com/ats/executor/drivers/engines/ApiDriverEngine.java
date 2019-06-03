@@ -57,6 +57,7 @@ import com.ats.executor.drivers.engines.webservices.RestApiExecutor;
 import com.ats.executor.drivers.engines.webservices.SoapApiExecutor;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
+import com.ats.graphic.TemplateMatchingSimple;
 import com.ats.script.actions.ActionApi;
 import com.google.common.base.Charsets;
 import com.google.common.io.ByteStreams;
@@ -158,6 +159,11 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	@Override
 	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> searchPredicate) {
 		return executor.findElements(channel, sysComp, testObject, tagName, attributes, searchPredicate);
+	}
+	
+	@Override
+	public ArrayList<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template) {
+		return null;
 	}
 	
 	@Override

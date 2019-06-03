@@ -44,6 +44,7 @@ public class SearchedElement {
 	private SearchedElement parent;
 	private int index = 0;
 	private List<CalculatedProperty> criterias;
+	private byte[] image;
 
 	public SearchedElement() {} // default constructor
 
@@ -194,5 +195,13 @@ public class SearchedElement {
 
 	public void setCriterias(List<CalculatedProperty> value) {
 		this.criterias = value;
+	}
+		
+	public byte[] getImage() {
+		return image;
+	}
+
+	public void setImage(byte[] image) {
+		this.image = image;
 	}
 }

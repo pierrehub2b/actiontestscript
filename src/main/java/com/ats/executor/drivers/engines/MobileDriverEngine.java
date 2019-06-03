@@ -58,6 +58,7 @@ import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
+import com.ats.graphic.TemplateMatchingSimple;
 import com.ats.script.actions.ActionApi;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -305,6 +306,12 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 		}
 
 		return list.parallelStream().filter(searchPredicate).map(e -> new FoundElement(e)).collect(Collectors.toCollection(ArrayList::new));
+	}
+	
+	@Override
+	public ArrayList<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template) {
+
+		return null;
 	}
 
 	private void loadElementsByTag(AtsMobileElement root, String tag, List<AtsMobileElement> list) {

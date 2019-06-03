@@ -36,6 +36,6 @@ public class TestElementSystem extends TestElement {
 		}
 
 		this.engine = channel.getDesktopDriverEngine();
-		startSearch(true, searchElement.getTag(), searchElement.getCriterias());
+		startSearch(true, searchElement);
 	}
 }

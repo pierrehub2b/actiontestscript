@@ -21,7 +21,6 @@ package com.ats.element;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
@@ -36,8 +35,10 @@ import com.ats.executor.drivers.engines.IDriverEngine;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
+import com.ats.graphic.TemplateMatchingSimple;
 import com.ats.recorder.IVisualRecorder;
 import com.ats.script.actions.ActionSelect;
+import com.ats.tools.Utils;
 
 public class TestElement{
 
@@ -65,7 +66,7 @@ public class TestElement{
 	private boolean sysComp = false;
 
 	public TestElement() {}
-	
+
 	public TestElement(Channel channel) {
 		this.channel = channel;
 		this.index = 0;
@@ -97,16 +98,16 @@ public class TestElement{
 		this.setIndex(index);
 	}
 
-	public TestElement(Channel channel, int maxTry, Predicate<Integer> predicate, SearchedElement searchElement) {
+	public TestElement(Channel channel, int maxTry, Predicate<Integer> predicate, SearchedElement searchedElement) {
 
-		this(channel, maxTry, predicate, searchElement.getIndex());
+		this(channel, maxTry, predicate, searchedElement.getIndex());
 
-		if(searchElement.getParent() != null){
-			this.parent = new TestElement(channel, maxTry, predicate, searchElement.getParent());
+		if(searchedElement.getParent() != null){
+			this.parent = new TestElement(channel, maxTry, predicate, searchedElement.getParent());
 		}
 
 		this.engine = channel.getDriverEngine();
-		startSearch(false, searchElement.getTag(), searchElement.getCriterias());
+		startSearch(false, searchedElement);
 	}
 
 	public void dispose() {
@@ -137,30 +138,50 @@ public class TestElement{
 		return channel;
 	}
 
-	protected void startSearch(boolean sysComp, String tag, List<CalculatedProperty> properties) {
+	protected void startSearch(boolean sysComp, SearchedElement searchedElement) {
 
 		this.sysComp = sysComp;
 
 		if(channel != null){
 
-			searchedTag = tag;
-			criterias = tag;
+			searchedTag = searchedElement.getTag();
+			criterias = searchedElement.getTag();
 
 			searchDuration = System.currentTimeMillis();
 
 			if(parent == null || (parent != null && parent.getCount() > 0)){
 
-				ArrayList<String> attributes = new ArrayList<String>();
-				Predicate<AtsBaseElement> fullPredicate = Objects::nonNull;
+				if(FoundElement.IMAGE_TAG.equals(searchedTag)) {
+	
+					final TemplateMatchingSimple template = new TemplateMatchingSimple(searchedElement.getImage());
+					
+					for (CalculatedProperty property : searchedElement.getCriterias()){
+						if("error".equals(property.getName())){
+							final String value = property.getValue().getCalculated();
+							if(value.endsWith("%")) {
+								template.setPercentError(Utils.string2Double(value.replace("%", "").trim()));
+							}else {
+								template.setErrorMax(Utils.string2Int(value.trim()));
+							}
+							break;
+						}
+					}
+					
+					foundElements = engine.findElements(parent, template);
+					
+				}else {
+					ArrayList<String> attributes = new ArrayList<String>();
+					Predicate<AtsBaseElement> fullPredicate = Objects::nonNull;
 
-				for (CalculatedProperty property : properties){
-					criterias += "," + property.getName() + ":" + property.getValue().getCalculated();
-					fullPredicate = property.getPredicate(fullPredicate);
+					for (CalculatedProperty property : searchedElement.getCriterias()){
+						criterias += "," + property.getName() + ":" + property.getValue().getCalculated();
+						fullPredicate = property.getPredicate(fullPredicate);
 
-					attributes.add(property.getName());
+						attributes.add(property.getName());
+					}
+
+					foundElements = engine.findElements(sysComp, this, searchedTag, attributes, fullPredicate);
 				}
-
-				foundElements = engine.findElements(sysComp, this, tag, attributes, fullPredicate);
 			}
 
 			searchDuration = System.currentTimeMillis() - this.searchDuration;
@@ -188,7 +209,7 @@ public class TestElement{
 	public FoundElement getFoundElement() {
 		return foundElements.get(getStartOneIndex()); 
 	}
-	
+
 	public boolean isPassword() {
 		return getFoundElement().isPassword();
 	}
@@ -200,7 +221,7 @@ public class TestElement{
 	public WebElement getWebElement() {
 		return getFoundElement().getValue();
 	}
-	
+
 	public boolean isBody() {
 		return getFoundElement().getTag().equalsIgnoreCase("body");
 	}
@@ -233,7 +254,7 @@ public class TestElement{
 		this.searchedTag = "AlertBox";
 		this.criterias = "";
 	}
-	
+
 	private int getStartOneIndex() {
 		if(index > 1) {
 			return index-1;
@@ -329,9 +350,9 @@ public class TestElement{
 	//-------------------------------------------------------------------------------------------------------------------
 
 	public void enterText(ActionStatus status, CalculatedValue text, IVisualRecorder recorder) {
-		
+
 		final MouseDirection md = new MouseDirection();
-		
+
 		over(status, md, false);
 		if(status.isPassed()) {
 			click(status, md);

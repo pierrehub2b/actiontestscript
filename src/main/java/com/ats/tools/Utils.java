@@ -27,10 +27,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -70,6 +70,14 @@ public class Utils {
 			return Integer.parseInt(value);
 		} catch (NumberFormatException e) {
 			return 0;
+		}
+	}
+	
+	public static double string2Double(String value){
+		try {
+			return Double.parseDouble(value);
+		} catch (NumberFormatException e) {
+			return 0.0;
 		}
 	}
 
@@ -273,21 +281,21 @@ public class Utils {
 
 	public static ArrayList<String[]> loadCsvData(URL url) throws IOException{
 
-		ArrayList<String[]> result = new ArrayList<String[]>();
-		try {
-			final Reader reader = new InputStreamReader(new BOMInputStream(url.openStream()), "UTF-8");
-			final CSVParser parser = new CSVParser(reader, CSVFormat.EXCEL.withAllowMissingColumnNames());
+		final ArrayList<String[]> result = new ArrayList<String[]>();
 
-			for (final CSVRecord record : parser) {
-				String[] lineData = new String[record.size()];
-				for (int i=0; i < record.size(); i++) {
-					lineData[i] = record.get(i);
-				}
-				result.add(lineData);
+		final Reader reader = new InputStreamReader(new BOMInputStream(url.openStream()), StandardCharsets.UTF_8);
+		final CSVParser parser = new CSVParser(reader, CSVFormat.EXCEL.withAllowMissingColumnNames());
+
+		for (final CSVRecord record : parser) {
+			String[] lineData = new String[record.size()];
+			for (int i=0; i < record.size(); i++) {
+				lineData[i] = record.get(i);
 			}
-			parser.close();
-		} catch (UnsupportedEncodingException e) {
+			result.add(lineData);
 		}
+		parser.close();
+		reader.close();
+
 		return result;
 	}
 
@@ -313,16 +321,16 @@ public class Utils {
 		if(driverVersion == null) {
 			driverVersion = "--";
 		}
-		
+
 		if(browserVersion == null) {
 			browserVersion = "--";
 		}
-		
-		StringBuilder htmlContent = new StringBuilder();
+
+		final StringBuilder htmlContent = new StringBuilder();
 		htmlContent.append("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">");
 
 		htmlContent.append(ResourceContent.getPageStyle());
-		
+
 		htmlContent.append("<title>");
 		htmlContent.append(titleUid);
 		htmlContent.append("</title></head><body bgcolor=\"#f2f2f2\"><div><div id=\"header\"><div class=\"clearfix\">");
@@ -340,24 +348,24 @@ public class Utils {
 
 		htmlContent.append("<br><strong>Browser driver version : </strong>");
 		htmlContent.append(driverVersion);
-		
+
 		htmlContent.append("<br><strong>Desktop driver version : </strong>");
 		htmlContent.append(desktopDriver.getDriverVersion());
-		
+
 		htmlContent.append("<br><strong>Search element max try : </strong>");
 		htmlContent.append(maxtry);
-		
+
 		htmlContent.append("<br><strong>Get property max try : </strong>");
 		htmlContent.append(maxTryProperty);
-		
+
 		htmlContent.append("<br>JavaScript execution time out : ");
 		htmlContent.append(scriptTimeout);
 		htmlContent.append(" s");
-		
+
 		htmlContent.append("<br>Page load time out : ");
 		htmlContent.append(pageLoadTimeout);
 		htmlContent.append(" s");
-		
+
 		htmlContent.append("<br>Action execution watchdog : ");
 		htmlContent.append(watchdog);
 		htmlContent.append(" s");
@@ -378,20 +386,20 @@ public class Utils {
 		htmlContent.append(testBound.getX().intValue());
 		htmlContent.append(" x ");
 		htmlContent.append(testBound.getY().intValue());
-		
+
 		htmlContent.append("<br><strong>  - Start size : </strong>");
 		htmlContent.append(testBound.getWidth().intValue());
 		htmlContent.append(" x ");
 		htmlContent.append(testBound.getHeight().intValue());
-		
+
 		htmlContent.append("<br><strong>  - Wait after action : </strong>");
 		htmlContent.append(actionWait);
 		htmlContent.append(" ms");
-		
+
 		htmlContent.append("<br><strong>  - Double check property : </strong>");
 		htmlContent.append(propertyWait);
 		htmlContent.append(" ms");		
-		
+
 		htmlContent.append("</p></div><div class=\"alert warning\" style=\"margin-left:30px;min-width: 360px;display: inline-block\"><p>");
 		htmlContent.append("<strong>Operating System : </strong>");
 		htmlContent.append("<br><strong>  - Machine name : </strong>");
@@ -409,7 +417,7 @@ public class Utils {
 
 		htmlContent.append("<br><strong>  - Resolution : </strong>");
 		htmlContent.append(desktopDriver.getScreenResolution());
-		
+
 		htmlContent.append("<br><strong>  - Processor name : </strong>");
 		htmlContent.append(desktopDriver.getCpuName());
 		htmlContent.append("<br><strong>  - Processor socket : </strong>");
@@ -420,13 +428,13 @@ public class Utils {
 		htmlContent.append(desktopDriver.getCpuMaxClock());
 		htmlContent.append("<br><strong>  - Processor cores : </strong>");
 		htmlContent.append(desktopDriver.getCpuCores());
-		
+
 		htmlContent.append("<br><strong>  - Current drive letter : </strong>");
 		htmlContent.append(desktopDriver.getDriveLetter());
-		
+
 		htmlContent.append("<br><strong>  - Disk total size : </strong>");
 		htmlContent.append(desktopDriver.getDiskTotalSize());
-		
+
 		htmlContent.append("<br><strong>  - Disk free space : </strong>");
 		htmlContent.append(desktopDriver.getDiskFreeSpace());		
 

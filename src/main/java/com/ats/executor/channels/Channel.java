@@ -496,6 +496,10 @@ public class Channel {
 	//----------------------------------------------------------------------------------------------------------
 	//----------------------------------------------------------------------------------------------------------
 
+	public void scroll(int delta) {
+		engine.scroll(delta*scrollUnit);
+	}
+	
 	public void scroll(FoundElement foundElement, int delta) {
 		engine.scroll(foundElement, delta*scrollUnit);
 	}

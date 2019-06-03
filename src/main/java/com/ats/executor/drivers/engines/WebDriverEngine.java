@@ -66,6 +66,7 @@ import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
+import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.DriverProcess;
@@ -74,6 +75,7 @@ import com.ats.executor.drivers.desktop.DesktopWindow;
 import com.ats.executor.drivers.engines.desktop.DesktopDriverEngine;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
+import com.ats.graphic.TemplateMatchingSimple;
 import com.ats.script.actions.ActionApi;
 import com.ats.script.actions.ActionGotoUrl;
 import com.ats.script.actions.ActionWindowState;
@@ -918,9 +920,9 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	@Override
 	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> predicate) {
 
-		if(tagName == null) {
-			tagName = BODY;
-		}
+		//if(tagName == null) {
+		//	tagName = BODY;
+		//}
 
 		WebElement startElement = null;
 
@@ -963,6 +965,22 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		}
 
 		return new ArrayList<FoundElement>();
+	}
+	
+	@Override
+	public ArrayList<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template) {
+
+		TestBound outterBound = null;
+		if(parent != null) {
+			outterBound = parent.getFoundElement().getTestScreenBound();
+		}else {
+			outterBound = channel.getDimension();
+		}
+		
+		channel.toFront();
+		final byte[] screenShot = getDesktopDriver().getScreenshotByte(outterBound.getX(), outterBound.getY(), outterBound.getWidth(), outterBound.getHeight());
+		
+		return template.findOccurrences(screenShot).parallelStream().map(r -> new FoundElement(r)).collect(Collectors.toCollection(ArrayList::new));
 	}
 
 	@Override

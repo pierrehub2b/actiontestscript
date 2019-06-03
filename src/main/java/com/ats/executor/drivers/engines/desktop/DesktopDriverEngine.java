@@ -50,6 +50,7 @@ import com.ats.executor.drivers.engines.DriverEngineAbstract;
 import com.ats.executor.drivers.engines.IDriverEngine;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
+import com.ats.graphic.TemplateMatchingSimple;
 import com.ats.script.actions.ActionApi;
 
 public class DesktopDriverEngine extends DriverEngineAbstract implements IDriverEngine {
@@ -261,6 +262,12 @@ public class DesktopDriverEngine extends DriverEngineAbstract implements IDriver
 		}else {
 			return getDesktopDriver().findElements(channel, testElement, tag, attributes, predicate);
 		}
+	}
+	
+	@Override
+	public ArrayList<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template) {
+
+		return null;
 	}
 
 	@Override

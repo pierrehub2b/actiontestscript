@@ -37,6 +37,8 @@ public class FoundElement{
 	public final static String DESKTOP = "desktop";
 	public final static String MOBILE = "mobile";
 	public final static String API = "api";
+		
+	public static final String IMAGE_TAG = "@IMAGE";
 
 	private String id;
 
@@ -165,6 +167,18 @@ public class FoundElement{
 			iframes.clear();
 			setParent(new FoundElement(channel, iframes, elements, initElementX, initElementY));
 		}
+	}
+
+	public FoundElement(Rectangle rect) {
+		this.tag = FoundElement.IMAGE_TAG;
+		this.width = rect.getWidth();
+		this.height = rect.getHeight();
+
+		this.screenX = rect.getX();
+		this.screenY = rect.getY();
+
+		this.x = this.screenX;
+		this.y = this.screenY;
 	}
 
 	public boolean isDesktop() {
@@ -348,5 +362,9 @@ public class FoundElement{
 
 	public TestBound getTestBound() {
 		return new TestBound(x, y, width, height);
+	}
+	
+	public TestBound getTestScreenBound() {
+		return new TestBound(screenX, screenY, width, height);
 	}
 }
