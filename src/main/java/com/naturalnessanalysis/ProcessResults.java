@@ -17,19 +17,18 @@ specific language governing permissions and limitations
 under the License.
  */
 
-package com.naturalness;
+package com.naturalnessanalysis;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.List;
 
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+import com.naturalness.NaturalnessModel;
+import com.naturalness.Ranking;
 import org.xml.sax.SAXException;
 
 import com.ats.generator.ATS;
@@ -108,8 +107,8 @@ public class ProcessResults {
 		System.out.println("The redundancy ratio is : "+redundancyRatio);
 
 		System.out.println("Ranking");
-		List<Ranking<String>> rankingList = analyzer.rank();
-		for (Ranking<String> rank : analyzer.rank()) {
+		List<Ranking> rankingList = analyzer.rank();
+		for (Ranking rank : analyzer.rank()) {
 			String name = analyzer.getSequenceName(rank.getSequence());
 			double crossEntropy = rank.getCrossEntropy();
 			System.out.println("Test "+name+" has "+crossEntropy+" entropy");
