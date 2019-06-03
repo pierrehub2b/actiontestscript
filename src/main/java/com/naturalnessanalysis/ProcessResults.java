@@ -17,23 +17,28 @@ specific language governing permissions and limitations
 under the License.
  */
 
-package com.naturalness;
+package com.naturalnessanalysis;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.List;
 
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.w3c.dom.Document;
+import com.naturalness.NaturalnessModel;
+import com.naturalness.Ranking;
 import org.xml.sax.SAXException;
 
 import com.ats.generator.ATS;
 import com.ats.tools.XmlReport;
 
 public class ProcessResults {
+	final int DEPTH = 5;
+	final double PROBA_OF_UNKNOWN = 1e-6;
+
+	private Analyzer analyzer;
 	
 	public static void main(String[] args) {
 		if(args.length > 0) {
@@ -50,6 +55,7 @@ public class ProcessResults {
 	}
 
 	public ProcessResults(File reportsFolder) {
+		analyzer = new Analyzer(DEPTH, PROBA_OF_UNKNOWN);
 
 		if(!reportsFolder.exists()){
 			ATS.logError("xml reports folder does not exists -> " + reportsFolder.getAbsolutePath());
@@ -62,7 +68,11 @@ public class ProcessResults {
 		}
 
 		try {
-			Files.find(reportsFolder.toPath(), 99999, (p, f) -> f.isRegularFile() && XmlReport.REPORT_FILE.equals(p.toFile().getName())).forEach(p -> xmlReports.add(p.toFile()));
+			Files.find(
+				reportsFolder.toPath(), 
+				99999, 
+				(p, f) -> f.isRegularFile() && XmlReport.REPORT_FILE.equals(p.toFile().getName())
+			).forEach(p -> xmlReports.add(p.toFile()));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -78,20 +88,30 @@ public class ProcessResults {
 			// now we have the name of the executed test and the xml report of the test		
 			//-----------------------------------------------------------------------------------------------------------------
 			
-			final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			try {
-				final Document doc = dbFactory.newDocumentBuilder().parse(xml);
-				
-				System.out.println("Xml report -> " + testName + " -- " + doc);
-				
-				
-				
-				
-				
-				
+				analyzer.recordSequenceFromLogFile(xml);
+				System.out.println("Xml report -> " + testName + " learnt ");
 			} catch (ParserConfigurationException | SAXException | IOException e) {
 				e.printStackTrace();
 			}
+		}
+
+		NaturalnessModel<String> model = analyzer.learn();
+		int modelSize = model.size();
+		System.out.println(modelSize+" ngrams have been extracted");
+
+		int modelOccurence = model.occurence();
+		System.out.println(modelOccurence+" occurences have been extracted");
+
+		double redundancyRatio = (double) modelOccurence / modelSize;
+		System.out.println("The redundancy ratio is : "+redundancyRatio);
+
+		System.out.println("Ranking");
+		List<Ranking> rankingList = analyzer.rank();
+		for (Ranking rank : analyzer.rank()) {
+			String name = analyzer.getSequenceName(rank.getSequence());
+			double crossEntropy = rank.getCrossEntropy();
+			System.out.println("Test "+name+" has "+crossEntropy+" entropy");
 		}
 	}
 }
