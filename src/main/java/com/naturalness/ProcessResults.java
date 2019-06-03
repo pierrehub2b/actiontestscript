@@ -96,9 +96,23 @@ public class ProcessResults {
 				e.printStackTrace();
 			}
 		}
+
+		NaturalnessModel<String> model = analyzer.learn();
+		int modelSize = model.size();
+		System.out.println(modelSize+" ngrams have been extracted");
+
+		int modelOccurence = model.occurence();
+		System.out.println(modelOccurence+" occurences have been extracted");
+
+		double redundancyRatio = (double) modelOccurence / modelSize;
+		System.out.println("The redundancy ratio is : "+redundancyRatio);
+
+		System.out.println("Ranking");
+		List<Ranking<String>> rankingList = analyzer.rank();
 		for (Ranking<String> rank : analyzer.rank()) {
-			rank.getSequence();
-			rank.getCrossEntropy();
+			String name = analyzer.getSequenceName(rank.getSequence());
+			double crossEntropy = rank.getCrossEntropy();
+			System.out.println("Test "+name+" has "+crossEntropy+" entropy");
 		}
 	}
 }
