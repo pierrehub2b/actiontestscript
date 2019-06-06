@@ -21,14 +21,12 @@ package com.naturalnessanalysis;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import com.naturalness.NaturalnessModel;
-import com.naturalness.Ranking;
 import org.xml.sax.SAXException;
 
 import com.ats.generator.ATS;
@@ -104,8 +102,18 @@ public class ProcessResults {
 		String csvSequence = analyzer.sequenceAnalysis().toCSV();
 		System.out.println(csvSequence);
 
-
-		reportsFolder.createNewFile();
-
+		try {
+			File report = new File(reportsFolder.getPath() + File.separator + "analysis.csv");
+			boolean isCreated = report.createNewFile();
+			if (isCreated) {
+				PrintWriter pw = new PrintWriter(report);
+				pw.println(csvGlobal);
+				pw.println(csvRanking);
+				pw.println(csvSequence);
+				pw.close();
+			}
+		} catch (IOException ex) {
+			System.out.println("Can't write file");
+		}
 	}
 }
