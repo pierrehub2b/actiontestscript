@@ -32,7 +32,7 @@ import com.naturalness.Ranking;
 import org.xml.sax.SAXException;
 
 import com.ats.generator.ATS;
-import com.ats.tools.XmlReport;
+
 
 public class ProcessResults {
 	final int DEPTH = 5;
@@ -71,7 +71,7 @@ public class ProcessResults {
 			Files.find(
 				reportsFolder.toPath(), 
 				99999, 
-				(p, f) -> f.isRegularFile() && XmlReport.REPORT_FILE.equals(p.toFile().getName())
+				(p, f) -> f.isRegularFile()
 			).forEach(p -> xmlReports.add(p.toFile()));
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -80,38 +80,32 @@ public class ProcessResults {
 		//-----------------------------------------------------------------------------------------------------------------
 		// List of xml reports files is populated
 		//-----------------------------------------------------------------------------------------------------------------
-		
+
+		System.out.println("files: "+xmlReports.size());
 		for (File xml : xmlReports) {
 			final String testName = xml.getParentFile().getName().replaceAll("\\_xml$", "");
-			
 			//-----------------------------------------------------------------------------------------------------------------
 			// now we have the name of the executed test and the xml report of the test		
 			//-----------------------------------------------------------------------------------------------------------------
 			
 			try {
 				analyzer.recordSequenceFromLogFile(xml);
-				System.out.println("Xml report -> " + testName + " learnt ");
 			} catch (ParserConfigurationException | SAXException | IOException e) {
 				e.printStackTrace();
 			}
 		}
 
-		NaturalnessModel<String> model = analyzer.learn();
-		int modelSize = model.size();
-		System.out.println(modelSize+" ngrams have been extracted");
+		String csvGlobal = analyzer.globalAnalysis().toCSV();
+		System.out.println(csvGlobal);
 
-		int modelOccurence = model.occurence();
-		System.out.println(modelOccurence+" occurences have been extracted");
+		String csvRanking = analyzer.rankAnalysis().toCSV();
+		System.out.println(csvRanking);
 
-		double redundancyRatio = (double) modelOccurence / modelSize;
-		System.out.println("The redundancy ratio is : "+redundancyRatio);
+		String csvSequence = analyzer.sequenceAnalysis().toCSV();
+		System.out.println(csvSequence);
 
-		System.out.println("Ranking");
-		List<Ranking> rankingList = analyzer.rank();
-		for (Ranking rank : analyzer.rank()) {
-			String name = analyzer.getSequenceName(rank.getSequence());
-			double crossEntropy = rank.getCrossEntropy();
-			System.out.println("Test "+name+" has "+crossEntropy+" entropy");
-		}
+
+		reportsFolder.createNewFile();
+
 	}
 }

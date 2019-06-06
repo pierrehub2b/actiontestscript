@@ -69,17 +69,29 @@ public class Analyzer {
         return testSequenceMap.get(sequence);
     }
 
-    public List<Ranking> rank() {
+    public RankAnalysisResult rankAnalysis() {
         SequenceSuite<String> sequenceList = new SequenceSuite(new ArrayList<>(testSequenceMap.keySet()));
-        return sequenceList.rank();
+        return new RankAnalysisResult(sequenceList.rank(), testSequenceMap);
     }
 
-    public NaturalnessModel<String> learn() {
+    public SequenceAnalysis sequenceAnalysis() {
+        Map<Sequence<String>, NaturalnessModel<String>> modelMap = new HashMap<>();
+
+        for (Sequence<String> sequence : testSequenceMap.keySet()) {
+            NaturalnessModel<String> model = new NaturalnessModel<>(depth, probaOfUnknown);
+            model.learn(sequence);
+            modelMap.put(sequence, model);
+        }
+
+        return new SequenceAnalysis(modelMap, testSequenceMap);
+    }
+
+    public GlobalAnalysisResult globalAnalysis() {
         NaturalnessModel<String> model = new NaturalnessModel<>(depth, probaOfUnknown);
         for (Sequence<String> sequence : testSequenceMap.keySet()) {
             model.learn(sequence);
         }
-        return model;
+        return new GlobalAnalysisResult(model);
     }
 
     private String hashActionElement(Element actionElement) {
