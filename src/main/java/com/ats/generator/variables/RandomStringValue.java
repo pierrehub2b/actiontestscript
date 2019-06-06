@@ -22,6 +22,8 @@ package com.ats.generator.variables;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.ats.tools.Utils;
+
 public class RandomStringValue extends BaseValue {
 
 	public static final Pattern RND_PATTERN = Pattern.compile("\\$rndstring\\s*?\\((\\d+),?(\\w{0,3}?[^\\)]*)?\\)", Pattern.CASE_INSENSITIVE);
@@ -37,10 +39,6 @@ public class RandomStringValue extends BaseValue {
 	}
 
 	public int getValue() {
-		try {
-			return Integer.parseInt(value);
-		}catch(NumberFormatException e) {}
-		
-		return 10;
+		return Utils.string2Int(value, 10);
 	}
 }

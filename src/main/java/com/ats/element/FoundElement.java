@@ -38,8 +38,6 @@ public class FoundElement{
 	public final static String MOBILE = "mobile";
 	public final static String API = "api";
 		
-	public static final String IMAGE_TAG = "@IMAGE";
-
 	private String id;
 
 	private Double x = 0.0;
@@ -169,16 +167,21 @@ public class FoundElement{
 		}
 	}
 
-	public FoundElement(Rectangle rect) {
-		this.tag = FoundElement.IMAGE_TAG;
+	public FoundElement(TestElement parent, Rectangle rect) {
+		this.tag = SearchedElement.IMAGE;
 		this.width = rect.getWidth();
 		this.height = rect.getHeight();
-
-		this.screenX = rect.getX();
-		this.screenY = rect.getY();
-
-		this.x = this.screenX;
-		this.y = this.screenY;
+		
+		if(parent != null) {
+			this.x = rect.getX() + parent.getFoundElement().getX();
+			this.y = rect.getY() + parent.getFoundElement().getY();
+		}else {
+			this.x = rect.getX();
+			this.y = rect.getY();
+		}
+		
+		this.screenX = this.x;
+		this.screenY = this.y;
 	}
 
 	public boolean isDesktop() {

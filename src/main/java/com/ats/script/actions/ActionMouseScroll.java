@@ -26,6 +26,7 @@ import com.ats.executor.ActionTestScript;
 import com.ats.generator.objects.mouse.MouseScroll;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
+import com.ats.tools.Utils;
 
 public class ActionMouseScroll extends ActionMouse {
 
@@ -39,10 +40,7 @@ public class ActionMouseScroll extends ActionMouse {
 
 	public ActionMouseScroll(ScriptLoader script, String value, boolean stop, ArrayList<String> options, ArrayList<String> elementArray) {
 		super(script, stop, options, elementArray);
-		
-		try{
-			setValue(Integer.parseInt(value));
-		}catch (NumberFormatException e) {}
+		setValue(Utils.string2Int(value));
 	}
 
 	public ActionMouseScroll(Script script, boolean stop, int maxTry, SearchedElement element, MouseScroll mouse) {

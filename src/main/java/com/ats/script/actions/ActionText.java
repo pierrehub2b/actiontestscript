@@ -29,6 +29,7 @@ import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
+import com.ats.tools.Utils;
 
 public class ActionText extends ActionExecuteElement {
 
@@ -48,12 +49,10 @@ public class ActionText extends ActionExecuteElement {
 		Iterator<String> itr = options.iterator();
 		while (itr.hasNext())
 		{
-			String data = itr.next();
-			Matcher matcher = INSERT_PATTERN.matcher(data);
+			final String data = itr.next();
+			final Matcher matcher = INSERT_PATTERN.matcher(data);
 			if(matcher.find()){
-				try {
-					setInsert(Integer.parseInt(matcher.group(1)));
-				}catch(NumberFormatException e){}
+				setInsert(Utils.string2Int(matcher.group(1), -1));
 				break;
 			}
 		}

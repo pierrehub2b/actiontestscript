@@ -63,6 +63,7 @@ import com.ats.script.ScriptHeader;
 import com.ats.script.actions.Action;
 import com.ats.script.actions.ActionExecute;
 import com.ats.script.actions.ActionExecuteElement;
+import com.ats.tools.Utils;
 import com.ats.tools.logger.ExecutionLogger;
 import com.ats.tools.logger.MessageCode;
 
@@ -137,12 +138,8 @@ public class ActionTestScript extends Script implements ITest{
 			// check report output specified
 			//-----------------------------------------------------------
 
-			int visualQuality = 0;
-			try {
-				visualQuality = Integer.parseInt(getEnvironmentValue("visual.report", "0"));
-			}catch(NumberFormatException e) {};
-
-			boolean xml = "true".equals(getEnvironmentValue("xml.report", "").toLowerCase());
+			final int visualQuality = Utils.string2Int(getEnvironmentValue("visual.report", "0"));
+			final boolean xml = "true".equals(getEnvironmentValue("xml.report", "").toLowerCase());
 
 			if(visualQuality > 0 || xml) {
 				

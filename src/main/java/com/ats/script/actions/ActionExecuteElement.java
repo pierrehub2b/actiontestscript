@@ -38,6 +38,7 @@ import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
 import com.ats.script.Script;
 import com.ats.tools.Operators;
+import com.ats.tools.Utils;
 import com.ats.tools.logger.MessageCode;
 
 public class ActionExecuteElement extends ActionExecute {
@@ -65,9 +66,7 @@ public class ActionExecuteElement extends ActionExecute {
 		{
 			Matcher matcher = MAX_TRY_PATTERN.matcher(itr.next());
 			if(matcher.find()){
-				try {
-					setMaxTry(Integer.parseInt(matcher.group(1)));
-				}catch(NumberFormatException e){}
+				setMaxTry(Utils.string2Int(matcher.group(1)));
 				itr.remove();
 			}
 		}

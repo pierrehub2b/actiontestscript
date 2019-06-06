@@ -73,20 +73,19 @@ public class ActionCallscript extends Action {
 
 		if(parameters != null && parameters.length > 0) {
 
-			String firstParam = parameters[0];
+			final String firstParam = parameters[0];
 			if(firstParam.startsWith(ASSETS_PROTOCOLE) || firstParam.startsWith(FILE_PROTOCOLE) || firstParam.startsWith(HTTP_PROTOCOLE) || firstParam.startsWith(HTTPS_PROTOCOLE)) {
 				setCsvFilePath(firstParam);
 			}else {
-				ArrayList<CalculatedValue> paramsValues = new ArrayList<CalculatedValue>();
+				
+				final ArrayList<CalculatedValue> paramsValues = new ArrayList<CalculatedValue>();
 				for(String param : parameters){
 
 					param = param.replaceAll("\n", ",");
 
 					Matcher match = LOOP_REGEXP.matcher(param);
 					if(match.find()){
-						try{
-							this.loop = Integer.parseInt(match.group(1));
-						}catch (NumberFormatException e){}
+						this.loop = Utils.string2Int(match.group(1), 1);
 					}else {
 						paramsValues.add(new CalculatedValue(script, param.trim()));
 					}
@@ -96,7 +95,7 @@ public class ActionCallscript extends Action {
 		}
 
 		if(returnValue != null && returnValue.length > 0 && this.loop == 1){
-			ArrayList<Variable> variableValues = new ArrayList<Variable>();
+			final ArrayList<Variable> variableValues = new ArrayList<Variable>();
 			for (String varName : returnValue ){
 				variableValues.add(script.getVariable(varName.trim(), true));
 			}

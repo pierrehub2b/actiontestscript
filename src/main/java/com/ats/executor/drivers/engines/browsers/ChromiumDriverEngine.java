@@ -17,6 +17,7 @@ public class ChromiumDriverEngine extends WebDriverEngine {
 		super(channel, name, driverProcess, windowsDriver, props, 100);
 
 		ChromeOptions options = new ChromeOptions();
+		options.addArguments("--no-sandbox");
 		options.addArguments("--no-default-browser-check");
 		options.addArguments("--test-type");
 		options.addArguments("--allow-file-access-from-files");
@@ -24,11 +25,14 @@ public class ChromiumDriverEngine extends WebDriverEngine {
 		options.addArguments("--allow-file-access-from-files");
 		options.addArguments("--allow-cross-origin-auth-prompt");
 		options.addArguments("--allow-file-access");
+		options.addArguments("--disable-dev-shm-usage");
+		options.addArguments("--disable-extensions");
 		options.addArguments("--disable-infobars");
 		options.addArguments("--disable-notifications");
 		options.addArguments("--disable-web-security");
+		options.addArguments("--disable-dev-shm-usage");
 		options.addArguments("--user-data-dir=" + Utils.createDriverFolder(DriverManager.CHROMIUM_BROWSER));
-		
+				
 		if(lang != null) {
 			options.addArguments("--lang=" + lang);
 		}

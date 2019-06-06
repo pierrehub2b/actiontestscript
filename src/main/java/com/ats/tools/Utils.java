@@ -25,6 +25,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.HttpURLConnection;
@@ -66,10 +67,14 @@ public class Utils {
 	}
 
 	public static int string2Int(String value){
+		return string2Int(value, 0);
+	}
+	
+	public static int string2Int(String value, int defaultValue){
 		try {
 			return Integer.parseInt(value);
 		} catch (NumberFormatException e) {
-			return 0;
+			return defaultValue;
 		}
 	}
 	
@@ -297,6 +302,28 @@ public class Utils {
 		reader.close();
 
 		return result;
+	}
+	
+	public static byte[] loadImage(URL url) {
+		
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
+        
+        try (InputStream inputStream = url.openStream()) {
+            
+        	int n = 0;
+            byte [] buffer = new byte[ 1024 ];
+            
+            while (-1 != (n = inputStream.read(buffer))) {
+                output.write(buffer, 0, n);
+            }
+            
+            return output.toByteArray();
+            
+        } catch (IOException e) {
+
+		}
+
+		return null;
 	}
 
 	//-------------------------------------------------------------------------------------------------------------------------------------------

@@ -27,15 +27,15 @@ public class TemplateMatchingSimple {
 	public TemplateMatchingSimple(final BufferedImage image) {
 		this(getVector(image));
 	}
-	
+
 	public TemplateMatchingSimple(final byte[] image) {
 		this(getVector(getBufferedImage(image)));
 	}
-	
-	public void setErrorMax(int value) {
+
+	public void setError(int value) {
 		this.maxPixelsError = value;
 	}
-	
+
 	public void setPercentError(double value) {
 		this.maxPixelsError = getMaxError(targetWidth, targetWidth, value);
 	}
@@ -51,14 +51,14 @@ public class TemplateMatchingSimple {
 	public ArrayList<Rectangle> findOccurrences(final BufferedImage mainImage) {
 		return getLocations(mainImage, target, targetWidth, targetHeight, maxPixelsError);
 	}
-	
+
 	//------------------------------------------------------------------------------------------------------------------------
 	//------------------------------------------------------------------------------------------------------------------------
 
 	private static int getMaxError(int width, int height, double percent) {
 		return (int) (width * height * percent / 100);
 	}
-	
+
 	private static BufferedImage getBufferedImage(final byte[] image) {
 		final InputStream in = new ByteArrayInputStream(image);
 		try {
@@ -67,7 +67,7 @@ public class TemplateMatchingSimple {
 			return null;
 		}
 	}
-	
+
 	public static ArrayList<Rectangle> getLocations(final byte[] mainImageInBytes, final BufferedImage subImage, int maxError) {
 		final InputStream in = new ByteArrayInputStream(mainImageInBytes);
 		try {
@@ -96,7 +96,7 @@ public class TemplateMatchingSimple {
 		final int[][] mainVector = getVector(mainImage);
 
 		final ArrayList<Rectangle> result = new ArrayList<Rectangle>();
-		
+
 		Rectangle found = findSubImage(mainVector, raster, xOffsetMax, yOffsetMax, subVector, subWidth, subHeight, maxError);
 
 		while(found != null) {
@@ -139,7 +139,13 @@ public class TemplateMatchingSimple {
 	private static boolean subImageIsAtOffset(final int[][] subImage, final int[][] image, final int xOffset, final int yOffset, final int width, final int height, int maxError) {
 		for (int x = 0; x < width; x++){
 			for (int y = 0; y < height; y++){
-				if (subImage[x][y] != image[xOffset + x][yOffset + y]) {
+				
+				//if (pixelDiff(subImage[x][y], image[xOffset + x][yOffset + y]) > maxError) {
+				//	return false;
+				//}
+				
+				//if (subImage[x][y] != image[xOffset + x][yOffset + y]) {
+				if (pixelDiff(subImage[x][y], image[xOffset + x][yOffset + y]) > 10) {
 					if(maxError > 0) {
 						maxError--;
 					}else {
@@ -149,5 +155,17 @@ public class TemplateMatchingSimple {
 			}
 		}
 		return true;
+	}
+
+	private static int pixelDiff(int rgb1, int rgb2) {
+		int r1 = (rgb1 >> 16) & 0xff;
+		int g1 = (rgb1 >>  8) & 0xff;
+		int b1 =  rgb1        & 0xff;
+		int r2 = (rgb2 >> 16) & 0xff;
+		int g2 = (rgb2 >>  8) & 0xff;
+		int b2 =  rgb2        & 0xff;
+		
+		return Math.abs(r1 - r2 + g1 - g2 + b1 - b2);
+		//return Math.abs(r1 - r2) + Math.abs(g1 - g2) + Math.abs(b1 - b2);
 	}
 }

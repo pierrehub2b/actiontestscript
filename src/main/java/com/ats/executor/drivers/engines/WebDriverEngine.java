@@ -980,7 +980,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		channel.toFront();
 		final byte[] screenShot = getDesktopDriver().getScreenshotByte(outterBound.getX(), outterBound.getY(), outterBound.getWidth(), outterBound.getHeight());
 		
-		return template.findOccurrences(screenShot).parallelStream().map(r -> new FoundElement(r)).collect(Collectors.toCollection(ArrayList::new));
+		return template.findOccurrences(screenShot).parallelStream().map(r -> new FoundElement(parent, r)).collect(Collectors.toCollection(ArrayList::new));
 	}
 
 	@Override

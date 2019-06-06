@@ -28,6 +28,7 @@ import com.ats.executor.ActionTestScript;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
 import com.ats.tools.Operators;
+import com.ats.tools.Utils;
 
 public class ActionAssertCount extends ActionExecuteElement {
 
@@ -46,9 +47,7 @@ public class ActionAssertCount extends ActionExecuteElement {
 		Matcher m = COUNT_PATTERN.matcher(data);
 		if(m.matches()) {
 			
-			try {
-				setValue(Integer.parseInt(m.group(1).trim())); 
-			}catch(NumberFormatException e) {}
+			setValue(Utils.string2Int(m.group(1).trim(), 1));
 
 			if(m.groupCount() > 1) {
 				switch (m.group(2).trim()) {

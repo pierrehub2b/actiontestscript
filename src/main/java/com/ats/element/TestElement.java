@@ -145,23 +145,23 @@ public class TestElement{
 		if(channel != null){
 
 			searchedTag = searchedElement.getTag();
-			criterias = searchedElement.getTag();
+			criterias = searchedTag;
 
 			searchDuration = System.currentTimeMillis();
 
 			if(parent == null || (parent != null && parent.getCount() > 0)){
 
-				if(FoundElement.IMAGE_TAG.equals(searchedTag)) {
+				if(searchedElement.isImage()) {
 	
-					final TemplateMatchingSimple template = new TemplateMatchingSimple(searchedElement.getImage());
+					final TemplateMatchingSimple template = new TemplateMatchingSimple(searchedElement.getImage(channel));
 					
 					for (CalculatedProperty property : searchedElement.getCriterias()){
 						if("error".equals(property.getName())){
 							final String value = property.getValue().getCalculated();
 							if(value.endsWith("%")) {
 								template.setPercentError(Utils.string2Double(value.replace("%", "").trim()));
-							}else {
-								template.setErrorMax(Utils.string2Int(value.trim()));
+							}else{
+								template.setError(Utils.string2Int(value.trim()));
 							}
 							break;
 						}
@@ -170,7 +170,7 @@ public class TestElement{
 					foundElements = engine.findElements(parent, template);
 					
 				}else {
-					ArrayList<String> attributes = new ArrayList<String>();
+					final ArrayList<String> attributes = new ArrayList<String>();
 					Predicate<AtsBaseElement> fullPredicate = Objects::nonNull;
 
 					for (CalculatedProperty property : searchedElement.getCriterias()){
@@ -393,14 +393,11 @@ public class TestElement{
 	public void select(ActionStatus status, CalculatedProperty selectProperty, boolean select, boolean ctrl) {
 		if(isValidated()){
 
-			Select selectElement = new Select(getWebElement());
+			final Select selectElement = new Select(getWebElement());
 
 			if(ActionSelect.SELECT_INDEX.equals(selectProperty.getName())){
 
-				int idx = 0;
-				try {
-					idx = Integer.parseInt(selectProperty.getValue().getCalculated());
-				}catch(NumberFormatException e) {}
+				final int idx = Utils.string2Int(selectProperty.getValue().getCalculated());
 
 				if(select) {
 					selectElement.selectByIndex(idx);

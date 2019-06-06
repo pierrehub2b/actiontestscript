@@ -19,6 +19,8 @@ under the License.
 
 package com.ats.generator.objects;
 
+import com.ats.tools.Utils;
+
 public class MouseDirectionData {
 
 	private Cartesian type;
@@ -33,9 +35,7 @@ public class MouseDirectionData {
 	
 	public MouseDirectionData(String name, String value) {
 		this.setName(name);
-		try{
-			this.setValue(Integer.parseInt(value));
-		}catch (NumberFormatException e){}
+		this.setValue(Utils.string2Int(value));
 	}
 	
 	public MouseDirectionData(Cartesian type, int value) {

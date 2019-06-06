@@ -42,6 +42,7 @@ import org.xml.sax.SAXException;
 
 import com.ats.executor.TestBound;
 import com.ats.generator.ATS;
+import com.ats.tools.Utils;
 
 public class AtsManager {
 
@@ -240,30 +241,22 @@ public class AtsManager {
 					if(nl0 != null && nl0.getLength() > 0) {
 						NodeList timeOut = ((Element)nl0.item(0)).getElementsByTagName("script");
 						if(timeOut != null && timeOut.getLength() > 0) {
-							try {
-								scriptTimeOut = Integer.parseInt(timeOut.item(0).getChildNodes().item(0).getNodeValue());
-							}catch(NumberFormatException e){}
+							scriptTimeOut = Utils.string2Int(timeOut.item(0).getChildNodes().item(0).getNodeValue(), SCRIPT_TIMEOUT);
 						}
 
 						timeOut = ((Element)nl0.item(0)).getElementsByTagName("pageLoad");
 						if(timeOut != null && timeOut.getLength() > 0) {
-							try {
-								pageloadTimeOut = Integer.parseInt(timeOut.item(0).getChildNodes().item(0).getNodeValue());
-							}catch(NumberFormatException e){}
+							pageloadTimeOut = Utils.string2Int(timeOut.item(0).getChildNodes().item(0).getNodeValue(), PAGELOAD_TIMEOUT);
 						}
 
 						timeOut = ((Element)nl0.item(0)).getElementsByTagName("watchDog");
 						if(timeOut != null && timeOut.getLength() > 0) {
-							try {
-								watchDogTimeOut = Integer.parseInt(timeOut.item(0).getChildNodes().item(0).getNodeValue());
-							}catch(NumberFormatException e){}
+							watchDogTimeOut = Utils.string2Int(timeOut.item(0).getChildNodes().item(0).getNodeValue(), WATCHDOG_TIMEOUT); 
 						}
 						
 						timeOut = ((Element)nl0.item(0)).getElementsByTagName("webService");
 						if(timeOut != null && timeOut.getLength() > 0) {
-							try {
-								webServiceTimeOut = Integer.parseInt(timeOut.item(0).getChildNodes().item(0).getNodeValue());
-							}catch(NumberFormatException e){}
+							webServiceTimeOut = Utils.string2Int(timeOut.item(0).getChildNodes().item(0).getNodeValue(), WEBSERVICE_TIMEOUT);
 						}
 					}
 
@@ -271,16 +264,12 @@ public class AtsManager {
 					if(nl0 != null && nl0.getLength() > 0) {
 						NodeList maxTryNode = ((Element)nl0.item(0)).getElementsByTagName("searchElement");
 						if(maxTryNode != null && maxTryNode.getLength() > 0) {
-							try {
-								maxTrySearch = Integer.parseInt(maxTryNode.item(0).getChildNodes().item(0).getNodeValue());
-							}catch(NumberFormatException e){}
+							maxTrySearch = Utils.string2Int(maxTryNode.item(0).getChildNodes().item(0).getNodeValue(), MAX_TRY_SEARCH);
 						}
 
 						maxTryNode = ((Element)nl0.item(0)).getElementsByTagName("getProperty");
 						if(maxTryNode != null && maxTryNode.getLength() > 0) {
-							try {
-								maxTryProperty = Integer.parseInt(maxTryNode.item(0).getChildNodes().item(0).getNodeValue());
-							}catch(NumberFormatException e){}
+							maxTryProperty = Utils.string2Int(maxTryNode.item(0).getChildNodes().item(0).getNodeValue(), MAX_TRY_PROPERTY);
 						}
 					}
 
@@ -311,9 +300,7 @@ public class AtsManager {
 
 								data = ((Element)nl0.item(0)).getElementsByTagName("port");
 								if(data != null && data.getLength() > 0) {
-									try {
-										port = Integer.parseInt(data.item(0).getChildNodes().item(0).getNodeValue());
-									}catch(NumberFormatException e){}
+									port = Utils.string2Int(data.item(0).getChildNodes().item(0).getNodeValue());
 								}
 
 								if(host != null && port > 0) {
@@ -338,7 +325,6 @@ public class AtsManager {
 											host = nl.item(0).getChildNodes().item(0).getNodeValue();
 										}
 									}
-
 
 									String port = null;
 									nl = recorderElement.getElementsByTagName("port");
@@ -379,21 +365,16 @@ public class AtsManager {
 											}
 										}
 
-										String port = null;
+										int port = 0;
 										nl = designElement.getElementsByTagName("port");
 										if(nl != null && nl.getLength() > 0) {
 											if(nl.item(0).getChildNodes().getLength() > 0) {
-												port = nl.item(0).getChildNodes().item(0).getNodeValue();
+												port = Utils.string2Int(nl.item(0).getChildNodes().item(0).getNodeValue());
 											}
 										}
 
-										if(api != null && port != null) {
-											try {
-												final int portValue = Integer.parseInt(port);
-												if(portValue > 0) {
-													neoloadDesignApi = "http://" + neoloadProxy.getHost() + ":" + portValue + api;
-												}
-											}catch (NumberFormatException e) {}
+										if(api != null && port > 0) {
+											neoloadDesignApi = "http://" + neoloadProxy.getHost() + ":" + port + api;
 										}
 									}
 								}
@@ -540,17 +521,7 @@ public class AtsManager {
 	}
 
 	private void addApplicationProperties(int type, String name, String driver, String path, String wait, String check, String lang) {
-		int waitValue = -1;
-		try {
-			waitValue = Integer.parseInt(wait);
-		}catch(NumberFormatException e){}
-
-		int checkProperty = -1;
-		try {
-			checkProperty = Integer.parseInt(check);
-		}catch(NumberFormatException e){}
-
-		applicationsList.add(new ApplicationProperties(type, name, driver, path, waitValue, checkProperty, lang));
+		applicationsList.add(new ApplicationProperties(type, name, driver, path, Utils.string2Int(wait, -1), Utils.string2Int(check, -1), lang));
 	}
 
 	//------------------------------------------------------------------------------------------------------------------

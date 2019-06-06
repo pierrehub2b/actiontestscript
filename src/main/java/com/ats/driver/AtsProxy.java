@@ -23,6 +23,8 @@ import org.apache.http.HttpHost;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.Proxy.ProxyType;
 
+import com.ats.tools.Utils;
+
 public class AtsProxy {
 
 	public final static String AUTO = "auto";
@@ -41,12 +43,7 @@ public class AtsProxy {
 	public AtsProxy(String host, String port) {
 		this.type = MANUAL;
 		this.host = host;
-		
-		try {
-			this.port = Integer.parseInt(port);
-		}catch(NumberFormatException e) {
-			this.port = 8080;
-		}
+		this.port = Utils.string2Int(port, 8080);
 	}
 
 	public AtsProxy(String type, String host, int port) {

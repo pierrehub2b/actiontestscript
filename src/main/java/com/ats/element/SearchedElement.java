@@ -15,44 +15,48 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.element;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.StringJoiner;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import com.ats.executor.ActionTestScript;
+import com.ats.executor.channels.Channel;
 import com.ats.generator.variables.CalculatedProperty;
+import com.ats.script.ProjectData;
 import com.ats.script.Script;
+import com.ats.tools.Utils;
 
 public class SearchedElement {
 
 	public static final String WILD_CHAR = "*";
-	
+
 	private static final String DIALOG = "DIALOG";
 	private static final String SYSCOMP = "SYSCOMP";
 	private static final String SYSBUTTON = "SYSBUTTON";
-	
-	private static final Pattern OBJECT_INDEX_PATTERN = Pattern.compile("\\s*?index\\((\\d+)\\)\\s*?");
+	public static final String IMAGE = "@IMAGE";
 
 	private String tag = WILD_CHAR;
 	private SearchedElement parent;
+	
 	private int index = 0;
 	private List<CalculatedProperty> criterias;
-	private byte[] image;
 
 	public SearchedElement() {} // default constructor
 
 	public SearchedElement(Script script, ArrayList<String> elements) {
-
+		
 		final String value = elements.remove(0);
 		final Matcher objectMatcher = Script.OBJECT_PATTERN.matcher(value);
-		
+
 		setCriterias(new ArrayList<CalculatedProperty>());
 
 		if (objectMatcher.find()) {
@@ -62,17 +66,17 @@ public class SearchedElement {
 				setTag(objectMatcher.group(1).trim());
 
 				if(objectMatcher.groupCount() >= 2){
-					Arrays.stream(objectMatcher.group(2).split(",")).forEach(s -> addCriteria(script, s));
+					Arrays.stream(objectMatcher.group(2).split(",")).parallel().map(String::trim).forEach(s -> addCriteria(script, s));
 				}
-				
+
 			}else{
 				setTag(value.trim());
 			}
-			
+
 		}else if(value != null){
 			setTag(value.trim());
 		}
-				
+
 		if(elements.size() > 0){
 			this.setParent(new SearchedElement(script, elements));
 		}
@@ -81,34 +85,79 @@ public class SearchedElement {
 	public SearchedElement(int index, String tag, CalculatedProperty[] properties) {
 		this(null, index, tag, properties);
 	}
-	
+
 	public SearchedElement(SearchedElement parent, int index, String tag, CalculatedProperty[] properties) {
 		setParent(parent);
 		setIndex(index);
 		setTag(tag);
 		setCriterias(Arrays.asList(properties));
 	}
-	
+
 	public void dispose() {
 		if(parent != null) {
 			parent.dispose();
 		}
-		
+
 		if(criterias != null) {
 			while(criterias.size() > 0) {
 				criterias.remove(0).dispose();
 			}
 		}
 	}
+
+	private void addCriteria(Script script, String data){
+		if(data.startsWith("index") || data.startsWith("@index")) {
+			this.index = Utils.string2Int(data.replaceAll("[^\\d]", ""));
+		}else{
+			this.criterias.add(new CalculatedProperty(script, data));
+		}
+	}
 	
+	public byte[] getImage(Channel channel) {
+		
+		final CalculatedProperty prop = criterias.stream().filter(c -> "source".equals(c.getName())).findFirst().orElse(null);
+		if(prop == null) {
+			channel.sendLog(0, "imagepath ->", "prop null !!");
+		}else {
+			final String imagePath = prop.getValue().getCalculated();
+			channel.sendLog(0, "imagepath ->", imagePath);
+
+			URL imageUrl = null;
+			if(imagePath.startsWith("http://") || imagePath.startsWith("https://") || imagePath.startsWith("file://")) {
+				try {
+					imageUrl = new URL(imagePath);
+				} catch (MalformedURLException e) {}
+			}else {
+				final String relativePath = ProjectData.ASSETS_FOLDER + File.separator + ProjectData.RESOURCES_FOLDER + File.separator + ProjectData.IMAGES_FOLDER + File.separator + imagePath;
+				imageUrl = getClass().getClassLoader().getResource(relativePath);
+				channel.sendLog(0, "image ->", relativePath);
+				channel.sendLog(0, "image ->", imageUrl);
+			}
+			
+			if(imageUrl != null) {
+				return Utils.loadImage(imageUrl);
+			}
+		}
+		
+		return null;
+	}
+
+	//----------------------------------------------------------------------------------------------------------------
+	// types
+	//----------------------------------------------------------------------------------------------------------------
+
+	public boolean isImage() {
+		return IMAGE.equals(tag.toUpperCase());
+	}
+
 	public boolean isDialog() {
 		return DIALOG.equals(tag.toUpperCase());
 	}
-	
+
 	public boolean isSysButton() {
 		return SYSBUTTON.equals(tag.toUpperCase());
 	}
-	
+
 	public boolean isSysComp() {
 		if(parent != null) {
 			return parent.isSysComp();
@@ -116,22 +165,15 @@ public class SearchedElement {
 		return SYSCOMP.equals(tag.toUpperCase());
 	}
 
-	private void addCriteria(Script script, String data){
-		Matcher match = OBJECT_INDEX_PATTERN.matcher(data);
-		if(match.find()){
-			try{
-				this.index = Integer.parseInt(match.group(1));
-			}catch(NumberFormatException ex){}
-		}else{
-			this.criterias.add(new CalculatedProperty(script, data));
-		}
-	}
+	//----------------------------------------------------------------------------------------------------------------
+	//
+	//----------------------------------------------------------------------------------------------------------------
 
 	public String getJavaCode() {
 
 		StringBuilder codeBuilder = new StringBuilder(ActionTestScript.JAVA_ELEMENT_FUNCTION_NAME);
 		codeBuilder.append("(");
-		
+
 		if(parent != null){
 			codeBuilder.append(parent.getJavaCode());
 			codeBuilder.append(", ");
@@ -140,7 +182,7 @@ public class SearchedElement {
 		codeBuilder.append(index);
 		codeBuilder.append(", \"");
 		codeBuilder.append(getTag());
-		
+
 		if(criterias != null && criterias.size() > 0){
 
 			codeBuilder.append("\", ");
@@ -149,13 +191,13 @@ public class SearchedElement {
 			for (CalculatedProperty criteria : criterias){
 				joiner.add(criteria.getJavaCode());
 			}
-			
+
 			codeBuilder.append(joiner.toString());
 
 		}else{
 			codeBuilder.append("\"");
 		}
-		
+
 		codeBuilder.append(")");
 
 		return codeBuilder.toString();
@@ -172,7 +214,7 @@ public class SearchedElement {
 	public void setParent(SearchedElement value) {
 		this.parent = value;
 	}
-	
+
 	public String getTag() {
 		return tag;
 	}
@@ -195,13 +237,5 @@ public class SearchedElement {
 
 	public void setCriterias(List<CalculatedProperty> value) {
 		this.criterias = value;
-	}
-		
-	public byte[] getImage() {
-		return image;
-	}
-
-	public void setImage(byte[] image) {
-		this.image = image;
 	}
 }

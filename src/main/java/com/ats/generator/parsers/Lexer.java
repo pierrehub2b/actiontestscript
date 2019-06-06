@@ -62,6 +62,7 @@ import com.ats.script.actions.neoload.ActionNeoloadContainer;
 import com.ats.script.actions.neoload.ActionNeoloadRecord;
 import com.ats.script.actions.neoload.ActionNeoloadStart;
 import com.ats.script.actions.neoload.ActionNeoloadStop;
+import com.ats.tools.Utils;
 
 public class Lexer {
 
@@ -267,12 +268,7 @@ public class Lexer {
 					// Window action
 					//-----------------------
 
-					int num = 0;
-					try {
-						num = Integer.parseInt(dataOne);
-					}catch(NumberFormatException e) {}
-
-					script.addAction(new ActionWindowSwitch(script, num), disabled);
+					script.addAction(new ActionWindowSwitch(script, Utils.string2Int(dataOne)), disabled);
 
 					if(ActionWindowState.SCRIPT_CLOSE_LABEL.equals(actionType)){
 						script.addAction(new ActionWindowState(script, ActionWindowState.CLOSE), disabled);
