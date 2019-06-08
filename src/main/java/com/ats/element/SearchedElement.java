@@ -29,7 +29,6 @@ import java.util.StringJoiner;
 import java.util.regex.Matcher;
 
 import com.ats.executor.ActionTestScript;
-import com.ats.executor.channels.Channel;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.ProjectData;
 import com.ats.script.Script;
@@ -42,18 +41,20 @@ public class SearchedElement {
 	private static final String DIALOG = "DIALOG";
 	private static final String SYSCOMP = "SYSCOMP";
 	private static final String SYSBUTTON = "SYSBUTTON";
-	public static final String IMAGE = "@IMAGE";
+	public static final String IMAGE_TAG = "@IMAGE";
 
 	private String tag = WILD_CHAR;
 	private SearchedElement parent;
-	
+
 	private int index = 0;
 	private List<CalculatedProperty> criterias;
+	
+	private byte[] image;
 
 	public SearchedElement() {} // default constructor
 
 	public SearchedElement(Script script, ArrayList<String> elements) {
-		
+
 		final String value = elements.remove(0);
 		final Matcher objectMatcher = Script.OBJECT_PATTERN.matcher(value);
 
@@ -112,42 +113,46 @@ public class SearchedElement {
 			this.criterias.add(new CalculatedProperty(script, data));
 		}
 	}
-	
-	public byte[] getImage(Channel channel) {
-		
-		final CalculatedProperty prop = criterias.stream().filter(c -> "source".equals(c.getName())).findFirst().orElse(null);
-		if(prop == null) {
-			channel.sendLog(0, "imagepath ->", "prop null !!");
-		}else {
-			final String imagePath = prop.getValue().getCalculated();
-			channel.sendLog(0, "imagepath ->", imagePath);
 
-			URL imageUrl = null;
-			if(imagePath.startsWith("http://") || imagePath.startsWith("https://") || imagePath.startsWith("file://")) {
-				try {
-					imageUrl = new URL(imagePath);
-				} catch (MalformedURLException e) {}
-			}else {
-				final String relativePath = ProjectData.ASSETS_FOLDER + File.separator + ProjectData.RESOURCES_FOLDER + File.separator + ProjectData.IMAGES_FOLDER + File.separator + imagePath;
-				imageUrl = getClass().getClassLoader().getResource(relativePath);
-				channel.sendLog(0, "image ->", relativePath);
-				channel.sendLog(0, "image ->", imageUrl);
-			}
-			
-			if(imageUrl != null) {
-				return Utils.loadImage(imageUrl);
+	//----------------------------------------------------------------------------------------------------------------
+	// image management
+	//----------------------------------------------------------------------------------------------------------------
+	
+	public void setImage(byte[] value) {
+		this.image = value;
+	}
+
+	public byte[] getImage() {
+		if(image == null) {
+			final CalculatedProperty prop = criterias.stream().filter(c -> "source".equals(c.getName())).findFirst().orElse(null);
+			if(prop != null) {
+
+				final String imagePath = prop.getValue().getCalculated();
+
+				URL imageUrl = null;
+				if(imagePath.startsWith("http://") || imagePath.startsWith("https://") || imagePath.startsWith("file://")) {
+					try {
+						imageUrl = new URL(imagePath);
+					} catch (MalformedURLException e) {}
+				}else {
+					final String relativePath = ProjectData.ASSETS_FOLDER + File.separator + ProjectData.RESOURCES_FOLDER + File.separator + ProjectData.IMAGES_FOLDER + File.separator + imagePath;
+					imageUrl = getClass().getClassLoader().getResource(relativePath);
+				}
+
+				if(imageUrl != null) {
+					image = Utils.loadImage(imageUrl);
+				}
 			}
 		}
-		
-		return null;
+		return image;
 	}
 
 	//----------------------------------------------------------------------------------------------------------------
 	// types
 	//----------------------------------------------------------------------------------------------------------------
 
-	public boolean isImage() {
-		return IMAGE.equals(tag.toUpperCase());
+	public boolean isImageSearch() {
+		return IMAGE_TAG.equals(tag.toUpperCase());
 	}
 
 	public boolean isDialog() {

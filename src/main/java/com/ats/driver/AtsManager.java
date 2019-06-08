@@ -64,6 +64,7 @@ public class AtsManager {
 
 	private static final int MAX_TRY_SEARCH = 15;
 	private static final int MAX_TRY_PROPERTY = 10;
+	private static final int MAX_TRY_WEBSERVICE = 1;
 
 	private static final int SCROLL_UNIT = 100;
 
@@ -89,6 +90,7 @@ public class AtsManager {
 
 	private int maxTrySearch = MAX_TRY_SEARCH;
 	private int maxTryProperty = MAX_TRY_PROPERTY;
+	private int maxTryWebservice = MAX_TRY_WEBSERVICE;
 
 	private AtsProxy proxy;
 	private AtsProxy neoloadProxy;
@@ -270,6 +272,14 @@ public class AtsManager {
 						maxTryNode = ((Element)nl0.item(0)).getElementsByTagName("getProperty");
 						if(maxTryNode != null && maxTryNode.getLength() > 0) {
 							maxTryProperty = Utils.string2Int(maxTryNode.item(0).getChildNodes().item(0).getNodeValue(), MAX_TRY_PROPERTY);
+						}
+						
+						maxTryNode = ((Element)nl0.item(0)).getElementsByTagName("webService");
+						if(maxTryNode != null && maxTryNode.getLength() > 0) {
+							maxTryWebservice = Utils.string2Int(maxTryNode.item(0).getChildNodes().item(0).getNodeValue(), MAX_TRY_WEBSERVICE);
+							if(maxTryWebservice < 1) {
+								maxTryWebservice = MAX_TRY_WEBSERVICE;
+							}
 						}
 					}
 
@@ -572,6 +582,10 @@ public class AtsManager {
 
 	public int getMaxTryProperty() {
 		return maxTryProperty;
+	}
+	
+	public int getMaxTryWebservice() {
+		return maxTryWebservice;
 	}
 
 	public int getScrollUnit() {

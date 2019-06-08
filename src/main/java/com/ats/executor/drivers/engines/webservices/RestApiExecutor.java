@@ -15,11 +15,12 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.executor.drivers.engines.webservices;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -47,10 +48,10 @@ public class RestApiExecutor extends ApiExecutor {
 	private HttpRequestBase request;
 	private CloseableHttpClient httpClient;
 
-	public RestApiExecutor(HttpHost proxy, int timeout, String authentication, String authenticationValue, String wsUrl) {
+	public RestApiExecutor(HttpHost proxy, int timeout, int maxTry, String authentication, String authenticationValue, String wsUrl) {
 
-		super(timeout, authentication, authenticationValue);
-		
+		super(timeout, maxTry, authentication, authenticationValue);
+
 		if(!wsUrl.endsWith("/")) {
 			wsUrl += "/";
 		}
@@ -60,14 +61,14 @@ public class RestApiExecutor extends ApiExecutor {
 				.setConnectTimeout(timeout)
 				.setConnectionRequestTimeout(timeout)
 				.setSocketTimeout(timeout);
-		
+
 		if(proxy != null) {
 			requestBuilder.setProxy(proxy);
 		}
 
 		httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestBuilder.build()).build();
 	}
-	
+
 	private String getContentType(String value) {
 		value = value.trim();
 		if((value.startsWith("[") && value.endsWith("]")) || (value.startsWith("{") && value.endsWith("}"))){
@@ -83,28 +84,28 @@ public class RestApiExecutor extends ApiExecutor {
 
 		super.execute(status, api);
 
-		String fullUri = uri.resolve(api.getMethod().getCalculated()).toString();
+		final String fullUri = uri.resolve(api.getMethod().getCalculated()).toString();
 		String parameters = "";
 		if(api.getData() != null) {
 			parameters = api.getData().getCalculated();
 		}
-		
+
 		final String apiType = api.getType().toUpperCase();
 		if(ActionApi.GET.equals(apiType) || ActionApi.DELETE.equals(apiType)) {
-			
+
 			if(parameters.length() > 0) {
 				parameters = "/" + URLEncoder.encode(parameters, StandardCharsets.UTF_8);
 			}
-			
+
 			if(ActionApi.GET.equals(apiType)) {
 				request = new HttpGet(fullUri + parameters);
 			}else {
 				request = new HttpDelete(fullUri + parameters);
 			}
-			
+
 		}else {
 			addHeader("Content-Type", getContentType(parameters));
-			
+
 			if(ActionApi.PATCH.equals(apiType)) {
 				request = new HttpPatch(fullUri);
 			}else if(ActionApi.PUT.equals(apiType)) {
@@ -117,8 +118,14 @@ public class RestApiExecutor extends ApiExecutor {
 
 		headerProperties.forEach((k,v) -> request.addHeader(k, v));
 
+		int max = maxTry;
+		while(!executeRequest(status) && max > 0) {
+			max--;
+		}
+	}
+
+	private boolean executeRequest(ActionStatus status) {
 		try {
-			
 			final HttpResponse response = httpClient.execute(request);
 			final int responseCode = response.getStatusLine().getStatusCode();
 			if(responseCode >= 200 && responseCode < 300) {
@@ -131,11 +138,13 @@ public class RestApiExecutor extends ApiExecutor {
 				status.setMessage("REST response error : (code " + responseCode + ") " + response.getStatusLine().getReasonPhrase());
 				status.setPassed(false);
 			}
-
+			return true;
+			
 		} catch (IOException e) {
 			status.setCode(ActionStatus.WEB_DRIVER_ERROR);
 			status.setMessage("Execute REST action error : " + e.getMessage());
 			status.setPassed(false);
 		}
+		return false;
 	}
 }

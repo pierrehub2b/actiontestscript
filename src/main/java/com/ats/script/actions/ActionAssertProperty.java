@@ -82,7 +82,7 @@ public class ActionAssertProperty extends ActionExecuteElement {
 
 			}else {
 					
-				String expectedResult = value.getExpectedResult();
+				final String expectedResult = value.getExpectedResult();
 				
 				if(value.checkProperty(attributeValue)) {
 		

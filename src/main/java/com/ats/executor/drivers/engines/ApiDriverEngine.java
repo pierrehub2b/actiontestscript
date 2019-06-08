@@ -20,12 +20,7 @@ under the License.
 package com.ats.executor.drivers.engines;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.function.Predicate;
 
@@ -71,6 +66,7 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		
 		super(channel, desktopDriver, path, props, 0, 60);
 		
+		final int maxTry = DriverManager.ATS.getMaxTryWebservice();
 		final int timeout = DriverManager.ATS.getWebServiceTimeOut() * 1000;
 		
 		HttpHost proxy = null;
@@ -86,15 +82,38 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			applicationPath = path;
 		}
 
+		final Builder configBuilder = RequestConfig.custom()
+				.setConnectTimeout(timeout)
+				.setConnectionRequestTimeout(timeout)
+				.setSocketTimeout(timeout);
+		
 		String wsContent = null;
-		File wsContentFile = null;
-
+		int max = maxTry;
+		while(wsContent == null && max > 0) {
+			wsContent = getWsContent(status, configBuilder);
+			max--;
+		}
+		
+		if(status.isPassed()) {
+			if(wsContent.endsWith("definitions>")) {
+				try {
+					executor = new SoapApiExecutor(proxy, timeout, maxTry, channel.getAuthentication(), channel.getAuthenticationValue(), wsContent, applicationPath);
+					channel.setApplicationData(API, ActionApi.SOAP, ((SoapApiExecutor)executor).getOperations());
+				} catch (SAXException | IOException | ParserConfigurationException e) {
+					status.setCode(ActionStatus.CHANNEL_START_ERROR);
+					status.setMessage(e.getMessage());
+					status.setPassed(false);
+				}
+			}else {
+				channel.setApplicationData(API, ActionApi.REST);
+				executor = new RestApiExecutor(proxy, timeout, maxTry, channel.getAuthentication(), channel.getAuthenticationValue(), applicationPath);
+			}
+		}
+	}
+	
+	private String getWsContent(ActionStatus status, Builder configBuilder) {
+		
 		try {
-
-			final Builder configBuilder = RequestConfig.custom()
-					.setConnectTimeout(timeout)
-					.setConnectionRequestTimeout(timeout)
-					.setSocketTimeout(timeout);
 
 			final CloseableHttpClient httpClient = HttpClientBuilder.create().setDefaultRequestConfig(configBuilder.build()).build();
 			final HttpResponse response = httpClient.execute(new HttpGet(applicationPath));
@@ -102,16 +121,12 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			if(response.getStatusLine().getStatusCode() >= 200 && response.getStatusLine().getStatusCode() < 300) {
 
 				final BufferedInputStream buff = new BufferedInputStream(response.getEntity().getContent());
-				wsContent = new String(ByteStreams.toByteArray(buff), Charsets.UTF_8).trim();
+				final String wsContent = new String(ByteStreams.toByteArray(buff), Charsets.UTF_8).trim();
 				buff.close();
+				
+				status.setPassed(true);
 
-				wsContentFile = File.createTempFile("atsWs_", ".txt");
-				wsContentFile.deleteOnExit();
-
-				final Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(wsContentFile), Charsets.UTF_8));
-				writer.write(wsContent);
-				writer.flush();
-				writer.close();
+				return wsContent;
 
 			}else {
 				status.setCode(ActionStatus.CHANNEL_START_ERROR);
@@ -121,29 +136,11 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		} catch (IOException e) {
 			status.setCode(ActionStatus.CHANNEL_START_ERROR);
-			status.setMessage(e.getMessage());
+			status.setMessage("service is not responding -> " + e.getMessage());
 			status.setPassed(false);
 		}
-
-		if(wsContent != null) {
-			if(wsContent.endsWith("definitions>")) {
-				try {
-					executor = new SoapApiExecutor(proxy, timeout, channel.getAuthentication(), channel.getAuthenticationValue(), wsContentFile, applicationPath);
-					channel.setApplicationData(API, ActionApi.SOAP, ((SoapApiExecutor)executor).getOperations());
-				} catch (SAXException | IOException | ParserConfigurationException e) {
-					status.setCode(ActionStatus.CHANNEL_START_ERROR);
-					status.setMessage(e.getMessage());
-					status.setPassed(false);
-				}
-			}else {
-				channel.setApplicationData(API, ActionApi.REST);
-				executor = new RestApiExecutor(proxy, timeout, channel.getAuthentication(), channel.getAuthenticationValue(), applicationPath);
-			}
-		}else {
-			status.setCode(ActionStatus.CHANNEL_START_ERROR);
-			status.setMessage("service is not responding");
-			status.setPassed(false);
-		}
+		
+		return null;
 	}
 
 	@Override

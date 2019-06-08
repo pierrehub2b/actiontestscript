@@ -168,7 +168,7 @@ public class FoundElement{
 	}
 
 	public FoundElement(TestElement parent, Rectangle rect) {
-		this.tag = SearchedElement.IMAGE;
+		this.tag = SearchedElement.IMAGE_TAG;
 		this.width = rect.getWidth();
 		this.height = rect.getHeight();
 		

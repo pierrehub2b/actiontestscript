@@ -54,7 +54,7 @@ public class AtsMobileElement extends AtsBaseElement {
 	}
 
 	private String getText() {
-		String result = attributes.get(TEXT);
+		final String result = attributes.get(TEXT);
 		if(result == null) {
 			return "";
 		}
@@ -70,7 +70,7 @@ public class AtsMobileElement extends AtsBaseElement {
 	}
 
 	public CalculatedProperty[] getMobileAttributes() {
-		List<CalculatedProperty> properties = attributes.entrySet().stream().parallel().map(e -> new CalculatedProperty(e.getKey(), e.getValue())).collect(Collectors.toCollection(ArrayList::new));
+		final List<CalculatedProperty> properties = attributes.entrySet().stream().parallel().map(e -> new CalculatedProperty(e.getKey(), e.getValue())).collect(Collectors.toCollection(ArrayList::new));
 		properties.add(new CalculatedProperty(INNER_TEXT, getInnerText()));
 
 		return properties.toArray(new CalculatedProperty[properties.size()]);

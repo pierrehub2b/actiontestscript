@@ -113,7 +113,7 @@ public class DriverManager {
 		final String appName = props.getName().toLowerCase();
 		final String driverName = props.getDriver();
 
-		DriverProcess driverProcess;
+		DriverProcess driverProcess = null;
 		
 		if(CHROME_BROWSER.equals(appName)) {
 			driverProcess = getDriverProcess(status, appName, getDriverName(driverName, CHROME_DRIVER_FILE_NAME));

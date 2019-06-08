@@ -98,12 +98,12 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 			applicationPath = app;
 		}
 
-		int start = applicationPath.indexOf("://");
+		final int start = applicationPath.indexOf("://");
 		if(start > -1) {
 			applicationPath = applicationPath.substring(start + 3);
 		}
 
-		String[] appData = applicationPath.split("/");
+		final String[] appData = applicationPath.split("/");
 		if(appData.length > 1) {
 
 			final String endPoint = appData[0];
@@ -111,14 +111,11 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 
 			applicationPath = "http://" + endPoint;
 			channel.setApplication(application);
-			//application = appData[1];
 			
 			requestConfig = RequestConfig.custom()
 					.setConnectTimeout(10*000)
 					.setConnectionRequestTimeout(10*000)
 					.setSocketTimeout(20*000).build();
-
-			//httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
 
 			JsonObject response = executeRequest(DRIVER, START);
 

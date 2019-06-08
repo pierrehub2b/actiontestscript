@@ -43,9 +43,6 @@ public class ActionApi extends Action {
 	public static final String SOAP = "SOAP";
 	public static final String REST = "REST";
 
-	public static final String SCRIPT_LABEL_GET = SCRIPT_LABEL + GET;
-	public static final String SCRIPT_LABEL_DELETE = SCRIPT_LABEL + DELETE;
-
 	private CalculatedValue method;
 	private CalculatedValue data;
 

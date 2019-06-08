@@ -44,7 +44,7 @@ public class ActionAssertCount extends ActionExecuteElement {
 	public ActionAssertCount(ScriptLoader script, boolean stop, ArrayList<String> options, String data, ArrayList<String> objectArray) {
 		super(script, stop, options, objectArray);
 
-		Matcher m = COUNT_PATTERN.matcher(data);
+		final Matcher m = COUNT_PATTERN.matcher(data);
 		if(m.matches()) {
 			
 			setValue(Utils.string2Int(m.group(1).trim(), 1));
@@ -96,7 +96,6 @@ public class ActionAssertCount extends ActionExecuteElement {
 
 	@Override
 	public void terminateExecution(ActionTestScript ts) {
-
 		getTestElement().checkOccurrences(ts, status, operator, value);
 		status.getElement().setFoundElements(null);
 	}

@@ -20,11 +20,15 @@ under the License.
 package com.ats.executor.drivers.engines.webservices;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -47,6 +51,7 @@ import org.xml.sax.SAXException;
 
 import com.ats.executor.ActionStatus;
 import com.ats.script.actions.ActionApi;
+import com.google.common.base.Charsets;
 
 public class SoapApiExecutor extends ApiExecutor {
 
@@ -63,13 +68,21 @@ public class SoapApiExecutor extends ApiExecutor {
 
 	private Proxy proxy;
 
-	public SoapApiExecutor(HttpHost proxy, int timeout, String authentication, String authenticationValue, File wsdlFile, String wsUrl) throws SAXException, IOException, ParserConfigurationException {
+	public SoapApiExecutor(HttpHost proxy, int timeout, int maxTry, String authentication, String authenticationValue, String wsdlContent, String wsUrl) throws SAXException, IOException, ParserConfigurationException {
 
-		super(timeout, authentication, authenticationValue);
+		super(timeout, maxTry, authentication, authenticationValue);
 
 		if(proxy != null) {
 			this.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy.getHostName(), proxy.getPort()));
 		}
+		
+		final File wsdlFile = File.createTempFile("atsWs_", ".txt");
+		wsdlFile.deleteOnExit();
+
+		final Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(wsdlFile), Charsets.UTF_8));
+		writer.write(wsdlContent);
+		writer.flush();
+		writer.close();
 
 		this.setUri(wsUrl);
 		this.loadDataFromWSDL(wsdlFile, wsUrl);
@@ -89,7 +102,14 @@ public class SoapApiExecutor extends ApiExecutor {
 
 		final String action = api.getMethod().getCalculated();
 		final String xmlInput = soapXmlMessage.replaceAll("#ACTION#", action).replace("#ACTIONDATA#", api.getData().getCalculated());
-
+		
+		int max = maxTry;
+		while(!executeRequest(status, xmlInput, action) && max > 0) {
+			max--;
+		}
+	}
+	
+	private boolean executeRequest(ActionStatus status, String xmlInput, String action) {
 		try {
 
 			HttpURLConnection httpConn;
@@ -100,12 +120,10 @@ public class SoapApiExecutor extends ApiExecutor {
 			}
 			httpConn.setConnectTimeout(timeout); 
 			
-			ByteArrayOutputStream bout = new ByteArrayOutputStream();
-
-			byte[] buffer = new byte[xmlInput.length()];
-			buffer = xmlInput.getBytes();
-			bout.write(buffer);
-			byte[] b = bout.toByteArray();
+			final ByteArrayOutputStream bout = new ByteArrayOutputStream();
+			bout.write(xmlInput.getBytes());
+			
+			final byte[] b = bout.toByteArray();
 
 			httpConn.setRequestProperty("Content-Length", String.valueOf(b.length));
 			httpConn.setRequestProperty("Content-Type", "text/xml; charset=utf-8");
@@ -114,7 +132,7 @@ public class SoapApiExecutor extends ApiExecutor {
 			httpConn.setDoOutput(true);
 			httpConn.setDoInput(true);
 
-			OutputStream out = httpConn.getOutputStream();
+			final OutputStream out = httpConn.getOutputStream();
 			out.write(b);
 			out.close();
 
@@ -134,7 +152,7 @@ public class SoapApiExecutor extends ApiExecutor {
 
 			final BufferedReader in = new BufferedReader(isr);
 
-			StringBuilder builder = new StringBuilder("");
+			final StringBuilder builder = new StringBuilder("");
 			String responseString = "";
 			while ((responseString = in.readLine()) != null) {
 				builder.append(responseString);
@@ -143,12 +161,15 @@ public class SoapApiExecutor extends ApiExecutor {
 			in.close();
 
 			parseResponse(responseType, builder.toString());
+			return true;
 
 		}catch(IOException e) {
 			status.setCode(ActionStatus.WEB_DRIVER_ERROR);
 			status.setMessage("Execute soap action error : " + e.getMessage());
 			status.setPassed(false);
 		}
+		
+		return false;
 	}
 
 	private void loadDataFromWSDL(File wsdlFile, String wsdlPath) throws SAXException, IOException, ParserConfigurationException {

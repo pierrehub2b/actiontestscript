@@ -152,6 +152,7 @@ Here is an example of global ATS configuration file (*.atsProperties* file in AT
 	<maxTry>
 		<searchElement>15</searchElement>
 		<getProperty>10</getProperty>
+		<webService>1</webService>		
 	</maxTry>
 	<timeOut>
 		<script>60</script>
@@ -214,8 +215,9 @@ Proxy types available are *'system'*, *'auto'*, *'direct'* and *'manual'*, if *'
 </proxy>
 ```
 * **[appBounding]** : initial window size of a tested application and it's initial position
-* **[searchElement]** : action's maxTry to wait element exists or wait element is interactable before execute
-* **[getProperty]** : action's maxTry get property to wait element's property exists and property is not null
+* **[maxTry -> searchElement]** : action's maxTry to wait element exists or wait element is interactable before execute
+* **[maxTry -> getProperty]** : action's maxTry get property to wait element's property exists and property is not null
+* **[maxTry -> webService]** : api REST or SOAP webservice max try if request fail with timeout
 * **[timeOut -> script]** : javascript execution timeout (in sec.) for web application only
 * **[timeOut -> pageLoad]** : page load timeout (in sec.) for web application only
 * **[timeOut -> watchDog]** : action's execution timeout (in sec.) to prevent browser or application infinite hangup

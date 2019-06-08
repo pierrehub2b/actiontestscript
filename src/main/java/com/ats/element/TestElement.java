@@ -151,9 +151,9 @@ public class TestElement{
 
 			if(parent == null || (parent != null && parent.getCount() > 0)){
 
-				if(searchedElement.isImage()) {
+				if(searchedElement.isImageSearch()) {
 	
-					final TemplateMatchingSimple template = new TemplateMatchingSimple(searchedElement.getImage(channel));
+					final TemplateMatchingSimple template = new TemplateMatchingSimple(searchedElement.getImage());
 					
 					for (CalculatedProperty property : searchedElement.getCriterias()){
 						if("error".equals(property.getName())){

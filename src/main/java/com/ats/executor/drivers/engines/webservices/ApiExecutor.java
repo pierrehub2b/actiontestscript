@@ -87,9 +87,11 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 	protected String authentication;
 	protected String authenticationValue;
 	protected int timeout;
+	protected int maxTry;
 	
-	public ApiExecutor(int timeout, String authentication, String authenticationValue) {
+	public ApiExecutor(int timeout, int maxTry, String authentication, String authenticationValue) {
 		this.timeout = timeout;
+		this.maxTry = maxTry;
 		this.authentication = authentication;
 		this.authenticationValue = authenticationValue;
 	}
