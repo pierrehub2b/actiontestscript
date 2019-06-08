@@ -1,12 +1,32 @@
+/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
 package com.ats.graphic;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.awt.image.WritableRaster;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.stream.IntStream;
 
 import javax.imageio.ImageIO;
 
@@ -19,12 +39,12 @@ public class TemplateMatchingSimple {
 	private int maxPixelsError = 0;
 	private int maxPixelsDiff = 10;
 
-	public TemplateMatchingSimple(final int[][] image) {
+	public TemplateMatchingSimple(int[][] image) {
 		this.target = image;
 		if(image != null) {
 			this.targetWidth = image.length;
 			this.targetHeight = image[0].length;
-			this.setPercentError(0.5);
+			this.setPercentError(0.3);
 		}
 	}
 
@@ -64,12 +84,14 @@ public class TemplateMatchingSimple {
 	}
 
 	private static BufferedImage getBufferedImage(final byte[] image) {
+		BufferedImage result = null;
 		final InputStream in = new ByteArrayInputStream(image);
 		try {
-			return ImageIO.read(in);
-		} catch (IOException e) {
-			return null;
-		}
+			result = ImageIO.read(in);
+			in.close();
+		} catch (IOException e) {}
+
+		return result;
 	}
 
 	public static ArrayList<Rectangle> getLocations(final byte[] mainImageInBytes, final BufferedImage subImage, int maxError, int maxDiff) {
@@ -92,21 +114,19 @@ public class TemplateMatchingSimple {
 	private static ArrayList<Rectangle> getLocations(final BufferedImage mainImage, int[][] subVector, int subWidth, int subHeight, int maxError, int maxDiff) {
 
 		final ArrayList<Rectangle> result = new ArrayList<Rectangle>();
+		
 		final int[][] mainVector = getVector(mainImage);
+		final int[][] burned = new int[mainImage.getWidth()][ mainImage.getHeight()];
 
 		if(mainVector != null && subVector != null) {
+
 			final int xOffsetMax = mainImage.getWidth() - subWidth;
 			final int yOffsetMax = mainImage.getHeight() - subHeight;
 
-			final int pixels[] = new int[subWidth * subHeight * 4];
-			final WritableRaster raster = mainImage.getRaster();
-
-			Rectangle found = findSubImage(mainVector, raster, xOffsetMax, yOffsetMax, subVector, subWidth, subHeight, maxError, maxDiff);
-
+			Rectangle found = findSubImage(mainVector, burned, xOffsetMax, yOffsetMax, subVector, subWidth, subHeight, maxError, maxDiff);
 			while(found != null) {
 				result.add(found);
-				raster.setPixels(found.x, found.y, subWidth, subHeight, pixels);
-				found = findSubImage(mainVector, raster, xOffsetMax, yOffsetMax, subVector, subWidth, subHeight, maxError, maxDiff);
+				found = findSubImage(mainVector, burned, xOffsetMax, yOffsetMax, subVector, subWidth, subHeight, maxError, maxDiff);
 			}
 		}
 
@@ -116,27 +136,30 @@ public class TemplateMatchingSimple {
 	private static int[][] getVector(BufferedImage img) {
 		if(img != null) {
 			final int[][] data = new int[img.getWidth()][img.getHeight()];
-			for(int x = 0; x < img.getWidth(); x++){
-				for(int y = 0; y < img.getHeight(); y++){
-					data[x][y] = pixelGrayed(img.getRGB(x, y));
-					//data[x][y] = img.getRGB(x, y);
-				}
-			}
+			IntStream.range(0, data.length).parallel().forEach(x -> Arrays.parallelSetAll(data[x], y -> pixelGrayed(img.getRGB(x, y))));
 			return data;
 		}
 		return null;
 	}
 
-	private static Rectangle findSubImage(final int[][] mainVector, final WritableRaster raster, final int xOffsetMax, final int yOffsetMax, final int[][] subImage, final int subWidth, final int subHeight, int maxError, int maxDiff) {
-
-		int[] pix = new int[4];
-
+	private static Rectangle findSubImage(int[][] mainVector, int[][] burned, int xOffsetMax, int yOffsetMax, int[][] subImage, int subWidth, int subHeight, int maxError, int maxDiff) {
 		for (int x = 0; x < xOffsetMax; x++){
 			for (int y = 0; y < yOffsetMax; y++){
-				raster.getPixel(x, y, pix);
-				if(pix[3] != 0) {
+				if(burned[x][y] == 0) {
 					if (subImageIsAtOffset(subImage, mainVector, x, y, subWidth, subHeight, maxError, maxDiff)) {
-						return new Rectangle(x,y,subWidth,subHeight);
+
+						final int x0 = x;
+						final int y0 = y;
+						
+						IntStream.range(x0, x0 + subWidth).parallel().forEach(x1 -> IntStream.range(y0, y0 + subHeight).parallel().forEach(y1 -> burned[x1][y1] = 1));
+												
+						/*for(int x0 = 0; x0 < subWidth; x0++) {
+							for(int y0 = 0; y0 < subHeight; y0++) {
+								burned[x0+x][y0+y] = 1;
+							}
+						}*/
+						
+						return new Rectangle(x, y, subWidth, subHeight);
 					}
 				}
 			}
@@ -150,23 +173,24 @@ public class TemplateMatchingSimple {
 		for (int x = 0; x < width; x++){
 			for (int y = 0; y < height; y++){
 				if (Math.abs(subImage[x][y] - image[xOffset + x][yOffset + y]) > maxDiff) {
-					if(maxError > 0) {
-						maxError--;
-					}else {
+					if(maxError <= 0) {
 						return false;
 					}
+					maxError--;
 				}
 			}
 		}
 		return true;
 	}
 
-	private static int pixelGrayed(int rgb) {
+	private static int pixelGrayed(final int rgb) {
 		final int r = (rgb >> 16) & 0xff;
 		final int g = (rgb >>  8) & 0xff;
 		final int b =  rgb        & 0xff;
 
-		return (r+g+b)/3;
+		//return (r+g+b)/3;
+		
+		return (int) ((0.299*r) + (0.587*g) + (0.114*b));
 	}
 
 	/*private static int pixelDiff(int rgb1, int rgb2) {

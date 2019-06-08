@@ -39,7 +39,7 @@ public class TestImage {
 		long start = new Date().getTime();
 		
 		TemplateMatchingSimple template = new TemplateMatchingSimple(subImage);
-		template.setPercentError(0.5);
+		//template.setPercentError(0.5);
 		
 		ArrayList<Rectangle> result = template.findOccurrences(mainImage);
 		
