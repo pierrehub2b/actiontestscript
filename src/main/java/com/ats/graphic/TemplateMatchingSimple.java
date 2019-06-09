@@ -32,19 +32,23 @@ import javax.imageio.ImageIO;
 
 public class TemplateMatchingSimple {
 
+	//private final static double[] GRAYSCALE = new double[] {0.299, 0.587, 0.114};
+	private final static double[] GRAYSCALE = new double[] {0.2126, 0.7152, 0.0722};
+	private final static double PERCENT_DEFAULT = 0.3;
+	private final static int MAX_PIXELS_DIFF = 10;
+	
 	private int targetWidth = 100;
 	private int targetHeight = 100;
 
 	private int[][] target;
 	private int maxPixelsError = 0;
-	private int maxPixelsDiff = 10;
-
+	
 	public TemplateMatchingSimple(int[][] image) {
 		this.target = image;
 		if(image != null) {
 			this.targetWidth = image.length;
 			this.targetHeight = image[0].length;
-			this.setPercentError(0.3);
+			this.setPercentError(PERCENT_DEFAULT);
 		}
 	}
 
@@ -73,7 +77,7 @@ public class TemplateMatchingSimple {
 	}
 
 	public ArrayList<Rectangle> findOccurrences(final BufferedImage mainImage) {
-		return getLocations(mainImage, target, targetWidth, targetHeight, maxPixelsError, maxPixelsDiff);
+		return getLocations(mainImage, target, targetWidth, targetHeight, maxPixelsError, MAX_PIXELS_DIFF);
 	}
 
 	//------------------------------------------------------------------------------------------------------------------------
@@ -152,12 +156,6 @@ public class TemplateMatchingSimple {
 						final int y0 = y;
 						
 						IntStream.range(x0, x0 + subWidth).parallel().forEach(x1 -> IntStream.range(y0, y0 + subHeight).parallel().forEach(y1 -> burned[x1][y1] = 1));
-												
-						/*for(int x0 = 0; x0 < subWidth; x0++) {
-							for(int y0 = 0; y0 < subHeight; y0++) {
-								burned[x0+x][y0+y] = 1;
-							}
-						}*/
 						
 						return new Rectangle(x, y, subWidth, subHeight);
 					}
@@ -187,10 +185,8 @@ public class TemplateMatchingSimple {
 		final int r = (rgb >> 16) & 0xff;
 		final int g = (rgb >>  8) & 0xff;
 		final int b =  rgb        & 0xff;
-
-		//return (r+g+b)/3;
 		
-		return (int) ((0.299*r) + (0.587*g) + (0.114*b));
+		return (int) (GRAYSCALE[0]*r + GRAYSCALE[1]*g + GRAYSCALE[2]*b);
 	}
 
 	/*private static int pixelDiff(int rgb1, int rgb2) {
