@@ -1,9 +1,9 @@
 package com.naturalnessanalysis;
 
+import java.util.Map;
+
 import com.naturalness.NaturalnessModel;
 import com.naturalness.Sequence;
-
-import java.util.Map;
 
 public class SequenceAnalysis extends AnalysisResult {
     private Map<Sequence<String>, NaturalnessModel<String>> sequenceModelMap;

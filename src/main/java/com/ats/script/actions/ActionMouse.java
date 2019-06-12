@@ -62,7 +62,7 @@ public class ActionMouse extends ActionExecuteElement {
 		if(status.isPassed()) {
 			
 			status.startDuration();
-			getTestElement().over(status, position, ts.isDesktopDragDrop());
+			getTestElement().over(status, position, ts.isDesktopDragDrop(), 0, 0);
 
 			status.endDuration();
 			ts.getRecorder().updateScreen(0, status.getDuration(), getType(), position);

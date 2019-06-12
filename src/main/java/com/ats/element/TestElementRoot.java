@@ -51,7 +51,7 @@ public class TestElementRoot extends TestElement {
 	}
 
 	@Override
-	public void over(ActionStatus status, MouseDirection position, boolean desktopDragDrop) {
+	public void over(ActionStatus status, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {
 		// do nothing, this is the root, no need to scroll over the root element
 	}
 }

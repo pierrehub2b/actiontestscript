@@ -19,11 +19,11 @@ under the License.
 
 package com.naturalnessanalysis;
 
-import com.naturalness.Ranking;
-import com.naturalness.Sequence;
-
 import java.util.List;
 import java.util.Map;
+
+import com.naturalness.Ranking;
+import com.naturalness.Sequence;
 
 public class RankAnalysisResult extends AnalysisResult{
 

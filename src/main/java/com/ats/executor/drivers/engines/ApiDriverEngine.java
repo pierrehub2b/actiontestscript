@@ -57,7 +57,7 @@ import com.ats.script.actions.ActionApi;
 import com.google.common.base.Charsets;
 import com.google.common.io.ByteStreams;
 
-public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngine{
+public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 
 	private final static String API = "API";
 	private ApiExecutor executor;
@@ -247,7 +247,7 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {}
 
 	@Override
-	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean desktopDragDrop) {}
+	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {}
 
 	@Override
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {}
@@ -256,7 +256,7 @@ public class ApiDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	public void clearText(ActionStatus status, FoundElement foundElement) {}
 
 	@Override
-	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position) {}
+	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {}
 
 	@Override
 	public void drag(ActionStatus status, FoundElement element, MouseDirection position) {}

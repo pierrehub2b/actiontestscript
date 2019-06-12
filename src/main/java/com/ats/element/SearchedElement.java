@@ -19,7 +19,6 @@ under the License.
 
 package com.ats.element;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -128,14 +127,14 @@ public class SearchedElement {
 			if(prop != null) {
 
 				final String imagePath = prop.getValue().getCalculated();
-
+				
 				URL imageUrl = null;
 				if(imagePath.startsWith("http://") || imagePath.startsWith("https://") || imagePath.startsWith("file://")) {
 					try {
 						imageUrl = new URL(imagePath);
 					} catch (MalformedURLException e) {}
 				}else {
-					final String relativePath = ProjectData.ASSETS_FOLDER + File.separator + ProjectData.RESOURCES_FOLDER + File.separator + ProjectData.IMAGES_FOLDER + File.separator + imagePath;
+					final String relativePath = ProjectData.ASSETS_FOLDER + "/" + ProjectData.RESOURCES_FOLDER + "/" + ProjectData.IMAGES_FOLDER + "/" + imagePath;
 					imageUrl = getClass().getClassLoader().getResource(relativePath);
 				}
 

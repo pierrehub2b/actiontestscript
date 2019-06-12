@@ -30,6 +30,7 @@ import org.openqa.selenium.StaleElementReferenceException;
 import com.ats.element.SearchedElement;
 import com.ats.element.TestElement;
 import com.ats.element.TestElementDialog;
+import com.ats.element.TestElementImage;
 import com.ats.element.TestElementRoot;
 import com.ats.element.TestElementSystem;
 import com.ats.element.TestElementSystemButton;
@@ -110,7 +111,7 @@ public class ActionExecuteElement extends ActionExecute {
 			status.endDuration();
 
 		}else if(testElement == null) {
-			
+
 			if(searchElement == null) {
 				setTestElement(new TestElementRoot(channel));
 			}else {
@@ -145,7 +146,11 @@ public class ActionExecuteElement extends ActionExecute {
 					}else {
 						while (trySearch < searchMaxTry) {
 
-							setTestElement(new TestElement(channel, searchMaxTry, predicate, searchElement));
+							if(searchElement.isImageSearch()) {
+								setTestElement(new TestElementImage(channel, searchMaxTry, predicate, searchElement));
+							}else {
+								setTestElement(new TestElement(channel, searchMaxTry, predicate, searchElement));
+							}
 
 							if(testElement.isValidated()) {
 								trySearch = searchMaxTry;

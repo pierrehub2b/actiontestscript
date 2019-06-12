@@ -120,17 +120,17 @@ public class TemplateMatchingSimple {
 		final ArrayList<Rectangle> result = new ArrayList<Rectangle>();
 		
 		final int[][] mainVector = getVector(mainImage);
-		final int[][] burned = new int[mainImage.getWidth()][ mainImage.getHeight()];
+		final int[][] burnedPixels = new int[mainImage.getWidth()][ mainImage.getHeight()];
 
 		if(mainVector != null && subVector != null) {
 
 			final int xOffsetMax = mainImage.getWidth() - subWidth;
 			final int yOffsetMax = mainImage.getHeight() - subHeight;
 
-			Rectangle found = findSubImage(mainVector, burned, xOffsetMax, yOffsetMax, subVector, subWidth, subHeight, maxError, maxDiff);
+			Rectangle found = findSubImage(mainVector, burnedPixels, xOffsetMax, yOffsetMax, subVector, subWidth, subHeight, maxError, maxDiff);
 			while(found != null) {
 				result.add(found);
-				found = findSubImage(mainVector, burned, xOffsetMax, yOffsetMax, subVector, subWidth, subHeight, maxError, maxDiff);
+				found = findSubImage(mainVector, burnedPixels, xOffsetMax, yOffsetMax, subVector, subWidth, subHeight, maxError, maxDiff);
 			}
 		}
 
@@ -154,8 +154,10 @@ public class TemplateMatchingSimple {
 
 						final int x0 = x;
 						final int y0 = y;
+						final int w0 = x0 + subWidth;
+						final int h0 = y0 + subHeight;
 						
-						IntStream.range(x0, x0 + subWidth).parallel().forEach(x1 -> IntStream.range(y0, y0 + subHeight).parallel().forEach(y1 -> burned[x1][y1] = 1));
+						IntStream.range(x0, w0).parallel().forEach(x1 -> IntStream.range(y0, h0).parallel().forEach(y1 -> burned[x1][y1] = 1));
 						
 						return new Rectangle(x, y, subWidth, subHeight);
 					}
@@ -181,12 +183,8 @@ public class TemplateMatchingSimple {
 		return true;
 	}
 
-	private static int pixelGrayed(final int rgb) {
-		final int r = (rgb >> 16) & 0xff;
-		final int g = (rgb >>  8) & 0xff;
-		final int b =  rgb        & 0xff;
-		
-		return (int) (GRAYSCALE[0]*r + GRAYSCALE[1]*g + GRAYSCALE[2]*b);
+	private static int pixelGrayed(int rgb) {
+		return (int) (GRAYSCALE[0]*((rgb >> 16)& 0xff) + GRAYSCALE[1]*((rgb >>  8)& 0xff) + GRAYSCALE[2]*(rgb& 0xff));
 	}
 
 	/*private static int pixelDiff(int rgb1, int rgb2) {

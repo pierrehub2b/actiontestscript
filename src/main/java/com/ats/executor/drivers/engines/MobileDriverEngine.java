@@ -65,7 +65,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-public class MobileDriverEngine extends DriverEngineAbstract implements IDriverEngine{
+public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 
 	private final static String DRIVER = "driver";
 	private final static String APP = "app";
@@ -330,7 +330,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	}
 
 	@Override
-	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position) {
+	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {
 		final Rectangle rect = element.getRectangle();
 		executeRequest(ELEMENT, element.getId(), TAP, (int)(getOffsetX(rect, position)) + "", (int)(getOffsetY(rect, position)) + "");
 	}	
@@ -409,7 +409,7 @@ public class MobileDriverEngine extends DriverEngineAbstract implements IDriverE
 	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {}
 
 	@Override
-	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean desktopDragDrop) {}
+	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {}
 
 	@Override
 	public String setWindowBound(BoundData x, BoundData y, BoundData width, BoundData height) {return "";}

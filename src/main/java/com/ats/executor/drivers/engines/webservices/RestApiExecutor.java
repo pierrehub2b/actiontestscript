@@ -20,7 +20,6 @@ under the License.
 package com.ats.executor.drivers.engines.webservices;
 
 import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -28,6 +27,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.config.RequestConfig.Builder;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
@@ -39,7 +39,7 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
-import org.apache.http.client.config.RequestConfig.Builder;
+
 import com.ats.executor.ActionStatus;
 import com.ats.script.actions.ActionApi;
 

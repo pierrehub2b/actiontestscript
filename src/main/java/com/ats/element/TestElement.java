@@ -35,7 +35,6 @@ import com.ats.executor.drivers.engines.IDriverEngine;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
-import com.ats.graphic.TemplateMatchingSimple;
 import com.ats.recorder.IVisualRecorder;
 import com.ats.script.actions.ActionSelect;
 import com.ats.tools.Utils;
@@ -150,44 +149,27 @@ public class TestElement{
 			searchDuration = System.currentTimeMillis();
 
 			if(parent == null || (parent != null && parent.getCount() > 0)){
-
-				if(searchedElement.isImageSearch()) {
-	
-					final TemplateMatchingSimple template = new TemplateMatchingSimple(searchedElement.getImage());
-					
-					for (CalculatedProperty property : searchedElement.getCriterias()){
-						if("error".equals(property.getName())){
-							final String value = property.getValue().getCalculated();
-							if(value.endsWith("%")) {
-								template.setPercentError(Utils.string2Double(value.replace("%", "").trim()));
-							}else{
-								template.setError(Utils.string2Int(value.trim()));
-							}
-							break;
-						}
-					}
-					
-					foundElements = engine.findElements(parent, template);
-					
-				}else {
-					final ArrayList<String> attributes = new ArrayList<String>();
-					Predicate<AtsBaseElement> fullPredicate = Objects::nonNull;
-
-					for (CalculatedProperty property : searchedElement.getCriterias()){
-						criterias += "," + property.getName() + ":" + property.getValue().getCalculated();
-						fullPredicate = property.getPredicate(fullPredicate);
-
-						attributes.add(property.getName());
-					}
-
-					foundElements = engine.findElements(sysComp, this, searchedTag, attributes, fullPredicate);
-				}
+				foundElements = loadElements(searchedElement);
 			}
 
 			searchDuration = System.currentTimeMillis() - this.searchDuration;
 			totalSearchDuration = getTotalDuration();
 			count = getElementsCount();
 		}
+	}
+	
+	protected ArrayList<FoundElement> loadElements(SearchedElement searchedElement) {
+		
+		final ArrayList<String> attributes = new ArrayList<String>();
+		Predicate<AtsBaseElement> fullPredicate = Objects::nonNull;
+
+		for (CalculatedProperty property : searchedElement.getCriterias()){
+			criterias += "," + property.getName() + ":" + property.getValue().getCalculated();
+			fullPredicate = property.getPredicate(fullPredicate);
+
+			attributes.add(property.getName());
+		}
+		return engine.findElements(sysComp, this, searchedTag, attributes, fullPredicate);
 	}
 
 	private int getElementsCount() {
@@ -296,7 +278,7 @@ public class TestElement{
 
 	public void setFoundElements(ArrayList<FoundElement> data) {
 		this.foundElements = data;
-	}	
+	}
 
 	public String getCriterias() {
 		return criterias;
@@ -353,13 +335,15 @@ public class TestElement{
 
 		final MouseDirection md = new MouseDirection();
 
-		over(status, md, false);
+		over(status, md, false, 0, 0);
 		if(status.isPassed()) {
 			click(status, md);
 			if(status.isPassed()) {
 				clearText(status);
 				if(status.isPassed()) {
 
+					recorder.updateScreen(true);
+					
 					String enteredText = null;
 					if(isPassword()) {
 						enteredText = "xxxxxxxxxx";
@@ -367,7 +351,6 @@ public class TestElement{
 						enteredText = text.getCalculated();
 					}
 
-					recorder.updateScreen(true);
 					sendText(status, text);
 
 					status.endDuration();
@@ -433,8 +416,8 @@ public class TestElement{
 	// Mouse ...
 	//-------------------------------------------------------------------------------------------------------------------
 
-	public void over(ActionStatus status, MouseDirection position, boolean desktopDragDrop) {
-		engine.mouseMoveToElement(status, getFoundElement(), position, desktopDragDrop);
+	public void over(ActionStatus status, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {
+		engine.mouseMoveToElement(status, getFoundElement(), position, desktopDragDrop, offsetX, offsetY);
 	}
 
 	public void click(ActionStatus status, MouseDirection position, Keys key) {
@@ -446,17 +429,17 @@ public class TestElement{
 	public void click(ActionStatus status, MouseDirection position) {
 
 		int tryLoop = maxTry;
-		mouseClick(status, position);
+		mouseClick(status, position, 0, 0);
 
 		while(tryLoop > 0 && !status.isPassed()) {
 			channel.progressiveWait(tryLoop);
-			mouseClick(status, position);
+			mouseClick(status, position, 0, 0);
 			tryLoop--;
 		}
 	}
 
-	private void mouseClick(ActionStatus status, MouseDirection position) {
-		engine.mouseClick(status, getFoundElement(), position);
+	protected void mouseClick(ActionStatus status, MouseDirection position, int offsetX, int offsetY) {
+		engine.mouseClick(status, getFoundElement(), position, offsetX, offsetY);
 		channel.actionTerminated();
 	}
 

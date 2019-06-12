@@ -57,7 +57,7 @@ public class IEDriverEngine extends WebDriverEngine {
 	}
 
 	@Override
-	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean desktopDragDrop) {
+	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {
 		desktopMoveToElement(foundElement, position,0 ,-9);
 	}
 

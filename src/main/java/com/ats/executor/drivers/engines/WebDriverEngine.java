@@ -66,7 +66,6 @@ import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
-import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.DriverProcess;
@@ -75,7 +74,6 @@ import com.ats.executor.drivers.desktop.DesktopWindow;
 import com.ats.executor.drivers.engines.desktop.DesktopDriverEngine;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
-import com.ats.graphic.TemplateMatchingSimple;
 import com.ats.script.actions.ActionApi;
 import com.ats.script.actions.ActionGotoUrl;
 import com.ats.script.actions.ActionWindowState;
@@ -84,7 +82,7 @@ import com.ats.tools.Utils;
 import com.google.gson.Gson;
 
 @SuppressWarnings("unchecked")
-public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngine {
+public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	protected static final String WEB_ELEMENT_REF = "element-6066-11e4-a52e-4f735466cecf";
 
@@ -316,11 +314,11 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		final ArrayList<Double> newPosition = (ArrayList<Double>) runJavaScript(JS_SCROLL_IF_NEEDED, element.getValue());
 		updatePosition(newPosition, element);
 	}
-	
+
 	//---------------------------------------------------------------------------------------------------------------------
 	// 
 	//---------------------------------------------------------------------------------------------------------------------
-	
+
 	private void updatePosition(ArrayList<Double> position, FoundElement element) {
 		if(position != null && position.size() > 1) {
 			element.updatePosition(position.get(0), position.get(1), channel, 0.0, 0.0);
@@ -428,7 +426,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 			hoverElement.setParent(getTestElementParent(hoverElement));
 		}
 	}
-	
+
 	//---------------------------------------------------------------------------------------------------------------------
 	// 
 	//---------------------------------------------------------------------------------------------------------------------
@@ -588,16 +586,17 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	//-----------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean withDesktop) {
+	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean withDesktop, int offsetX, int offsetY) {
+		
 		if(withDesktop) {
-			desktopMoveToElement(foundElement, position,0 ,0);
+			desktopMoveToElement(foundElement, position,offsetX ,offsetY);
 		}else {
 
 			int maxTry = 10;
 			while(maxTry > 0) {
 				try {
 
-					scrollAndMove(foundElement, position);
+					scrollAndMove(foundElement, position, offsetX, offsetY);
 
 					status.setPassed(true);
 					status.setMessage("");
@@ -617,11 +616,11 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		}
 	}
 
-	private void scrollAndMove(FoundElement element, MouseDirection position) {
+	private void scrollAndMove(FoundElement element, MouseDirection position, int offsetX, int offsetY) {
 		scroll(element);
 
 		final Rectangle rect = element.getRectangle();
-		move(element, getOffsetX(rect, position), getOffsetY(rect, position));
+		move(element, getOffsetX(rect, position) + offsetX, getOffsetY(rect, position) + offsetY);
 	}
 
 	protected void move(FoundElement element, int offsetX, int offsetY) {
@@ -629,11 +628,11 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	@Override
-	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position) {
+	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {
 
 		final Rectangle rect = element.getRectangle();
 		try {
-			click(element, getOffsetX(rect, position), getOffsetY(rect, position));
+			click(element, getOffsetX(rect, position) + offsetX, getOffsetY(rect, position) + offsetY);
 			status.setPassed(true);
 		}catch(StaleElementReferenceException e1) {
 			throw e1;
@@ -647,9 +646,9 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 	}
 
 	protected void click(FoundElement element, int offsetX, int offsetY) {
-		actions.moveToElement(element.getValue(), offsetX, offsetY).click(element.getValue()).build().perform();
+		actions.moveToElement(element.getValue(), offsetX, offsetY).click().build().perform();
 	}
-
+	
 	@Override
 	public void drag(ActionStatus status, FoundElement element, MouseDirection position) {
 
@@ -880,7 +879,7 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 
 		return null;
 	}
-	
+
 	//---------------------------------------------------------------------------------------------------------------------
 	// 
 	//---------------------------------------------------------------------------------------------------------------------
@@ -965,22 +964,6 @@ public class WebDriverEngine extends DriverEngineAbstract implements IDriverEngi
 		}
 
 		return new ArrayList<FoundElement>();
-	}
-	
-	@Override
-	public ArrayList<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template) {
-
-		TestBound outterBound = null;
-		if(parent != null) {
-			outterBound = parent.getFoundElement().getTestScreenBound();
-		}else {
-			outterBound = channel.getDimension();
-		}
-		
-		channel.toFront();
-		final byte[] screenShot = getDesktopDriver().getScreenshotByte(outterBound.getX(), outterBound.getY(), outterBound.getWidth(), outterBound.getHeight());
-		
-		return template.findOccurrences(screenShot).parallelStream().map(r -> new FoundElement(parent, r)).collect(Collectors.toCollection(ArrayList::new));
 	}
 
 	@Override

@@ -107,7 +107,7 @@ public class TestElementDialog extends TestElement {
 	}
 
 	@Override
-	public void over(ActionStatus status, MouseDirection position, boolean desktopDragDrop) {
+	public void over(ActionStatus status, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {
 	}
 
 	@Override

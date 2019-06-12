@@ -167,7 +167,8 @@ public class FoundElement{
 		}
 	}
 
-	public FoundElement(TestElement parent, Rectangle rect) {
+	public FoundElement(Channel channel, TestElement parent, Rectangle rect) {
+		this.setRemoteWebElement((RemoteWebElement) channel.getRootElement());
 		this.tag = SearchedElement.IMAGE_TAG;
 		this.width = rect.getWidth();
 		this.height = rect.getHeight();
@@ -182,6 +183,9 @@ public class FoundElement{
 		
 		this.screenX = this.x;
 		this.screenY = this.y;
+		
+		this.boundX = this.x - channel.getSubDimension().getX();
+		this.boundY = this.y - channel.getSubDimension().getY();
 	}
 
 	public boolean isDesktop() {
