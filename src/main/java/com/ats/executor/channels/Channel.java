@@ -90,8 +90,9 @@ public class Channel {
 		final DesktopDriver desktopDriver = new DesktopDriver(status, driverManager);
 
 		if(status.isPassed()) {
-			status.setChannel(this);
 
+			status.setChannel(this);
+			
 			this.mainScript = script;
 			this.current = true;
 			this.actionStart = action;
@@ -117,6 +118,10 @@ public class Channel {
 	public void cleanHandle() {
 		winHandle = -1;
 		toFront();
+	}
+	
+	public void updateWinHandle(DesktopDriver drv, int index) {
+		winHandle = getHandle(drv, index);
 	}
 
 	public int getHandle(DesktopDriver drv) {

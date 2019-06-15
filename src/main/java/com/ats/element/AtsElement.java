@@ -90,11 +90,7 @@ public class AtsElement extends AtsBaseElement {
 	public boolean isNumeric() {
 		return numeric;
 	}
-	
-	public boolean isPassword() {
-		return password;
-	}
-	
+		
 	public Double getBoundX() {
 		return boundX;
 	}
@@ -115,6 +111,14 @@ public class AtsElement extends AtsBaseElement {
 	// Desktop serialization
 	//----------------------------------------------------------------------------------------
 
+	public boolean isPassword() {
+		return password;
+	}
+	
+	public void setPassword(boolean value) {
+		this.password = value;
+	}
+	
 	public ArrayList<DesktopData> getAttributes() {
 		return null;
 	}

@@ -80,7 +80,7 @@ public interface IDriverEngine{
 	public void middleClick(ActionStatus status, MouseDirection position, TestElement element);
 	public void buttonClick(String id);
 	
-	public void drag(ActionStatus status, FoundElement element, MouseDirection position);
+	public void drag(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY);
 	public void drop(MouseDirection md, boolean desktopDragDrop);
 	public void keyDown(Keys key);
 	public void keyUp(Keys key);

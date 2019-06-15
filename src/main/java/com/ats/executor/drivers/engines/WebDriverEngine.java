@@ -650,13 +650,13 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 	
 	@Override
-	public void drag(ActionStatus status, FoundElement element, MouseDirection position) {
+	public void drag(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {
 
 		final Rectangle rect = element.getRectangle();
 
 		try {
 
-			final Actions act = actions.moveToElement(element.getValue(), getOffsetX(rect, position), getOffsetY(rect, position));
+			final Actions act = actions.moveToElement(element.getValue(), getOffsetX(rect, position) + offsetX, getOffsetY(rect, position) + offsetY);
 			act.clickAndHold().build().perform();
 			status.setPassed(true);
 

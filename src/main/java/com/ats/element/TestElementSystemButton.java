@@ -55,7 +55,7 @@ public class TestElementSystemButton extends TestElement {
 	}
 
 	@Override
-	public void drag(ActionStatus status, MouseDirection position) {}
+	public void drag(ActionStatus status, MouseDirection position, int offsetX, int offsetY) {}
 
 	@Override
 	public void drop(ActionStatus status, MouseDirection md, boolean desktopDragDrop) {}

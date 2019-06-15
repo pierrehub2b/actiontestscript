@@ -336,7 +336,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	}	
 
 	@Override
-	public void drag(ActionStatus status, FoundElement element, MouseDirection position) {
+	public void drag(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {
 		final Rectangle rect = element.getRectangle();
 		testElement = new MobileTestElement(element.getId(), (int)(getOffsetX(rect, position)), (int)(getOffsetY(rect, position)));
 	}

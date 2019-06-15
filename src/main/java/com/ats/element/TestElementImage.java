@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.function.Predicate;
 
 import com.ats.executor.ActionStatus;
+import com.ats.executor.SendKeyData;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
+import com.ats.generator.variables.CalculatedValue;
 import com.ats.graphic.TemplateMatchingSimple;
 import com.ats.tools.Utils;
 
@@ -47,6 +49,11 @@ public class TestElementImage extends TestElement {
 	protected void mouseClick(ActionStatus status, MouseDirection position, int offsetX, int offsetY) {
 		super.mouseClick(status, position, getFoundElement().getBoundX().intValue(), getFoundElement().getBoundY().intValue());
 	}
+	
+	@Override
+	public void mouseWheel(int delta) {
+		// do nothing for the moment
+	}
 
 	//-------------------------------------------------------------------------------------------------------------------
 	// Text ...
@@ -54,55 +61,41 @@ public class TestElementImage extends TestElement {
 
 	@Override
 	public void clearText(ActionStatus status) {
-		engine.clearText(status, getFoundElement());
+		engine.getDesktopDriver().clearText();
 	}
 	
-	/*@Override
+	@Override
 	public void sendText(ActionStatus status, CalculatedValue text) {
-
-	}*/
+		for(SendKeyData sequence : text.getCalculatedText()) {
+			engine.getDesktopDriver().sendKeys(sequence.getSequenceDesktop());
+		}
+		channel.actionTerminated();
+	}
 
 	//-------------------------------------------------------------------------------------------------------------------
 	// Drag drop ...
 	//-------------------------------------------------------------------------------------------------------------------
 
-	@Override
-	public void drag(ActionStatus status, MouseDirection position) {
-
-	}
-
-	@Override
-	public void drop(ActionStatus status, MouseDirection md, boolean desktopDragDrop) {
-
-	}
-
-	@Override
-	public void swipe(ActionStatus status, MouseDirection position, MouseDirection direction) {
-
-	}
-
-	@Override
-	public void mouseWheel(int delta) {
-
-	}
-
-	@Override
-	public void wheelClick(ActionStatus status, MouseDirection position) {
-
-	}
-
-	@Override
-	public void doubleClick() {
-
-	}
 
 	@Override
 	public String getAttribute(ActionStatus status, String name) {
+		if("x".equals(name)) {
+			return getFoundElement().getBoundX() + "";
+		}else if("y".equals(name)) {
+			return getFoundElement().getBoundY() + "";
+		}
 		return "";
 	}
 
 	@Override
+	public void drag(ActionStatus status, MouseDirection position, int offsetX, int offsetY) {
+		super.drag(status, position, getFoundElement().getBoundX().intValue(), getFoundElement().getBoundY().intValue());
+	}
+
+	@Override
 	public CalculatedProperty[] getAttributes(boolean reload) {
+		
+		
 		return new CalculatedProperty[0];
 	}
 

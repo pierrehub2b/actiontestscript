@@ -62,7 +62,7 @@ public class IEDriverEngine extends WebDriverEngine {
 	}
 
 	@Override
-	public void drag(ActionStatus status, FoundElement element, MouseDirection position) {
+	public void drag(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {
 		getDesktopDriver().mouseDown();
 	}
 

@@ -139,7 +139,6 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 
 					final Process applicationProcess = runtime.exec(args.toArray(new String[args.size()]));
 					processId = applicationProcess.pid();
-
 					status.setPassed(true);
 
 				} catch (IOException e) {
@@ -266,7 +265,6 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void updateDimensions() {
-
 		DesktopWindow win = getDesktopDriver().getWindowByHandle(channel.getHandle(desktopDriver));
 		if(win != null){
 			channel.setDimensions(new TestBound(
@@ -286,6 +284,14 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public void switchWindow(ActionStatus status, int index) {
 		getDesktopDriver().switchTo(channel, index);
+		channel.updateWinHandle(getDesktopDriver(), index);
+		status.setPassed(true);
+	}	
+
+	@Override
+	public boolean setWindowToFront() {
+		//no window order management implemented for the moment
+		return true;
 	}
 
 	@Override
@@ -322,7 +328,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public void drag(ActionStatus status, FoundElement element, MouseDirection md) {
+	public void drag(ActionStatus status, FoundElement element, MouseDirection md, int offsetX, int offsetY) {
 		getDesktopDriver().mouseDown();
 		md.updateForDrag();
 		mouseMoveToElement(status, element, md, true, 0, 0);
@@ -376,12 +382,6 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public void refreshElementMapLocation() {
 		getDesktopDriver().refreshElementMapLocation(channel);
-	}
-
-	@Override
-	public boolean setWindowToFront() {
-		//no window order management implemented for the moment
-		return true;
 	}
 
 	//--------------------------------------------------

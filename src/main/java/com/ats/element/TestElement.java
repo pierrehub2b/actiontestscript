@@ -443,8 +443,8 @@ public class TestElement{
 		channel.actionTerminated();
 	}
 
-	public void drag(ActionStatus status, MouseDirection position) {
-		engine.drag(status, getFoundElement(), position);
+	public void drag(ActionStatus status, MouseDirection position, int offsetX, int offsetY) {
+		engine.drag(status, getFoundElement(), position, offsetX, offsetY);
 		channel.actionTerminated();
 	}
 
@@ -454,7 +454,7 @@ public class TestElement{
 	}
 
 	public void swipe(ActionStatus status, MouseDirection position, MouseDirection direction) {
-		drag(status, position);
+		drag(status, position, 0, 0);
 		engine.moveByOffset(direction.getHorizontalDirection(), direction.getVerticalDirection());
 		drop(status, null, false);
 	}

@@ -117,6 +117,8 @@ public class FoundElement{
 		this.type = DESKTOP;
 		this.visible = element.isVisible();
 		this.id = element.getId();
+		
+		this.password = element.isPassword();
 
 		this.tag = element.getTag();
 		this.width = element.getWidth();

@@ -21,6 +21,7 @@ package com.ats.executor.drivers.engines;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.net.ProxySelector;
 import java.util.ArrayList;
 import java.util.function.Predicate;
 
@@ -31,8 +32,11 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.config.RequestConfig.Builder;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.routing.HttpRoutePlanner;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
+import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
@@ -77,6 +81,13 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 			channel.setNeoload(false);
 			proxy = DriverManager.ATS.getProxyHttpHost();
 		}
+		
+		HttpRoutePlanner routePlanner = null;
+		if(proxy != null) {
+			routePlanner = new DefaultProxyRoutePlanner(proxy);
+		}else {
+			routePlanner = new SystemDefaultRoutePlanner(ProxySelector.getDefault());
+		}
 
 		if(applicationPath == null) {
 			applicationPath = path;
@@ -87,10 +98,12 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 				.setConnectionRequestTimeout(timeout)
 				.setSocketTimeout(timeout);
 		
+		//new SystemDefaultRoutePlanner(ProxySelector.getDefault());
+		
 		String wsContent = null;
 		int max = maxTry;
 		while(wsContent == null && max > 0) {
-			wsContent = getWsContent(status, configBuilder);
+			wsContent = getWsContent(status, configBuilder, routePlanner);
 			max--;
 		}
 		
@@ -111,11 +124,16 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 		}
 	}
 	
-	private String getWsContent(ActionStatus status, Builder configBuilder) {
+	private String getWsContent(ActionStatus status, Builder configBuilder, HttpRoutePlanner routePlanner) {
 		
 		try {
-
-			final CloseableHttpClient httpClient = HttpClientBuilder.create().setDefaultRequestConfig(configBuilder.build()).build();
+		
+			final CloseableHttpClient httpClient = 
+					HttpClientBuilder
+					.create()
+					.setRoutePlanner(routePlanner)
+					.setDefaultRequestConfig(configBuilder.build()).build();
+			
 			final HttpResponse response = httpClient.execute(new HttpGet(applicationPath));
 
 			if(response.getStatusLine().getStatusCode() >= 200 && response.getStatusLine().getStatusCode() < 300) {
@@ -259,7 +277,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {}
 
 	@Override
-	public void drag(ActionStatus status, FoundElement element, MouseDirection position) {}
+	public void drag(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {}
 	
 	@Override
 	public void keyDown(Keys key) {}
