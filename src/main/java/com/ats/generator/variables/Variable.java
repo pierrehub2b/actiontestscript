@@ -67,8 +67,8 @@ public class Variable implements Comparable<Variable>{
 		}
 	}	
 
-	public void updateValue(String attributeValue) {
-		data = attributeValue;
+	public void setData(String value) {
+		data = value;
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

@@ -31,11 +31,9 @@ import com.ats.executor.drivers.engines.WebDriverEngine;
 import com.ats.tools.Utils;
 
 public class OperaDriverEngine extends WebDriverEngine {
-
-	private final static int DEFAULT_WAIT = 130;
 	
 	public OperaDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
-		super(channel, DriverManager.OPERA_BROWSER, driverProcess, windowsDriver, props, DEFAULT_WAIT);
+		super(channel, DriverManager.OPERA_BROWSER, driverProcess, windowsDriver, props);
 				
 		initElementX = 20.0;
 		

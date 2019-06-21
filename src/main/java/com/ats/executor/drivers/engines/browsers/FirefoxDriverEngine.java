@@ -51,9 +51,10 @@ import com.google.gson.JsonObject;
 public class FirefoxDriverEngine extends WebDriverEngine {
 
 	private final static int DEFAULT_WAIT = 250;
+	private final static int DEFAULT_PROPERTY_WAIT = 250;
 
 	public FirefoxDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
-		super(channel, DriverManager.FIREFOX_BROWSER, driverProcess, windowsDriver, props, DEFAULT_WAIT);
+		super(channel, DriverManager.FIREFOX_BROWSER, driverProcess, windowsDriver, props, DEFAULT_WAIT, DEFAULT_PROPERTY_WAIT);
 
 		this.autoScrollElement = JS_SCROLL_IF_NEEDED;//JS_AUTO_SCROLL_MOZ;
 		
@@ -77,6 +78,8 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 
 		launchDriver(status, options);
 	}
+	
+	
 
 	@Override
 	protected boolean switchToWindowHandle(String handle) {

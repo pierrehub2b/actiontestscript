@@ -42,7 +42,7 @@ public class ActionReturnVariable extends ActionExecuteElement {
 	}
 	
 	protected void updateVariableValue(String value) {
-		variable.updateValue(value);
+		variable.setData(value);
 	}
 	
 	//--------------------------------------------------------

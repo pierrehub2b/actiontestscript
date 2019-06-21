@@ -38,10 +38,8 @@ public class IEDriverEngine extends WebDriverEngine {
 
 	protected static final String IE_MIDDLE_CLICK = "var evt=document.createEvent(\"MouseEvents\"),result={};evt.initMouseEvent(\"click\",true,true,window,1,0,0,0,0,false,false,false,false,1,null);arguments[0].dispatchEvent(evt);";
 
-	private final static int DEFAULT_WAIT = 150;
-
 	public IEDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
-		super(channel, "ie", driverProcess, windowsDriver, props, DEFAULT_WAIT);
+		super(channel, "ie", driverProcess, windowsDriver, props);
 
 		InternetExplorerOptions ieOptions = new InternetExplorerOptions();
 		ieOptions.introduceFlakinessByIgnoringSecurityDomains();

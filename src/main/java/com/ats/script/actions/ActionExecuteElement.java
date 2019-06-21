@@ -51,6 +51,7 @@ public class ActionExecuteElement extends ActionExecute {
 	private TestElement testElement;
 
 	private boolean async;
+	private int actionMaxTry;
 
 	public ActionExecuteElement() {}
 
@@ -103,6 +104,11 @@ public class ActionExecuteElement extends ActionExecute {
 
 		super.execute(ts);
 		final Channel channel = ts.getCurrentChannel();
+		
+		actionMaxTry = ts.getChannelManager().getMaxTry() + maxTry;
+		if(actionMaxTry < 1) {
+			actionMaxTry = 1;
+		}
 
 		if(channel == null) {
 
@@ -116,10 +122,7 @@ public class ActionExecuteElement extends ActionExecute {
 				setTestElement(new TestElementRoot(channel));
 			}else {
 
-				int searchMaxTry = ts.getChannelManager().getMaxTry() + maxTry;
-				if(searchMaxTry < 1) {
-					searchMaxTry = 1;
-				}
+				int searchMaxTry = actionMaxTry;
 
 				if(searchElement.isDialog()) {
 					setTestElement(new TestElementDialog(channel, searchMaxTry, searchElement));
@@ -173,6 +176,10 @@ public class ActionExecuteElement extends ActionExecute {
 		}else {
 			terminateExecution(ts);
 		}
+	}
+
+	public int getActionMaxTry() {
+		return actionMaxTry;
 	}
 
 	private Predicate<Integer> getPredicate(String operator, int value) {

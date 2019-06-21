@@ -24,9 +24,11 @@ import java.util.ArrayList;
 import com.ats.element.SearchedElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
+import com.ats.executor.channels.Channel;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
+import com.ats.tools.logger.MessageCode;
 
 public class ActionAssertProperty extends ActionExecuteElement {
 
@@ -64,27 +66,41 @@ public class ActionAssertProperty extends ActionExecuteElement {
 	public void terminateExecution(ActionTestScript ts) {
 
 		super.terminateExecution(ts);
+		final Channel channel = ts.getCurrentChannel();
 
 		if(status.isPassed()) {
 			
 			getTestElement().updateScreen();
 			
-			final String attributeValue = getTestElement().getAttribute(status, value.getName());
-			status.endDuration();		
-			
+			String attributeValue = getTestElement().getAttribute(status, value.getName());
+												
 			if(attributeValue == null) {
 				status.setPassed(false);
 				status.setCode(ActionStatus.ATTRIBUTE_NOT_SET);
 				status.setData(value.getName());
 				status.setMessage("Attribute '" + value.getName() + "' not found !");
 
+				status.endDuration();
 				ts.getRecorder().update(ActionStatus.ATTRIBUTE_NOT_SET, status.getDuration(), value.getName());
 
 			}else {
 					
 				final String expectedResult = value.getExpectedResult();
 				
-				if(value.checkProperty(attributeValue)) {
+				boolean passed = value.checkProperty(attributeValue);
+				int currentTry = getActionMaxTry();
+				
+				while(!passed && currentTry > 0) {
+					passed = value.checkProperty(attributeValue);
+					
+					channel.sendLog(MessageCode.PROPERTY_TRY_ASSERT, "Assert property value", currentTry);
+					channel.progressiveWait(currentTry);
+					currentTry--;
+				}
+
+				status.endDuration();
+				
+				if(passed) {
 		
 					status.setPassed(true);
 					status.setMessage(attributeValue);

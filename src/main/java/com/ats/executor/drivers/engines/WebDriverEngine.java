@@ -79,13 +79,17 @@ import com.ats.script.actions.ActionGotoUrl;
 import com.ats.script.actions.ActionWindowState;
 import com.ats.tools.ResourceContent;
 import com.ats.tools.Utils;
+import com.ats.tools.logger.MessageCode;
 import com.google.gson.Gson;
 
 @SuppressWarnings("unchecked")
 public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	protected static final String WEB_ELEMENT_REF = "element-6066-11e4-a52e-4f735466cecf";
-
+	
+	private final static int DEFAULT_WAIT = 150;
+	private final static int DEFAULT_PROPERTY_WAIT = 200;
+	
 	//-----------------------------------------------------------------------------------------------------------------------------
 	// Javascript static code
 	//-----------------------------------------------------------------------------------------------------------------------------
@@ -134,11 +138,22 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			DriverProcess driverProcess, 
 			DesktopDriver desktopDriver,
 			ApplicationProperties props,
-			int defaultWait) {
+			int defaultWait,
+			int defaultPropertyWait) {
 
-		super(channel, desktopDriver, browser, props, defaultWait, 60);
+		super(channel, desktopDriver, browser, props, defaultWait, defaultPropertyWait);
 
 		this.driverProcess = driverProcess;
+	}
+	
+	public WebDriverEngine(
+			Channel channel, 
+			String browser, 
+			DriverProcess driverProcess, 
+			DesktopDriver desktopDriver,
+			ApplicationProperties props) {
+
+		this(channel, browser, driverProcess, desktopDriver, props, DEFAULT_WAIT, DEFAULT_PROPERTY_WAIT);
 	}
 
 	protected DriverProcess getDriverProcess() {
@@ -466,6 +481,8 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			if(result != null && doubleCheckAttribute(status, result, element, attributeName)) {
 				return result;
 			}
+			channel.sendLog(MessageCode.PROPERTY_NOT_FOUND, "Property not found", tryLoop);
+			channel.sleep(getPropertyWait());
 			tryLoop--;
 		}
 		return null;
@@ -494,9 +511,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 			if(result == null) {
 				final Object obj = executeJavaScript(status, attributeName);
-				if(obj == null) {
-					channel.sleep(100);
-				}else {
+				if(obj != null) {
 					result = obj.toString();
 				}
 			}

@@ -428,7 +428,8 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public String getSource() {
-		return "";
+		getDesktopDriver().refreshElementMap(channel);
+		return getDesktopDriver().getSource();
 	}
 
 	@Override

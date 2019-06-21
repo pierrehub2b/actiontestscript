@@ -325,7 +325,7 @@ public class ActionTestScript extends Script implements ITest{
 			if(variables.size() < index + 1) {
 				break;
 			}
-			variables.get(index).updateValue(value);
+			variables.get(index).setData(value);
 			index++;
 		}
 	}

@@ -61,6 +61,7 @@ import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.ScriptHeader;
 import com.ats.tools.logger.IExecutionLogger;
 import com.exadel.flamingo.flex.messaging.amf.io.AMF3Deserializer;
+import com.google.gson.Gson;
 
 public class DesktopDriver extends RemoteWebDriver {
 
@@ -478,6 +479,10 @@ public class DesktopDriver extends RemoteWebDriver {
 	public void refreshElementMapLocation(Channel channel) {
 		new Thread(new LoadMapElement(channel, this)).start();
 	}
+	
+	public void refreshElementMap(Channel channel) {
+		setElementMapLocation(getWebElementsListByHandle(channel.getDimension(), channel.getHandle(this)));
+	}
 
 	public void setElementMapLocation(List<FoundElement> list) {
 		this.elementMapLocation = list;
@@ -864,5 +869,10 @@ public class DesktopDriver extends RemoteWebDriver {
 		} catch (IOException e) {
 
 		}
+	}
+	
+	public String getSource() {
+		final Gson gson = new Gson();
+		return gson.toJson(elementMapLocation);
 	}
 }

@@ -15,20 +15,24 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.element;
 
+import java.util.Base64;
+
 import com.ats.executor.ActionStatus;
+import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.MouseDirection;
+import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.recorder.IVisualRecorder;
 
 public class TestElementRoot extends TestElement {
 
 	public TestElementRoot() {}
-	
+
 	public TestElementRoot(Channel channel) {
 		super(channel);
 		setCriterias("root");
@@ -54,4 +58,41 @@ public class TestElementRoot extends TestElement {
 	public void over(ActionStatus status, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {
 		// do nothing, this is the root, no need to scroll over the root element
 	}
+
+	@Override
+	public String getAttribute(ActionStatus status, String name) {
+		switch (name.toLowerCase()) {
+		case "source":
+			return engine.getSource();
+		case "rectangle":
+			return getRectangle();
+		case "screenshot":
+			return Base64.getEncoder().encodeToString(channel.getScreenShot());
+		case "version":
+			return channel.getApplicationVersion();
+		case "processid":
+			return channel.getProcessId() + "";
+		default :
+			return "";
+		}
+	}
+
+	@Override
+	public CalculatedProperty[] getAttributes(boolean reload) {
+		
+		final CalculatedProperty[] props = new CalculatedProperty[4];
+		props[0] = new CalculatedProperty("source", "[...]");
+		props[1] = new CalculatedProperty("version", channel.getApplicationVersion());
+		props[2] = new CalculatedProperty("rectangle", getRectangle());
+		props[3] = new CalculatedProperty("processId", channel.getProcessId() + "");
+		
+		return props;
+	}
+	
+	private String getRectangle() {
+		final TestBound bound = channel.getDimension();
+		return bound.getX().intValue() + "," + bound.getY().intValue() + "," + bound.getWidth().intValue() + "," + bound.getHeight().intValue();
+	}
+
+
 }

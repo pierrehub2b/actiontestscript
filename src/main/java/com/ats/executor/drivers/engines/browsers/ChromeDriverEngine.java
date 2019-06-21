@@ -32,11 +32,9 @@ import com.ats.tools.Utils;
 
 public class ChromeDriverEngine extends WebDriverEngine {
 
-	private final static int DEFAULT_WAIT = 130;
-
 	public ChromeDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
 
-		super(channel, DriverManager.CHROME_BROWSER, driverProcess, windowsDriver, props, DEFAULT_WAIT);
+		super(channel, DriverManager.CHROME_BROWSER, driverProcess, windowsDriver, props);
 
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments("--no-default-browser-check");

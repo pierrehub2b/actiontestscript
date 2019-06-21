@@ -40,10 +40,8 @@ import com.ats.generator.objects.MouseDirection;
 
 public class EdgeDriverEngine extends WebDriverEngine {
 
-	private final static int DEFAULT_WAIT = 150;
-
 	public EdgeDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
-		super(channel, DriverManager.EDGE_BROWSER, driverProcess, windowsDriver, props, DEFAULT_WAIT);
+		super(channel, DriverManager.EDGE_BROWSER, driverProcess, windowsDriver, props);
 
 		this.searchElementScript = JS_WAIT_BEFORE_SEARCH + JS_SEARCH_ELEMENT;
 		this.autoScrollElement = JS_SCROLL_IF_NEEDED;//JS_AUTO_SCROLL_CALC;

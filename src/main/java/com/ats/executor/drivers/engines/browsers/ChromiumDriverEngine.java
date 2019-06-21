@@ -33,7 +33,7 @@ import com.ats.tools.Utils;
 public class ChromiumDriverEngine extends WebDriverEngine {
 
 	public ChromiumDriverEngine(Channel channel, ActionStatus status, String name, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
-		super(channel, name, driverProcess, windowsDriver, props, 100);
+		super(channel, name, driverProcess, windowsDriver, props);
 
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments("--no-sandbox");

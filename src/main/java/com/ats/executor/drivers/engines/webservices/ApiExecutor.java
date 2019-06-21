@@ -54,6 +54,8 @@ import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.actions.ActionApi;
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
@@ -192,9 +194,9 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 		}
 
 		if("*".equals(tagName)) {
-			atsElements.parallelStream().filter(predicate).forEach(e -> result.add(new FoundElement(e)));
+			atsElements.stream().filter(predicate).forEach(e -> result.add(new FoundElement(e)));
 		}else {
-			atsElements.parallelStream().filter(e -> e.getTag().equals(searchedTag)).filter(predicate).forEach(e -> result.add(new FoundElement(e)));
+			atsElements.stream().filter(e -> e.getTag().equals(searchedTag)).filter(predicate).forEach(e -> result.add(new FoundElement(e)));
 		}
 
 		return result;
@@ -210,14 +212,25 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 		HashMap<String, String> attributes = new HashMap<String, String>(Map.of("name", name));
 
 		if(json.isJsonArray()) {
-			atsElements.add(new AtsJsonElement(json, ARRAY, attributes));
 
+			final JsonArray array = json.getAsJsonArray();
+			attributes.put("size", array.size() + "");
+			
+			final AtsJsonElement jsonElement = new AtsJsonElement(json, ARRAY, attributes);
+			
+			atsElements.add(jsonElement);
+			
 			int index = 0;
-			for (JsonElement el : json.getAsJsonArray()) {
-				loadElementsList(el, "index" + index);
+			for (JsonElement el : array) {
+				if(el.isJsonPrimitive()) {
+					loadArrayList(el, "index" + index, el.getAsString());
+				}else {
+					loadElementsList(el, "index" + index);
+				}
+
 				index++;
 			}
-
+			
 		}else if(json.isJsonObject()) {
 
 			for (Entry<String, JsonElement> entry : json.getAsJsonObject().entrySet()) {
@@ -237,6 +250,10 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 
 			atsElements.add(new AtsJsonElement(json, OBJECT, attributes));
 		}
+	}
+
+	private void loadArrayList(JsonElement el, String item, String value) {
+		atsElements.add(new AtsJsonElement(el, ELEMENT, ImmutableMap.of("name", item, "value", value)));
 	}
 
 	//-------------------------------------------------------------------------------------------------------------------------------------------------------

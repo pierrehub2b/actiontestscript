@@ -69,7 +69,7 @@ public class ActionProperty extends ActionReturnVariable {
 		super.terminateExecution(ts);
 		
 		if(status.isPassed()) {
-			String attributeValue = getTestElement().getAttribute(status, name);
+			final String attributeValue = getTestElement().getAttribute(status, name);
 			status.endDuration();
 
 			if(attributeValue == null) {
