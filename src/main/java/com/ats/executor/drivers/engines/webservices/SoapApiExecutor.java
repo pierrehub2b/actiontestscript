@@ -19,29 +19,22 @@ under the License.
 
 package com.ats.executor.drivers.engines.webservices;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.http.HttpHost;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -50,8 +43,13 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.ats.executor.ActionStatus;
+import com.ats.executor.channels.Channel;
 import com.ats.script.actions.ActionApi;
 import com.google.common.base.Charsets;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request.Builder;
+import okhttp3.RequestBody;
 
 public class SoapApiExecutor extends ApiExecutor {
 
@@ -66,16 +64,10 @@ public class SoapApiExecutor extends ApiExecutor {
 	private String soapXmlMessage;
 	private Map<String, String> operations;
 
-	private Proxy proxy;
+	public SoapApiExecutor(OkHttpClient client, int timeout, int maxTry, Channel channel, String wsdlContent, String wsUrl) throws SAXException, IOException, ParserConfigurationException {
 
-	public SoapApiExecutor(HttpHost proxy, int timeout, int maxTry, String authentication, String authenticationValue, String wsdlContent, String wsUrl) throws SAXException, IOException, ParserConfigurationException {
+		super(client, timeout, maxTry, channel);
 
-		super(timeout, maxTry, authentication, authenticationValue);
-
-		if(proxy != null) {
-			this.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy.getHostName(), proxy.getPort()));
-		}
-		
 		final File wsdlFile = File.createTempFile("atsWs_", ".txt");
 		wsdlFile.deleteOnExit();
 
@@ -102,74 +94,17 @@ public class SoapApiExecutor extends ApiExecutor {
 
 		final String action = api.getMethod().getCalculated();
 		final String xmlInput = soapXmlMessage.replaceAll("#ACTION#", action).replace("#ACTIONDATA#", api.getData().getCalculated());
-		
-		int max = maxTry;
-		while(!executeRequest(status, xmlInput, action) && max > 0) {
-			max--;
-		}
-	}
-	
-	private boolean executeRequest(ActionStatus status, String xmlInput, String action) {
-		try {
 
-			HttpURLConnection httpConn;
-			if(proxy != null) {
-				httpConn = (HttpURLConnection)uri.toURL().openConnection(proxy);
-			}else {
-				httpConn = (HttpURLConnection)uri.toURL().openConnection();
-			}
-			httpConn.setConnectTimeout(timeout); 
-			
-			final ByteArrayOutputStream bout = new ByteArrayOutputStream();
-			bout.write(xmlInput.getBytes());
-			
-			final byte[] b = bout.toByteArray();
+		final Builder requestBuilder = new Builder().url(uri.toString()).post(RequestBody.create(null, xmlInput));
 
-			httpConn.setRequestProperty("Content-Length", String.valueOf(b.length));
-			httpConn.setRequestProperty("Content-Type", "text/xml; charset=utf-8");
-			httpConn.setRequestProperty("SOAPAction", operations.get(action));
-			httpConn.setRequestMethod("POST");
-			httpConn.setDoOutput(true);
-			httpConn.setDoInput(true);
+		requestBuilder.addHeader("Content-Type", "text/xml; charset=utf-8");
+		requestBuilder.addHeader("SOAPAction", operations.get(action));
 
-			final OutputStream out = httpConn.getOutputStream();
-			out.write(b);
-			out.close();
-
-			InputStreamReader isr = null;
-			String responseType = "";
-			if (httpConn.getResponseCode() == 200) {
-				isr = new InputStreamReader(httpConn.getInputStream());
-				responseType = httpConn.getContentType();
-			} else {
-
-				isr = new InputStreamReader(httpConn.getErrorStream());
-
-				status.setCode(ActionStatus.WEB_DRIVER_ERROR);
-				status.setMessage("Execute soap action error");
-				status.setPassed(false);
-			}
-
-			final BufferedReader in = new BufferedReader(isr);
-
-			final StringBuilder builder = new StringBuilder("");
-			String responseString = "";
-			while ((responseString = in.readLine()) != null) {
-				builder.append(responseString);
-			}
-
-			in.close();
-
-			parseResponse(responseType, builder.toString());
-			return true;
-
-		}catch(IOException e) {
-			status.setCode(ActionStatus.WEB_DRIVER_ERROR);
-			status.setMessage("Execute soap action error : " + e.getMessage());
-			status.setPassed(false);
+		for (Entry<String,String> header : headerProperties.entrySet()) {
+			requestBuilder.addHeader(header.getKey(), header.getValue());
 		}
 		
-		return false;
+		executeRequest(status, requestBuilder.build());
 	}
 
 	private void loadDataFromWSDL(File wsdlFile, String wsdlPath) throws SAXException, IOException, ParserConfigurationException {

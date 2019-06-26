@@ -64,9 +64,9 @@ public class Channel {
 	private TestBound dimension = DriverManager.ATS.getApplicationBound();
 	private TestBound subDimension = new TestBound();
 
-	private String applicationVersion;
-	private String driverVersion;
-	private String os;
+	private String applicationVersion = "";
+	private String driverVersion = "";
+	private String os = "";
 
 	private byte[] icon;
 	private String screenServer;

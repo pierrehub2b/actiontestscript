@@ -15,28 +15,29 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.executor.drivers.engines;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.net.ProxySelector;
+import java.io.InputStreamReader;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.config.RequestConfig.Builder;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.routing.HttpRoutePlanner;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
-import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
@@ -59,7 +60,12 @@ import com.ats.generator.variables.CalculatedProperty;
 import com.ats.graphic.TemplateMatchingSimple;
 import com.ats.script.actions.ActionApi;
 import com.google.common.base.Charsets;
-import com.google.common.io.ByteStreams;
+import com.google.common.io.CharStreams;
+
+import okhttp3.OkHttpClient;
+import okhttp3.OkHttpClient.Builder;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 
@@ -67,50 +73,38 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	private ApiExecutor executor;
 
 	public ApiDriverEngine(Channel channel, ActionStatus status, String path, DesktopDriver desktopDriver, ApplicationProperties props) {
-		
-		super(channel, desktopDriver, path, props, 0, 60);
-		
+
+		super(channel, desktopDriver, path, props, 0, 0);
+
 		final int maxTry = DriverManager.ATS.getMaxTryWebservice();
-		final int timeout = DriverManager.ATS.getWebServiceTimeOut() * 1000;
-		
-		HttpHost proxy = null;
+		final int timeout = DriverManager.ATS.getWebServiceTimeOut();
+
+		final Builder builder = createHttpBuilder(timeout);
+
 		if(channel.isNeoload()) {
 			channel.setNeoloadDesignApi(DriverManager.ATS.getNeoloadDesignApi());
-			proxy = DriverManager.ATS.getNeoloadProxyHttpHost();
+			builder.proxy(DriverManager.ATS.getNeoloadProxy().getHttpProxy());
 		}else {
-			channel.setNeoload(false);
-			proxy = DriverManager.ATS.getProxyHttpHost();
+			builder.proxy(DriverManager.ATS.getProxy().getHttpProxy());
 		}
-		
-		HttpRoutePlanner routePlanner = null;
-		if(proxy != null) {
-			routePlanner = new DefaultProxyRoutePlanner(proxy);
-		}else {
-			routePlanner = new SystemDefaultRoutePlanner(ProxySelector.getDefault());
-		}
+
+		final OkHttpClient client = builder.build();
 
 		if(applicationPath == null) {
 			applicationPath = path;
 		}
 
-		final Builder configBuilder = RequestConfig.custom()
-				.setConnectTimeout(timeout)
-				.setConnectionRequestTimeout(timeout)
-				.setSocketTimeout(timeout);
-		
-		//new SystemDefaultRoutePlanner(ProxySelector.getDefault());
-		
+		final Request request = new Request.Builder().url(applicationPath).get().build();
+
 		String wsContent = null;
-		int max = maxTry;
-		while(wsContent == null && max > 0) {
-			wsContent = getWsContent(status, configBuilder, routePlanner);
-			max--;
-		}
-		
-		if(status.isPassed()) {
+		try {
+
+			final Response response = client.newCall(request).execute();
+			wsContent = CharStreams.toString(new InputStreamReader(response.body().byteStream(), Charsets.UTF_8)).trim();
+
 			if(wsContent.endsWith("definitions>")) {
 				try {
-					executor = new SoapApiExecutor(proxy, timeout, maxTry, channel.getAuthentication(), channel.getAuthenticationValue(), wsContent, applicationPath);
+					executor = new SoapApiExecutor(client, timeout, maxTry, channel, wsContent, applicationPath);
 					channel.setApplicationData(API, ActionApi.SOAP, ((SoapApiExecutor)executor).getOperations());
 				} catch (SAXException | IOException | ParserConfigurationException e) {
 					status.setCode(ActionStatus.CHANNEL_START_ERROR);
@@ -119,46 +113,14 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 				}
 			}else {
 				channel.setApplicationData(API, ActionApi.REST);
-				executor = new RestApiExecutor(proxy, timeout, maxTry, channel.getAuthentication(), channel.getAuthenticationValue(), applicationPath);
-			}
-		}
-	}
-	
-	private String getWsContent(ActionStatus status, Builder configBuilder, HttpRoutePlanner routePlanner) {
-		
-		try {
-		
-			final CloseableHttpClient httpClient = 
-					HttpClientBuilder
-					.create()
-					.setRoutePlanner(routePlanner)
-					.setDefaultRequestConfig(configBuilder.build()).build();
-			
-			final HttpResponse response = httpClient.execute(new HttpGet(applicationPath));
-
-			if(response.getStatusLine().getStatusCode() >= 200 && response.getStatusLine().getStatusCode() < 300) {
-
-				final BufferedInputStream buff = new BufferedInputStream(response.getEntity().getContent());
-				final String wsContent = new String(ByteStreams.toByteArray(buff), Charsets.UTF_8).trim();
-				buff.close();
-				
-				status.setPassed(true);
-
-				return wsContent;
-
-			}else {
-				status.setCode(ActionStatus.CHANNEL_START_ERROR);
-				status.setMessage("Service not reachable");
-				status.setPassed(false);
+				executor = new RestApiExecutor(client, timeout, maxTry, channel, applicationPath);
 			}
 
 		} catch (IOException e) {
 			status.setCode(ActionStatus.CHANNEL_START_ERROR);
-			status.setMessage("service is not responding -> " + e.getMessage());
+			status.setMessage("Service is not responding -> " + e.getMessage());
 			status.setPassed(false);
 		}
-		
-		return null;
 	}
 
 	@Override
@@ -170,27 +132,27 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	public String getSource() {
 		return executor.getSource();
 	}
-	
+
 	@Override
 	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> searchPredicate) {
 		return executor.findElements(channel, sysComp, testObject, tagName, attributes, searchPredicate);
 	}
-	
+
 	@Override
 	public ArrayList<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template) {
 		return null;
 	}
-	
+
 	@Override
 	public String getAttribute(ActionStatus status, FoundElement element, String attributeName, int maxTry) {
 		return executor.getElementAttribute(element.getId(), attributeName, maxTry);
 	}
-	
+
 	@Override
 	public CalculatedProperty[] getAttributes(FoundElement element, boolean reload) {
 		return executor.getElementAttributes(element.getId());
 	}
-	
+
 	@Override
 	public void refreshElementMapLocation() {}
 
@@ -206,10 +168,10 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	@Override
 	public void close() {
 	}
-
+	
 	@Override
 	public CalculatedProperty[] getCssAttributes(FoundElement element) {
-		return null;
+		return new CalculatedProperty[0];
 	}
 
 	@Override
@@ -233,7 +195,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	public FoundElement getElementFromPoint(Boolean syscomp, Double x, Double y) {
 		return null;
 	}
-	
+
 	@Override
 	public FoundElement getElementFromRect(Boolean syscomp, Double x, Double y, Double w, Double h) {
 		return null;
@@ -254,10 +216,10 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 
 	@Override
 	public void scroll(FoundElement element) {}
-	
+
 	@Override
 	public void scroll(int value) {}
-	
+
 	@Override
 	public void scroll(FoundElement element, int delta) {}
 
@@ -278,7 +240,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 
 	@Override
 	public void drag(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {}
-	
+
 	@Override
 	public void keyDown(Keys key) {}
 
@@ -319,9 +281,61 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	public Object executeJavaScript(ActionStatus status, String script, TestElement element) {
 		return null;
 	}
-	
+
 	@Override
 	public Object executeJavaScript(ActionStatus status, String script) {
 		return null;
 	}
+	
+	
+	//------------------------------------------------------------------------------------------------------------------------------------
+	// init http client
+	//------------------------------------------------------------------------------------------------------------------------------------
+
+	private static Builder createHttpBuilder(int timeout){
+
+		Builder builder = new Builder().connectTimeout(timeout, TimeUnit.SECONDS).writeTimeout(timeout, TimeUnit.SECONDS).readTimeout(timeout, TimeUnit.SECONDS);
+		
+        TrustManager [] trustAllCerts = new TrustManager [] { trustManager () };
+
+		try {
+			SSLContext sslContext = SSLContext.getInstance ("SSL");
+	        sslContext.init (null, trustAllCerts, new SecureRandom ());
+	        SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory ();
+	        
+	        builder.sslSocketFactory (sslSocketFactory, (X509TrustManager)trustAllCerts [0]);
+	        builder.hostnameVerifier (hostnameVerifier ());
+			
+		} catch (NoSuchAlgorithmException | KeyManagementException e) {
+
+		}
+		
+		return builder;
+    }
+	
+	private static TrustManager trustManager () {
+        return new X509TrustManager () {
+
+        	@Override
+			public void checkClientTrusted(java.security.cert.X509Certificate[] arg0, String arg1)throws CertificateException {}
+
+			@Override
+			public void checkServerTrusted(java.security.cert.X509Certificate[] arg0, String arg1)throws CertificateException {}
+
+			@Override
+			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+				return new X509Certificate [] {  };
+			}
+        };
+    }
+		
+	private static HostnameVerifier hostnameVerifier () {
+        return new HostnameVerifier () {
+            @Override
+            public boolean verify (String hostname, SSLSession session) {
+                return true;
+            }
+        };
+    }
+	
 }

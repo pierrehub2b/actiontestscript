@@ -19,6 +19,8 @@ under the License.
 
 package com.ats.driver;
 
+import java.net.InetSocketAddress;
+
 import org.apache.http.HttpHost;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.Proxy.ProxyType;
@@ -75,7 +77,7 @@ public class AtsProxy {
 			proxy.setProxyType(ProxyType.DIRECT);
 		}else if(MANUAL.equals(type)) {
 
-			String proxyAddress = host + ":" + port;
+			final String proxyAddress = host + ":" + port;
 			proxy.setHttpProxy(proxyAddress).setFtpProxy(proxyAddress).setSslProxy(proxyAddress);
 
 		}else {
@@ -88,6 +90,13 @@ public class AtsProxy {
 	public HttpHost getHttpHost() {
 		if(MANUAL.equals(type)){
 			return new HttpHost(host, port);
+		}
+		return null;
+	}
+	
+	public java.net.Proxy getHttpProxy() {
+		if(MANUAL.equals(type)){
+			return new java.net.Proxy(java.net.Proxy.Type.HTTP, new InetSocketAddress(host, port));
 		}
 		return null;
 	}

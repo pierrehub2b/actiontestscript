@@ -156,8 +156,16 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		this(channel, browser, driverProcess, desktopDriver, props, DEFAULT_WAIT, DEFAULT_PROPERTY_WAIT);
 	}
 
+	public WebDriverEngine(Channel channel, DesktopDriver desktopDriver, String application, ApplicationProperties props, int defaultWait, int defaultCheck) {
+		super(channel, desktopDriver, application, props, defaultWait, defaultCheck);
+	}
+
 	protected DriverProcess getDriverProcess() {
 		return driverProcess;
+	}
+	
+	public void setDriverProcess(DriverProcess driverProcess) {
+		this.driverProcess = driverProcess;
 	}
 
 	protected void launchDriver(ActionStatus status, MutableCapabilities cap) {
@@ -172,10 +180,10 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 		if(channel.isNeoload()) {
 			channel.setNeoloadDesignApi(ats.getNeoloadDesignApi());
-			cap.setCapability(CapabilityType.PROXY, ats.getNeoloadProxy());
+			cap.setCapability(CapabilityType.PROXY, ats.getNeoloadProxy().getValue());
 		}else {
 			channel.setNeoload(false);
-			cap.setCapability(CapabilityType.PROXY, ats.getProxy());
+			cap.setCapability(CapabilityType.PROXY, ats.getProxy().getValue());
 		}
 
 		cap.setCapability(CapabilityType.SUPPORTS_FINDING_BY_CSS, false);

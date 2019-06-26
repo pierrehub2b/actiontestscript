@@ -20,18 +20,19 @@ under the License.
 package com.ats.executor.drivers.engines.webservices;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -54,27 +55,35 @@ import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.actions.ActionApi;
+import com.ats.tools.logger.MessageCode;
+import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.io.CharStreams;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 public abstract class ApiExecutor implements IApiDriverExecutor {
 
-	private final Pattern xmlPattern = Pattern.compile("<\\?xml (?:(?!>).)*>");
-	private final Pattern xmlPropertyPattern = Pattern.compile(".*:");
+	private final static Pattern xmlPattern = Pattern.compile("<\\?xml (?:(?!>).)*>");
+	private final static Pattern xmlPropertyPattern = Pattern.compile(".*:");
 
-	private final Pattern jsonObjectPattern = Pattern.compile("(?s)^\\{.*\\}$");
-	private final Pattern jsonArrayPattern = Pattern.compile("(?s)^\\[.*\\]$");
+	private final static Pattern jsonObjectPattern = Pattern.compile("(?s)^\\{.*\\}$");
+	private final static Pattern jsonArrayPattern = Pattern.compile("(?s)^\\[.*\\]$");
 
-	private final short TEXT_TYPE = 0;
-	private final short JSON_TYPE = 1;
-	private final short XML_TYPE = 2;
+	private final static short TEXT_TYPE = 0;
+	private final static short JSON_TYPE = 1;
+	private final static short XML_TYPE = 2;
 
-	private final String ELEMENT = "ELEMENT";
-	private final String NODE = "NODE";
-	private final String OBJECT = "OBJECT";
-	private final String ARRAY = "ARRAY";	
+	private final static String ELEMENT = "ELEMENT";
+	private final static String NODE = "NODE";
+	private final static String OBJECT = "OBJECT";
+	private final static String ARRAY = "ARRAY";	
+	public final static String RESPONSE = "RESPONSE";
 
 	protected URI uri;
 	private String source;
@@ -85,17 +94,24 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 	private ArrayList<AtsApiElement> atsElements;
 
 	protected Map<String, String> headerProperties;
-	
+
 	protected String authentication;
 	protected String authenticationValue;
 	protected int timeout;
 	protected int maxTry;
-	
-	public ApiExecutor(int timeout, int maxTry, String authentication, String authenticationValue) {
+
+	protected Channel channel;
+
+	protected OkHttpClient client;
+	private Response response;
+
+	public ApiExecutor(OkHttpClient client, int timeout, int maxTry, Channel channel) {
+		this.client = client;
 		this.timeout = timeout;
 		this.maxTry = maxTry;
-		this.authentication = authentication;
-		this.authenticationValue = authenticationValue;
+		this.channel = channel;
+		this.authentication = channel.getAuthentication();
+		this.authenticationValue = channel.getAuthenticationValue();
 	}
 
 	protected void setUri(String value) {
@@ -114,7 +130,7 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 		if(authentication != null && authenticationValue != null) {
 			headerProperties.put("Authorization", authentication + " " + authenticationValue);
 		}
-				
+
 		for (CalculatedProperty property : action.getHeader()) {
 			headerProperties.put(property.getName(), property.getValue().getCalculated());
 		}
@@ -132,36 +148,86 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 		}
 	}
 
+	//------------------------------------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------------------------------------
+
+	protected void executeRequest(ActionStatus status, final Request request) {
+		int max = maxTry;
+		while(!clientCall(status, request) && max > 0) {
+			channel.sendLog(MessageCode.PROPERTY_TRY_ASSERT, "Call Webservice  failed", max);
+			channel.sleep(500);
+			max--;
+		}
+	}
+
+	protected boolean clientCall(ActionStatus status, Request request) {
+
+		String type = "";
+
+		try {
+
+			response = client.newCall(request).execute();
+			final List<String> contentTypes = response.headers("Content-Type");
+
+			if(contentTypes != null && contentTypes.size() > 0) {
+				type = contentTypes.get(0);
+			}
+
+			parseResponse(type, CharStreams.toString(new InputStreamReader(response.body().byteStream(), Charsets.UTF_8)).trim());
+
+			return true;
+
+		} catch (IOException e) {
+			status.setCode(ActionStatus.WEB_DRIVER_ERROR);
+			status.setMessage("Call Webservice error -> " + e.getMessage());
+			status.setPassed(false);
+		}
+		return false;
+	}
+
+	//------------------------------------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------------------------------------
+
 	protected void parseResponse(String type, String source) {
+
+		source = source.trim();
+		initAtsElements();
 
 		if(type.contains("/xml")) {
 
-			this.type = XML_TYPE;
-			this.source = xmlPattern.matcher(StringEscapeUtils.unescapeXml(source)).replaceAll("");
+			source = xmlPattern.matcher(StringEscapeUtils.unescapeXml(source)).replaceAll("");
+			this.type = XML_TYPE;			
 
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			try {
-				final DocumentBuilder db = dbf.newDocumentBuilder();
-				final Document doc = db.parse(new InputSource(new StringReader(this.source)));
+				final Document doc = dbf.newDocumentBuilder().parse(new InputSource(new StringReader(source)));
 				loadElementsList(doc.getElementsByTagName("*"));
 			} catch (SAXException | IOException | ParserConfigurationException e) {
 
 			} 
 
-		}else if(type.contains("/json")){
-			this.type = JSON_TYPE;
-			this.source = source.trim();
+			source = "<root><RESPONSE code=\"" + response.code() + "\"><data>" + source + "</data></RESPONSE></root>";
 
-			if(jsonObjectPattern.matcher(this.source).matches() || jsonArrayPattern.matcher(this.source).matches()) {
-				this.atsElements = new ArrayList<AtsApiElement>();
+		}else {
+
+			if(type.contains("/json") && (jsonObjectPattern.matcher(source).matches() || jsonArrayPattern.matcher(source).matches())){
+
+				this.type = JSON_TYPE;
 				loadElementsList(new JsonParser().parse(source), "root");
+
+				source = "{\"response\":{\"name\":\"response\",\"code\":" + response.code() + ",\"data\":" + source + "}}"; 
+
 			}else {
 				this.type = TEXT_TYPE;
 			}
-
-		}else {
-			this.source = source;
 		}
+
+		this.source = source;
+	}
+
+	private void initAtsElements(){
+		this.atsElements = new ArrayList<AtsApiElement>();
+		atsElements.add(new AtsApiElement(RESPONSE, ImmutableMap.of("name", "response", "code", response.code() + "")));
 	}
 
 	public String getSource() {
@@ -178,16 +244,19 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 		}else {
 			Optional<AtsApiElement> parentElement = atsElements.stream().filter(e -> e.getId().equals(testObject.getParent().getFoundElement().getId())).findFirst();
 			if(parentElement.isPresent()) {
-				if(type == XML_TYPE) {
-					Element elem = ((AtsXmlElement)parentElement.get()).getElement();
-					if(elem != null) {
-						loadElementsList(elem.getElementsByTagName("*"));
-					}
-				}else if(type == JSON_TYPE) {
-					AtsJsonElement elem = (AtsJsonElement)parentElement.get();
-					if(elem != null) {
-						this.atsElements = new ArrayList<AtsApiElement>();
-						loadElementsList(elem.getElement(), elem.getAttribute("name"));
+				if(!parentElement.get().isResponse()) {
+					if(type == XML_TYPE) {
+						Element elem = ((AtsXmlElement)parentElement.get()).getElement();
+						if(elem != null) {
+							initAtsElements();
+							loadElementsList(elem.getElementsByTagName("*"));
+						}
+					}else if(type == JSON_TYPE) {
+						AtsJsonElement elem = (AtsJsonElement)parentElement.get();
+						if(elem != null) {
+							initAtsElements();
+							loadElementsList(elem.getElement(), elem.getAttribute("name"));
+						}
 					}
 				}
 			}
@@ -215,11 +284,9 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 
 			final JsonArray array = json.getAsJsonArray();
 			attributes.put("size", array.size() + "");
-			
-			final AtsJsonElement jsonElement = new AtsJsonElement(json, ARRAY, attributes);
-			
-			atsElements.add(jsonElement);
-			
+
+			atsElements.add(new AtsJsonElement(json, ARRAY, attributes));
+
 			int index = 0;
 			for (JsonElement el : array) {
 				if(el.isJsonPrimitive()) {
@@ -230,7 +297,7 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 
 				index++;
 			}
-			
+
 		}else if(json.isJsonObject()) {
 
 			for (Entry<String, JsonElement> entry : json.getAsJsonObject().entrySet()) {
@@ -262,15 +329,16 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 
 	private void loadElementsList(NodeList nodeList) {
 
-		this.atsElements = new ArrayList<AtsApiElement>();
 		for (int i = 0; i < nodeList.getLength(); i++) {
-			Node node = nodeList.item(i);
+
+			final Node node = nodeList.item(i);
+			final String nodeName = node.getNodeName();
 
 			Map<String, String> foundAttributes = new HashMap<String, String>();
 			NamedNodeMap nodeAttributes = node.getAttributes();
 
-			if(node.getNodeName() != null) {
-				foundAttributes.put("name", xmlPropertyPattern.matcher(node.getNodeName()).replaceFirst(""));
+			if(nodeName != null) {
+				foundAttributes.put("name", xmlPropertyPattern.matcher(nodeName).replaceFirst(""));
 			}
 
 			for(int j=0; j<nodeAttributes.getLength(); j++) {

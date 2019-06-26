@@ -33,7 +33,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.http.HttpHost;
-import org.openqa.selenium.Proxy;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -596,25 +595,18 @@ public class AtsManager {
 		return neoloadDesignApi;
 	}
 
-	public HttpHost getNeoloadProxyHttpHost() {
-		if(neoloadProxy != null) {
-			return neoloadProxy.getHttpHost();
-		}
-		return getProxyHttpHost();
-	}
-
 	public HttpHost getProxyHttpHost() {
 		return proxy.getHttpHost();
 	}
 
-	public Proxy getNeoloadProxy() {
+	public AtsProxy getNeoloadProxy() {
 		if(neoloadProxy != null) {
-			return neoloadProxy.getValue();
+			return neoloadProxy;
 		}
 		return getProxy();
 	}
 
-	public Proxy getProxy() {
-		return proxy.getValue();
+	public AtsProxy getProxy() {
+		return proxy;
 	}
 }

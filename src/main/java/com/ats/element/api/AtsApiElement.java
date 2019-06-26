@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.ats.element.AtsBaseElement;
+import com.ats.executor.drivers.engines.webservices.ApiExecutor;
 import com.google.common.collect.ImmutableMap;
 
 public class AtsApiElement extends AtsBaseElement {
@@ -31,5 +32,9 @@ public class AtsApiElement extends AtsBaseElement {
 		this.id = UUID.randomUUID().toString();
 		this.tag = tag;
 		this.attributes = ImmutableMap.copyOf(attributes);
+	}
+	
+	public boolean isResponse() {
+		return ApiExecutor.RESPONSE.equals(this.tag);
 	}
 }

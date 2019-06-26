@@ -35,6 +35,7 @@ import com.ats.executor.drivers.engines.browsers.ChromiumDriverEngine;
 import com.ats.executor.drivers.engines.browsers.EdgeDriverEngine;
 import com.ats.executor.drivers.engines.browsers.FirefoxDriverEngine;
 import com.ats.executor.drivers.engines.browsers.IEDriverEngine;
+import com.ats.executor.drivers.engines.browsers.JxDriverEngine;
 import com.ats.executor.drivers.engines.browsers.OperaDriverEngine;
 import com.ats.executor.drivers.engines.desktop.DesktopDriverEngine;
 import com.ats.executor.drivers.engines.desktop.ExplorerDriverEngine;
@@ -43,6 +44,7 @@ public class DriverManager {
 
 	public static final String CHROME_BROWSER = "chrome";
 	public static final String CHROMIUM_BROWSER = "chromium";
+	public static final String JX_BROWSER = "jx";
 	public static final String FIREFOX_BROWSER = "firefox";
 	public static final String IE_BROWSER = "ie";
 	public static final String EDGE_BROWSER = "edge";
@@ -118,35 +120,60 @@ public class DriverManager {
 		if(CHROME_BROWSER.equals(appName)) {
 			driverProcess = getDriverProcess(status, appName, getDriverName(driverName, CHROME_DRIVER_FILE_NAME));
 			if(status.isPassed()) {
-				return new ChromeDriverEngine(channel, status, driverProcess, desktopDriver, props);	
+				return new ChromeDriverEngine(
+						channel, 
+						status, 
+						driverProcess, 
+						desktopDriver, 
+						props);	
 			}else {
 				return null;
 			}
 		}else if(EDGE_BROWSER.equals(appName)) {
 			driverProcess = getDriverProcess(status, appName, getDriverName(driverName, EDGE_DRIVER_FILE_NAME + "-" + desktopDriver.getOsBuildVersion()));
 			if(status.isPassed()) {
-				return new EdgeDriverEngine(channel, status, driverProcess, desktopDriver, props);	
+				return new EdgeDriverEngine(
+						channel, 
+						status, 
+						driverProcess, 
+						desktopDriver, 
+						props);	
 			}else {
 				return null;
 			}
 		}else if(OPERA_BROWSER.equals(appName)) {
 			driverProcess = getDriverProcess(status, appName, getDriverName(driverName, OPERA_DRIVER_FILE_NAME));
 			if(status.isPassed()) {
-				return new OperaDriverEngine(channel, status, driverProcess, desktopDriver, props);	
+				return new OperaDriverEngine(
+						channel, 
+						status, 
+						driverProcess, 
+						desktopDriver, 
+						props);	
 			}else {
 				return null;
 			}
 		}else if(FIREFOX_BROWSER.equals(appName)) {
 			driverProcess = getDriverProcess(status, appName, getDriverName(driverName, FIREFOX_DRIVER_FILE_NAME));
 			if(status.isPassed()) {
-				return new FirefoxDriverEngine(channel, status, driverProcess, desktopDriver, props);	
+				return new FirefoxDriverEngine(
+						channel, 
+						status, 
+						driverProcess, 
+						desktopDriver, 
+						props);	
 			}else {
 				return null;
 			}
 		}else if(IE_BROWSER.equals(appName)) {
 			driverProcess = getDriverProcess(status, appName, getDriverName(driverName, IE_DRIVER_FILE_NAME));
 			if(status.isPassed()) {
-				return new IEDriverEngine(channel, status, driverProcess, desktopDriver, props);	
+				return new IEDriverEngine(
+						channel, 
+						status, 
+						driverProcess, 
+						desktopDriver, 
+						props);	
 			}else {
 				return null;
 			}
@@ -154,7 +181,13 @@ public class DriverManager {
 			if(driverName != null && props.getUri() != null) {
 				driverProcess = getDriverProcess(status, appName, getDriverName(driverName, null));
 				if(status.isPassed()) {
-					return new ChromiumDriverEngine(channel, status, props.getName(), driverProcess, desktopDriver, props);
+					return new ChromiumDriverEngine(
+							channel, 
+							status, 
+							props.getName(), 
+							driverProcess, 
+							desktopDriver, 
+							props);
 				}else {
 					return null;
 				}
@@ -164,6 +197,24 @@ public class DriverManager {
 				status.setMessage("Missing Chromium properties ('path' and 'driver') in .atsProperties file !");
 				return null;
 			}
+		}else if(JX_BROWSER.equals(appName)) {
+			if(driverName != null && props.getUri() != null) {
+				
+				final JxDriverEngine jxEngine = new JxDriverEngine(channel, status, desktopDriver, props);
+				if(status.isPassed()) {
+					return jxEngine;
+				}
+				
+				jxEngine.close();
+				return null;
+				
+			}else {
+				status.setPassed(false);
+				status.setCode(ActionStatus.CHANNEL_START_ERROR);
+				status.setMessage("Missing JxBrowser properties ('path' and 'driver') in .atsProperties file !");
+				return null;
+			}
+			
 		}else if(props.isMobile() || application.startsWith(MOBILE + "://")){
 			mobileDriverEngine = new MobileDriverEngine(channel, status, application, desktopDriver, props);
 			return mobileDriverEngine;			

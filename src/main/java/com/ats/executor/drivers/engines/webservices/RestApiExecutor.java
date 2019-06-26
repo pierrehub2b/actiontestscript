@@ -19,54 +19,28 @@ under the License.
 
 package com.ats.executor.drivers.engines.webservices;
 
-import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-
-import org.apache.http.Header;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.config.RequestConfig.Builder;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPatch;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
+import java.util.Map.Entry;
 
 import com.ats.executor.ActionStatus;
+import com.ats.executor.channels.Channel;
 import com.ats.script.actions.ActionApi;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request.Builder;
+import okhttp3.RequestBody;
 
 public class RestApiExecutor extends ApiExecutor {
 
-	private HttpRequestBase request;
-	private CloseableHttpClient httpClient;
+	public RestApiExecutor(OkHttpClient client, int timeout, int maxTry, Channel channel, String wsUrl) {
 
-	public RestApiExecutor(HttpHost proxy, int timeout, int maxTry, String authentication, String authenticationValue, String wsUrl) {
-
-		super(timeout, maxTry, authentication, authenticationValue);
+		super(client, timeout, maxTry, channel);
 
 		if(!wsUrl.endsWith("/")) {
 			wsUrl += "/";
 		}
 		this.setUri(wsUrl);
-
-		final Builder requestBuilder = RequestConfig.custom()
-				.setConnectTimeout(timeout)
-				.setConnectionRequestTimeout(timeout)
-				.setSocketTimeout(timeout);
-
-		if(proxy != null) {
-			requestBuilder.setProxy(proxy);
-		}
-
-		httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestBuilder.build()).build();
 	}
 
 	private String getContentType(String value) {
@@ -90,6 +64,11 @@ public class RestApiExecutor extends ApiExecutor {
 			parameters = api.getData().getCalculated();
 		}
 
+		final Builder requestBuilder = new Builder();
+		for (Entry<String,String> header : headerProperties.entrySet()) {
+			requestBuilder.addHeader(header.getKey(), header.getValue());
+		}
+		
 		final String apiType = api.getType().toUpperCase();
 		if(ActionApi.GET.equals(apiType) || ActionApi.DELETE.equals(apiType)) {
 
@@ -97,54 +76,30 @@ public class RestApiExecutor extends ApiExecutor {
 				parameters = "/" + URLEncoder.encode(parameters, StandardCharsets.UTF_8);
 			}
 
+			requestBuilder.url(fullUri + parameters);
+						
 			if(ActionApi.GET.equals(apiType)) {
-				request = new HttpGet(fullUri + parameters);
+				requestBuilder.get();
 			}else {
-				request = new HttpDelete(fullUri + parameters);
+				requestBuilder.delete();
 			}
-
-		}else {
-			addHeader("Content-Type", getContentType(parameters));
-
-			if(ActionApi.PATCH.equals(apiType)) {
-				request = new HttpPatch(fullUri);
-			}else if(ActionApi.PUT.equals(apiType)) {
-				request = new HttpPut(fullUri);
-			}else {
-				request = new HttpPost(fullUri);
-			}
-			((HttpEntityEnclosingRequestBase)request).setEntity(new ByteArrayEntity(parameters.getBytes(StandardCharsets.UTF_8)));
-		}
-
-		headerProperties.forEach((k,v) -> request.addHeader(k, v));
-
-		int max = maxTry;
-		while(!executeRequest(status) && max > 0) {
-			max--;
-		}
-	}
-
-	private boolean executeRequest(ActionStatus status) {
-		try {
-			final HttpResponse response = httpClient.execute(request);
-			final int responseCode = response.getStatusLine().getStatusCode();
-			if(responseCode >= 200 && responseCode < 300) {
-				final Header[] contentType = response.getHeaders("Content-Type");
-				if(contentType != null && contentType.length > 0) {
-					parseResponse(contentType[0].getValue(), EntityUtils.toString(response.getEntity()));
-				}
-			}else {
-				status.setCode(ActionStatus.WEB_DRIVER_ERROR);
-				status.setMessage("REST response error : (code " + responseCode + ") " + response.getStatusLine().getReasonPhrase());
-				status.setPassed(false);
-			}
-			return true;
 			
-		} catch (IOException e) {
-			status.setCode(ActionStatus.WEB_DRIVER_ERROR);
-			status.setMessage("Execute REST action error : " + e.getMessage());
-			status.setPassed(false);
+		}else {
+			
+			requestBuilder.url(fullUri);
+			requestBuilder.addHeader("Content-Type", getContentType(parameters));
+			
+			final RequestBody body = RequestBody.create(null, parameters);
+						
+			if(ActionApi.PATCH.equals(apiType)) {
+				requestBuilder.patch(body);
+			}else if(ActionApi.PUT.equals(apiType)) {
+				requestBuilder.put(body);
+			}else {
+				requestBuilder.post(body);
+			}
 		}
-		return false;
+		
+		executeRequest(status, requestBuilder.build());
 	}
 }
