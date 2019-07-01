@@ -24,10 +24,10 @@ import java.util.ArrayList;
 import com.ats.element.SearchedElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
-import com.ats.executor.channels.Channel;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
+import com.ats.tools.Utils;
 import com.ats.tools.logger.MessageCode;
 
 public class ActionAssertProperty extends ActionExecuteElement {
@@ -66,55 +66,71 @@ public class ActionAssertProperty extends ActionExecuteElement {
 	public void terminateExecution(ActionTestScript ts) {
 
 		super.terminateExecution(ts);
-		final Channel channel = ts.getCurrentChannel();
 
 		if(status.isPassed()) {
 			
 			getTestElement().updateScreen();
 			
-			String attributeValue = getTestElement().getAttribute(status, value.getName());
-												
-			if(attributeValue == null) {
-				status.setPassed(false);
-				status.setCode(ActionStatus.ATTRIBUTE_NOT_SET);
-				status.setData(value.getName());
-				status.setMessage("Attribute '" + value.getName() + "' not found !");
-
-				status.endDuration();
+			int maxCheckTry = getActionMaxTry();
+			int checkValue = checkProperty(value.getName());
+			
+			while(checkValue < 0 && maxCheckTry > 0) {
+				ts.getCurrentChannel().sendLog(MessageCode.PROPERTY_TRY_ASSERT, "Assert property value", maxCheckTry);
+				ts.getCurrentChannel().progressiveWait(getActionMaxTry() - maxCheckTry);
+				
+				checkValue = checkProperty(value.getName());
+				maxCheckTry--;
+			}
+			
+			status.endDuration();
+			
+			if(checkValue == ActionStatus.ATTRIBUTE_NOT_SET) {
 				ts.getRecorder().update(ActionStatus.ATTRIBUTE_NOT_SET, status.getDuration(), value.getName());
+			}else {
+				ts.getRecorder().update(checkValue, status.getDuration(), value.getExpectedResult(), attributeValue);
+			}
+		}
+	}
+	
+	private String attributeValue;
+	
+	private int checkProperty(String name) {
+		
+		attributeValue = getTestElement().getAttribute(status, name);
+		
+		if(attributeValue == null) {
+			
+			status.setPassed(false);
+			status.setCode(ActionStatus.ATTRIBUTE_NOT_SET);
+			status.setData(value.getName());
+			status.setMessage("Attribute '" + name + "' not found !");
+			
+			return ActionStatus.ATTRIBUTE_NOT_SET;
+
+		}else {
+							
+			final boolean passed = value.checkProperty(attributeValue);
+			final String shortAttribute = Utils.truncateString(attributeValue, 200);
+			
+			if(passed) {
+	
+				status.setPassed(true);
+				status.setCode(0);
+				status.setData(null);
+				status.setMessage(shortAttribute);
+				
+				return 0;
 
 			}else {
-					
+				
 				final String expectedResult = value.getExpectedResult();
 				
-				boolean passed = value.checkProperty(attributeValue);
-				int currentTry = getActionMaxTry();
+				status.setPassed(false);
+				status.setCode(ActionStatus.ATTRIBUTE_CHECK_FAIL);
+				status.setData(new String[]{shortAttribute, value.getValue().getCalculated()});
+				status.setMessage("Expected result : '" + expectedResult + "'");
 				
-				while(!passed && currentTry > 0) {
-					passed = value.checkProperty(attributeValue);
-					
-					channel.sendLog(MessageCode.PROPERTY_TRY_ASSERT, "Assert property value", currentTry);
-					channel.progressiveWait(currentTry);
-					currentTry--;
-				}
-
-				status.endDuration();
-				
-				if(passed) {
-		
-					status.setPassed(true);
-					status.setMessage(attributeValue);
-					
-					ts.getRecorder().update(0, status.getDuration(), expectedResult, attributeValue);
-
-				}else {
-					status.setPassed(false);
-					status.setCode(ActionStatus.ATTRIBUTE_CHECK_FAIL);
-					status.setData(new String[]{attributeValue, value.getValue().getCalculated()});
-					status.setMessage("Expected result : '" + expectedResult + "'");
-					
-					ts.getRecorder().update(ActionStatus.ATTRIBUTE_CHECK_FAIL, status.getDuration(), expectedResult, attributeValue);
-				}
+				return ActionStatus.ATTRIBUTE_CHECK_FAIL;
 			}
 		}
 	}

@@ -69,7 +69,7 @@ public class Utils {
 	public static int string2Int(String value){
 		return string2Int(value, 0);
 	}
-	
+
 	public static int string2Int(String value, int defaultValue){
 		try {
 			return Integer.parseInt(value);
@@ -77,13 +77,20 @@ public class Utils {
 			return defaultValue;
 		}
 	}
-	
+
 	public static double string2Double(String value){
 		try {
 			return Double.parseDouble(value);
 		} catch (NumberFormatException e) {
 			return 0.0;
 		}
+	}
+
+	public static String truncateString(String value, int length)
+	{
+		if (value != null && value.length() > length)
+			value = value.substring(0, length);
+		return value;
 	}
 
 	public static JsonArray string2JsonArray(String value){
@@ -303,23 +310,23 @@ public class Utils {
 
 		return result;
 	}
-	
+
 	public static byte[] loadImage(URL url) {
-		
+
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
-        
-        try (InputStream inputStream = url.openStream()) {
-            
-        	int n = 0;
-            byte [] buffer = new byte[ 1024 ];
-            
-            while (-1 != (n = inputStream.read(buffer))) {
-                output.write(buffer, 0, n);
-            }
-            
-            return output.toByteArray();
-            
-        } catch (IOException e) {
+
+		try (InputStream inputStream = url.openStream()) {
+
+			int n = 0;
+			byte [] buffer = new byte[ 1024 ];
+
+			while (-1 != (n = inputStream.read(buffer))) {
+				output.write(buffer, 0, n);
+			}
+
+			return output.toByteArray();
+
+		} catch (IOException e) {
 
 		}
 

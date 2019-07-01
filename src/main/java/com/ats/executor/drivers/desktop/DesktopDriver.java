@@ -27,26 +27,16 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import org.apache.http.Consts;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import com.ats.element.AtsBaseElement;
-import com.ats.element.AtsElement;
 import com.ats.element.FoundElement;
 import com.ats.element.SearchedElement;
 import com.ats.element.TestElement;
@@ -63,6 +53,12 @@ import com.ats.tools.logger.IExecutionLogger;
 import com.exadel.flamingo.flex.messaging.amf.io.AMF3Deserializer;
 import com.google.gson.Gson;
 
+import okhttp3.OkHttpClient;
+import okhttp3.OkHttpClient.Builder;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
 public class DesktopDriver extends RemoteWebDriver {
 
 	private final static String USER_AGENT = "AtsDesktopDriver";
@@ -75,8 +71,8 @@ public class DesktopDriver extends RemoteWebDriver {
 	private DesktopDriverEngine engine;
 
 	private String driverUrl;
-	private RequestConfig requestConfig;
-	private CloseableHttpClient httpClient;
+
+	private OkHttpClient client;
 
 	private String driverVersion;
 
@@ -114,20 +110,20 @@ public class DesktopDriver extends RemoteWebDriver {
 		final DriverProcess desktopDriverProcess = driverManager.getDesktopDriver(status);
 
 		if(status.isPassed()) {
-			
+
 			this.driverHost = desktopDriverProcess.getDriverServerUrl().getHost();
 			this.driverPort = desktopDriverProcess.getDriverServerUrl().getPort();
 			this.driverUrl = "http://" + getDriverHost() + ":" + getDriverPort();
 
-			this.requestConfig = RequestConfig.custom()
-					.setConnectTimeout(20*000)
-					.setConnectionRequestTimeout(20*000)
-					.setSocketTimeout(20*000).build();
-
-			this.httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
+			this.client = new Builder().
+					cache(null)
+					.connectTimeout(40, TimeUnit.SECONDS)
+					.writeTimeout(40, TimeUnit.SECONDS)
+					.readTimeout(40, TimeUnit.SECONDS)
+					.build();
 
 			final DesktopResponse resp = sendRequestCommand(CommandType.Driver, DriverType.Capabilities);
-			if(resp != null) {
+			if(resp.errorCode != -999) {
 				for (DesktopData data : resp.data) {
 					if("BuildNumber".equals(data.getName())) {
 						this.osBuildVersion = data.getValue();
@@ -241,7 +237,7 @@ public class DesktopDriver extends RemoteWebDriver {
 	public String getCpuName() {
 		return cpuName;
 	}
-	
+
 	public String getCpuSocket() {
 		return cpuSocket;
 	}
@@ -253,7 +249,7 @@ public class DesktopDriver extends RemoteWebDriver {
 	public String getDotNetVersion() {
 		return dotNetVersion;
 	}
-	
+
 	//------------------------------------------------------------------------------------------------------------
 	// Enum types
 	//------------------------------------------------------------------------------------------------------------
@@ -466,20 +462,13 @@ public class DesktopDriver extends RemoteWebDriver {
 	//---------------------------------------------------------------------------------------------------------------------------
 
 	public List<FoundElement> getWebElementsListByHandle(TestBound channelDimension, int handle) {
-
-		final DesktopResponse resp = sendRequestCommand(CommandType.Element, ElementType.Find, handle, SearchedElement.WILD_CHAR);
-
-		if(resp != null && resp.elements != null) {
-			return resp.elements.stream().map(e -> new FoundElement(e, channelDimension)).collect(Collectors.toCollection(ArrayList::new));
-		}else {
-			return new ArrayList<FoundElement>();
-		}
+		return sendRequestCommand(CommandType.Element, ElementType.Find, handle, SearchedElement.WILD_CHAR).getFoundElements(channelDimension);
 	}
 
 	public void refreshElementMapLocation(Channel channel) {
 		new Thread(new LoadMapElement(channel, this)).start();
 	}
-	
+
 	public void refreshElementMap(Channel channel) {
 		setElementMapLocation(getWebElementsListByHandle(channel.getDimension(), channel.getHandle(this)));
 	}
@@ -509,7 +498,7 @@ public class DesktopDriver extends RemoteWebDriver {
 		}
 		return hoverElement;
 	}
-	
+
 	public FoundElement getElementFromRect(Double x, Double y, Double w, Double h) {
 		FoundElement hoverElement = null;
 		if (elementMapLocation != null) {
@@ -532,39 +521,21 @@ public class DesktopDriver extends RemoteWebDriver {
 		}
 		return hoverElement;
 	}
-	
+
 	public ArrayList<DesktopData> getVersion(String appPath) {
-		final DesktopResponse resp = sendRequestCommand(CommandType.Driver, DriverType.Application, appPath);
-		if(resp != null) {
-			return resp.data;
-		}else {
-			return new ArrayList<DesktopData>();
-		}
+		return sendRequestCommand(CommandType.Driver, DriverType.Application, appPath).getData();
 	}
 
 	public List<DesktopWindow> getWindowsByPid(Long pid) {
-		final DesktopResponse resp = sendRequestCommand(CommandType.Window, WindowType.List, pid);
-		if(resp.windows != null) {
-			return resp.windows;
-		}else {
-			return new ArrayList<DesktopWindow>();
-		}
+		return sendRequestCommand(CommandType.Window, WindowType.List, pid).getWindows();
 	}
 
 	public DesktopWindow getWindowByHandle(int handle) {
-		final DesktopResponse resp = sendRequestCommand(CommandType.Window, WindowType.Handle, handle);
-		if(resp != null && resp.windows != null && resp.windows.size() > 0) {
-			return resp.windows.get(0);
-		}
-		return null;
+		return sendRequestCommand(CommandType.Window, WindowType.Handle, handle).getWindow();
 	}
 
 	public DesktopWindow getWindowByTitle(String title) {
-		final DesktopResponse resp = sendRequestCommand(CommandType.Window, WindowType.Title, title);
-		if(resp != null && resp.windows != null && resp.windows.size() > 0) {
-			return resp.windows.get(0);
-		}
-		return null;
+		return sendRequestCommand(CommandType.Window, WindowType.Title, title).getWindow();
 	}
 
 	public void setChannelToFront(int handle, long pid) {
@@ -600,53 +571,24 @@ public class DesktopDriver extends RemoteWebDriver {
 	}
 
 	public void gotoUrl(ActionStatus status, int handle, String url) {
+		
+		status.setData(url);
+		
 		final DesktopResponse resp = sendRequestCommand(CommandType.Window, WindowType.Url, handle, url);
-		if(resp != null) {
-			status.setData(url);
-			if(resp.errorCode < 0) {
-				status.setPassed(false);
-				status.setMessage(resp.errorMessage);
-			}else {
-				status.setPassed(true);
-			}
+		if(resp.errorCode < 0) {
+			status.setPassed(false);
+			status.setMessage(resp.errorMessage);
+		}else {
+			status.setPassed(true);
 		}
 	}
 
 	public FoundElement getTestElementParent(String elementId, Channel channel){
-
-		final DesktopResponse resp = sendRequestCommand(CommandType.Element, ElementType.Parents, elementId);
-
-		FoundElement result = null;
-
-		if(resp.elements != null) {
-
-			FoundElement current = null;
-
-			for(Object obj : resp.elements) {
-				FoundElement elem = new FoundElement((AtsElement)obj, channel.getDimension());
-				if(current == null) {
-					result = elem;
-				}else {
-					current.setParent(elem);
-				}
-				current = elem;
-			}
-		}
-		return result;
+		return sendRequestCommand(CommandType.Element, ElementType.Parents, elementId).getParentsElement(channel.getDimension());
 	}
 
 	public CalculatedProperty[] getElementAttributes(String elementId) {
-
-		ArrayList<CalculatedProperty> listAttributes = new ArrayList<CalculatedProperty>();
-
-		DesktopResponse resp = sendRequestCommand(CommandType.Element, ElementType.Attributes, elementId);
-		if(resp.data != null) {
-			for(DesktopData data : resp.data) {
-				listAttributes.add(new CalculatedProperty(data.getName(), data.getValue()));
-			}
-		}
-
-		return listAttributes.toArray(new CalculatedProperty[listAttributes.size()]);
+		return sendRequestCommand(CommandType.Element, ElementType.Attributes, elementId).getAttributes();
 	}
 
 	public ArrayList<FoundElement> findElements(Channel channel, TestElement testElement, String tag, ArrayList<String> attributes, Predicate<AtsBaseElement> predicate) {
@@ -667,20 +609,13 @@ public class DesktopDriver extends RemoteWebDriver {
 			params[0] = channel.getHandle(this);
 			response = sendRequestCommand(CommandType.Element, ElementType.Find, params);
 		}
-
-		if(response.elements != null) {
-			return response.elements.parallelStream().filter(predicate).map(e -> new FoundElement(e, channel.getDimension())).collect(Collectors.toCollection(ArrayList::new));
-		}else {
-			return new ArrayList<FoundElement>();
-		}
+		
+		return response.getFoundElements(predicate, channel.getDimension());
 	}
 
 	public String getElementAttribute(String elementId, String attribute) {
 		final DesktopResponse resp = sendRequestCommand(CommandType.Element, ElementType.Attributes, elementId, attribute);
-		if(resp.data != null && resp.data.size() > 0) {
-			return resp.data.get(0).getValue();
-		}
-		return null;
+		return resp.getFirstAttribute();
 	}
 
 	private static class LoadMapElement
@@ -755,9 +690,6 @@ public class DesktopDriver extends RemoteWebDriver {
 			x = bound.getX();
 			y = bound.getY();
 
-			//x = elem.getBoundX();
-			//y = elem.getBoundY();
-
 			w = bound.getWidth();
 			h = bound.getHeight();
 
@@ -803,27 +735,23 @@ public class DesktopDriver extends RemoteWebDriver {
 
 	public DesktopResponse sendRequestCommand(CommandType type, Enum<?> subType, Object... data) {
 
-		final HttpPost request = new HttpPost(
-				new StringBuilder(driverUrl)
+		final String url = new StringBuilder(driverUrl)
 				.append("/")
 				.append(type)
 				.append("/")
 				.append(subType)
-				.toString());
+				.toString();
 
-		request.setHeader("User-Agent", USER_AGENT);
-
-		StringJoiner joiner = new StringJoiner("\n");
-		for (Object obj : data) {
-			joiner.add(obj.toString());
-		}
-
-		request.setEntity(new StringEntity(joiner.toString(), ContentType.create("application/x-www-form-urlencoded", Consts.UTF_8)));
-
+		final Request request = new Request.Builder()
+				.url(url)
+				.addHeader("User-Agent", USER_AGENT)
+				.addHeader("Content-Type","application/x-www-form-urlencoded;charset=UTF8")
+				.post(RequestBody.create(null, Stream.of(data).map(Object::toString).collect(Collectors.joining("\n"))))
+				.build();
+				
 		try {
 
-			final HttpResponse response = httpClient.execute(request);
-			final AMF3Deserializer amf3 = new AMF3Deserializer(response.getEntity().getContent());
+			final AMF3Deserializer amf3 = new AMF3Deserializer(client.newCall(request).execute().body().byteStream());
 			final DesktopResponse desktopResponse = (DesktopResponse) amf3.readObject();
 
 			amf3.close();
@@ -831,46 +759,50 @@ public class DesktopDriver extends RemoteWebDriver {
 			return desktopResponse;
 
 		} catch (IOException e) {
-			return null;
+			return new DesktopResponse(e.getMessage());
 		}
 	}
 
 	public void saveVisualReportFile(Path path, IExecutionLogger logger) {
 
-		final CloseableHttpClient downloadClient = HttpClients.createDefault();
-
-		final HttpGet request = new HttpGet(
-				new StringBuilder(driverUrl)
+		final String url = new StringBuilder(driverUrl)
 				.append("/")
 				.append(CommandType.Record)
 				.append("/")
 				.append(RecordType.Download)
-				.toString());
+				.toString();
 
-		request.setHeader("User-Agent", USER_AGENT);
-
+		final Request request = new Request.Builder()
+				.url(url)
+				.addHeader("User-Agent", USER_AGENT)
+				.get()
+				.build();
+		
 		try {
 
-			final HttpResponse response = downloadClient.execute(request);
-			if(response.getStatusLine().getStatusCode() == 200) {
-				BufferedInputStream bis = new BufferedInputStream(response.getEntity().getContent());
+			final Response resp = client.newCall(request).execute();
+			if(resp.code() == 200) {
+				
 				BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(path.toFile()));
-
+				BufferedInputStream bis = new BufferedInputStream(resp.body().byteStream());
+				
 				int inByte;
 				while((inByte = bis.read()) != -1) bos.write(inByte);
 
 				bis.close();
 				bos.close();
+				
 				logger.sendInfo("Save ATSV file -> ", path.toString());
+								
 			}else {
-				logger.sendError("Unable to save ATSV file -> ", response.getStatusLine().getReasonPhrase());
+				logger.sendError("Unable to save ATSV file -> ", resp.message());
 			}
 
 		} catch (IOException e) {
 
 		}
 	}
-	
+
 	public String getSource() {
 		final Gson gson = new Gson();
 		return gson.toJson(elementMapLocation);

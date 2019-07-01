@@ -168,7 +168,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	@Override
 	public void close() {
 	}
-	
+
 	@Override
 	public CalculatedProperty[] getCssAttributes(FoundElement element) {
 		return new CalculatedProperty[0];
@@ -286,56 +286,58 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	public Object executeJavaScript(ActionStatus status, String script) {
 		return null;
 	}
-	
-	
+
 	//------------------------------------------------------------------------------------------------------------------------------------
 	// init http client
 	//------------------------------------------------------------------------------------------------------------------------------------
 
 	private static Builder createHttpBuilder(int timeout){
 
-		Builder builder = new Builder().connectTimeout(timeout, TimeUnit.SECONDS).writeTimeout(timeout, TimeUnit.SECONDS).readTimeout(timeout, TimeUnit.SECONDS);
-		
-        TrustManager [] trustAllCerts = new TrustManager [] { trustManager () };
+		final Builder builder = new Builder()
+				.connectTimeout(timeout, TimeUnit.SECONDS)
+				.writeTimeout(timeout, TimeUnit.SECONDS)
+				.readTimeout(timeout, TimeUnit.SECONDS)
+				.cache(null)
+				.followRedirects(true)
+				.followSslRedirects(true);
+
+		final TrustManager [] trustAllCerts = new TrustManager [] { trustManager () };
 
 		try {
-			SSLContext sslContext = SSLContext.getInstance ("SSL");
-	        sslContext.init (null, trustAllCerts, new SecureRandom ());
-	        SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory ();
-	        
-	        builder.sslSocketFactory (sslSocketFactory, (X509TrustManager)trustAllCerts [0]);
-	        builder.hostnameVerifier (hostnameVerifier ());
-			
+			final SSLContext sslContext = SSLContext.getInstance ("SSL");
+			sslContext.init (null, trustAllCerts, new SecureRandom ());
+
+			final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory ();
+
+			builder.sslSocketFactory (sslSocketFactory, (X509TrustManager)trustAllCerts [0]);
+			builder.hostnameVerifier(new HostnameVerifier() {
+				@Override
+				public boolean verify(String hostname, SSLSession session) {
+					return true;
+				}
+			});
 		} catch (NoSuchAlgorithmException | KeyManagementException e) {
 
 		}
-		
+
 		return builder;
-    }
-	
+	}
+
 	private static TrustManager trustManager () {
-        return new X509TrustManager () {
-
-        	@Override
-			public void checkClientTrusted(java.security.cert.X509Certificate[] arg0, String arg1)throws CertificateException {}
+		return new X509TrustManager () {
 
 			@Override
-			public void checkServerTrusted(java.security.cert.X509Certificate[] arg0, String arg1)throws CertificateException {}
-
-			@Override
-			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-				return new X509Certificate [] {  };
+			public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
 			}
-        };
-    }
-		
-	private static HostnameVerifier hostnameVerifier () {
-        return new HostnameVerifier () {
-            @Override
-            public boolean verify (String hostname, SSLSession session) {
-                return true;
-            }
-        };
-    }
-	
+
+			@Override
+			public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+			}
+
+			@Override
+			public X509Certificate[] getAcceptedIssuers() {
+				return new java.security.cert.X509Certificate[]{};
+			}
+		};
+	}
 }

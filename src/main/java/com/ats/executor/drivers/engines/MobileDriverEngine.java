@@ -21,24 +21,16 @@ package com.ats.executor.drivers.engines;
 
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.StringJoiner;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import org.apache.http.Consts;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
@@ -60,10 +52,18 @@ import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.graphic.TemplateMatchingSimple;
 import com.ats.script.actions.ActionApi;
+import com.google.common.base.Charsets;
+import com.google.common.io.CharStreams;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+
+import okhttp3.OkHttpClient;
+import okhttp3.OkHttpClient.Builder;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 
 public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 
@@ -87,8 +87,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 
 	private MobileTestElement testElement;
 	
-	private RequestConfig requestConfig;
-	private CloseableHttpClient httpClient;
+	private OkHttpClient client;
 
 	public MobileDriverEngine(Channel channel, ActionStatus status, String app, DesktopDriver desktopDriver, ApplicationProperties props) {
 
@@ -109,13 +108,10 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 			final String endPoint = appData[0];
 			final String application = appData[1];
 
-			applicationPath = "http://" + endPoint;
+			this.applicationPath = "http://" + endPoint;
 			channel.setApplication(application);
-			
-			requestConfig = RequestConfig.custom()
-					.setConnectTimeout(10*000)
-					.setConnectionRequestTimeout(10*000)
-					.setSocketTimeout(20*000).build();
+									
+			this.client = new Builder().cache(null).connectTimeout(40, TimeUnit.SECONDS).writeTimeout(40, TimeUnit.SECONDS).readTimeout(40, TimeUnit.SECONDS).build();
 
 			JsonObject response = executeRequest(DRIVER, START);
 
@@ -473,50 +469,38 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	}
 
 	protected JsonObject executeRequest(String type, String ... data) {
-
-		JsonObject result = new JsonObject();
 		
-		final HttpPost request = new HttpPost(
-				new StringBuilder(applicationPath)
+		final String url = new StringBuilder(applicationPath)
 				.append("/")
 				.append(type)
-				.toString());
+				.toString();
 
-		StringJoiner joiner = new StringJoiner("\n");
-		for (Object obj : data) {
-			joiner.add(obj.toString());
-		}
-
-		request.setEntity(new StringEntity(joiner.toString(), ContentType.create("application/x-www-form-urlencoded", Consts.UTF_8)));
-			
+		final Request request = new Request.Builder()
+				.url(url)
+				.addHeader("Content-Type","application/x-www-form-urlencoded;charset=UTF8")
+				.post(RequestBody.
+						create(null, 
+								Stream.of(data).
+								map(Object::toString).
+								collect(Collectors.joining("\n"))))
+				.build();
+		
 		try {
+			JsonElement jsonResponse = parser.parse(
+					CharStreams.toString(
+							new InputStreamReader(
+									client
+									.newCall(request)
+									.execute()
+									.body()
+									.byteStream(), 
+									Charsets.UTF_8)));
 			
-			httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
+			return jsonResponse.getAsJsonObject();
 			
-			final HttpResponse httpResponse = httpClient.execute(request);
-			final BufferedReader in = new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent(), StandardCharsets.UTF_8));
-
-			if(in != null) {
-				String inputLine;
-				StringBuffer response = new StringBuffer();
-
-				while ((inputLine = in.readLine()) != null) {
-					response.append(inputLine);
-				} in .close();
-
-				final String responseData = response.toString();
-				final JsonElement jsonResponse = parser.parse(responseData);
-
-				result = jsonResponse.getAsJsonObject();
-			}
-
-			httpClient.close();
-			
-		} catch (Exception e) {
-
+		} catch (JsonSyntaxException | IOException e) {
+			return null;
 		}
-
-		return result;
 	}
 
 	@Override

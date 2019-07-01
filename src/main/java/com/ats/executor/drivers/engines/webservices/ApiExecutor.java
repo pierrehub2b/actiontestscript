@@ -84,6 +84,7 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 	private final static String OBJECT = "OBJECT";
 	private final static String ARRAY = "ARRAY";	
 	public final static String RESPONSE = "RESPONSE";
+	public final static String DATA = "DATA";
 
 	protected URI uri;
 	private String source;
@@ -219,6 +220,9 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 
 			}else {
 				this.type = TEXT_TYPE;
+				atsElements.add(new AtsApiElement(DATA, ImmutableMap.of("value", source)));
+				
+				source = "<ats_response><code>" + response.code() + "</code><data><![CDATA[" + source + "]]></data></ats_response>";
 			}
 		}
 
