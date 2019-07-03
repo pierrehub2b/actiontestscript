@@ -19,8 +19,11 @@ under the License.
 
 package com.ats.executor.drivers.engines;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -75,11 +78,18 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	public ApiDriverEngine(Channel channel, ActionStatus status, String path, DesktopDriver desktopDriver, ApplicationProperties props) {
 
 		super(channel, desktopDriver, path, props, 0, 0);
+		
+		final File file = new File("ws_error.log");
+		PrintStream errorStream = null;
+		try {
+			errorStream = new PrintStream(file);
+		} catch (FileNotFoundException e1) {}
+		
 
 		final int maxTry = DriverManager.ATS.getMaxTryWebservice();
 		final int timeout = DriverManager.ATS.getWebServiceTimeOut();
 
-		final Builder builder = createHttpBuilder(timeout);
+		final Builder builder = createHttpBuilder(timeout, errorStream);
 
 		if(channel.isNeoload()) {
 			channel.setNeoloadDesignApi(DriverManager.ATS.getNeoloadDesignApi());
@@ -120,6 +130,8 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 			status.setCode(ActionStatus.CHANNEL_START_ERROR);
 			status.setMessage("Service is not responding -> " + e.getMessage());
 			status.setPassed(false);
+			
+			e.printStackTrace(errorStream);
 		}
 	}
 
@@ -291,7 +303,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	// init http client
 	//------------------------------------------------------------------------------------------------------------------------------------
 
-	private static Builder createHttpBuilder(int timeout){
+	private static Builder createHttpBuilder(int timeout, PrintStream errorStream){
 
 		final Builder builder = new Builder()
 				.connectTimeout(timeout, TimeUnit.SECONDS)
@@ -317,7 +329,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 				}
 			});
 		} catch (NoSuchAlgorithmException | KeyManagementException e) {
-
+			e.printStackTrace(errorStream);
 		}
 
 		return builder;

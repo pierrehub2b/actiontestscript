@@ -63,7 +63,7 @@ public class ExplorerDriverEngine extends DesktopDriverEngine {
 			
 			if(window != null) {
 				
-				channel.setApplicationData(DriverManager.DESKTOP_EXPLORER, window.handle);
+				channel.setApplicationData(DriverManager.DESKTOP_EXPLORER, window.getHandle());
 				
 				desktopDriver.moveWindow(channel, channel.getDimension().getPoint());
 				desktopDriver.resizeWindow(channel, channel.getDimension().getSize());
@@ -79,11 +79,11 @@ public class ExplorerDriverEngine extends DesktopDriverEngine {
 
 	@Override
 	public void goToUrl(ActionStatus status, String url) {
-		getDesktopDriver().gotoUrl(status, window.handle, url);
+		getDesktopDriver().gotoUrl(status, window.getHandle(), url);
 	}
 
 	@Override
 	public void close() {
-		getDesktopDriver().closeWindow(window.handle);
+		getDesktopDriver().closeWindow(window.getHandle());
 	}
 }

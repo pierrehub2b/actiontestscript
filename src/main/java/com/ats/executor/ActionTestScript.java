@@ -277,7 +277,7 @@ public class ActionTestScript extends Script implements ITest{
 
 	public static final String JAVA_PARAM_FUNCTION_NAME = "prm";
 	public String prm(int index) {
-		return getParameterValue(index, "");
+		return getParameterValue(index);
 	}
 
 	public String prm(int index, String defaultValue) {
@@ -292,7 +292,7 @@ public class ActionTestScript extends Script implements ITest{
 
 	public static final String JAVA_RETURNS_FUNCTION_NAME = "rtn";
 	public void rtn(CalculatedValue ... values) {
-
+	
 		int i = 0;
 		returnValues = new String[values.length];
 
@@ -303,6 +303,8 @@ public class ActionTestScript extends Script implements ITest{
 
 		updateVariables();
 	}
+	
+	//---------------------------------------------------------------------------------------------
 
 	public void rtn(String ... values) {
 
@@ -328,6 +330,13 @@ public class ActionTestScript extends Script implements ITest{
 			variables.get(index).setData(value);
 			index++;
 		}
+	}
+	
+	//---------------------------------------------------------------------------------------------
+
+	public void returnValues(String... values) {
+		returnValues = values;
+		updateVariables();
 	}
 
 	//---------------------------------------------------------------------------------------------

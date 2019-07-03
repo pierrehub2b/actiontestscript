@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.RandomStringValue;
+import com.ats.generator.variables.ScriptValue;
 import com.ats.generator.variables.Variable;
 import com.ats.generator.variables.transform.DateTransformer;
 import com.ats.generator.variables.transform.TimeTransformer;
@@ -231,6 +232,14 @@ public class Script {
 	            .limit(len)
 	            .collect(Collectors.joining());
 	}
+			
+	public ScriptValue getParameter(int index) {
+		return new ScriptValue(getParameterValue(index, ""));
+	}
+	
+	public String getParameterValue(int index) {
+		return getParameterValue(index, "");
+	}
 	
 	public String getParameterValue(int index, String defaultValue) {
 		if(parameters.size() > index) {
@@ -276,13 +285,5 @@ public class Script {
 			return "";
 		}
 		return "file://" + url.getPath();
-	}
-	
-	//public String getProjectGav() {
-	//	return "";
-	//}
-
-	public void setReturnValues(String ... values) {
-
 	}
 }

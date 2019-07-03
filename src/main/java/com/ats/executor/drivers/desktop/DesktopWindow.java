@@ -22,14 +22,27 @@ package com.ats.executor.drivers.desktop;
 import com.ats.element.AtsElement;
 
 public class DesktopWindow extends AtsElement {
-	public int pid = -1;
-	public int handle = -1;
+	
+	private int pid = -1;
+	private int handle = -1;
 	
 	public DesktopWindow() {
 		super();
 	}
 	
-	public Integer getHandle() {
+	public int getPid() {
+		return pid;
+	}
+
+	public void setPid(int pid) {
+		this.pid = pid;
+	}
+
+	public int getHandle() {
 		return handle;
+	}
+
+	public void setHandle(int handle) {
+		this.handle = handle;
 	}
 }

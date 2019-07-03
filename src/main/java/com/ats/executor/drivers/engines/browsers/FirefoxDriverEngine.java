@@ -20,14 +20,9 @@ under the License.
 package com.ats.executor.drivers.engines.browsers;
 
 import java.io.IOException;
-import java.net.SocketTimeoutException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxOptions;
@@ -48,10 +43,17 @@ import com.ats.generator.objects.MouseDirectionData;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import okhttp3.OkHttpClient;
+import okhttp3.OkHttpClient.Builder;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+
 public class FirefoxDriverEngine extends WebDriverEngine {
 
 	private final static int DEFAULT_WAIT = 250;
 	private final static int DEFAULT_PROPERTY_WAIT = 250;
+	
+	private OkHttpClient client;
 
 	public FirefoxDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
 		super(channel, DriverManager.FIREFOX_BROWSER, driverProcess, windowsDriver, props, DEFAULT_WAIT, DEFAULT_PROPERTY_WAIT);
@@ -75,12 +77,18 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		//FirefoxProfile atsProfile = profile.getProfile("atsProfile");
 		//atsProfile.setPreference("intl.accept_languages", "fr");
 		//options.setProfile(atsProfile);
+				
+		final Builder builder = new Builder()
+				.connectTimeout(20, TimeUnit.SECONDS)
+				.writeTimeout(20, TimeUnit.SECONDS)
+				.readTimeout(20, TimeUnit.SECONDS)
+				.cache(null);
 
+		client = builder.build();
+			
 		launchDriver(status, options);
 	}
 	
-	
-
 	@Override
 	protected boolean switchToWindowHandle(String handle) {
 		if(super.switchToWindowHandle(handle)) {
@@ -215,26 +223,18 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	
 	private void executeRequest(JsonObject action, String type) {
 
-		final CloseableHttpClient httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
-		final HttpPost request = new HttpPost(driverSession + "/" + type);
+		final RequestBody body = RequestBody.create(null, action.toString());
 		
-		request.addHeader("content-type", "application/json");
-
+		final Request request = new Request.Builder()
+				.url(driverSession + "/" + type)
+				.addHeader("Content-Type", "application/json")
+				.post(body)
+				.build();
+		
 		try {
-
-			request.setEntity(new StringEntity(action.toString(), StandardCharsets.UTF_8));
-			httpClient.execute(request);
-
-		} catch (SocketTimeoutException e) {
-
-			throw new WebDriverException("Geckodriver hangup issue after mouse move action (try to raise up 'actionWait' value in ATS properties for firefox)");
-
+			client.newCall(request).execute();
 		} catch (IOException e) {
-
-		} finally {
-			try {
-				httpClient.close();
-			} catch (IOException e) {}
+			throw new WebDriverException("Geckodriver hangup issue after mouse move action (try to raise up 'actionWait' value in ATS properties for firefox)");
 		}
 	}
 }

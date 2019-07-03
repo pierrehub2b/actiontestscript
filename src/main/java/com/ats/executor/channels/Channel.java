@@ -134,7 +134,7 @@ public class Channel {
 	public int getHandle(DesktopDriver drv, int index) {
 		List<DesktopWindow> processWindows = drv.getWindowsByPid(getProcessId());
 		if(processWindows != null && processWindows.size() > index) {
-			return processWindows.get(index).handle;
+			return processWindows.get(index).getHandle();
 		}
 		return -1;
 	}
@@ -190,6 +190,11 @@ public class Channel {
 
 	public void setApplicationData(String os, String version, String dVersion, long pid) {
 		setApplicationData(os, version, dVersion, pid, new byte[0], "");
+	}
+	
+	public void setApplicationData(String os, String version, String dVersion, long pid, long handle) {
+		setApplicationData(os, version, dVersion, pid, new byte[0], "");
+		this.winHandle = (int) handle;
 	}
 
 	public String getAuthenticationValue() {

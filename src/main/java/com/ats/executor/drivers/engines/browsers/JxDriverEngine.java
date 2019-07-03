@@ -2,14 +2,16 @@ package com.ats.executor.drivers.engines.browsers;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.ProcessBuilder.Redirect;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.http.client.config.RequestConfig;
-import org.openqa.selenium.chrome.ChromeDriverService;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Point;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -18,6 +20,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import com.ats.driver.ApplicationProperties;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.desktop.DesktopWindow;
 import com.ats.executor.drivers.engines.WebDriverEngine;
@@ -28,20 +31,19 @@ public class JxDriverEngine extends WebDriverEngine {
 
 	private final static int DEFAULT_WAIT = 150;
 	private final static int DEFAULT_PROPERTY_WAIT = 200;
+	
+	private final static String JX_WINDOW_SIZE = "var result=[window.screenX+7.0001, window.screenY+8.0001, window.innerWidth+0.0001, window.innerHeight+0.0001];";
 
-	private Process process;
-	private ChromeDriverService service;
+	private ProcessHandle jxProcess;
 
-	public JxDriverEngine(Channel channel, ActionStatus status, DesktopDriver desktopDriver, ApplicationProperties props) {
+	@SuppressWarnings("unchecked")
+	public JxDriverEngine(DriverManager driverManager, String appName, Path driversPath, String driverName, Channel channel, ActionStatus status, DesktopDriver desktopDriver, ApplicationProperties props) {
 		super(channel, desktopDriver, props.getUri(), props, DEFAULT_WAIT, DEFAULT_PROPERTY_WAIT);
 
 		final ProcessBuilder builder = new ProcessBuilder(getApplicationPath());
-		builder.redirectErrorStream(true);
-		builder.redirectInput(Redirect.INHERIT);
 
 		try {
-			process = builder.start();
-			Runtime.getRuntime().addShutdownHook(new Thread(process::destroy));
+			builder.start();
 			status.setPassed(true);
 		} catch (IOException e1) {
 			status.setPassed(false);
@@ -49,133 +51,130 @@ public class JxDriverEngine extends WebDriverEngine {
 			status.setCode(ActionStatus.CHANNEL_START_ERROR);
 		}
 
-		ChromeDriverService service = new ChromeDriverService.Builder()
-				.usingDriverExecutable(new File("C:\\Users\\agilitest\\.actiontestscript\\drivers\\jxdriver.exe"))
-				.usingAnyFreePort()
-				.build();
+		this.setDriverProcess(driverManager.getDriverProcess(status, appName, driverName, null));
 
-
-		try {
-			service.start();
-
-			DesiredCapabilities capabilities = new DesiredCapabilities();
-
-			ChromeOptions options = new ChromeOptions();
-			/*options.addArguments("--no-sandbox");
-			options.addArguments("--no-default-browser-check");
-			options.addArguments("--test-type");
-			options.addArguments("--allow-file-access-from-files");
-			options.addArguments("--allow-running-insecure-content");
-			options.addArguments("--allow-file-access-from-files");
-			options.addArguments("--allow-cross-origin-auth-prompt");
-			options.addArguments("--allow-file-access");
-			options.addArguments("--disable-dev-shm-usage");
-			options.addArguments("--disable-extensions");
-			options.addArguments("--disable-infobars");
-			options.addArguments("--disable-notifications");
-			options.addArguments("--disable-web-security");
-			options.addArguments("--disable-dev-shm-usage");
-			options.addArguments("--user-data-dir=" + Utils.createDriverFolder(DriverManager.CHROMIUM_BROWSER));
-
-			if(lang != null) {
-				options.addArguments("--lang=" + lang);
-			}*/
-
-			options.setExperimentalOption("debuggerAddress", "localhost:9222");
-			capabilities.setCapability(ChromeOptions.CAPABILITY, options);
-
-			driver = new RemoteWebDriver(service.getUrl(), capabilities);
-
-
-		} catch (Exception e) {
-			close();
-			e.printStackTrace();
-		}
-		
-		
-		if(driver != null) {
-			status.setPassed(true);
-
-			actions = new Actions(driver);
-
-			driver.manage().timeouts().setScriptTimeout(50, TimeUnit.SECONDS);
-			driver.manage().timeouts().pageLoadTimeout(60, TimeUnit.SECONDS);
-
-			try{
-				driver.manage().window().setSize(channel.getDimension().getSize());
-				driver.manage().window().setPosition(channel.getDimension().getPoint());
-			}catch(Exception ex){
-				System.err.println(ex.getMessage());
-			}
-
-			String applicationVersion = null;
-			String driverVersion = null;
-
-			Map<String, ?> infos = driver.getCapabilities().asMap();
-			for (Map.Entry<String, ?> entry : infos.entrySet()){
-				if("browserVersion".equals(entry.getKey()) || "version".equals(entry.getKey())){
-					applicationVersion = entry.getValue().toString();
-				}else if("chrome".equals(entry.getKey())) {
-					Map<String, String> chromeData = (Map<String, String>) entry.getValue();
-					driverVersion = chromeData.get("chromedriverVersion");
-					if(driverVersion != null) {
-						driverVersion = driverVersion.replaceFirst("\\(.*\\)", "").trim();
-					}
-				}else if("moz:geckodriverVersion".equals(entry.getKey())) {
-					driverVersion = entry.getValue().toString();
-				}
-			}
-
-			final String titleUid = UUID.randomUUID().toString();
+		if(status.isPassed()) {
 			try {
-				final File tempHtml = File.createTempFile("ats_", ".html");
-				tempHtml.deleteOnExit();
+				DesiredCapabilities capabilities = new DesiredCapabilities();
 
-				Files.write(tempHtml.toPath(), Utils.getAtsBrowserContent(titleUid, channel.getApplication(), applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait(), getPropertyWait(), 20, 20, 20, 20, 20, getDesktopDriver()));
-				driver.get(tempHtml.toURI().toString());
-			} catch (IOException e) {}
+				ChromeOptions options = new ChromeOptions();
+				options.setExperimentalOption("debuggerAddress", "localhost:9222");
+				capabilities.setCapability(ChromeOptions.CAPABILITY, options);
 
-			int maxTry = 10;
-			while(maxTry > 0) {
-				final DesktopWindow window = desktopDriver.getWindowByTitle(titleUid);
-				if(window != null) {
-					desktopDriver.setEngine(new DesktopDriverEngine(channel, window));
-					channel.setApplicationData(
-							"windows",
-							applicationVersion,
-							driverVersion,
-							process.pid());
-					maxTry = 0;
+				driver = new RemoteWebDriver(getDriverProcess().getDriverServerUrl(), capabilities);
+
+			} catch (Exception e) {
+				close();
+				status.setPassed(false);
+				status.setMessage(e.getMessage());
+				status.setCode(ActionStatus.CHANNEL_START_ERROR);
+			}
+
+			if(driver != null) {
+				status.setPassed(true);
+
+				actions = new Actions(driver);
+
+				driver.manage().timeouts().setScriptTimeout(50, TimeUnit.SECONDS);
+				driver.manage().timeouts().pageLoadTimeout(60, TimeUnit.SECONDS);
+
+				String applicationVersion = null;
+				String driverVersion = null;
+
+				Map<String, ?> infos = driver.getCapabilities().asMap();
+				for (Map.Entry<String, ?> entry : infos.entrySet()){
+					if("browserVersion".equals(entry.getKey()) || "version".equals(entry.getKey())){
+						applicationVersion = entry.getValue().toString();
+					}else if("chrome".equals(entry.getKey())) {
+						Map<String, String> chromeData = (Map<String, String>) entry.getValue();
+						driverVersion = chromeData.get("chromedriverVersion");
+						if(driverVersion != null) {
+							driverVersion = driverVersion.replaceFirst("\\(.*\\)", "").trim();
+						}
+					}
+				}
+
+				final String titleUid = UUID.randomUUID().toString();
+				try {
+					final File tempHtml = File.createTempFile("ats_", ".html");
+					tempHtml.deleteOnExit();
+
+					Files.write(tempHtml.toPath(), Utils.getAtsBrowserContent(titleUid, channel.getApplication(), applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait(), getPropertyWait(), 20, 20, 20, 20, 20, getDesktopDriver()));
+					driver.get(tempHtml.toURI().toString());
+				} catch (IOException e) {}
+
+				int maxTry = 10;
+				while(maxTry > 0) {
+					final DesktopWindow window = desktopDriver.getWindowByTitle(titleUid);
+					if(window != null && window.getPid() > 0) {
+
+						desktopDriver.setEngine(new DesktopDriverEngine(channel, window));
+						channel.setApplicationData(
+								"windows",
+								applicationVersion,
+								driverVersion,
+								window.getPid(),
+								window.getHandle());
+						
+						Optional<ProcessHandle> opt = ProcessHandle.allProcesses().filter(p -> p.pid() == window.getPid()).findFirst();
+						if(opt.isPresent()) {
+							maxTry = 0;
+							jxProcess = opt.get();
+						}else {
+							maxTry--;
+						}
+						
+					}else {
+						channel.sleep(300);
+						maxTry--;
+					}
+				}
+				
+				if(jxProcess == null) {
+					status.setPassed(false);
+					status.setCode(ActionStatus.CHANNEL_START_ERROR);
+					status.setMessage("Unable to find JxBrowser main window");
 				}else {
-					channel.sleep(300);
-					maxTry--;
+					setSize(channel.getDimension().getSize());
+					setPosition(channel.getDimension().getPoint());
 				}
 			}
-			
-
-			requestConfig = RequestConfig.custom()
-					.setConnectTimeout(5000)
-					.setConnectionRequestTimeout(5000)
-					.setSocketTimeout(10000).build();
-			//try {
-			//	driverSession = new URI(driverProcess.getDriverServerUrl() + "/session/" + driver.getSessionId().toString());
-			//} catch (URISyntaxException e) {}
-
-		}else {
-			status.setPassed(false);
-			status.setCode(ActionStatus.CHANNEL_START_ERROR);
-			//status.setMessage(errorMessage);
-
-			//driverProcess.close();
 		}
+	}
+	
+	@Override
+	protected void setPosition(Point pt) {
+		getDesktopDriver().moveWindow(channel, pt);
+	}
 
+	@Override
+	protected void setSize(Dimension size) {
+		getDesktopDriver().resizeWindow(channel, size);
+	}
+
+	@Override
+	public void updateDimensions() {
+		
+		final DesktopWindow win = getDesktopDriver().getWindowByHandle(channel.getHandle(desktopDriver));
+		final Double channelX = win.getX();
+		final Double channelY = win.getY();
+		
+		channel.getDimension().update(channelX, channelY, win.getWidth(), win.getHeight());
+		
+		@SuppressWarnings("unchecked")
+		final ArrayList<Double> response = (ArrayList<Double>) runJavaScript(JX_WINDOW_SIZE);
+		channel.getSubDimension().update(response.get(0) - channelX, response.get(1) - channelY, response.get(2), response.get(3));
 	}
 
 	@Override
 	public void close() {
-		driver.close();
-		process.destroyForcibly();
-		service.stop();
-		super.close();
+
+		try {
+			
+			jxProcess.destroyForcibly();
+			driver.close();
+			getDriverProcess().close();
+
+		}catch(Exception e) {}
 	}
 }

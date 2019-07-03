@@ -38,7 +38,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.http.client.config.RequestConfig;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
@@ -94,7 +93,6 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	// Javascript static code
 	//-----------------------------------------------------------------------------------------------------------------------------
 
-	//protected static final String JS_WAIT_READYSTATE = "var result=window.document.readyState=='complete';";
 	protected static final String JS_WAIT_BEFORE_SEARCH = "var interval=setInterval(function(){if(window.document.readyState==='complete'){clearInterval(interval);done();}},200);";
 
 	//protected static final String JS_AUTO_SCROLL = "var e=arguments[0];e.scrollIntoView();var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
@@ -127,7 +125,6 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	protected Actions actions;
 
 	protected java.net.URI driverSession;
-	protected RequestConfig requestConfig;
 
 	protected String searchElementScript = JS_SEARCH_ELEMENT;
 	protected String autoScrollElement = JS_SCROLL_IF_NEEDED;//JS_AUTO_SCROLL;
@@ -254,7 +251,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 							"windows",
 							applicationVersion,
 							driverVersion,
-							window.pid);
+							window.getPid());
 					maxTry = 0;
 				}else {
 					channel.sleep(300);
@@ -262,10 +259,6 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 				}
 			}
 
-			requestConfig = RequestConfig.custom()
-					.setConnectTimeout(5000)
-					.setConnectionRequestTimeout(5000)
-					.setSocketTimeout(10000).build();
 			try {
 				driverSession = new URI(driverProcess.getDriverServerUrl() + "/session/" + driver.getSessionId().toString());
 			} catch (URISyntaxException e) {}
