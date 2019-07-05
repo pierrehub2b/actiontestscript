@@ -21,24 +21,23 @@ package com.ats.tools;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -48,17 +47,13 @@ import javax.imageio.stream.ImageOutputStream;
 import javax.net.ssl.HttpsURLConnection;
 import javax.swing.Icon;
 
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.io.input.BOMInputStream;
-
 import com.ats.driver.AtsManager;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.TestBound;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonPrimitive;
+import com.opencsv.CSVReader;
 
 public class Utils {
 
@@ -255,6 +250,25 @@ public class Utils {
 			return false;
 		}
 	}
+	
+	public static String removeExtension(String s) {
+
+	    String separator = System.getProperty("file.separator");
+	    String filename;
+
+	    int lastSeparatorIndex = s.lastIndexOf(separator);
+	    if (lastSeparatorIndex == -1) {
+	        filename = s;
+	    } else {
+	        filename = s.substring(lastSeparatorIndex + 1);
+	    }
+
+	    int extensionIndex = filename.lastIndexOf(".");
+	    if (extensionIndex == -1)
+	        return filename;
+
+	    return filename.substring(0, extensionIndex);
+	}
 
 	//-------------------------------------------------------------------------------------------------------------------------------------------
 	//  Image utils
@@ -282,35 +296,7 @@ public class Utils {
 
 		return null;
 	}
-
-	//-------------------------------------------------------------------------------------------------------------------------------------------
-	//  CSV utils
-	//-------------------------------------------------------------------------------------------------------------------------------------------
-
-	public static ArrayList<String[]> loadCsvData(String url) throws MalformedURLException, IOException{
-		return loadCsvData(new URL(url));
-	}
-
-	public static ArrayList<String[]> loadCsvData(URL url) throws IOException{
-
-		final ArrayList<String[]> result = new ArrayList<String[]>();
-
-		final Reader reader = new InputStreamReader(new BOMInputStream(url.openStream()), StandardCharsets.UTF_8);
-		final CSVParser parser = new CSVParser(reader, CSVFormat.EXCEL.withAllowMissingColumnNames());
-
-		for (final CSVRecord record : parser) {
-			String[] lineData = new String[record.size()];
-			for (int i=0; i < record.size(); i++) {
-				lineData[i] = record.get(i);
-			}
-			result.add(lineData);
-		}
-		parser.close();
-		reader.close();
-
-		return result;
-	}
-
+	
 	public static byte[] loadImage(URL url) {
 
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -331,6 +317,27 @@ public class Utils {
 		}
 
 		return null;
+	}
+
+	//-------------------------------------------------------------------------------------------------------------------------------------------
+	//  CSV utils
+	//-------------------------------------------------------------------------------------------------------------------------------------------
+
+	public static List<String[]> loadCsvData(String url) throws MalformedURLException, IOException{
+		return loadCsvData(new URL(url));
+	}
+
+	public static List<String[]> loadCsvData(URL url) throws IOException{
+
+		final CSVReader reader = new CSVReader(
+				new BufferedReader(
+						new InputStreamReader(url.openStream())));
+		
+		final List<String[]> result = reader.readAll();
+		
+		reader.close();
+		
+		return result;
 	}
 
 	//-------------------------------------------------------------------------------------------------------------------------------------------

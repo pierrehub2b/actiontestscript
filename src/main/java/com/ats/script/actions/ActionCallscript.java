@@ -227,7 +227,7 @@ public class ActionCallscript extends Action {
 
 					try {
 
-						ArrayList<String[]> data = Utils.loadCsvData(csvUrl);
+						List<String[]> data = Utils.loadCsvData(csvUrl);
 
 						for (String[] param : data) {
 							ts.getTopScript().sendInfo("Call subscript -> ", name.getCalculated());

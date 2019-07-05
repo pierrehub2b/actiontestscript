@@ -67,7 +67,7 @@ public class ActionNeoloadRecord extends ActionNeoload {
 	@Override
 	public void executeRequest(Channel channel, String designApiUrl) {
 		super.executeRequest(channel, designApiUrl + getServiceName());
-		postDesignDataString("{\"d\": {}}");
+		postData("{\"d\": {}}");
 	}
 
 	//--------------------------------------------------------

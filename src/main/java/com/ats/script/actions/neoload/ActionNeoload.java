@@ -20,15 +20,7 @@ under the License.
 package com.ats.script.actions.neoload;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.config.RequestConfig.Builder;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import java.util.concurrent.TimeUnit;
 
 import com.ats.driver.AtsManager;
 import com.ats.executor.ActionTestScript;
@@ -37,13 +29,19 @@ import com.ats.script.Script;
 import com.ats.script.actions.Action;
 import com.google.gson.Gson;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request.Builder;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
 public class ActionNeoload extends Action {
 
 	public static final String SCRIPT_NEOLOAD_LABEL = "neoload";
-	
+
 	private static final String USER_AGENT = "ATS-Neoload-Recoder/" + AtsManager.getVersion();
 
-	private CloseableHttpClient httpClient;
+	private OkHttpClient client;
+
 	private String apiUrl;
 
 	public ActionNeoload() {}
@@ -53,12 +51,11 @@ public class ActionNeoload extends Action {
 	}
 
 	private void initClient() {
-		final Builder configBuilder = RequestConfig.custom()
-				.setConnectTimeout(30000)
-				.setConnectionRequestTimeout(30000)
-				.setSocketTimeout(30000);
-
-		httpClient = HttpClientBuilder.create().setDefaultRequestConfig(configBuilder.build()).build();
+		client =  new okhttp3.OkHttpClient.Builder()
+				.connectTimeout(30, TimeUnit.SECONDS)
+				.writeTimeout(30, TimeUnit.SECONDS)
+				.readTimeout(30, TimeUnit.SECONDS)
+				.cache(null).build();
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -76,45 +73,38 @@ public class ActionNeoload extends Action {
 		status.setPassed(true);
 		status.setMessage(designApiUrl);
 	}
-	
+
 	protected boolean postDesignData(Object data) {
-		return postDesignDataString(new Gson().toJson(getDesignRequest(data)));
-	}
-	
-	protected boolean postDesignDataString(String data) {
-		return postData(data.getBytes(StandardCharsets.UTF_8));
+		return postData(new Gson().toJson(getDesignRequest(data)));
 	}
 
-	private boolean postData(byte[] dataByte) {
-		
+	protected boolean postData(String data) {
+
+		final RequestBody body = RequestBody.create(null, data);
+
+		final Builder request = 
+				new Builder().url(apiUrl).post(body)
+				.addHeader("User-Agent", USER_AGENT)
+				.addHeader("Accept", "application/json")
+				.addHeader("Content-Type", "application/json");
+
 		try {
-			final HttpPost postRequest = new HttpPost(apiUrl);
-			postRequest.addHeader("Accept", "application/json");
-			postRequest.addHeader("Content-Type", "application/json");
-			postRequest.addHeader("Cache-Control", "nocache");
-			postRequest.addHeader("Pragma", "nocache");
-			postRequest.addHeader("User-Agent", USER_AGENT);
-			postRequest.addHeader("Connection", "keepalive");
-						
-			postRequest.setEntity(new ByteArrayEntity(dataByte));
-			
-			final HttpResponse response = httpClient.execute(postRequest);
-			final int responseCode = response.getStatusLine().getStatusCode();
-			if(responseCode >= 200 && responseCode < 300) {
+			final Response response = client.newCall(request.build()).execute();
+			if(response.code() >= 200 && response.code() < 300) {
 				status.setPassed(true);
 				return true;
 			}else {
 				status.setPassed(false);
-				status.setMessage(response.getStatusLine().getReasonPhrase());
+				status.setMessage(response.message());
 			}
-		}catch (IOException | IllegalArgumentException e) {
+		} catch (IOException e) {
 			status.setPassed(false);
 			status.setMessage(e.getMessage());
 		}
 		
 		return false;
 	}
-		
+
 	//--------------------------------------------------------
 	// Json serialization
 	//--------------------------------------------------------
@@ -125,7 +115,7 @@ public class ActionNeoload extends Action {
 			this.d = data;
 		}
 	}
-	
+
 	protected DesignRequest getDesignRequest(Object data) {
 		return new DesignRequest(data);
 	}

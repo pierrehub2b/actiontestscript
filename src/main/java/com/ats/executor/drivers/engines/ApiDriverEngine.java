@@ -79,12 +79,14 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 
 		super(channel, desktopDriver, path, props, 0, 0);
 		
+		System.setProperty("https.protocols", "TLSv1.2,TLSv1.1,SSLv3");
+
 		final File file = new File("ws_error.log");
 		PrintStream errorStream = null;
 		try {
 			errorStream = new PrintStream(file);
 		} catch (FileNotFoundException e1) {}
-		
+
 
 		final int maxTry = DriverManager.ATS.getMaxTryWebservice();
 		final int timeout = DriverManager.ATS.getWebServiceTimeOut();
@@ -130,7 +132,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 			status.setCode(ActionStatus.CHANNEL_START_ERROR);
 			status.setMessage("Service is not responding -> " + e.getMessage());
 			status.setPassed(false);
-			
+
 			e.printStackTrace(errorStream);
 		}
 	}

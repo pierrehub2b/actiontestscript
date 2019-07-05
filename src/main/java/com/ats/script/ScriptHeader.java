@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.StringJoiner;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.Test;
@@ -42,6 +41,7 @@ import com.ats.generator.variables.Variable;
 import com.ats.script.actions.Action;
 import com.ats.script.actions.neoload.ActionNeoload;
 import com.ats.tools.Operators;
+import com.ats.tools.Utils;
 
 public class ScriptHeader {
 
@@ -72,13 +72,13 @@ public class ScriptHeader {
 	}
 
 	public ScriptHeader(ProjectData projectData, File file){
-
+		
 		this.projectData = projectData;
 		this.atsVersion = loadAtsVersion();
 
 		this.setProjectPath(projectData.getFolderPath());
 		this.setPath(file.getAbsolutePath());
-		this.setName(FilenameUtils.removeExtension(file.getName()));
+		this.setName(Utils.removeExtension(file.getName()));
 		this.setPackageName(file.getParent().substring(projectData.getAtsSourceFolder().toFile().getAbsolutePath().length()).replace(File.separator, "."));
 	}
 	

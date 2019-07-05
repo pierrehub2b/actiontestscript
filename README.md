@@ -236,6 +236,14 @@ Proxy types available are *'system'*, *'auto'*, *'direct'* and *'manual'*, if *'
 	<path>C:\Program\chromium\chrome.exe</path>
 </browser>
 ```
+* If you want to use JxBrowser based application, you have to define *'name'*, *'driver'* and *'path'* attributes of the browser element. The *'driver'* attribute is the driver file *(without extension)* in the ATS drivers folder and the *'path'* attribute is the executable file of the JxBrowser start script, the remote debug port used by default is 9222 (you have to enable debug mode to the JxBrowser based application), you can find all chromium driver versions here : https://sites.google.com/a/chromium.org/chromedriver, you have to choose the version corresponding to your version of chromium engine in your JxBrowser based application:
+```
+<browser>
+	<name>jx</name>
+	<driver>jxbrowser</driver>
+	<path>C:\Program\path_to_jxbrowser_based_application\app.exe</path>
+</browser>
+```
 *Chromium binaries files and Chromium driver for Windows can be found here : http://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html?prefix=Win_x64/650848/*
 * ATS will automatically be updated with the last version of the supported browsers, in order to use another browser driver version you can define an executable driver name in the *'driver'* property of a named browser. If you want to use the version 73 of the chromedriver you have to download the right version of the driver, rename it, and copy it into the *'drivers'* folder :
 ```

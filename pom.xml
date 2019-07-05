@@ -6,7 +6,7 @@
 	<groupId>com.actiontestscript</groupId>
 	<artifactId>ats-automated-testing</artifactId>
 
-	<version>1.5.3</version>
+	<version>1.5.4</version>
 	<packaging>jar</packaging>
 
 	<name>ats-automated-testing</name>
@@ -80,13 +80,13 @@
 		<lib.amf.serializer.version>2.2.0</lib.amf.serializer.version>
 		<lib.slf4j.version>1.7.26</lib.slf4j.version>
 		<lib.mxparser.version>4.3.3</lib.mxparser.version>
-		<lib.selenium.version>3.14.0</lib.selenium.version>
+		<lib.selenium.version>3.141.59</lib.selenium.version>
 		<lib.testng.version>6.14.3</lib.testng.version>
 		<lib.junit.version>LATEST</lib.junit.version>
 		<lib.apache.ant.version>1.10.6</lib.apache.ant.version>
 		<lib.apache.cli.version>1.4</lib.apache.cli.version>
-		<lib.apache.csv.version>1.6</lib.apache.csv.version>
 		<lib.gson.version>2.8.5</lib.gson.version>
+		<lib.opencsv.version>4.6</lib.opencsv.version>
 		<lib.naturalness.version>1.1</lib.naturalness.version>
 	</properties>
 
@@ -148,14 +148,14 @@
 			<version>${lib.apache.cli.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-csv</artifactId>
-			<version>${lib.apache.csv.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 			<version>${lib.gson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>${lib.opencsv.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.labri-progress</groupId>

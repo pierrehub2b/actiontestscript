@@ -21,7 +21,6 @@ package com.ats.driver;
 
 import java.net.InetSocketAddress;
 
-import org.apache.http.HttpHost;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.Proxy.ProxyType;
 
@@ -85,13 +84,6 @@ public class AtsProxy {
 		}
 
 		return proxy;
-	}
-
-	public HttpHost getHttpHost() {
-		if(MANUAL.equals(type)){
-			return new HttpHost(host, port);
-		}
-		return null;
 	}
 	
 	public java.net.Proxy getHttpProxy() {

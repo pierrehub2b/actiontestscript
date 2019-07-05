@@ -32,7 +32,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.http.HttpHost;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -593,10 +592,6 @@ public class AtsManager {
 	
 	public String getNeoloadDesignApi() {
 		return neoloadDesignApi;
-	}
-
-	public HttpHost getProxyHttpHost() {
-		return proxy.getHttpHost();
 	}
 
 	public AtsProxy getNeoloadProxy() {
