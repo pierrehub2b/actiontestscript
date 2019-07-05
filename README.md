@@ -236,7 +236,8 @@ Proxy types available are *'system'*, *'auto'*, *'direct'* and *'manual'*, if *'
 	<path>C:\Program\chromium\chrome.exe</path>
 </browser>
 ```
-* If you want to use JxBrowser based application, you have to define *'name'*, *'driver'* and *'path'* attributes of the browser element. The *'driver'* attribute is the driver file *(without extension)* in the ATS drivers folder and the *'path'* attribute is the executable file of the JxBrowser start script, the remote debug port used by default is 9222 (you have to enable debug mode to the JxBrowser based application), you can find all chromium driver versions here : https://sites.google.com/a/chromium.org/chromedriver, you have to choose the version corresponding to your version of chromium engine in your JxBrowser based application:
+* If you want to use JxBrowser based application, you have to define *'name'*, *'driver'* and *'path'* attributes of the browser element. The *'driver'* attribute is the driver file *(without extension)* in the ATS drivers folder and the *'path'* attribute is the executable file of the JxBrowser start script, the remote debug port used by default is 9222 (you have to enable debug mode to the JxBrowser based application).
+You can find all chromium driver versions here : https://sites.google.com/a/chromium.org/chromedriver, you have to choose the version corresponding to your version of chromium engine in your JxBrowser based application:
 ```
 <browser>
 	<name>jx</name>
