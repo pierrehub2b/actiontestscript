@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.interactions.Actions;
 import org.testng.ITest;
 import org.testng.ITestContext;
 import org.testng.SkipException;
@@ -67,6 +68,8 @@ import com.ats.tools.Utils;
 import com.ats.tools.logger.ExecutionLogger;
 import com.ats.tools.logger.MessageCode;
 
+import okhttp3.OkHttpClient;
+
 public class ActionTestScript extends Script implements ITest{
 
 	public static final String MAIN_TEST_FUNCTION = "testMain";
@@ -91,9 +94,6 @@ public class ActionTestScript extends Script implements ITest{
 	}
 
 	private void init() {
-
-		java.util.logging.Logger.getLogger("org.openqa.selenium").setLevel(Level.OFF);
-
 		topScript = this;
 		channelManager = new ChannelManager(this);
 	}
@@ -120,10 +120,13 @@ public class ActionTestScript extends Script implements ITest{
 	@BeforeClass(alwaysRun=true)
 	public void beforeAtsTest(ITestContext ctx) {
 		
+		java.util.logging.Logger.getLogger(Actions.class.getName()).setLevel(Level.SEVERE);
+		java.util.logging.Logger.getLogger(OkHttpClient.class.getName()).setLevel(Level.SEVERE);
+		
 		final TestRunner runner = (TestRunner) ctx;
 		setTestName(this.getClass().getName());
 
-		if("true".equals(runner.getTest().getParameter("check.mode"))) {
+		if("true".equalsIgnoreCase(runner.getTest().getParameter("check.mode"))) {
 			throw new SkipException("check mode : " + testName);
 		}else {
 		
@@ -139,7 +142,7 @@ public class ActionTestScript extends Script implements ITest{
 			//-----------------------------------------------------------
 
 			final int visualQuality = Utils.string2Int(getEnvironmentValue("visual.report", "0"));
-			final boolean xml = "true".equals(getEnvironmentValue("xml.report", "").toLowerCase());
+			final boolean xml = "true".equalsIgnoreCase(getEnvironmentValue("xml.report", ""));
 
 			if(visualQuality > 0 || xml) {
 				

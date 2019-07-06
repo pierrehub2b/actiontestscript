@@ -78,8 +78,6 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	public ApiDriverEngine(Channel channel, ActionStatus status, String path, DesktopDriver desktopDriver, ApplicationProperties props) {
 
 		super(channel, desktopDriver, path, props, 0, 0);
-		
-		System.setProperty("https.protocols", "TLSv1.2,TLSv1.1,SSLv3");
 
 		final File file = new File("ws_error.log");
 		PrintStream errorStream = null;
@@ -113,7 +111,8 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 
 			final Response response = client.newCall(request).execute();
 			wsContent = CharStreams.toString(new InputStreamReader(response.body().byteStream(), Charsets.UTF_8)).trim();
-
+			response.close();
+			
 			if(wsContent.endsWith("definitions>")) {
 				try {
 					executor = new SoapApiExecutor(client, timeout, maxTry, channel, wsContent, applicationPath);
@@ -333,6 +332,10 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 		} catch (NoSuchAlgorithmException | KeyManagementException e) {
 			e.printStackTrace(errorStream);
 		}
+		
+		//KeyManagerFactory kmfactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+		//kmfactory.init(clientStore,  null);
+		//KeyManager[] keymanagers = kmfactory.getKeyManagers();
 
 		return builder;
 	}

@@ -109,7 +109,6 @@ public class ChannelManager {
 				setCurrentChannel(newChannel);
 				sendInfo("Start channel with application", app);
 
-				//status.setData(getChannelsList());
 				status.setChannel(newChannel);
 				status.endDuration();
 

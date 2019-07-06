@@ -53,6 +53,7 @@ import com.ats.tools.logger.IExecutionLogger;
 import com.exadel.flamingo.flex.messaging.amf.io.AMF3Deserializer;
 import com.google.gson.Gson;
 
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.OkHttpClient.Builder;
 import okhttp3.Request;
@@ -60,8 +61,6 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class DesktopDriver extends RemoteWebDriver {
-
-	private final static String USER_AGENT = "AtsDesktopDriver";
 
 	private List<FoundElement> elementMapLocation;
 
@@ -733,6 +732,9 @@ public class DesktopDriver extends RemoteWebDriver {
 	//---------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------
 
+	private final static String USER_AGENT = "AtsDesktopDriver";
+	private static final MediaType MEDIA_UTF8 = MediaType.parse("application/x-www-form-urlencoded; charset=utf-8");
+	
 	public DesktopResponse sendRequestCommand(CommandType type, Enum<?> subType, Object... data) {
 
 		final String url = new StringBuilder(driverUrl)
@@ -745,16 +747,17 @@ public class DesktopDriver extends RemoteWebDriver {
 		final Request request = new Request.Builder()
 				.url(url)
 				.addHeader("User-Agent", USER_AGENT)
-				.addHeader("Content-Type","application/x-www-form-urlencoded;charset=UTF8")
-				.post(RequestBody.create(null, Stream.of(data).map(Object::toString).collect(Collectors.joining("\n"))))
+				.post(RequestBody.create(MEDIA_UTF8, Stream.of(data).map(Object::toString).collect(Collectors.joining("\n"))))
 				.build();
 				
 		try {
 
-			final AMF3Deserializer amf3 = new AMF3Deserializer(client.newCall(request).execute().body().byteStream());
+			final Response response = client.newCall(request).execute();
+			final AMF3Deserializer amf3 = new AMF3Deserializer(response.body().byteStream());
 			final DesktopResponse desktopResponse = (DesktopResponse) amf3.readObject();
 
 			amf3.close();
+			response.close();
 
 			return desktopResponse;
 
@@ -797,6 +800,8 @@ public class DesktopDriver extends RemoteWebDriver {
 			}else {
 				logger.sendError("Unable to save ATSV file -> ", resp.message());
 			}
+			
+			resp.close();
 
 		} catch (IOException e) {
 

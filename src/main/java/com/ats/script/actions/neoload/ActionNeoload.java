@@ -51,7 +51,7 @@ public class ActionNeoload extends Action {
 	}
 
 	private void initClient() {
-		client =  new okhttp3.OkHttpClient.Builder()
+		client = new okhttp3.OkHttpClient.Builder()
 				.connectTimeout(30, TimeUnit.SECONDS)
 				.writeTimeout(30, TimeUnit.SECONDS)
 				.readTimeout(30, TimeUnit.SECONDS)
@@ -89,20 +89,22 @@ public class ActionNeoload extends Action {
 				.addHeader("Content-Type", "application/json");
 
 		try {
+			
 			final Response response = client.newCall(request.build()).execute();
 			if(response.code() >= 200 && response.code() < 300) {
 				status.setPassed(true);
-				return true;
 			}else {
 				status.setPassed(false);
 				status.setMessage(response.message());
 			}
+			response.close();
+			
 		} catch (IOException e) {
 			status.setPassed(false);
 			status.setMessage(e.getMessage());
 		}
 		
-		return false;
+		return status.isPassed();
 	}
 
 	//--------------------------------------------------------

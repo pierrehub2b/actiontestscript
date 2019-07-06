@@ -175,7 +175,8 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 			}
 
 			parseResponse(type, CharStreams.toString(new InputStreamReader(response.body().byteStream(), Charsets.UTF_8)).trim());
-
+			response.close();
+			
 			return true;
 
 		} catch (IOException e) {

@@ -64,6 +64,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.OkHttpClient.Builder;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 
@@ -486,16 +487,15 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 				.build();
 		
 		try {
-			JsonElement jsonResponse = parser.parse(
+			final Response response = client.newCall(request).execute();
+			final JsonElement jsonResponse = parser.parse(
 					CharStreams.toString(
 							new InputStreamReader(
-									client
-									.newCall(request)
-									.execute()
+									response
 									.body()
 									.byteStream(), 
 									Charsets.UTF_8)));
-			
+			response.close();
 			return jsonResponse.getAsJsonObject();
 			
 		} catch (JsonSyntaxException | IOException e) {

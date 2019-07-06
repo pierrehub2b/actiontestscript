@@ -47,6 +47,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.OkHttpClient.Builder;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class FirefoxDriverEngine extends WebDriverEngine {
 
@@ -232,7 +233,8 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 				.build();
 		
 		try {
-			client.newCall(request).execute();
+			final Response response = client.newCall(request).execute();
+			response.close();
 		} catch (IOException e) {
 			throw new WebDriverException("Geckodriver hangup issue after mouse move action (try to raise up 'actionWait' value in ATS properties for firefox)");
 		}
