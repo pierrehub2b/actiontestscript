@@ -120,8 +120,9 @@ public class ActionTestScript extends Script implements ITest{
 	@BeforeClass(alwaysRun=true)
 	public void beforeAtsTest(ITestContext ctx) {
 		
-		java.util.logging.Logger.getLogger(Actions.class.getName()).setLevel(Level.SEVERE);
-		java.util.logging.Logger.getLogger(OkHttpClient.class.getName()).setLevel(Level.SEVERE);
+		java.util.logging.Logger.getLogger("org.openqa.selenium").setLevel(Level.OFF);
+		java.util.logging.Logger.getLogger(Actions.class.getName()).setLevel(Level.OFF);
+		java.util.logging.Logger.getLogger(OkHttpClient.class.getName()).setLevel(Level.FINE);
 		
 		final TestRunner runner = (TestRunner) ctx;
 		setTestName(this.getClass().getName());

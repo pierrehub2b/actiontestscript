@@ -324,7 +324,7 @@ public class TestElement{
 		}
 
 		status.endDuration();
-		terminateExecution(ts, error, status.getDuration(), count + "", operator + " " + expected);
+		terminateExecution(status, ts, error, status.getDuration(), count + "", operator + " " + expected);
 	}
 
 	//-------------------------------------------------------------------------------------------------------------------
@@ -362,7 +362,7 @@ public class TestElement{
 
 	public void sendText(ActionStatus status, CalculatedValue text) {
 		engine.sendTextData(status, this, text.getCalculatedText());
-		channel.actionTerminated();
+		channel.actionTerminated(status);
 	}
 
 	public void clearText(ActionStatus status) {
@@ -440,12 +440,12 @@ public class TestElement{
 
 	protected void mouseClick(ActionStatus status, MouseDirection position, int offsetX, int offsetY) {
 		engine.mouseClick(status, getFoundElement(), position, offsetX, offsetY);
-		channel.actionTerminated();
+		channel.actionTerminated(status);
 	}
 
 	public void drag(ActionStatus status, MouseDirection position, int offsetX, int offsetY) {
 		engine.drag(status, getFoundElement(), position, offsetX, offsetY);
-		channel.actionTerminated();
+		channel.actionTerminated(status);
 	}
 
 	public void drop(ActionStatus status, MouseDirection md, boolean desktopDragDrop) {
@@ -505,16 +505,16 @@ public class TestElement{
 		return null;
 	}
 
-	public void terminateExecution(ActionTestScript script, int error, Long duration) {
+	public void terminateExecution(ActionStatus status, ActionTestScript script, int error, Long duration) {
 		recorder = script.getRecorder();
 		recorder.update(error, duration, this);
-		channel.actionTerminated();
+		channel.actionTerminated(status);
 	}
 
-	public void terminateExecution(ActionTestScript script, int error, Long duration, String value, String data) {
+	public void terminateExecution(ActionStatus status, ActionTestScript script, int error, Long duration, String value, String data) {
 		recorder = script.getRecorder();
 		recorder.update(error, duration, value, data, this);
-		channel.actionTerminated();
+		channel.actionTerminated(status);
 	}
 
 	public void updateScreen() {

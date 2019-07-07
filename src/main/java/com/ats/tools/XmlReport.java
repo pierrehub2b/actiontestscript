@@ -209,6 +209,8 @@ public class XmlReport {
 					logger.sendError("XML report stream error ->", e0.getMessage());
 				} catch (IOException e1) {
 					logger.sendError("XML report file error ->", e1.getMessage());
+				} catch (Exception e2) {
+					logger.sendError("XML report exception ->", e2.getMessage());
 				}finally {
 					try {
 						if(fis != null) {

@@ -56,7 +56,7 @@ public interface IDriverEngine{
 	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> searchPredicate);
 	public ArrayList<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template);
 	
-	public void waitAfterAction();
+	public void waitAfterAction(ActionStatus status);
 	public void updateDimensions();
 	public FoundElement getElementFromPoint(Boolean syscomp, Double x, Double y);
 	public FoundElement getElementFromRect(Boolean syscomp, Double x, Double y, Double w, Double h);

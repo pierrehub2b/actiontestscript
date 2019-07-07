@@ -230,7 +230,7 @@ public class ActionExecuteElement extends ActionExecute {
 		}
 
 		status.endDuration();
-		testElement.terminateExecution(ts, error, status.getDuration());
+		testElement.terminateExecution(status, ts, error, status.getDuration());
 	}
 
 	public TestElement getTestElement() {

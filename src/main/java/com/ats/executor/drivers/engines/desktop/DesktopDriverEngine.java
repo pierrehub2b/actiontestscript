@@ -201,7 +201,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	//---------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void waitAfterAction() {
+	public void waitAfterAction(ActionStatus status) {
 		actionWait();
 	}
 

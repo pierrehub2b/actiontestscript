@@ -391,7 +391,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	public void goToUrl(ActionStatus status, String url) {}
 
 	@Override
-	public void waitAfterAction() {}
+	public void waitAfterAction(ActionStatus status) {}
 
 	@Override
 	public void scroll(FoundElement element) {}

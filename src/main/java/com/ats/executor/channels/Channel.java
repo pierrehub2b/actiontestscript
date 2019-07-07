@@ -163,9 +163,9 @@ public class Channel {
 		}
 	}
 
-	public void rootKeys(String keys){
+	public void rootKeys(ActionStatus status, String keys){
 		getDesktopDriver().rootKeys(getHandle(getDesktopDriver()), keys);
-		actionTerminated();
+		actionTerminated(status);
 	}
 
 	public byte[] getScreenShot(){
@@ -442,8 +442,8 @@ public class Channel {
 		mainScript.sleep(ms);
 	}
 
-	public void actionTerminated(){
-		engine.waitAfterAction();
+	public void actionTerminated(ActionStatus status){
+		engine.waitAfterAction(status);
 	}
 
 	//----------------------------------------------------------------------------------------------------------
@@ -516,7 +516,7 @@ public class Channel {
 
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position) {
 		engine.mouseMoveToElement(status, foundElement, position, false, 0, 0);
-		actionTerminated();
+		actionTerminated(status);
 	}
 
 	//----------------------------------------------------------------------------------------------------------

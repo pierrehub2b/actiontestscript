@@ -20,13 +20,20 @@ under the License.
 package com.ats.executor.drivers.engines;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.net.URL;
+import java.nio.file.Path;
 import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -34,6 +41,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
@@ -61,6 +70,7 @@ import com.ats.executor.drivers.engines.webservices.SoapApiExecutor;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.graphic.TemplateMatchingSimple;
+import com.ats.script.ProjectData;
 import com.ats.script.actions.ActionApi;
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
@@ -74,22 +84,33 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 
 	private final static String API = "API";
 	private ApiExecutor executor;
+	
+	private PrintStream logStream;
 
 	public ApiDriverEngine(Channel channel, ActionStatus status, String path, DesktopDriver desktopDriver, ApplicationProperties props) {
 
 		super(channel, desktopDriver, path, props, 0, 0);
 
-		final File file = new File("ws_error.log");
-		PrintStream errorStream = null;
 		try {
-			errorStream = new PrintStream(file);
+			
+			final File logsFolder = new File(ProjectData.TARGET_FOLDER + File.separator + ProjectData.LOGS_FOLDER);
+			if(!logsFolder.exists()) {
+				logsFolder.mkdirs();
+			}
+			
+			final Path logFile = logsFolder.toPath().resolve("ws_" + System.currentTimeMillis() + ".log");
+			logStream = new PrintStream(logFile.toFile());
+			logStream.println("Start ATS ws channel ...");
+			
 		} catch (FileNotFoundException e1) {}
-
 
 		final int maxTry = DriverManager.ATS.getMaxTryWebservice();
 		final int timeout = DriverManager.ATS.getWebServiceTimeOut();
 
-		final Builder builder = createHttpBuilder(timeout, errorStream);
+		final Builder builder = createHttpBuilder(
+				timeout, 
+				logStream, 
+				getClass().getClassLoader().getResource(ProjectData.ASSETS_FOLDER + "/" + ProjectData.CERTS_FOLDER));
 
 		if(channel.isNeoload()) {
 			channel.setNeoloadDesignApi(DriverManager.ATS.getNeoloadDesignApi());
@@ -112,7 +133,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 			final Response response = client.newCall(request).execute();
 			wsContent = CharStreams.toString(new InputStreamReader(response.body().byteStream(), Charsets.UTF_8)).trim();
 			response.close();
-			
+
 			if(wsContent.endsWith("definitions>")) {
 				try {
 					executor = new SoapApiExecutor(client, timeout, maxTry, channel, wsContent, applicationPath);
@@ -132,7 +153,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 			status.setMessage("Service is not responding -> " + e.getMessage());
 			status.setPassed(false);
 
-			e.printStackTrace(errorStream);
+			e.printStackTrace(logStream);
 		}
 	}
 
@@ -180,6 +201,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 
 	@Override
 	public void close() {
+		logStream.println("Close ATS ws channel");
 	}
 
 	@Override
@@ -199,7 +221,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	//------------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void waitAfterAction() {}
+	public void waitAfterAction(ActionStatus status) {}
 
 	@Override
 	public void updateDimensions() {}
@@ -304,8 +326,17 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	// init http client
 	//------------------------------------------------------------------------------------------------------------------------------------
 
-	private static Builder createHttpBuilder(int timeout, PrintStream errorStream){
+	private static Builder createHttpBuilder(int timeout, PrintStream errorStream, URL clientCertsUrl){
 
+		File pfxFile = null;
+		final File certsFolder = new File(clientCertsUrl.getPath());
+		if(certsFolder.exists()) {
+			File[] pfxFiles = certsFolder.listFiles((dir, name) -> name.toLowerCase().endsWith(".pfx"));
+			if(pfxFiles.length > 0) {
+				pfxFile = pfxFiles[0];
+			}
+		}
+		
 		final Builder builder = new Builder()
 				.connectTimeout(timeout, TimeUnit.SECONDS)
 				.writeTimeout(timeout, TimeUnit.SECONDS)
@@ -314,34 +345,61 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 				.followRedirects(true)
 				.followSslRedirects(true);
 
-		final TrustManager [] trustAllCerts = new TrustManager [] { trustManager () };
+		final TrustManager [] trustManager = getTrustManager ();
 
 		try {
-			final SSLContext sslContext = SSLContext.getInstance ("SSL");
-			sslContext.init (null, trustAllCerts, new SecureRandom ());
 
-			final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory ();
+			final SSLSocketFactory sslSocketFactory = getSslSocketFactory(pfxFile, trustManager, errorStream);
 
-			builder.sslSocketFactory (sslSocketFactory, (X509TrustManager)trustAllCerts [0]);
+			builder.sslSocketFactory (sslSocketFactory, (X509TrustManager)trustManager [0]);
 			builder.hostnameVerifier(new HostnameVerifier() {
 				@Override
 				public boolean verify(String hostname, SSLSession session) {
 					return true;
 				}
 			});
-		} catch (NoSuchAlgorithmException | KeyManagementException e) {
+		} catch (NoSuchAlgorithmException | KeyManagementException | CertificateException | IOException e) {
 			e.printStackTrace(errorStream);
 		}
-		
-		//KeyManagerFactory kmfactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-		//kmfactory.init(clientStore,  null);
-		//KeyManager[] keymanagers = kmfactory.getKeyManagers();
 
 		return builder;
 	}
 
-	private static TrustManager trustManager () {
-		return new X509TrustManager () {
+	private static SSLSocketFactory getSslSocketFactory(File pfxFile, TrustManager [] trustManager, PrintStream errorStream) throws KeyManagementException, NoSuchAlgorithmException, CertificateException, IOException {
+		final SSLContext sslContext = SSLContext.getInstance ("SSL");
+		
+		KeyManager[] keyManager = null;
+		
+		if(pfxFile != null && pfxFile.exists()) {
+						
+			final String password = "";
+			final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
+			
+			try {
+				final KeyStore keyStore = KeyStore.getInstance("PKCS12");
+				final InputStream keyInput = new FileInputStream(pfxFile);
+				
+				keyStore.load(keyInput, password.toCharArray());
+				keyInput.close();
+				
+				keyManagerFactory.init(keyStore, password.toCharArray());
+				
+				keyManager = keyManagerFactory.getKeyManagers();
+				
+			} catch (KeyStoreException | UnrecoverableKeyException e) {
+				e.printStackTrace(errorStream);
+			}
+
+		}else {
+			errorStream.println("No pfx files found in the project");
+		}
+		
+		sslContext.init (keyManager, trustManager, new SecureRandom ());
+		return sslContext.getSocketFactory();
+	}
+
+	private static TrustManager[] getTrustManager () {
+		final X509TrustManager manager = new X509TrustManager () {
 
 			@Override
 			public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
@@ -356,5 +414,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 				return new java.security.cert.X509Certificate[]{};
 			}
 		};
+
+		return new TrustManager [] { manager };
 	}
 }

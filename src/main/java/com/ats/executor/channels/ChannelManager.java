@@ -66,7 +66,6 @@ public class ChannelManager {
 			cnl.setCurrent(cnl == channel);
 		}
 		currentChannel = channel;
-		//mainScript.setCurrentChannel(channel);
 		channel.setCurrent(true);
 	}
 

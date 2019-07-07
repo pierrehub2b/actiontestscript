@@ -40,7 +40,7 @@ public class TestElementRoot extends TestElement {
 
 	@Override
 	public void enterText(ActionStatus status, CalculatedValue text, IVisualRecorder recorder) {
-		channel.rootKeys(text.getCalculated());
+		channel.rootKeys(status, text.getCalculated());
 		status.endDuration();
 	}
 
@@ -93,6 +93,4 @@ public class TestElementRoot extends TestElement {
 		final TestBound bound = channel.getDimension();
 		return bound.getX().intValue() + "," + bound.getY().intValue() + "," + bound.getWidth().intValue() + "," + bound.getHeight().intValue();
 	}
-
-
 }

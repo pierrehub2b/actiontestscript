@@ -69,7 +69,7 @@ public class TestElementImage extends TestElement {
 		for(SendKeyData sequence : text.getCalculatedText()) {
 			engine.getDesktopDriver().sendKeys(sequence.getSequenceDesktop());
 		}
-		channel.actionTerminated();
+		channel.actionTerminated(status);
 	}
 
 	//-------------------------------------------------------------------------------------------------------------------

@@ -43,7 +43,7 @@ public class EdgeDriverEngine extends WebDriverEngine {
 	public EdgeDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
 		super(channel, DriverManager.EDGE_BROWSER, driverProcess, windowsDriver, props);
 
-		this.searchElementScript = JS_WAIT_BEFORE_SEARCH + JS_SEARCH_ELEMENT;
+		this.searchElementScript = JS_WAIT_READYSTATE + JS_SEARCH_ELEMENT;
 		this.autoScrollElement = JS_SCROLL_IF_NEEDED;//JS_AUTO_SCROLL_CALC;
 
 		EdgeOptions options = new EdgeOptions();
@@ -115,6 +115,6 @@ public class EdgeDriverEngine extends WebDriverEngine {
 	@Override
 	public void goToUrl(ActionStatus status, String url) {
 		super.goToUrl(status, url);
-		waitAfterAction();
+		waitAfterAction(status);
 	}
 }

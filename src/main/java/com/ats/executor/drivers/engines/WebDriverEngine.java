@@ -93,7 +93,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	// Javascript static code
 	//-----------------------------------------------------------------------------------------------------------------------------
 
-	protected static final String JS_WAIT_BEFORE_SEARCH = "var interval=setInterval(function(){if(window.document.readyState==='complete'){clearInterval(interval);done();}},200);";
+	protected static final String JS_WAIT_READYSTATE = "var interval=setInterval(function(){if(window.document.readyState==='complete'){clearInterval(interval);done();}},200);";
 
 	//protected static final String JS_AUTO_SCROLL = "var e=arguments[0];e.scrollIntoView();var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
 	//protected static final String JS_AUTO_SCROLL_CALC = "var e=arguments[0];var r=e.getBoundingClientRect();var top=r.top + window.pageYOffset;window.scrollTo(0, top-(window.innerHeight / 2));r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
@@ -184,6 +184,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		}
 
 		cap.setCapability(CapabilityType.SUPPORTS_FINDING_BY_CSS, false);
+		cap.setCapability(CapabilityType.TAKES_SCREENSHOT, false);
 		cap.setCapability(CapabilityType.HAS_NATIVE_EVENTS, false);
 		cap.setCapability(CapabilityType.PAGE_LOAD_STRATEGY, PageLoadStrategy.NONE);
 
@@ -282,7 +283,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public void waitAfterAction() {
+	public void waitAfterAction(ActionStatus status) {
 		actionWait();
 	}
 

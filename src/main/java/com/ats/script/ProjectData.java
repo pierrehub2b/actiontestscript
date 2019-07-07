@@ -40,7 +40,8 @@ public class ProjectData {
 
 	private static final DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 
-	private static final String TARGET_FOLDER = "target";
+	public static final String TARGET_FOLDER = "target";
+	public static final String LOGS_FOLDER = "logs";
 	private static final String TARGET_FOLDER_REPORT = "report";
 	
 	public static final String TARGET_FOLDER_GENERATED = "generated";
@@ -48,6 +49,7 @@ public class ProjectData {
 
 	public static final String SRC_FOLDER = "src";
 	public static final String ASSETS_FOLDER = "assets";
+	public static final String CERTS_FOLDER = "certs";
 	public static final String RESOURCES_FOLDER = "resources";
 	public static final String IMAGES_FOLDER = "images";
 	
