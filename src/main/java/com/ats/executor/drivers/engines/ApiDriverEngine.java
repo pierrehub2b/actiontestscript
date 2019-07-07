@@ -28,6 +28,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.URL;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -109,8 +110,8 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 
 		final Builder builder = createHttpBuilder(
 				timeout, 
-				logStream, 
-				getClass().getClassLoader().getResource(ProjectData.ASSETS_FOLDER + "/" + ProjectData.CERTS_FOLDER));
+				logStream,
+				getClass().getClassLoader());
 
 		if(channel.isNeoload()) {
 			channel.setNeoloadDesignApi(DriverManager.ATS.getNeoloadDesignApi());
@@ -326,14 +327,25 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	// init http client
 	//------------------------------------------------------------------------------------------------------------------------------------
 
-	private static Builder createHttpBuilder(int timeout, PrintStream errorStream, URL clientCertsUrl){
+	private static Builder createHttpBuilder(int timeout, PrintStream logStream, ClassLoader classLoader){
 
+		final Path certsFolderPath = Paths.get("").toAbsolutePath().resolve(ProjectData.SRC_FOLDER).resolve(ProjectData.ASSETS_FOLDER).resolve(ProjectData.CERTS_FOLDER);
+		
+		File certsFolder = certsFolderPath.toFile();
+		if(!certsFolder.exists()) {
+			final URL certsFolderUrl = classLoader.getResource(ProjectData.ASSETS_FOLDER + "/" + ProjectData.CERTS_FOLDER);
+			if(certsFolderUrl != null) {
+				certsFolder = new File(certsFolderUrl.getPath());
+			}
+		}
+		
 		File pfxFile = null;
-		final File certsFolder = new File(clientCertsUrl.getPath());
+
 		if(certsFolder.exists()) {
 			File[] pfxFiles = certsFolder.listFiles((dir, name) -> name.toLowerCase().endsWith(".pfx"));
 			if(pfxFiles.length > 0) {
 				pfxFile = pfxFiles[0];
+				logStream.println("Using pfx file -> " + pfxFile.getAbsolutePath());
 			}
 		}
 		
@@ -349,7 +361,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 
 		try {
 
-			final SSLSocketFactory sslSocketFactory = getSslSocketFactory(pfxFile, trustManager, errorStream);
+			final SSLSocketFactory sslSocketFactory = getSslSocketFactory(pfxFile, trustManager, logStream);
 
 			builder.sslSocketFactory (sslSocketFactory, (X509TrustManager)trustManager [0]);
 			builder.hostnameVerifier(new HostnameVerifier() {
@@ -359,7 +371,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 				}
 			});
 		} catch (NoSuchAlgorithmException | KeyManagementException | CertificateException | IOException e) {
-			e.printStackTrace(errorStream);
+			e.printStackTrace(logStream);
 		}
 
 		return builder;
