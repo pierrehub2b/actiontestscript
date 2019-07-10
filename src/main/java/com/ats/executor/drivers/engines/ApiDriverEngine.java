@@ -111,6 +111,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 		final Builder builder = createHttpBuilder(
 				timeout, 
 				logStream,
+				channel.getTopScriptPackage(),
 				getClass().getClassLoader());
 
 		if(channel.isNeoload()) {
@@ -137,7 +138,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 
 			if(wsContent.endsWith("definitions>")) {
 				try {
-					executor = new SoapApiExecutor(client, timeout, maxTry, channel, wsContent, applicationPath);
+					executor = new SoapApiExecutor(logStream, client, timeout, maxTry, channel, wsContent, applicationPath);
 					channel.setApplicationData(API, ActionApi.SOAP, ((SoapApiExecutor)executor).getOperations());
 				} catch (SAXException | IOException | ParserConfigurationException e) {
 					status.setCode(ActionStatus.CHANNEL_START_ERROR);
@@ -146,7 +147,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 				}
 			}else {
 				channel.setApplicationData(API, ActionApi.REST);
-				executor = new RestApiExecutor(client, timeout, maxTry, channel, applicationPath);
+				executor = new RestApiExecutor(logStream, client, timeout, maxTry, channel, applicationPath);
 			}
 
 		} catch (IOException e) {
@@ -327,7 +328,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	// init http client
 	//------------------------------------------------------------------------------------------------------------------------------------
 
-	private static Builder createHttpBuilder(int timeout, PrintStream logStream, ClassLoader classLoader){
+	private static Builder createHttpBuilder(int timeout, PrintStream logStream, String packageName, ClassLoader classLoader){
 
 		final Path certsFolderPath = Paths.get("").toAbsolutePath().resolve(ProjectData.SRC_FOLDER).resolve(ProjectData.ASSETS_FOLDER).resolve(ProjectData.CERTS_FOLDER);
 		

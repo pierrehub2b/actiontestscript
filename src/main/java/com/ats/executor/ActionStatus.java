@@ -175,6 +175,6 @@ public class ActionStatus {
 		if(channel == null) {
 			return "";
 		}
-		return "   - Channel : " + channel.getName() + "\n   - Application : " + channel.getApplication();
+		return "   - Channel : " + channel.getName() + "\n   - Application : " + channel.getApplication() + "\n";
 	}
 }

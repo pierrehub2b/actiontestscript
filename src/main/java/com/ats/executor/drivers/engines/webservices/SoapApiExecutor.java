@@ -24,9 +24,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.io.Writer;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -64,9 +63,9 @@ public class SoapApiExecutor extends ApiExecutor {
 	private String soapXmlMessage;
 	private Map<String, String> operations;
 
-	public SoapApiExecutor(OkHttpClient client, int timeout, int maxTry, Channel channel, String wsdlContent, String wsUrl) throws SAXException, IOException, ParserConfigurationException {
+	public SoapApiExecutor(PrintStream logStream, OkHttpClient client, int timeout, int maxTry, Channel channel, String wsdlContent, String wsUrl) throws SAXException, IOException, ParserConfigurationException {
 
-		super(client, timeout, maxTry, channel);
+		super(logStream, client, timeout, maxTry, channel);
 
 		final File wsdlFile = File.createTempFile("atsWs_", ".txt");
 		wsdlFile.deleteOnExit();
@@ -94,8 +93,8 @@ public class SoapApiExecutor extends ApiExecutor {
 
 		final String action = api.getMethod().getCalculated();
 		final String xmlInput = soapXmlMessage.replaceAll("#ACTION#", action).replace("#ACTIONDATA#", api.getData().getCalculated());
-
-		final Builder requestBuilder = new Builder().url(uri.toString()).post(RequestBody.create(null, xmlInput));
+		
+		final Builder requestBuilder = new Builder().post(RequestBody.create(null, xmlInput)).url(getUri().toString());
 
 		requestBuilder.addHeader("Content-Type", "text/xml; charset=utf-8");
 		requestBuilder.addHeader("SOAPAction", operations.get(action));
@@ -150,7 +149,7 @@ public class SoapApiExecutor extends ApiExecutor {
 				nd = document.getElementsByTagName(tagPrefix + ":import");
 
 			else if (document.getElementsByTagName("wsdl:import").getLength() > 0) 
-				nd =document.getElementsByTagName("wsdl:import");  
+				nd = document.getElementsByTagName("wsdl:import");  
 
 			for (int k = 0; k < nd.item(0).getAttributes().getLength(); k++) {
 				String strAttributes = nd.item(0).getAttributes().item(k).getNodeName();
@@ -168,9 +167,9 @@ public class SoapApiExecutor extends ApiExecutor {
 		if((document.getElementsByTagName(str3).getLength()>0)||(document.getElementsByTagName(str4).getLength()>0)){
 
 			if(document.getElementsByTagName(str3).getLength()>0){
-				nodeListOfOperations =document.getElementsByTagName(str3);
+				nodeListOfOperations = document.getElementsByTagName(str3);
 			}else if (document.getElementsByTagName(str4).getLength()>0) {
-				nodeListOfOperations =document.getElementsByTagName(str4);
+				nodeListOfOperations = document.getElementsByTagName(str4);
 			}
 
 			for (int i = 0; i < nodeListOfOperations.getLength(); i++) {
@@ -235,8 +234,8 @@ public class SoapApiExecutor extends ApiExecutor {
 				Node addressLocation = addresses.item(0).getAttributes().getNamedItem("location");
 				if(addressLocation != null) {
 					try {
-						this.uri = new URI(addressLocation.getNodeValue());
-					} catch (DOMException | URISyntaxException e) {}
+						setUri(addressLocation.getNodeValue());
+					} catch (DOMException e) {}
 				}
 			}
 		}

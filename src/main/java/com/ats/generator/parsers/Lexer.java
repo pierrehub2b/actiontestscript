@@ -248,7 +248,7 @@ public class Lexer {
 						dataOne = matcher.group(1).trim();
 						headerData = matcher.group(2).trim();
 					}
-					script.addAction(new ActionApi(script, actionType, dataOne, headerData, dataArray), disabled);
+					script.addAction(new ActionApi(script, actionType, optionsFlat, dataOne, headerData, dataArray), disabled);
 
 				}else if(ActionWindowResize.SCRIPT_RESIZE_LABEL.equals(actionType)){
 

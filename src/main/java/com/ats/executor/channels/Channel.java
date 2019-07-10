@@ -106,6 +106,11 @@ public class Channel {
 			}
 		}
 	}
+	
+	public String getTopScriptPackage() {
+		final String topScriptName = mainScript.getTopScript().getTestName();
+		return topScriptName.substring(0, topScriptName.lastIndexOf("."));
+	}
 
 	public ActionStatus newActionStatus() {
 		return new ActionStatus(this);

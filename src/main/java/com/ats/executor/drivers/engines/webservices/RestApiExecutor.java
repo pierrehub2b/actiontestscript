@@ -19,6 +19,7 @@ under the License.
 
 package com.ats.executor.drivers.engines.webservices;
 
+import java.io.PrintStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map.Entry;
@@ -33,9 +34,9 @@ import okhttp3.RequestBody;
 
 public class RestApiExecutor extends ApiExecutor {
 
-	public RestApiExecutor(OkHttpClient client, int timeout, int maxTry, Channel channel, String wsUrl) {
+	public RestApiExecutor(PrintStream logStream, OkHttpClient client, int timeout, int maxTry, Channel channel, String wsUrl) {
 
-		super(client, timeout, maxTry, channel);
+		super(logStream, client, timeout, maxTry, channel);
 
 		if(!wsUrl.endsWith("/")) {
 			wsUrl += "/";
@@ -58,7 +59,8 @@ public class RestApiExecutor extends ApiExecutor {
 
 		super.execute(status, api);
 
-		final String fullUri = uri.resolve(api.getMethod().getCalculated()).toString();
+		final String fullUri = getMethodUri().toString();
+		
 		String parameters = "";
 		if(api.getData() != null) {
 			parameters = api.getData().getCalculated();

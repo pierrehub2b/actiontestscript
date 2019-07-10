@@ -28,6 +28,7 @@ import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
+import com.ats.tools.Utils;
 
 public class ActionApi extends Action {
 
@@ -49,32 +50,37 @@ public class ActionApi extends Action {
 	private List<CalculatedProperty> header;
 
 	private String type = GET;
+	
+	private int port = -1;
 
 	public ActionApi() {}
 
-	public ActionApi(Script script, String type, String method, String headerData, ArrayList<String> data) {
+	public ActionApi(Script script, String type, String port, String method, String headerData, ArrayList<String> data) {
 		super(script);
 
 		setType(type.substring(SCRIPT_LABEL_LENGTH));
 		setMethod(new CalculatedValue(script, method));
 
-		header = new ArrayList<CalculatedProperty>();
+		this.header = new ArrayList<CalculatedProperty>();
 		if(headerData.length() > 0) {
-			Arrays.stream(headerData.split(",")).forEach(s -> header.add(new CalculatedProperty(script, s)));
+			Arrays.stream(headerData.split(",")).forEach(s -> this.header.add(new CalculatedProperty(script, s)));
 		}
 
 		if(data.size() > 0) {
 			setData(new CalculatedValue(script, data.get(0).trim()));
 		}
+		
+		this.port = Utils.string2Int(port, -1);
 	}
 	
 	public ActionApi(Script script, String type, CalculatedValue method, CalculatedValue data) {
-		this(script, type, method, data, new CalculatedProperty[0]);
+		this(script, type, -1, method, data, new CalculatedProperty[0]);
 	}
 
-	public ActionApi(Script script, String type, CalculatedValue method, CalculatedValue data, CalculatedProperty ... headerData) {
+	public ActionApi(Script script, String type, int port, CalculatedValue method, CalculatedValue data, CalculatedProperty ... headerData) {
 		super(script);
 		setType(type);
+		setPort(port);
 		setMethod(method);
 		setData(data);
 		setHeader(new ArrayList<CalculatedProperty>(Arrays.asList(headerData)));
@@ -91,6 +97,8 @@ public class ActionApi extends Action {
 		codeBuilder.append("\"")
 		.append(type)
 		.append("\", ")
+		.append(port)
+		.append(", ")
 		.append(method.getJavaCode())
 		.append(", ");
 
@@ -132,6 +140,14 @@ public class ActionApi extends Action {
 	// getters and setters for serialization
 	//--------------------------------------------------------
 
+	public int getPort() {
+		return port;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
+	}
+	
 	public List<CalculatedProperty> getHeader() {
 		return header;
 	}

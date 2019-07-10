@@ -177,8 +177,6 @@ public class ScriptLoader extends Script {
 		}
 	}
 
-	public final static byte[] UTF8_BOM = {(byte)0xEF, (byte)0xBB, (byte)0xBF};
-
 	public void generateJavaFile(String projectGav){
 		if(header.getJavaDestinationFolder() != null){
 

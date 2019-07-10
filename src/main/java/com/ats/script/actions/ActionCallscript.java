@@ -34,6 +34,8 @@ import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.openqa.selenium.StaleElementReferenceException;
+
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.Variable;
@@ -249,19 +251,18 @@ public class ActionCallscript extends Action {
 						ts.getTopScript().sendInfo("call subscript -> ", name.getCalculated());
 						testMain.invoke(ats);
 					}
-
 					status.setData(ats.getReturnValues());
 				}
 
 			} catch (InstantiationException e) {
 			} catch (IllegalAccessException e) {
 			} catch (IllegalArgumentException e) {
+			} catch (StaleElementReferenceException e) {
+				e.printStackTrace();
 			} catch (InvocationTargetException e) {
-
 				if(e.getTargetException() instanceof AssertionError) {
 					fail(e.getCause().getMessage());
 				}
-
 			} catch (NoSuchMethodException e) {
 			} catch (SecurityException e) {
 			}

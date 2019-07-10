@@ -21,9 +21,12 @@ package com.ats.executor.drivers.engines.webservices;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.io.StringReader;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -86,7 +89,7 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 	public final static String RESPONSE = "RESPONSE";
 	public final static String DATA = "DATA";
 
-	protected URI uri;
+	private URI uri;
 	private String source;
 	private short type;
 
@@ -98,6 +101,7 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 
 	protected String authentication;
 	protected String authenticationValue;
+	
 	protected int timeout;
 	protected int maxTry;
 
@@ -105,8 +109,11 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 
 	protected OkHttpClient client;
 	private Response response;
+	
+	private PrintStream logStream;
 
-	public ApiExecutor(OkHttpClient client, int timeout, int maxTry, Channel channel) {
+	public ApiExecutor(PrintStream logStream, OkHttpClient client, int timeout, int maxTry, Channel channel) {
+		this.logStream = logStream;
 		this.client = client;
 		this.timeout = timeout;
 		this.maxTry = maxTry;
@@ -119,6 +126,20 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 		try {
 			this.uri = new URI(value);
 		} catch (URISyntaxException e) {}
+	}
+	
+	protected URI getUri() {
+		if(lastAction.getPort() > -1) {
+			try {
+				final URL originalURL = uri.toURL();
+				return (new URL(originalURL.getProtocol(), originalURL.getHost(), lastAction.getPort(), originalURL.getFile())).toURI();
+			} catch (MalformedURLException | URISyntaxException e) {}
+		}
+		return uri;
+	}
+
+	protected URI getMethodUri() {
+		return getUri().resolve(lastAction.getMethod().getCalculated());
 	}
 
 	@Override
@@ -153,15 +174,22 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 	//------------------------------------------------------------------------------------------------------------
 
 	protected void executeRequest(ActionStatus status, final Request request) {
+		
+		logStream.println("call request -> " + request.url().toString());
+		
 		int max = maxTry;
 		while(!clientCall(status, request) && max > 0) {
 			channel.sendLog(MessageCode.PROPERTY_TRY_ASSERT, "Call Webservice  failed", max);
 			channel.sleep(500);
 			max--;
 		}
+		
+		if(max == 0) {
+			logStream.println("call request failed -> " + status.getFailMessage());
+		}
 	}
 
-	protected boolean clientCall(ActionStatus status, Request request) {
+	private boolean clientCall(ActionStatus status, Request request) {
 
 		String type = "";
 
