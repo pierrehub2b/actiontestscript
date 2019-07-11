@@ -112,9 +112,9 @@ public class ActionTestScript extends Script implements ITest{
 
 	@BeforeSuite(alwaysRun=true)
 	public void beforeSuite() {
-		System.out.println("----------------------------------------------");
+		System.out.println("---------------------------------------------------");
 		System.out.println("    ATS execution started (version " + AtsManager.getVersion() + ")");
-		System.out.println("----------------------------------------------");
+		System.out.println("---------------------------------------------------");
 	}
 
 	@BeforeClass(alwaysRun=true)
@@ -502,22 +502,22 @@ public class ActionTestScript extends Script implements ITest{
 	public void exec(int line, Action action){
 		atsCodeLine = line;
 		exec(action);
-		execFinished(action.getStatus(), true);
+		execFinished(action.getClass().getName(), action.getStatus(), true);
 	}
 
 	public void exec(int line, ActionExecute action){
 		atsCodeLine = line;
 		exec(action);
-		execFinished(action.getStatus(), action.isStop());
+		execFinished(action.getClass().getName(), action.getStatus(), action.isStop());
 	}
 
 	public void exec(int line, ActionExecuteElement action){
 		atsCodeLine = line;
 		exec(action);
-		execFinished(action.getStatus(), action.isStop());
+		execFinished(action.getClass().getName(), action.getStatus(), action.isStop());
 	}
 
-	private void execFinished(ActionStatus status, boolean stop) {
+	private void execFinished(String actionClass, ActionStatus status, boolean stop) {
 		if(!status.isPassed()) {
 			final String atsScriptLine = "(" + getTestName() + "." + ATS_EXTENSION + ":" + atsCodeLine + ")";
 
@@ -525,7 +525,7 @@ public class ActionTestScript extends Script implements ITest{
 				fail("[ATS-ERROR] -> No running channel, please check that 'start channel action' has been added to the script " + atsScriptLine);
 			}else {
 				if(stop) {
-					fail("[ATS-ERROR] -> " + status.getFailMessage() + " " + atsScriptLine + "\n" + status.getChannelInfo());
+					fail("[ATS-ERROR] -> " + status.getFailMessage() + "\n   - ATS Script : " + getTestName() + ":" + atsCodeLine + "\n   - Action type : " + actionClass + "\n" + status.getChannelInfo());
 				}else {
 					getTopScript().sendLog(MessageCode.NON_BLOCKING_FAILED, "[ATS-INFO] -> Not stoppable action failed", status.getMessage() + atsScriptLine);
 				}

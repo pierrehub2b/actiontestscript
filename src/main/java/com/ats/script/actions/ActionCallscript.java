@@ -64,20 +64,20 @@ public class ActionCallscript extends Action {
 	private List<Variable> variables;
 	private List<CalculatedValue> parameters;
 	private int loop = 1;
-	private String csvFilePath = null;
+	private CalculatedValue csvFilePath = null;
 
 	public ActionCallscript() {}
 
 	public ActionCallscript(ScriptLoader script, String name, String[] parameters, String[] returnValue) {
 
 		super(script);
-		setName(new CalculatedValue(script, name));
+		this.setName(new CalculatedValue(script, name));
 
 		if(parameters != null && parameters.length > 0) {
 
 			final String firstParam = parameters[0];
 			if(firstParam.startsWith(ASSETS_PROTOCOLE) || firstParam.startsWith(FILE_PROTOCOLE) || firstParam.startsWith(HTTP_PROTOCOLE) || firstParam.startsWith(HTTPS_PROTOCOLE)) {
-				setCsvFilePath(firstParam);
+				this.setCsvFilePath(new CalculatedValue(script, firstParam));
 			}else {
 				
 				final ArrayList<CalculatedValue> paramsValues = new ArrayList<CalculatedValue>();
@@ -85,14 +85,14 @@ public class ActionCallscript extends Action {
 
 					param = param.replaceAll("\n", ",");
 
-					Matcher match = LOOP_REGEXP.matcher(param);
+					final Matcher match = LOOP_REGEXP.matcher(param);
 					if(match.find()){
 						this.loop = Utils.string2Int(match.group(1), 1);
 					}else {
 						paramsValues.add(new CalculatedValue(script, param.trim()));
 					}
 				}
-				setParameters(paramsValues);
+				this.setParameters(paramsValues);
 			}
 		}
 
@@ -101,44 +101,44 @@ public class ActionCallscript extends Action {
 			for (String varName : returnValue ){
 				variableValues.add(script.getVariable(varName.trim(), true));
 			}
-			setVariables(variableValues);
+			this.setVariables(variableValues);
 		}
 	}
 
 	public ActionCallscript(Script script, CalculatedValue name) {
 		super(script);
-		setName(name);
+		this.setName(name);
 	}
 
 	public ActionCallscript(Script script, CalculatedValue name, CalculatedValue[] parameters) {
 		this(script, name);
-		setParameters(new ArrayList<CalculatedValue>(Arrays.asList(parameters)));
+		this.setParameters(new ArrayList<CalculatedValue>(Arrays.asList(parameters)));
 	}
 
 	public ActionCallscript(Script script, CalculatedValue name, Variable ... variables) {
 		this(script, name);
-		setVariables(new ArrayList<Variable>(Arrays.asList(variables)));
+		this.setVariables(new ArrayList<Variable>(Arrays.asList(variables)));
 	}
 
 	public ActionCallscript(Script script, CalculatedValue name, CalculatedValue[] parameters, Variable ... variables) {
 		this(script, name);
-		setParameters(new ArrayList<CalculatedValue>(Arrays.asList(parameters)));
-		setVariables(new ArrayList<Variable>(Arrays.asList(variables)));
+		this.setParameters(new ArrayList<CalculatedValue>(Arrays.asList(parameters)));
+		this.setVariables(new ArrayList<Variable>(Arrays.asList(variables)));
 	}
 
-	public ActionCallscript(Script script, CalculatedValue name, String csvFilePath) {
+	public ActionCallscript(Script script, CalculatedValue name, CalculatedValue csvFilePath) {
 		this(script, name);
-		setCsvFilePath(csvFilePath);
+		this.setCsvFilePath(csvFilePath);
 	}
 
 	public ActionCallscript(Script script, CalculatedValue name, CalculatedValue[] parameters, int loop) {
 		this(script, name, parameters);
-		setLoop(loop);
+		this.setLoop(loop);
 	}
 
 	public ActionCallscript(Script script, CalculatedValue name, int loop) {
 		this(script, name);
-		setLoop(loop);
+		this.setLoop(loop);
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -148,16 +148,16 @@ public class ActionCallscript extends Action {
 	@Override
 	public StringBuilder getJavaCode() {
 
-		StringBuilder codeBuilder = super.getJavaCode();
+		final StringBuilder codeBuilder = super.getJavaCode();
 		codeBuilder.append(name.getJavaCode());
 
 		if(csvFilePath != null) {
 			codeBuilder.append(", \"")
-			.append(csvFilePath)
+			.append(csvFilePath.getJavaCode())
 			.append("\"");
 		}else {
 			if(parameters != null){
-				StringJoiner joiner = new StringJoiner(", ");
+				final StringJoiner joiner = new StringJoiner(", ");
 				for (CalculatedValue value : parameters){
 					joiner.add(value.getJavaCode());
 				}
@@ -172,7 +172,7 @@ public class ActionCallscript extends Action {
 				codeBuilder.append(", ")
 				.append(loop);
 			}else if(variables != null){
-				StringJoiner joiner = new StringJoiner(", ");
+				final StringJoiner joiner = new StringJoiner(", ");
 				for (Variable variable : variables){
 					joiner.add(variable.getName());
 				}
@@ -211,37 +211,38 @@ public class ActionCallscript extends Action {
 
 				if(csvFilePath != null) {
 
+					final String csvPath = csvFilePath.getCalculated();
 					URL csvUrl = null;
 
-					if(csvFilePath.startsWith(ASSETS_PROTOCOLE)) {
-						csvUrl = getClass().getClassLoader().getResource(csvFilePath.replace(ASSETS_PROTOCOLE, ProjectData.ASSETS_FOLDER + File.separator));
+					if(csvPath.startsWith(ASSETS_PROTOCOLE)) {
+						csvUrl = getClass().getClassLoader().getResource(csvPath.replace(ASSETS_PROTOCOLE, ProjectData.ASSETS_FOLDER + File.separator));
 					}else {
 						try {
-							csvUrl = new URL(csvFilePath);
+							csvUrl = new URL(csvPath);
 						} catch (MalformedURLException e) {}
 					}
 
 					if(csvUrl == null) {
 						status.setPassed(false);
-						status.setMessage("CSV file not found : " + csvFilePath);
+						status.setMessage("CSV file not found : " + csvPath);
 						return;
 					}
 
 					try {
 
-						List<String[]> data = Utils.loadCsvData(csvUrl);
+						final List<String[]> data = Utils.loadCsvData(csvUrl);
 
 						for (String[] param : data) {
 							ts.getTopScript().sendInfo("Call subscript -> ", name.getCalculated());
 
 							ats.initCalledScript(ts.getTopScript(), param, null);
-							Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
+							final Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
 							testMain.invoke(ats);
 						}
 
 					} catch (IOException e) {
 						status.setPassed(false);
-						status.setMessage("CSV file IO error : " + csvFilePath + " -> " + e.getMessage());
+						status.setMessage("CSV file IO error : " + csvPath + " -> " + e.getMessage());
 					}
 
 				}else {
@@ -274,7 +275,7 @@ public class ActionCallscript extends Action {
 	private String[] getCalculatedParameters() {
 		if(parameters != null) {
 			int index = 0;
-			String[] calculatedParameters = new String[parameters.size()];
+			final String[] calculatedParameters = new String[parameters.size()];
 			for(CalculatedValue calc : parameters) {
 				calculatedParameters[index] = calc.getCalculated();
 				index++;
@@ -336,11 +337,11 @@ public class ActionCallscript extends Action {
 		this.loop = loop;
 	}
 
-	public String getCsvFilePath() {
+	public CalculatedValue getCsvFilePath() {
 		return csvFilePath;
 	}
 
-	public void setCsvFilePath(String value) {
+	public void setCsvFilePath(CalculatedValue value) {
 		this.csvFilePath = value;
 		if(value != null) {
 			this.parameters = null;
