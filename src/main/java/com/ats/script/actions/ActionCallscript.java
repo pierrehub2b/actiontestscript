@@ -152,9 +152,8 @@ public class ActionCallscript extends Action {
 		codeBuilder.append(name.getJavaCode());
 
 		if(csvFilePath != null) {
-			codeBuilder.append(", \"")
-			.append(csvFilePath.getJavaCode())
-			.append("\"");
+			codeBuilder.append(", ")
+			.append(csvFilePath.getJavaCode());
 		}else {
 			if(parameters != null){
 				final StringJoiner joiner = new StringJoiner(", ");
