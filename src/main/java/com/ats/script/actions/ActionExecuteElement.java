@@ -208,6 +208,8 @@ public class ActionExecuteElement extends ActionExecute {
 
 			setTestElement(null);
 			execute(ts);
+		}catch (Exception e) {
+			status.setMessage("catch exception -> " + e.getMessage());
 		}
 	}	
 
