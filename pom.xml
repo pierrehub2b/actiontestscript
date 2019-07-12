@@ -6,7 +6,7 @@
 	<groupId>com.actiontestscript</groupId>
 	<artifactId>ats-automated-testing</artifactId>
 
-	<version>1.5.44-SNAPSHOT</version>
+	<version>1.5.45-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>ats-automated-testing</name>

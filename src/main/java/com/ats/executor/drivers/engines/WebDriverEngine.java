@@ -619,13 +619,17 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 					status.setMessage("");
 
 					maxTry = 0;
-
+					
+				}catch(StaleElementReferenceException e0) {
+					
+					throw e0;
+					
 				}catch(WebDriverException e) {
 
 					channel.sleep(500);
 
 					status.setPassed(false);
-					status.setMessage(e.getMessage());
+					status.setErrorData(e.getClass().getName(), e.getMessage());
 
 					maxTry--;
 				}
@@ -658,7 +662,8 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			status.setCode(ActionStatus.OBJECT_NOT_VISIBLE);
 		}catch (Exception e) {
 			status.setPassed(false);
-			status.setMessage(e.getMessage());
+			status.setCode(ActionStatus.OBJECT_NOT_INTERACTABLE);
+			status.setErrorData(e.getClass().getName(), e.getMessage());
 		}
 	}
 
@@ -684,7 +689,8 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			status.setCode(ActionStatus.OBJECT_NOT_VISIBLE);
 		}catch (Exception e) {
 			status.setPassed(false);
-			status.setMessage(e.getMessage());
+			status.setCode(ActionStatus.OBJECT_NOT_INTERACTABLE);
+			status.setErrorData(e.getClass().getName(), e.getMessage());
 		}
 	}
 
@@ -856,12 +862,12 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		status.setPassed(true);
 		try {
 			result = driver.executeAsyncScript("return " + javaScript);
-		}catch(StaleElementReferenceException ex) {
-			throw ex;
-		}catch(Exception ex) {
+		}catch(StaleElementReferenceException e0) {
+			throw e0;
+		}catch(Exception e1) {
 			status.setPassed(false);
 			status.setCode(ActionStatus.JAVASCRIPT_ERROR);
-			status.setMessage(ex.getMessage());
+			status.setErrorData(e1.getClass().getName(), e1.getMessage());
 		}
 		return result;
 	}
@@ -886,12 +892,12 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		status.setPassed(true);
 		try {
 			return driver.executeAsyncScript(javaScript + ";arguments[arguments.length-1](result);", params);
-		}catch(StaleElementReferenceException ex) {
-			throw ex;
-		}catch(Exception ex) {
+		}catch(StaleElementReferenceException e0) {
+			throw e0;
+		}catch(Exception e1) {
 			status.setPassed(false);
 			status.setCode(ActionStatus.JAVASCRIPT_ERROR);
-			status.setMessage(ex.getMessage());
+			status.setErrorData(e1.getClass().getName(), e1.getMessage());
 		}
 
 		return null;

@@ -532,7 +532,8 @@ public class ActionTestScript extends Script implements ITest{
 					info.append(getTestName()).append(":").append(atsCodeLine)
 					.append("\n   - Action type : ").append(actionClass)
 					.append("\n").append(status.getChannelInfo())
-					.append(status.getChannelInfo())
+					.append("\n   - Fail code :\n").append(status.getCode())
+					.append("\n   - Fail type :\n").append(status.getErrorType())
 					.append("\n   - Fail message :\n").append(status.getFailMessage());
 				
 					fail(info.toString());

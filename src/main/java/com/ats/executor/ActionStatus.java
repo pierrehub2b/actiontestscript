@@ -58,6 +58,8 @@ public class ActionStatus {
 	private String message = "";
 	private TestElement element = null;
 	private Object data = null;
+	
+	private String errorType = "";
 
 	public ActionStatus(Channel channel) {
 		this.channel = channel;
@@ -74,6 +76,15 @@ public class ActionStatus {
 	
 	public void endDuration() {
 		duration = System.currentTimeMillis() - startedAt;
+	}
+	
+	public void setErrorData(String type, String message) {
+		this.errorType = type;
+		this.message = message;
+	}
+	
+	public String getErrorType() {
+		return errorType;
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------
