@@ -25,6 +25,8 @@ import java.io.File;
 import java.util.List;
 import java.util.logging.Level;
 
+import javax.naming.spi.InitialContextFactoryBuilder;
+
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.interactions.Actions;
 import org.testng.ITest;
@@ -525,7 +527,16 @@ public class ActionTestScript extends Script implements ITest{
 				fail("[ATS-ERROR] -> No running channel, please check that 'start channel action' has been added to the script " + atsScriptLine);
 			}else {
 				if(stop) {
-					fail("[ATS-ERROR] -> " + status.getFailMessage() + "\n   - ATS Script : " + getTestName() + ":" + atsCodeLine + "\n   - Action type : " + actionClass + "\n" + status.getChannelInfo());
+				
+					final StringBuilder info = new StringBuilder("[ATS-ERROR] -> ");
+					info.append(getTestName()).append(":").append(atsCodeLine)
+					.append("\n   - Action type : ").append(actionClass)
+					.append("\n").append(status.getChannelInfo())
+					.append(status.getChannelInfo())
+					.append("\n   - Fail message :\n").append(status.getFailMessage());
+				
+					fail(info.toString());
+				
 				}else {
 					getTopScript().sendLog(MessageCode.NON_BLOCKING_FAILED, "[ATS-INFO] -> Not stoppable action failed", status.getMessage() + atsScriptLine);
 				}

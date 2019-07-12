@@ -203,15 +203,17 @@ public class ActionExecuteElement extends ActionExecute {
 	public void execute(ActionTestScript ts) {
 		try {
 			execute(ts, Operators.GREATER, 0);
-		}catch (StaleElementReferenceException ex) {
-			ts.getCurrentChannel().sleep(200);
-
-			setTestElement(null);
-			execute(ts);
 		}catch (Exception e) {
-			status.setMessage("catch exception -> " + e.getMessage());
+			if(e instanceof StaleElementReferenceException || e.getMessage().toLowerCase().contains("stale element reference")) {
+				ts.getCurrentChannel().sleep(300);
+				setTestElement(null);
+				execute(ts);
+			}else {
+				final StringBuilder errorMessage = new StringBuilder("Unexpected error -> ").append(e.getClass().getName()).append("\n").append(status.getMessage());
+				status.setMessage(errorMessage.toString());
+			}
 		}
-	}	
+	}
 
 	private void asyncExec(ActionTestScript ts) {
 		if(!async) {

@@ -171,10 +171,10 @@ public class ActionStatus {
 		return message + " after " + duration + " ms";
 	}
 
-	public String getChannelInfo() {
+	public StringBuilder getChannelInfo() {
 		if(channel == null) {
-			return "";
+			return new StringBuilder();
 		}
-		return "   - Channel : " + channel.getName() + "\n   - Application : " + channel.getApplication() + "\n";
+		return new StringBuilder("   - Channel : ").append(channel.getName()).append("\n   - Application : ").append(channel.getApplication());
 	}
 }
