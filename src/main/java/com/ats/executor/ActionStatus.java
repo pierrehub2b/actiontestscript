@@ -59,7 +59,7 @@ public class ActionStatus {
 	private TestElement element = null;
 	private Object data = null;
 	
-	private String errorType = "";
+	private String errorType = "AtsError";
 
 	public ActionStatus(Channel channel) {
 		this.channel = channel;
@@ -78,9 +78,15 @@ public class ActionStatus {
 		duration = System.currentTimeMillis() - startedAt;
 	}
 	
-	public void setErrorData(String type, String message) {
-		this.errorType = type;
-		this.message = message;
+	public void setException(Exception ex) {
+		this.passed = false;
+		this.errorType = ex.getClass().getName();
+		this.message = ex.getMessage();
+	}
+	
+	public void setException(int code, Exception ex) {
+		this.code = code;
+		setException(ex);
 	}
 	
 	public String getErrorType() {

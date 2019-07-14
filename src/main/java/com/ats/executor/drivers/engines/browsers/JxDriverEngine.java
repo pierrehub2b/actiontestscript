@@ -46,9 +46,7 @@ public class JxDriverEngine extends WebDriverEngine {
 			builder.start();
 			status.setPassed(true);
 		} catch (IOException e1) {
-			status.setPassed(false);
-			status.setMessage(e1.getMessage());
-			status.setCode(ActionStatus.CHANNEL_START_ERROR);
+			status.setException(ActionStatus.CHANNEL_START_ERROR, e1);
 		}
 
 		this.setDriverProcess(driverManager.getDriverProcess(status, appName, driverName, null));

@@ -19,7 +19,6 @@ under the License.
 
 package com.ats.script.actions;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.function.Predicate;

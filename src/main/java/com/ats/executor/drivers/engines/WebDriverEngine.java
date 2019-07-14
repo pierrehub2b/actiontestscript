@@ -625,12 +625,8 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 					throw e0;
 					
 				}catch(WebDriverException e) {
-
 					channel.sleep(500);
-
-					status.setPassed(false);
-					status.setErrorData(e.getClass().getName(), e.getMessage());
-
+					status.setException(e);
 					maxTry--;
 				}
 			}
@@ -661,9 +657,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			status.setPassed(false);
 			status.setCode(ActionStatus.OBJECT_NOT_VISIBLE);
 		}catch (Exception e) {
-			status.setPassed(false);
-			status.setCode(ActionStatus.OBJECT_NOT_INTERACTABLE);
-			status.setErrorData(e.getClass().getName(), e.getMessage());
+			status.setException(ActionStatus.OBJECT_NOT_INTERACTABLE, e);
 		}
 	}
 
@@ -688,9 +682,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			status.setPassed(false);
 			status.setCode(ActionStatus.OBJECT_NOT_VISIBLE);
 		}catch (Exception e) {
-			status.setPassed(false);
-			status.setCode(ActionStatus.OBJECT_NOT_INTERACTABLE);
-			status.setErrorData(e.getClass().getName(), e.getMessage());
+			status.setException(ActionStatus.OBJECT_NOT_INTERACTABLE, e);
 		}
 	}
 
@@ -865,9 +857,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		}catch(StaleElementReferenceException e0) {
 			throw e0;
 		}catch(Exception e1) {
-			status.setPassed(false);
-			status.setCode(ActionStatus.JAVASCRIPT_ERROR);
-			status.setErrorData(e1.getClass().getName(), e1.getMessage());
+			status.setException(ActionStatus.JAVASCRIPT_ERROR, e1);
 		}
 		return result;
 	}
@@ -895,9 +885,8 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		}catch(StaleElementReferenceException e0) {
 			throw e0;
 		}catch(Exception e1) {
-			status.setPassed(false);
+			status.setException(ActionStatus.JAVASCRIPT_ERROR, e1);
 			status.setCode(ActionStatus.JAVASCRIPT_ERROR);
-			status.setErrorData(e1.getClass().getName(), e1.getMessage());
 		}
 
 		return null;

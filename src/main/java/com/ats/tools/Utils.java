@@ -31,6 +31,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -331,7 +332,7 @@ public class Utils {
 
 		final CSVReader reader = new CSVReader(
 				new BufferedReader(
-						new InputStreamReader(url.openStream())));
+						new InputStreamReader(url.openStream(), StandardCharsets.UTF_8)));
 		
 		final List<String[]> result = reader.readAll();
 		

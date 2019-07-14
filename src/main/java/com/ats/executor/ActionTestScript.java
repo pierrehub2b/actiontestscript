@@ -25,8 +25,6 @@ import java.io.File;
 import java.util.List;
 import java.util.logging.Level;
 
-import javax.naming.spi.InitialContextFactoryBuilder;
-
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.interactions.Actions;
 import org.testng.ITest;
@@ -532,8 +530,8 @@ public class ActionTestScript extends Script implements ITest{
 					info.append(getTestName()).append(":").append(atsCodeLine)
 					.append("\n   - Action type : ").append(actionClass)
 					.append("\n").append(status.getChannelInfo())
-					.append("\n   - Fail code :\n").append(status.getCode())
-					.append("\n   - Fail type :\n").append(status.getErrorType())
+					.append("\n   - Fail code : ").append(status.getCode())
+					.append("\n   - Fail type : ").append(status.getErrorType())
 					.append("\n   - Fail message :\n").append(status.getFailMessage());
 				
 					fail(info.toString());
