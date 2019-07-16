@@ -36,6 +36,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.Listeners;
 
 import com.ats.driver.AtsManager;
 import com.ats.element.SearchedElement;
@@ -70,9 +71,12 @@ import com.ats.tools.logger.MessageCode;
 
 import okhttp3.OkHttpClient;
 
+@Listeners({TestListener.class})
 public class ActionTestScript extends Script implements ITest{
 
 	public static final String MAIN_TEST_FUNCTION = "testMain";
+	
+	private static final String printLine = "----------------------------------------------------------------------------";
 
 	protected ActionTestScript topScript;
 	private ChannelManager channelManager;
@@ -112,31 +116,31 @@ public class ActionTestScript extends Script implements ITest{
 
 	@BeforeSuite(alwaysRun=true)
 	public void beforeSuite() {
-		System.out.println("---------------------------------------------------");
-		System.out.println("    ATS execution started (version " + AtsManager.getVersion() + ")");
-		System.out.println("---------------------------------------------------");
+		System.out.println(printLine);
+		System.out.println("-    ATS execution start (version " + AtsManager.getVersion() + ")");
+		System.out.println(printLine);
 	}
 
 	@BeforeClass(alwaysRun=true)
 	public void beforeAtsTest(ITestContext ctx) {
-		
+
 		java.util.logging.Logger.getLogger("org.openqa.selenium").setLevel(Level.OFF);
 		java.util.logging.Logger.getLogger(Actions.class.getName()).setLevel(Level.OFF);
 		java.util.logging.Logger.getLogger(OkHttpClient.class.getName()).setLevel(Level.FINE);
-		
+
 		final TestRunner runner = (TestRunner) ctx;
 		setTestName(this.getClass().getName());
 
 		if("true".equalsIgnoreCase(runner.getTest().getParameter("check.mode"))) {
 			throw new SkipException("check mode : " + testName);
 		}else {
-		
+
 			setTestExecutionVariables(runner.getTest().getAllParameters());
-			
+
 			final ExecutionLogger mainLogger = new ExecutionLogger(System.out, getEnvironmentValue("ats.log.level", ""));
 			setLogger(mainLogger);
-			
-			sendInfo("Starting script", " -> " + testName);
+
+			sendActionLog("Starting script", testName);
 
 			//-----------------------------------------------------------
 			// check report output specified
@@ -146,9 +150,9 @@ public class ActionTestScript extends Script implements ITest{
 			final boolean xml = "true".equalsIgnoreCase(getEnvironmentValue("xml.report", ""));
 
 			if(visualQuality > 0 || xml) {
-				
+
 				final ScriptHeader header = getHeader();
-				
+
 				header.setName(getTestName());
 				header.setAtsVersion(AtsManager.getVersion());
 
@@ -162,7 +166,7 @@ public class ActionTestScript extends Script implements ITest{
 
 			//-----------------------------------------------------------
 			//-----------------------------------------------------------
-			
+
 			Runtime.getRuntime().addShutdownHook(new Thread() {
 				@Override
 				public void run() {
@@ -176,7 +180,7 @@ public class ActionTestScript extends Script implements ITest{
 
 	@AfterClass(alwaysRun=true)
 	public void afterClass() {
-		sendInfo("Script terminated", " -> " + testName);
+		sendActionLog("Script terminated", testName);
 	}
 
 	@AfterTest(alwaysRun=true)
@@ -245,7 +249,7 @@ public class ActionTestScript extends Script implements ITest{
 	}
 
 	public void tearDown(){
-		sendInfo("Closing drivers ...", "");
+		sendInfo("Closing drivers ...");
 		getChannelManager().tearDown();
 	}
 
@@ -296,7 +300,7 @@ public class ActionTestScript extends Script implements ITest{
 
 	public static final String JAVA_RETURNS_FUNCTION_NAME = "rtn";
 	public void rtn(CalculatedValue ... values) {
-	
+
 		int i = 0;
 		returnValues = new String[values.length];
 
@@ -307,7 +311,7 @@ public class ActionTestScript extends Script implements ITest{
 
 		updateVariables();
 	}
-	
+
 	//---------------------------------------------------------------------------------------------
 
 	public void rtn(String ... values) {
@@ -335,7 +339,7 @@ public class ActionTestScript extends Script implements ITest{
 			index++;
 		}
 	}
-	
+
 	//---------------------------------------------------------------------------------------------
 
 	public void returnValues(String... values) {
@@ -473,14 +477,14 @@ public class ActionTestScript extends Script implements ITest{
 	public MouseSwipe ms(MouseDirectionData hdir, MouseDirectionData vdir) {
 		return new MouseSwipe(hdir, vdir);
 	}
-	
+
 	//---------------------------------------------------------------------------------------------
 
 	public static final String JAVA_EMBEDED_FUNCTION_NAME = "emb";
 	public String emb(String relativePath) {
 		return getAssetsUrl(relativePath);
 	}
-	
+
 	//---------------------------------------------------------------------------------------------
 
 	public static final String JAVA_GAV_FUNCTION_NAME = "gav";
@@ -502,19 +506,19 @@ public class ActionTestScript extends Script implements ITest{
 	public void exec(int line, Action action){
 		atsCodeLine = line;
 		exec(action);
-		execFinished(action.getClass().getName(), action.getStatus(), true);
+		execFinished(action.getClass().getSimpleName(), action.getStatus(), true);
 	}
 
 	public void exec(int line, ActionExecute action){
 		atsCodeLine = line;
 		exec(action);
-		execFinished(action.getClass().getName(), action.getStatus(), action.isStop());
+		execFinished(action.getClass().getSimpleName(), action.getStatus(), action.isStop());
 	}
 
 	public void exec(int line, ActionExecuteElement action){
 		atsCodeLine = line;
 		exec(action);
-		execFinished(action.getClass().getName(), action.getStatus(), action.isStop());
+		execFinished(action.getClass().getSimpleName(), action.getStatus(), action.isStop());
 	}
 
 	private void execFinished(String actionClass, ActionStatus status, boolean stop) {
@@ -522,22 +526,22 @@ public class ActionTestScript extends Script implements ITest{
 			final String atsScriptLine = "(" + getTestName() + "." + ATS_EXTENSION + ":" + atsCodeLine + ")";
 
 			if(status.getCode() == ActionStatus.CHANNEL_NOT_FOUND) {
-				fail("[ATS-ERROR] -> No running channel, please check that 'start channel action' has been added to the script " + atsScriptLine);
+				fail("[ATS-ERROR] No running channel, please check that 'start channel action' has been added to the script " + atsScriptLine);
 			}else {
 				if(stop) {
-				
-					final StringBuilder info = new StringBuilder("[ATS-ERROR] -> ");
-					info.append(getTestName()).append(":").append(atsCodeLine)
-					.append("\n   - Action type : ").append(actionClass)
-					.append("\n").append(status.getChannelInfo())
-					.append("\n   - Fail code : ").append(status.getCode())
-					.append("\n   - Fail type : ").append(status.getErrorType())
-					.append("\n   - Fail message :\n").append(status.getFailMessage());
-				
+
+					final StringBuilder info = new StringBuilder("[ATS-ERROR] ").append(actionClass).append(" -> ")
+							.append(getTestName()).append(" (").append(atsCodeLine).append(")")
+							.append("\n").append(printLine)
+							.append("\n   - Application -> ").append(status.getChannelApplication())
+							.append("\n   - Error -> ").append(status.getErrorType()).append(" [").append(status.getCode()).append("]")
+							.append("\n   - Error message -> ").append(status.getFailMessage())
+							.append("\n").append(printLine);
+
 					fail(info.toString());
-				
+
 				}else {
-					getTopScript().sendLog(MessageCode.NON_BLOCKING_FAILED, "[ATS-INFO] -> Not stoppable action failed", status.getMessage() + atsScriptLine);
+					getTopScript().sendLog(MessageCode.NON_BLOCKING_FAILED, "[ATS-INFO] Not stoppable action failed", status.getMessage() + atsScriptLine);
 				}
 			}
 		}
@@ -548,19 +552,19 @@ public class ActionTestScript extends Script implements ITest{
 	//-----------------------------------------------------------------------------------------------------------
 
 	private boolean dragWithDesktop = false;
-	
+
 	public void startDrag() {
 		topScript.dragWithDesktop = getCurrentChannel().isDesktop();
 	}
-	
+
 	public boolean isDesktopDragDrop() {
 		return topScript.dragWithDesktop;
 	}
-	
+
 	public void endDrag() {
 		topScript.dragWithDesktop = false;
 	}
-	
+
 	//-----------------------------------------------------------------------------------------------------------
 	//  - Animation recorder
 	//-----------------------------------------------------------------------------------------------------------

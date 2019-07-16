@@ -240,7 +240,7 @@ public class XmlReport {
 				logger.sendError("XML report parser error ->", e4.getMessage());
 			}
 			
-			logger.sendInfo("XML report generated in -> ", xmlFolder.getAbsolutePath());
+			logger.sendInfo("XML report generated -> ", xmlFolder.getAbsolutePath());
 		}
 	}
 }

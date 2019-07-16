@@ -32,7 +32,6 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import com.ats.executor.channels.Channel;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.RandomStringValue;
 import com.ats.generator.variables.ScriptValue;
@@ -80,10 +79,6 @@ public class Script {
 		this.projectAtsFolder = projectAtsFolder;
 	}
 	
-	public void setCurrentChannel(Channel channel) {
-		logger.setChannel(channel);
-	}
-	
 	public void sendLog(int code, String message) {
 		logger.sendLog(code, message, "");
 	}
@@ -96,8 +91,12 @@ public class Script {
 		logger.sendLog(code, message, value);
 	}
 	
-	public void sendInfo(String message, String value) {
-		logger.sendInfo(message, value); 
+	public void sendInfo(String message) {
+		logger.sendInfo(message, ""); 
+	}
+	
+	public void sendActionLog(String actionType, String value) {
+		logger.sendInfo(actionType, " -> " + value); 
 	}
 	
 	public void setLogger(ExecutionLogger logger) {

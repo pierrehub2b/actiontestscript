@@ -42,7 +42,7 @@ public class ChannelManager {
 		this.channelsList = new ArrayList<Channel>();
 		this.driverManager = new DriverManager();
 
-		script.sendInfo("ATS drivers folder -> ", this.driverManager.getDriverFolderPath());
+		script.sendActionLog("ATS drivers folder", this.driverManager.getDriverFolderPath());
 	}
 
 	public int getMaxTry() {
@@ -71,7 +71,6 @@ public class ChannelManager {
 
 	private void noChannel() {
 		currentChannel = null;
-		mainScript.setCurrentChannel(null);
 	}
 
 	public void closeAllChannels(){
@@ -106,7 +105,8 @@ public class ChannelManager {
 				
 				channelsList.add(newChannel);
 				setCurrentChannel(newChannel);
-				sendInfo("Start channel with application", app);
+				
+				mainScript.sendActionLog("Start channel : " + newChannel.getName(), "application : " + app);
 
 				status.setChannel(newChannel);
 				status.endDuration();
@@ -133,7 +133,7 @@ public class ChannelManager {
 						setCurrentChannel(cnl);
 						cnl.toFront();
 
-						sendInfo("Switch to channel", name);
+						mainScript.sendActionLog("Switch to channel", name);
 
 						status.setData(getChannelsList());
 						status.setChannel(cnl);
@@ -156,8 +156,7 @@ public class ChannelManager {
 	public void channelClosed(ActionStatus status, Channel channel){
 		status.startDuration();
 		if(channelsList.remove(channel)) {
-			sendInfo("Close channel ", channel.getName());
-			
+			mainScript.sendActionLog("Close channel", channel.getName());
 			if(channelsList.size() > 0){
 				final Channel current = channelsList.get(0);
 				setCurrentChannel(current);
@@ -173,10 +172,6 @@ public class ChannelManager {
 			status.setMessage("Channel '" + channel.getName() + "' not found !");
 		}
 		status.endDuration();
-	}
-
-	private void sendInfo(String type, String message) {
-		mainScript.sendInfo(type, " -> " + message);
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------

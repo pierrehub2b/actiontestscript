@@ -265,10 +265,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			} catch (URISyntaxException e) {}
 
 		}else {
-			status.setPassed(false);
-			status.setCode(ActionStatus.CHANNEL_START_ERROR);
-			status.setMessage(errorMessage);
-
+			status.setTechnicalError(ActionStatus.CHANNEL_START_ERROR, errorMessage);
 			driverProcess.close();
 		}
 	}

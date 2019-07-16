@@ -358,7 +358,6 @@ public class Channel {
 	public void setCurrent(boolean value) {
 		this.current = value;
 		if(value){
-			mainScript.setCurrentChannel(this);
 			toFront();
 		}
 	}

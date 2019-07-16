@@ -43,6 +43,9 @@ public class ActionStatus {
 	public static final int DRIVER_NOT_REACHABLE = -17;
 	public static final int JAVA_EXCEPTION = -18;
 	public static final int CHANNEL_START_ERROR = -19;
+	
+	private static final String ATS_TECHNICAL_ERROR = "AtsTechnicalError";
+	private static final String ATS_FUNCTIONAL_ERROR = "AtsFunctionalError";
 
 	private Channel channel;
 
@@ -59,7 +62,7 @@ public class ActionStatus {
 	private TestElement element = null;
 	private Object data = null;
 	
-	private String errorType = "AtsError";
+	private String errorType = ATS_FUNCTIONAL_ERROR;
 
 	public ActionStatus(Channel channel) {
 		this.channel = channel;
@@ -87,6 +90,13 @@ public class ActionStatus {
 	public void setException(int code, Exception ex) {
 		this.code = code;
 		setException(ex);
+	}
+
+	public void setTechnicalError(int code, String message) {
+		this.passed = false;
+		this.code = code;
+		this.errorType = ATS_TECHNICAL_ERROR;
+		this.message = message;
 	}
 	
 	public String getErrorType() {
@@ -187,11 +197,25 @@ public class ActionStatus {
 	public String getFailMessage() {
 		return message + " after " + duration + " ms";
 	}
+	
+	public String getChannelName() {
+		if(channel == null) {
+			return "";
+		}
+		return channel.getName();
+	}
+	
+	public String getChannelApplication() {
+		if(channel == null) {
+			return "";
+		}
+		return channel.getApplication();
+	}
 
 	public StringBuilder getChannelInfo() {
 		if(channel == null) {
 			return new StringBuilder();
 		}
-		return new StringBuilder("   - Channel : ").append(channel.getName()).append("\n   - Application : ").append(channel.getApplication());
+		return new StringBuilder("\n   - Channel -> ").append(channel.getName()).append("\n   - Application -> ").append(channel.getApplication());
 	}
 }

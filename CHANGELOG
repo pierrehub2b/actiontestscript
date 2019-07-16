@@ -1,0 +1,6 @@
+v1.5.5
+==================
+
+* Fix csv read file using UTF8 charset
+* Fix stale reference exception on mouse click action
+* Add JxBrowser support

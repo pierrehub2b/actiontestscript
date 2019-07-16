@@ -179,7 +179,7 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 		
 		int max = maxTry;
 		while(!clientCall(status, request) && max > 0) {
-			channel.sendLog(MessageCode.PROPERTY_TRY_ASSERT, "Call Webservice  failed", max);
+			channel.sendLog(MessageCode.PROPERTY_TRY_ASSERT, "Call webservice failed", max);
 			channel.sleep(500);
 			max--;
 		}

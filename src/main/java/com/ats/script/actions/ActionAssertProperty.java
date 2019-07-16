@@ -75,7 +75,7 @@ public class ActionAssertProperty extends ActionExecuteElement {
 			int checkValue = checkProperty(value.getName());
 			
 			while(checkValue < 0 && maxCheckTry > 0) {
-				ts.getCurrentChannel().sendLog(MessageCode.PROPERTY_TRY_ASSERT, "Assert property value", maxCheckTry);
+				ts.getCurrentChannel().sendLog(MessageCode.PROPERTY_TRY_ASSERT, "Assert property", maxCheckTry);
 				ts.getCurrentChannel().progressiveWait(getActionMaxTry() - maxCheckTry);
 				
 				checkValue = checkProperty(value.getName());
@@ -128,7 +128,7 @@ public class ActionAssertProperty extends ActionExecuteElement {
 				status.setPassed(false);
 				status.setCode(ActionStatus.ATTRIBUTE_CHECK_FAIL);
 				status.setData(new String[]{shortAttribute, value.getValue().getCalculated()});
-				status.setMessage("Expected result : '" + expectedResult + "'");
+				status.setMessage("Expected result '" + expectedResult + "'");
 				
 				return ActionStatus.ATTRIBUTE_CHECK_FAIL;
 			}

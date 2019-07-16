@@ -21,8 +21,6 @@ package com.ats.tools.logger;
 
 import java.io.PrintStream;
 
-import com.ats.executor.channels.Channel;
-
 public class ExecutionLogger implements IExecutionLogger {
 
 	private final static String ERROR_LEVEL = "error";
@@ -35,10 +33,7 @@ public class ExecutionLogger implements IExecutionLogger {
 	public static final String ANSI_YELLOW = "\u001B[33m";
 	public static final String ANSI_BLUE = "\u001B[34m";
 
-	private final static String NO_CHANNEL = " || ";
-
 	private PrintStream printOut;
-	private String channelName = NO_CHANNEL;
 
 	private int level = 0;
 
@@ -58,23 +53,11 @@ public class ExecutionLogger implements IExecutionLogger {
 
 		if(level > 0) {
 			this.printOut = sysout;
-			sysout.println("[INFO] ATS log level -> " + verbose);
+			sysout.println("[ATS-INFO] log level -> " + verbose);
 		}else {
 			this.printOut = new NullPrintStream();
-			sysout.println("[INFO] ATS log disabled");
+			sysout.println("[ATS-INFO] log disabled");
 		}
-	}
-
-	public void setChannel(Channel channel) {
-		if(channel == null) {
-			this.channelName = NO_CHANNEL;
-		}else {
-			this.channelName = " | " + "channel '" + channel.getName() + "' | ";
-		}
-	}
-
-	public void setChannelName(String name) {
-		this.channelName = name;
 	}
 
 	public void sendLog(int code, String message, Object value) {
@@ -115,6 +98,6 @@ public class ExecutionLogger implements IExecutionLogger {
 	}
 
 	private void print(String type, String data) {
-		printOut.println("[ATS-" + type + "]" + channelName + data);
+		printOut.println("[ATS-" + type + "] " + data);
 	}
 }
