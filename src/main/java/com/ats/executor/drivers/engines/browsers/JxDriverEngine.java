@@ -31,7 +31,7 @@ public class JxDriverEngine extends WebDriverEngine {
 
 	private final static int DEFAULT_WAIT = 150;
 	private final static int DEFAULT_PROPERTY_WAIT = 200;
-	
+
 	private final static String JX_WINDOW_SIZE = "var result=[window.screenX+7.0001, window.screenY+8.0001, window.innerWidth+0.0001, window.innerHeight+0.0001];";
 
 	private ProcessHandle jxProcess;
@@ -76,8 +76,8 @@ public class JxDriverEngine extends WebDriverEngine {
 				driver.manage().timeouts().setScriptTimeout(50, TimeUnit.SECONDS);
 				driver.manage().timeouts().pageLoadTimeout(60, TimeUnit.SECONDS);
 
-				String applicationVersion = null;
-				String driverVersion = null;
+				String applicationVersion = "N/A";
+				String driverVersion = "N/A";
 
 				Map<String, ?> infos = driver.getCapabilities().asMap();
 				for (Map.Entry<String, ?> entry : infos.entrySet()){
@@ -93,53 +93,74 @@ public class JxDriverEngine extends WebDriverEngine {
 				}
 
 				final String titleUid = UUID.randomUUID().toString();
+				String atsStartPageUri = null;
 				try {
 					final File tempHtml = File.createTempFile("ats_", ".html");
 					tempHtml.deleteOnExit();
 
 					Files.write(tempHtml.toPath(), Utils.getAtsBrowserContent(titleUid, channel.getApplication(), applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait(), getPropertyWait(), 20, 20, 20, 20, 20, getDesktopDriver()));
-					driver.get(tempHtml.toURI().toString());
+					atsStartPageUri = tempHtml.toURI().toString();
 				} catch (IOException e) {}
 
-				int maxTry = 10;
-				while(maxTry > 0) {
-					final DesktopWindow window = desktopDriver.getWindowByTitle(titleUid);
-					if(window != null && window.getPid() > 0) {
+				final DesktopWindow window = getJxBrowserWindow(atsStartPageUri, titleUid);
+				if(window != null) {
 
-						desktopDriver.setEngine(new DesktopDriverEngine(channel, window));
-						channel.setApplicationData(
-								"windows",
-								applicationVersion,
-								driverVersion,
-								window.getPid(),
-								window.getHandle());
-						
+					int maxTry = 10;
+					while(maxTry > 0) {
 						Optional<ProcessHandle> opt = ProcessHandle.allProcesses().filter(p -> p.pid() == window.getPid()).findFirst();
 						if(opt.isPresent()) {
 							maxTry = 0;
 							jxProcess = opt.get();
+							
+							desktopDriver.setEngine(new DesktopDriverEngine(channel, window));
+							channel.setApplicationData(
+									"windows",
+									applicationVersion,
+									driverVersion,
+									window.getPid(),
+									window.getHandle());							
+							
+							setSize(channel.getDimension().getSize());
+							setPosition(channel.getDimension().getPoint());
+							
+							return;
+							
 						}else {
 							maxTry--;
 						}
-						
-					}else {
-						channel.sleep(300);
-						maxTry--;
 					}
-				}
-				
-				if(jxProcess == null) {
+
+					status.setPassed(false);
+					status.setCode(ActionStatus.CHANNEL_START_ERROR);
+					status.setMessage("Unable to find JxBrowser running process");
+
+				}else {
 					status.setPassed(false);
 					status.setCode(ActionStatus.CHANNEL_START_ERROR);
 					status.setMessage("Unable to find JxBrowser main window");
-				}else {
-					setSize(channel.getDimension().getSize());
-					setPosition(channel.getDimension().getPoint());
 				}
 			}
 		}
 	}
-	
+
+	private DesktopWindow getJxBrowserWindow(String atsStartPage, String titleId) {
+
+		int maxTry = 10;
+		while(maxTry > 0) {
+			
+			driver.get(atsStartPage);
+			
+			final DesktopWindow window = desktopDriver.getWindowByTitle(titleId);
+			if(window != null && window.getPid() > 0) {
+				return window;
+			}else {
+				channel.sleep(300);
+				maxTry--;
+			}
+		}
+		return null;
+	}
+
 	@Override
 	protected void setPosition(Point pt) {
 		getDesktopDriver().moveWindow(channel, pt);
@@ -152,13 +173,13 @@ public class JxDriverEngine extends WebDriverEngine {
 
 	@Override
 	public void updateDimensions() {
-		
+
 		final DesktopWindow win = getDesktopDriver().getWindowByHandle(channel.getHandle(desktopDriver));
 		final Double channelX = win.getX();
 		final Double channelY = win.getY();
-		
+
 		channel.getDimension().update(channelX, channelY, win.getWidth(), win.getHeight());
-		
+
 		@SuppressWarnings("unchecked")
 		final ArrayList<Double> response = (ArrayList<Double>) runJavaScript(JX_WINDOW_SIZE);
 		channel.getSubDimension().update(response.get(0) - channelX, response.get(1) - channelY, response.get(2), response.get(3));
@@ -168,7 +189,7 @@ public class JxDriverEngine extends WebDriverEngine {
 	public void close() {
 
 		try {
-			
+
 			jxProcess.destroyForcibly();
 			driver.close();
 			getDriverProcess().close();
