@@ -47,6 +47,9 @@ public class ChromeDriverEngine extends WebDriverEngine {
 		options.addArguments("--disable-infobars");
 		options.addArguments("--disable-notifications");
 		options.addArguments("--disable-web-security");
+		options.addArguments("--disable-popup-blocking");
+		options.addArguments("--use-fake-ui-for-media-stream");
+		options.addArguments("--use-fake-device-for-media-stream");
 		options.addArguments("--user-data-dir=" + Utils.createDriverFolder(DriverManager.CHROME_BROWSER));
 		
 		if(lang != null) {

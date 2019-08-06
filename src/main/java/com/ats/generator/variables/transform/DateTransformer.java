@@ -31,6 +31,10 @@ import com.ats.executor.ActionTestScript;
 public class DateTransformer extends Transformer {
 
 	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+	private static final DateTimeFormatter SINGLE_DAY_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-d");
+	private static final DateTimeFormatter SINGLE_MONTH_FORMATTER = DateTimeFormatter.ofPattern("yyyy-M-dd");
+	private static final DateTimeFormatter SINGLE_DAY_MONTH_FORMATTER = DateTimeFormatter.ofPattern("yyyy-M-d");
+	
 	private static final Pattern PATTERN_DAY_TRANSFORM = Pattern.compile("(-?\\d+)([ymd])");
 	
 	private int year = 0;
@@ -83,14 +87,34 @@ public class DateTransformer extends Transformer {
 	
 	@Override
 	public String format(String data) {
+		
+		LocalDate date = null;
+		data = data.replaceAll("/", "-");
+		
 		try {
-			LocalDate date = LocalDate.parse(data, DATE_FORMATTER);
+			date = LocalDate.parse(data, DATE_FORMATTER);
+		} catch (DateTimeParseException e0) {
+			try {
+				date = LocalDate.parse(data, SINGLE_DAY_FORMATTER);
+			} catch (DateTimeParseException e1) {
+				try {
+					date = LocalDate.parse(data, SINGLE_MONTH_FORMATTER);
+				} catch (DateTimeParseException e2) {
+					try {
+						date = LocalDate.parse(data, SINGLE_DAY_MONTH_FORMATTER);
+					} catch (DateTimeParseException e3) {
+						
+					}
+				}
+			}
+		}
+				
+		if(date != null) {
 			date = date.plusYears(year).plusMonths(month).plusDays(day);
 			return date.toString();
-
-		} catch (DateTimeParseException e) {}
-		
-		return "";
+		}else {
+			return "#Date parse error : " + data + "#"; 
+		}
 	}
 	
 	//--------------------------------------------------------

@@ -223,13 +223,11 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	}
 	
 	private void executeRequest(JsonObject action, String type) {
-
-		final RequestBody body = RequestBody.create(null, action.toString());
 		
 		final Request request = new Request.Builder()
 				.url(driverSession + "/" + type)
 				.addHeader("Content-Type", "application/json")
-				.post(body)
+				.post(RequestBody.create(null, action.toString()))
 				.build();
 		
 		try {
