@@ -233,6 +233,11 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	public CalculatedProperty[] getCssAttributes(FoundElement element) {
 		return null;
 	}
+	
+	@Override
+	public ArrayList<FoundElement> findSelectOptions(TestElement element) {
+		return new ArrayList<FoundElement>();
+	}
 
 	//---------------------------------------------------------------------------------------------------------------------
 	// 
@@ -249,7 +254,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testElement, String tag, ArrayList<String> attributes, Predicate<AtsBaseElement> predicate) {
+	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testElement, String tag, ArrayList<String> attributes, Predicate<AtsBaseElement> predicate, WebElement startElement) {
 		if(sysComp) {
 			if(SYSCOMP.equals(tag.toUpperCase())) {
 				ArrayList<FoundElement> win = new ArrayList<FoundElement>();

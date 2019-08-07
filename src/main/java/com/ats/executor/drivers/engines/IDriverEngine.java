@@ -53,7 +53,7 @@ public interface IDriverEngine{
 	public Object executeJavaScript(ActionStatus status, String script);
 	public void goToUrl(ActionStatus status, String url);
 	
-	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> searchPredicate);
+	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> searchPredicate, WebElement startElement);
 	public ArrayList<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template);
 	
 	public void waitAfterAction(ActionStatus status);
@@ -63,6 +63,7 @@ public interface IDriverEngine{
 	public String getAttribute(ActionStatus status, FoundElement element, String attributeName, int maxTry);
 	public CalculatedProperty[] getAttributes(FoundElement element, boolean reload);
 	public CalculatedProperty[] getCssAttributes(FoundElement element);
+	public ArrayList<FoundElement> findSelectOptions(TestElement testElement);
 	public void loadParents(FoundElement hoverElement);
 	
 	public void scroll(int delta);

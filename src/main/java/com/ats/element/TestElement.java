@@ -21,12 +21,13 @@ package com.ats.element;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.Select;
 
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
@@ -157,9 +158,9 @@ public class TestElement{
 			count = getElementsCount();
 		}
 	}
-	
+
 	protected ArrayList<FoundElement> loadElements(SearchedElement searchedElement) {
-		
+
 		final ArrayList<String> attributes = new ArrayList<String>();
 		Predicate<AtsBaseElement> fullPredicate = Objects::nonNull;
 
@@ -169,7 +170,7 @@ public class TestElement{
 
 			attributes.add(property.getName());
 		}
-		return engine.findElements(sysComp, this, searchedTag, attributes, fullPredicate);
+		return engine.findElements(sysComp, this, searchedTag, attributes, fullPredicate, null);
 	}
 
 	private int getElementsCount() {
@@ -343,7 +344,7 @@ public class TestElement{
 				if(status.isPassed()) {
 
 					recorder.updateScreen(true);
-					
+
 					String enteredText = null;
 					if(isPassword()) {
 						enteredText = "xxxxxxxxxx";
@@ -372,43 +373,45 @@ public class TestElement{
 	//-------------------------------------------------------------------------------------------------------------------
 	// Select ...
 	//-------------------------------------------------------------------------------------------------------------------
-
-	public void select(ActionStatus status, CalculatedProperty selectProperty, boolean select, boolean ctrl) {
+	
+	public void select(ActionStatus status, CalculatedProperty selectProperty) {
 		if(isValidated()){
 
-			final Select selectElement = new Select(getWebElement());
+			final ArrayList<FoundElement> options = engine.findSelectOptions(this);
 
-			if(ActionSelect.SELECT_INDEX.equals(selectProperty.getName())){
+			if(options != null && options.size() > 0) {
+				if(ActionSelect.SELECT_INDEX.equals(selectProperty.getName())){
 
-				final int idx = Utils.string2Int(selectProperty.getValue().getCalculated());
+					final int index = Utils.string2Int(selectProperty.getValue().getCalculated());
+					if(options.size() > index) {
+						options.get(index).getValue().click();
+					}else {
+						status.setPassed(false);
+						status.setCode(ActionStatus.OBJECT_NOT_INTERACTABLE);
+						status.setMessage("Index not found, max length options : " + options.size());
+					}
+					
+				}else{
 
-				if(select) {
-					selectElement.selectByIndex(idx);
-				}else {
-					selectElement.deselectByIndex(idx);
-				}
+					final String attribute = selectProperty.getName();
+					final String searchedValue = selectProperty.getValue().getCalculated();
+					Optional<FoundElement> foundOption = null;
 
-			}else if (ActionSelect.SELECT_VALUE.equals(selectProperty.getName())){
-				if(select) {
-					selectElement.selectByValue(selectProperty.getValue().getCalculated());
-				}else {
-					selectElement.deselectByValue(selectProperty.getValue().getCalculated());
-				}
-			}else {
+					if(selectProperty.isRegexp()) {
+						foundOption = options.stream().filter(e -> e.getValue().getAttribute(attribute).matches(searchedValue)).findFirst();
+					}else {
+						foundOption = options.stream().filter(e -> e.getValue().getAttribute(attribute).equals(searchedValue)).findFirst();
+					}
 
-				if(select) {
-					selectElement.selectByVisibleText(selectProperty.getValue().getCalculated());
-				}else {
-					selectElement.deselectByVisibleText(selectProperty.getValue().getCalculated());
+					try {
+						foundOption.get().getValue().click();
+					}catch (NoSuchElementException e) {
+						status.setPassed(false);
+						status.setCode(ActionStatus.OBJECT_NOT_INTERACTABLE);
+						status.setMessage("Option not found : " + searchedValue);
+					}
 				}
 			}
-
-			status.setPassed(true);
-
-		}else{
-			status.setPassed(false);
-			status.setCode(ActionStatus.OBJECT_NOT_FOUND);
-			status.setMessage("Element not found, cannot select index !");
 		}
 	}
 

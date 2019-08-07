@@ -285,6 +285,18 @@ public class Channel {
 	public CalculatedProperty[] getAttributes(FoundElement element){
 		return engine.getAttributes(element, false);
 	}
+	
+	public ArrayList<String[]> getSelectValues(TestElement element){
+				
+		final ArrayList<String[]> result = new ArrayList<String[]>();
+		final ArrayList<FoundElement> options = engine.findSelectOptions(element);
+
+		if(options != null && options.size() > 0) {
+			options.stream().forEachOrdered(e -> result.add(new String[]{e.getValue().getAttribute("value"), e.getValue().getAttribute("text")}));
+		}
+				
+		return result;
+	}
 
 	public String getAttribute(ActionStatus status, FoundElement element, String attributeName, int maxTry){
 		return engine.getAttribute(status, element, attributeName, maxTry + DriverManager.ATS.getMaxTryProperty());

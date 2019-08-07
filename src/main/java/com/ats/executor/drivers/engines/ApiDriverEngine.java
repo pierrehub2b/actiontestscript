@@ -170,7 +170,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	}
 
 	@Override
-	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> searchPredicate) {
+	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> searchPredicate, WebElement startElement) {
 		return executor.findElements(channel, sysComp, testObject, tagName, attributes, searchPredicate);
 	}
 
@@ -203,12 +203,17 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 
 	@Override
 	public void close() {
-		logStream.println("Close ATS ws channel");
+		logStream.println("Close ATS WebService channel");
 	}
 
 	@Override
 	public CalculatedProperty[] getCssAttributes(FoundElement element) {
 		return new CalculatedProperty[0];
+	}
+	
+	@Override
+	public ArrayList<FoundElement> findSelectOptions(TestElement element) {
+		return new ArrayList<FoundElement>();
 	}
 
 	@Override

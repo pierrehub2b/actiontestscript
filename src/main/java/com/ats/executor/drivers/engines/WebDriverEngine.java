@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -39,12 +40,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.openqa.selenium.Alert;
-import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.MutableCapabilities;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.NoSuchWindowException;
 import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.Point;
@@ -85,10 +84,10 @@ import com.google.gson.Gson;
 public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	protected static final String WEB_ELEMENT_REF = "element-6066-11e4-a52e-4f735466cecf";
-	
+
 	private final static int DEFAULT_WAIT = 150;
 	private final static int DEFAULT_PROPERTY_WAIT = 200;
-	
+
 	//-----------------------------------------------------------------------------------------------------------------------------
 	// Javascript static code
 	//-----------------------------------------------------------------------------------------------------------------------------
@@ -142,7 +141,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 		this.driverProcess = driverProcess;
 	}
-	
+
 	public WebDriverEngine(
 			Channel channel, 
 			String browser, 
@@ -160,7 +159,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	protected DriverProcess getDriverProcess() {
 		return driverProcess;
 	}
-	
+
 	public void setDriverProcess(DriverProcess driverProcess) {
 		this.driverProcess = driverProcess;
 	}
@@ -185,89 +184,78 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 		cap.setCapability(CapabilityType.SUPPORTS_FINDING_BY_CSS, false);
 		cap.setCapability(CapabilityType.TAKES_SCREENSHOT, false);
-		cap.setCapability(CapabilityType.HAS_NATIVE_EVENTS, false);
+		cap.setCapability(CapabilityType.HAS_NATIVE_EVENTS, true);
 		cap.setCapability(CapabilityType.PAGE_LOAD_STRATEGY, PageLoadStrategy.NONE);
 
-		int maxTry = 10;
-		String errorMessage = null;
+		try{
+			driver = new RemoteWebDriver(driverProcess.getDriverServerUrl(), cap);
+		}catch(Exception ex){
+			status.setTechnicalError(ActionStatus.CHANNEL_START_ERROR, ex.getMessage());
+			driverProcess.close();
+			return;
+		}
 
+		status.setPassed(true);
+
+		actions = new Actions(driver);
+
+		driver.manage().timeouts().setScriptTimeout(scriptTimeout, TimeUnit.SECONDS);
+		driver.manage().timeouts().pageLoadTimeout(pageLoadTimeout, TimeUnit.SECONDS);
+
+		try{
+			driver.manage().window().setSize(channel.getDimension().getSize());
+			driver.manage().window().setPosition(channel.getDimension().getPoint());
+		}catch(Exception ex){
+			System.err.println(ex.getMessage());
+		}
+
+		String applicationVersion = null;
+		String driverVersion = null;
+
+		Map<String, ?> infos = driver.getCapabilities().asMap();
+		for (Map.Entry<String, ?> entry : infos.entrySet()){
+			if("browserVersion".equals(entry.getKey()) || "version".equals(entry.getKey())){
+				applicationVersion = entry.getValue().toString();
+			}else if("chrome".equals(entry.getKey())) {
+				Map<String, String> chromeData = (Map<String, String>) entry.getValue();
+				driverVersion = chromeData.get("chromedriverVersion");
+				if(driverVersion != null) {
+					driverVersion = driverVersion.replaceFirst("\\(.*\\)", "").trim();
+				}
+			}else if("moz:geckodriverVersion".equals(entry.getKey())) {
+				driverVersion = entry.getValue().toString();
+			}
+		}
+
+		final String titleUid = UUID.randomUUID().toString();
+		try {
+			final File tempHtml = File.createTempFile("ats_", ".html");
+			tempHtml.deleteOnExit();
+
+			Files.write(tempHtml.toPath(), Utils.getAtsBrowserContent(titleUid, channel.getApplication(), applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait(), getPropertyWait(), maxTrySearch, maxTryProperty, scriptTimeout, pageLoadTimeout, watchdog, getDesktopDriver()));
+			driver.get(tempHtml.toURI().toString());
+		} catch (IOException e) {}
+
+		int maxTry = 10;
 		while(maxTry > 0) {
-			try{
-				driver = new RemoteWebDriver(driverProcess.getDriverServerUrl(), cap);
+			final DesktopWindow window = desktopDriver.getWindowByTitle(titleUid);
+			if(window != null) {
+				desktopDriver.setEngine(new DesktopDriverEngine(channel, window));
+				channel.setApplicationData(
+						"windows",
+						applicationVersion,
+						driverVersion,
+						window.getPid());
 				maxTry = 0;
-			}catch(Exception ex){
-				errorMessage = ex.getMessage();
+			}else {
+				channel.sleep(300);
 				maxTry--;
 			}
 		}
 
-		if(driver != null) {
-			status.setPassed(true);
-
-			actions = new Actions(driver);
-
-			driver.manage().timeouts().setScriptTimeout(scriptTimeout, TimeUnit.SECONDS);
-			driver.manage().timeouts().pageLoadTimeout(pageLoadTimeout, TimeUnit.SECONDS);
-
-			try{
-				driver.manage().window().setSize(channel.getDimension().getSize());
-				driver.manage().window().setPosition(channel.getDimension().getPoint());
-			}catch(Exception ex){
-				System.err.println(ex.getMessage());
-			}
-
-			String applicationVersion = null;
-			String driverVersion = null;
-
-			Map<String, ?> infos = driver.getCapabilities().asMap();
-			for (Map.Entry<String, ?> entry : infos.entrySet()){
-				if("browserVersion".equals(entry.getKey()) || "version".equals(entry.getKey())){
-					applicationVersion = entry.getValue().toString();
-				}else if("chrome".equals(entry.getKey())) {
-					Map<String, String> chromeData = (Map<String, String>) entry.getValue();
-					driverVersion = chromeData.get("chromedriverVersion");
-					if(driverVersion != null) {
-						driverVersion = driverVersion.replaceFirst("\\(.*\\)", "").trim();
-					}
-				}else if("moz:geckodriverVersion".equals(entry.getKey())) {
-					driverVersion = entry.getValue().toString();
-				}
-			}
-
-			final String titleUid = UUID.randomUUID().toString();
-			try {
-				final File tempHtml = File.createTempFile("ats_", ".html");
-				tempHtml.deleteOnExit();
-
-				Files.write(tempHtml.toPath(), Utils.getAtsBrowserContent(titleUid, channel.getApplication(), applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait(), getPropertyWait(), maxTrySearch, maxTryProperty, scriptTimeout, pageLoadTimeout, watchdog, getDesktopDriver()));
-				driver.get(tempHtml.toURI().toString());
-			} catch (IOException e) {}
-
-			maxTry = 10;
-			while(maxTry > 0) {
-				final DesktopWindow window = desktopDriver.getWindowByTitle(titleUid);
-				if(window != null) {
-					desktopDriver.setEngine(new DesktopDriverEngine(channel, window));
-					channel.setApplicationData(
-							"windows",
-							applicationVersion,
-							driverVersion,
-							window.getPid());
-					maxTry = 0;
-				}else {
-					channel.sleep(300);
-					maxTry--;
-				}
-			}
-
-			try {
-				driverSession = new URI(driverProcess.getDriverServerUrl() + "/session/" + driver.getSessionId().toString());
-			} catch (URISyntaxException e) {}
-
-		}else {
-			status.setTechnicalError(ActionStatus.CHANNEL_START_ERROR, errorMessage);
-			driverProcess.close();
-		}
+		try {
+			driverSession = new URI(driverProcess.getDriverServerUrl() + "/session/" + driver.getSessionId().toString());
+		} catch (URISyntaxException e) {}
 	}
 
 	@Override
@@ -460,12 +448,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	private WebElement getBody() {
-		try {
-			return driver.findElement(By.tagName("body"));
-		}catch(NoSuchElementException ex) {
-			channel.sleep(200);
-			return null;
-		}
+		return (WebElement)driver.executeScript("return window.document.getElementsByTagName(\"body\")[0];");
 	}
 
 	private RemoteWebElement getWebElement(FoundElement element) {
@@ -485,6 +468,11 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			tryLoop--;
 		}
 		return null;
+	}
+	
+	@Override
+	public ArrayList<FoundElement> findSelectOptions(TestElement element) {
+		return findElements(false, element, "option", new ArrayList<String>(), Objects::nonNull, element.getWebElement());
 	}
 
 	private boolean doubleCheckAttribute(ActionStatus status, String verify, FoundElement element, String attributeName) {
@@ -601,7 +589,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean withDesktop, int offsetX, int offsetY) {
-		
+
 		if(withDesktop) {
 			desktopMoveToElement(foundElement, position,offsetX ,offsetY);
 		}else {
@@ -616,11 +604,11 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 					status.setMessage("");
 
 					maxTry = 0;
-					
+
 				}catch(StaleElementReferenceException e0) {
-					
+
 					throw e0;
-					
+
 				}catch(WebDriverException e) {
 					channel.sleep(500);
 					status.setException(e);
@@ -659,9 +647,10 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	protected void click(FoundElement element, int offsetX, int offsetY) {
-		actions.moveToElement(element.getValue(), offsetX, offsetY).click().build().perform();
+		//actions.moveToElement(element.getValue(), offsetX, offsetY).click().build().perform();
+		actions.moveToElement(element.getValue(), offsetX, offsetY).click(element.getValue()).build().perform();
 	}
-	
+
 	@Override
 	public void drag(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {
 
@@ -926,13 +915,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	private double offsetIframeY = 0.0;
 
 	@Override
-	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> predicate) {
-
-		//if(tagName == null) {
-		//	tagName = BODY;
-		//}
-
-		WebElement startElement = null;
+	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> predicate, WebElement startElement) {
 
 		if(testObject.getParent() != null){
 			if(testObject.getParent().isIframe()) {
@@ -952,7 +935,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 					return new ArrayList<FoundElement>();
 				}
 
-			}else {
+			}else if(startElement == null) {
 				startElement = testObject.getParent().getWebElement();
 			}
 		}else {

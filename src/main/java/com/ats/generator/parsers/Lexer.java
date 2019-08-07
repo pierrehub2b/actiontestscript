@@ -308,13 +308,13 @@ public class Lexer {
 						script.addAction(new ActionProperty(script, stopExec, options, propertyName, variable, dataArray), disabled);
 					}
 
-				}else if(ActionSelect.SCRIPT_LABEL_SELECT.equals(actionType) || ActionSelect.SCRIPT_LABEL_DESELECT.equals(actionType)){
+				}else if(actionType.contains(ActionSelect.SCRIPT_LABEL_SELECT)){
 
 					//-----------------------
 					// Select action
 					//-----------------------
 
-					script.addAction(new ActionSelect(script, actionType, stopExec, options, dataOne, dataArray), disabled);
+					script.addAction(new ActionSelect(script, dataOne, stopExec, options, dataArray), disabled);
 
 				}else if(ActionCallscript.SCRIPT_LABEL.equals(actionType)){
 

@@ -30,31 +30,22 @@ import com.ats.script.ScriptLoader;
 public class ActionSelect extends ActionExecuteElement {
 
 	public static final String SCRIPT_LABEL_SELECT = "select";
-	public static final String SCRIPT_LABEL_DESELECT = "deselect";
 	
 	public static final String SELECT_TEXT = "text";
 	public static final String SELECT_VALUE = "value";
 	public static final String SELECT_INDEX = "index";
 
 	private CalculatedProperty selectValue;
-	
-	private boolean select = true;
-	private boolean ctrl = false;
 
 	public ActionSelect() {}
 
-	public ActionSelect(ScriptLoader script, String type, boolean stop, ArrayList<String> options, String select, ArrayList<String> objectArray) {
+	public ActionSelect(ScriptLoader script, String data, boolean stop, ArrayList<String> options, ArrayList<String> objectArray) {
 		super(script, stop, options, objectArray);
-		setSelect(!SCRIPT_LABEL_DESELECT.toLowerCase().equals(type.toLowerCase()));
-		setSelectValue(new CalculatedProperty(script, select));
-		if(options != null && options.size() > 0) {
-			this.ctrl = options.remove(ActionMouseKey.CTRL_KEY);
-		}
+		setSelectValue(new CalculatedProperty(script, data));
 	}
 
-	public ActionSelect(Script script, boolean stop, int maxTry, SearchedElement element, boolean select, CalculatedProperty selectValue) {
+	public ActionSelect(Script script, boolean stop, int maxTry, SearchedElement element, CalculatedProperty selectValue) {
 		super(script, stop, maxTry, element);
-		setSelect(select);
 		setSelectValue(selectValue);
 	}
 	
@@ -66,8 +57,6 @@ public class ActionSelect extends ActionExecuteElement {
 	public StringBuilder getJavaCode() {
 		StringBuilder codeBuilder = super.getJavaCode();
 		codeBuilder.append(", ")
-		.append(select)
-		.append(", ")
 		.append(selectValue.getJavaCode())
 		.append(")");
 		return codeBuilder;
@@ -81,7 +70,7 @@ public class ActionSelect extends ActionExecuteElement {
 		
 		super.terminateExecution(ts);
 		
-		getTestElement().select(status, selectValue, select, ctrl);
+		getTestElement().select(status, selectValue);
 		
 		status.endDuration();
 		ts.getRecorder().updateScreen(0, status.getDuration());
@@ -97,21 +86,5 @@ public class ActionSelect extends ActionExecuteElement {
 
 	public void setSelectValue(CalculatedProperty value) {
 		this.selectValue = value;
-	}
-
-	public boolean isSelect() {
-		return select;
-	}
-
-	public void setSelect(boolean select) {
-		this.select = select;
-	}
-	
-	public boolean isCtrl() {
-		return ctrl;
-	}
-
-	public void setCtrl(boolean ctrl) {
-		this.ctrl = ctrl;
 	}
 }
