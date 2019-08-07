@@ -19,6 +19,8 @@ under the License.
 
 package com.ats.executor.drivers.engines.browsers;
 
+import java.util.Collections;
+
 import org.openqa.selenium.chrome.ChromeOptions;
 
 import com.ats.driver.ApplicationProperties;
@@ -44,7 +46,6 @@ public class ChromeDriverEngine extends WebDriverEngine {
 		options.addArguments("--allow-file-access-from-files");
 		options.addArguments("--allow-cross-origin-auth-prompt");
 		options.addArguments("--allow-file-access");
-		options.addArguments("--disable-infobars");
 		options.addArguments("--disable-notifications");
 		options.addArguments("--disable-web-security");
 		options.addArguments("--disable-dev-shm-usage");
@@ -60,6 +61,9 @@ public class ChromeDriverEngine extends WebDriverEngine {
 		if(applicationPath != null) {
 			options.setBinary(applicationPath);
 		}
+		
+		options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
+		options.setExperimentalOption("useAutomationExtension", false);
 
 		launchDriver(status, options);
 	}
