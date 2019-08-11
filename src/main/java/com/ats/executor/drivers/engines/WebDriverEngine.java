@@ -184,7 +184,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 		cap.setCapability(CapabilityType.SUPPORTS_FINDING_BY_CSS, false);
 		cap.setCapability(CapabilityType.TAKES_SCREENSHOT, false);
-		cap.setCapability(CapabilityType.HAS_NATIVE_EVENTS, true);
+		cap.setCapability(CapabilityType.HAS_NATIVE_EVENTS, false);
 		cap.setCapability(CapabilityType.PAGE_LOAD_STRATEGY, PageLoadStrategy.NONE);
 
 		try{
@@ -647,8 +647,10 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	protected void click(FoundElement element, int offsetX, int offsetY) {
-		//actions.moveToElement(element.getValue(), offsetX, offsetY).click().build().perform();
-		actions.moveToElement(element.getValue(), offsetX, offsetY).click(element.getValue()).build().perform();
+		actions.moveToElement(element.getValue(), offsetX, offsetY)
+		.click(element.getValue())
+		.build()
+		.perform();
 	}
 
 	@Override
@@ -657,9 +659,12 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		final Rectangle rect = element.getRectangle();
 
 		try {
-
-			final Actions act = actions.moveToElement(element.getValue(), getOffsetX(rect, position) + offsetX, getOffsetY(rect, position) + offsetY);
-			act.clickAndHold().build().perform();
+			
+			actions.moveToElement(element.getValue(), getOffsetX(rect, position) + offsetX, getOffsetY(rect, position) + offsetY)
+			.clickAndHold(element.getValue())
+			.build()
+			.perform();
+			
 			status.setPassed(true);
 
 		}catch(StaleElementReferenceException e1) {

@@ -190,7 +190,7 @@ public class Lexer {
 				}
 
 				optionsFlat = optionsFlat.toLowerCase();
-				
+
 				if(ActionNeoloadStart.SCRIPT_LABEL.equals(actionType)) {
 					script.addAction(new ActionNeoloadStart(script, optionsFlat, userData), disabled);
 				}else {
@@ -324,6 +324,7 @@ public class Lexer {
 
 					String[] parameters = null;
 					String[] returnValues = null;
+					String csvFilePath = null;
 
 					if(dataOne.contains(ScriptParser.ATS_ASSIGN_SEPARATOR)) {
 						final String[] callscriptData = dataOne.split(ScriptParser.ATS_ASSIGN_SEPARATOR);
@@ -331,27 +332,32 @@ public class Lexer {
 						returnValues = callscriptData[1].split(",");
 					}
 
-					matcher = ACTION_PATTERN.matcher(dataOne);
-					if (matcher.find()){
-						dataOne = matcher.group(1).trim();
-						String parametersData = matcher.group(2);
+					if(dataArray.size() > 0) {
+						csvFilePath = dataArray.remove(0).trim();
+					}else {
 
-						Matcher mv = ParameterValue.PARAMETER_PATTERN.matcher(parametersData);
-						while (mv.find()) {
-							ParameterValue sp = new ParameterValue(mv);
-							parametersData = parametersData.replace(sp.getReplace(), sp.getNoComma());
-						}
+						matcher = ACTION_PATTERN.matcher(dataOne);
+						if (matcher.find()){
+							dataOne = matcher.group(1).trim();
+							String parametersData = matcher.group(2);
 
-						mv = EnvironmentValue.ENV_PATTERN.matcher(parametersData);
-						while (mv.find()) {
-							final EnvironmentValue sp = new EnvironmentValue(mv);
-							parametersData = parametersData.replace(sp.getReplace(), sp.getNoComma());
-						}
+							Matcher mv = ParameterValue.PARAMETER_PATTERN.matcher(parametersData);
+							while (mv.find()) {
+								ParameterValue sp = new ParameterValue(mv);
+								parametersData = parametersData.replace(sp.getReplace(), sp.getNoComma());
+							}
 
-						parameters = parametersData.split(",");
-					}			
+							mv = EnvironmentValue.ENV_PATTERN.matcher(parametersData);
+							while (mv.find()) {
+								final EnvironmentValue sp = new EnvironmentValue(mv);
+								parametersData = parametersData.replace(sp.getReplace(), sp.getNoComma());
+							}
 
-					script.addAction(new ActionCallscript(script, dataOne, parameters, returnValues), disabled);
+							parameters = parametersData.split(",");
+						}	
+					}
+
+					script.addAction(new ActionCallscript(script, dataOne, parameters, returnValues, csvFilePath), disabled);
 
 				}else if(ActionComment.SCRIPT_LABEL.equals(actionType)){
 

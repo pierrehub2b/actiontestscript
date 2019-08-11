@@ -66,31 +66,29 @@ public class ActionCallscript extends Action {
 
 	public ActionCallscript() {}
 
-	public ActionCallscript(ScriptLoader script, String name, String[] parameters, String[] returnValue) {
+	public ActionCallscript(ScriptLoader script, String name, String[] parameters, String[] returnValue, String csvFilePath) {
 
 		super(script);
 		this.setName(new CalculatedValue(script, name));
 
-		if(parameters != null && parameters.length > 0) {
+		if(!setCsvFilePathData(csvFilePath)) {
+			if(parameters != null && parameters.length > 0) {
+				final String firstParam = parameters[0].trim();
+				if(!setCsvFilePathData(firstParam)) {
+					final ArrayList<CalculatedValue> paramsValues = new ArrayList<CalculatedValue>();
+					for(String param : parameters){
 
-			final String firstParam = parameters[0];
-			if(firstParam.startsWith(ASSETS_PROTOCOLE) || firstParam.startsWith(FILE_PROTOCOLE) || firstParam.startsWith(HTTP_PROTOCOLE) || firstParam.startsWith(HTTPS_PROTOCOLE)) {
-				this.setCsvFilePath(new CalculatedValue(script, firstParam));
-			}else {
-				
-				final ArrayList<CalculatedValue> paramsValues = new ArrayList<CalculatedValue>();
-				for(String param : parameters){
+						param = param.replaceAll("\n", ",");
 
-					param = param.replaceAll("\n", ",");
-
-					final Matcher match = LOOP_REGEXP.matcher(param);
-					if(match.find()){
-						this.loop = Utils.string2Int(match.group(1), 1);
-					}else {
-						paramsValues.add(new CalculatedValue(script, param.trim()));
+						final Matcher match = LOOP_REGEXP.matcher(param);
+						if(match.find()){
+							this.loop = Utils.string2Int(match.group(1), 1);
+						}else {
+							paramsValues.add(new CalculatedValue(script, param.trim()));
+						}
 					}
+					this.setParameters(paramsValues);
 				}
-				this.setParameters(paramsValues);
 			}
 		}
 
@@ -137,6 +135,16 @@ public class ActionCallscript extends Action {
 	public ActionCallscript(Script script, CalculatedValue name, int loop) {
 		this(script, name);
 		this.setLoop(loop);
+	}
+
+	private boolean setCsvFilePathData(String value) {
+		if(value != null) {
+			if(value.startsWith("$") || value.startsWith(ASSETS_PROTOCOLE) || value.startsWith(FILE_PROTOCOLE) || value.startsWith(HTTP_PROTOCOLE) || value.startsWith(HTTPS_PROTOCOLE)) {
+				this.setCsvFilePath(new CalculatedValue(script, value));
+				return true;
+			}
+		}
+		return false;
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -263,7 +271,7 @@ public class ActionCallscript extends Action {
 			} catch (SecurityException e) {
 			}
 		}
-		
+
 		status.endDuration();
 	}
 

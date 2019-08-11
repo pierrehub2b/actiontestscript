@@ -286,7 +286,7 @@ public class Channel {
 		return engine.getAttributes(element, false);
 	}
 	
-	public ArrayList<String[]> getSelectValues(TestElement element){
+	public ArrayList<String[]> findSelectOptions(TestElement element){
 				
 		final ArrayList<String[]> result = new ArrayList<String[]>();
 		final ArrayList<FoundElement> options = engine.findSelectOptions(element);
