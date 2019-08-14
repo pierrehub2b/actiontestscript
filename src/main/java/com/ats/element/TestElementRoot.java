@@ -21,6 +21,8 @@ package com.ats.element;
 
 import java.util.Base64;
 
+import org.openqa.selenium.WebElement;
+
 import com.ats.executor.ActionStatus;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
@@ -45,8 +47,8 @@ public class TestElementRoot extends TestElement {
 	}
 
 	@Override
-	public Object executeScript(ActionStatus status, String script) {
-		return engine.executeJavaScript(status, script);
+	public Object executeScript(ActionStatus status, String script, boolean returnValue) {
+		return engine.executeJavaScript(status, script, returnValue);
 	}
 
 	@Override
@@ -75,6 +77,11 @@ public class TestElementRoot extends TestElement {
 		default :
 			return "";
 		}
+	}
+	
+	@Override
+	public WebElement getWebElement() {
+		return engine.getRootElement();
 	}
 
 	@Override

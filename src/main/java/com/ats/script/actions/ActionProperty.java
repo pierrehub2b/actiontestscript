@@ -55,7 +55,7 @@ public class ActionProperty extends ActionReturnVariable {
 		codeBuilder.append(", \"")
 		.append(name)
 		.append("\", ")
-		.append(getVariable().getName())
+		.append(variable.getName())
 		.append(")");
 		return codeBuilder;
 	}

@@ -83,7 +83,7 @@ public class TestElementSystemButton extends TestElement {
 	}
 
 	@Override
-	public Object executeScript(ActionStatus status, String script) {
+	public Object executeScript(ActionStatus status, String script, boolean returnValue) {
 		return null;
 	}
 }

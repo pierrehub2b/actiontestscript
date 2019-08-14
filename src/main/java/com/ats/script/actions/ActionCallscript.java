@@ -139,7 +139,7 @@ public class ActionCallscript extends Action {
 
 	private boolean setCsvFilePathData(String value) {
 		if(value != null) {
-			if(value.startsWith("$") || value.startsWith(ASSETS_PROTOCOLE) || value.startsWith(FILE_PROTOCOLE) || value.startsWith(HTTP_PROTOCOLE) || value.startsWith(HTTPS_PROTOCOLE)) {
+			if(value.startsWith(ASSETS_PROTOCOLE) || value.startsWith(FILE_PROTOCOLE) || value.startsWith(HTTP_PROTOCOLE) || value.startsWith(HTTPS_PROTOCOLE)) {
 				this.setCsvFilePath(new CalculatedValue(script, value));
 				return true;
 			}

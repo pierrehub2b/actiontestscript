@@ -497,7 +497,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			result = getCssAttributeValueByName(element, attributeName);
 
 			if(result == null) {
-				final Object obj = executeJavaScript(status, attributeName);
+				final Object obj = executeJavaScript(status, attributeName, true);
 				if(obj != null) {
 					result = obj.toString();
 				}
@@ -840,17 +840,23 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public Object executeJavaScript(ActionStatus status, String javaScript) {
-		Object result = null;
-		status.setPassed(true);
+	public Object executeJavaScript(ActionStatus status, String javaScript, boolean returnValue) {
 		try {
-			result = driver.executeAsyncScript("return " + javaScript);
+			if(returnValue) {
+				final Object result = driver.executeAsyncScript("var callback=arguments[arguments.length-1];var result=" + javaScript + ";callback(result);");
+				status.setMessage(result.toString());
+				return result;
+			}else {
+				driver.executeScript(javaScript);
+			}
+			status.setPassed(true);
 		}catch(StaleElementReferenceException e0) {
 			throw e0;
 		}catch(Exception e1) {
+			status.setPassed(false);
 			status.setException(ActionStatus.JAVASCRIPT_ERROR, e1);
 		}
-		return result;
+		return null;
 	}
 
 	@Override

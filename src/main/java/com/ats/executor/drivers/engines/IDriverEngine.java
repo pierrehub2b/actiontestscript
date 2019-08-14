@@ -50,7 +50,7 @@ public interface IDriverEngine{
 	public void closeWindow(ActionStatus status);
 	public Object executeScript(ActionStatus status, String script, Object ... params);
 	public Object executeJavaScript(ActionStatus status, String script, TestElement element);
-	public Object executeJavaScript(ActionStatus status, String script);
+	public Object executeJavaScript(ActionStatus status, String script, boolean returnValue);
 	public void goToUrl(ActionStatus status, String url);
 	
 	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> searchPredicate, WebElement startElement);

@@ -78,7 +78,7 @@ public class IEDriverEngine extends WebDriverEngine {
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {
 		if(element.isNumeric()) {
 			for(SendKeyData sequence : textActionList) {
-				element.executeScript(status, "value='" + sequence.getData() + "'");
+				element.executeScript(status, "value='" + sequence.getData() + "'", true);
 			}
 		}else {
 			for(SendKeyData sequence : textActionList) {

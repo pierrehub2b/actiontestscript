@@ -497,7 +497,7 @@ public class TestElement{
 		return engine.getCssAttributes(getFoundElement());
 	}
 
-	public Object executeScript(ActionStatus status, String script) {
+	public Object executeScript(ActionStatus status, String script, boolean returnValue) {
 		if(isValidated()){
 			return engine.executeJavaScript(status, script, this);
 		}else{

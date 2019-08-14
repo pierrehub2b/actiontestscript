@@ -454,7 +454,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 		return null;
 	}
 	@Override
-	public Object executeJavaScript(ActionStatus status, String script) {
+	public Object executeJavaScript(ActionStatus status, String script, boolean returnValue) {
 		status.setPassed(true);
 		return null;
 	}

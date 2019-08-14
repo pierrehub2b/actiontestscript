@@ -325,7 +325,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	}
 
 	@Override
-	public Object executeJavaScript(ActionStatus status, String script) {
+	public Object executeJavaScript(ActionStatus status, String script, boolean returnValue) {
 		return null;
 	}
 

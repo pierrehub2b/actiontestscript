@@ -27,7 +27,7 @@ import com.ats.script.Script;
 
 public class ActionReturnVariable extends ActionExecuteElement {
 	
-	private Variable variable;
+	protected Variable variable;
 	
 	public ActionReturnVariable() {}
 	

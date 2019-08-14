@@ -71,13 +71,17 @@ public class ActionJavascript extends ActionReturnVariable {
 		super.terminateExecution(ts);
 		
 		status.startDuration();
-		Object result = getTestElement().executeScript(status, jsCode.getCalculated());
-		status.endDuration();
 		
-		if(getVariable() != null && result != null) {
-			updateVariableValue(result.toString());
+		if(variable != null) {
+			final Object result = getTestElement().executeScript(status, jsCode.getCalculated(), true);
+			if(result != null) {
+				updateVariableValue(result.toString());
+			}
+		}else {
+			getTestElement().executeScript(status, jsCode.getCalculated(), false);
 		}
-
+	
+		status.endDuration();
 		ts.getRecorder().updateScreen(0, status.getDuration(), jsCode.getCalculated());
 	}
 

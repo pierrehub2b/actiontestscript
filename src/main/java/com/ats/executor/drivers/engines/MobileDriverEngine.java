@@ -522,7 +522,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 		return null;
 	}
 	@Override
-	public Object executeJavaScript(ActionStatus status, String script) {
+	public Object executeJavaScript(ActionStatus status, String script, boolean returnValue) {
 		return null;
 	}
 }
