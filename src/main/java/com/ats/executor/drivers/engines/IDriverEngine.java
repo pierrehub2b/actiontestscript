@@ -96,4 +96,5 @@ public interface IDriverEngine{
 	public void api(ActionStatus status, ActionApi api);
 	public int getCurrentWindow();
 	public void windowState(ActionStatus status, Channel channel, String state);
+	public String getTitle();
 }

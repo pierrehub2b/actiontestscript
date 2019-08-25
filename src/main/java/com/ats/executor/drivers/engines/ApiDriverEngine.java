@@ -328,6 +328,11 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	public Object executeJavaScript(ActionStatus status, String script, boolean returnValue) {
 		return null;
 	}
+	
+	@Override
+	public String getTitle() {
+		return "";
+	}
 
 	//------------------------------------------------------------------------------------------------------------------------------------
 	// init http client

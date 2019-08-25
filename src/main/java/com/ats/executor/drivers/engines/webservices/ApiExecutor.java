@@ -240,7 +240,7 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 
 		}else {
 
-			if(type.contains("/json") && (jsonObjectPattern.matcher(source).matches() || jsonArrayPattern.matcher(source).matches())){
+			if(( type.contains("/json") || type.contains("/javascript")) && (jsonObjectPattern.matcher(source).matches() || jsonArrayPattern.matcher(source).matches())){
 
 				this.type = JSON_TYPE;
 				loadElementsList(new JsonParser().parse(source), "root");

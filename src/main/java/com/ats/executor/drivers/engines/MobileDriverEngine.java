@@ -84,10 +84,10 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	private Gson gson = new Gson();
 
 	private AtsMobileElement rootElement;
-	private AtsMobileElement capturedElement;
+	private AtsMobileElement cachedElement;
 
 	private MobileTestElement testElement;
-	
+
 	private OkHttpClient client;
 
 	public MobileDriverEngine(Channel channel, ActionStatus status, String app, DesktopDriver desktopDriver, ApplicationProperties props) {
@@ -111,7 +111,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 
 			this.applicationPath = "http://" + endPoint;
 			channel.setApplication(application);
-									
+
 			this.client = new Builder().cache(null).connectTimeout(40, TimeUnit.SECONDS).writeTimeout(40, TimeUnit.SECONDS).readTimeout(40, TimeUnit.SECONDS).build();
 
 			JsonObject response = executeRequest(DRIVER, START);
@@ -152,7 +152,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 
 						final String[] endPointData = endPoint.split(":");
 						final String version = response.get("version").getAsString();
-						
+
 						channel.setApplicationData(os + ":" + systemName, version, driverVersion, -1, icon, endPointData[0] + ":" + screenCapturePort);
 
 						refreshElementMapLocation();
@@ -186,16 +186,17 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 
 	@Override
 	public FoundElement getElementFromPoint(Boolean syscomp, Double x, Double y) {
-		capturedElement = gson.fromJson(executeRequest(CAPTURE), AtsMobileElement.class);
+
+		loadCapturedElement();
 
 		ArrayList<AtsMobileElement> listElements = new ArrayList<AtsMobileElement>();
 
-		loadList(capturedElement, listElements);
+		loadList(cachedElement, listElements);
 
 		final int mouseX = (int)(channel.getSubDimension().getX() + x);
 		final int mouseY = (int)(channel.getSubDimension().getY() + y);
 
-		AtsMobileElement element = capturedElement;
+		AtsMobileElement element = cachedElement;
 
 		for (int i=0; i<listElements.size(); i++) {
 			AtsMobileElement child = listElements.get(i);
@@ -206,19 +207,20 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 
 		return element.getFoundElement();
 	}
-	
+
 	@Override
 	public FoundElement getElementFromRect(Boolean syscomp, Double x, Double y, Double w, Double h) {
-		capturedElement = gson.fromJson(executeRequest(CAPTURE), AtsMobileElement.class);
+
+		loadCapturedElement();
 
 		ArrayList<AtsMobileElement> listElements = new ArrayList<AtsMobileElement>();
 
-		loadList(capturedElement, listElements);
+		loadList(cachedElement, listElements);
 
 		final int mouseX = (int)(channel.getSubDimension().getX() + x);
 		final int mouseY = (int)(channel.getSubDimension().getY() + y);
 
-		AtsMobileElement element = capturedElement;
+		AtsMobileElement element = cachedElement;
 
 		for (int i=0; i<listElements.size(); i++) {
 			AtsMobileElement child = listElements.get(i);
@@ -271,8 +273,8 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	}
 
 	private AtsMobileElement getCapturedElementById(String id, boolean reload) {
-		if(!reload && capturedElement != null) {
-			return getElementById(capturedElement, id);
+		if(!reload && cachedElement != null) {
+			return getElementById(cachedElement, id);
 		}else {
 			return getElementById(rootElement, id);
 		}
@@ -301,7 +303,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 
 		return list.parallelStream().filter(searchPredicate).map(e -> new FoundElement(e)).collect(Collectors.toCollection(ArrayList::new));
 	}
-	
+
 	@Override
 	public ArrayList<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template) {
 
@@ -316,6 +318,15 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 
 		for(AtsMobileElement child : root.getChildren()) {
 			loadElementsByTag(child, tag, list);
+		}
+	}
+
+	private long cachedElementTime = System.currentTimeMillis();
+	private void loadCapturedElement() {
+		long current = System.currentTimeMillis();
+		if(cachedElement == null || current - 2500 > cachedElementTime) {
+			cachedElement = gson.fromJson(executeRequest(CAPTURE), AtsMobileElement.class);
+			cachedElementTime = System.currentTimeMillis();
 		}
 	}
 
@@ -365,7 +376,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	public CalculatedProperty[] getCssAttributes(FoundElement element) {
 		return new CalculatedProperty[0];
 	}
-	
+
 	@Override
 	public ArrayList<FoundElement> findSelectOptions(TestElement element) {
 		return new ArrayList<FoundElement>();
@@ -400,10 +411,10 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 
 	@Override
 	public void scroll(FoundElement element) {}
-	
+
 	@Override
 	public void scroll(int value) {}
-	
+
 	@Override
 	public void scroll(FoundElement element, int delta) {}
 
@@ -434,6 +445,11 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	@Override
 	public Alert switchToAlert() {
 		return null;
+	}
+	
+	@Override
+	public String getTitle() {
+		return "";
 	}
 
 	@Override
@@ -475,7 +491,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	}
 
 	protected JsonObject executeRequest(String type, String ... data) {
-		
+
 		final String url = new StringBuilder(applicationPath)
 				.append("/")
 				.append(type)
@@ -490,7 +506,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 								map(Object::toString).
 								collect(Collectors.joining("\n"))))
 				.build();
-		
+
 		try {
 			final Response response = client.newCall(request).execute();
 			final JsonElement jsonResponse = parser.parse(
@@ -502,7 +518,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 									Charsets.UTF_8)));
 			response.close();
 			return jsonResponse.getAsJsonObject();
-			
+
 		} catch (JsonSyntaxException | IOException e) {
 			return null;
 		}

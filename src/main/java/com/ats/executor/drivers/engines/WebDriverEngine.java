@@ -446,6 +446,11 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 		return body;
 	}
+	
+	@Override
+	public String getTitle() {
+		return driver.getTitle();
+	}
 
 	private WebElement getBody() {
 		return (WebElement)driver.executeScript("return window.document.getElementsByTagName(\"body\")[0];");

@@ -74,6 +74,8 @@ public class TestElementRoot extends TestElement {
 			return channel.getApplicationVersion();
 		case "processid":
 			return channel.getProcessId() + "";
+		case "title":
+			return engine.getTitle();
 		default :
 			return "";
 		}
@@ -87,11 +89,12 @@ public class TestElementRoot extends TestElement {
 	@Override
 	public CalculatedProperty[] getAttributes(boolean reload) {
 		
-		final CalculatedProperty[] props = new CalculatedProperty[4];
+		final CalculatedProperty[] props = new CalculatedProperty[5];
 		props[0] = new CalculatedProperty("source", "[...]");
 		props[1] = new CalculatedProperty("version", channel.getApplicationVersion());
 		props[2] = new CalculatedProperty("rectangle", getRectangle());
 		props[3] = new CalculatedProperty("processId", channel.getProcessId() + "");
+		props[4] = new CalculatedProperty("title", engine.getTitle());
 		
 		return props;
 	}

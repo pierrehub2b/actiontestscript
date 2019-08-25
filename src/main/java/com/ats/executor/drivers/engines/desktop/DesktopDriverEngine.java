@@ -394,6 +394,11 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	//--------------------------------------------------
 
 	@Override
+	public String getTitle() {
+		return "";
+	}
+	
+	@Override
 	public Object executeScript(ActionStatus status, String script, Object... params) {
 		status.setPassed(true);
 		return null;
@@ -453,6 +458,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 		status.setPassed(true);
 		return null;
 	}
+	
 	@Override
 	public Object executeJavaScript(ActionStatus status, String script, boolean returnValue) {
 		status.setPassed(true);
