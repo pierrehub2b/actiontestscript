@@ -89,23 +89,23 @@ public class ChannelManager {
 	}
 
 	public void startChannel(ActionStatus status, ActionChannelStart action){
-		
+
 		final String name = action.getName();
 
 		if(getChannel(name) == null){
-			
+
 			final String app = action.getApplication().getCalculated();
 			final Channel newChannel = new Channel(status, mainScript, driverManager, action);
 
 			if(status.isPassed()) {
-				
+
 				for(Channel cn : channelsList) {
 					cn.clearData();
 				}
-				
+
 				channelsList.add(newChannel);
 				setCurrentChannel(newChannel);
-				
+
 				mainScript.sendActionLog("Start channel : " + newChannel.getName(), "application : " + app);
 
 				status.setChannel(newChannel);
@@ -113,54 +113,58 @@ public class ChannelManager {
 
 				mainScript.getRecorder().createVisualAction(action, status.getDuration(), name, app);
 			}
-			
+
 			status.setData(getChannelsList());
 		}
 	}
 
 	public void switchChannel(ActionStatus status, String name){
 
-		boolean found = false;
-
 		status.startDuration();
 		if(channelsList != null){
 			for(Channel cnl : channelsList){
 				if(cnl.getName().equals(name)){
 
-					found = true;
-
 					if(!cnl.isCurrent()) {
 						setCurrentChannel(cnl);
-						cnl.toFront();
+						//cnl.toFront();
 
 						mainScript.sendActionLog("Switch to channel", name);
 
 						status.setData(getChannelsList());
 						status.setChannel(cnl);
 					}
+
+					status.setPassed(true);
+					status.endDuration();
+
+					return;
 				}
 			}
 		}
 
-		status.setPassed(found);
+		status.setPassed(false);
+		status.setMessage("Channel [" + name + "] is not running !");
 		status.endDuration();
 	}
-	
+
 	public void closeChannel(ActionStatus status, String channelName){
 		Optional<Channel> cn = channelsList.stream().filter(c -> c.getName().equals(channelName)).findFirst();
 		if(cn.isPresent()) {
 			cn.get().close(status);
 		}
 	}
-	
+
 	public void channelClosed(ActionStatus status, Channel channel){
 		status.startDuration();
 		if(channelsList.remove(channel)) {
 			mainScript.sendActionLog("Close channel", channel.getName());
 			if(channelsList.size() > 0){
-				final Channel current = channelsList.get(0);
-				setCurrentChannel(current);
-				status.setChannel(current);
+				if(channel.isCurrent()) {
+					final Channel current = channelsList.get(0);
+					setCurrentChannel(current);
+					status.setChannel(current);
+				}
 			}else{
 				noChannel();
 			}

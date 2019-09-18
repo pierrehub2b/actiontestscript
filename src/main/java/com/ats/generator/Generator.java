@@ -154,7 +154,9 @@ public class Generator implements ScriptProcessedEvent{
 
 	public GeneratorReport launch(){
 
-		Utils.copyDir(projectData.getJavaSourceFolder().toString(), projectData.getJavaDestinationFolder().toString(), true);
+		if(projectData.getJavaSourceFolder().toFile().exists()){
+			Utils.copyDir(projectData.getJavaSourceFolder().toString(), projectData.getJavaDestinationFolder().toString(), true);
+		}
 
 		final Stream<File> stream = filesList.parallelStream();
 		stream.forEach(f -> loadScript(f));

@@ -63,7 +63,10 @@ public interface IDriverEngine{
 	public String getAttribute(ActionStatus status, FoundElement element, String attributeName, int maxTry);
 	public CalculatedProperty[] getAttributes(FoundElement element, boolean reload);
 	public CalculatedProperty[] getCssAttributes(FoundElement element);
-	public ArrayList<FoundElement> findSelectOptions(TestElement testElement);
+	
+	public ArrayList<FoundElement> findSelectOptions(TestElement element);
+	public void selectOptionsItem(ActionStatus status, TestElement testElement, CalculatedProperty selectProperty);
+	
 	public void loadParents(FoundElement hoverElement);
 	
 	public void scroll(int delta);

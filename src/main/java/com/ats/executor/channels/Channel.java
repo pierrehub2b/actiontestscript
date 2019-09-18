@@ -125,6 +125,10 @@ public class Channel {
 		toFront();
 	}
 	
+	public void setWinHandle(int hdl) {
+		winHandle = hdl;
+	}
+	
 	public void updateWinHandle(DesktopDriver drv, int index) {
 		winHandle = getHandle(drv, index);
 	}
@@ -611,5 +615,9 @@ public class Channel {
 	public void updateVisualAction(int error, long duration, String value, String data) {
 		getDesktopDriver().updateVisualStatus(error, duration);
 		getDesktopDriver().updateVisualData(value, data);
+	}
+
+	public FoundElement getElementFromMousePoint() {
+		return getDesktopDriver().getElementFromMousePoint(dimension);
 	}
 }

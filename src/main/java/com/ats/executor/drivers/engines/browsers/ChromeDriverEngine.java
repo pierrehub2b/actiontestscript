@@ -19,6 +19,7 @@ under the License.
 
 package com.ats.executor.drivers.engines.browsers;
 
+import java.io.File;
 import java.util.Collections;
 
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -52,7 +53,20 @@ public class ChromeDriverEngine extends WebDriverEngine {
 		options.addArguments("--disable-popup-blocking");
 		options.addArguments("--use-fake-ui-for-media-stream");
 		options.addArguments("--use-fake-device-for-media-stream");
-		options.addArguments("--user-data-dir=" + Utils.createDriverFolder(DriverManager.CHROME_BROWSER));
+		
+		File profileFolder = null;
+		if(props.getUserDataDir() != null) {
+			profileFolder = new File(props.getUserDataDir());
+			if(!profileFolder.exists()) {
+				profileFolder = null;
+			}
+		}
+		
+		if(profileFolder == null) {
+			profileFolder = Utils.createDriverFolder(DriverManager.CHROME_BROWSER);
+		}
+		options.addArguments("--user-data-dir=" + profileFolder.getAbsolutePath());
+		
 		
 		if(lang != null) {
 			options.addArguments("--lang=" + lang);

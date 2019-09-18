@@ -215,6 +215,10 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	public ArrayList<FoundElement> findSelectOptions(TestElement element) {
 		return new ArrayList<FoundElement>();
 	}
+	
+	@Override
+	public void selectOptionsItem(ActionStatus status, TestElement element, CalculatedProperty selectProperty) {
+	}
 
 	@Override
 	public void loadParents(FoundElement hoverElement) {

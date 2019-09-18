@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
@@ -133,11 +134,15 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 
 				applicationPath = exeFile.getAbsolutePath();
 				args.add(0, applicationPath);
-
-				final Runtime runtime = Runtime.getRuntime();
+				
+				final ProcessBuilder builder = new ProcessBuilder(args.toArray(new String[args.size()]));
+				builder.directory(exeFile.getParentFile()); // this is where you set the root folder for the executable to run with
+				builder.redirectErrorStream(true);
+				
 				try{
-
-					final Process applicationProcess = runtime.exec(args.toArray(new String[args.size()]));
+					
+					final Process applicationProcess = builder.start();
+					
 					processId = applicationProcess.pid();
 					status.setPassed(true);
 
@@ -236,13 +241,18 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	
 	@Override
 	public ArrayList<FoundElement> findSelectOptions(TestElement element) {
-		return new ArrayList<FoundElement>();
+		return findElements(false, element, "ListItem", new ArrayList<String>(), Objects::nonNull, element.getWebElement());
+	}
+	
+	@Override
+	public void selectOptionsItem(ActionStatus status, TestElement element, CalculatedProperty selectProperty) {
+		getDesktopDriver().selectItem(element.getFoundElement().getId(), selectProperty.getName(), selectProperty.getValue().getCalculated(), selectProperty.isRegexp());
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------
 	// 
 	//---------------------------------------------------------------------------------------------------------------------
-
+	
 	@Override
 	public FoundElement getElementFromPoint(Boolean syscomp, Double x, Double y){
 		return getDesktopDriver().getElementFromPoint(x, y);

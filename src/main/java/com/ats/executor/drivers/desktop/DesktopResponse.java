@@ -88,12 +88,9 @@ public class DesktopResponse {
 		
 		if(elements != null) {
 			for(Object obj : elements) {
-				FoundElement elem = new FoundElement((AtsElement)obj, dimension);
-				if(current == null) {
-					current = elem;
-				}else {
-					current.setParent(elem);
-				}
+				final FoundElement elem = new FoundElement((AtsElement)obj, dimension);
+				elem.setParent(current);
+
 				current = elem;
 			}
 		}

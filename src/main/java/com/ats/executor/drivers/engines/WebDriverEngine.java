@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -74,6 +75,7 @@ import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.actions.ActionApi;
 import com.ats.script.actions.ActionGotoUrl;
+import com.ats.script.actions.ActionSelect;
 import com.ats.script.actions.ActionWindowState;
 import com.ats.tools.ResourceContent;
 import com.ats.tools.Utils;
@@ -478,6 +480,46 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public ArrayList<FoundElement> findSelectOptions(TestElement element) {
 		return findElements(false, element, "option", new ArrayList<String>(), Objects::nonNull, element.getWebElement());
+	}
+	
+	@Override
+	public void selectOptionsItem(ActionStatus status, TestElement element, CalculatedProperty selectProperty) {
+		
+		final ArrayList<FoundElement> items = findSelectOptions(element);
+		
+		if(items != null && items.size() > 0) {
+			if(ActionSelect.SELECT_INDEX.equals(selectProperty.getName())){
+
+				final int index = Utils.string2Int(selectProperty.getValue().getCalculated());
+				if(items.size() > index) {
+					items.get(index).getValue().click();
+				}else {
+					status.setPassed(false);
+					status.setCode(ActionStatus.OBJECT_NOT_INTERACTABLE);
+					status.setMessage("Index not found, max length options : " + items.size());
+				}
+				
+			}else{
+
+				final String attribute = selectProperty.getName();
+				final String searchedValue = selectProperty.getValue().getCalculated();
+				Optional<FoundElement> foundOption = null;
+
+				if(selectProperty.isRegexp()) {
+					foundOption = items.stream().filter(e -> e.getValue().getAttribute(attribute).matches(searchedValue)).findFirst();
+				}else {
+					foundOption = items.stream().filter(e -> e.getValue().getAttribute(attribute).equals(searchedValue)).findFirst();
+				}
+
+				try {
+					foundOption.get().getValue().click();
+				}catch (NoSuchElementException e) {
+					status.setPassed(false);
+					status.setCode(ActionStatus.OBJECT_NOT_INTERACTABLE);
+					status.setMessage("Option not found : " + searchedValue);
+				}
+			}
+		}
 	}
 
 	private boolean doubleCheckAttribute(ActionStatus status, String verify, FoundElement element, String attributeName) {

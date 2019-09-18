@@ -84,7 +84,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	private Gson gson = new Gson();
 
 	private AtsMobileElement rootElement;
-	private AtsMobileElement cachedElement;
+	protected AtsMobileElement cachedElement;
 
 	private MobileTestElement testElement;
 
@@ -173,6 +173,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	@Override
 	public void refreshElementMapLocation() {
 		rootElement = gson.fromJson(executeRequest(CAPTURE), AtsMobileElement.class);
+		cachedElementTime = 0L;
 	}
 
 	@Override
@@ -321,8 +322,8 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 		}
 	}
 
-	private long cachedElementTime = System.currentTimeMillis();
-	private void loadCapturedElement() {
+	protected long cachedElementTime = System.currentTimeMillis();
+	protected void loadCapturedElement() {
 		long current = System.currentTimeMillis();
 		if(cachedElement == null || current - 2500 > cachedElementTime) {
 			cachedElement = gson.fromJson(executeRequest(CAPTURE), AtsMobileElement.class);
@@ -380,6 +381,10 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	@Override
 	public ArrayList<FoundElement> findSelectOptions(TestElement element) {
 		return new ArrayList<FoundElement>();
+	}
+	
+	@Override
+	public void selectOptionsItem(ActionStatus status, TestElement element, CalculatedProperty selectProperty) {
 	}
 
 	@Override

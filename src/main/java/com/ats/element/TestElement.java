@@ -21,9 +21,7 @@ package com.ats.element;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
-import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Predicate;
 
 import org.openqa.selenium.Keys;
@@ -37,8 +35,6 @@ import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.recorder.IVisualRecorder;
-import com.ats.script.actions.ActionSelect;
-import com.ats.tools.Utils;
 
 public class TestElement{
 
@@ -376,42 +372,7 @@ public class TestElement{
 	
 	public void select(ActionStatus status, CalculatedProperty selectProperty) {
 		if(isValidated()){
-
-			final ArrayList<FoundElement> options = engine.findSelectOptions(this);
-
-			if(options != null && options.size() > 0) {
-				if(ActionSelect.SELECT_INDEX.equals(selectProperty.getName())){
-
-					final int index = Utils.string2Int(selectProperty.getValue().getCalculated());
-					if(options.size() > index) {
-						options.get(index).getValue().click();
-					}else {
-						status.setPassed(false);
-						status.setCode(ActionStatus.OBJECT_NOT_INTERACTABLE);
-						status.setMessage("Index not found, max length options : " + options.size());
-					}
-					
-				}else{
-
-					final String attribute = selectProperty.getName();
-					final String searchedValue = selectProperty.getValue().getCalculated();
-					Optional<FoundElement> foundOption = null;
-
-					if(selectProperty.isRegexp()) {
-						foundOption = options.stream().filter(e -> e.getValue().getAttribute(attribute).matches(searchedValue)).findFirst();
-					}else {
-						foundOption = options.stream().filter(e -> e.getValue().getAttribute(attribute).equals(searchedValue)).findFirst();
-					}
-
-					try {
-						foundOption.get().getValue().click();
-					}catch (NoSuchElementException e) {
-						status.setPassed(false);
-						status.setCode(ActionStatus.OBJECT_NOT_INTERACTABLE);
-						status.setMessage("Option not found : " + searchedValue);
-					}
-				}
-			}
+			engine.selectOptionsItem(status, this, selectProperty);
 		}
 	}
 

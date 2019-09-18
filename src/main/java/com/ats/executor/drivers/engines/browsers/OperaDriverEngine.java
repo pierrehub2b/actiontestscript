@@ -19,6 +19,8 @@ under the License.
 
 package com.ats.executor.drivers.engines.browsers;
 
+import java.io.File;
+
 import org.openqa.selenium.opera.OperaOptions;
 
 import com.ats.driver.ApplicationProperties;
@@ -46,8 +48,20 @@ public class OperaDriverEngine extends WebDriverEngine {
 		options.addArguments("--allow-file-access-from-files");
 		options.addArguments("--disable-web-security");
 		options.addArguments("--allow-running-insecure-content");
-		options.addArguments("--user-data-dir=" + Utils.createDriverFolder(DriverManager.OPERA_BROWSER));
 				
+		File profileFolder = null;
+		if(props.getUserDataDir() != null) {
+			profileFolder = new File(props.getUserDataDir());
+			if(!profileFolder.exists()) {
+				profileFolder = null;
+			}
+		}
+		
+		if(profileFolder == null) {
+			profileFolder = Utils.createDriverFolder(DriverManager.OPERA_BROWSER);
+		}
+		options.addArguments("--user-data-dir=" + profileFolder.getAbsolutePath());
+								
 		if(lang != null) {
 			options.addArguments("--lang=" + lang);
 		}

@@ -335,7 +335,8 @@ public class DesktopDriver extends RemoteWebDriver {
 		Close (7),
 		Url (8),
 		Keys(9),
-		State(10);
+		State(10),
+		IEToFront(11);
 
 		private final int type;
 		WindowType(int value){
@@ -351,7 +352,9 @@ public class DesktopDriver extends RemoteWebDriver {
 		Childs (0),
 		Parents (1),
 		Find (2),
-		Attributes (3);
+		Attributes (3),
+		Select (4),
+		FromPoint(5);
 
 		private final int type;
 		ElementType(int value){
@@ -475,8 +478,17 @@ public class DesktopDriver extends RemoteWebDriver {
 	public void setElementMapLocation(List<FoundElement> list) {
 		this.elementMapLocation = list;
 	}
+	
+	public FoundElement getElementFromMousePoint(TestBound channelDimension) {
+		final DesktopResponse resp = sendRequestCommand(CommandType.Element, ElementType.FromPoint);
+		if(resp.elements != null && resp.elements.size() > 0) {
+			return new FoundElement(resp.elements.get(0), channelDimension);
+		}
+		return null;
+	}
 
 	public FoundElement getElementFromPoint(Double x, Double y) {
+
 		FoundElement hoverElement = null;
 		if (elementMapLocation != null) {
 			for (FoundElement testElement : elementMapLocation) {
@@ -539,6 +551,14 @@ public class DesktopDriver extends RemoteWebDriver {
 
 	public void setChannelToFront(int handle, long pid) {
 		sendRequestCommand(CommandType.Window, WindowType.ToFront, handle, pid);
+	}
+
+	public void setWindowToFront(Long pid) {
+		sendRequestCommand(CommandType.Window, WindowType.ToFront, pid);
+	}
+	
+	public DesktopResponse setIEWindowToFront(int index) {
+		return sendRequestCommand(CommandType.Window, WindowType.IEToFront, index);
 	}
 
 	public void rootKeys(int handle, String keys) {
@@ -610,6 +630,10 @@ public class DesktopDriver extends RemoteWebDriver {
 		}
 		
 		return response.getFoundElements(predicate, channel.getDimension());
+	}
+	
+	public void selectItem(String elementId, String type, String value, boolean regexp) {
+		sendRequestCommand(CommandType.Element, ElementType.Select, elementId, type, value, regexp);
 	}
 
 	public String getElementAttribute(String elementId, String attribute) {

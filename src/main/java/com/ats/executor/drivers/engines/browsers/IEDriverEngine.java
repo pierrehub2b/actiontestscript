@@ -20,6 +20,8 @@ under the License.
 package com.ats.executor.drivers.engines.browsers;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 import org.openqa.selenium.ie.InternetExplorerOptions;
 
@@ -31,8 +33,10 @@ import com.ats.executor.SendKeyData;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
+import com.ats.executor.drivers.desktop.DesktopResponse;
 import com.ats.executor.drivers.engines.WebDriverEngine;
 import com.ats.generator.objects.MouseDirection;
+import com.ats.tools.Utils;
 
 public class IEDriverEngine extends WebDriverEngine {
 
@@ -85,5 +89,31 @@ public class IEDriverEngine extends WebDriverEngine {
 				element.getWebElement().sendKeys(sequence.getSequenceWithDigit());
 			}
 		}
+	}
+
+	@Override
+	public void switchWindow(ActionStatus status, int index) {
+		DesktopResponse resp = getDesktopDriver().setIEWindowToFront(index);
+		
+		//TODO clean this mess
+		
+		if(resp.data != null && resp.data.size() > 0) {
+			
+			final int winIndex = Utils.string2Int(resp.data.get(0).getValue());
+			final Set<String> wins = driver.getWindowHandles();
+			
+			switchToWindowIndex(wins.toArray(new String[wins.size()]), index);
+			
+			
+			//final List<String> handles = new ArrayList<>(driver.getWindowHandles());
+			//driver.switchTo().window(handles.get(winIndex));
+			
+			//channel.cleanHandle();
+			channel.setWinHandle(-1);
+			//updateDimensions();
+			
+		}
+		
+
 	}
 }

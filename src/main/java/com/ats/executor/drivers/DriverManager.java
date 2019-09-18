@@ -216,6 +216,8 @@ public class DriverManager {
 			}
 			
 		}else if(props.isMobile() || application.startsWith(MOBILE + "://")){
+			
+			
 			mobileDriverEngine = new MobileDriverEngine(channel, status, application, desktopDriver, props);
 			return mobileDriverEngine;			
 		}else if(props.isApi() || application.startsWith(HTTP + "://") || application.startsWith(HTTPS + "://")) {	
