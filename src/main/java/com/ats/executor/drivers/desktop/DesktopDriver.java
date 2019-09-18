@@ -490,13 +490,16 @@ public class DesktopDriver extends RemoteWebDriver {
 	public FoundElement getElementFromPoint(Double x, Double y) {
 
 		FoundElement hoverElement = null;
-		if (elementMapLocation != null) {
+		if (elementMapLocation != null && elementMapLocation.size() > 0) {
+			
+			hoverElement = elementMapLocation.get(0);
+			
 			for (FoundElement testElement : elementMapLocation) {
 				if(testElement != null && testElement.isVisible()){
-					if (hoverElement == null) {
+					/*if (hoverElement == null && testElement.getRectangle().contains(x, y)) {
 						hoverElement = testElement;
 						continue;
-					}
+					}*/
 
 					final Rectangle rect = testElement.getRectangle();
 
