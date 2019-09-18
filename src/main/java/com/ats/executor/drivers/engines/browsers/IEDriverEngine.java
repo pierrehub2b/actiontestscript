@@ -20,7 +20,6 @@ under the License.
 package com.ats.executor.drivers.engines.browsers;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import org.openqa.selenium.ie.InternetExplorerOptions;
