@@ -71,6 +71,7 @@ public class DriverProcess {
 				status.setMessage(e1.getMessage());
 				status.setCode(ActionStatus.CHANNEL_START_ERROR);
 			}
+
 		}else{
 			status.setMessage("Unable to launch driver process, driver file is missing : " + driverFile.getAbsolutePath());
 			status.setCode(ActionStatus.CHANNEL_START_ERROR);

@@ -121,7 +121,17 @@ public class DesktopDriver extends RemoteWebDriver {
 					.readTimeout(40, TimeUnit.SECONDS)
 					.build();
 
-			final DesktopResponse resp = sendRequestCommand(CommandType.Driver, DriverType.Capabilities);
+			int maxTry = 10;
+			DesktopResponse resp = sendRequestCommand(CommandType.Driver, DriverType.Capabilities);
+			while (maxTry > 0 && (resp == null || resp.errorCode == -999)) {
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e) {}
+				
+				maxTry--;
+				resp = sendRequestCommand(CommandType.Driver, DriverType.Capabilities);
+			}
+						
 			if(resp.errorCode != -999) {
 				for (DesktopData data : resp.data) {
 					if("BuildNumber".equals(data.getName())) {
@@ -496,10 +506,6 @@ public class DesktopDriver extends RemoteWebDriver {
 			
 			for (FoundElement testElement : elementMapLocation) {
 				if(testElement != null && testElement.isVisible()){
-					/*if (hoverElement == null && testElement.getRectangle().contains(x, y)) {
-						hoverElement = testElement;
-						continue;
-					}*/
 
 					final Rectangle rect = testElement.getRectangle();
 

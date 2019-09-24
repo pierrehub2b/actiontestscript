@@ -76,7 +76,6 @@ public class TestElementImage extends TestElement {
 	// Drag drop ...
 	//-------------------------------------------------------------------------------------------------------------------
 
-
 	@Override
 	public String getAttribute(ActionStatus status, String name) {
 		if("x".equals(name)) {
@@ -94,8 +93,6 @@ public class TestElementImage extends TestElement {
 
 	@Override
 	public CalculatedProperty[] getAttributes(boolean reload) {
-		
-		
 		return new CalculatedProperty[0];
 	}
 
