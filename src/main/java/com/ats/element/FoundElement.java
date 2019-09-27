@@ -175,19 +175,19 @@ public class FoundElement{
 		this.width = rect.getWidth();
 		this.height = rect.getHeight();
 		
+		this.x = rect.getX();
+		this.y = rect.getY();
+		
 		if(parent != null) {
-			this.x = rect.getX() + parent.getFoundElement().getX();
-			this.y = rect.getY() + parent.getFoundElement().getY();
-		}else {
-			this.x = rect.getX();
-			this.y = rect.getY();
+			this.x += parent.getFoundElement().getX();
+			this.y += parent.getFoundElement().getY();
 		}
+				
+		this.boundX = this.x - channel.getSubDimension().getX() + (this.width/2);
+		this.boundY = this.y - channel.getSubDimension().getY() + (this.height/2);
 		
-		this.screenX = this.x;
-		this.screenY = this.y;
-		
-		this.boundX = this.x - channel.getSubDimension().getX();
-		this.boundY = this.y - channel.getSubDimension().getY();
+		this.screenX = this.x + channel.getDimension().getX() + (this.width/2);
+		this.screenY = this.y + channel.getDimension().getY() + (this.height/2);
 	}
 
 	//------------------------------------------------------------------------------------------------------------------------------

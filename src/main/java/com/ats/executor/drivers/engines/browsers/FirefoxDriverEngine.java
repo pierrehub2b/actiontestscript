@@ -37,9 +37,7 @@ import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.WebDriverEngine;
-import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.MouseDirection;
-import com.ats.generator.objects.MouseDirectionData;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
@@ -103,18 +101,6 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	protected void switchToFrame(WebElement we) {
 		super.switchToFrame(we);
 		actionWait();
-	}
-
-	@Override
-	protected int getDirectionValue(int value, MouseDirectionData direction, Cartesian cart1, Cartesian cart2, Cartesian cart3) {
-		int offset = super.getDirectionValue(value, direction, cart1, cart2, cart3);
-		offset -= value/2;
-		return offset;
-	}
-
-	@Override
-	protected int getNoDirectionValue(int value) {
-		return 0;
 	}
 
 	@Override

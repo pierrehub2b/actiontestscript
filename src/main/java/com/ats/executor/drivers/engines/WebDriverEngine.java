@@ -186,7 +186,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 		cap.setCapability(CapabilityType.SUPPORTS_FINDING_BY_CSS, false);
 		cap.setCapability(CapabilityType.TAKES_SCREENSHOT, false);
-		cap.setCapability(CapabilityType.HAS_NATIVE_EVENTS, false);
+		cap.setCapability(CapabilityType.HAS_NATIVE_EVENTS, true);
 		cap.setCapability(CapabilityType.PAGE_LOAD_STRATEGY, PageLoadStrategy.NONE);
 
 		try{
@@ -439,11 +439,11 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	public WebElement getRootElement() {
 		int maxTry = 20;
 
-		WebElement body = getBody();
+		WebElement body = getHtmlView();
 
 		while(body == null && maxTry > 0) {
 			maxTry--;
-			body = getBody();
+			body = getHtmlView();
 		}
 
 		return body;
@@ -454,8 +454,8 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		return driver.getTitle();
 	}
 
-	private WebElement getBody() {
-		return (WebElement)driver.executeScript("return window.document.getElementsByTagName(\"body\")[0];");
+	private WebElement getHtmlView() {
+		return (WebElement)driver.executeScript("return window.document.getElementsByTagName(\"html\")[0];");
 	}
 
 	private RemoteWebElement getWebElement(FoundElement element) {
@@ -695,7 +695,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	protected void click(FoundElement element, int offsetX, int offsetY) {
 		actions.moveToElement(element.getValue(), offsetX, offsetY)
-		.click(element.getValue())
+		.click()
 		.build()
 		.perform();
 	}

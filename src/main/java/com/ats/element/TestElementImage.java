@@ -39,15 +39,25 @@ public class TestElementImage extends TestElement {
 	//-------------------------------------------------------------------------------------------------------------------
 	// Mouse ...
 	//-------------------------------------------------------------------------------------------------------------------
-
+	
 	@Override
 	public void over(ActionStatus status, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {
-		super.over(status, position, desktopDragDrop, getFoundElement().getBoundX().intValue(), getFoundElement().getBoundY().intValue());
+		final FoundElement fe = getFoundElement();
+		
+		final int clientWidth = Utils.string2Int(fe.getValue().getAttribute("clientWidth"));
+		final int clientHeight = Utils.string2Int(fe.getValue().getAttribute("clientHeight"));
+		
+		super.over(status, position, desktopDragDrop, fe.getBoundX().intValue() - clientWidth/2, fe.getBoundY().intValue() - clientHeight/2);
 	}
 
 	@Override
 	protected void mouseClick(ActionStatus status, MouseDirection position, int offsetX, int offsetY) {
-		super.mouseClick(status, position, getFoundElement().getBoundX().intValue(), getFoundElement().getBoundY().intValue());
+		final FoundElement fe = getFoundElement();
+		
+		final int clientWidth = Utils.string2Int(fe.getValue().getAttribute("clientWidth"));
+		final int clientHeight = Utils.string2Int(fe.getValue().getAttribute("clientHeight"));
+		
+		super.mouseClick(status, position, fe.getBoundX().intValue() - clientWidth/2, fe.getBoundY().intValue() - clientHeight/2);
 	}
 	
 	@Override

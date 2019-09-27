@@ -114,34 +114,27 @@ public abstract class DriverEngine {
 	}
 
 	protected int getDirectionValue(int value, MouseDirectionData direction, Cartesian cart1, Cartesian cart2, Cartesian cart3) {
-		if(cart1.equals(direction.getName())) {
-			return direction.getValue();
-		}else if(cart2.equals(direction.getName())) {
-			return value - direction.getValue() -1;
-		}else if(cart3.equals(direction.getName())) {
-			return value/2 + direction.getValue();
+		if(cart1.equals(direction.getName())) {				//left or top
+			return direction.getValue() - (value/2) + 1;
+		}else if(cart3.equals(direction.getName())) {		//right or bottom
+			return (value/2) - direction.getValue() - 3;
 		}
-		return 0;
-	}
-
-	protected int getNoDirectionValue(int value) {
-		return value / 2;
+		return direction.getValue(); 						// middle or center
 	}
 
 	private int getCartesianOffset(int value, MouseDirectionData direction, Cartesian cart1, Cartesian cart2, Cartesian cart3) {
 		if(direction != null) {
 			return getDirectionValue(value, direction, cart1, cart2, cart3);
-		}else {
-			return getNoDirectionValue(value);
 		}
+		return 0;
 	}
 
 	protected int getOffsetX(Rectangle rect, MouseDirection position) {
-		return getCartesianOffset(rect.width, position.getHorizontalPos(), Cartesian.LEFT, Cartesian.RIGHT, Cartesian.CENTER);
+		return getCartesianOffset(rect.width, position.getHorizontalPos(), Cartesian.LEFT, Cartesian.CENTER, Cartesian.RIGHT);
 	}
 
 	protected int getOffsetY(Rectangle rect, MouseDirection position) {
-		return getCartesianOffset(rect.height, position.getVerticalPos(), Cartesian.TOP, Cartesian.BOTTOM, Cartesian.MIDDLE);
+		return getCartesianOffset(rect.height, position.getVerticalPos(), Cartesian.TOP, Cartesian.MIDDLE, Cartesian.BOTTOM);
 	}
 	
 	public String setWindowBound(BoundData x, BoundData y, BoundData w, BoundData h) {
