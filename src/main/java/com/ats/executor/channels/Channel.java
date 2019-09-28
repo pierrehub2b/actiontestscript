@@ -471,7 +471,7 @@ public class Channel {
 	//----------------------------------------------------------------------------------------------------------
 
 	public WebElement getRootElement() {
-		return engine.getRootElement();
+		return engine.getRootElement(this);
 	}
 
 	public void switchWindow(ActionStatus status, int index){

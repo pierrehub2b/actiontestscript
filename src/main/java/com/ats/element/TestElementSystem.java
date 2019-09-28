@@ -21,7 +21,9 @@ package com.ats.element;
 
 import java.util.function.Predicate;
 
+import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
+import com.ats.generator.objects.MouseDirection;
 
 public class TestElementSystem extends TestElement {
 
@@ -37,5 +39,26 @@ public class TestElementSystem extends TestElement {
 
 		this.engine = channel.getDesktopDriverEngine();
 		startSearch(true, searchElement);
+	}
+
+	@Override
+	protected void mouseClick(ActionStatus status, MouseDirection position, int offsetX, int offsetY) {
+		
+		final FoundElement fe = getFoundElement();
+
+		final int halfWidth = (int) (fe.getWidth()/2);
+		final int halfHeight = (int) (fe.getHeight()/2);
+		
+		super.mouseClick(status, position, offsetX + halfWidth, offsetY + halfHeight);
+	}
+
+	@Override
+	public void over(ActionStatus status, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {
+		final FoundElement fe = getFoundElement();
+
+		final int halfWidth = (int) (fe.getWidth()/2);
+		final int halfHeight = (int) (fe.getHeight()/2);
+		
+		super.over(status, position, desktopDragDrop, offsetX + halfWidth, offsetY + halfHeight);
 	}
 }

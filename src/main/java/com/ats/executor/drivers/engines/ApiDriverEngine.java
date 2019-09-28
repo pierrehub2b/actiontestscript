@@ -225,7 +225,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	}	
 
 	@Override
-	public WebElement getRootElement() {
+	public WebElement getRootElement(Channel cnl) {
 		return null;
 	}
 

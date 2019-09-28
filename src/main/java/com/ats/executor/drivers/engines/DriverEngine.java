@@ -113,18 +113,14 @@ public abstract class DriverEngine {
 		return propertyWait;
 	}
 
-	protected int getDirectionValue(int value, MouseDirectionData direction, Cartesian cart1, Cartesian cart2, Cartesian cart3) {
-		if(cart1.equals(direction.getName())) {				//left or top
-			return direction.getValue() - (value/2) + 1;
-		}else if(cart3.equals(direction.getName())) {		//right or bottom
-			return (value/2) - direction.getValue() - 3;
-		}
-		return direction.getValue(); 						// middle or center
-	}
-
-	private int getCartesianOffset(int value, MouseDirectionData direction, Cartesian cart1, Cartesian cart2, Cartesian cart3) {
+	protected int getCartesianOffset(int value, MouseDirectionData direction, Cartesian cart1, Cartesian cart2, Cartesian cart3) {
 		if(direction != null) {
-			return getDirectionValue(value, direction, cart1, cart2, cart3);
+			if(cart1.equals(direction.getName())) {				// <-- left or top
+				return direction.getValue() - (value/2) + 1;	//
+			}else if(cart3.equals(direction.getName())) {		// <-- right or bottom
+				return (value/2) - direction.getValue() - 3;	//
+			}													//
+			return direction.getValue(); 						// <-- middle or center
 		}
 		return 0;
 	}

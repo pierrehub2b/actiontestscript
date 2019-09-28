@@ -51,6 +51,9 @@ public class FoundElement{
 
 	private Double width = 0.0;
 	private Double height = 0.0;
+	
+	private int centerWidth = 0;
+	private int centerHeight = 0;
 
 	private String tag;
 
@@ -72,9 +75,11 @@ public class FoundElement{
 	public FoundElement() {}
 
 	public FoundElement(Channel channel) {
-		this.setRemoteWebElement((RemoteWebElement) channel.getRootElement());
-		this.width = channel.getDimension().getWidth();
-		this.height = channel.getDimension().getHeight();
+		RemoteWebElement root = (RemoteWebElement) channel.getRootElement();
+		
+		this.setRemoteWebElement(root);
+		this.width = (double) root.getSize().getWidth(); //channel.getDimension().getWidth();
+		this.height = (double) root.getSize().getHeight(); //channel.getDimension().getHeight();
 	}
 
 	public FoundElement(AtsElement element) {
@@ -175,6 +180,9 @@ public class FoundElement{
 		this.width = rect.getWidth();
 		this.height = rect.getHeight();
 		
+		this.centerWidth = (int)(this.width/2);
+		this.centerHeight = (int)(this.height/2);
+		
 		this.x = rect.getX();
 		this.y = rect.getY();
 		
@@ -194,6 +202,14 @@ public class FoundElement{
 	// end of contructors
 	//------------------------------------------------------------------------------------------------------------------------------
 
+	public int getCenterWidth() {
+		return this.centerWidth;
+	}
+	
+	public int getCenterHeight() {
+		return this.centerHeight;
+	}
+		
 	public boolean isDesktop() {
 		return DESKTOP.equals(type);
 	}

@@ -21,8 +21,6 @@ package com.ats.element;
 
 import java.util.Base64;
 
-import org.openqa.selenium.WebElement;
-
 import com.ats.executor.ActionStatus;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
@@ -38,6 +36,10 @@ public class TestElementRoot extends TestElement {
 	public TestElementRoot(Channel channel) {
 		super(channel);
 		setCriterias("root");
+	}	
+
+	@Override
+	protected void startSearch(boolean sysComp, SearchedElement searchedElement) {
 	}
 
 	@Override
@@ -79,11 +81,6 @@ public class TestElementRoot extends TestElement {
 		default :
 			return "";
 		}
-	}
-	
-	@Override
-	public WebElement getWebElement() {
-		return engine.getRootElement();
 	}
 
 	@Override

@@ -42,7 +42,7 @@ import com.ats.script.actions.ActionApi;
 public interface IDriverEngine{
 	
 	public DesktopDriver getDesktopDriver();
-	public WebElement getRootElement();
+	public WebElement getRootElement(Channel cnl);
 	public void close();
 
 	public String getApplicationPath();

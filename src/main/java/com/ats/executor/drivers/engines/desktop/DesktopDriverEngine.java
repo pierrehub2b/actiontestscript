@@ -38,6 +38,7 @@ import org.openqa.selenium.WebElement;
 
 import com.ats.driver.ApplicationProperties;
 import com.ats.element.AtsBaseElement;
+import com.ats.element.DesktopRootElement;
 import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
@@ -49,7 +50,9 @@ import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.desktop.DesktopWindow;
 import com.ats.executor.drivers.engines.DriverEngine;
 import com.ats.executor.drivers.engines.IDriverEngine;
+import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.MouseDirection;
+import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.actions.ActionApi;
 
@@ -333,8 +336,8 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {
 		final Rectangle rect = foundElement.getRectangle();
 		getDesktopDriver().mouseMove(
-				getOffsetX(rect, position) + foundElement.getScreenX().intValue(), 
-				getOffsetY(rect, position) + foundElement.getScreenY().intValue());
+				getOffsetX(rect, position) + foundElement.getScreenX().intValue() - foundElement.getCenterWidth(), 
+				getOffsetY(rect, position) + foundElement.getScreenY().intValue() - foundElement.getCenterHeight());
 	}
 
 	@Override
@@ -362,6 +365,12 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public void keyUp(Keys key) {
 		getDesktopDriver().keyUp(key.getCodePoint());
+	}
+	
+	@Override
+	protected int getCartesianOffset(int value, MouseDirectionData direction, Cartesian cart1, Cartesian cart2,	Cartesian cart3) {
+		final int result = super.getCartesianOffset(value, direction, cart1, cart2, cart3);
+		return result + value/2;
 	}
 
 	@Override
@@ -418,8 +427,8 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	public void goToUrl(ActionStatus status, String url) {} // open default browser ?
 
 	@Override
-	public WebElement getRootElement() {
-		return null;
+	public WebElement getRootElement(Channel cnl) {
+		return new DesktopRootElement(cnl.getDimension().getWidth().intValue(), (int)cnl.getDimension().getHeight().intValue());
 	}
 
 	@Override

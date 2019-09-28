@@ -436,7 +436,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	//---------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public WebElement getRootElement() {
+	public WebElement getRootElement(Channel cnl) {
 		int maxTry = 20;
 
 		WebElement body = getHtmlView();

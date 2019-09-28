@@ -35,31 +35,32 @@ public class TestElementImage extends TestElement {
 		}
 		return engine.findElements(parent, template);
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------------------------
 	// Mouse ...
 	//-------------------------------------------------------------------------------------------------------------------
-	
+
 	@Override
 	public void over(ActionStatus status, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {
 		final FoundElement fe = getFoundElement();
-		
-		final int clientWidth = Utils.string2Int(fe.getValue().getAttribute("clientWidth"));
-		final int clientHeight = Utils.string2Int(fe.getValue().getAttribute("clientHeight"));
-		
-		super.over(status, position, desktopDragDrop, fe.getBoundX().intValue() - clientWidth/2, fe.getBoundY().intValue() - clientHeight/2);
+
+		int halfWidth = Utils.string2Int(fe.getValue().getAttribute("clientWidth"))/2;
+		int halfHeight = Utils.string2Int(fe.getValue().getAttribute("clientHeight"))/2;
+
+		super.over(status, position, desktopDragDrop, fe.getBoundX().intValue() - halfWidth, fe.getBoundY().intValue() - halfHeight);
 	}
 
 	@Override
 	protected void mouseClick(ActionStatus status, MouseDirection position, int offsetX, int offsetY) {
 		final FoundElement fe = getFoundElement();
-		
-		final int clientWidth = Utils.string2Int(fe.getValue().getAttribute("clientWidth"));
-		final int clientHeight = Utils.string2Int(fe.getValue().getAttribute("clientHeight"));
-		
-		super.mouseClick(status, position, fe.getBoundX().intValue() - clientWidth/2, fe.getBoundY().intValue() - clientHeight/2);
+
+		final int halfWidth = Utils.string2Int(fe.getValue().getAttribute("clientWidth"))/2;
+		final int halfHeight = Utils.string2Int(fe.getValue().getAttribute("clientHeight"))/2;
+
+		super.mouseClick(status, position, fe.getBoundX().intValue() - halfWidth, fe.getBoundY().intValue() - halfHeight);
+
 	}
-	
+
 	@Override
 	public void mouseWheel(int delta) {
 		// do nothing for the moment
@@ -73,7 +74,7 @@ public class TestElementImage extends TestElement {
 	public void clearText(ActionStatus status) {
 		engine.getDesktopDriver().clearText();
 	}
-	
+
 	@Override
 	public void sendText(ActionStatus status, CalculatedValue text) {
 		for(SendKeyData sequence : text.getCalculatedText()) {

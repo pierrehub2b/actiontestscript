@@ -363,7 +363,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	}
 
 	@Override
-	public WebElement getRootElement() {
+	public WebElement getRootElement(Channel cnl) {
 
 		refreshElementMapLocation();
 
