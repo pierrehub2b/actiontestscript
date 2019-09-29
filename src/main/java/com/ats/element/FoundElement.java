@@ -180,8 +180,11 @@ public class FoundElement{
 		this.width = rect.getWidth();
 		this.height = rect.getHeight();
 		
-		this.centerWidth = (int)(this.width/2);
-		this.centerHeight = (int)(this.height/2);
+		final int cw = (int)(this.width/2);
+		final int ch = (int)(this.height/2);
+		
+		this.centerWidth = cw;
+		this.centerHeight = ch;
 		
 		this.x = rect.getX();
 		this.y = rect.getY();
@@ -191,11 +194,11 @@ public class FoundElement{
 			this.y += parent.getFoundElement().getY();
 		}
 				
-		this.boundX = this.x - channel.getSubDimension().getX() + (this.width/2);
-		this.boundY = this.y - channel.getSubDimension().getY() + (this.height/2);
+		this.boundX = this.x - channel.getSubDimension().getX() + cw;
+		this.boundY = this.y - channel.getSubDimension().getY() + ch;
 		
-		this.screenX = this.x + channel.getDimension().getX() + (this.width/2);
-		this.screenY = this.y + channel.getDimension().getY() + (this.height/2);
+		this.screenX = this.x + channel.getDimension().getX() + cw;
+		this.screenY = this.y + channel.getDimension().getY() + ch;
 	}
 
 	//------------------------------------------------------------------------------------------------------------------------------

@@ -71,7 +71,9 @@ import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.desktop.DesktopWindow;
 import com.ats.executor.drivers.engines.desktop.DesktopDriverEngine;
+import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.MouseDirection;
+import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.actions.ActionApi;
 import com.ats.script.actions.ActionGotoUrl;
@@ -634,6 +636,11 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	// Mouse position by browser
 	//-----------------------------------------------------------------------------------------------------------------------------------
 
+	@Override
+	protected int getCartesianOffset(int value, MouseDirectionData direction, Cartesian cart1, Cartesian cart2,	Cartesian cart3) {
+		return super.getCartesianOffset(value, direction, cart1, cart2, cart3) - value/2;
+	}
+	
 	@Override
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean withDesktop, int offsetX, int offsetY) {
 

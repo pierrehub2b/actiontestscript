@@ -50,9 +50,7 @@ import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.desktop.DesktopWindow;
 import com.ats.executor.drivers.engines.DriverEngine;
 import com.ats.executor.drivers.engines.IDriverEngine;
-import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.MouseDirection;
-import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.actions.ActionApi;
 
@@ -365,12 +363,6 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public void keyUp(Keys key) {
 		getDesktopDriver().keyUp(key.getCodePoint());
-	}
-	
-	@Override
-	protected int getCartesianOffset(int value, MouseDirectionData direction, Cartesian cart1, Cartesian cart2,	Cartesian cart3) {
-		final int result = super.getCartesianOffset(value, direction, cart1, cart2, cart3);
-		return result + value/2;
 	}
 
 	@Override
