@@ -147,6 +147,16 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 				
 		executeRequestActions(getElementAction(actionList));
 	}
+	
+	@Override
+	public void doubleClick() {
+		final JsonArray actionList = new JsonArray();
+		actionList.add(getMouseClickAction("pointerDown"));
+		actionList.add(getMouseClickAction("pointerUp"));
+		actionList.add(getMouseClickAction("pointerDown"));
+		actionList.add(getMouseClickAction("pointerUp"));	
+		executeRequestActions(getElementAction(actionList));
+	}
 
 	@Override
 	protected void loadUrl(String url) {
@@ -162,6 +172,14 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		action.addProperty("type", type);
 		action.addProperty("button", 0);
 		action.add("origin", origin);
+		return action;
+	}
+	
+	private JsonObject getMouseClickAction(String type) {
+		final JsonObject action = new JsonObject();
+		action.addProperty("duration", 20);
+		action.addProperty("type", type);
+		action.addProperty("button", 0);
 		return action;
 	}
 

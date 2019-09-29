@@ -36,6 +36,7 @@ import com.ats.executor.drivers.desktop.DesktopResponse;
 import com.ats.executor.drivers.engines.WebDriverEngine;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.tools.Utils;
+import com.google.gson.JsonArray;
 
 public class IEDriverEngine extends WebDriverEngine {
 
@@ -70,6 +71,16 @@ public class IEDriverEngine extends WebDriverEngine {
 	@Override
 	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {
 		runJavaScript(status, IE_MIDDLE_CLICK, element.getWebElement());
+	}
+	
+	@Override
+	public void doubleClick() {
+		getDesktopDriver().doubleClick();
+	}
+	
+	@Override
+	public void rightClick() {
+		getDesktopDriver().mouseRightClick();
 	}
 
 	@Override

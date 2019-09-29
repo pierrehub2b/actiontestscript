@@ -757,7 +757,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void doubleClick() {
-		actions.doubleClick();
+		actions.doubleClick().perform();
 	}	
 
 	@Override

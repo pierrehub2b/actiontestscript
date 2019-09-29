@@ -30,6 +30,8 @@ import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.WebDriverEngine;
+import com.ats.generator.objects.Cartesian;
+import com.ats.generator.objects.MouseDirectionData;
 import com.ats.tools.Utils;
 
 public class OperaDriverEngine extends WebDriverEngine {
@@ -71,5 +73,10 @@ public class OperaDriverEngine extends WebDriverEngine {
 		}
 		
 		launchDriver(status, options);
+	}
+	
+	@Override
+	protected int getCartesianOffset(int value, MouseDirectionData direction, Cartesian cart1, Cartesian cart2,	Cartesian cart3) {
+		return super.getCartesianOffset(value, direction, cart1, cart2, cart3) + value/2;
 	}
 }
