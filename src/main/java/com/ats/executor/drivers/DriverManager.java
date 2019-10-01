@@ -79,7 +79,6 @@ public class DriverManager {
 
 	public static void killAllDrivers() {
 		Predicate<ProcessHandle> fullPredicate = p -> p.info().command().isPresent();
-		//Predicate<ProcessHandle> keyHook  =  p -> p.info().command().get().contains("KeyHook.exe");
 		Predicate<ProcessHandle> desktop  =  p -> p.info().command().get().contains(DESKTOP_DRIVER_FILE_NAME);
 		Predicate<ProcessHandle> chrome  = p -> p.info().command().get().contains(CHROME_DRIVER_FILE_NAME);
 		Predicate<ProcessHandle> opera  =  p -> p.info().command().get().contains(OPERA_DRIVER_FILE_NAME);

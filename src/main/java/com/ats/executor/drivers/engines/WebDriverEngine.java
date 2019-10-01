@@ -915,8 +915,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public Object executeJavaScript(ActionStatus status, String javaScript, TestElement element) {
-
-		final Object result = runJavaScript(status, "var result=arguments[0]." + javaScript + ";", element.getWebElement());
+		final Object result = runJavaScript(status, "var e=arguments[0];var result=e." + javaScript.replaceAll("this", "e") + ";", element.getWebElement());
 		if(status.isPassed() && result != null) {
 			status.setMessage(result.toString());
 		}
@@ -929,7 +928,6 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	protected Object runJavaScript(ActionStatus status, String javaScript, Object ... params) {
-
 		status.setPassed(true);
 		try {
 			return driver.executeAsyncScript(javaScript + ";arguments[arguments.length-1](result);", params);
@@ -939,7 +937,6 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			status.setException(ActionStatus.JAVASCRIPT_ERROR, e1);
 			status.setCode(ActionStatus.JAVASCRIPT_ERROR);
 		}
-
 		return null;
 	}
 
