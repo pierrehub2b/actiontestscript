@@ -36,7 +36,6 @@ import com.ats.executor.drivers.desktop.DesktopResponse;
 import com.ats.executor.drivers.engines.WebDriverEngine;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.tools.Utils;
-import com.google.gson.JsonArray;
 
 public class IEDriverEngine extends WebDriverEngine {
 
