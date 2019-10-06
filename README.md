@@ -35,6 +35,9 @@ Pretty simple no ?
 * Apache Maven or Ant to generate and compile ATS project.
 * Install TestNG plugin on your favorite java IDE (for Eclipse : http://testng.org/doc/eclipse.html).
 * Read TestNG documentation about suite management.
+* For mobile testing you need to install 'MobileStation', this tool will set the mobile in 'test mode'
+- ** [Mobile Station for Windows](www.actiontestscript.com/drivers/mobile/AtsMobileStation.exe), you can set Android devices in test mode
+- ** [Mobile Station for MacOs](www.actiontestscript.com/drivers/mobile/AtsMobileStation.dmg), you can set Android and IOS devices in test mode
 
 
 ### Installing
