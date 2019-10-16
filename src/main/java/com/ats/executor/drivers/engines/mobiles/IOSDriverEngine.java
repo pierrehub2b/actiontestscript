@@ -24,7 +24,6 @@ import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.MobileDriverEngine;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 public class IOSDriverEngine extends MobileDriverEngine {
@@ -37,7 +36,7 @@ public class IOSDriverEngine extends MobileDriverEngine {
 		super(channel, status, application, desktopDriver, props);
 	}
 
-	@Override
+	/*@Override
 	protected void loadCapturedElement() {
 		
 		JsonObject result = executeRequest("capture2");
@@ -46,7 +45,7 @@ public class IOSDriverEngine extends MobileDriverEngine {
 		
 		
 		super.loadCapturedElement();
-	}
+	}*/
 
 	
 	
