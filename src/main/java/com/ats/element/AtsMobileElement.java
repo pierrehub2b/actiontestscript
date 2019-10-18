@@ -21,7 +21,9 @@ package com.ats.element;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.ats.generator.variables.CalculatedProperty;
@@ -43,6 +45,17 @@ public class AtsMobileElement extends AtsBaseElement {
 			rect = new Rectangle(x.intValue(), y.intValue(), width.intValue(), height.intValue());
 		}
 		return rect;
+	}
+	
+	public AtsMobileElement(String id, String tag, Double width, Double height, Double x, Double y, Boolean clickable, Map<String, String> attributes) {
+		this.id = id;
+		this.tag = tag;
+		this.width = width;
+		this.height = height;
+		this.clickable = clickable;
+		this.x = x;
+		this.y = y;
+		this.attributes = attributes;
 	}
 		
 	public boolean isClickable() {
@@ -105,10 +118,22 @@ public class AtsMobileElement extends AtsBaseElement {
 	}
 
 	public AtsMobileElement[] getChildren() {
+		if(this.children == null) {
+			return new AtsMobileElement[0];
+		}
 		return children;
 	}
 
 	public void setChildren(AtsMobileElement[] children) {
 		this.children = children;
+	}
+	
+	public void addChildren(AtsMobileElement element) {
+		var tmpChild = new ArrayList<AtsMobileElement>();
+		if(this.children != null) {
+			tmpChild = new ArrayList<AtsMobileElement>(Arrays.asList(this.children));
+		}
+		tmpChild.add(element);
+		this.children = tmpChild.toArray(new AtsMobileElement[tmpChild.size()]);
 	}
 }

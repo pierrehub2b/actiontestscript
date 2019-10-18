@@ -47,6 +47,9 @@ import com.ats.executor.SendKeyData;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.desktop.DesktopDriver;
+import com.ats.executor.drivers.engines.mobiles.AndroidRootElement;
+import com.ats.executor.drivers.engines.mobiles.IosRootElement;
+import com.ats.executor.drivers.engines.mobiles.RootElement;
 import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
@@ -54,7 +57,6 @@ import com.ats.graphic.TemplateMatchingSimple;
 import com.ats.script.actions.ActionApi;
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -74,6 +76,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	private final static String STOP = "stop";
 	private final static String SWITCH = "switch";
 	private final static String CAPTURE = "capture";
+	private final static String DOM = "dom";
 	private final static String ELEMENT = "element";
 	private final static String TAP = "tap";
 	private final static String INPUT = "input";
@@ -81,9 +84,8 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	private final static String BUTTON = "button";
 
 	private JsonParser parser = new JsonParser();
-	private Gson gson = new Gson();
 
-	private AtsMobileElement rootElement;
+	protected RootElement rootElement;
 	protected AtsMobileElement cachedElement;
 
 	private MobileTestElement testElement;
@@ -124,6 +126,13 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 
 				final String systemName = response.get("systemName").getAsString();
 				final String os = response.get("os").getAsString();
+				
+				if (os.equals("ios")) {
+					rootElement = new IosRootElement();
+				} else {
+					rootElement = new AndroidRootElement();
+				}
+					
 				final String driverVersion = response.get("driverVersion").getAsString();
 
 				final double channelWidth = response.get("channelWidth").getAsDouble();
@@ -172,7 +181,9 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 
 	@Override
 	public void refreshElementMapLocation() {
-		rootElement = gson.fromJson(executeRequest(CAPTURE), AtsMobileElement.class);
+		var jsonObject = executeRequest(CAPTURE);
+		rootElement.refresh(jsonObject);
+		cachedElement = rootElement.getValue();
 		cachedElementTime = 0L;
 	}
 
@@ -235,10 +246,12 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 
 	private void loadList(AtsMobileElement element, ArrayList<AtsMobileElement> list) {
 		for (int i=0; i<element.getChildren().length; i++) {
-			AtsMobileElement child = element.getChildren()[i];
+			if(element.getChildren() != null) {
+				AtsMobileElement child = element.getChildren()[i];
 
-			list.add(child);
-			loadList(child, list);
+				list.add(child);
+				loadList(child, list);
+			}
 		}
 	}
 
@@ -277,7 +290,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 		if(!reload && cachedElement != null) {
 			return getElementById(cachedElement, id);
 		}else {
-			return getElementById(rootElement, id);
+			return getElementById(rootElement.getValue(), id);
 		}
 	}
 
@@ -297,7 +310,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 
 		if(testObject.getParent() == null) {
 			refreshElementMapLocation();
-			loadElementsByTag(rootElement, tagName, list);
+			loadElementsByTag(rootElement.getValue(), tagName, list);
 		}else {
 			loadElementsByTag(getElementById(testObject.getParent().getWebElementId()), tagName, list);
 		}
@@ -323,14 +336,16 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	}
 
 	protected long cachedElementTime = System.currentTimeMillis();
+	
 	protected void loadCapturedElement() {
 		long current = System.currentTimeMillis();
 		if(cachedElement == null || current - 2500 > cachedElementTime) {
-			cachedElement = gson.fromJson(executeRequest(CAPTURE), AtsMobileElement.class);
+			var jsonObject = executeRequest(CAPTURE);
+			rootElement.refresh(jsonObject);
+			cachedElement = rootElement.getValue();
 			cachedElementTime = System.currentTimeMillis();
 		}
 	}
-
 	//-------------------------------------------------------------------------------------------------------------
 	
 	@Override
@@ -341,7 +356,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	@Override
 	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {
 		final Rectangle rect = element.getRectangle();
-		executeRequest(ELEMENT, element.getId(), TAP, (int)(getOffsetX(rect, position)) + "", (int)(getOffsetY(rect, position)) + "");
+		executeRequest(ELEMENT, element.getId(), TAP, (int)(getOffsetX(rect, position)) + "", (int)(getOffsetY(rect, position)) + "");	
 	}	
 
 	@Override
@@ -368,7 +383,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 		refreshElementMapLocation();
 
 		RemoteWebElement elem = new RemoteWebElement();
-		elem.setId(rootElement.getId());
+		elem.setId(rootElement.getValue().getId());
 
 		return elem;
 	}
@@ -476,7 +491,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	//----------------------------------------------------------------------------------------------------------------------------------------
 
 	private AtsMobileElement getElementById(String id) {
-		return getElementById(rootElement, id);
+		return getElementById(rootElement.getValue(), id);
 	}
 
 	private AtsMobileElement getElementById(AtsMobileElement root, String id) {
