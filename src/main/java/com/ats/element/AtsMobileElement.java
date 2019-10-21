@@ -76,8 +76,10 @@ public class AtsMobileElement extends AtsBaseElement {
 
 	private String getInnerText() {
 		String result = getText();
-		for(int i=0; i<children.length; i++) {
-			result += " " + children[i].getInnerText();
+		if(children != null) {
+			for(int i=0; i<children.length; i++) {
+				result += " " + children[i].getInnerText();
+			}
 		}
 		return result.trim();
 	}

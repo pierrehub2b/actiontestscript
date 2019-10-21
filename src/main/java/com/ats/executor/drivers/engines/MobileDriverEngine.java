@@ -76,7 +76,6 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	private final static String STOP = "stop";
 	private final static String SWITCH = "switch";
 	private final static String CAPTURE = "capture";
-	private final static String DOM = "dom";
 	private final static String ELEMENT = "element";
 	private final static String TAP = "tap";
 	private final static String INPUT = "input";
@@ -356,24 +355,47 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	@Override
 	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {
 		final Rectangle rect = element.getRectangle();
-		executeRequest(ELEMENT, element.getId(), TAP, (int)(getOffsetX(rect, position)) + "", (int)(getOffsetY(rect, position)) + "");	
-	}	
+		if(rootElement instanceof IosRootElement) {
+			var coordinates = new StringBuilder(element.getX()+";"+element.getY()+";"+element.getWidth()+";"+element.getHeight());
+			coordinates.append(";"+((IosRootElement) rootElement).getRatioWidth()+";"+((IosRootElement) rootElement).getRatioHeight());
+			executeRequest(ELEMENT, 
+					element.getId(), 
+					TAP, 
+					(int)(getOffsetX(rect, position)) + "", 
+					(int)(getOffsetY(rect, position)) + "", 
+					coordinates.toString()
+				);
+		} else {
+			executeRequest(ELEMENT, element.getId(), TAP, (int)(getOffsetX(rect, position)) + "", (int)(getOffsetY(rect, position)) + "");	
+		}
+	}
 
 	@Override
 	public void drag(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {
 		final Rectangle rect = element.getRectangle();
-		testElement = new MobileTestElement(element.getId(), (int)(getOffsetX(rect, position)), (int)(getOffsetY(rect, position)));
+		var coordinates = new StringBuilder(element.getX()+";"+element.getY()+";"+element.getWidth()+";"+element.getHeight());
+		coordinates.append(";"+((IosRootElement) rootElement).getRatioWidth()+";"+((IosRootElement) rootElement).getRatioHeight());
+		testElement = new MobileTestElement(
+				element.getId(), 
+				(int)(getOffsetX(rect, position)), 
+				(int)(getOffsetY(rect, position)), 
+				coordinates.toString()
+			);
 	}
 
 	@Override
 	public void moveByOffset(int hDirection, int vDirection) {
-		executeRequest(ELEMENT, testElement.getId(), SWIPE, testElement.getOffsetX() + "", testElement.getOffsetY() + "", hDirection + "", + vDirection + "");
+		if(rootElement instanceof IosRootElement) {
+			executeRequest(ELEMENT, testElement.getId(), SWIPE, testElement.getOffsetX() + "", testElement.getOffsetY() + "", hDirection + "", + vDirection + "",  testElement.getCoordinates());
+		} else {
+			executeRequest(ELEMENT, testElement.getId(), SWIPE, testElement.getOffsetX() + "", testElement.getOffsetY() + "", hDirection + "", + vDirection + "");
+		}
 	}
 
 	@Override
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {
-		for(SendKeyData sequence : textActionList) {
-			executeRequest(ELEMENT, element.getFoundElement().getId(), INPUT, sequence.getMobileSequence());
+		for(SendKeyData sequence : textActionList) {	
+			executeRequest(ELEMENT, element.getFoundElement().getId(), INPUT, sequence.getMobileSequence()		);
 		}
 	}
 

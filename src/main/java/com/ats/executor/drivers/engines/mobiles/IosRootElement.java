@@ -16,14 +16,18 @@ public class IosRootElement extends RootElement {
 	protected String regexBraces = "[{},]+";
 	protected String regexBracesAndSpaces = "[\\s{},]+";
 	
+	protected Double deviceWidth = 0.0;
+	protected Double deviceHeight = 0.0;
+	
+	protected Double ratioWidth = 1.0;
+	protected Double ratioHeight = 1.0;
+	
 	@Override
 	public void refresh(JsonObject jsonObject) {
 		var debugDescription = jsonObject.get("root").getAsString();
-		var deviceHeight = jsonObject.get("deviceHeight").getAsDouble();
-		var deviceWidth = jsonObject.get("deviceWidth").getAsDouble();
+		this.deviceHeight = jsonObject.get("deviceHeight").getAsDouble();
+		this.deviceWidth = jsonObject.get("deviceWidth").getAsDouble();
 		var debugDescriptionArray = debugDescription.split("\n");
-		var ratioWidth = 1.0;
-		var ratioHeight = 1.0;
 		
 		Double width = 0.0;
 		Double height = 0.0;
@@ -109,6 +113,22 @@ public class IosRootElement extends RootElement {
 		
 		this.value = domStructure;
 	}
+	
+	public Double getDeviceWidth() {
+		return this.deviceWidth;
+	}
+	
+	public Double getDeviceHeight() {
+		return this.deviceHeight;
+	}
+	
+	public Double getRatioWidth() {
+		return this.ratioWidth;
+	}
+	
+	public Double getRatioHeight() {
+		return this.ratioHeight;
+	}
 
 	protected Map<String,String> getAttributes(String str) {
 		var result = new TreeMap<String, String>();
@@ -145,16 +165,16 @@ public class IosRootElement extends RootElement {
 		}
 		
 		if(!result.containsKey("text")) {
-			result.put("text", null);
+			result.put("text", "");
 		}
 		if(!result.containsKey("description")) {
-			result.put("description", null);
+			result.put("description", "");
 		}
 		if(!result.containsKey("identifier")) {
-			result.put("identifier", null);
+			result.put("identifier", "");
 		}
 		if(!result.containsKey("value")) {
-			result.put("value", null);
+			result.put("value", "");
 		}
 		if(!result.containsKey("enabled")) {
 			result.put("enabled", "true");
@@ -173,7 +193,7 @@ public class IosRootElement extends RootElement {
 	protected String cleanAttribute(String str) {
 		return str.split(":")[str.split(":").length-1].replace("\'", "").replaceAll(regexSpaces, "");
 	}
-
+	
 	protected String[] parseLine(String str) {
 		return str.split("\\,");
 	}
