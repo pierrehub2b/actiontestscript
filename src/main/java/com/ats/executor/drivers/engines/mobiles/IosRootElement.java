@@ -111,6 +111,17 @@ public class IosRootElement extends RootElement {
 			currentIndex++;
 		}
 		
+		var firstChilds = domStructure.getChildren();
+		if(firstChilds != null && firstChilds.length >= 0) {
+			var frontElements = firstChilds[0].getChildren();
+			if(frontElements != null && frontElements.length > 0) {
+				// at least 2 elements; so get only the last one
+				var child = new AtsMobileElement[1];
+				child[0] = frontElements[frontElements.length-1];
+				domStructure.getChildren()[0].setChildren(child);
+			}
+		}
+		
 		this.value = domStructure;
 	}
 	
