@@ -180,10 +180,12 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 
 	@Override
 	public void refreshElementMapLocation() {
-		var jsonObject = executeRequest(CAPTURE);
-		rootElement.refresh(jsonObject);
-		cachedElement = rootElement.getValue();
-		cachedElementTime = 0L;
+		new Thread(() -> {
+			var jsonObject = executeRequest(CAPTURE);
+			rootElement.refresh(jsonObject);
+			cachedElement = rootElement.getValue();
+			cachedElementTime = 0L;
+		}).start();
 	}
 
 	@Override
@@ -339,10 +341,12 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	protected void loadCapturedElement() {
 		long current = System.currentTimeMillis();
 		if(cachedElement == null || current - 2500 > cachedElementTime) {
-			var jsonObject = executeRequest(CAPTURE);
-			rootElement.refresh(jsonObject);
-			cachedElement = rootElement.getValue();
-			cachedElementTime = System.currentTimeMillis();
+			new Thread(() -> {
+				var jsonObject = executeRequest(CAPTURE);
+				rootElement.refresh(jsonObject);
+				cachedElement = rootElement.getValue();
+				cachedElementTime = System.currentTimeMillis();
+			}).start();
 		}
 	}
 	//-------------------------------------------------------------------------------------------------------------

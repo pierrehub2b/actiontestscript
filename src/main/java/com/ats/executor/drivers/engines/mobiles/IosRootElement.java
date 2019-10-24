@@ -37,8 +37,6 @@ public class IosRootElement extends RootElement {
 		for (int i = 0; i < debugDescriptionArray.length; i++) {
 			var level = countSpaces(debugDescriptionArray[i]);
 			if(level >= 4 && !debugDescriptionArray[i].contains("Application, pid:")) {
-				
-				
 				String trimmedLine = debugDescriptionArray[i].replaceAll(regexSpaces, "");
 				if(trimmedLine.startsWith("Window (Main)")) {
 					var arraySize = trimmedLine.split(regexBracesAndSpaces);
