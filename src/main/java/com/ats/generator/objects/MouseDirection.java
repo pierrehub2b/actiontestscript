@@ -15,27 +15,23 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.generator.objects;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import com.ats.executor.ActionTestScript;
 
 public class MouseDirection {
 
-	public static final Pattern POSITION_REGEXP = Pattern.compile("(" + Cartesian.RIGHT + "|" + Cartesian.TOP + "|" + Cartesian.LEFT + "|" + Cartesian.BOTTOM + "|" + Cartesian.MIDDLE + "|" + Cartesian.CENTER + ")\\s*?\\((-?\\d+)\\)", Pattern.CASE_INSENSITIVE);
-
 	private MouseDirectionData horizontalPos;
 	private MouseDirectionData verticalPos;
 
 	public MouseDirection() {}
-	
+
 	public MouseDirection(ArrayList<String> options, boolean canBeEmpty) {
 		Iterator<String> itr = options.iterator();
 		while (itr.hasNext()){
@@ -43,7 +39,7 @@ public class MouseDirection {
 				itr.remove();
 			}
 		}
-		
+
 		if(!canBeEmpty && this.horizontalPos == null && this.verticalPos == null) {
 			this.setHorizontalPos(new MouseDirectionData(Cartesian.RIGHT, 20));
 		}
@@ -55,38 +51,60 @@ public class MouseDirection {
 	}
 
 	public boolean addPosition(String value) {
-	  
-		Matcher match = POSITION_REGEXP.matcher(value);
-		if(match.find()){
-			
-			String name = match.group(1);
-			String pos = match.group(2);
-			
-			if(Cartesian.RIGHT.equals(name) || Cartesian.LEFT.equals(name) || Cartesian.CENTER.equals(name)){
-				setHorizontalPos(new MouseDirectionData(name, pos));
-			}else if(Cartesian.TOP.equals(name) || Cartesian.BOTTOM.equals(name) || Cartesian.MIDDLE.equals(name)){
-				setVerticalPos(new MouseDirectionData(name, pos));
-			}
+
+		String data = Cartesian.RIGHT.extractData(value);
+		if(data != null) {
+			setHorizontalPos(new MouseDirectionData(Cartesian.RIGHT.toString(), data));
 			return true;
 		}
-		
+
+		data = Cartesian.RIGHT.extractData(value);
+		if(data != null) {
+			setHorizontalPos(new MouseDirectionData(Cartesian.RIGHT.toString(), data));
+			return true;
+		}
+
+		data = Cartesian.CENTER.extractData(value);
+		if(data != null) {
+			setHorizontalPos(new MouseDirectionData(Cartesian.CENTER.toString(), data));
+			return true;
+		}
+
+		data = Cartesian.TOP.extractData(value);
+		if(data != null) {
+			setVerticalPos(new MouseDirectionData(Cartesian.TOP.toString(), data));
+			return true;
+		}
+
+		data = Cartesian.BOTTOM.extractData(value);
+		if(data != null) {
+			setVerticalPos(new MouseDirectionData(Cartesian.BOTTOM.toString(), data));
+			return true;
+		}
+
+		data = Cartesian.MIDDLE.extractData(value);
+		if(data != null) {
+			setVerticalPos(new MouseDirectionData(Cartesian.MIDDLE.toString(), data));
+			return true;
+		}
+
 		return false;
 	}
-	
+
 	public int getHorizontalDirection() {
 		if(horizontalPos != null) {
 			return horizontalPos.getHorizontalDirection();
 		}
 		return 0;
 	}
-	
+
 	public int getVerticalDirection() {
 		if(verticalPos != null) {
 			return verticalPos.getVerticalDirection();
 		}
 		return 0;
 	}
-	
+
 	public void updateForDrag() {
 		setHorizontalPos(null);
 		setVerticalPos(new MouseDirectionData(Cartesian.BOTTOM, -20));
@@ -103,7 +121,7 @@ public class MouseDirection {
 			}else {
 				codeData.add("null");
 			}
-			
+
 			if(verticalPos != null){
 				codeData.add(ActionTestScript.JAVA_POS_FUNCTION_NAME + "(" + verticalPos.getJavaCode() + ")");
 			}else {
@@ -113,11 +131,11 @@ public class MouseDirection {
 		}
 		return "";
 	}
-	
+
 	public String getPositionJavaCode() {
 		return getJavaCode(new ArrayList<String>(Arrays.asList(new String[]{""})));
 	}
-	
+
 	public String getDirectionJavaCode() {
 		return getJavaCode(new ArrayList<String>());
 	}

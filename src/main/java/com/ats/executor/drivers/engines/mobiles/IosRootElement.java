@@ -1,5 +1,6 @@
 package com.ats.executor.drivers.engines.mobiles;
 
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -7,46 +8,107 @@ import java.util.TreeMap;
 import java.util.UUID;
 
 import com.ats.element.AtsMobileElement;
+import com.ats.element.FoundElement;
+import com.ats.element.MobileTestElement;
 import com.ats.element.StructDebugDescription;
+import com.ats.executor.ActionStatus;
+import com.ats.executor.drivers.engines.MobileDriverEngine;
+import com.ats.generator.objects.MouseDirection;
 import com.google.gson.JsonObject;
 
 public class IosRootElement extends RootElement {	
 
-	protected String regexSpaces = "^\\s+";
-	protected String regexBraces = "[{},]+";
-	protected String regexBracesAndSpaces = "[\\s{},]+";
+	private String regexSpaces = "^\\s+";
+	private String regexBraces = "[{},]+";
+	private String regexBracesAndSpaces = "[\\s{},]+";
 	
-	protected Double deviceWidth = 0.0;
-	protected Double deviceHeight = 0.0;
+	private Double deviceWidth = 0.0;
+	private Double deviceHeight = 0.0;
 	
-	protected Double ratioWidth = 1.0;
-	protected Double ratioHeight = 1.0;
+	private Double ratioWidth = 1.0;
+	private Double ratioHeight = 1.0;
 	
+	public IosRootElement(MobileDriverEngine drv) {
+		super(drv);
+	}
+		
+	@Override
+	public MobileTestElement getCurrentElement(FoundElement element, MouseDirection position) {
+
+		final Rectangle rect = element.getRectangle();
+		
+		final StringBuilder coordinates = new StringBuilder()
+		.append(element.getX()).append(";")
+		.append(element.getY()).append(";")
+		.append(element.getWidth()).append(";")
+		.append(element.getHeight()).append(";")
+		.append(getRatioWidth()).append(";")
+		.append(getRatioHeight());
+				
+		return new MobileTestElement(
+				element.getId(), 
+				(int)(driver.getOffsetX(rect, position)), 
+				(int)(driver.getOffsetY(rect, position)), 
+				coordinates.toString()
+			);
+	}
+
+	@Override
+	public void tap(ActionStatus status, FoundElement element, MouseDirection position) {
+		final Rectangle rect = element.getRectangle();
+
+		final StringBuilder coordinates = new StringBuilder()
+		.append(element.getX()).append(";")
+		.append(element.getY()).append(";")
+		.append(element.getWidth()).append(";")
+		.append(element.getHeight()).append(";")
+		.append(getRatioWidth()).append(";")
+		.append(getRatioHeight());
+	
+		driver.executeRequest(MobileDriverEngine.ELEMENT, 
+				element.getId(), 
+				MobileDriverEngine.TAP, 
+				(int)(driver.getOffsetX(rect, position)) + "", 
+				(int)(driver.getOffsetY(rect, position)) + "", 
+				coordinates.toString()
+			);
+	}
+		
+	@Override
+	public void swipe(MobileTestElement testElement, int hDirection, int vDirection) {
+		driver.executeRequest(MobileDriverEngine.ELEMENT, testElement.getId(), MobileDriverEngine.SWIPE, testElement.getOffsetX() + "", testElement.getOffsetY() + "", hDirection + "", + vDirection + "",  testElement.getCoordinates());
+	}
+
 	@Override
 	public void refresh(JsonObject jsonObject) {
-		var debugDescription = jsonObject.get("root").getAsString();
+		
+		if(jsonObject == null || jsonObject.get("root") == null) {
+			return;
+		}
+		
 		this.deviceHeight = jsonObject.get("deviceHeight").getAsDouble();
 		this.deviceWidth = jsonObject.get("deviceWidth").getAsDouble();
-		var debugDescriptionArray = debugDescription.split("\n");
+		
+		final String debugDescription = jsonObject.get("root").getAsString();
+		final String[] debugDescriptionArray = debugDescription.split("\n");
 		
 		Double width = 0.0;
 		Double height = 0.0;
 		
-		ArrayList<StructDebugDescription> structDebug = new ArrayList<StructDebugDescription>();
+		final ArrayList<StructDebugDescription> structDebug = new ArrayList<StructDebugDescription>();
 
 		for (int i = 0; i < debugDescriptionArray.length; i++) {
-			var level = countSpaces(debugDescriptionArray[i]);
+			int level = countSpaces(debugDescriptionArray[i]);
 			if(level >= 4 && !debugDescriptionArray[i].contains("Application, pid:")) {
 				String trimmedLine = debugDescriptionArray[i].replaceAll(regexSpaces, "");
 				if(trimmedLine.startsWith("Window (Main)")) {
-					var arraySize = trimmedLine.split(regexBracesAndSpaces);
+					final String[] arraySize = trimmedLine.split(regexBracesAndSpaces);
 					width = Double.parseDouble(arraySize[arraySize.length-2]);
 					height = Double.parseDouble(arraySize[arraySize.length-1]);
 				}
 				structDebug.add(new StructDebugDescription((level/2)-1, trimmedLine));
 			}
-		}
-		
+		}		
 		
 		//calculate ratio
 		if(height != deviceHeight || width != deviceWidth) {
@@ -56,13 +118,15 @@ public class IosRootElement extends RootElement {
 			height = height * ratioHeight;
 		}
 		
-		var domStructure = new AtsMobileElement(UUID.randomUUID().toString(),"root",width, height, 0.0,0.0, false, new HashMap<String, String>());
+		final AtsMobileElement domStructure = new AtsMobileElement(UUID.randomUUID().toString(),"root",width, height, 0.0,0.0, false, new HashMap<String, String>());
 	
-		var currentIndex = 0;
+		int currentIndex = 0;
 		for (StructDebugDescription structDebugDescription : structDebug) {
-			var tag = structDebugDescription.getContent().split(regexBraces)[0].replaceAll(regexSpaces, "");
-			var arraySize = structDebugDescription.getContent().split(regexBraces);
-			ArrayList<String> stringArray = new ArrayList<String>();
+			
+			final String tag = structDebugDescription.getContent().split(regexBraces)[0].replaceAll(regexSpaces, "");
+			final String[] arraySize = structDebugDescription.getContent().split(regexBraces);
+			
+			final ArrayList<String> stringArray = new ArrayList<String>();
 
 			for (int i = 0; i < arraySize.length; i++) {
 				if(!arraySize[i].replaceAll(regexSpaces, "").equals("")) {
@@ -70,12 +134,12 @@ public class IosRootElement extends RootElement {
 				}
 			}
 			
-			var currentX = Double.parseDouble(stringArray.get(2)) * ratioWidth;
-			var currentY = Double.parseDouble(stringArray.get(3)) * ratioHeight; 
-			var currentWidth = Double.parseDouble(stringArray.get(4)) * ratioWidth;
-			var currentheight = Double.parseDouble(stringArray.get(5)) * ratioHeight; 
+			final double currentX = Double.parseDouble(stringArray.get(2)) * ratioWidth;
+			final double currentY = Double.parseDouble(stringArray.get(3)) * ratioHeight; 
+			final double currentWidth = Double.parseDouble(stringArray.get(4)) * ratioWidth;
+			final double currentheight = Double.parseDouble(stringArray.get(5)) * ratioHeight; 
 			
-			var currentAtsMobileElement = new AtsMobileElement(
+			final AtsMobileElement currentAtsMobileElement = new AtsMobileElement(
 					structDebugDescription.getUuid().toString(), 
 					tag, 
 					currentWidth, 
@@ -91,7 +155,7 @@ public class IosRootElement extends RootElement {
 			} else 
 			{
 				// get parentLevel
-				var i = currentIndex;
+				int i = currentIndex;
 				UUID uuidParent = null;
 				while ((i-1) > -1) {
 					if(structDebug.get(i-1).getLevel()+1 == structDebugDescription.getLevel()) {
@@ -109,12 +173,12 @@ public class IosRootElement extends RootElement {
 			currentIndex++;
 		}
 		
-		var firstChilds = domStructure.getChildren();
+		final AtsMobileElement[] firstChilds = domStructure.getChildren();
 		if(firstChilds != null && firstChilds.length >= 0) {
-			var frontElements = firstChilds[0].getChildren();
+			final AtsMobileElement[] frontElements = firstChilds[0].getChildren();
 			if(frontElements != null && frontElements.length > 0) {
 				// at least 2 elements; so get only the last one
-				var child = new AtsMobileElement[1];
+				final AtsMobileElement[] child = new AtsMobileElement[1];
 				child[0] = frontElements[frontElements.length-1];
 				domStructure.getChildren()[0].setChildren(child);
 			}
@@ -139,7 +203,7 @@ public class IosRootElement extends RootElement {
 		return this.ratioHeight;
 	}
 
-	protected Map<String,String> getAttributes(String str) {
+	private Map<String,String> getAttributes(String str) {
 		var result = new TreeMap<String, String>();
 		var arraySize = str.split(regexBraces);
 		
@@ -199,15 +263,11 @@ public class IosRootElement extends RootElement {
 		return result;
 	}
 	
-	protected String cleanAttribute(String str) {
+	private String cleanAttribute(String str) {
 		return str.split(":")[str.split(":").length-1].replace("\'", "").replaceAll(regexSpaces, "");
 	}
 	
-	protected String[] parseLine(String str) {
-		return str.split("\\,");
-	}
-	
-	protected int countSpaces(String str) {
+	private int countSpaces(String str) {
 		int count = 0;
 
 	    for(int i=0; i < str.length(); i++)
@@ -222,15 +282,11 @@ public class IosRootElement extends RootElement {
 	    return count;
 	}
 	
-	protected String trimStart(String str) {
-        return str.replaceFirst("^\\s+", "");
-    }
-	
-	protected void searchAndAdd(String uuid, AtsMobileElement node, AtsMobileElement elementToAdd){
+	private void searchAndAdd(String uuid, AtsMobileElement node, AtsMobileElement elementToAdd){
 		if(node.getId().equals(uuid)) {
 			node.addChildren(elementToAdd);
 		} else {
-			var childs = node.getChildren();
+			final AtsMobileElement[] childs = node.getChildren();
 			if(childs != null ) {
 				for (int i = 0; i < node.getChildren().length; i++) {
 					searchAndAdd(uuid, node.getChildren()[i], elementToAdd);

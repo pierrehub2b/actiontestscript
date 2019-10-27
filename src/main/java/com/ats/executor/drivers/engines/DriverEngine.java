@@ -125,11 +125,11 @@ public abstract class DriverEngine {
 		return value/2;
 	}
 
-	protected int getOffsetX(Rectangle rect, MouseDirection position) {
+	public int getOffsetX(Rectangle rect, MouseDirection position) {
 		return getCartesianOffset(rect.width, position.getHorizontalPos(), Cartesian.LEFT, Cartesian.CENTER, Cartesian.RIGHT);
 	}
 
-	protected int getOffsetY(Rectangle rect, MouseDirection position) {
+	public int getOffsetY(Rectangle rect, MouseDirection position) {
 		return getCartesianOffset(rect.height, position.getVerticalPos(), Cartesian.TOP, Cartesian.MIDDLE, Cartesian.BOTTOM);
 	}
 	
@@ -184,8 +184,8 @@ public abstract class DriverEngine {
 				getOffsetY(rect, position) + foundElement.getScreenY().intValue() + offsetY);
 	}
 
-	protected void setPosition(Point pt) {} // no action by default
-	protected void setSize(Dimension dim) {} // no action by default
+	abstract protected void setPosition(Point pt);
+	abstract protected void setSize(Dimension dim);
 	
 	public ArrayList<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template) {
 

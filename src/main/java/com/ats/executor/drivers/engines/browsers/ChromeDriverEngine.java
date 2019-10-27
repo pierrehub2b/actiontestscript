@@ -21,6 +21,8 @@ package com.ats.executor.drivers.engines.browsers;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.openqa.selenium.chrome.ChromeOptions;
 
@@ -64,10 +66,14 @@ public class ChromeDriverEngine extends WebDriverEngine {
 		
 		if(profileFolder == null) {
 			profileFolder = Utils.createDriverFolder(DriverManager.CHROME_BROWSER);
+			
+			Map<String, Object> prefs = new HashMap<String, Object>();
+	        prefs.put("credentials_enable_service", false);
+	        prefs.put("profile.password_manager_enabled", false);
+	        options.setExperimentalOption("prefs", prefs);
 		}
 		options.addArguments("--user-data-dir=" + profileFolder.getAbsolutePath());
-		
-		
+        
 		if(lang != null) {
 			options.addArguments("--lang=" + lang);
 		}

@@ -346,7 +346,8 @@ public class DesktopDriver extends RemoteWebDriver {
 		Url (8),
 		Keys(9),
 		State(10),
-		IEToFront(11);
+		SwitchIE(11),
+		CloseIE(12);
 
 		private final int type;
 		WindowType(int value){
@@ -566,10 +567,14 @@ public class DesktopDriver extends RemoteWebDriver {
 		sendRequestCommand(CommandType.Window, WindowType.ToFront, pid);
 	}
 	
-	public DesktopResponse setIEWindowToFront(int index) {
-		return sendRequestCommand(CommandType.Window, WindowType.IEToFront, index);
+	public DesktopResponse switchIEWindow(int index) {
+		return sendRequestCommand(CommandType.Window, WindowType.SwitchIE, index);
 	}
-
+	
+	public DesktopResponse closeIEWindow() {
+		return sendRequestCommand(CommandType.Window, WindowType.CloseIE);
+	}
+	
 	public void rootKeys(int handle, String keys) {
 		sendRequestCommand(CommandType.Window, WindowType.Keys, handle, keys);
 	}

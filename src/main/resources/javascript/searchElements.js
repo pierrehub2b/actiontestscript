@@ -1,28 +1,28 @@
-var result = [], parent = arguments[0];
-const tag = arguments[1], attributes = arguments[2], attributesLen = arguments[3];	
-const screenOffsetX = (window.outerWidth - window.innerWidth)/2 + window.screenX + 0.0001, screenOffsetY = window.outerHeight - window.innerHeight + window.screenY + 0.0001;
+let result=[], parent=arguments[0];
+const tag=arguments[1], attributes=arguments[2], attributesLen=arguments[3];	
+const screenOffsetX=(window.outerWidth-window.innerWidth)/2+window.screenX+0.0001, screenOffsetY=window.outerHeight-window.innerHeight+window.screenY+0.0001;
 
 if(parent == null){
 	parent = window.document;
 };
 
-const elts = parent.getElementsByTagName(tag);
-const eltsLength = elts.length;
+const elts=parent.getElementsByTagName(tag);
+const eltsLength=elts.length;
 
-var addElement = function (e, a){
+let addElement=function(e, a){
 	let r = e.getBoundingClientRect();
 	result[result.length] = [e, e.tagName, e.getAttribute('inputmode')=='numeric',e.getAttribute('type')=='password', r.x+0.0001, r.y+0.0001, r.width+0.0001, r.height+0.0001, r.left+0.0001, r.top+0.0001, screenOffsetX, screenOffsetY, a];
 };
 
 if(attributesLen == 0){
 
-	for(var h = 0; h < eltsLength; h++){
+	for(let h = 0; h < eltsLength; h++){
 		addElement(elts[h], {});
 	}
 
 }else{
 
-	var i = 0, loop = function (){
+	let i=0, loop=function (){
 
 		let e = elts[i], a = {}, j = 0;
 

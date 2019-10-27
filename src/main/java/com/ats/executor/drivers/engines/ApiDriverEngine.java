@@ -52,7 +52,9 @@ import javax.net.ssl.X509TrustManager;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.openqa.selenium.Alert;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.xml.sax.SAXException;
 
@@ -443,5 +445,13 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 		};
 
 		return new TrustManager [] { manager };
+	}
+
+	@Override
+	protected void setPosition(Point pt) {
+	}
+
+	@Override
+	protected void setSize(Dimension dim) {
 	}
 }

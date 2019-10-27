@@ -20,7 +20,6 @@ under the License.
 package com.ats.executor.drivers.engines.browsers;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 import org.openqa.selenium.ie.InternetExplorerOptions;
 
@@ -32,10 +31,8 @@ import com.ats.executor.SendKeyData;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
-import com.ats.executor.drivers.desktop.DesktopResponse;
 import com.ats.executor.drivers.engines.WebDriverEngine;
 import com.ats.generator.objects.MouseDirection;
-import com.ats.tools.Utils;
 
 public class IEDriverEngine extends WebDriverEngine {
 
@@ -44,7 +41,7 @@ public class IEDriverEngine extends WebDriverEngine {
 	public IEDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
 		super(channel, "ie", driverProcess, windowsDriver, props);
 
-		InternetExplorerOptions ieOptions = new InternetExplorerOptions();
+		final InternetExplorerOptions ieOptions = new InternetExplorerOptions();
 		ieOptions.introduceFlakinessByIgnoringSecurityDomains();
 		ieOptions.enablePersistentHovering();
 
@@ -69,14 +66,10 @@ public class IEDriverEngine extends WebDriverEngine {
 
 	@Override
 	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {
-		runJavaScript(status, IE_MIDDLE_CLICK, element.getWebElement());
+		//runJavaScript(status, IE_MIDDLE_CLICK, element.getWebElement());
+		getDesktopDriver().mouseMiddleClick();
 	}
-	
-	@Override
-	public void doubleClick() {
-		getDesktopDriver().doubleClick();
-	}
-	
+		
 	@Override
 	public void rightClick() {
 		getDesktopDriver().mouseRightClick();
@@ -98,31 +91,16 @@ public class IEDriverEngine extends WebDriverEngine {
 				element.getWebElement().sendKeys(sequence.getSequenceWithDigit());
 			}
 		}
+	}	
+
+	@Override
+	public void closeWindow(ActionStatus status) {
+		getDesktopDriver().closeIEWindow();
 	}
 
 	@Override
 	public void switchWindow(ActionStatus status, int index) {
-		DesktopResponse resp = getDesktopDriver().setIEWindowToFront(index);
-		
-		//TODO clean this mess
-		
-		if(resp.data != null && resp.data.size() > 0) {
-			
-			final int winIndex = Utils.string2Int(resp.data.get(0).getValue());
-			final Set<String> wins = driver.getWindowHandles();
-			
-			switchToWindowIndex(wins.toArray(new String[wins.size()]), index);
-			
-			
-			//final List<String> handles = new ArrayList<>(driver.getWindowHandles());
-			//driver.switchTo().window(handles.get(winIndex));
-			
-			//channel.cleanHandle();
-			channel.setWinHandle(-1);
-			//updateDimensions();
-			
-		}
-		
-
+		super.switchWindow(status, index);
+		getDesktopDriver().switchIEWindow(index);
 	}
 }

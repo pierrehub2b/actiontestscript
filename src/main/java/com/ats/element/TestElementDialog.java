@@ -20,7 +20,9 @@ under the License.
 package com.ats.element;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.NoAlertPresentException;
@@ -34,7 +36,7 @@ import com.ats.recorder.IVisualRecorder;
 
 public class TestElementDialog extends TestElement {
 
-	private static final int waitBox = 500;
+	private static final int WAIT_BOX = 500;
 	private static final String ACCEPT = "accept";
 	private static final String DISMISS = "dismiss";
 
@@ -42,19 +44,14 @@ public class TestElementDialog extends TestElement {
 	private String alertAction = ACCEPT;
 
 	public TestElementDialog() {}
-	
+
 	public TestElementDialog(Channel channel) {
 		super(channel);
 	}
 
-	public TestElementDialog(Channel channel, int maxTry, SearchedElement searchElement) {
-		super(channel, maxTry);
+	public TestElementDialog(Channel channel, int maxTry, SearchedElement searchElement, Predicate<Integer> predicate) {
+		super(channel, maxTry, predicate);
 		initSearch(searchElement.getCriterias());
-	}
-
-	@Override
-	public boolean isValidated() {
-		return alert != null;
 	}
 
 	public TestElementDialog(Channel channel, int maxTry, List<CalculatedProperty> criterias) {
@@ -77,23 +74,18 @@ public class TestElementDialog extends TestElement {
 			}
 		}
 
-		int tryLoop = getMaxTry();
+		try {
 
-		while (alert == null && tryLoop > 0) {
-			try {
-				alert = getChannel().switchToAlert();
-				getChannel().sleep(waitBox);
+			getChannel().sleep(WAIT_BOX);
+			alert = getChannel().switchToAlert();
 
-				final ArrayList<FoundElement> elements = new ArrayList<FoundElement>();
-				elements.add(new FoundElement());
-				setFoundElements(elements);
+			setFoundElements(new ArrayList<FoundElement>(Arrays.asList(new FoundElement())));
+			setCount(1);
 
-			}catch(NoAlertPresentException ex) {
-				getChannel().sleep(200);
-				tryLoop--;
-			}
+		}catch(NoAlertPresentException ex) {
+			getChannel().sleep(WAIT_BOX);
+			setCount(0);
 		}
-
 	}
 
 	@Override
@@ -114,10 +106,10 @@ public class TestElementDialog extends TestElement {
 	public void enterText(ActionStatus status, CalculatedValue text, IVisualRecorder recorder) {
 
 		recorder.updateScreen(true);
-		
+
 		sendText(status, text);
 		status.endDuration();
-		
+
 		recorder.updateScreen(0, status.getDuration(), text.getCalculated());
 	}
 
@@ -127,28 +119,28 @@ public class TestElementDialog extends TestElement {
 
 	@Override
 	public void sendText(ActionStatus status, CalculatedValue text) {
-		getChannel().sleep(waitBox);
+		getChannel().sleep(WAIT_BOX);
 		alert.sendKeys(text.getCalculated());
 	}
 
 	@Override
 	public String getAttribute(ActionStatus status, String name) {
-		getChannel().sleep(waitBox);
+		getChannel().sleep(WAIT_BOX);
 		return alert.getText();
 	}
 
 	@Override
 	public void click(ActionStatus status, MouseDirection position) {
-		if(alertAction != null) {
-			getChannel().sleep(waitBox);
-			if(DISMISS.equals(alertAction)) {
-				alert.dismiss();
-			}else {
-				alert.accept();
-			}
-			getChannel().sleep(waitBox);
-			getChannel().switchToDefaultContent();
+
+		getChannel().sleep(WAIT_BOX);
+		if(DISMISS.equals(alertAction)) {
+			alert.dismiss();
+		}else {
+			alert.accept();
 		}
+		
+		getChannel().sleep(WAIT_BOX);
+		getChannel().switchToDefaultContent();
 
 		status.setPassed(true);
 	}

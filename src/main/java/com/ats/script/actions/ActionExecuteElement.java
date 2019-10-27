@@ -22,9 +22,8 @@ package com.ats.script.actions;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.function.Predicate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.StaleElementReferenceException;
 
 import com.ats.element.SearchedElement;
@@ -44,8 +43,8 @@ import com.ats.tools.logger.MessageCode;
 
 public class ActionExecuteElement extends ActionExecute {
 
-	public static final Pattern MAX_TRY_PATTERN = Pattern.compile("try\\((\\-?\\d+)\\)", Pattern.CASE_INSENSITIVE);
-
+	private static final String TRY_LABEL = "try";
+	
 	private int maxTry = 0;
 	private SearchedElement searchElement;
 	private TestElement testElement;
@@ -66,10 +65,11 @@ public class ActionExecuteElement extends ActionExecute {
 		Iterator<String> itr = options.iterator();
 		while (itr.hasNext())
 		{
-			Matcher matcher = MAX_TRY_PATTERN.matcher(itr.next());
-			if(matcher.find()){
-				setMaxTry(Utils.string2Int(matcher.group(1)));
+			final String opt = itr.next();
+			if(opt.contains(TRY_LABEL)) {
+				setMaxTry(Utils.string2Int(StringUtils.replaceEach(opt, new String[]{TRY_LABEL, "=", "(", ")"}, new String[] {"", "", "", ""}).trim()));
 				itr.remove();
+				break;
 			}
 		}
 	}
@@ -122,16 +122,28 @@ public class ActionExecuteElement extends ActionExecute {
 				setTestElement(new TestElementRoot(channel));
 			}else {
 
+				int trySearch = 0;
 				int searchMaxTry = actionMaxTry;
+				
+				final Predicate<Integer> predicate = getPredicate(operator, value);
 
 				if(searchElement.isDialog()) {
-					setTestElement(new TestElementDialog(channel, searchMaxTry, searchElement));
+					while (trySearch < searchMaxTry) {
+
+						setTestElement(new TestElementDialog(channel, searchMaxTry, searchElement, predicate));
+
+						if(testElement.isValidated()) {
+							trySearch = searchMaxTry;
+						}else {
+							trySearch++;
+							channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "Searching element", searchMaxTry - trySearch);
+							channel.progressiveWait(trySearch);
+						}
+					}
+					
 				}else if(searchElement.isSysButton()) {	
 					setTestElement(new TestElementSystemButton(channel, searchElement));
 				}else {
-
-					final Predicate<Integer> predicate = getPredicate(operator, value);
-					int trySearch = 0;
 
 					if(searchElement.isSysComp()){
 						while (trySearch < searchMaxTry) {

@@ -169,7 +169,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	protected void launchDriver(ActionStatus status, MutableCapabilities cap) {
-
+		
 		final AtsManager ats = DriverManager.ATS;
 		final int maxTrySearch = ats.getMaxTrySearch();
 		final int maxTryProperty = ats.getMaxTryProperty();
@@ -276,7 +276,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		actionWait();
 	}
 
-	private String[] getWindowsHandle(int index) {
+	protected String[] getWindowsHandle(int index) {
 		Set<String> list = getDriverWindowsList();
 		int maxTry = 15;
 		while(index >= list.size() && maxTry > 0) {

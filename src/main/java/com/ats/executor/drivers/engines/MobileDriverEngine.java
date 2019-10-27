@@ -20,7 +20,6 @@ under the License.
 package com.ats.executor.drivers.engines;
 
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -32,6 +31,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.openqa.selenium.Alert;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebElement;
@@ -76,10 +76,10 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	private final static String STOP = "stop";
 	private final static String SWITCH = "switch";
 	private final static String CAPTURE = "capture";
-	private final static String ELEMENT = "element";
-	private final static String TAP = "tap";
+	public final static String ELEMENT = "element";
+	public final static String TAP = "tap";
 	private final static String INPUT = "input";
-	private final static String SWIPE = "swipe";
+	public final static String SWIPE = "swipe";
 	private final static String BUTTON = "button";
 
 	private JsonParser parser = new JsonParser();
@@ -127,9 +127,9 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 				final String os = response.get("os").getAsString();
 				
 				if (os.equals("ios")) {
-					rootElement = new IosRootElement();
+					rootElement = new IosRootElement(this);
 				} else {
-					rootElement = new AndroidRootElement();
+					rootElement = new AndroidRootElement(this);
 				}
 					
 				final String driverVersion = response.get("driverVersion").getAsString();
@@ -180,12 +180,17 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 
 	@Override
 	public void refreshElementMapLocation() {
-		new Thread(() -> {
-			var jsonObject = executeRequest(CAPTURE);
+		
+		rootElement.refresh(executeRequest(CAPTURE));
+		cachedElement = rootElement.getValue();
+		cachedElementTime = 0L;
+		
+		/*new Thread(() -> {
+			final JsonObject jsonObject = executeRequest(CAPTURE);
 			rootElement.refresh(jsonObject);
 			cachedElement = rootElement.getValue();
 			cachedElementTime = 0L;
-		}).start();
+		}).start();*/
 	}
 
 	@Override
@@ -321,7 +326,6 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 
 	@Override
 	public ArrayList<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template) {
-
 		return null;
 	}
 
@@ -341,12 +345,17 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	protected void loadCapturedElement() {
 		long current = System.currentTimeMillis();
 		if(cachedElement == null || current - 2500 > cachedElementTime) {
-			new Thread(() -> {
-				var jsonObject = executeRequest(CAPTURE);
+			
+			rootElement.refresh(executeRequest(CAPTURE));
+			cachedElement = rootElement.getValue();
+			cachedElementTime = System.currentTimeMillis();
+			
+			/*new Thread(() -> {
+				final JsonObject jsonObject = executeRequest(CAPTURE);
 				rootElement.refresh(jsonObject);
 				cachedElement = rootElement.getValue();
 				cachedElementTime = System.currentTimeMillis();
-			}).start();
+			}).start();*/
 		}
 	}
 	//-------------------------------------------------------------------------------------------------------------
@@ -358,42 +367,17 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 
 	@Override
 	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {
-		final Rectangle rect = element.getRectangle();
-		if(rootElement instanceof IosRootElement) {
-			var coordinates = new StringBuilder(element.getX()+";"+element.getY()+";"+element.getWidth()+";"+element.getHeight());
-			coordinates.append(";"+((IosRootElement) rootElement).getRatioWidth()+";"+((IosRootElement) rootElement).getRatioHeight());
-			executeRequest(ELEMENT, 
-					element.getId(), 
-					TAP, 
-					(int)(getOffsetX(rect, position)) + "", 
-					(int)(getOffsetY(rect, position)) + "", 
-					coordinates.toString()
-				);
-		} else {
-			executeRequest(ELEMENT, element.getId(), TAP, (int)(getOffsetX(rect, position)) + "", (int)(getOffsetY(rect, position)) + "");	
-		}
+		rootElement.tap(status, element, position);
 	}
 
 	@Override
 	public void drag(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {
-		final Rectangle rect = element.getRectangle();
-		var coordinates = new StringBuilder(element.getX()+";"+element.getY()+";"+element.getWidth()+";"+element.getHeight());
-		coordinates.append(";"+((IosRootElement) rootElement).getRatioWidth()+";"+((IosRootElement) rootElement).getRatioHeight());
-		testElement = new MobileTestElement(
-				element.getId(), 
-				(int)(getOffsetX(rect, position)), 
-				(int)(getOffsetY(rect, position)), 
-				coordinates.toString()
-			);
+		testElement = rootElement.getCurrentElement(element, position);
 	}
 
 	@Override
 	public void moveByOffset(int hDirection, int vDirection) {
-		if(rootElement instanceof IosRootElement) {
-			executeRequest(ELEMENT, testElement.getId(), SWIPE, testElement.getOffsetX() + "", testElement.getOffsetY() + "", hDirection + "", + vDirection + "",  testElement.getCoordinates());
-		} else {
-			executeRequest(ELEMENT, testElement.getId(), SWIPE, testElement.getOffsetX() + "", testElement.getOffsetY() + "", hDirection + "", + vDirection + "");
-		}
+		rootElement.swipe(testElement, hDirection, vDirection);
 	}
 
 	@Override
@@ -536,7 +520,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 		return null;
 	}
 
-	protected JsonObject executeRequest(String type, String ... data) {
+	public JsonObject executeRequest(String type, String ... data) {
 
 		final String url = new StringBuilder(applicationPath)
 				.append("/")
@@ -586,5 +570,13 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	@Override
 	public Object executeJavaScript(ActionStatus status, String script, boolean returnValue) {
 		return null;
+	}
+
+	@Override
+	protected void setPosition(org.openqa.selenium.Point pt) {
+	}
+
+	@Override
+	protected void setSize(Dimension dim) {
 	}
 }

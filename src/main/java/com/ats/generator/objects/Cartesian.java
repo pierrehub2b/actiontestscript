@@ -15,9 +15,11 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.generator.objects;
+
+import org.apache.commons.lang3.StringUtils;
 
 public enum Cartesian {
 	LEFT("left"),
@@ -25,8 +27,7 @@ public enum Cartesian {
 	TOP("top"),
 	BOTTOM("bottom"),
 	MIDDLE("middle"),
-	CENTER("center")
-	;
+	CENTER("center");
 
 	private final String text;
 
@@ -41,11 +42,18 @@ public enum Cartesian {
 	public String toString() {
 		return text;
 	}
-	
+
 	public boolean equals(String value) {
 		return text.equals(value);
 	}
-	
+
+	public String extractData(String value) {
+		if(value.contains(text)) {
+			return StringUtils.replaceEach(value, new String[]{text, "=", "(", ")"}, new String[] {"", "", "", ""}).trim();
+		}
+		return null;
+	}
+
 	public String getJavacode() {
 		return this.getClass().getSimpleName() + "." + text.toUpperCase();
 	}
