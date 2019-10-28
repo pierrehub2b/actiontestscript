@@ -85,7 +85,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	private JsonParser parser = new JsonParser();
 
 	protected RootElement rootElement;
-	protected AtsMobileElement cachedElement;
+	protected RootElement cachedElement;
 
 	private MobileTestElement testElement;
 
@@ -128,8 +128,10 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 				
 				if (os.equals("ios")) {
 					rootElement = new IosRootElement(this);
+					cachedElement = new IosRootElement(this);
 				} else {
 					rootElement = new AndroidRootElement(this);
+					cachedElement = new AndroidRootElement(this);
 				}
 					
 				final String driverVersion = response.get("driverVersion").getAsString();
@@ -182,7 +184,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	public void refreshElementMapLocation() {
 		
 		rootElement.refresh(executeRequest(CAPTURE));
-		cachedElement = rootElement.getValue();
+		cachedElement = rootElement;
 		cachedElementTime = 0L;
 		
 		/*new Thread(() -> {
@@ -209,12 +211,12 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 
 		ArrayList<AtsMobileElement> listElements = new ArrayList<AtsMobileElement>();
 
-		loadList(cachedElement, listElements);
+		loadList(cachedElement.getValue(), listElements);
 
 		final int mouseX = (int)(channel.getSubDimension().getX() + x);
 		final int mouseY = (int)(channel.getSubDimension().getY() + y);
 
-		AtsMobileElement element = cachedElement;
+		AtsMobileElement element = cachedElement.getValue();
 
 		for (int i=0; i<listElements.size(); i++) {
 			AtsMobileElement child = listElements.get(i);
@@ -233,12 +235,12 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 
 		ArrayList<AtsMobileElement> listElements = new ArrayList<AtsMobileElement>();
 
-		loadList(cachedElement, listElements);
+		loadList(cachedElement.getValue(), listElements);
 
 		final int mouseX = (int)(channel.getSubDimension().getX() + x);
 		final int mouseY = (int)(channel.getSubDimension().getY() + y);
 
-		AtsMobileElement element = cachedElement;
+		AtsMobileElement element = cachedElement.getValue();
 
 		for (int i=0; i<listElements.size(); i++) {
 			AtsMobileElement child = listElements.get(i);
@@ -294,7 +296,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 
 	private AtsMobileElement getCapturedElementById(String id, boolean reload) {
 		if(!reload && cachedElement != null) {
-			return getElementById(cachedElement, id);
+			return getElementById(cachedElement.getValue(), id);
 		}else {
 			return getElementById(rootElement.getValue(), id);
 		}
@@ -347,7 +349,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 		if(cachedElement == null || current - 2500 > cachedElementTime) {
 			
 			rootElement.refresh(executeRequest(CAPTURE));
-			cachedElement = rootElement.getValue();
+			cachedElement = rootElement;
 			cachedElementTime = System.currentTimeMillis();
 			
 			/*new Thread(() -> {
