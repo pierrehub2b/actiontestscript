@@ -70,6 +70,10 @@ public class CalculatedValue{
 	public CalculatedValue(String value) {
 		this.setData(value);
 	}
+	
+	public CalculatedValue(int value) {
+		this(value + "");
+	}
 
 	public CalculatedValue(ActionTestScript actionTestScript, Object[] data) {
 		this.dataList = data;
@@ -237,6 +241,10 @@ public class CalculatedValue{
 		if(sendKey != null) {
 			chain.add(sendKey);
 		}
+	}
+	
+	public int toInt() {
+	 	return Utils.string2Int(getCalculated());
 	}
 
 	//--------------------------------------------------------

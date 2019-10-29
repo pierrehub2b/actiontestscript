@@ -439,7 +439,7 @@ public class ActionTestScript extends Script implements ITest{
 	//---------------------------------------------------------------------------------------------
 
 	public static final String JAVA_POS_FUNCTION_NAME = "ps";
-	public MouseDirectionData ps(Cartesian cart, int value) {
+	public MouseDirectionData ps(Cartesian cart, CalculatedValue value) {
 		return new MouseDirectionData(cart, value);
 	}
 

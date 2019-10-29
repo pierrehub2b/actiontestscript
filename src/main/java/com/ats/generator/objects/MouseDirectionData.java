@@ -19,44 +19,39 @@ under the License.
 
 package com.ats.generator.objects;
 
-import com.ats.tools.Utils;
+import com.ats.generator.variables.CalculatedValue;
 
 public class MouseDirectionData {
 
 	private Cartesian type;
-	private int value = 0;
+	private CalculatedValue value = new CalculatedValue("0");
 
 	public MouseDirectionData() {}
 
-	public MouseDirectionData(String name, int value) {
+	public MouseDirectionData(String name, CalculatedValue value) {
 		this.setName(name);
 		this.setValue(value);
 	}
 	
-	public MouseDirectionData(String name, String value) {
-		this.setName(name);
-		this.setValue(Utils.string2Int(value));
-	}
-	
-	public MouseDirectionData(Cartesian type, int value) {
+	public MouseDirectionData(Cartesian type, CalculatedValue value) {
 		this.type = type;
 		this.setValue(value);
 	}
 	
 	public int getHorizontalDirection() {
 		if(Cartesian.RIGHT.equals(type)) {
-			return value;
+			return value.toInt();
 		}else if(Cartesian.LEFT.equals(type)) {
-			return -value;
+			return -value.toInt();
 		}
 		return 0;
 	}
 	
 	public int getVerticalDirection() {
 		if(Cartesian.BOTTOM.equals(type)) {
-			return value;
+			return value.toInt();
 		}else if(Cartesian.TOP.equals(type)) {
-			return -value;
+			return -value.toInt();
 		}
 		return 0;
 	}
@@ -66,10 +61,10 @@ public class MouseDirectionData {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	public String getJavaCode() {
-		if(value == 0 && (Cartesian.MIDDLE.equals(type) || Cartesian.CENTER.equals(type))){
+		if(value.toInt() == 0 && (Cartesian.MIDDLE.equals(type) || Cartesian.CENTER.equals(type))){
 			return "";
 		}
-		return type.getJavacode() + ", " + value;
+		return type.getJavacode() + ", " + value.getJavaCode();
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------
@@ -84,11 +79,11 @@ public class MouseDirectionData {
 		this.type = Cartesian.valueOf(value.toUpperCase());
 	}
 
-	public int getValue() {
+	public CalculatedValue getValue() {
 		return value;
 	}
 
-	public void setValue(int value) {
+	public void setValue(CalculatedValue value) {
 		this.value = value;
 	}
 }

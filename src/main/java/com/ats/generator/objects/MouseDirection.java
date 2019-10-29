@@ -24,6 +24,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import com.ats.executor.ActionTestScript;
+import com.ats.generator.variables.CalculatedValue;
+import com.ats.script.Script;
 
 public class MouseDirection {
 
@@ -32,16 +34,16 @@ public class MouseDirection {
 
 	public MouseDirection() {}
 
-	public MouseDirection(ArrayList<String> options, boolean canBeEmpty) {
+	public MouseDirection(Script script, ArrayList<String> options, boolean canBeEmpty) {
 		Iterator<String> itr = options.iterator();
 		while (itr.hasNext()){
-			if(addPosition(itr.next())){
+			if(addPosition(script, itr.next())){
 				itr.remove();
 			}
 		}
 
 		if(!canBeEmpty && this.horizontalPos == null && this.verticalPos == null) {
-			this.setHorizontalPos(new MouseDirectionData(Cartesian.RIGHT, 20));
+			this.setHorizontalPos(new MouseDirectionData(Cartesian.CENTER, new CalculatedValue(script, "0")));
 		}
 	}
 
@@ -50,41 +52,41 @@ public class MouseDirection {
 		setVerticalPos(vpos);
 	}
 
-	public boolean addPosition(String value) {
+	private boolean addPosition(Script script, String value) {
 
-		String data = Cartesian.RIGHT.extractData(value);
+		String data = Cartesian.RIGHT.getData(value);
 		if(data != null) {
-			setHorizontalPos(new MouseDirectionData(Cartesian.RIGHT.toString(), data));
+			setHorizontalPos(new MouseDirectionData(Cartesian.RIGHT.toString(), new CalculatedValue(script, data)));
 			return true;
 		}
 
-		data = Cartesian.RIGHT.extractData(value);
+		data = Cartesian.LEFT.getData(value);
 		if(data != null) {
-			setHorizontalPos(new MouseDirectionData(Cartesian.RIGHT.toString(), data));
+			setHorizontalPos(new MouseDirectionData(Cartesian.LEFT.toString(), new CalculatedValue(script, data)));
 			return true;
 		}
 
-		data = Cartesian.CENTER.extractData(value);
+		data = Cartesian.CENTER.getData(value);
 		if(data != null) {
-			setHorizontalPos(new MouseDirectionData(Cartesian.CENTER.toString(), data));
+			setHorizontalPos(new MouseDirectionData(Cartesian.CENTER.toString(), new CalculatedValue(script, data)));
 			return true;
 		}
 
-		data = Cartesian.TOP.extractData(value);
+		data = Cartesian.TOP.getData(value);
 		if(data != null) {
-			setVerticalPos(new MouseDirectionData(Cartesian.TOP.toString(), data));
+			setVerticalPos(new MouseDirectionData(Cartesian.TOP.toString(), new CalculatedValue(script, data)));
 			return true;
 		}
 
-		data = Cartesian.BOTTOM.extractData(value);
+		data = Cartesian.BOTTOM.getData(value);
 		if(data != null) {
-			setVerticalPos(new MouseDirectionData(Cartesian.BOTTOM.toString(), data));
+			setVerticalPos(new MouseDirectionData(Cartesian.BOTTOM.toString(), new CalculatedValue(script, data)));
 			return true;
 		}
 
-		data = Cartesian.MIDDLE.extractData(value);
+		data = Cartesian.MIDDLE.getData(value);
 		if(data != null) {
-			setVerticalPos(new MouseDirectionData(Cartesian.MIDDLE.toString(), data));
+			setVerticalPos(new MouseDirectionData(Cartesian.MIDDLE.toString(), new CalculatedValue(script, data)));
 			return true;
 		}
 
@@ -107,7 +109,7 @@ public class MouseDirection {
 
 	public void updateForDrag() {
 		setHorizontalPos(null);
-		setVerticalPos(new MouseDirectionData(Cartesian.BOTTOM, -20));
+		setVerticalPos(new MouseDirectionData(Cartesian.BOTTOM, new CalculatedValue(-20)));
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

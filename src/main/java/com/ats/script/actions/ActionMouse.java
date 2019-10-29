@@ -38,7 +38,7 @@ public class ActionMouse extends ActionExecuteElement {
 
 	public ActionMouse(ScriptLoader script, boolean stop, ArrayList<String> options, ArrayList<String> objectArray) {
 		super(script, stop, options, objectArray);
-		setPosition(new MouseDirection(options, true));
+		setPosition(new MouseDirection(script, options, true));
 		setType("undefined");
 	}
 

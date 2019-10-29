@@ -116,11 +116,11 @@ public abstract class DriverEngine {
 	protected int getCartesianOffset(int value, MouseDirectionData direction, Cartesian cart1, Cartesian cart2, Cartesian cart3) {
 		if(direction != null) {
 			if(cart1.equals(direction.getName())) {				// <-- left or top
-				return direction.getValue() + 1;				//
+				return direction.getValue().toInt() + 1;				//
 			}else if(cart3.equals(direction.getName())) {		// <-- right or bottom
-				return value - direction.getValue() - 2;		//
+				return value - direction.getValue().toInt() - 2;		//
 			}													//
-			return direction.getValue() + (value/2); 			// <-- middle or center
+			return direction.getValue().toInt() + (value/2); 			// <-- middle or center
 		}
 		return value/2;
 	}
