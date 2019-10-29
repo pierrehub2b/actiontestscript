@@ -343,7 +343,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 		}
 	}
 
-	protected long cachedElementTime = System.currentTimeMillis();
+	protected long cachedElementTime = 0L;
 
 	//-------------------------------------------------------------------------------------------------------------
 	
