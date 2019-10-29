@@ -317,8 +317,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 		final List<AtsMobileElement> list = new ArrayList<AtsMobileElement>();
 
 		if(testObject.getParent() == null) {
-			refreshElementMapLocation();
-			loadElementsByTag(rootElement.getValue(), tagName, list);
+			loadElementsByTag(cachedElement.getValue(), tagName, list);
 		}else {
 			loadElementsByTag(getElementById(testObject.getParent().getWebElementId()), tagName, list);
 		}
@@ -347,7 +346,8 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	protected void loadCapturedElement() {
 		long current = System.currentTimeMillis();
 		if(cachedElement == null || current - 2500 > cachedElementTime) {
-			cachedElement.refresh(executeRequest(CAPTURE));
+			rootElement.refresh(executeRequest(CAPTURE));
+			cachedElement = rootElement;
 			cachedElementTime = System.currentTimeMillis();
 			
 			/*new Thread(() -> {
