@@ -35,6 +35,7 @@ public class SendKeyData {
 	private String data;
 	private CharSequence chord;
 	private boolean enterKey = false;
+	private String specialKey = "";
 
 	public SendKeyData(String key, String spare) {
 
@@ -57,6 +58,7 @@ public class SendKeyData {
 		}else {
 			try {
 				sequence.append(Keys.valueOf(key));
+				specialKey = "$KEY-" + key;
 			}catch(IllegalArgumentException e) {}
 		}
 
@@ -141,7 +143,13 @@ public class SendKeyData {
 	}	
 
 	public String getSequenceDesktop() {
-		return Base64.getEncoder().encodeToString(data.getBytes(StandardCharsets.UTF_8));
+		String sequenceData = "";
+		if(data.length() > 0) {
+			sequenceData = data;
+		}else if (specialKey.length() > 0) {
+			sequenceData = specialKey;
+		}
+		return Base64.getEncoder().encodeToString(sequenceData.getBytes(StandardCharsets.UTF_8));
 	}
 	
 	public String getMobileSequence() {
