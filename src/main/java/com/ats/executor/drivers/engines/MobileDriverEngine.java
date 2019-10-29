@@ -86,7 +86,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 
 	protected RootElement rootElement;
 	protected RootElement cachedElement;
-
+	
 	private MobileTestElement testElement;
 
 	private OkHttpClient client;
@@ -181,18 +181,16 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	}
 
 	@Override
-	public void refreshElementMapLocation() {
-		
+	public void refreshElementMapLocation() {	
 		rootElement.refresh(executeRequest(CAPTURE));
-		cachedElement = rootElement;
-		cachedElementTime = 0L;
-		
-		/*new Thread(() -> {
-			final JsonObject jsonObject = executeRequest(CAPTURE);
-			rootElement.refresh(jsonObject);
-			cachedElement = rootElement.getValue();
-			cachedElementTime = 0L;
-		}).start();*/
+	}
+	
+	protected void loadCapturedElement() {
+		long current = System.currentTimeMillis();
+		if(cachedElement == null || current - 2500 > cachedElementTime) {
+			cachedElement.refresh(executeRequest(CAPTURE));
+			cachedElementTime = System.currentTimeMillis();
+		}
 	}
 
 	@Override
@@ -295,10 +293,13 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	}
 
 	private AtsMobileElement getCapturedElementById(String id, boolean reload) {
-		if(!reload && cachedElement != null) {
-			return getElementById(cachedElement.getValue(), id);
-		}else {
-			return getElementById(rootElement.getValue(), id);
+		if(reload) {
+			refreshElementMapLocation();
+			return getElementById(rootElement.getValue(), id); 
+		} else if(cachedElement != null) {
+			return getElementById(cachedElement.getValue(), id); 
+		} else {
+			return null;
 		}
 	}
 
@@ -317,7 +318,8 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 		final List<AtsMobileElement> list = new ArrayList<AtsMobileElement>();
 
 		if(testObject.getParent() == null) {
-			loadElementsByTag(cachedElement.getValue(), tagName, list);
+			refreshElementMapLocation();
+			loadElementsByTag(rootElement.getValue(), tagName, list);
 		}else {
 			loadElementsByTag(getElementById(testObject.getParent().getWebElementId()), tagName, list);
 		}
@@ -342,22 +344,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	}
 
 	protected long cachedElementTime = System.currentTimeMillis();
-	
-	protected void loadCapturedElement() {
-		long current = System.currentTimeMillis();
-		if(cachedElement == null || current - 2500 > cachedElementTime) {
-			rootElement.refresh(executeRequest(CAPTURE));
-			cachedElement = rootElement;
-			cachedElementTime = System.currentTimeMillis();
-			
-			/*new Thread(() -> {
-				final JsonObject jsonObject = executeRequest(CAPTURE);
-				rootElement.refresh(jsonObject);
-				cachedElement = rootElement.getValue();
-				cachedElementTime = System.currentTimeMillis();
-			}).start();*/
-		}
-	}
+
 	//-------------------------------------------------------------------------------------------------------------
 	
 	@Override
