@@ -347,9 +347,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	protected void loadCapturedElement() {
 		long current = System.currentTimeMillis();
 		if(cachedElement == null || current - 2500 > cachedElementTime) {
-			
-			rootElement.refresh(executeRequest(CAPTURE));
-			cachedElement = rootElement;
+			cachedElement.refresh(executeRequest(CAPTURE));
 			cachedElementTime = System.currentTimeMillis();
 			
 			/*new Thread(() -> {
