@@ -49,11 +49,18 @@ public enum Cartesian {
 
 	public String getData(String value) {
 		if(value.contains(text)) {
+			String data;
 			if(value.contains("=")) {
-				return StringUtils.replaceEach(value, new String[]{text, "="}, new String[] {"", ""}).trim();
+				data = StringUtils.replaceEach(value, new String[]{text, "="}, new String[] {"", ""});
 			}else {
-				return StringUtils.replaceEach(value, new String[]{text, "(", ")"}, new String[] {"", "", ""}).trim();
+				data = StringUtils.replaceEach(value, new String[]{text, "(", ")"}, new String[] {"", "", ""});
 			}
+			
+			data = data.trim();
+			if(data.length() == 0) {
+				return "0";
+			}
+			return data;
 		}
 		return null;
 	}

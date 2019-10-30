@@ -20,6 +20,7 @@ under the License.
 package com.ats.generator.objects;
 
 import com.ats.generator.variables.CalculatedValue;
+import com.ats.tools.Utils;
 
 public class MouseDirectionData {
 
@@ -40,20 +41,24 @@ public class MouseDirectionData {
 	
 	public int getHorizontalDirection() {
 		if(Cartesian.RIGHT.equals(type)) {
-			return value.toInt();
+			return getIntValue();
 		}else if(Cartesian.LEFT.equals(type)) {
-			return -value.toInt();
+			return -getIntValue();
 		}
 		return 0;
 	}
 	
 	public int getVerticalDirection() {
 		if(Cartesian.BOTTOM.equals(type)) {
-			return value.toInt();
+			return getIntValue();
 		}else if(Cartesian.TOP.equals(type)) {
-			return -value.toInt();
+			return -getIntValue();
 		}
 		return 0;
+	}
+	
+	public int getIntValue() {
+	 	return Utils.string2Int(value.getCalculated());
 	}
 	
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -61,7 +66,7 @@ public class MouseDirectionData {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	public String getJavaCode() {
-		if(value.toInt() == 0 && (Cartesian.MIDDLE.equals(type) || Cartesian.CENTER.equals(type))){
+		if(("0".equals(value.getCalculated()) || "".equals(value.getCalculated())) && (Cartesian.MIDDLE.equals(type) || Cartesian.CENTER.equals(type))){
 			return "";
 		}
 		return type.getJavacode() + ", " + value.getJavaCode();

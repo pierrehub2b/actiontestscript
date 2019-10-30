@@ -85,7 +85,9 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	private JsonParser parser = new JsonParser();
 
 	protected RootElement rootElement;
+	
 	protected RootElement cachedElement;
+	protected long cachedElementTime = 0L;
 	
 	private MobileTestElement testElement;
 
@@ -343,8 +345,6 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 		}
 	}
 
-	protected long cachedElementTime = 0L;
-
 	//-------------------------------------------------------------------------------------------------------------
 	
 	@Override
@@ -354,6 +354,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 
 	@Override
 	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {
+		cachedElementTime = 0L;
 		rootElement.tap(status, element, position);
 	}
 
