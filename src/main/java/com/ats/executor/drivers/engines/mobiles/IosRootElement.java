@@ -139,6 +139,10 @@ public class IosRootElement extends RootElement {
 			final double currentWidth = Double.parseDouble(stringArray.get(4)) * ratioWidth;
 			final double currentheight = Double.parseDouble(stringArray.get(5)) * ratioHeight; 
 			
+			if(currentX < 0.0 || currentX > height) {
+				continue;
+			}
+			
 			final AtsMobileElement currentAtsMobileElement = new AtsMobileElement(
 					structDebugDescription.getUuid().toString(), 
 					tag, 
