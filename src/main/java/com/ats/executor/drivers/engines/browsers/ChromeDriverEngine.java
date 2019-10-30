@@ -19,10 +19,7 @@ under the License.
 
 package com.ats.executor.drivers.engines.browsers;
 
-import java.io.File;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.openqa.selenium.chrome.ChromeOptions;
 
@@ -33,7 +30,6 @@ import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.WebDriverEngine;
-import com.ats.tools.Utils;
 
 public class ChromeDriverEngine extends WebDriverEngine {
 
@@ -56,23 +52,7 @@ public class ChromeDriverEngine extends WebDriverEngine {
 		options.addArguments("--use-fake-ui-for-media-stream");
 		options.addArguments("--use-fake-device-for-media-stream");
 		
-		File profileFolder = null;
-		if(props.getUserDataDir() != null) {
-			profileFolder = new File(props.getUserDataDir());
-			if(!profileFolder.exists()) {
-				profileFolder = null;
-			}
-		}
-		
-		if(profileFolder == null) {
-			profileFolder = Utils.createDriverFolder(DriverManager.CHROME_BROWSER);
-			
-			Map<String, Object> prefs = new HashMap<String, Object>();
-	        prefs.put("credentials_enable_service", false);
-	        prefs.put("profile.password_manager_enabled", false);
-	        options.setExperimentalOption("prefs", prefs);
-		}
-		options.addArguments("--user-data-dir=" + profileFolder.getAbsolutePath());
+		addProfileFolder(options, props, DriverManager.CHROME_BROWSER);
         
 		if(lang != null) {
 			options.addArguments("--lang=" + lang);

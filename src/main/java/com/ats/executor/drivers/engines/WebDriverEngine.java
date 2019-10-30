@@ -28,6 +28,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -52,6 +53,7 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -164,12 +166,28 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		return driverProcess;
 	}
 
+	protected void addProfileFolder(ChromeOptions options, ApplicationProperties props, String browser) {
+		
+		File profileFolder = null;
+		if(props.getUserDataDir() != null) {
+			profileFolder = new File(props.getUserDataDir());
+		}else {
+			profileFolder = Utils.createDriverFolder(browser);
+		}
+		options.addArguments("--user-data-dir=" + profileFolder.getAbsolutePath());
+		
+		Map<String, Object> prefs = new HashMap<String, Object>();
+		prefs.put("credentials_enable_service", false);
+		prefs.put("profile.password_manager_enabled", false);
+		options.setExperimentalOption("prefs", prefs);
+	}
+
 	public void setDriverProcess(DriverProcess driverProcess) {
 		this.driverProcess = driverProcess;
 	}
 
 	protected void launchDriver(ActionStatus status, MutableCapabilities cap) {
-		
+
 		final AtsManager ats = DriverManager.ATS;
 		final int maxTrySearch = ats.getMaxTrySearch();
 		final int maxTryProperty = ats.getMaxTryProperty();
@@ -450,7 +468,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 		return body;
 	}
-	
+
 	@Override
 	public String getTitle() {
 		return driver.getTitle();
@@ -478,17 +496,17 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		}
 		return null;
 	}
-	
+
 	@Override
 	public ArrayList<FoundElement> findSelectOptions(TestElement element) {
 		return findElements(false, element, "option", new ArrayList<String>(), Objects::nonNull, element.getWebElement());
 	}
-	
+
 	@Override
 	public void selectOptionsItem(ActionStatus status, TestElement element, CalculatedProperty selectProperty) {
-		
+
 		final ArrayList<FoundElement> items = findSelectOptions(element);
-		
+
 		if(items != null && items.size() > 0) {
 			if(ActionSelect.SELECT_INDEX.equals(selectProperty.getName())){
 
@@ -500,7 +518,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 					status.setCode(ActionStatus.OBJECT_NOT_INTERACTABLE);
 					status.setMessage("Index not found, max length options : " + items.size());
 				}
-				
+
 			}else{
 
 				final String attribute = selectProperty.getName();
@@ -640,7 +658,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	protected int getCartesianOffset(int value, MouseDirectionData direction, Cartesian cart1, Cartesian cart2,	Cartesian cart3) {
 		return super.getCartesianOffset(value, direction, cart1, cart2, cart3) - value/2;
 	}
-	
+
 	@Override
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean withDesktop, int offsetX, int offsetY) {
 
@@ -713,12 +731,12 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		final Rectangle rect = element.getRectangle();
 
 		try {
-			
+
 			actions.moveToElement(element.getValue(), getOffsetX(rect, position) + offsetX, getOffsetY(rect, position) + offsetY)
 			.clickAndHold(element.getValue())
 			.build()
 			.perform();
-			
+
 			status.setPassed(true);
 
 		}catch(StaleElementReferenceException e1) {

@@ -30,7 +30,6 @@ import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.WebDriverEngine;
-import com.ats.tools.Utils;
 
 public class ChromiumDriverEngine extends WebDriverEngine {
 
@@ -51,8 +50,9 @@ public class ChromiumDriverEngine extends WebDriverEngine {
 		options.addArguments("--disable-notifications");
 		options.addArguments("--disable-web-security");
 		options.addArguments("--disable-dev-shm-usage");
-		options.addArguments("--user-data-dir=" + Utils.createDriverFolder(DriverManager.CHROMIUM_BROWSER));
 				
+		addProfileFolder(options, props, DriverManager.CHROMIUM_BROWSER);
+		
 		if(lang != null) {
 			options.addArguments("--lang=" + lang);
 		}
