@@ -756,12 +756,12 @@ public class DesktopDriver extends RemoteWebDriver {
 
 		if(hdir != null) {
 			hdirName = hdir.getName();
-			hdirValue = hdir.getValue().toInt();
+			hdirValue = hdir.getIntValue();
 		}
 
 		if(vdir != null) {
 			vdirName = vdir.getName();
-			vdirValue = vdir.getValue().toInt();
+			vdirValue = vdir.getIntValue();
 		}
 
 		sendRequestCommand(CommandType.Record, RecordType.Position, hdirName, hdirValue, vdirName, vdirValue);

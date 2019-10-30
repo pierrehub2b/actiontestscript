@@ -242,10 +242,6 @@ public class CalculatedValue{
 			chain.add(sendKey);
 		}
 	}
-	
-	public int toInt() {
-	 	return Utils.string2Int(getCalculated());
-	}
 
 	//--------------------------------------------------------
 	// getters and setters for serialization
