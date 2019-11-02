@@ -38,6 +38,7 @@ public class DriverProcess {
 	private int port = 4444;
 	private Process process;
 	private DriverManager manager;
+	private String driverFilePath;
 
 	public DriverProcess(ActionStatus status, String name, DriverManager manager, Path driverFolderPath, String driverFileName, String[] args) {
 		
@@ -53,8 +54,9 @@ public class DriverProcess {
 		if(driverFile.exists()){
 			
 			port = findFreePort();
+			driverFilePath = driverFile.getAbsolutePath();
 
-			String[] arguments = {driverFile.getAbsolutePath(), "--port=" + port};
+			String[] arguments = {driverFilePath, "--port=" + port};
 
 			if(args != null) {
 				arguments = Stream.of(arguments, args).flatMap(Stream::of).toArray(String[]::new);
@@ -89,6 +91,10 @@ public class DriverProcess {
 	
 	public int getPort() {
 		return port;
+	}
+	
+	public String getDriverFilePath() {
+		return driverFilePath;
 	}
 
 	public URL getDriverServerUrl(){

@@ -28,20 +28,21 @@ import com.ats.generator.variables.Variable;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
 
-public class ActionJavascript extends ActionReturnVariable {
+public class ActionScripting extends ActionReturnVariable {
 
-	public static final String SCRIPT_LABEL = "javascript";
+	public static final String JAVASCRIPT_LABEL = "javascript";
+	public static final String SCRIPT_LABEL = "scripting";
 
 	private CalculatedValue jsCode;
 
-	public ActionJavascript() {}
+	public ActionScripting() {}
 
-	public ActionJavascript(ScriptLoader script, boolean stop, ArrayList<String> options, String code, Variable variable, ArrayList<String> objectArray) {
+	public ActionScripting(ScriptLoader script, boolean stop, ArrayList<String> options, String code, Variable variable, ArrayList<String> objectArray) {
 		super(script, stop, options, objectArray, variable);
 		setJsCode(new CalculatedValue(script, code));
 	}
 
-	public ActionJavascript(Script script, boolean stop, int maxTry, SearchedElement element, CalculatedValue jsCode, Variable variable) {
+	public ActionScripting(Script script, boolean stop, int maxTry, SearchedElement element, CalculatedValue jsCode, Variable variable) {
 		super(script, stop, maxTry, element, variable);
 		setJsCode(jsCode);
 	}

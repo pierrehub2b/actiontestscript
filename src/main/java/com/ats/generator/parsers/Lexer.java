@@ -45,7 +45,7 @@ import com.ats.script.actions.ActionChannelSwitch;
 import com.ats.script.actions.ActionComment;
 import com.ats.script.actions.ActionExecute;
 import com.ats.script.actions.ActionGotoUrl;
-import com.ats.script.actions.ActionJavascript;
+import com.ats.script.actions.ActionScripting;
 import com.ats.script.actions.ActionMouse;
 import com.ats.script.actions.ActionMouseDragDrop;
 import com.ats.script.actions.ActionMouseKey;
@@ -274,7 +274,7 @@ public class Lexer {
 						script.addAction(new ActionWindowState(script, ActionWindowState.CLOSE), disabled);
 					}
 
-				}else if(ActionJavascript.SCRIPT_LABEL.equals(actionType)){
+				}else if(actionType.equals(ActionScripting.SCRIPT_LABEL) || actionType.equals(ActionScripting.JAVASCRIPT_LABEL)){
 
 					//-----------------------
 					// Javascript action
@@ -291,9 +291,9 @@ public class Lexer {
 							variable = script.getVariable(jsDataArray[1].trim(), true);
 						}
 
-						script.addAction(new ActionJavascript(script, stopExec, options, jsCode, variable, dataArray), disabled);
+						script.addAction(new ActionScripting(script, stopExec, options, jsCode, variable, dataArray), disabled);
 					}
-
+					
 				}else if(ActionProperty.SCRIPT_LABEL.equals(actionType)){
 
 					//-----------------------

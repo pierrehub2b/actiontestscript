@@ -98,7 +98,7 @@ public class JxDriverEngine extends WebDriverEngine {
 					final File tempHtml = File.createTempFile("ats_", ".html");
 					tempHtml.deleteOnExit();
 
-					Files.write(tempHtml.toPath(), Utils.getAtsBrowserContent(titleUid, channel.getApplication(), applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait(), getPropertyWait(), 20, 20, 20, 20, 20, getDesktopDriver()));
+					Files.write(tempHtml.toPath(), Utils.getAtsBrowserContent(titleUid, channel.getApplication(), applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait(), getPropertyWait(), 20, 20, 20, 20, 20, getDesktopDriver(), null));
 					atsStartPageUri = tempHtml.toURI().toString();
 				} catch (IOException e) {}
 

@@ -365,7 +365,8 @@ public class DesktopDriver extends RemoteWebDriver {
 		Find (2),
 		Attributes (3),
 		Select (4),
-		FromPoint(5);
+		FromPoint(5),
+		Script(6);
 
 		private final int type;
 		ElementType(int value){
@@ -622,6 +623,10 @@ public class DesktopDriver extends RemoteWebDriver {
 
 	public CalculatedProperty[] getElementAttributes(String elementId) {
 		return sendRequestCommand(CommandType.Element, ElementType.Attributes, elementId).getAttributes();
+	}
+
+	public ArrayList<DesktopData> executeScript(ActionStatus status, String script, FoundElement element) {
+		return sendRequestCommand(CommandType.Element, ElementType.Script, element.getId(), script).getData();
 	}
 
 	public ArrayList<FoundElement> findElements(Channel channel, TestElement testElement, String tag, ArrayList<String> attributes, Predicate<AtsBaseElement> predicate) {

@@ -85,7 +85,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 
 		client = builder.build();
 			
-		launchDriver(status, options);
+		launchDriver(status, options, null);
 	}
 	
 	@Override

@@ -72,7 +72,7 @@ public class OperaDriverEngine extends WebDriverEngine {
 			options.setBinary(applicationPath);
 		}
 		
-		launchDriver(status, options);
+		launchDriver(status, options, profileFolder.getAbsolutePath());
 	}
 	
 	@Override

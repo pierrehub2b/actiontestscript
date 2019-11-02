@@ -28,7 +28,6 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -50,10 +49,8 @@ import org.openqa.selenium.NoSuchWindowException;
 import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -125,7 +122,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	protected Double initElementX = 0.0;
 	protected Double initElementY = 0.0;
 
-	private DriverProcess driverProcess;
+	protected DriverProcess driverProcess;
 
 	protected Actions actions;
 
@@ -166,27 +163,11 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		return driverProcess;
 	}
 
-	protected void addProfileFolder(ChromeOptions options, ApplicationProperties props, String browser) {
-		
-		File profileFolder = null;
-		if(props.getUserDataDir() != null) {
-			profileFolder = new File(props.getUserDataDir());
-		}else {
-			profileFolder = Utils.createDriverFolder(browser);
-		}
-		options.addArguments("--user-data-dir=" + profileFolder.getAbsolutePath());
-		
-		Map<String, Object> prefs = new HashMap<String, Object>();
-		prefs.put("credentials_enable_service", false);
-		prefs.put("profile.password_manager_enabled", false);
-		options.setExperimentalOption("prefs", prefs);
-	}
-
 	public void setDriverProcess(DriverProcess driverProcess) {
 		this.driverProcess = driverProcess;
 	}
 
-	protected void launchDriver(ActionStatus status, MutableCapabilities cap) {
+	protected void launchDriver(ActionStatus status, MutableCapabilities cap, String profilePath) {
 
 		final AtsManager ats = DriverManager.ATS;
 		final int maxTrySearch = ats.getMaxTrySearch();
@@ -254,7 +235,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			final File tempHtml = File.createTempFile("ats_", ".html");
 			tempHtml.deleteOnExit();
 
-			Files.write(tempHtml.toPath(), Utils.getAtsBrowserContent(titleUid, channel.getApplication(), applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait(), getPropertyWait(), maxTrySearch, maxTryProperty, scriptTimeout, pageLoadTimeout, watchdog, getDesktopDriver()));
+			Files.write(tempHtml.toPath(), Utils.getAtsBrowserContent(titleUid, channel.getApplication(), applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait(), getPropertyWait(), maxTrySearch, maxTryProperty, scriptTimeout, pageLoadTimeout, watchdog, getDesktopDriver(), profilePath));
 			driver.get(tempHtml.toURI().toString());
 		} catch (IOException e) {}
 
@@ -876,7 +857,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		driver.manage().window().setSize(dim);
 	}
 
-	private void closeWindowHandler(String windowHandle) {
+	protected void closeWindowHandler(String windowHandle) {
 		switchToWindowHandle(windowHandle);
 		closeCurrentWindow();
 	}
@@ -981,10 +962,19 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 		status.setPassed(true);
 		status.setData(url);
-		status.setMessage(getCurrentUrl());
+		//status.setMessage(getCurrentUrl());
 
 		actionWait();
 	}
+	
+	/*private String getCurrentUrl() {
+		try {
+			return driver.getCurrentUrl();
+		}catch(UnhandledAlertException e) {
+			return "";
+		}
+	}*/
+
 
 	protected void loadUrl(String url) {
 		driver.get(url);
@@ -1050,14 +1040,6 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public Alert switchToAlert() {
 		return driver.switchTo().alert();
-	}
-
-	private String getCurrentUrl() {
-		try {
-			return driver.getCurrentUrl();
-		}catch(UnhandledAlertException e) {
-			return "";
-		}
 	}
 
 	@Override

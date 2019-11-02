@@ -358,7 +358,9 @@ public class Utils {
 			int maxTryProperty,
 			int scriptTimeout,
 			int pageLoadTimeout,
-			int watchdog, DesktopDriver desktopDriver) {
+			int watchdog, 
+			DesktopDriver desktopDriver, 
+			String profilePath) {
 
 		if(driverVersion == null) {
 			driverVersion = "--";
@@ -423,7 +425,12 @@ public class Utils {
 			htmlContent.append("<br><strong>  - Binary path : </strong>");
 			htmlContent.append(browserPath);
 		}
-
+		
+		if(profilePath != null) {
+			htmlContent.append("<br><strong>  - Profile path : </strong>");
+			htmlContent.append(profilePath);
+		}
+		
 		htmlContent.append("<br><strong>  - Start position : </strong>");
 		htmlContent.append(testBound.getX().intValue());
 		htmlContent.append(" x ");

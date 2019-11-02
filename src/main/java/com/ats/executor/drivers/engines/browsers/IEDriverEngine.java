@@ -36,7 +36,7 @@ import com.ats.generator.objects.MouseDirection;
 
 public class IEDriverEngine extends WebDriverEngine {
 
-	protected static final String IE_MIDDLE_CLICK = "var evt=document.createEvent(\"MouseEvents\"),result={};evt.initMouseEvent(\"click\",true,true,window,1,0,0,0,0,false,false,false,false,1,null);arguments[0].dispatchEvent(evt);";
+	//protected static final String IE_MIDDLE_CLICK = "var evt=document.createEvent(\"MouseEvents\"),result={};evt.initMouseEvent(\"click\",true,true,window,1,0,0,0,0,false,false,false,false,1,null);arguments[0].dispatchEvent(evt);";
 
 	public IEDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
 		super(channel, "ie", driverProcess, windowsDriver, props);
@@ -45,13 +45,13 @@ public class IEDriverEngine extends WebDriverEngine {
 		ieOptions.introduceFlakinessByIgnoringSecurityDomains();
 		ieOptions.enablePersistentHovering();
 
-		launchDriver(status, ieOptions);
+		launchDriver(status, ieOptions, null);
 		
-		/*if(!"11".equals(channel.getApplicationVersion())) {
+		if(status.isPassed() && !"11".equals(channel.getApplicationVersion())) {
 			status.setPassed(false);
 			status.setCode(ActionStatus.CHANNEL_START_ERROR);
 			status.setMessage("Cannot start channel with IE" + channel.getApplicationVersion() + " ! (Only IE11 is supported by ATS)");
-		}*/
+		}
 	}
 
 	@Override
