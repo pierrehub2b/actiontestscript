@@ -131,7 +131,7 @@ public class AtsMobileElement extends AtsBaseElement {
 	}
 	
 	public void addChildren(AtsMobileElement element) {
-		var tmpChild = new ArrayList<AtsMobileElement>();
+		ArrayList<AtsMobileElement> tmpChild = new ArrayList<AtsMobileElement>();
 		if(this.children != null) {
 			tmpChild = new ArrayList<AtsMobileElement>(Arrays.asList(this.children));
 		}
