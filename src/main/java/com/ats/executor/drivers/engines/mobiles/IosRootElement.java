@@ -180,34 +180,34 @@ public class IosRootElement extends RootElement {
 		final AtsMobileElement[] firstChilds = domStructure.getChildren();
 		if(firstChilds != null && firstChilds.length >= 0) {
 			final AtsMobileElement[] frontElements = firstChilds[0].getChildren();
-			if(frontElements != null && frontElements.length > 0) {
+			if(frontElements != null && frontElements.length > 1) {
 				// at least 2 elements; so get only the last one
-				final AtsMobileElement[] child = new AtsMobileElement[1];
+				final AtsMobileElement child = frontElements[frontElements.length-1];
 				//check consistancy of second element 
-				var containsElements = checkConsistancy(child);
+				var containsElements = checkConsistancy(child.getChildren(), false);
 				if(containsElements) {
-					child[0] = frontElements[frontElements.length-1];
+					domStructure.getChildren()[0].setChildren(child.getChildren());
 				} else {
-					child[0] = frontElements[0];
+					domStructure.getChildren()[0].setChildren(frontElements[0].getChildren());
 				}
-				domStructure.getChildren()[0].setChildren(child);
+				
 			}
 		}
 		
 		this.value = domStructure;
 	}
 	
-	public Boolean checkConsistancy(AtsMobileElement[] child) {
+	public Boolean checkConsistancy(AtsMobileElement[] child, Boolean val) {
 		for (int i = 0; i < child.length; i++) {
 			if(child[i] != null && child[i].getChildren().length > 0) {
-				return checkConsistancy(child[i].getChildren());
+				val = checkConsistancy(child[i].getChildren(), val);
 			} else {
 				if(child[i] != null && !child[i].getTag().equalsIgnoreCase("other")) {
-					return true;
+					val = true;
 				}
 			}
 		}
-		return false;
+		return val;
 	}
 	
 	public Double getDeviceWidth() {
