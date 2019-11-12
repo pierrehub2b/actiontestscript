@@ -183,12 +183,31 @@ public class IosRootElement extends RootElement {
 			if(frontElements != null && frontElements.length > 0) {
 				// at least 2 elements; so get only the last one
 				final AtsMobileElement[] child = new AtsMobileElement[1];
-				child[0] = frontElements[frontElements.length-1];
+				//check consistancy of second element 
+				var containsElements = checkConsistancy(child);
+				if(containsElements) {
+					child[0] = frontElements[frontElements.length-1];
+				} else {
+					child[0] = frontElements[0];
+				}
 				domStructure.getChildren()[0].setChildren(child);
 			}
 		}
 		
 		this.value = domStructure;
+	}
+	
+	public Boolean checkConsistancy(AtsMobileElement[] child) {
+		for (int i = 0; i < child.length; i++) {
+			if(child[i] != null && child[i].getChildren().length > 0) {
+				return checkConsistancy(child[i].getChildren());
+			} else {
+				if(child[i] != null && !child[i].getTag().equalsIgnoreCase("other")) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 	public Double getDeviceWidth() {
