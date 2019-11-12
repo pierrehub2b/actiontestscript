@@ -227,8 +227,8 @@ public class IosRootElement extends RootElement {
 	}
 
 	private Map<String,String> getAttributes(String str) {
-		var result = new TreeMap<String, String>();
-		var arraySize = str.split(regexBraces);
+		TreeMap<String, String> result = new TreeMap<String, String>();
+		String[] arraySize = str.split(regexBraces);
 		
 		if(arraySize[0].contains("checkbox")) {
 			result.put("checkable", "true");
@@ -238,7 +238,7 @@ public class IosRootElement extends RootElement {
 		}
 		
 		for (String s : arraySize) {
-			var cleanString = cleanAttribute(s);
+			final String cleanString = cleanAttribute(s);
 			if(s.contains("label")) {
 				result.put("text", cleanString);
 			}

@@ -116,9 +116,9 @@ public class DesktopDriver extends RemoteWebDriver {
 
 			this.client = new Builder().
 					cache(null)
-					.connectTimeout(40, TimeUnit.SECONDS)
-					.writeTimeout(40, TimeUnit.SECONDS)
-					.readTimeout(40, TimeUnit.SECONDS)
+					.connectTimeout(60, TimeUnit.SECONDS)
+					.writeTimeout(60, TimeUnit.SECONDS)
+					.readTimeout(60, TimeUnit.SECONDS)
 					.build();
 
 			int maxTry = 10;

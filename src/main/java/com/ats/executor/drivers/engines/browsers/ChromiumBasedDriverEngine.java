@@ -52,6 +52,13 @@ public class ChromiumBasedDriverEngine extends WebDriverEngine {
 
 		options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
 		options.setExperimentalOption("useAutomationExtension", false);
+		
+		Map<String, Object> prefs = new HashMap<String, Object>();
+		prefs.put("credentials_enable_service", false);
+		prefs.put("profile.password_manager_enabled", false);
+		options.setExperimentalOption("prefs", prefs);
+		
+		options.addArguments("--profile-directory=Default");
 
 		launchDriver(status, options, profilePath);
 	}
@@ -59,20 +66,18 @@ public class ChromiumBasedDriverEngine extends WebDriverEngine {
 	private String checkProfileFolder(ChromeOptions options, ApplicationProperties props, String browser) {
 
 		String path = "";
-		if(props.getUserDataDir() != null) {
-			path = new File(props.getUserDataDir()).getAbsolutePath();
+		final String atsProfileFolder = props.getUserDataDir();
+		if(atsProfileFolder != null) {
+			if("default".equals(atsProfileFolder) || "disabled".equals(atsProfileFolder) || "no".equals(atsProfileFolder)) {
+				return "Default profile folder";
+			}
+			path = new File(atsProfileFolder).getAbsolutePath();
 			profileFolder = path;
 		}else {
 			path = Utils.createDriverFolder(browser).getAbsolutePath();
 		}
 		
 		options.addArguments("--user-data-dir=" + path);
-
-		Map<String, Object> prefs = new HashMap<String, Object>();
-		prefs.put("credentials_enable_service", false);
-		prefs.put("profile.password_manager_enabled", false);
-		options.setExperimentalOption("prefs", prefs);
-		
 		return path;
 	}
 
