@@ -43,6 +43,7 @@ public class AtsElement extends AtsBaseElement {
 	private Double boundY = 0.0;
 
 	private boolean visible = true;
+	private boolean clickable = true;
 
 	public static boolean checkIframe(String value) {
 		value = value.toUpperCase();
@@ -127,6 +128,14 @@ public class AtsElement extends AtsBaseElement {
 		if(attributes != null) {
 			this.attributes = attributes.parallelStream().collect(Collectors.toMap(s -> s.getName(), s -> s.getValue()));
 		}
+	}
+	
+	public boolean isClickable() {
+		return clickable;
+	}
+
+	public void setClickable(boolean clickable) {
+		this.clickable = clickable;
 	}
 
 	//----------------------------------------------------------------------------------------

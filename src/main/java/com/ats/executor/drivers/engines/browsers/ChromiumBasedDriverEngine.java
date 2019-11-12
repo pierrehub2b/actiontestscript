@@ -12,7 +12,6 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import com.ats.driver.ApplicationProperties;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
-import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.WebDriverEngine;
@@ -20,11 +19,14 @@ import com.ats.tools.Utils;
 
 public class ChromiumBasedDriverEngine extends WebDriverEngine {
 
-	private String profileFolder = null;
+	protected String profileFolder = null;
 
 	public ChromiumBasedDriverEngine(Channel channel, ActionStatus status, String browser, DriverProcess driverProcess, DesktopDriver desktopDriver, ApplicationProperties props) {
 		super(channel, browser, driverProcess, desktopDriver, props);
-
+	}
+	
+	protected ChromeOptions initOptions(ApplicationProperties props, String browserName) {
+		
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments("--no-sandbox");
 		options.addArguments("--no-default-browser-check");
@@ -40,14 +42,17 @@ public class ChromiumBasedDriverEngine extends WebDriverEngine {
 		options.addArguments("--disable-web-security");
 		options.addArguments("--disable-dev-shm-usage");
 
-		final String profilePath = checkProfileFolder(options, props, DriverManager.CHROMIUM_BROWSER);
+		checkProfileFolder(options, props, browserName);
 
 		if(lang != null) {
 			options.addArguments("--lang=" + lang);
 		}
 
 		if(applicationPath != null) {
-			options.setBinary(applicationPath);
+			final File browserBinaryFile = new File(applicationPath);
+			if(browserBinaryFile.exists()) {
+				options.setBinary(browserBinaryFile.getAbsolutePath());
+			}
 		}
 
 		options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
@@ -58,27 +63,22 @@ public class ChromiumBasedDriverEngine extends WebDriverEngine {
 		prefs.put("profile.password_manager_enabled", false);
 		options.setExperimentalOption("prefs", prefs);
 		
-		options.addArguments("--profile-directory=Default");
-
-		launchDriver(status, options, profilePath);
+		return options;
 	}
 
-	private String checkProfileFolder(ChromeOptions options, ApplicationProperties props, String browser) {
+	private void checkProfileFolder(ChromeOptions options, ApplicationProperties props, String browser) {
 
-		String path = "";
 		final String atsProfileFolder = props.getUserDataDir();
 		if(atsProfileFolder != null) {
 			if("default".equals(atsProfileFolder) || "disabled".equals(atsProfileFolder) || "no".equals(atsProfileFolder)) {
-				return "Default profile folder";
+				return;
 			}
-			path = new File(atsProfileFolder).getAbsolutePath();
-			profileFolder = path;
+			profileFolder = new File(atsProfileFolder).getAbsolutePath();
 		}else {
-			path = Utils.createDriverFolder(browser).getAbsolutePath();
+			profileFolder = Utils.createDriverFolder(browser).getAbsolutePath();
 		}
 		
-		options.addArguments("--user-data-dir=" + path);
-		return path;
+		options.addArguments("--user-data-dir=" + profileFolder);
 	}
 
 	@Override

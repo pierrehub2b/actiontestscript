@@ -29,5 +29,6 @@ import com.ats.executor.drivers.desktop.DesktopDriver;
 public class ChromeDriverEngine extends ChromiumBasedDriverEngine {
 	public ChromeDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
 		super(channel, status, DriverManager.CHROME_BROWSER, driverProcess, windowsDriver, props);
+		launchDriver(status, initOptions(props,DriverManager.CHROME_BROWSER), profileFolder);
 	}
 }

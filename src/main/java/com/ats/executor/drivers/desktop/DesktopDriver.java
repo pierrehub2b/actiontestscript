@@ -480,7 +480,9 @@ public class DesktopDriver extends RemoteWebDriver {
 	}
 
 	public void refreshElementMapLocation(Channel channel) {
-		new Thread(new LoadMapElement(channel, this)).start();
+		//new Thread(new LoadMapElement(channel, this)).start();
+		
+		setElementMapLocation(getWebElementsListByHandle(channel.getDimension(), channel.getHandle(this)));
 	}
 
 	public void refreshElementMap(Channel channel) {
@@ -502,21 +504,44 @@ public class DesktopDriver extends RemoteWebDriver {
 	public FoundElement getElementFromPoint(Double x, Double y) {
 
 		FoundElement hoverElement = null;
-		if (elementMapLocation != null && elementMapLocation.size() > 0) {
+		if (elementMapLocation != null && elementMapLocation.size() > 1) {
 			
+			int size = elementMapLocation.size();
 			hoverElement = elementMapLocation.get(0);
 			
-			for (FoundElement testElement : elementMapLocation) {
-				if(testElement != null && testElement.isVisible()){
+			for(int i = 1; i < size; i++) {
+				FoundElement elem = elementMapLocation.get(i);
+				if(elem != null && elem.isActive()){
 
-					final Rectangle rect = testElement.getRectangle();
-
-					if (!rect.contains(x, y) 
-							|| hoverElement.getWidth() <= testElement.getWidth() 
-							&& hoverElement.getHeight() <= testElement.getHeight()) continue;
-					hoverElement = testElement;
+					final Rectangle rect = elem.getRectangle();
+					rect.translate(-1, -1);
+					rect.setSize(rect.width+2, rect.height+2);
+					
+					if (!rect.contains(x, y) || hoverElement.getWidth() <= elem.getWidth() && hoverElement.getHeight() <= elem.getHeight()) {
+						continue;
+					}
+					hoverElement = elem;
 				}
 			}
+						
+			
+			/*hoverElement = elementMapLocation.get(0);
+			
+			for (FoundElement elem : elementMapLocation) {
+				if(elem != null && elem.isVisible()){
+
+					final Rectangle rect = elem.getRectangle();
+					rect.translate(-1, -1);
+					rect.setSize(rect.width+2, rect.height+2);
+					
+					if(rect.contains(x, y) && (hoverElement.getWidth() > rect.width && hoverElement.getHeight() > rect.height)) {
+						hoverElement = elem;
+					}
+
+					//if (!rect.contains(x, y) || hoverElement.getWidth() <= elem.getWidth() && hoverElement.getHeight() <= elem.getHeight()) continue;
+					//hoverElement = elem;
+				}
+			}*/
 		}
 		return hoverElement;
 	}
@@ -660,8 +685,7 @@ public class DesktopDriver extends RemoteWebDriver {
 		return resp.getFirstAttribute();
 	}
 
-	private static class LoadMapElement
-	implements Runnable {
+	private static class LoadMapElement	implements Runnable {
 		final TestBound channelDimension;
 		final int handle;
 		final DesktopDriver driver;

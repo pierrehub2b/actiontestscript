@@ -128,6 +128,8 @@ public class FoundElement{
 		this.tag = element.getTag();
 		this.width = element.getWidth();
 		this.height = element.getHeight();
+		
+		this.clickable = element.isClickable();
 
 		this.screenX = element.getX();
 		this.screenY = element.getY();
@@ -145,8 +147,6 @@ public class FoundElement{
 		this.tag = element.getTag();
 		this.width = element.getWidth();
 		this.height = element.getHeight();
-
-		this.clickable = element.isClickable();
 
 		this.screenX = element.getX();
 		this.screenY = element.getY();
@@ -273,6 +273,10 @@ public class FoundElement{
 	
 	public boolean isPassword() {
 		return password;
+	}
+	
+	public boolean isActive() {
+		return visible && clickable;
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------

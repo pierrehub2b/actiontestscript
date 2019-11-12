@@ -36,6 +36,7 @@ import com.ats.executor.drivers.engines.browsers.EdgeDriverEngine;
 import com.ats.executor.drivers.engines.browsers.FirefoxDriverEngine;
 import com.ats.executor.drivers.engines.browsers.IEDriverEngine;
 import com.ats.executor.drivers.engines.browsers.JxDriverEngine;
+import com.ats.executor.drivers.engines.browsers.MsEdgeDriverEngine;
 import com.ats.executor.drivers.engines.browsers.OperaDriverEngine;
 import com.ats.executor.drivers.engines.desktop.DesktopDriverEngine;
 import com.ats.executor.drivers.engines.desktop.ExplorerDriverEngine;
@@ -48,6 +49,7 @@ public class DriverManager {
 	public static final String FIREFOX_BROWSER = "firefox";
 	public static final String IE_BROWSER = "ie";
 	public static final String EDGE_BROWSER = "edge";
+	public static final String MSEDGE_BROWSER = "msedge";
 	public static final String OPERA_BROWSER = "opera";
 	public static final String SAFARI_BROWSER = "safari";
 
@@ -56,6 +58,7 @@ public class DriverManager {
 	public static final String CHROMIUM_DRIVER_FILE_NAME = "chromiumdriver";
 	public static final String IE_DRIVER_FILE_NAME = "IEDriverServer";
 	public static final String EDGE_DRIVER_FILE_NAME = "MicrosoftWebDriver";
+	public static final String MSEDGE_DRIVER_FILE_NAME = "msedgedriver";
 	public static final String OPERA_DRIVER_FILE_NAME = "operadriver";
 	public static final String FIREFOX_DRIVER_FILE_NAME = "geckodriver";
 
@@ -135,6 +138,19 @@ public class DriverManager {
 				return new EdgeDriverEngine(
 						channel, 
 						status, 
+						driverProcess, 
+						desktopDriver, 
+						props);	
+			}else {
+				return null;
+			}
+		}else if(MSEDGE_BROWSER.equals(appName)) {
+			driverProcess = getDriverProcess(status, appName, driverName, MSEDGE_DRIVER_FILE_NAME);
+			if(status.isPassed()) {
+				return new MsEdgeDriverEngine(
+						channel, 
+						status,
+						MSEDGE_BROWSER,
 						driverProcess, 
 						desktopDriver, 
 						props);	
