@@ -165,6 +165,10 @@ public class Channel {
 		refreshLocation();
 		engine.refreshElementMapLocation();
 	}
+	
+	public void defineRoot(String id) {
+		getDesktopDriver().defineRoot(dimension, id);
+	}
 
 	public void toFront(){
 		if(engine.setWindowToFront()) {

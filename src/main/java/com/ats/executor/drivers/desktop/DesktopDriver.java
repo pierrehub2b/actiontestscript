@@ -366,7 +366,8 @@ public class DesktopDriver extends RemoteWebDriver {
 		Attributes (3),
 		Select (4),
 		FromPoint(5),
-		Script(6);
+		Script(6),
+		Root(7);
 
 		private final int type;
 		ElementType(int value){
@@ -478,11 +479,14 @@ public class DesktopDriver extends RemoteWebDriver {
 	public List<FoundElement> getWebElementsListByHandle(TestBound channelDimension, int handle) {
 		return sendRequestCommand(CommandType.Element, ElementType.Find, handle, SearchedElement.WILD_CHAR).getFoundElements(channelDimension);
 	}
+	
+	public void defineRoot(TestBound channelDimension, String id) {
+		setElementMapLocation(sendRequestCommand(CommandType.Element, ElementType.Root, id).getFoundElements(channelDimension));
+	}
 
 	public void refreshElementMapLocation(Channel channel) {
-		//new Thread(new LoadMapElement(channel, this)).start();
-		
-		setElementMapLocation(getWebElementsListByHandle(channel.getDimension(), channel.getHandle(this)));
+		new Thread(new LoadMapElement(channel, this)).start(); // asynch response
+		//setElementMapLocation(getWebElementsListByHandle(channel.getDimension(), channel.getHandle(this)));
 	}
 
 	public void refreshElementMap(Channel channel) {
