@@ -64,6 +64,7 @@ import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
+import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.desktop.DesktopDriver;
@@ -214,7 +215,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	}
 	
 	@Override
-	public ArrayList<FoundElement> findSelectOptions(TestElement element) {
+	public ArrayList<FoundElement> findSelectOptions(TestBound dimension, TestElement element) {
 		return new ArrayList<FoundElement>();
 	}
 	

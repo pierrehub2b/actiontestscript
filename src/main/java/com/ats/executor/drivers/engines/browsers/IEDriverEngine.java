@@ -36,8 +36,6 @@ import com.ats.generator.objects.MouseDirection;
 
 public class IEDriverEngine extends WebDriverEngine {
 
-	//protected static final String IE_MIDDLE_CLICK = "var evt=document.createEvent(\"MouseEvents\"),result={};evt.initMouseEvent(\"click\",true,true,window,1,0,0,0,0,false,false,false,false,1,null);arguments[0].dispatchEvent(evt);";
-
 	public IEDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
 		super(channel, "ie", driverProcess, windowsDriver, props);
 
@@ -46,7 +44,7 @@ public class IEDriverEngine extends WebDriverEngine {
 		ieOptions.enablePersistentHovering();
 
 		launchDriver(status, ieOptions, null);
-		
+
 		if(status.isPassed() && !"11".equals(channel.getApplicationVersion())) {
 			status.setPassed(false);
 			status.setCode(ActionStatus.CHANNEL_START_ERROR);
@@ -65,19 +63,28 @@ public class IEDriverEngine extends WebDriverEngine {
 	}
 
 	@Override
-	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {
-		//runJavaScript(status, IE_MIDDLE_CLICK, element.getWebElement());
-		getDesktopDriver().mouseMiddleClick();
-	}
-		
-	@Override
-	public void rightClick() {
-		getDesktopDriver().mouseRightClick();
+	public void drop(MouseDirection md, boolean desktopDriver) {
+		getDesktopDriver().mouseRelease();
 	}
 
 	@Override
-	public void drop(MouseDirection md, boolean desktopDriver) {
-		getDesktopDriver().mouseRelease();
+	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {
+		getDesktopDriver().mouseMiddleClick();
+	}
+
+	@Override
+	public void doubleClick() {
+		getDesktopDriver().doubleClick();
+	}
+
+	@Override
+	protected void click(FoundElement element, int offsetX, int offsetY) {
+		getDesktopDriver().mouseClick();
+	}
+
+	@Override
+	public void rightClick() {
+		getDesktopDriver().mouseRightClick();
 	}
 
 	@Override
@@ -87,8 +94,13 @@ public class IEDriverEngine extends WebDriverEngine {
 				element.executeScript(status, "value='" + sequence.getData() + "'", true);
 			}
 		}else {
-			for(SendKeyData sequence : textActionList) {
-				element.getWebElement().sendKeys(sequence.getSequenceWithDigit());
+			try {
+				for(SendKeyData sequence : textActionList) {
+					element.getWebElement().sendKeys(sequence.getSequenceWithDigit());
+				}
+			}catch(Exception e) {
+				status.setPassed(false);
+				status.setMessage(e.getMessage());
 			}
 		}
 	}	

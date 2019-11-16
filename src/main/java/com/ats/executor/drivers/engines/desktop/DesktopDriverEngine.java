@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
@@ -241,8 +240,8 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 	
 	@Override
-	public ArrayList<FoundElement> findSelectOptions(TestElement element) {
-		return findElements(false, element, "ListItem", new ArrayList<String>(), Objects::nonNull, element.getWebElement());
+	public ArrayList<FoundElement> findSelectOptions(TestBound dimension, TestElement element) {
+		return getDesktopDriver().getChildren(dimension, element.getFoundElement().getId(), "ListItem");
 	}
 	
 	@Override
@@ -302,7 +301,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 		getDesktopDriver().switchTo(channel, index);
 		channel.updateWinHandle(getDesktopDriver(), index);
 		status.setPassed(true);
-	}	
+	}
 
 	@Override
 	public boolean setWindowToFront() {

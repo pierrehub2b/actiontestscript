@@ -392,7 +392,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	}
 
 	@Override
-	public ArrayList<FoundElement> findSelectOptions(TestElement element) {
+	public ArrayList<FoundElement> findSelectOptions(TestBound dimension, TestElement element) {
 		return new ArrayList<FoundElement>();
 	}
 	

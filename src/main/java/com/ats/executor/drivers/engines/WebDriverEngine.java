@@ -64,6 +64,7 @@ import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
+import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.DriverProcess;
@@ -78,6 +79,7 @@ import com.ats.script.actions.ActionApi;
 import com.ats.script.actions.ActionGotoUrl;
 import com.ats.script.actions.ActionSelect;
 import com.ats.script.actions.ActionWindowState;
+import com.ats.tools.Operators;
 import com.ats.tools.ResourceContent;
 import com.ats.tools.Utils;
 import com.ats.tools.logger.MessageCode;
@@ -479,14 +481,14 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public ArrayList<FoundElement> findSelectOptions(TestElement element) {
+	public ArrayList<FoundElement> findSelectOptions(TestBound dimension, TestElement element) {
 		return findElements(false, element, "option", new ArrayList<String>(), Objects::nonNull, element.getWebElement());
 	}
 
 	@Override
 	public void selectOptionsItem(ActionStatus status, TestElement element, CalculatedProperty selectProperty) {
 
-		final ArrayList<FoundElement> items = findSelectOptions(element);
+		final ArrayList<FoundElement> items = findSelectOptions(null, element);
 
 		if(items != null && items.size() > 0) {
 			if(ActionSelect.SELECT_INDEX.equals(selectProperty.getName())){
@@ -931,8 +933,10 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		try {
 			return driver.executeAsyncScript(javaScript + ";arguments[arguments.length-1](result);", params);
 		}catch(StaleElementReferenceException e0) {
+			status.setPassed(false);
 			throw e0;
 		}catch(Exception e1) {
+			status.setPassed(false);
 			status.setException(ActionStatus.JAVASCRIPT_ERROR, e1);
 			status.setCode(ActionStatus.JAVASCRIPT_ERROR);
 		}
@@ -962,19 +966,9 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 		status.setPassed(true);
 		status.setData(url);
-		//status.setMessage(getCurrentUrl());
 
 		actionWait();
 	}
-	
-	/*private String getCurrentUrl() {
-		try {
-			return driver.getCurrentUrl();
-		}catch(UnhandledAlertException e) {
-			return "";
-		}
-	}*/
-
 
 	protected void loadUrl(String url) {
 		driver.get(url);
@@ -1014,6 +1008,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 				offsetIframeX = 0.0;
 				offsetIframeY = 0.0;
 			}
+			
 			if(!switchToDefaultContent()) {
 				return new ArrayList<FoundElement>();
 			}
@@ -1044,8 +1039,14 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void clearText(ActionStatus status, FoundElement element) {
-		executeScript(status, "arguments[0].value='';", element.getValue());
-		status.setMessage("");
+		try {
+			executeScript(status, "arguments[0].value='';", element.getValue());
+			status.setMessage("");
+		}catch (StaleElementReferenceException e) {
+			status.setPassed(false);
+			status.setCode(ActionStatus.ENTER_TEXT_FAIL);
+			status.setMessage("Cannot clear text on this element");
+		}
 	}
 
 	@Override

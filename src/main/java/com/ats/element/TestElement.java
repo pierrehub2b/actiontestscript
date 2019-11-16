@@ -331,17 +331,17 @@ public class TestElement{
 	public void enterText(ActionStatus status, CalculatedValue text, IVisualRecorder recorder) {
 
 		final MouseDirection md = new MouseDirection();
-
+		String enteredText = "";
+		
 		over(status, md, false, 0, 0);
 		if(status.isPassed()) {
 			click(status, md);
 			if(status.isPassed()) {
 				clearText(status);
 				if(status.isPassed()) {
-
+					
 					recorder.updateScreen(true);
 
-					String enteredText = null;
 					if(isPassword()) {
 						enteredText = "xxxxxxxxxx";
 					}else {
@@ -349,12 +349,11 @@ public class TestElement{
 					}
 
 					sendText(status, text);
-
-					status.endDuration();
-					recorder.updateTextScreen(0, status.getDuration(), enteredText, status.getMessage());
 				}
 			}
 		}
+		status.endDuration();
+		recorder.updateTextScreen(0, status.getDuration(), enteredText, status.getMessage());
 	}
 
 	public void sendText(ActionStatus status, CalculatedValue text) {

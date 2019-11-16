@@ -1,4 +1,4 @@
-let result=[], parent=arguments[0];
+let parent=arguments[0];
 const attributes=arguments[2], attributesLen=arguments[3];	
 const screenOffsetX=(window.outerWidth-window.innerWidth)/2+window.screenX+0.0001, screenOffsetY=window.outerHeight-window.innerHeight+window.screenY+0.0001;
 
@@ -8,6 +8,8 @@ if(parent == null){
 
 const elts=parent.getElementsByTagName(arguments[1]);
 const eltsLength=elts.length;
+
+result=[]; 
 
 let addElement=function(e, t, a){
 	const r = e.getBoundingClientRect();

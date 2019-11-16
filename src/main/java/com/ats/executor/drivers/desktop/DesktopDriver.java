@@ -680,6 +680,10 @@ public class DesktopDriver extends RemoteWebDriver {
 		return response.getFoundElements(predicate, channel.getDimension());
 	}
 	
+	public ArrayList<FoundElement> getChildren(TestBound dimension, String comboId, String tag){
+		return sendRequestCommand(CommandType.Element, ElementType.Childs, new Object[] {comboId, tag}).getFoundElements(dimension);
+	}
+	
 	public void selectItem(String elementId, String type, String value, boolean regexp) {
 		sendRequestCommand(CommandType.Element, ElementType.Select, elementId, type, value, regexp);
 	}

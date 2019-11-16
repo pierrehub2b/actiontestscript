@@ -297,7 +297,7 @@ public class Channel {
 	public ArrayList<String[]> findSelectOptions(TestElement element){
 				
 		final ArrayList<String[]> result = new ArrayList<String[]>();
-		final ArrayList<FoundElement> options = engine.findSelectOptions(element);
+		final ArrayList<FoundElement> options = engine.findSelectOptions(dimension, element);
 
 		if(options != null && options.size() > 0) {
 			options.stream().forEachOrdered(e -> result.add(new String[]{e.getValue().getAttribute("value"), e.getValue().getAttribute("text")}));

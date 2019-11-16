@@ -31,6 +31,7 @@ import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
+import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.generator.objects.BoundData;
@@ -64,7 +65,7 @@ public interface IDriverEngine{
 	public CalculatedProperty[] getAttributes(FoundElement element, boolean reload);
 	public CalculatedProperty[] getCssAttributes(FoundElement element);
 	
-	public ArrayList<FoundElement> findSelectOptions(TestElement element);
+	public ArrayList<FoundElement> findSelectOptions(TestBound dimension, TestElement element);
 	public void selectOptionsItem(ActionStatus status, TestElement testElement, CalculatedProperty selectProperty);
 	
 	public void loadParents(FoundElement hoverElement);
