@@ -1,12 +1,12 @@
 let parent=arguments[0];
-const attributes=arguments[2], attributesLen=arguments[3];	
+const tagName=arguments[1], attributes=arguments[2], attributesLen=arguments[3];	
 const screenOffsetX=(window.outerWidth-window.innerWidth)/2+window.screenX+0.0001, screenOffsetY=window.outerHeight-window.innerHeight+window.screenY+0.0001;
 
 if(parent == null){
 	parent = window.document;
 };
 
-const elts=parent.getElementsByTagName(arguments[1]);
+const elts=parent.getElementsByTagName(tagName);
 const eltsLength=elts.length;
 
 result=[]; 
