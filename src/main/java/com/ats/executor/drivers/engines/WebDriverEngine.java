@@ -79,7 +79,6 @@ import com.ats.script.actions.ActionApi;
 import com.ats.script.actions.ActionGotoUrl;
 import com.ats.script.actions.ActionSelect;
 import com.ats.script.actions.ActionWindowState;
-import com.ats.tools.Operators;
 import com.ats.tools.ResourceContent;
 import com.ats.tools.Utils;
 import com.ats.tools.logger.MessageCode;
