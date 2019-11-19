@@ -37,6 +37,7 @@ import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.desktop.DesktopResponse;
 import com.ats.executor.drivers.desktop.DesktopWindow;
 import com.ats.executor.drivers.engines.IDriverEngine;
+import com.ats.executor.drivers.engines.MobileDriverEngine;
 import com.ats.executor.drivers.engines.desktop.DesktopDriverEngine;
 import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.MouseDirection;
@@ -352,6 +353,11 @@ public class Channel {
 		return engine instanceof DesktopDriverEngine;
 	}
 	public void setDesktop(boolean value) {} // read only
+	
+	public boolean isMobile() {
+		return engine instanceof MobileDriverEngine;
+	}
+	public void setMobile(boolean value) {} // read only
 
 	public String getName() {
 		return actionStart.getName();

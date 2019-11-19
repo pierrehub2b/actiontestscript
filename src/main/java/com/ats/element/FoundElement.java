@@ -217,6 +217,10 @@ public class FoundElement{
 		return DESKTOP.equals(type);
 	}
 	
+	public boolean isMobile() {
+		return MOBILE.equals(type);
+	}
+	
 	public ArrayList<AtsElement> getIframes(){
 		return iframes;
 	}
