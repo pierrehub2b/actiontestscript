@@ -20,7 +20,6 @@ under the License.
 package com.ats.generator.parsers;
 
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -102,9 +101,10 @@ public class ScriptParser {
 			
 		}else if((m = CREATED_DATE_PATTERN.matcher(data)) != null && m.find()){
 
+			final String dateString = getDataGroup(m, 1);
 			try {
-				script.setCreatedDate(dateFormat.parse(getDataGroup(m, 1)));
-			}catch (ParseException | NumberFormatException e) {}
+				script.setCreatedDate(dateFormat.parse(dateString));
+			}catch (Exception e) {}
 
 		}else if((m = AUTHOR_PATTERN.matcher(data)) != null && m.find()){
 
