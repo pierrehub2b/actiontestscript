@@ -419,7 +419,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public WebElement getRootElement(Channel cnl) {
-		return new DesktopRootElement(cnl.getDimension().getWidth().intValue(), (int)cnl.getDimension().getHeight().intValue());
+		return new DesktopRootElement(getDesktopDriver().getRootElement(cnl));
 	}
 
 	@Override

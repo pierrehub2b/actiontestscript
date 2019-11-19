@@ -39,7 +39,7 @@ public class ActionMouseSwipe extends ActionMouse {
 
 	public ActionMouseSwipe(ScriptLoader script, String type, String direction, boolean stop, ArrayList<String> options, ArrayList<String> objectArray) {
 		super(script, type, stop, options, objectArray);
-		this.direction = new MouseDirection(script, new ArrayList<String>(Arrays.asList(direction.split(","))), false);
+		this.setDirection(new MouseDirection(script, new ArrayList<String>(Arrays.asList(direction.split(","))), false));
 	}
 
 	public ActionMouseSwipe(Script script, boolean stop, int maxTry, SearchedElement element, MouseSwipe mouse) {

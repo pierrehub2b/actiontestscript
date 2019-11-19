@@ -84,6 +84,10 @@ public abstract class DriverEngine {
 			propertyWait = defaultCheck;
 		}
 	}
+
+	public TestElement getTestElementRoot() {
+		return new TestElement(channel);
+	}
 		
 	public DesktopDriver getDesktopDriver() {
 		return desktopDriver;

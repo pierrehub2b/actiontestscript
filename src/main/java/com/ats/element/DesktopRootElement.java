@@ -8,10 +8,11 @@ public class DesktopRootElement extends RemoteWebElement {
 	private int width = 0;
 	private int height = 0;
 	
-	public DesktopRootElement(int w, int h) {
+	public DesktopRootElement(FoundElement root) {
 		super();
-		this.width = w;
-		this.height = h;
+		this.id = root.getId();
+		this.width = root.getWidth().intValue();
+		this.height = root.getHeight().intValue();
 	}
 
 	@Override
@@ -22,12 +23,10 @@ public class DesktopRootElement extends RemoteWebElement {
 	@Override
 	public String getAttribute(String name) {
 		if("clientWidth".equals(name)){
-			return width + "";
+			return super.getAttribute("BoundingWidth");
 		}else if("clientHeight".equals(name)) {
-			return height + "";
+			return super.getAttribute("BoundingHeight");
 		}
 		return super.getAttribute(name);
 	}
-	
-	
 }

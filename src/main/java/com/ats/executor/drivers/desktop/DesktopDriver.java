@@ -572,6 +572,14 @@ public class DesktopDriver extends RemoteWebDriver {
 		}
 		return hoverElement;
 	}
+	
+	public FoundElement getRootElement(Channel channel) {
+		refreshElementMap(channel);
+		if (elementMapLocation != null && elementMapLocation.size() > 0) {
+			return elementMapLocation.get(0);
+		}
+		return null;
+	}
 
 	public ArrayList<DesktopData> getVersion(String appPath) {
 		return sendRequestCommand(CommandType.Driver, DriverType.Application, appPath).getData();

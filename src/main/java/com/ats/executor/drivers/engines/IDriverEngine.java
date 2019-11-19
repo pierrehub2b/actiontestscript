@@ -44,6 +44,7 @@ public interface IDriverEngine{
 	
 	public DesktopDriver getDesktopDriver();
 	public WebElement getRootElement(Channel cnl);
+	public TestElement getTestElementRoot();
 	public void close();
 
 	public String getApplicationPath();

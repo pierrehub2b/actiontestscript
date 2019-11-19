@@ -34,12 +34,12 @@ import org.openqa.selenium.Alert;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.RemoteWebElement;
 
 import com.ats.driver.ApplicationProperties;
 import com.ats.element.AtsBaseElement;
 import com.ats.element.AtsMobileElement;
 import com.ats.element.FoundElement;
+import com.ats.element.MobileRootElement;
 import com.ats.element.MobileTestElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
@@ -180,6 +180,18 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 				}
 			}
 		}
+	}
+	
+	@Override
+	public WebElement getRootElement(Channel cnl) {
+		refreshElementMapLocation();
+		return new MobileRootElement(rootElement.getValue());
+	}
+	
+	@Override
+	public TestElement getTestElementRoot() {
+		refreshElementMapLocation();
+		return new TestElement(new FoundElement(rootElement.getValue()), channel);
 	}
 
 	@Override
@@ -373,17 +385,6 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 		for(SendKeyData sequence : textActionList) {	
 			executeRequest(ELEMENT, element.getFoundElement().getId(), INPUT, sequence.getMobileSequence()		);
 		}
-	}
-
-	@Override
-	public WebElement getRootElement(Channel cnl) {
-
-		refreshElementMapLocation();
-
-		RemoteWebElement elem = new RemoteWebElement();
-		elem.setId(rootElement.getValue().getId());
-
-		return elem;
 	}
 
 	@Override

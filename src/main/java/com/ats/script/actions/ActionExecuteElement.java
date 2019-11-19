@@ -30,7 +30,6 @@ import com.ats.element.SearchedElement;
 import com.ats.element.TestElement;
 import com.ats.element.TestElementDialog;
 import com.ats.element.TestElementImage;
-import com.ats.element.TestElementRoot;
 import com.ats.element.TestElementSystem;
 import com.ats.element.TestElementSystemButton;
 import com.ats.executor.ActionStatus;
@@ -119,7 +118,7 @@ public class ActionExecuteElement extends ActionExecute {
 		}else if(testElement == null) {
 
 			if(searchElement == null) {
-				setTestElement(new TestElementRoot(channel));
+				setTestElement(channel.getTestElementRoot());
 			}else {
 
 				int trySearch = 0;

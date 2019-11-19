@@ -21,6 +21,7 @@ package com.ats.element;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Predicate;
 
@@ -65,10 +66,9 @@ public class TestElement{
 
 	public TestElement(Channel channel) {
 		this.channel = channel;
-		this.index = 0;
-		this.foundElements = new ArrayList<FoundElement>();
-		this.foundElements.add(new FoundElement(channel));
+		this.foundElements = new ArrayList<FoundElement>(Arrays.asList(new FoundElement(channel)));
 		this.count = 1;
+		this.index = 0;
 		this.occurrences = p -> true;
 		this.engine = channel.getDriverEngine();
 	}
@@ -77,7 +77,7 @@ public class TestElement{
 		this.channel = channel;
 		this.maxTry = maxTry;
 	}
-
+	
 	public TestElement(FoundElement element, Channel currentChannel) {
 		this(currentChannel);
 		this.foundElements.add(element);
@@ -92,6 +92,10 @@ public class TestElement{
 	public TestElement(Channel channel, int maxTry, Predicate<Integer> predicate, int index) {
 		this(channel, maxTry, predicate);
 		this.setIndex(index);
+	}
+	
+	public TestElement(Channel channel, SearchedElement searchedElement) {
+		this(channel, 1, p -> true, searchedElement);
 	}
 
 	public TestElement(Channel channel, int maxTry, Predicate<Integer> predicate, SearchedElement searchedElement) {

@@ -474,6 +474,10 @@ public class Channel {
 	// driver actions
 	//----------------------------------------------------------------------------------------------------------
 
+	public TestElement getTestElementRoot() {
+		return engine.getTestElementRoot();
+	}
+	
 	public WebElement getRootElement() {
 		return engine.getRootElement(this);
 	}

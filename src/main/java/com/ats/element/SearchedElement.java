@@ -51,6 +51,11 @@ public class SearchedElement {
 	private byte[] image;
 
 	public SearchedElement() {} // default constructor
+	
+	public SearchedElement(String tag) {
+		this.tag = tag;
+		this.criterias = new ArrayList<CalculatedProperty>();
+	}
 
 	public SearchedElement(Script script, ArrayList<String> elements) {
 
