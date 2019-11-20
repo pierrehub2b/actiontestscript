@@ -83,6 +83,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	private final static String BUTTON = "button";
 
 	private JsonParser parser = new JsonParser();
+	private JsonObject source;
 
 	protected RootElement rootElement;
 	
@@ -195,8 +196,9 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	}
 
 	@Override
-	public void refreshElementMapLocation() {	
-		rootElement.refresh(executeRequest(CAPTURE));
+	public void refreshElementMapLocation() {
+		source = executeRequest(CAPTURE);
+		rootElement.refresh(source);
 	}
 	
 	protected void loadCapturedElement() {
@@ -545,7 +547,8 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 
 	@Override
 	public String getSource() {
-		return "";
+		refreshElementMapLocation();
+		return source.toString();
 	}
 
 	@Override

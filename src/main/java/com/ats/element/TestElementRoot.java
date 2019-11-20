@@ -79,7 +79,7 @@ public class TestElementRoot extends TestElement {
 		case "title":
 			return engine.getTitle();
 		default :
-			return "";
+			return engine.getAttribute(status, getFoundElement(), name, 5);
 		}
 	}
 

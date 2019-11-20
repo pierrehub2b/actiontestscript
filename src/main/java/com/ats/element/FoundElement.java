@@ -75,7 +75,7 @@ public class FoundElement{
 	public FoundElement() {}
 
 	public FoundElement(Channel channel) {
-		RemoteWebElement root = (RemoteWebElement) channel.getRootElement();
+		final RemoteWebElement root = (RemoteWebElement) channel.getRootElement();
 		
 		this.setRemoteWebElement(root);
 		this.width = (double) root.getSize().getWidth(); //channel.getDimension().getWidth();
