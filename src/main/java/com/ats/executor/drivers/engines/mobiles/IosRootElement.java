@@ -181,9 +181,7 @@ public class IosRootElement extends RootElement {
 		if(firstChilds != null && firstChilds.length >= 0) {
 			final AtsMobileElement[] frontElements = firstChilds[0].getChildren();
 			if(frontElements != null && frontElements.length > 1) {
-				// at least 2 elements; so get only the last one
 				final AtsMobileElement child = frontElements[frontElements.length-1];
-				//check consistancy of second element 
 				var containsElements = checkConsistancy(child.getChildren(), false);
 				if(containsElements) {
 					domStructure.getChildren()[0].setChildren(child.getChildren());
@@ -193,7 +191,7 @@ public class IosRootElement extends RootElement {
 				
 			}
 		}
-		
+		domStructure.getChildren()[0].setChildren(fixErrorsInDOM(domStructure.getChildren()[0]));
 		this.value = domStructure;
 	}
 	
@@ -209,6 +207,65 @@ public class IosRootElement extends RootElement {
 		}
 		return val;
 	}
+	
+	public AtsMobileElement[] fixErrorsInDOM(AtsMobileElement domStructure) {
+		var childrens = domStructure.getChildren();
+		for (int i = 0; i < childrens.length; i++) {			
+			if(childrens[i] != null && childrens[i].getChildren().length > 0) {
+				childrens[i].setChildren(fixErrorsInDOM(childrens[i]));
+				if(childrens[i].getChildren().length == 0 && childrens[i].getTag().equalsIgnoreCase("other")) {
+					childrens = removeTheElement(childrens, i); 
+			        i--;
+				}
+			} else {
+				if(childrens[i] != null && childrens[i].getTag().equalsIgnoreCase("other") && childrens[i].getChildren().length == 0) {
+					childrens = removeTheElement(childrens, i); 
+			        i--;
+				}
+			}
+		}
+		if(childrens.length == 0) {
+			return null;
+		}
+		return childrens;
+	}
+	
+	// Function to remove the element 
+    public static AtsMobileElement[] removeTheElement(AtsMobileElement[] arr, 
+                                          int index) 
+    { 
+  
+        // If the array is empty 
+        // or the index is not in array range 
+        // return the original array 
+        if (arr == null
+            || index < 0
+            || index >= arr.length) { 
+  
+            return arr; 
+        } 
+  
+        // Create another array of size one less 
+        AtsMobileElement[] anotherArray = new AtsMobileElement[arr.length - 1]; 
+  
+        // Copy the elements except the index 
+        // from original array to the other array 
+        for (int i = 0, k = 0; i < arr.length; i++) { 
+  
+            // if the index is 
+            // the removal element index 
+            if (i == index) { 
+                continue; 
+            } 
+  
+            // if the index is not 
+            // the removal element index 
+            anotherArray[k++] = arr[i]; 
+        } 
+  
+        // return the resultant array 
+        return anotherArray; 
+    } 
 	
 	public Double getDeviceWidth() {
 		return this.deviceWidth;
