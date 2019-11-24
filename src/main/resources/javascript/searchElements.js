@@ -12,8 +12,8 @@ const eltsLength=elts.length;
 result=[]; 
 
 let addElement=function(e, t, a){
-	const r = e.getBoundingClientRect();
-	result[result.length] = [e, t, e.getAttribute('inputmode')=='numeric',e.getAttribute('type')=='password', r.x+0.0001, r.y+0.0001, r.width+0.0001, r.height+0.0001, r.left+0.0001, r.top+0.0001, screenOffsetX, screenOffsetY, a];
+	let rect = e.getBoundingClientRect();
+	result[result.length] = [e, t, e.getAttribute('inputmode')=='numeric',e.getAttribute('type')=='password', rect.x+0.0001, rect.y+0.0001, rect.width+0.0001, rect.height+0.0001, rect.left+0.0001, rect.top+0.0001, screenOffsetX, screenOffsetY, a];
 };
 
 if(attributesLen == 0){

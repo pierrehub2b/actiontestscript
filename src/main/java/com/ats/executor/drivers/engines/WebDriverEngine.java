@@ -96,13 +96,11 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	// Javascript static code
 	//-----------------------------------------------------------------------------------------------------------------------------
 
-	protected static final String JS_WAIT_READYSTATE = "var interval=setInterval(function(){if(window.document.readyState==='complete'){clearInterval(interval);done();}},200);";
-
 	//protected static final String JS_AUTO_SCROLL = "var e=arguments[0];e.scrollIntoView();var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
 	//protected static final String JS_AUTO_SCROLL_CALC = "var e=arguments[0];var r=e.getBoundingClientRect();var top=r.top + window.pageYOffset;window.scrollTo(0, top-(window.innerHeight / 2));r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
 	//protected static final String JS_AUTO_SCROLL_MOZ = "var e=arguments[0];e.scrollIntoView({behavior:'auto',block:'center',inline:'center'});var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
 
-	protected static final String JS_SCROLL_IF_NEEDED = "var e=arguments[0], result=[];var r=e.getBoundingClientRect();if(r.top < 0 || r.left < 0 || r.bottom > (window.innerHeight || document.documentElement.clientHeight) || r.right > (window.innerWidth || document.documentElement.clientWidth)) {e.scrollIntoView({behavior:'auto',block:'center',inline:'center'});r=e.getBoundingClientRect();result=[r.left+0.0001, r.top+0.0001];}";
+	protected String JS_SCROLL_IF_NEEDED = "var e=arguments[0], result=[];var r=e.getBoundingClientRect();if(r.top < 0 || r.left < 0 || r.bottom > (window.innerHeight || document.documentElement.clientHeight) || r.right > (window.innerWidth || document.documentElement.clientWidth)) {e.scrollIntoView({behavior:'instant',block:'center',inline:'nearest'});r=e.getBoundingClientRect();result=[r.left+0.0001, r.top+0.0001];}";
 
 	protected static final String JS_ELEMENT_SCROLL = "var e=arguments[0];var d=arguments[1];e.scrollTop += d;var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
 	protected static final String JS_WINDOW_SCROLL = "window.scrollBy(0,arguments[0]);var result=[0.0001, 0.0001]";
@@ -130,7 +128,6 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	protected java.net.URI driverSession;
 
 	protected String searchElementScript = JS_SEARCH_ELEMENT;
-	protected String autoScrollElement = JS_SCROLL_IF_NEEDED;//JS_AUTO_SCROLL;
 
 	public WebDriverEngine(
 			Channel channel, 
@@ -306,19 +303,17 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void scroll(FoundElement element, int delta) {
-		ArrayList<Double> newPosition;
 		if(delta == 0) {
-			newPosition =  (ArrayList<Double>) runJavaScript(autoScrollElement, element.getValue());
+			scroll(element);
 		}else {
-			newPosition =  (ArrayList<Double>) runJavaScript(JS_ELEMENT_SCROLL, element.getValue(), delta);
+			final ArrayList<Double> newPosition =  (ArrayList<Double>) runJavaScript(JS_ELEMENT_SCROLL, element.getValue(), delta);
+			updatePosition(newPosition, element);
 		}
-		updatePosition(newPosition, element);
 	}
 
 	@Override
 	public void scroll(FoundElement element) {
-		final ArrayList<Double> newPosition = (ArrayList<Double>) runJavaScript(JS_SCROLL_IF_NEEDED, element.getValue());
-		updatePosition(newPosition, element);
+		updatePosition((ArrayList<Double>) runJavaScript(JS_SCROLL_IF_NEEDED, element.getValue()), element);
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------

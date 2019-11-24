@@ -25,6 +25,8 @@ import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.ats.generator.GeneratorReport;
 import com.ats.generator.events.ScriptProcessedNotifier;
 import com.ats.generator.objects.mouse.Mouse;
@@ -119,12 +121,12 @@ public class Lexer {
 	//---------------------------------------------------------------------------------------------------------------
 
 	public void createAction(ScriptLoader script, String data, boolean disabled){
-
+		
 		final ArrayList<String> dataArray = new ArrayList<String>(Arrays.asList(data.split(ScriptParser.ATS_SEPARATOR)));
-
+				
 		if(dataArray.size() > 0){
 
-			String actionType = dataArray.remove(0).trim().toLowerCase();
+			String actionType = StringUtils.trim(dataArray.remove(0));
 
 			String optionsFlat;
 			ArrayList<String> options;
@@ -132,17 +134,17 @@ public class Lexer {
 
 			Matcher matcher = ACTION_PATTERN.matcher(actionType);
 			if (matcher.find()){
-				actionType = matcher.group(1).trim();
+				actionType = StringUtils.lowerCase(StringUtils.trim(matcher.group(1)));
 				optionsFlat = matcher.group(2).trim();
 				options = new ArrayList<>(Arrays.asList(optionsFlat.split(",")));
-				stopExec = !options.remove(ActionExecute.NO_FAIL_LABEL);
+				stopExec = !options.removeIf(s -> s.equalsIgnoreCase(ActionExecute.NO_FAIL_LABEL));
 			}else {
 				optionsFlat = "";
 				options = new ArrayList<String>();
 				stopExec = true;
 			}
 
-			if(Mouse.OVER.equals(actionType)){
+			if(Mouse.OVER.equals(actionType)){ 
 
 				//-----------------------
 				// Mouse over action
@@ -322,8 +324,8 @@ public class Lexer {
 					// Callscript action
 					//-----------------------
 
-					String[] parameters = null;
-					String[] returnValues = null;
+					String[] parameters = new String[0];
+					String[] returnValues = new String[0];
 					String csvFilePath = null;
 
 					if(dataOne.contains(ScriptParser.ATS_ASSIGN_SEPARATOR)) {

@@ -65,6 +65,7 @@ public class AtsManager {
 	private static final int MAX_TRY_WEBSERVICE = 1;
 
 	private static final int SCROLL_UNIT = 100;
+	private static final int MAX_STALE_ERROR = 100;
 
 	//-----------------------------------------------------------------------------------------------------
 	//-----------------------------------------------------------------------------------------------------
@@ -77,8 +78,6 @@ public class AtsManager {
 
 	private double applicationX = APPLICATION_X;
 	private double applicationY = APPLICATION_Y;
-
-	private int scrollUnit = SCROLL_UNIT;
 
 	private int scriptTimeOut = SCRIPT_TIMEOUT;
 	private int pageloadTimeOut = PAGELOAD_TIMEOUT;
@@ -96,6 +95,14 @@ public class AtsManager {
 	private String neoloadDesignApi;
 
 	private List<ApplicationProperties> applicationsList = new ArrayList<ApplicationProperties>();
+	
+	public static int getScrollUnit() {
+		return SCROLL_UNIT;
+	}
+	
+	public static int getMaxStaleError() {
+		return MAX_STALE_ERROR;
+	}
 
 	public static String getVersion() {
 
@@ -592,10 +599,6 @@ public class AtsManager {
 	
 	public int getMaxTryWebservice() {
 		return maxTryWebservice;
-	}
-
-	public int getScrollUnit() {
-		return scrollUnit;
 	}
 	
 	public String getNeoloadDesignApi() {

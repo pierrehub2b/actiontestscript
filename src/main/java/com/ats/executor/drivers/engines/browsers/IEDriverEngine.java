@@ -29,6 +29,7 @@ import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
 import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.WebDriverEngine;
@@ -37,7 +38,9 @@ import com.ats.generator.objects.MouseDirection;
 public class IEDriverEngine extends WebDriverEngine {
 
 	public IEDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
-		super(channel, "ie", driverProcess, windowsDriver, props);
+		super(channel, DriverManager.IE_BROWSER, driverProcess, windowsDriver, props);
+
+		JS_SCROLL_IF_NEEDED = "var e=arguments[0], bo=arguments[1], result=[];var r=e.getBoundingClientRect();if(r.top < 0 || r.left < 0 || r.bottom > (window.innerHeight || document.documentElement.clientHeight) || r.right > (window.innerWidth || document.documentElement.clientWidth)) {e.scrollIntoView(false);r=e.getBoundingClientRect();result=[r.left+0.0001, r.top+0.0001];}";
 
 		final InternetExplorerOptions ieOptions = new InternetExplorerOptions();
 		ieOptions.introduceFlakinessByIgnoringSecurityDomains();
@@ -54,7 +57,18 @@ public class IEDriverEngine extends WebDriverEngine {
 
 	@Override
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {
-		desktopMoveToElement(foundElement, position, (int)(foundElement.getWidth()/2), (int)(foundElement.getHeight()/2) - 8);
+		if(!foundElement.isIframe()) {
+			channel.toFront();
+			super.mouseMoveToElement(status, foundElement, position, false, offsetX, offsetY);
+			desktopMoveToElement(foundElement, position, (int)(foundElement.getWidth()/2), (int)(foundElement.getHeight()/2) - 8);
+		}
+	}
+	
+	@Override
+	public void scroll(FoundElement element) {
+		try {
+			super.scroll(element);
+		}catch(Exception e) {}
 	}
 
 	@Override
@@ -75,16 +89,6 @@ public class IEDriverEngine extends WebDriverEngine {
 	@Override
 	public void doubleClick() {
 		getDesktopDriver().doubleClick();
-	}
-
-	@Override
-	protected void click(FoundElement element, int offsetX, int offsetY) {
-		getDesktopDriver().mouseClick();
-	}
-
-	@Override
-	public void rightClick() {
-		getDesktopDriver().mouseRightClick();
 	}
 
 	@Override

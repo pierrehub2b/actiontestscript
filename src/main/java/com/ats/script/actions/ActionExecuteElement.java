@@ -26,6 +26,7 @@ import java.util.function.Predicate;
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.StaleElementReferenceException;
 
+import com.ats.driver.AtsManager;
 import com.ats.element.SearchedElement;
 import com.ats.element.TestElement;
 import com.ats.element.TestElementDialog;
@@ -44,7 +45,7 @@ import com.ats.tools.logger.MessageCode;
 public class ActionExecuteElement extends ActionExecute {
 
 	private static final String TRY_LABEL = "try";
-	
+
 	private int maxTry = 0;
 	private SearchedElement searchElement;
 	private TestElement testElement;
@@ -65,7 +66,7 @@ public class ActionExecuteElement extends ActionExecute {
 		Iterator<String> itr = options.iterator();
 		while (itr.hasNext())
 		{
-			final String opt = itr.next();
+			final String opt = itr.next().toLowerCase();
 			if(opt.contains(TRY_LABEL)) {
 				setMaxTry(Utils.string2Int(StringUtils.replaceEach(opt, new String[]{TRY_LABEL, "=", "(", ")"}, new String[] {"", "", "", ""}).trim()));
 				itr.remove();
@@ -124,7 +125,7 @@ public class ActionExecuteElement extends ActionExecute {
 
 				int trySearch = 0;
 				int searchMaxTry = actionMaxTry;
-				
+
 				final Predicate<Integer> predicate = getPredicate(operator, value);
 
 				if(searchElement.isDialog()) {
@@ -140,7 +141,7 @@ public class ActionExecuteElement extends ActionExecute {
 							channel.progressiveWait(trySearch);
 						}
 					}
-					
+
 				}else if(searchElement.isSysButton()) {	
 					setTestElement(new TestElementSystemButton(channel, searchElement));
 				}else {
@@ -210,14 +211,21 @@ public class ActionExecuteElement extends ActionExecute {
 		return p -> p == value;
 	}
 
+	private int maxExecution = 0;
 	@Override
 	public void execute(ActionTestScript ts) {
 		try {
 			execute(ts, Operators.GREATER, 0);
+			maxExecution = 0;
 		}catch (StaleElementReferenceException e) {
-			ts.getCurrentChannel().sleep(300);
-			setTestElement(null);
-			execute(ts);
+			if(maxExecution < AtsManager.getMaxStaleError()) {
+				maxExecution++;
+				ts.getCurrentChannel().sleep(200);
+				setTestElement(null);
+				execute(ts);
+			}else {
+				throw e;
+			}
 		}
 	}
 

@@ -22,6 +22,7 @@ package com.ats.generator.variables.transform;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 
+import org.apache.commons.lang3.StringUtils;
 import org.mariuszgromada.math.mxparser.Expression;
 
 import com.ats.executor.ActionTestScript;
@@ -61,17 +62,16 @@ public class NumericTransformer extends Transformer {
 	@Override
 	public String format(String data) {
 
+		formatter.setGroupingSize(0);
+		data = StringUtils.replace(data, " ", "");
+	
 		if(decimal > -1) {
 			data = "round(" + data + "," + decimal + ")";
 			formatter.setMinimumFractionDigits(decimal);
 		}else {
 			formatter.setMaximumFractionDigits( 12 );
 		}
-
-		Expression e = new Expression(data);
-		Double result = e.calculate();
-
-		return formatter.format(result);
+		return formatter.format(new Expression(data).calculate());
 	}
 
 	//--------------------------------------------------------

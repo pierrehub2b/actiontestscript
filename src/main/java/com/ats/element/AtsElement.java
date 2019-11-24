@@ -57,15 +57,22 @@ public class AtsElement extends AtsBaseElement {
 		this.tag = data.get(1).toString();
 		this.numeric = (boolean) data.get(2);
 		this.password = (boolean) data.get(3);
-		this.boundX = (Double) data.get(4);
-		this.boundY = (Double) data.get(5);
-		this.width = (Double) data.get(6);
-		this.height = (Double) data.get(7);
-		this.x = (Double) data.get(8);
-		this.y = (Double) data.get(9);
-		this.screenX = (Double) data.get(10);
-		this.screenY = (Double) data.get(11);
+		this.boundX = getDataValue(data.get(4));
+		this.boundY = getDataValue(data.get(5));
+		this.width = getDataValue(data.get(6));
+		this.height = getDataValue(data.get(7));
+		this.x = getDataValue(data.get(8));
+		this.y = getDataValue(data.get(9));
+		this.screenX = getDataValue(data.get(10));
+		this.screenY = getDataValue(data.get(11));
 		this.attributes = (Map<String, String>) data.get(12);
+	}
+	
+	private static Double getDataValue(Object data) {
+		if(data == null) {
+			return 0.0;
+		}
+		return (Double)data;
 	}
 
 	public RemoteWebElement getElement() {

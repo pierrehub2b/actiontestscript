@@ -56,8 +56,6 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 
 	public FirefoxDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
 		super(channel, DriverManager.FIREFOX_BROWSER, driverProcess, windowsDriver, props, DEFAULT_WAIT, DEFAULT_PROPERTY_WAIT);
-
-		this.autoScrollElement = JS_SCROLL_IF_NEEDED;//JS_AUTO_SCROLL_MOZ;
 		
 		FirefoxOptions options = new FirefoxOptions();
 		options.setCapability("acceptSslCerts ", true);

@@ -46,8 +46,7 @@ public class ActionMouseKey extends ActionMouse {
 
 		Iterator<String> itr = options.iterator();
 		while (itr.hasNext()){
-			String key = itr.next().trim();
-			setKey(key);
+			setKey(itr.next().trim().toLowerCase());
 		}
 	}	
 

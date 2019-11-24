@@ -134,15 +134,15 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 
 				applicationPath = exeFile.getAbsolutePath();
 				args.add(0, applicationPath);
-				
+
 				final ProcessBuilder builder = new ProcessBuilder(args.toArray(new String[args.size()]));
 				builder.directory(exeFile.getParentFile()); // this is where you set the root folder for the executable to run with
 				builder.redirectErrorStream(true);
-				
+
 				try{
-					
+
 					final Process applicationProcess = builder.start();
-					
+
 					processId = applicationProcess.pid();
 					status.setPassed(true);
 
@@ -162,7 +162,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 				return;
 			}
 		}
-		
+
 		String appVersion = "N/A";
 		String appBuildVersion = "N/A";
 
@@ -238,12 +238,12 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	public CalculatedProperty[] getCssAttributes(FoundElement element) {
 		return null;
 	}
-	
+
 	@Override
 	public ArrayList<FoundElement> findSelectOptions(TestBound dimension, TestElement element) {
 		return getDesktopDriver().getChildren(dimension, element.getFoundElement().getId(), "ListItem");
 	}
-	
+
 	@Override
 	public void selectOptionsItem(ActionStatus status, TestElement element, CalculatedProperty selectProperty) {
 		getDesktopDriver().selectItem(element.getFoundElement().getId(), selectProperty.getName(), selectProperty.getValue().getCalculated(), selectProperty.isRegexp());
@@ -252,12 +252,12 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	//---------------------------------------------------------------------------------------------------------------------
 	// 
 	//---------------------------------------------------------------------------------------------------------------------
-	
+
 	@Override
 	public FoundElement getElementFromPoint(Boolean syscomp, Double x, Double y){
 		return getDesktopDriver().getElementFromPoint(x, y);
 	}
-	
+
 	@Override
 	public FoundElement getElementFromRect(Boolean syscomp, Double x, Double y, Double w, Double h){
 		return getDesktopDriver().getElementFromRect(x, y, w, h);
@@ -281,7 +281,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public void updateDimensions() {
 		DesktopWindow win = getDesktopDriver().getWindowByHandle(channel.getHandle(desktopDriver));
-		if(win != null){
+		if(win != null && win.getWidth() != 9999.99 && win.getHeight() != 9999.99){
 			channel.setDimensions(new TestBound(
 					win.getX(),
 					win.getY(),
@@ -407,7 +407,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	public String getTitle() {
 		return "";
 	}
-	
+
 	@Override
 	public Object executeScript(ActionStatus status, String script, Object... params) {
 		status.setPassed(true);
@@ -424,12 +424,12 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void scroll(FoundElement element) {}
-	
+
 	@Override
 	public void scroll(int delta) {
 		getDesktopDriver().mouseWheel(delta);
 	}
-	
+
 	@Override
 	public void scroll(FoundElement element, int delta) {
 		getDesktopDriver().mouseWheel(delta);
@@ -467,7 +467,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	public Object executeJavaScript(ActionStatus status, String script, TestElement element) {
 		return getDesktopDriver().executeScript(status, script, element.getFoundElement());
 	}
-	
+
 	@Override
 	public Object executeJavaScript(ActionStatus status, String script, boolean returnValue) {
 		status.setPassed(true);

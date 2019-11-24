@@ -52,7 +52,7 @@ public class ActionChannelStart extends ActionChannel {
 		if(dataArray != null) {
 			options.addAll(dataArray);
 		}
-		options.forEach(o -> parseOptions(o.trim()));
+		options.forEach(o -> parseOptions(o.trim().toLowerCase()));
 	}
 	
 	private void parseOptions(String value){

@@ -48,19 +48,25 @@ public enum Cartesian {
 	}
 
 	public String getData(String value) {
-		if(value.contains(text)) {
+		
+		if(StringUtils.containsIgnoreCase(value, text)) {
 			String data;
-			if(value.contains("=")) {
-				data = StringUtils.replaceEach(value, new String[]{text, "="}, new String[] {"", ""});
+			int found = value.indexOf("=");
+			if(found > -1) {
+				data = value.substring(found+1);
 			}else {
-				data = StringUtils.replaceEach(value, new String[]{text, "(", ")"}, new String[] {"", "", ""});
+				found = value.indexOf("(");
+				if(found > -1) {
+					data = value.substring(found+1).replace(")", "");
+				}else {
+					return null;
+				}
 			}
 			
-			data = data.trim();
-			if(data.length() == 0) {
+			if(StringUtils.isAllBlank(data)) {
 				return "0";
 			}
-			return data;
+			return data.trim();
 		}
 		return null;
 	}

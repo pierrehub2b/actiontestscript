@@ -49,8 +49,7 @@ public class ActionText extends ActionExecuteElement {
 		Iterator<String> itr = options.iterator();
 		while (itr.hasNext())
 		{
-			final String data = itr.next();
-			final Matcher matcher = INSERT_PATTERN.matcher(data);
+			final Matcher matcher = INSERT_PATTERN.matcher(itr.next().toLowerCase());
 			if(matcher.find()){
 				setInsert(Utils.string2Int(matcher.group(1), -1));
 				break;

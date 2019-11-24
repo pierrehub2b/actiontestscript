@@ -61,7 +61,7 @@ public class Channel {
 
 	private ActionTestScript mainScript;
 
-	private int scrollUnit = DriverManager.ATS.getScrollUnit();
+	private int scrollUnit = AtsManager.getScrollUnit();
 	private TestBound dimension = DriverManager.ATS.getApplicationBound();
 	private TestBound subDimension = new TestBound();
 

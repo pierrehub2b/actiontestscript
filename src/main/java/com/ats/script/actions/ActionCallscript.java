@@ -72,7 +72,7 @@ public class ActionCallscript extends Action {
 		this.setName(new CalculatedValue(script, name));
 
 		if(!setCsvFilePathData(csvFilePath)) {
-			if(parameters != null && parameters.length > 0) {
+			if(parameters.length > 0) {
 				final String firstParam = parameters[0].trim();
 				if(!setCsvFilePathData(firstParam)) {
 					final ArrayList<CalculatedValue> paramsValues = new ArrayList<CalculatedValue>();
@@ -92,7 +92,7 @@ public class ActionCallscript extends Action {
 			}
 		}
 
-		if(returnValue != null && returnValue.length > 0 && this.loop == 1){
+		if(returnValue.length > 0 && this.loop == 1){
 			final ArrayList<Variable> variableValues = new ArrayList<Variable>();
 			for (String varName : returnValue ){
 				variableValues.add(script.getVariable(varName.trim(), true));
