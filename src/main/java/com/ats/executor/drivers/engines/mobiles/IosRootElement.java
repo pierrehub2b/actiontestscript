@@ -134,10 +134,16 @@ public class IosRootElement extends RootElement {
 				}
 			}
 			
-			final double currentX = Double.parseDouble(stringArray.get(2)) * ratioWidth;
-			final double currentY = Double.parseDouble(stringArray.get(3)) * ratioHeight; 
-			final double currentWidth = Double.parseDouble(stringArray.get(4)) * ratioWidth;
-			final double currentheight = Double.parseDouble(stringArray.get(5)) * ratioHeight; 
+			var firstSizeIndex = 2;
+			if(structDebugDescription.getContent().contains("pid:")) {
+				firstSizeIndex++;
+			}
+			
+			
+			final double currentX = Double.parseDouble(stringArray.get(firstSizeIndex)) * ratioWidth;
+			final double currentY = Double.parseDouble(stringArray.get(firstSizeIndex+1)) * ratioHeight; 
+			final double currentWidth = Double.parseDouble(stringArray.get(firstSizeIndex+2)) * ratioWidth;
+			final double currentheight = Double.parseDouble(stringArray.get(firstSizeIndex+3)) * ratioHeight; 
 			
 			if(currentX < 0.0 || currentX > height) {
 				continue;
@@ -191,7 +197,7 @@ public class IosRootElement extends RootElement {
 				
 			}
 		}
-		domStructure.getChildren()[0].setChildren(fixErrorsInDOM(domStructure.getChildren()[0]));
+		//domStructure.getChildren()[0].setChildren(fixErrorsInDOM(domStructure.getChildren()[0]));
 		this.value = domStructure;
 	}
 	
