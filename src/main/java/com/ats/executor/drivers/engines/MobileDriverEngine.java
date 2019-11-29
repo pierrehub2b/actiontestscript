@@ -418,7 +418,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public void createVisualAction(Channel channel, String actionType, int scriptLine, long timeline) {
 		getDesktopDriver().sendRequestCommand(CommandType.Record, RecordType.CreateMobile, actionType, scriptLine, timeline,
-				channel.getName(), channel.getDimension().getX().intValue(), channel.getDimension().getY().intValue(), channel.getDimension().getWidth().intValue(), channel.getDimension().getHeight().intValue(),this.channel.getApplicationPath()+"/screenshot");
+				channel.getName(), channel.getSubDimension().getX().intValue(), channel.getSubDimension().getY().intValue(), channel.getSubDimension().getWidth().intValue(), channel.getSubDimension().getHeight().intValue(),this.channel.getApplicationPath()+"/screenshot");
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------------------------------
