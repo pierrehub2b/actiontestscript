@@ -390,7 +390,9 @@ public class DesktopDriver extends RemoteWebDriver {
 		Status(7),
 		Element(8),
 		Position(9),
-		Download(10);
+		Download(10),
+		ImageMobile(11),
+		CreateMobile(12);
 
 		private final int type;
 		RecordType(int value){
@@ -485,8 +487,7 @@ public class DesktopDriver extends RemoteWebDriver {
 	}
 
 	public void refreshElementMapLocation(Channel channel) {
-		new Thread(new LoadMapElement(channel, this)).start(); // asynch response
-		//setElementMapLocation(getWebElementsListByHandle(channel.getDimension(), channel.getHandle(this)));
+		new Thread(new LoadMapElement(channel, this)).start();
 	}
 
 	public void refreshElementMap(Channel channel) {
@@ -527,25 +528,6 @@ public class DesktopDriver extends RemoteWebDriver {
 					hoverElement = elem;
 				}
 			}
-						
-			
-			/*hoverElement = elementMapLocation.get(0);
-			
-			for (FoundElement elem : elementMapLocation) {
-				if(elem != null && elem.isVisible()){
-
-					final Rectangle rect = elem.getRectangle();
-					rect.translate(-1, -1);
-					rect.setSize(rect.width+2, rect.height+2);
-					
-					if(rect.contains(x, y) && (hoverElement.getWidth() > rect.width && hoverElement.getHeight() > rect.height)) {
-						hoverElement = elem;
-					}
-
-					//if (!rect.contains(x, y) || hoverElement.getWidth() <= elem.getWidth() && hoverElement.getHeight() <= elem.getHeight()) continue;
-					//hoverElement = elem;
-				}
-			}*/
 		}
 		return hoverElement;
 	}

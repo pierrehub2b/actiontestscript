@@ -33,6 +33,8 @@ import com.ats.element.TestElement;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.desktop.DesktopDriver;
+import com.ats.executor.drivers.desktop.DesktopDriver.CommandType;
+import com.ats.executor.drivers.desktop.DesktopDriver.RecordType;
 import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.MouseDirection;
@@ -83,6 +85,14 @@ public abstract class DriverEngine {
 		if(propertyWait == -1) {
 			propertyWait = defaultCheck;
 		}
+	}
+	
+	public void getScreenshot(TestBound dimension, boolean isRef) {
+		getDesktopDriver().updateVisualImage(dimension, isRef);
+	}
+	
+	public void createVisualAction(Channel channel, String actionType, int scriptLine, long timeline) {
+		getDesktopDriver().createVisualAction(channel, actionType, scriptLine, timeline);
 	}
 
 	public TestElement getTestElementRoot() {
@@ -202,8 +212,9 @@ public abstract class DriverEngine {
 		
 		channel.toFront();
 		
-		final byte[] screenShot = getDesktopDriver().getScreenshotByte(outterBound.getX(), outterBound.getY(), outterBound.getWidth(), outterBound.getHeight());
+		byte[] screenshot = new byte[0];
+		screenshot = getDesktopDriver().getScreenshotByte(outterBound.getX(), outterBound.getY(), outterBound.getWidth(), outterBound.getHeight());
 
-		return template.findOccurrences(screenShot).parallelStream().map(r -> new FoundElement(channel, parent, r)).collect(Collectors.toCollection(ArrayList::new));
+		return template.findOccurrences(screenshot).parallelStream().map(r -> new FoundElement(channel, parent, r)).collect(Collectors.toCollection(ArrayList::new));
 	}
 }
