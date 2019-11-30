@@ -67,7 +67,6 @@ import com.ats.script.actions.ActionExecute;
 import com.ats.script.actions.ActionExecuteElement;
 import com.ats.tools.Utils;
 import com.ats.tools.logger.ExecutionLogger;
-import com.ats.tools.logger.MessageCode;
 
 import okhttp3.OkHttpClient;
 
@@ -75,8 +74,6 @@ import okhttp3.OkHttpClient;
 public class ActionTestScript extends Script implements ITest{
 
 	public static final String MAIN_TEST_FUNCTION = "testMain";
-	
-	private static final String printLine = "----------------------------------------------------------------------------";
 
 	protected ActionTestScript topScript;
 	private ChannelManager channelManager;
@@ -87,6 +84,10 @@ public class ActionTestScript extends Script implements ITest{
 
 	private String testName;
 	protected ScriptHeader getHeader() {return null;}
+	
+	private String scriptStatus;
+	private long scriptStart;
+	private int scriptActions;
 
 	public ActionTestScript() {
 		init();
@@ -116,9 +117,7 @@ public class ActionTestScript extends Script implements ITest{
 
 	@BeforeSuite(alwaysRun=true)
 	public void beforeSuite() {
-		System.out.println(printLine);
-		System.out.println("-    ATS execution start (version " + AtsManager.getVersion() + ")");
-		System.out.println(printLine);
+		System.out.println("-------------------------[ ATS " + AtsManager.getVersion() + " execution start ]-------------------------\n");
 	}
 
 	@BeforeClass(alwaysRun=true)
@@ -127,7 +126,11 @@ public class ActionTestScript extends Script implements ITest{
 		java.util.logging.Logger.getLogger("org.openqa.selenium").setLevel(Level.OFF);
 		java.util.logging.Logger.getLogger(Actions.class.getName()).setLevel(Level.OFF);
 		java.util.logging.Logger.getLogger(OkHttpClient.class.getName()).setLevel(Level.FINE);
-
+		
+		scriptActions = 0;
+		scriptStart = System.currentTimeMillis();
+		scriptStatus = "passed";
+		
 		final TestRunner runner = (TestRunner) ctx;
 		setTestName(this.getClass().getName());
 
@@ -140,7 +143,7 @@ public class ActionTestScript extends Script implements ITest{
 			final ExecutionLogger mainLogger = new ExecutionLogger(System.out, getEnvironmentValue("ats.log.level", ""));
 			setLogger(mainLogger);
 
-			sendActionLog("Starting script", testName);
+			sendScriptLog("Starting script -> " + testName);
 
 			//-----------------------------------------------------------
 			// check report output specified
@@ -180,7 +183,18 @@ public class ActionTestScript extends Script implements ITest{
 
 	@AfterClass(alwaysRun=true)
 	public void afterClass() {
-		sendActionLog("Script terminated", testName);
+		final StringBuilder status = 
+				new StringBuilder("Script terminated -> {\"name\":\"")
+				.append(testName)
+				.append("\", \"duration\":")
+				.append(System.currentTimeMillis() - scriptStart)
+				.append(", \"status\":\"")
+				.append(scriptStatus)
+				.append("\", \"actions\":")
+				.append(scriptActions)
+				.append("}");
+		
+		sendScriptLog(status.toString());
 	}
 
 	@AfterTest(alwaysRun=true)
@@ -198,6 +212,10 @@ public class ActionTestScript extends Script implements ITest{
 	@Override
 	public String getTestName() {
 		return this.getClass().getName();
+	}
+	
+	public void incrementAction() {
+		scriptActions++;
 	}
 
 	//----------------------------------------------------------------------------------------------------------
@@ -249,7 +267,7 @@ public class ActionTestScript extends Script implements ITest{
 	}
 
 	public void tearDown(){
-		sendInfo("Closing drivers ...");
+		sendScriptLog("Closing drivers ...");
 		getChannelManager().tearDown();
 	}
 
@@ -496,52 +514,53 @@ public class ActionTestScript extends Script implements ITest{
 	// Actions
 	//----------------------------------------------------------------------------------------------------------
 
-	private int atsCodeLine = -1;
-
 	public static final String JAVA_EXECUTE_FUNCTION_NAME = "exec";
 	public void exec(Action action){
 		action.execute(this);
 	}
 
 	public void exec(int line, Action action){
-		atsCodeLine = line;
 		exec(action);
-		execFinished(action.getClass().getSimpleName(), action.getStatus(), true);
+		execFinished(line, action, action.getStatus(), true);
 	}
 
 	public void exec(int line, ActionExecute action){
-		atsCodeLine = line;
 		exec(action);
-		execFinished(action.getClass().getSimpleName(), action.getStatus(), action.isStop());
+		execFinished(line, action, action.getStatus(), action.isStop());
 	}
 
 	public void exec(int line, ActionExecuteElement action){
-		atsCodeLine = line;
 		exec(action);
-		execFinished(action.getClass().getSimpleName(), action.getStatus(), action.isStop());
+		execFinished(line, action, action.getStatus(), action.isStop());
 	}
 
-	private void execFinished(String actionClass, ActionStatus status, boolean stop) {
-		if(!status.isPassed()) {
-			final String atsScriptLine = "(" + getTestName() + "." + ATS_EXTENSION + ":" + atsCodeLine + ")";
+	private void execFinished(int line, Action action, ActionStatus status, boolean stop) {
+
+		getTopScript().incrementAction();
+		
+		if(status.isPassed()) {
+			getTopScript().sendActionLog(action, getTestName(), line);
+		}else {
+
+			final StringBuilder atsScriptLine = new StringBuilder(getTestName()).append(".").append(ATS_EXTENSION).append(":").append(line);
 
 			if(status.getCode() == ActionStatus.CHANNEL_NOT_FOUND) {
-				fail("[ATS-ERROR] No running channel, please check that 'start channel action' has been added to the script " + atsScriptLine);
+				atsScriptLine.insert(0, "[ATS-ERROR] No running channel, please check that 'start channel action' has been added to the script -> ");
+				fail(atsScriptLine.toString());
 			}else {
 				if(stop) {
 
-					final StringBuilder info = new StringBuilder("[ATS-ERROR] ").append(actionClass).append(" -> ")
-							.append(getTestName()).append(" (").append(atsCodeLine).append(")")
-							.append("\n").append(printLine)
-							.append("\n   - Application -> ").append(status.getChannelApplication())
-							.append("\n   - Error -> ").append(status.getErrorType()).append(" [").append(status.getCode()).append("]")
-							.append("\n   - Error message -> ").append(status.getFailMessage())
-							.append("\n").append(printLine);
+					scriptStatus = "failed";
+					
+					atsScriptLine.insert(0, " (").insert(0, action.getClass().getSimpleName()).insert(0, "[ATS-ERROR] ").append(") -> ")
+					.append("{\"app\":\"").append(status.getChannelApplication()).append("\", ")
+					.append("\"errorCode\":").append(status.getCode()).append(", ")
+					.append("\"errorMessage\":\"").append(status.getFailMessage()).append("\"}");
 
-					fail(info.toString());
+					fail(atsScriptLine.toString());
 
 				}else {
-					getTopScript().sendLog(MessageCode.NON_BLOCKING_FAILED, "[ATS-INFO] Not stoppable action failed", status.getMessage() + atsScriptLine);
+					sendInfoLog(atsScriptLine.insert(0, "Unstoppable action (").append(")").toString(), status.getMessage());
 				}
 			}
 		}

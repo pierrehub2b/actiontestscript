@@ -33,8 +33,6 @@ import com.ats.script.ScriptHeader;
 import com.ats.script.actions.Action;
 import com.ats.tools.XmlReport;
 import com.ats.tools.logger.ExecutionLogger;
-import com.ats.tools.logger.IExecutionLogger;
-import com.ats.tools.logger.NullExecutionLogger;
 
 public class VisualRecorder implements IVisualRecorder {
 
@@ -47,11 +45,11 @@ public class VisualRecorder implements IVisualRecorder {
 	
 	private long started;
 	
-	private IExecutionLogger logger;
+	private ExecutionLogger logger;
 
 	public VisualRecorder(ScriptHeader header, ProjectData project, boolean xml, int quality) {
 
-		this.logger = new NullExecutionLogger();
+		this.logger = new ExecutionLogger();
 		
 		Path output = project.getReportFolder().resolve(header.getPackagePath());
 		output.toFile().mkdirs();

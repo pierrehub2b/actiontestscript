@@ -81,7 +81,6 @@ import com.ats.script.actions.ActionSelect;
 import com.ats.script.actions.ActionWindowState;
 import com.ats.tools.ResourceContent;
 import com.ats.tools.Utils;
-import com.ats.tools.logger.MessageCode;
 import com.google.gson.Gson;
 
 @SuppressWarnings("unchecked")
@@ -467,7 +466,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			if(result != null && doubleCheckAttribute(status, result, element, attributeName)) {
 				return result;
 			}
-			channel.sendLog(MessageCode.PROPERTY_NOT_FOUND, "Property not found", tryLoop);
+			channel.sendWarningLog("Property not found", tryLoop + "try");
 			channel.sleep(getPropertyWait());
 			tryLoop--;
 		}
@@ -590,7 +589,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		if(result != null && result instanceof Map){
 			return ((Map<String, Object>)result).entrySet().stream().parallel().filter(e -> !(e.getValue() instanceof Map)).map(e -> new CalculatedProperty(e.getKey(), e.getValue().toString())).toArray(c -> new CalculatedProperty[c]);
 		}
-		return null;
+		return new CalculatedProperty[0];
 	}
 
 	public FoundElement getTestElementParent(FoundElement element){
@@ -1010,7 +1009,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 		final ArrayList<ArrayList<Object>> response = (ArrayList<ArrayList<Object>>) runJavaScript(searchElementScript, startElement, tagName, attributes, attributes.size());
 		if(response != null){
-			final ArrayList<AtsElement> elements = response.parallelStream().map(e -> new AtsElement(e)).collect(Collectors.toCollection(ArrayList::new));
+			final ArrayList<AtsElement> elements = response.parallelStream().filter(Objects::nonNull).map(e -> new AtsElement(e)).collect(Collectors.toCollection(ArrayList::new));
 			return elements.parallelStream().filter(predicate).map(e -> new FoundElement(e, channel, initElementX + offsetIframeX, initElementY + offsetIframeY)).collect(Collectors.toCollection(ArrayList::new));
 		}
 
@@ -1034,13 +1033,20 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public void clearText(ActionStatus status, FoundElement element) {
 		try {
+			element.getValue().clear();
+			status.setMessage("");
+			return;
+		}catch(Exception e) {}
+				
+		try {
 			executeScript(status, "arguments[0].value='';", element.getValue());
 			status.setMessage("");
-		}catch (StaleElementReferenceException e) {
-			status.setPassed(false);
-			status.setCode(ActionStatus.ENTER_TEXT_FAIL);
-			status.setMessage("Cannot clear text on this element");
-		}
+			return;
+		}catch (StaleElementReferenceException e) {}
+		
+		status.setPassed(false);
+		status.setCode(ActionStatus.ENTER_TEXT_FAIL);
+		status.setMessage("Clear text failed on this element");
 	}
 
 	@Override

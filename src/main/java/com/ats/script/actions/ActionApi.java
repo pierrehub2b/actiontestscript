@@ -135,6 +135,19 @@ public class ActionApi extends Action {
 		}
 		status.endDuration();
 	}
+	
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
+		data.append("\"type\":\"")
+		.append(type)
+		.append("\", \"method\":\"")
+		.append(method.getCalculated())
+		.append("\", \"duration\":" + status.getDuration())
+		.append(", \"").append(status.getMessage()).append("\":\"")
+		.append(status.getData()).append("\"");
+
+		return super.getActionLogs(scriptName, scriptLine, data);
+	}
 
 	//--------------------------------------------------------
 	// getters and setters for serialization

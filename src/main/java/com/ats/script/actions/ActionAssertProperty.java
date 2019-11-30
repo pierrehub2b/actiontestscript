@@ -28,13 +28,13 @@ import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
 import com.ats.tools.Utils;
-import com.ats.tools.logger.MessageCode;
 
 public class ActionAssertProperty extends ActionExecuteElement {
 
 	public static final String SCRIPT_LABEL = "check-property";
 
 	private CalculatedProperty value;
+	private String attributeValue;
 
 	public ActionAssertProperty() {}
 
@@ -75,7 +75,7 @@ public class ActionAssertProperty extends ActionExecuteElement {
 			int checkValue = checkProperty(value.getName());
 			
 			while(checkValue < 0 && maxCheckTry > 0) {
-				ts.getCurrentChannel().sendLog(MessageCode.PROPERTY_TRY_ASSERT, "Assert property", maxCheckTry);
+				ts.getCurrentChannel().sendWarningLog("Assert property", maxCheckTry + " try");
 				ts.getCurrentChannel().progressiveWait(getActionMaxTry() - maxCheckTry);
 				
 				checkValue = checkProperty(value.getName());
@@ -91,8 +91,6 @@ public class ActionAssertProperty extends ActionExecuteElement {
 			}
 		}
 	}
-	
-	private String attributeValue;
 	
 	private int checkProperty(String name) {
 		
@@ -134,7 +132,21 @@ public class ActionAssertProperty extends ActionExecuteElement {
 			}
 		}
 	}
-
+	
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
+		
+		data.append("\"status\":\"");
+		if(status.isPassed()) {
+			data.append("passed\"");
+		}else {
+			data.append("failed\"");
+		}
+		data.append(", ");
+		
+		return super.getActionLogs(scriptName, scriptLine, data);
+	}
+	
 	//--------------------------------------------------------
 	// getters and setters for serialization
 	//--------------------------------------------------------

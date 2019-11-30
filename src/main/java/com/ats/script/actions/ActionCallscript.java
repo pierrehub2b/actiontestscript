@@ -197,16 +197,18 @@ public class ActionCallscript extends Action {
 	@Override
 	public void execute(ActionTestScript ts) {
 
+		final String scriptName = name.getCalculated();
+		
 		super.execute(ts.getCurrentChannel());
 
 		//Class<ActionTestScript> clazz = (Class<ActionTestScript>) Class.forName(name.getCalculated()); // old way still working
-		Class<ActionTestScript> clazz = classLoader.findClass(name.getCalculated());
+		Class<ActionTestScript> clazz = classLoader.findClass(scriptName);
 
 		if(clazz == null) {
 
 			status.setPassed(false);
 			status.setCode(MessageCode.SCRIPT_NOT_FOUND);
-			status.setMessage("ATS script not found : '" + name.getCalculated() + "' (maybe a letter case issue ?)\n");
+			status.setMessage("ATS script not found : '" + scriptName + "' (maybe a letter case issue ?)\n");
 
 		}else {
 
@@ -238,7 +240,7 @@ public class ActionCallscript extends Action {
 						final List<String[]> data = Utils.loadCsvData(csvUrl);
 
 						for (String[] param : data) {
-							ts.getTopScript().sendActionLog("Call subscript", name.getCalculated());
+							ts.getTopScript().sendScriptLog("Call subscript -> " + scriptName);
 
 							ats.initCalledScript(ts.getTopScript(), param, null);
 							final Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
@@ -254,7 +256,7 @@ public class ActionCallscript extends Action {
 					ats.initCalledScript(ts.getTopScript(), getCalculatedParameters(), variables);
 					Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
 					for (int i=0; i<loop; i++) {
-						ts.getTopScript().sendActionLog("Call subscript", name.getCalculated());
+						ts.getTopScript().sendScriptLog("Call subscript -> " + scriptName);
 						testMain.invoke(ats);
 					}
 					status.setData(ats.getReturnValues());
@@ -286,6 +288,16 @@ public class ActionCallscript extends Action {
 			return calculatedParameters;
 		}
 		return null;
+	}
+	
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
+		if(csvFilePath != null) {
+			data.append("\"csv\":\"").append(csvFilePath.getCalculated()).append("\"");
+		}else if(parameters != null) {
+			data.append("\"parameters\":").append(parameters.size());
+		}
+		return super.getActionLogs(scriptName, scriptLine, data);
 	}
 
 	//--------------------------------------------------------

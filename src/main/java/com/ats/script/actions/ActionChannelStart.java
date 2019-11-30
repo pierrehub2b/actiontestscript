@@ -52,7 +52,7 @@ public class ActionChannelStart extends ActionChannel {
 		if(dataArray != null) {
 			options.addAll(dataArray);
 		}
-		options.forEach(o -> parseOptions(o.trim().toLowerCase()));
+		options.forEach(o -> parseOptions(o.trim()));
 	}
 	
 	private void parseOptions(String value){
@@ -77,10 +77,17 @@ public class ActionChannelStart extends ActionChannel {
 		setStatus(new ActionStatus(ts.getCurrentChannel()));
 		ts.getChannelManager().startChannel(status, this);
 	}
+		
+	@Override
+	protected StringBuilder getActionLogsData() {
+		return super.getActionLogsData().append(", \"app\":").append(application.getCalculated()).append("\"");
+	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
 	// Code Generator
 	//---------------------------------------------------------------------------------------------------------------------------------
+
+
 
 	@Override
 	public StringBuilder getJavaCode() {

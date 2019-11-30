@@ -71,6 +71,11 @@ public class ActionMouseSwipe extends ActionMouse {
 			ts.getRecorder().updateScreen(0, status.getDuration());
 		}
 	}
+	
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
+		return super.getActionLogs(scriptName, scriptLine, new StringBuilder());
+	}
 
 	//--------------------------------------------------------
 	// getters and setters for serialization

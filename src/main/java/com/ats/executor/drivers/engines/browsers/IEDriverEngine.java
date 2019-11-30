@@ -56,14 +56,10 @@ public class IEDriverEngine extends WebDriverEngine {
 	}
 
 	@Override
-	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {
-		if(!foundElement.isIframe()) {
-			channel.toFront();
-			super.mouseMoveToElement(status, foundElement, position, false, offsetX, offsetY);
-			desktopMoveToElement(foundElement, position, (int)(foundElement.getWidth()/2), (int)(foundElement.getHeight()/2) - 8);
-		}
+	public void toFront() {
+		channel.toFront();
 	}
-	
+
 	@Override
 	public void scroll(FoundElement element) {
 		try {
@@ -73,6 +69,7 @@ public class IEDriverEngine extends WebDriverEngine {
 
 	@Override
 	public void drag(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {
+		desktopMoveToElement(element, position, (int)(element.getWidth()/2), (int)(element.getHeight()/2) - 8);
 		getDesktopDriver().mouseDown();
 	}
 

@@ -68,6 +68,11 @@ public class ActionMouse extends ActionExecuteElement {
 			ts.getRecorder().updateScreen(0, status.getDuration(), getType(), position);
 		}
 	}
+	
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
+		return super.getActionLogs(scriptName, scriptLine, data.append("\"type\":\"").append(type).append("\", "));
+	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
 	// Code Generator

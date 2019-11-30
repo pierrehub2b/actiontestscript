@@ -29,6 +29,7 @@ public class Action {
 	protected Script script;
 	protected int line;
 	protected boolean disabled = false;
+	
 	protected ActionStatus status;
 
 	public Action(){}
@@ -71,6 +72,10 @@ public class Action {
 		}else {
 			setStatus(channel.newActionStatus());
 		}
+	}
+	
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
+		return new StringBuilder(getClass().getSimpleName()).append(" (").append(scriptName).append(":").append(scriptLine).append(") -> {").append(data).append("}");
 	}
 
 	//--------------------------------------------------------

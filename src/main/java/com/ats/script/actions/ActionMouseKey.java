@@ -104,6 +104,15 @@ public class ActionMouseKey extends ActionMouse {
 			ts.getRecorder().updateScreen(0, status.getDuration());
 		}
 	}
+	
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
+		if(key == null) {
+			return super.getActionLogs(scriptName, scriptLine, data);
+		}else {
+			return super.getActionLogs(scriptName, scriptLine, data.append(", \"key\":\"").append(key).append("\""));
+		}
+	}
 
 	//--------------------------------------------------------
 	// getters and setters for serialization

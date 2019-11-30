@@ -262,6 +262,11 @@ public class ActionExecuteElement extends ActionExecute {
 		}
 		testElement = element;
 	}
+	
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
+		return super.getActionLogs(scriptName, scriptLine, data.append("\"duration\":").append(status.getDuration()-status.getSearchDuration()).append(", \"occurrences\":").append(status.getElement().getCount()));
+	}
 
 	//--------------------------------------------------------
 	// getters and setters for serialization

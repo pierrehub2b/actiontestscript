@@ -49,7 +49,7 @@ import com.ats.script.actions.ActionChannelStart;
 import com.ats.script.actions.neoload.ActionNeoload;
 import com.ats.script.actions.neoload.ActionNeoloadStop;
 import com.ats.tools.ResourceContent;
-import com.ats.tools.logger.IExecutionLogger;
+import com.ats.tools.logger.ExecutionLogger;
 
 public class Channel {
 
@@ -318,6 +318,10 @@ public class Channel {
 	public void sendLog(int code, String message, Object value) {
 		mainScript.sendLog(code, message, value);
 	}
+	
+	public void sendWarningLog(String message, String value) {
+		mainScript.sendWarningLog(message, value);
+	}
 
 	//----------------------------------------------------------------------------------------------------------------------
 	// Getter and setter for serialization
@@ -585,7 +589,7 @@ public class Channel {
 		getDesktopDriver().stopVisualRecord();
 	}
 
-	public void saveVisualReportFile(Path path, String fileName, IExecutionLogger logger) {
+	public void saveVisualReportFile(Path path, String fileName, ExecutionLogger logger) {
 		getDesktopDriver().saveVisualReportFile(path.resolve(fileName), logger);
 	}
 

@@ -60,9 +60,15 @@ public class ActionComment extends Action {
 		setComment(value);
 	}
 
+	
 	//---------------------------------------------------------------------------------------------------------------------------------
 	// Code Generator
 	//---------------------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
+		return super.getActionLogs(scriptName, scriptLine, data.append("\"type\":\"").append(type).append("\""));
+	}
 
 	@Override
 	public StringBuilder getJavaCode() {
@@ -89,7 +95,6 @@ public class ActionComment extends Action {
 				ts.getRecorder().update(type, comment.getCalculated());
 			}else if(LOG_TYPE.equals(type)) {
 				status.endDuration();
-				ts.getTopScript().sendActionLog("Comment log", comment.getCalculated());
 			}
 		}
 	}

@@ -200,6 +200,11 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 			return -1;
 		}
 	}
+	
+	@Override
+	public void toFront() {
+		channel.toFront();
+	}
 
 	//---------------------------------------------------------------------------------------------------------------------
 	// 

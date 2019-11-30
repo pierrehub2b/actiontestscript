@@ -136,7 +136,7 @@ public abstract class DriverEngine {
 	public int getOffsetY(Rectangle rect, MouseDirection position) {
 		return getCartesianOffset(rect.height, position.getVerticalPos(), Cartesian.TOP, Cartesian.MIDDLE, Cartesian.BOTTOM);
 	}
-	
+		
 	public String setWindowBound(BoundData x, BoundData y, BoundData w, BoundData h) {
 
 		int newX = 0;
@@ -190,6 +190,7 @@ public abstract class DriverEngine {
 
 	abstract protected void setPosition(Point pt);
 	abstract protected void setSize(Dimension dim);
+	public void toFront() {};
 	
 	public ArrayList<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template) {
 

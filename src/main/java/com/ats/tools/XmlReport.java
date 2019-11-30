@@ -24,21 +24,21 @@ import org.w3c.dom.Element;
 import com.ats.recorder.VisualAction;
 import com.ats.recorder.VisualImage;
 import com.ats.recorder.VisualReport;
-import com.ats.tools.logger.IExecutionLogger;
+import com.ats.tools.logger.ExecutionLogger;
 import com.exadel.flamingo.flex.messaging.amf.io.AMF3Deserializer;
 
 public class XmlReport {
 
 	public static String REPORT_FILE = "actions.xml";
 	
-	public static void createReport(Path output, String qualifiedName, IExecutionLogger logger) {
+	public static void createReport(Path output, String qualifiedName, ExecutionLogger logger) {
 
 		final File atsvFile = output.resolve(qualifiedName + ".atsv").toFile();
 
 		if(atsvFile.exists()) {
 
 			final File xmlFolder = output.resolve(qualifiedName + "_xml").toFile();
-			logger.sendInfo("Create XML report -> ", xmlFolder.getAbsolutePath());
+			logger.sendInfo("Create XML report", xmlFolder.getAbsolutePath());
 
 			final ArrayList<VisualImage> imagesList = new ArrayList<VisualImage>();
 			final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();

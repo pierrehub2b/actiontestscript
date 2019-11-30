@@ -67,6 +67,11 @@ public class ActionGotoUrl extends ActionExecute {
 		status.endDuration();
 		ts.getRecorder().updateScreen(0, status.getDuration(), urlString);
 	}
+	
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
+		return super.getActionLogs(scriptName, scriptLine, new StringBuilder("\"url\":\"").append(url.getCalculated()).append("\", \"duration\":").append(status.getDuration()));
+	}
 
 	//--------------------------------------------------------
 	// getters and setters for serialization

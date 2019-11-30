@@ -49,7 +49,7 @@ import com.ats.executor.drivers.engines.desktop.DesktopDriverEngine;
 import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.ScriptHeader;
-import com.ats.tools.logger.IExecutionLogger;
+import com.ats.tools.logger.ExecutionLogger;
 import com.exadel.flamingo.flex.messaging.amf.io.AMF3Deserializer;
 import com.google.gson.Gson;
 
@@ -849,7 +849,7 @@ public class DesktopDriver extends RemoteWebDriver {
 		}
 	}
 
-	public void saveVisualReportFile(Path path, IExecutionLogger logger) {
+	public void saveVisualReportFile(Path path, ExecutionLogger logger) {
 
 		final String url = new StringBuilder(driverUrl)
 				.append("/")
@@ -878,7 +878,7 @@ public class DesktopDriver extends RemoteWebDriver {
 				bis.close();
 				bos.close();
 				
-				logger.sendInfo("Save ATSV file -> ", path.toString());
+				logger.sendInfo("Save ATSV file", path.toString());
 								
 			}else {
 				logger.sendError("Unable to save ATSV file -> ", resp.message());

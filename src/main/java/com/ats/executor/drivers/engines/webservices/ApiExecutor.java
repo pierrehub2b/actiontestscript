@@ -148,9 +148,14 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 		type = TEXT_TYPE;
 		lastAction = action;
 
+		status.setMessage("authentication");
+		
 		headerProperties = new HashMap<String, String>();
-		if(authentication != null && authenticationValue != null) {
+		if(authentication != null && authenticationValue != null && authentication.length() > 0 && authenticationValue.length() > 0) {
 			headerProperties.put("Authorization", authentication + " " + authenticationValue);
+			status.setData(authentication);
+		}else {
+			status.setData("");
 		}
 
 		for (CalculatedProperty property : action.getHeader()) {

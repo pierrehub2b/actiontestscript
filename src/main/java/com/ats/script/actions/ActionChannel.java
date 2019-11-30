@@ -39,6 +39,15 @@ public class ActionChannel extends Action{
 	public void execute(ActionTestScript ts) {
 		super.execute(ts);
 	}
+	
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
+		return super.getActionLogs(scriptName, scriptLine, getActionLogsData());
+	}
+	
+	protected StringBuilder getActionLogsData() {
+		return new StringBuilder("\"name\":\"").append(name).append("\"");
+	}
 
 	//--------------------------------------------------------
 	// getters and setters for serialization

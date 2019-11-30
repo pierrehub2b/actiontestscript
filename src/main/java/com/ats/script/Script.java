@@ -39,6 +39,7 @@ import com.ats.generator.variables.Variable;
 import com.ats.generator.variables.transform.DateTransformer;
 import com.ats.generator.variables.transform.TimeTransformer;
 import com.ats.generator.variables.transform.Transformer;
+import com.ats.script.actions.Action;
 import com.ats.tools.logger.ExecutionLogger;
 
 public class Script {
@@ -79,6 +80,8 @@ public class Script {
 		this.projectAtsFolder = projectAtsFolder;
 	}
 	
+	//-------------------------------------------------------------------------------------
+	
 	public void sendLog(int code, String message) {
 		logger.sendLog(code, message, "");
 	}
@@ -91,13 +94,23 @@ public class Script {
 		logger.sendLog(code, message, value);
 	}
 	
-	public void sendInfo(String message) {
-		logger.sendInfo(message, ""); 
+	public void sendInfoLog(String message, String value) {
+		logger.sendInfo(message, value); 
 	}
 	
-	public void sendActionLog(String actionType, String value) {
-		logger.sendInfo(actionType, " -> " + value); 
+	public void sendActionLog(Action action, String testName, int line) {
+		logger.sendAction(action, testName, line); 
 	}
+	
+	public void sendScriptLog(String value) {
+		logger.sendScript(value); 
+	}
+	
+	public void sendWarningLog(String message, String value) {
+		logger.sendWarning(message, value); 
+	}
+	
+	//---------------------------------------------------------------------------------------------------
 	
 	public void setLogger(ExecutionLogger logger) {
 		this.logger = logger;

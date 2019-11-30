@@ -21,9 +21,17 @@ package com.ats.tools.logger;
 
 import java.io.PrintStream;
 
-public class ExecutionLogger implements IExecutionLogger {
+import com.ats.tools.logger.levels.LevelLoggerBase;
+import com.ats.script.actions.Action;
+import com.ats.tools.logger.levels.ErrorLevelLogger;
+import com.ats.tools.logger.levels.FullLevelLogger;
+import com.ats.tools.logger.levels.InfoLevelLogger;
+import com.ats.tools.logger.levels.WarningLevelLogger;
+
+public class ExecutionLogger {
 
 	private final static String ERROR_LEVEL = "error";
+	private final static String ALL_LEVEL = "all";
 	private final static String WARNING_LEVEL = "warning";
 	private final static String INFO_LEVEL = "info";
 	
@@ -33,71 +41,54 @@ public class ExecutionLogger implements IExecutionLogger {
 	public static final String ANSI_YELLOW = "\u001B[33m";
 	public static final String ANSI_BLUE = "\u001B[34m";
 
-	private PrintStream printOut;
-
-	private int level = 0;
+	private LevelLoggerBase levelLogger;
 
 	public ExecutionLogger() {
-		this.printOut = new NullPrintStream();
+		levelLogger = new LevelLoggerBase();
 	}
 
 	public ExecutionLogger(PrintStream sysout, String verbose) {
 
 		if(ERROR_LEVEL.equalsIgnoreCase(verbose)) {
-			level = 1;
+			levelLogger = new ErrorLevelLogger(sysout, "Error");
 		}else if(INFO_LEVEL.equalsIgnoreCase(verbose)) {
-			level = 2;
+			levelLogger = new InfoLevelLogger(sysout, "Error + Info");
 		}else if(WARNING_LEVEL.equalsIgnoreCase(verbose)) {
-			level = 3;
-		}		
-
-		if(level > 0) {
-			this.printOut = sysout;
-			sysout.println("[ATS-INFO] log level -> " + verbose);
+			levelLogger = new WarningLevelLogger(sysout, "Error + Info + Warning");
+		}else if(ALL_LEVEL.equalsIgnoreCase(verbose)) {
+			levelLogger = new FullLevelLogger(sysout, "Error + Info + Warning + Details");
 		}else {
-			this.printOut = new NullPrintStream();
-			sysout.println("[ATS-INFO] log disabled");
+			levelLogger = new LevelLoggerBase(sysout, "Disabled");
 		}
 	}
 
 	public void sendLog(int code, String message, Object value) {
-
-		String data = value.toString();
-		if(data.length() > 0) {
-			data = " -> " + data;
-		}
-
 		if(code < 100 ) {
-			sendInfo(message, data);
+			sendInfo(message, value.toString());
 		}else if (code < 399){
-			sendWarning(message, data);
+			sendWarning(message, value.toString());
 		}else {
-			sendError(message, data);
+			sendError(message, value.toString());
 		}
 	}
 	
-	@Override
+	public void sendScript(String message) {
+		levelLogger.log("SCRIPT", message);
+	}
+	
+	public void sendAction(Action action, String testName, int line) {
+		levelLogger.action(action, testName, line);
+	}
+	
 	public void sendWarning(String message, String value) {
-		if(level >= 3) {
-			print("WARNING", message + value);
-		}
+		levelLogger.warning(message + " -> " + value);
 	}
 
-	@Override
 	public void sendInfo(String message, String value) {
-		if(level >= 2) {
-			print("INFO", message + value);
-		}
+		levelLogger.info(message + " -> " + value);
 	}
 
-	@Override
 	public void sendError(String message, String value) {
-		if(level >= 1) {
-			print("ERROR",  message + value);
-		}
-	}
-
-	private void print(String type, String data) {
-		printOut.println("[ATS-" + type + "] " + data);
+		levelLogger.error(message + " -> " + value);
 	}
 }

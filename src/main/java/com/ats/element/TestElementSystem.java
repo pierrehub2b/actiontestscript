@@ -23,6 +23,7 @@ import java.util.function.Predicate;
 
 import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.engines.IDriverEngine;
 import com.ats.generator.objects.MouseDirection;
 
 public class TestElementSystem extends TestElement {
@@ -37,7 +38,7 @@ public class TestElementSystem extends TestElement {
 			this.parent = new TestElementSystem(channel, maxTry, predicate, searchElement.getParent());
 		}
 
-		this.engine = channel.getDesktopDriverEngine();
+		setEngine(channel.getDesktopDriverEngine());
 		startSearch(true, searchElement);
 	}
 

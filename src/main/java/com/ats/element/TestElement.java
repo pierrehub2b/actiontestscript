@@ -106,8 +106,13 @@ public class TestElement{
 			this.parent = new TestElement(channel, maxTry, predicate, searchedElement.getParent());
 		}
 
-		this.engine = channel.getDriverEngine();
+		setEngine(channel.getDriverEngine());
 		startSearch(false, searchedElement);
+	}
+	
+	protected void setEngine(IDriverEngine engine) {
+		this.engine = engine;
+		engine.toFront();
 	}
 
 	public void dispose() {
@@ -143,7 +148,7 @@ public class TestElement{
 		this.sysComp = sysComp;
 
 		if(channel != null){
-
+			
 			searchedTag = searchedElement.getTag();
 			criterias = searchedTag;
 

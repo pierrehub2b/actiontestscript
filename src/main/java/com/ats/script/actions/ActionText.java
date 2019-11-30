@@ -84,6 +84,11 @@ public class ActionText extends ActionExecuteElement {
 			getTestElement().enterText(status, text, ts.getRecorder());
 		}
 	}
+	
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
+		return super.getActionLogs(scriptName, scriptLine, data.append("\"text\":\"").append(text.getCalculated().replaceAll("\"", "\\\"")).append("\", "));
+	}
 
 	//--------------------------------------------------------
 	// getters and setters for serialization

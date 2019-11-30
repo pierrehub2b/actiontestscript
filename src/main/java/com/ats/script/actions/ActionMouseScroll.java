@@ -70,6 +70,12 @@ public class ActionMouseScroll extends ActionMouse {
 			ts.getRecorder().updateScreen(0, status.getDuration(), value + "");
 		}
 	}
+	
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
+		return super.getActionLogs(scriptName, scriptLine, new StringBuilder("\"value\":").append(value));
+	}
+
 
 	//--------------------------------------------------------
 	// getters and setters for serialization

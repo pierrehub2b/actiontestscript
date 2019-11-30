@@ -56,4 +56,9 @@ public class ActionMouseDragDrop extends ActionMouse {
 			status.updateDuration(System.currentTimeMillis());
 		}
 	}
+	
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
+		return super.getActionLogs(scriptName, scriptLine, new StringBuilder());
+	}
 }
