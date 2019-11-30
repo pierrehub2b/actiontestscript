@@ -182,10 +182,6 @@ public class Channel {
 		actionTerminated(status);
 	}
 
-	public byte[] getScreenShot(){
-		return screenShot(dimension);
-	}
-
 	public String getSource(){
 		return engine.getSource();
 	}
@@ -200,6 +196,10 @@ public class Channel {
 	private byte[] screenShot(TestBound dim) {
 		mainScript.sleep(50);
 		return getDesktopDriver().getScreenshotByte(dim.getX(), dim.getY(), dim.getWidth(), dim.getHeight());
+	}
+	
+	public byte[] getScreenShot(){
+		return screenShot(dimension);
 	}
 
 	public void setApplicationData(String os, String version, String dVersion, long pid) {
@@ -361,6 +361,7 @@ public class Channel {
 	public boolean isMobile() {
 		return engine instanceof MobileDriverEngine;
 	}
+	
 	public void setMobile(boolean value) {} // read only
 
 	public String getName() {
@@ -594,11 +595,11 @@ public class Channel {
 	}
 
 	public void createVisualAction(String actionName, int scriptLine, long timeline) {
-		getDesktopDriver().createVisualAction(this, actionName, scriptLine, timeline);
+		this.engine.createVisualAction(this, actionName, scriptLine, timeline);
 	}
 
 	public void updateVisualAction(boolean isRef) {
-		getDesktopDriver().updateVisualImage(dimension, isRef);
+		this.engine.getScreenshot(this.dimension, isRef);
 	}
 
 	public void updateVisualAction(String value) {

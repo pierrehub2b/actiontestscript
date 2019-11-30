@@ -76,6 +76,8 @@ public interface IDriverEngine{
 
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList);
 	public void clearText(ActionStatus status, FoundElement foundElement);
+	public void getScreenshot(TestBound dimension, boolean isRef);
+	public void createVisualAction(Channel channel, String actionType, int scriptLine, long timeline);
 	public String setWindowBound(BoundData x, BoundData y, BoundData width, BoundData height);
 	
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY);

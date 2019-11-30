@@ -47,6 +47,8 @@ import com.ats.executor.SendKeyData;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.desktop.DesktopDriver;
+import com.ats.executor.drivers.desktop.DesktopDriver.CommandType;
+import com.ats.executor.drivers.desktop.DesktopDriver.RecordType;
 import com.ats.executor.drivers.engines.mobiles.AndroidRootElement;
 import com.ats.executor.drivers.engines.mobiles.IosRootElement;
 import com.ats.executor.drivers.engines.mobiles.RootElement;
@@ -68,7 +70,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
+public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 	private final static String DRIVER = "driver";
 	private final static String APP = "app";
@@ -406,6 +408,17 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine{
 	@Override
 	public void clearText(ActionStatus status, FoundElement element) {
 		executeRequest(ELEMENT, element.getId(), INPUT, SendKeyData.EMPTY_DATA);
+	}
+	
+	@Override
+	public void getScreenshot(TestBound dimension, boolean isRef) {
+		getDesktopDriver().sendRequestCommand(CommandType.Record, RecordType.ImageMobile, this.channel.getApplicationPath()+"/screenshot", isRef); 
+	}
+	
+	@Override
+	public void createVisualAction(Channel channel, String actionType, int scriptLine, long timeline) {
+		getDesktopDriver().sendRequestCommand(CommandType.Record, RecordType.CreateMobile, actionType, scriptLine, timeline,
+				channel.getName(), channel.getSubDimension().getX().intValue(), channel.getSubDimension().getY().intValue(), channel.getSubDimension().getWidth().intValue(), channel.getSubDimension().getHeight().intValue(),this.channel.getApplicationPath()+"/screenshot");
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------------------------------
