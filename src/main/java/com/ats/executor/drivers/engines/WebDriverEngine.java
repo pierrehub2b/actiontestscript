@@ -55,6 +55,7 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.RemoteWebElement;
+import org.openqa.selenium.support.ui.Select;
 
 import com.ats.driver.ApplicationProperties;
 import com.ats.driver.AtsManager;
@@ -75,6 +76,7 @@ import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
+import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.actions.ActionApi;
 import com.ats.script.actions.ActionGotoUrl;
 import com.ats.script.actions.ActionSelect;
@@ -484,11 +486,18 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		final ArrayList<FoundElement> items = findSelectOptions(null, element);
 
 		if(items != null && items.size() > 0) {
+			
+			element.click(status, new MouseDirection());
+			
 			if(ActionSelect.SELECT_INDEX.equals(selectProperty.getName())){
 
 				final int index = Utils.string2Int(selectProperty.getValue().getCalculated());
 				if(items.size() > index) {
+					try {
 					items.get(index).getValue().click();
+					}catch (Exception e) {
+						new Select(items.get(index).getValue()).selectByIndex(index);
+					}
 				}else {
 					status.setPassed(false);
 					status.setCode(ActionStatus.OBJECT_NOT_INTERACTABLE);
@@ -515,6 +524,8 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 					status.setMessage("Option not found : " + searchedValue);
 				}
 			}
+			
+			element.click(status, new MouseDirection(new MouseDirectionData(Cartesian.LEFT, new CalculatedValue(-5)), null));
 		}
 	}
 
@@ -1008,7 +1019,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		}
 
 		final ArrayList<ArrayList<Object>> response = (ArrayList<ArrayList<Object>>) runJavaScript(searchElementScript, startElement, tagName, attributes, attributes.size());
-		if(response != null){
+		if(response != null && response.size() > 0){
 			final ArrayList<AtsElement> elements = response.parallelStream().filter(Objects::nonNull).map(e -> new AtsElement(e)).collect(Collectors.toCollection(ArrayList::new));
 			return elements.parallelStream().filter(predicate).map(e -> new FoundElement(e, channel, initElementX + offsetIframeX, initElementY + offsetIframeY)).collect(Collectors.toCollection(ArrayList::new));
 		}
@@ -1032,17 +1043,18 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void clearText(ActionStatus status, FoundElement element) {
-		try {
-			element.getValue().clear();
-			status.setMessage("");
-			return;
-		}catch(Exception e) {}
 				
 		try {
 			executeScript(status, "arguments[0].value='';", element.getValue());
 			status.setMessage("");
 			return;
 		}catch (StaleElementReferenceException e) {}
+		
+		try {
+			element.getValue().clear();
+			status.setMessage("");
+			return;
+		}catch(Exception e) {}
 		
 		status.setPassed(false);
 		status.setCode(ActionStatus.ENTER_TEXT_FAIL);

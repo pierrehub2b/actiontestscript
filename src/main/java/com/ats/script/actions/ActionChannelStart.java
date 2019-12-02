@@ -32,7 +32,6 @@ import com.ats.script.actions.neoload.ActionNeoload;
 public class ActionChannelStart extends ActionChannel {
 
 	public static final String SCRIPT_START_LABEL = SCRIPT_LABEL + "start";
-	
 	public static final String BASIC_AUTHENTICATION = "Basic";
 
 	private CalculatedValue application;
@@ -87,19 +86,17 @@ public class ActionChannelStart extends ActionChannel {
 	// Code Generator
 	//---------------------------------------------------------------------------------------------------------------------------------
 
-
-
 	@Override
 	public StringBuilder getJavaCode() {
 		
-		StringBuilder codeBuilder = super.getJavaCode();
+		final StringBuilder codeBuilder = super.getJavaCode();
 		codeBuilder.append("\"")
 		.append(getName())
 		.append("\", ")
 		.append(application.getJavaCode())
 		.append(", ");
 				
-		StringJoiner optionsJoiner = new StringJoiner(", ", "\"", "\"");
+		final StringJoiner optionsJoiner = new StringJoiner(", ", "\"", "\"");
 		if(neoload) {
 			optionsJoiner.add(ActionNeoload.SCRIPT_NEOLOAD_LABEL);
 		}

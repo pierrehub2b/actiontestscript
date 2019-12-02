@@ -134,7 +134,7 @@ public class IosRootElement extends RootElement {
 				}
 			}
 			
-			var firstSizeIndex = 2;
+			int firstSizeIndex = 2;
 			if(structDebugDescription.getContent().contains("pid:")) {
 				firstSizeIndex++;
 			}
@@ -187,8 +187,10 @@ public class IosRootElement extends RootElement {
 		if(firstChilds != null && firstChilds.length >= 0) {
 			final AtsMobileElement[] frontElements = firstChilds[0].getChildren();
 			if(frontElements != null && frontElements.length > 1) {
+				
 				final AtsMobileElement child = frontElements[frontElements.length-1];
-				var containsElements = checkConsistancy(child.getChildren(), false);
+				final boolean containsElements = checkConsistancy(child.getChildren(), false);
+				
 				if(containsElements) {
 					domStructure.getChildren()[0].setChildren(child.getChildren());
 				} else {
@@ -201,7 +203,7 @@ public class IosRootElement extends RootElement {
 		this.value = domStructure;
 	}
 	
-	public Boolean checkConsistancy(AtsMobileElement[] child, Boolean val) {
+	public boolean checkConsistancy(AtsMobileElement[] child, boolean val) {
 		for (int i = 0; i < child.length; i++) {
 			if(child[i] != null && child[i].getChildren().length > 0) {
 				val = checkConsistancy(child[i].getChildren(), val);
@@ -215,7 +217,9 @@ public class IosRootElement extends RootElement {
 	}
 	
 	public AtsMobileElement[] fixErrorsInDOM(AtsMobileElement domStructure) {
-		var childrens = domStructure.getChildren();
+		
+		AtsMobileElement[] childrens = domStructure.getChildren();
+		
 		for (int i = 0; i < childrens.length; i++) {			
 			if(childrens[i] != null && childrens[i].getChildren().length > 0) {
 				childrens[i].setChildren(fixErrorsInDOM(childrens[i]));
@@ -230,6 +234,7 @@ public class IosRootElement extends RootElement {
 				}
 			}
 		}
+		
 		if(childrens.length == 0) {
 			return null;
 		}

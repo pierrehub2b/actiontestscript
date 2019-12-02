@@ -1,4 +1,4 @@
-let parent=arguments[0];
+var parent=arguments[0], result=[];
 const tagName=arguments[1], attributes=arguments[2], attributesLen=arguments[3];	
 const screenOffsetX=(window.outerWidth-window.innerWidth)/2+window.screenX+0.0001, screenOffsetY=window.outerHeight-window.innerHeight+window.screenY+0.0001;
 
@@ -9,31 +9,26 @@ if(parent == null){
 const elts=parent.getElementsByTagName(tagName);
 const eltsLength=elts.length;
 
-result=[]; 
-
-let addElement=function(e, t, a){
-	let rect = e.getBoundingClientRect();
+var addElement=function(e, t, a){
+	var rect = e.getBoundingClientRect();
 	result[result.length] = [e, t, e.getAttribute('inputmode')=='numeric',e.getAttribute('type')=='password', rect.x+0.0001, rect.y+0.0001, rect.width+0.0001, rect.height+0.0001, rect.left+0.0001, rect.top+0.0001, screenOffsetX, screenOffsetY, a];
 };
 
 if(attributesLen == 0){
 
 	for(let h = 0; h < eltsLength; h++){
-		let e = elts[h];
+		var e = elts[h];
 		addElement(e, e.tagName, {});
 	}
 
 }else{
 
-	let loop=function (e){
+	let loop=function (e, i, arr){
 
-		let a={}, j=0;
+		let a={};
 		const t=e.tagName;
-
-		while(j < attributesLen){
-
-			const attributeName = attributes[j];
-
+		
+		attributes.forEach(function (attributeName) {
 			if(attributeName == 'text'){
 				if(e.textContent){
 					a['text'] = e.textContent.replace(/\xA0/g,' ').trim();
@@ -49,7 +44,7 @@ if(attributesLen == 0){
 					if(e.hasAttribute(attributeName)){
 						a[attributeName] = e.getAttribute(attributeName);
 					}else{
-						let prop = e[attributeName];
+						var prop = e[attributeName];
 						if(prop != null && prop != 'function'){
 							a[attributeName] = prop.toString();
 						}else{
@@ -58,15 +53,12 @@ if(attributesLen == 0){
 					}
 				}
 			}
-			j++;
-		}
+		});
 
 		if(Object.keys(a).length == attributesLen){
 			addElement(e, t, a);
 		}
 	};
 	
-	for (let i=0; i<eltsLength; i++){
-		loop(elts[i]);
-	}
+	Array.prototype.slice.call(elts).forEach(loop);
 };
