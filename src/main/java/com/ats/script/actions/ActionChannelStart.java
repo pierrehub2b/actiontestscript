@@ -35,7 +35,8 @@ public class ActionChannelStart extends ActionChannel {
 	public static final String BASIC_AUTHENTICATION = "Basic";
 
 	private CalculatedValue application;
-	
+	private ArrayList<CalculatedValue> arguments = new ArrayList<CalculatedValue>();
+
 	private boolean neoload = false;
 	private String authentication = "";
 	private String authenticationValue = "";
@@ -51,21 +52,28 @@ public class ActionChannelStart extends ActionChannel {
 		if(dataArray != null) {
 			options.addAll(dataArray);
 		}
-		options.forEach(o -> parseOptions(o.trim()));
+		options.forEach(o -> parseOptions(script, o.trim()));
 	}
 	
-	private void parseOptions(String value){
+	private void parseOptions(Script script, String value){
 		if(ActionNeoload.SCRIPT_NEOLOAD_LABEL.equalsIgnoreCase(value)) {
 			setNeoload(true);
 		}else if(BASIC_AUTHENTICATION.equalsIgnoreCase(value)){
 			setAuthentication(BASIC_AUTHENTICATION);
 		}else if(BASIC_AUTHENTICATION.equalsIgnoreCase(authentication)) {
 			setAuthenticationValue(value);
+		}else {
+			arguments.add(new CalculatedValue(script, value));
 		}
 	}
 	
 	public ActionChannelStart(Script script, String name, CalculatedValue value, String options) {
 		this(script, name, new ArrayList<>(Arrays.asList(options.split(","))), value, null);
+	}
+	
+	public ActionChannelStart(Script script, String name, CalculatedValue value, String options, CalculatedValue ...calculatedValues) {
+		this(script, name, new ArrayList<>(Arrays.asList(options.split(","))), value, null);
+		this.setArguments(new ArrayList<CalculatedValue>(Arrays.asList(calculatedValues)));
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -106,8 +114,19 @@ public class ActionChannelStart extends ActionChannel {
 			optionsJoiner.add(authenticationValue);
 		}
 		
-		codeBuilder.append(optionsJoiner.toString()).append(")");
+		codeBuilder.append(optionsJoiner.toString());
 		
+		if(arguments.size() > 0) {
+			codeBuilder.append(", ");
+			
+			final StringJoiner argumentsJoiner = new StringJoiner(", ");
+			for(CalculatedValue calc : arguments) {
+				argumentsJoiner.add(calc.getJavaCode());
+			}
+			codeBuilder.append(argumentsJoiner.toString());
+		}
+		
+		codeBuilder.append(")");
 		return codeBuilder;
 	}
 
@@ -145,5 +164,13 @@ public class ActionChannelStart extends ActionChannel {
 
 	public void setNeoload(boolean value) {
 		this.neoload = value;
+	}
+		
+	public ArrayList<CalculatedValue> getArguments() {
+		return arguments;
+	}
+
+	public void setArguments(ArrayList<CalculatedValue> arguments) {
+		this.arguments = arguments;
 	}
 }

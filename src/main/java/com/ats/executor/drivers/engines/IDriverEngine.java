@@ -54,7 +54,7 @@ public interface IDriverEngine{
 	public Object executeJavaScript(ActionStatus status, String script, boolean returnValue);
 	public void goToUrl(ActionStatus status, String url);
 	
-	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> searchPredicate, WebElement startElement);
+	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, ArrayList<String> attributesValues, Predicate<AtsBaseElement> searchPredicate, WebElement startElement);
 	public ArrayList<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template);
 	
 	public void waitAfterAction(ActionStatus status);
@@ -95,7 +95,7 @@ public interface IDriverEngine{
 
 	public Alert switchToAlert();
 	public boolean switchToDefaultContent();
-	public boolean setWindowToFront();
+	public void setWindowToFront();
 	public void switchToFrameId(String id);
 	public void refreshElementMapLocation();
 	public String getSource();

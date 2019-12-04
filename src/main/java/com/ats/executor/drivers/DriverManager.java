@@ -89,15 +89,17 @@ public class DriverManager {
 		Predicate<ProcessHandle> firefox  =  p -> p.info().command().get().contains(FIREFOX_DRIVER_FILE_NAME);
 		Predicate<ProcessHandle> ie  =  p -> p.info().command().get().contains(IE_DRIVER_FILE_NAME);
 
-		ProcessHandle
-		.allProcesses()
-		.parallel()
-		.filter(fullPredicate)
-		.filter(chrome.or(edge).or(firefox).or(opera).or(ie).or(desktop))
-		.forEach(p2 -> {
-			p2.children().parallel().forEach(p3 -> p3.destroy());
-			p2.destroy();
-		});
+		try {
+			ProcessHandle
+			.allProcesses()
+			.parallel()
+			.filter(fullPredicate)
+			.filter(chrome.or(edge).or(firefox).or(opera).or(ie).or(desktop))
+			.forEach(p2 -> {
+				p2.children().parallel().forEach(p3 -> p3.destroy());
+				p2.destroy();
+			});
+		}catch (Exception e) {}
 	}
 
 	//--------------------------------------------------------------------------------------------------------------
@@ -119,7 +121,7 @@ public class DriverManager {
 		final String driverName = props.getDriver();
 
 		DriverProcess driverProcess = null;
-		
+
 		if(CHROME_BROWSER.equals(appName)) {
 			driverProcess = getDriverProcess(status, appName, driverName, CHROME_DRIVER_FILE_NAME);
 			if(status.isPassed()) {
@@ -215,22 +217,22 @@ public class DriverManager {
 			}
 		}else if(JX_BROWSER.equals(appName)) {
 			if(driverName != null && props.getUri() != null) {
-				
+
 				final JxDriverEngine jxEngine = new JxDriverEngine(this, appName, ATS.getDriversFolderPath(), driverName, channel, status, desktopDriver, props);
 				if(status.isPassed()) {
 					return jxEngine;
 				}
-				
+
 				jxEngine.close();
 				return null;
-				
+
 			}else {
 				status.setPassed(false);
 				status.setCode(ActionStatus.CHANNEL_START_ERROR);
 				status.setMessage("Missing JxBrowser properties ('path' and 'driver') in .atsProperties file !");
 				return null;
 			}
-			
+
 		}else if(props.isMobile() || application.startsWith(MOBILE + "://")){
 			mobileDriverEngine = new MobileDriverEngine(channel, status, application, desktopDriver, props);
 			return mobileDriverEngine;			
@@ -251,9 +253,9 @@ public class DriverManager {
 	}
 
 	public DriverProcess getDriverProcess(ActionStatus status, String name, String driverName, String defaultDriverName) {
-		
+
 		driverName = getDriverName(driverName, defaultDriverName);
-		
+
 		for (DriverProcess proc : driversProcess) {
 			if(proc.getName().equals(name)) {
 				return proc;

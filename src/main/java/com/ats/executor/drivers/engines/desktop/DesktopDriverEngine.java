@@ -98,17 +98,6 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 
 		}else {
 
-			int firstSpace = application.indexOf(" ");
-			String applicationArguments = "";
-
-			ArrayList<String> args = new ArrayList<String>();
-
-			if(firstSpace > 0){
-				applicationArguments = application.substring(firstSpace);
-				application = application.substring(0, firstSpace);
-				args.add(applicationArguments);
-			}
-
 			URI fileUri = null;
 			File exeFile = null;
 
@@ -131,10 +120,13 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 			}
 
 			if(exeFile != null && exeFile.exists() && exeFile.isFile()){
-
+				
 				applicationPath = exeFile.getAbsolutePath();
-				args.add(0, applicationPath);
-
+				
+				final ArrayList<String> args = new ArrayList<String>();
+				args.add(applicationPath);
+				channel.getArguments().forEach(c -> args.add(c.getCalculated()));
+				
 				final ProcessBuilder builder = new ProcessBuilder(args.toArray(new String[args.size()]));
 				builder.directory(exeFile.getParentFile()); // this is where you set the root folder for the executable to run with
 				builder.redirectErrorStream(true);
@@ -269,17 +261,17 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testElement, String tag, ArrayList<String> attributes, Predicate<AtsBaseElement> predicate, WebElement startElement) {
+	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testElement, String tag, ArrayList<String> attributes, ArrayList<String> attributesValues, Predicate<AtsBaseElement> predicate, WebElement startElement) {
 		if(sysComp) {
 			if(SYSCOMP.equals(tag.toUpperCase())) {
 				ArrayList<FoundElement> win = new ArrayList<FoundElement>();
 				win.add(new FoundElement(mainWindow));
 				return win;
 			}else {
-				return getDesktopDriver().findElements(channel, testElement, tag, attributes, predicate);
+				return getDesktopDriver().findElements(channel, testElement, tag, attributesValues, predicate);
 			}
 		}else {
-			return getDesktopDriver().findElements(channel, testElement, tag, attributes, predicate);
+			return getDesktopDriver().findElements(channel, testElement, tag, attributesValues, predicate);
 		}
 	}
 
@@ -297,7 +289,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void close() {
-		getDesktopDriver().closeProcess(channel.getProcessId());
+		getDesktopDriver().closeWindows(channel.getProcessId());
 		getDesktopDriver().closeDriver();
 	}
 
@@ -309,9 +301,8 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public boolean setWindowToFront() {
+	public void setWindowToFront() {
 		//no window order management implemented for the moment
-		return true;
 	}
 
 	@Override

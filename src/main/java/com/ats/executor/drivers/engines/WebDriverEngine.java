@@ -285,7 +285,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		return list.toArray(new String[list.size()]);
 	}
 
-	private Set<String> getDriverWindowsList(){
+	protected Set<String> getDriverWindowsList(){
 		try {
 			return driver.getWindowHandles();
 		}catch (WebDriverException e) {
@@ -477,7 +477,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public ArrayList<FoundElement> findSelectOptions(TestBound dimension, TestElement element) {
-		return findElements(false, element, "option", new ArrayList<String>(), Objects::nonNull, element.getWebElement());
+		return findElements(false, element, "option", new ArrayList<String>(), new ArrayList<String>(), Objects::nonNull, element.getWebElement());
 	}
 
 	@Override
@@ -802,9 +802,8 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	protected boolean switchToWindowHandle(String handle) {
 		try {
-			channel.sleep(300);
 			driver.switchTo().window(handle);
-			channel.sleep(300);
+			channel.sleep(1000);
 			return switchToDefaultContent();
 		}catch(NoSuchWindowException ex) {
 			return false;
@@ -814,31 +813,30 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	protected void switchToWindowIndex(String[] wins, int index) {
 
 		int maxTry = 10;
-
-		channel.sleep(500);
 		boolean switched = switchToWindowHandle(wins[index]);
 
 		while(!switched && maxTry > 0) {
-			channel.sleep(500);
+			channel.sleep(1000);
 			wins = getWindowsHandle(index);
 			switched = switchToWindowHandle(wins[index]);
 		}
-		currentWindow = index;
+		
+		if(switched) {
+			currentWindow = index;
+		}
 	}
 
 	@Override
-	public boolean setWindowToFront() {
+	public void setWindowToFront() {
 		final String[] wins = getWindowsHandle(0);
 		if(wins.length> currentWindow) {
 			driver.switchTo().window(wins[currentWindow]);
 		}
-		return true;
 	}
 
 	@Override
 	public void switchWindow(ActionStatus status, int index) {
 		if(index >= 0) {
-			channel.sleep(500);
 			final String[] wins = getWindowsHandle(index);
 			if(wins.length > index) {
 				switchToWindowIndex(wins, index);
@@ -983,7 +981,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	private double offsetIframeY = 0.0;
 
 	@Override
-	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> predicate, WebElement startElement) {
+	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, ArrayList<String> attributesValues, Predicate<AtsBaseElement> predicate, WebElement startElement) {
 
 		if(testObject.getParent() != null){
 			if(testObject.getParent().isIframe()) {

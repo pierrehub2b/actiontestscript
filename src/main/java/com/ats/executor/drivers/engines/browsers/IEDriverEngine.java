@@ -20,8 +20,11 @@ under the License.
 package com.ats.executor.drivers.engines.browsers;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Set;
 
 import org.openqa.selenium.ie.InternetExplorerOptions;
+import org.testng.collections.Sets;
 
 import com.ats.driver.ApplicationProperties;
 import com.ats.element.FoundElement;
@@ -36,6 +39,8 @@ import com.ats.executor.drivers.engines.WebDriverEngine;
 import com.ats.generator.objects.MouseDirection;
 
 public class IEDriverEngine extends WebDriverEngine {
+	
+	private final Set<String> windows = Sets.newLinkedHashSet();
 
 	public IEDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
 		super(channel, DriverManager.IE_BROWSER, driverProcess, windowsDriver, props);
@@ -58,6 +63,15 @@ public class IEDriverEngine extends WebDriverEngine {
 	@Override
 	public void toFront() {
 		channel.toFront();
+		driver.executeAsyncScript("var callback=arguments[arguments.length-1];var result=setTimeout(function(){window.focus();},1000);callback(result);");
+	}
+	
+	@Override
+	public void setWindowToFront() {
+		super.setWindowToFront();
+		try {
+			driver.executeAsyncScript("var callback=arguments[arguments.length-1];var result=setTimeout(function(){window.focus();},1000);callback(result);");
+		}catch (Exception e) {}
 	}
 
 	@Override
@@ -107,13 +121,24 @@ public class IEDriverEngine extends WebDriverEngine {
 	}	
 
 	@Override
-	public void closeWindow(ActionStatus status) {
-		getDesktopDriver().closeIEWindow();
+	public void switchWindow(ActionStatus status, int index) {
+		super.switchWindow(status, index);
+		if(status.isPassed()) {
+			executeJavaScript(status, "setTimeout(function(){window.focus();},1000);", true);
+			channel.sleep(2000);
+		}
 	}
 
 	@Override
-	public void switchWindow(ActionStatus status, int index) {
-		super.switchWindow(status, index);
-		getDesktopDriver().switchIEWindow(index);
+	protected Set<String> getDriverWindowsList() {
+		final Set<String> driverList = super.getDriverWindowsList();
+		driverList.parallelStream().forEach(s -> windows.add(s));
+
+		for (Iterator<String> iterator = windows.iterator(); iterator.hasNext();) {
+		    if(!driverList.contains(iterator.next())) {
+		    	iterator.remove();
+		    }
+		}
+		return windows;
 	}
 }

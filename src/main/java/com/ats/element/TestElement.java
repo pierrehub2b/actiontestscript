@@ -167,15 +167,23 @@ public class TestElement{
 	protected ArrayList<FoundElement> loadElements(SearchedElement searchedElement) {
 
 		final ArrayList<String> attributes = new ArrayList<String>();
+		final ArrayList<String> attributesValues = new ArrayList<String>();
+		
 		Predicate<AtsBaseElement> fullPredicate = Objects::nonNull;
 
 		for (CalculatedProperty property : searchedElement.getCriterias()){
 			criterias += "," + property.getName() + ":" + property.getValue().getCalculated();
 			fullPredicate = property.getPredicate(fullPredicate);
-
+			
 			attributes.add(property.getName());
+			
+			if(property.isRegexp()) {
+				attributesValues.add(property.getName());
+			}else {
+				attributesValues.add(property.getName() + "\t" + property.getValue().getCalculated());
+			}
 		}
-		return engine.findElements(sysComp, this, searchedTag, attributes, fullPredicate, null);
+		return engine.findElements(sysComp, this, searchedTag, attributes, attributesValues, fullPredicate, null);
 	}
 
 	private int getElementsCount() {

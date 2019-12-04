@@ -43,6 +43,7 @@ import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
+import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.ScriptHeader;
 import com.ats.script.actions.ActionApi;
 import com.ats.script.actions.ActionChannelStart;
@@ -172,9 +173,8 @@ public class Channel {
 	}
 
 	public void toFront(){
-		if(engine.setWindowToFront()) {
-			getDesktopDriver().setChannelToFront(getHandle(getDesktopDriver()), processId);
-		}
+		getDesktopDriver().setChannelToFront(getHandle(getDesktopDriver()), processId);
+		engine.setWindowToFront();
 	}
 
 	public void rootKeys(ActionStatus status, String keys){
@@ -213,6 +213,10 @@ public class Channel {
 
 	public String getAuthenticationValue() {
 		return actionStart.getAuthenticationValue();
+	}
+	
+	public ArrayList<CalculatedValue> getArguments() {
+		return actionStart.getArguments();
 	}
 
 	public void setNeoloadDesignApi(String value) {

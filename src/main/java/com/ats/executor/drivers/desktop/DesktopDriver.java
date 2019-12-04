@@ -285,7 +285,7 @@ public class DesktopDriver extends RemoteWebDriver {
 	{
 		Capabilities (0),
 		Application (1),
-		Process (2),
+		CloseWindows (2),
 		Close (3);
 
 		private final int type;
@@ -345,9 +345,7 @@ public class DesktopDriver extends RemoteWebDriver {
 		Close (7),
 		Url (8),
 		Keys(9),
-		State(10),
-		SwitchIE(11),
-		CloseIE(12);
+		State(10);
 
 		private final int type;
 		WindowType(int value){
@@ -418,8 +416,8 @@ public class DesktopDriver extends RemoteWebDriver {
 		sendRequestCommand(CommandType.Driver, DriverType.Close);
 	}
 
-	public void closeProcess(long processId) {
-		sendRequestCommand(CommandType.Driver, DriverType.Process, processId);
+	public void closeWindows(long processId) {
+		sendRequestCommand(CommandType.Driver, DriverType.CloseWindows, processId);
 	}
 
 	public void clearText() {
@@ -587,14 +585,6 @@ public class DesktopDriver extends RemoteWebDriver {
 		sendRequestCommand(CommandType.Window, WindowType.ToFront, pid);
 	}
 	
-	public DesktopResponse switchIEWindow(int index) {
-		return sendRequestCommand(CommandType.Window, WindowType.SwitchIE, index);
-	}
-	
-	public DesktopResponse closeIEWindow() {
-		return sendRequestCommand(CommandType.Window, WindowType.CloseIE);
-	}
-	
 	public void rootKeys(int handle, String keys) {
 		sendRequestCommand(CommandType.Window, WindowType.Keys, handle, keys);
 	}
@@ -651,20 +641,14 @@ public class DesktopDriver extends RemoteWebDriver {
 	public ArrayList<FoundElement> findElements(Channel channel, TestElement testElement, String tag, ArrayList<String> attributes, Predicate<AtsBaseElement> predicate) {
 
 		DesktopResponse response = null;
-
-		Object[] params = new Object[attributes.size() + 2];
-		params[1] = tag;
-
-		for (int counter = 0; counter < attributes.size(); counter++) { 		      
-			params[counter+2] = attributes.get(counter); 		
-		}   
-
+		attributes.add(0, tag);
+		
 		if(testElement.getParent() != null){
-			params[0] = testElement.getParent().getWebElementId();
-			response = sendRequestCommand(CommandType.Element, ElementType.Childs, params);
+			attributes.add(0, testElement.getParent().getWebElementId());
+			response = sendRequestCommand(CommandType.Element, ElementType.Childs, attributes.toArray());
 		}else{
-			params[0] = channel.getHandle(this);
-			response = sendRequestCommand(CommandType.Element, ElementType.Find, params);
+			attributes.add(0, channel.getHandle(this)+"");
+			response = sendRequestCommand(CommandType.Element, ElementType.Find, attributes.toArray());
 		}
 		
 		return response.getFoundElements(predicate, channel.getDimension());

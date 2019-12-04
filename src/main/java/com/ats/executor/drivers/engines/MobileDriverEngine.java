@@ -331,7 +331,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> searchPredicate, WebElement startElement) {
+	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, ArrayList<String> attributesValues, Predicate<AtsBaseElement> searchPredicate, WebElement startElement) {
 
 		final List<AtsMobileElement> list = new ArrayList<AtsMobileElement>();
 
@@ -490,9 +490,8 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	public boolean switchToDefaultContent() {return true;}
 
 	@Override
-	public boolean setWindowToFront() {
+	public void setWindowToFront() {
 		executeRequest(APP, SWITCH, channel.getApplication());
-		return true;
 	}
 
 	@Override

@@ -173,7 +173,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	}
 
 	@Override
-	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> searchPredicate, WebElement startElement) {
+	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, ArrayList<String> attributesValues, Predicate<AtsBaseElement> searchPredicate, WebElement startElement) {
 		return executor.findElements(channel, sysComp, testObject, tagName, attributes, searchPredicate);
 	}
 
@@ -196,8 +196,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	public void refreshElementMapLocation() {}
 
 	@Override
-	public boolean setWindowToFront() {
-		return false;
+	public void setWindowToFront() {
 	}
 
 	@Override

@@ -33,8 +33,6 @@ import com.ats.element.TestElement;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.desktop.DesktopDriver;
-import com.ats.executor.drivers.desktop.DesktopDriver.CommandType;
-import com.ats.executor.drivers.desktop.DesktopDriver.RecordType;
 import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.MouseDirection;
