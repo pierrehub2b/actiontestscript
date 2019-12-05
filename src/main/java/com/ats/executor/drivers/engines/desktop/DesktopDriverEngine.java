@@ -21,11 +21,15 @@ package com.ats.executor.drivers.engines.desktop;
 
 import java.awt.MouseInfo;
 import java.awt.Rectangle;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
@@ -120,20 +124,27 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 			}
 
 			if(exeFile != null && exeFile.exists() && exeFile.isFile()){
-				
+
 				applicationPath = exeFile.getAbsolutePath();
-				
+				//final File parentFolder = exeFile.getParentFile();
+
 				final ArrayList<String> args = new ArrayList<String>();
 				args.add(applicationPath);
 				channel.getArguments().forEach(c -> args.add(c.getCalculated()));
-				
-				final ProcessBuilder builder = new ProcessBuilder(args.toArray(new String[args.size()]));
+
+				final ProcessBuilder builder = new ProcessBuilder(args.toArray(new String[args.size()])).inheritIO();
 				builder.directory(exeFile.getParentFile()); // this is where you set the root folder for the executable to run with
-				builder.redirectErrorStream(true);
+				//builder.redirectErrorStream(false);
 
 				try{
 
 					final Process applicationProcess = builder.start();
+
+					CompletableFuture<String> soutFut = readOutStream(applicationProcess.getInputStream());
+					CompletableFuture<String> serrFut = readOutStream(applicationProcess.getErrorStream());
+					CompletableFuture<String> resultFut = soutFut.thenCombine(serrFut, (stdout, stderr) -> {
+						return stdout;
+					});
 
 					processId = applicationProcess.pid();
 					status.setPassed(true);
@@ -146,6 +157,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 
 					return;
 				}
+
 			}else {
 				status.setCode(ActionStatus.CHANNEL_START_ERROR);
 				status.setMessage("app file path not found -> " + application);
@@ -192,7 +204,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 			return -1;
 		}
 	}
-	
+
 	@Override
 	public void toFront() {
 		channel.toFront();
@@ -468,5 +480,23 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	public Object executeJavaScript(ActionStatus status, String script, boolean returnValue) {
 		status.setPassed(true);
 		return null;
+	}
+
+	static CompletableFuture<String> readOutStream(InputStream is) {
+		return CompletableFuture.supplyAsync(() -> {
+			try (
+					InputStreamReader isr = new InputStreamReader(is);
+					BufferedReader br = new BufferedReader(isr);
+					){
+				StringBuilder res = new StringBuilder();
+				String inputLine;
+				while ((inputLine = br.readLine()) != null) {
+					res.append(inputLine).append(System.lineSeparator());
+				}
+				return res.toString();
+			} catch (Throwable e) {
+				throw new RuntimeException("problem with executing program", e);
+			}
+		});
 	}
 }
