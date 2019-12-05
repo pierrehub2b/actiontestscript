@@ -25,11 +25,13 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Predicate;
 
+import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
+import com.ats.executor.SendKeyData;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.engines.IDriverEngine;
 import com.ats.generator.objects.MouseDirection;
@@ -77,7 +79,7 @@ public class TestElement{
 		this.channel = channel;
 		this.maxTry = maxTry;
 	}
-	
+
 	public TestElement(FoundElement element, Channel currentChannel) {
 		this(currentChannel);
 		this.foundElements.add(element);
@@ -93,7 +95,7 @@ public class TestElement{
 		this(channel, maxTry, predicate);
 		this.setIndex(index);
 	}
-	
+
 	public TestElement(Channel channel, SearchedElement searchedElement) {
 		this(channel, 1, p -> true, searchedElement);
 	}
@@ -109,7 +111,7 @@ public class TestElement{
 		setEngine(channel.getDriverEngine());
 		startSearch(false, searchedElement);
 	}
-	
+
 	protected void setEngine(IDriverEngine engine) {
 		this.engine = engine;
 		engine.toFront();
@@ -148,7 +150,7 @@ public class TestElement{
 		this.sysComp = sysComp;
 
 		if(channel != null){
-			
+
 			searchedTag = searchedElement.getTag();
 			criterias = searchedTag;
 
@@ -168,15 +170,15 @@ public class TestElement{
 
 		final ArrayList<String> attributes = new ArrayList<String>();
 		final ArrayList<String> attributesValues = new ArrayList<String>();
-		
+
 		Predicate<AtsBaseElement> fullPredicate = Objects::nonNull;
 
 		for (CalculatedProperty property : searchedElement.getCriterias()){
 			criterias += "," + property.getName() + ":" + property.getValue().getCalculated();
 			fullPredicate = property.getPredicate(fullPredicate);
-			
+
 			attributes.add(property.getName());
-			
+
 			if(property.isRegexp()) {
 				attributesValues.add(property.getName());
 			}else {
@@ -327,13 +329,9 @@ public class TestElement{
 		int error = 0;
 
 		if(isValidated()) {
-			status.setPassed(true);
+			status.setNoError();
 		}else {
-			status.setPassed(false);
-			status.setCode(ActionStatus.OCCURRENCES_ERROR);
-			status.setData(count);
-			status.setMessage("[" + expected + "] expected occurence(s) but [" + count + "] occurence(s) found");
-
+			status.setError(ActionStatus.OCCURRENCES_ERROR, "[" + expected + "] expected occurence(s) but [" + count + "] occurence(s) found", count);
 			error = ActionStatus.OCCURRENCES_ERROR;
 		}
 
@@ -349,14 +347,14 @@ public class TestElement{
 
 		final MouseDirection md = new MouseDirection();
 		String enteredText = "";
-		
+
 		over(status, md, false, 0, 0);
 		if(status.isPassed()) {
 			click(status, md);
 			if(status.isPassed()) {
 				clearText(status);
 				if(status.isPassed()) {
-					
+
 					recorder.updateScreen(true);
 
 					if(isPassword()) {
@@ -374,8 +372,24 @@ public class TestElement{
 	}
 
 	public void sendText(ActionStatus status, CalculatedValue text) {
-		engine.sendTextData(status, this, text.getCalculatedText());
+		final ArrayList<SendKeyData> textData = text.getCalculatedText();
+		int max = maxTry;
+		while(!trySendText(status, textData) && max > 0) {
+			channel.sleep(100);
+			max--;
+		}
 		channel.actionTerminated(status);
+	}
+	
+	private boolean trySendText(ActionStatus status, ArrayList<SendKeyData> text) {
+		try {
+			engine.sendTextData(status, this, text);
+			status.setNoError();
+			return true;
+		}catch (ElementNotInteractableException e) {
+			status.setError(ActionStatus.OBJECT_NOT_INTERACTABLE, "element is not interactable");
+			return false;
+		}
 	}
 
 	public void clearText(ActionStatus status) {
@@ -385,7 +399,7 @@ public class TestElement{
 	//-------------------------------------------------------------------------------------------------------------------
 	// Select ...
 	//-------------------------------------------------------------------------------------------------------------------
-	
+
 	public void select(ActionStatus status, CalculatedProperty selectProperty) {
 		if(isValidated()){
 			engine.selectOptionsItem(status, this, selectProperty);

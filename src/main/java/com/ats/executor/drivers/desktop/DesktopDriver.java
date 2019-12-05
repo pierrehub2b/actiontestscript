@@ -179,9 +179,7 @@ public class DesktopDriver extends RemoteWebDriver {
 				}
 				status.setPassed(true);
 			}else {
-				status.setPassed(false);
-				status.setCode(ActionStatus.CHANNEL_START_ERROR);
-				status.setMessage("Unable to connect to desktop driver! Check DotNET and OS version ...");
+				status.setError(ActionStatus.CHANNEL_START_ERROR, "unable to connect to desktop driver, check DotNET and OS version ...");
 			}
 		}
 	}
@@ -619,8 +617,7 @@ public class DesktopDriver extends RemoteWebDriver {
 		
 		final DesktopResponse resp = sendRequestCommand(CommandType.Window, WindowType.Url, handle, url);
 		if(resp.errorCode < 0) {
-			status.setPassed(false);
-			status.setMessage(resp.errorMessage);
+			status.setError(resp.errorCode, resp.errorMessage);
 		}else {
 			status.setPassed(true);
 		}

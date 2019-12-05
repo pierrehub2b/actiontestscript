@@ -70,16 +70,16 @@ public class DriverProcess {
 				process = builder.start();
 				Runtime.getRuntime().addShutdownHook(new Thread(process::destroy));
 			} catch (IOException e1) {
-				status.setMessage(e1.getMessage());
-				status.setCode(ActionStatus.CHANNEL_START_ERROR);
+				status.setError(ActionStatus.CHANNEL_START_ERROR, e1.getMessage());
+				return;
 			}
 
 		}else{
-			status.setMessage("Unable to launch driver process, driver file is missing : " + driverFile.getAbsolutePath());
-			status.setCode(ActionStatus.CHANNEL_START_ERROR);
+			status.setError(ActionStatus.CHANNEL_START_ERROR, "unable to launch driver process, driver file is missing : " + driverFile.getAbsolutePath());
+			return;
 		}
 		
-		status.setPassed(process != null);
+		status.setNoError();
 	}
 	
 	//--------------------------------------------------------------------------------------------------

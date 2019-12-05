@@ -54,9 +54,7 @@ public class IEDriverEngine extends WebDriverEngine {
 		launchDriver(status, ieOptions, null);
 
 		if(status.isPassed() && !"11".equals(channel.getApplicationVersion())) {
-			status.setPassed(false);
-			status.setCode(ActionStatus.CHANNEL_START_ERROR);
-			status.setMessage("Cannot start channel with IE" + channel.getApplicationVersion() + " ! (Only IE11 is supported by ATS)");
+			status.setError(ActionStatus.CHANNEL_START_ERROR, "cannot start channel with IE" + channel.getApplicationVersion() + " (Only IE11 is supported by ATS)");
 		}
 	}
 

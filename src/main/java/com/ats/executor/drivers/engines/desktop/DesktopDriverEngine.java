@@ -29,7 +29,6 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
@@ -94,9 +93,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 			}
 
 			if(processId < 0) {
-				status.setCode(ActionStatus.CHANNEL_START_ERROR);
-				status.setMessage("unable to attach process with command like - > " + procPattern.pattern());
-				status.setPassed(false);
+				status.setError(ActionStatus.CHANNEL_START_ERROR, "unable to attach process with command like -> " + procPattern.pattern());
 				return;
 			}
 
@@ -126,43 +123,32 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 			if(exeFile != null && exeFile.exists() && exeFile.isFile()){
 
 				applicationPath = exeFile.getAbsolutePath();
-				//final File parentFolder = exeFile.getParentFile();
 
 				final ArrayList<String> args = new ArrayList<String>();
 				args.add(applicationPath);
 				channel.getArguments().forEach(c -> args.add(c.getCalculated()));
 
-				final ProcessBuilder builder = new ProcessBuilder(args.toArray(new String[args.size()])).inheritIO();
-				builder.directory(exeFile.getParentFile()); // this is where you set the root folder for the executable to run with
-				//builder.redirectErrorStream(false);
-
+				Runtime rt = Runtime.getRuntime();
+				
 				try{
 
-					final Process applicationProcess = builder.start();
+					Process proc = rt.exec(args.toArray(new String[args.size()]));
+					StreamGobbler errorGobbler = new StreamGobbler(proc.getErrorStream(), "ERROR");            
+					StreamGobbler outputGobbler = new StreamGobbler(proc.getInputStream(), "OUTPUT");
 
-					CompletableFuture<String> soutFut = readOutStream(applicationProcess.getInputStream());
-					CompletableFuture<String> serrFut = readOutStream(applicationProcess.getErrorStream());
-					CompletableFuture<String> resultFut = soutFut.thenCombine(serrFut, (stdout, stderr) -> {
-						return stdout;
-					});
+					errorGobbler.start();
+					outputGobbler.start();
 
-					processId = applicationProcess.pid();
-					status.setPassed(true);
+					processId = proc.pid();
+					status.setNoError();
 
-				} catch (IOException e) {
-
-					status.setCode(ActionStatus.CHANNEL_START_ERROR);
-					status.setMessage(e.getMessage());
-					status.setPassed(false);
-
+				} catch (Exception e) {
+					status.setError(ActionStatus.CHANNEL_START_ERROR, e.getMessage());
 					return;
 				}
 
 			}else {
-				status.setCode(ActionStatus.CHANNEL_START_ERROR);
-				status.setMessage("app file path not found -> " + application);
-				status.setPassed(false);
-
+				status.setError(ActionStatus.CHANNEL_START_ERROR, "app file path not found -> " + application);
 				return;
 			}
 		}
@@ -482,21 +468,30 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 		return null;
 	}
 
-	static CompletableFuture<String> readOutStream(InputStream is) {
-		return CompletableFuture.supplyAsync(() -> {
-			try (
-					InputStreamReader isr = new InputStreamReader(is);
-					BufferedReader br = new BufferedReader(isr);
-					){
-				StringBuilder res = new StringBuilder();
-				String inputLine;
-				while ((inputLine = br.readLine()) != null) {
-					res.append(inputLine).append(System.lineSeparator());
-				}
-				return res.toString();
-			} catch (Throwable e) {
-				throw new RuntimeException("problem with executing program", e);
+	class StreamGobbler extends Thread
+	{
+		InputStream is;
+		String type;
+
+		StreamGobbler(InputStream is, String type)
+		{
+			this.is = is;
+			this.type = type;
+		}
+
+		public void run()
+		{
+			try
+			{
+				InputStreamReader isr = new InputStreamReader(is);
+				BufferedReader br = new BufferedReader(isr);
+				String line=null;
+				while ( (line = br.readLine()) != null)
+					System.out.println(type + ">" + line);    
+			} catch (IOException ioe)
+			{
+				ioe.printStackTrace();  
 			}
-		});
+		}
 	}
 }

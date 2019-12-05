@@ -63,9 +63,7 @@ public class JxDriverEngine extends WebDriverEngine {
 
 			} catch (Exception e) {
 				close();
-				status.setPassed(false);
-				status.setMessage(e.getMessage());
-				status.setCode(ActionStatus.CHANNEL_START_ERROR);
+				status.setError(ActionStatus.CHANNEL_START_ERROR, e.getMessage());
 			}
 
 			if(driver != null) {
@@ -130,14 +128,9 @@ public class JxDriverEngine extends WebDriverEngine {
 						}
 					}
 
-					status.setPassed(false);
-					status.setCode(ActionStatus.CHANNEL_START_ERROR);
-					status.setMessage("Unable to find JxBrowser running process");
-
+					status.setError(ActionStatus.CHANNEL_START_ERROR, "unable to find JxBrowser running process");
 				}else {
-					status.setPassed(false);
-					status.setCode(ActionStatus.CHANNEL_START_ERROR);
-					status.setMessage("Unable to find JxBrowser main window");
+					status.setError(ActionStatus.CHANNEL_START_ERROR, "unable to find JxBrowser main window");
 				}
 			}
 		}

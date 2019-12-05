@@ -34,6 +34,7 @@ import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.Variable;
@@ -205,11 +206,7 @@ public class ActionCallscript extends Action {
 		Class<ActionTestScript> clazz = classLoader.findClass(scriptName);
 
 		if(clazz == null) {
-
-			status.setPassed(false);
-			status.setCode(MessageCode.SCRIPT_NOT_FOUND);
-			status.setMessage("ATS script not found : '" + scriptName + "' (maybe a letter case issue ?)\n");
-
+			status.setError(MessageCode.SCRIPT_NOT_FOUND, "ATS script not found : '" + scriptName + "' (maybe a letter case issue ?)\n");
 		}else {
 
 			try {
@@ -230,8 +227,7 @@ public class ActionCallscript extends Action {
 					}
 
 					if(csvUrl == null) {
-						status.setPassed(false);
-						status.setMessage("CSV file not found : " + csvPath);
+						status.setError(ActionStatus.FILE_NOT_FOUND, "CSV file not found : " + csvPath);
 						return;
 					}
 
@@ -248,8 +244,7 @@ public class ActionCallscript extends Action {
 						}
 
 					} catch (IOException e) {
-						status.setPassed(false);
-						status.setMessage("CSV file IO error : " + csvPath + " -> " + e.getMessage());
+						status.setError(ActionStatus.FILE_NOT_FOUND, "CSV file IO error : " + csvPath + " -> " + e.getMessage());
 					}
 
 				}else {

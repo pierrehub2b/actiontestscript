@@ -123,9 +123,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			JsonObject response = executeRequest(DRIVER, START);
 
 			if(response == null) {
-				status.setCode(ActionStatus.CHANNEL_START_ERROR);
-				status.setMessage("unable to connect to : " + applicationPath);
-				status.setPassed(false);
+				status.setError(ActionStatus.CHANNEL_START_ERROR, "unable to connect to : " + applicationPath);
 			}else {
 
 				final String systemName = response.get("systemName").getAsString();
@@ -172,14 +170,10 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 						refreshElementMapLocation();
 					}else {
-						status.setCode(ActionStatus.CHANNEL_START_ERROR);
-						status.setMessage(response.get("status").getAsString());
-						status.setPassed(false);
+						status.setError(ActionStatus.CHANNEL_START_ERROR, response.get("status").getAsString());
 					}
 				}else {
-					status.setCode(ActionStatus.CHANNEL_START_ERROR);
-					status.setMessage("unable to connect to : " + application);
-					status.setPassed(false);
+					status.setError(ActionStatus.CHANNEL_START_ERROR, "unable to connect to : " + application);
 				}
 			}
 		}

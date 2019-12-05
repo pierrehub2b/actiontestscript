@@ -144,9 +144,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 					executor = new SoapApiExecutor(logStream, client, timeout, maxTry, channel, wsContent, applicationPath);
 					channel.setApplicationData(API, ActionApi.SOAP, ((SoapApiExecutor)executor).getOperations());
 				} catch (SAXException | IOException | ParserConfigurationException e) {
-					status.setCode(ActionStatus.CHANNEL_START_ERROR);
-					status.setMessage(e.getMessage());
-					status.setPassed(false);
+					status.setError(ActionStatus.CHANNEL_START_ERROR, e.getMessage());
 				}
 			}else {
 				channel.setApplicationData(API, ActionApi.REST);
@@ -154,10 +152,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 			}
 
 		} catch (IOException e) {
-			status.setCode(ActionStatus.CHANNEL_START_ERROR);
-			status.setMessage("Service is not responding -> " + e.getMessage());
-			status.setPassed(false);
-
+			status.setError(ActionStatus.CHANNEL_START_ERROR, "service is not responding -> " + e.getMessage());
 			e.printStackTrace(logStream);
 		}
 	}

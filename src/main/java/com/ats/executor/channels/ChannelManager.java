@@ -165,11 +165,10 @@ public class ChannelManager {
 				noChannel();
 			}
 
-			status.setPassed(true);
+			status.setNoError();
 			status.setData(getChannelsList());
 		}else {
-			status.setPassed(false);
-			status.setMessage("Channel '" + channel.getName() + "' not found !");
+			status.setError(ActionStatus.CHANNEL_START_ERROR, "channel '" + channel.getName() + "' not found");
 		}
 		status.endDuration();
 	}

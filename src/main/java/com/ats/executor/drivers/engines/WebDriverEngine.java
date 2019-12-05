@@ -658,9 +658,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 				try {
 
 					scrollAndMove(foundElement, position, offsetX, offsetY);
-
-					status.setPassed(true);
-					status.setMessage("");
+					status.setNoError();
 
 					maxTry = 0;
 
@@ -698,8 +696,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		}catch(StaleElementReferenceException e1) {
 			throw e1;
 		}catch(ElementNotVisibleException e0) {	
-			status.setPassed(false);
-			status.setCode(ActionStatus.OBJECT_NOT_VISIBLE);
+			status.setError(ActionStatus.OBJECT_NOT_VISIBLE, "element is not visible");
 		}catch (Exception e) {
 			status.setException(ActionStatus.OBJECT_NOT_INTERACTABLE, e);
 		}
@@ -729,8 +726,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		}catch(StaleElementReferenceException e1) {
 			throw e1;
 		}catch(ElementNotVisibleException e0) {	
-			status.setPassed(false);
-			status.setCode(ActionStatus.OBJECT_NOT_VISIBLE);
+			status.setError(ActionStatus.OBJECT_NOT_VISIBLE, "element is not visible");
 		}catch (Exception e) {
 			status.setException(ActionStatus.OBJECT_NOT_INTERACTABLE, e);
 		}
@@ -938,9 +934,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			status.setPassed(false);
 			throw e0;
 		}catch(Exception e1) {
-			status.setPassed(false);
 			status.setException(ActionStatus.JAVASCRIPT_ERROR, e1);
-			status.setCode(ActionStatus.JAVASCRIPT_ERROR);
 		}
 		return null;
 	}
@@ -1053,10 +1047,8 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			status.setMessage("");
 			return;
 		}catch(Exception e) {}
-		
-		status.setPassed(false);
-		status.setCode(ActionStatus.ENTER_TEXT_FAIL);
-		status.setMessage("Clear text failed on this element");
+
+		status.setError(ActionStatus.ENTER_TEXT_FAIL, "clear text failed on this element");
 	}
 
 	@Override

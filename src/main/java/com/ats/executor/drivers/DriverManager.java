@@ -210,9 +210,7 @@ public class DriverManager {
 					return null;
 				}
 			}else {
-				status.setPassed(false);
-				status.setCode(ActionStatus.CHANNEL_START_ERROR);
-				status.setMessage("Missing Chromium properties ('path' and 'driver') in .atsProperties file !");
+				status.setError(ActionStatus.CHANNEL_START_ERROR, "missing Chromium properties ('path' and 'driver') in .atsProperties file");
 				return null;
 			}
 		}else if(JX_BROWSER.equals(appName)) {
@@ -227,9 +225,7 @@ public class DriverManager {
 				return null;
 
 			}else {
-				status.setPassed(false);
-				status.setCode(ActionStatus.CHANNEL_START_ERROR);
-				status.setMessage("Missing JxBrowser properties ('path' and 'driver') in .atsProperties file !");
+				status.setError(ActionStatus.CHANNEL_START_ERROR, "missing JxBrowser properties ('path' and 'driver') in .atsProperties file");
 				return null;
 			}
 

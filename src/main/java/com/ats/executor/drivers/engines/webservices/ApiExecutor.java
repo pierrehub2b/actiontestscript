@@ -213,10 +213,9 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 			return true;
 
 		} catch (IOException e) {
-			status.setCode(ActionStatus.WEB_DRIVER_ERROR);
-			status.setMessage("Call Webservice error -> " + e.getMessage());
-			status.setPassed(false);
+			status.setError(ActionStatus.WEB_DRIVER_ERROR, "call Webservice error -> " + e.getMessage());
 		}
+		
 		return false;
 	}
 

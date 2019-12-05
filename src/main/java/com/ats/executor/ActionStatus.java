@@ -43,6 +43,7 @@ public class ActionStatus {
 	public static final int DRIVER_NOT_REACHABLE = -17;
 	public static final int JAVA_EXCEPTION = -18;
 	public static final int CHANNEL_START_ERROR = -19;
+	public static final int FILE_NOT_FOUND = -20;
 	
 	private static final String ATS_TECHNICAL_ERROR = "AtsTechnicalError";
 	private static final String ATS_FUNCTIONAL_ERROR = "AtsFunctionalError";
@@ -101,6 +102,30 @@ public class ActionStatus {
 	
 	public String getErrorType() {
 		return errorType;
+	}
+	
+	public void setNoError() {
+		setPassed(true);
+		setCode(0);
+		setMessage("");
+	}
+	
+	public void setNoError(String message) {
+		setPassed(true);
+		setCode(0);
+		setMessage(message);
+		setData(null);
+	}
+	
+	public void setError(int code, String message) {
+		setPassed(false);
+		setCode(code);
+		setMessage(message);
+	}
+	
+	public void setError(int code, String message, Object data) {
+		setError(code, message);
+		setData(data);
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------
