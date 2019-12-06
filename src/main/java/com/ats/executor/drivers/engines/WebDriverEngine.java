@@ -83,7 +83,6 @@ import com.ats.script.actions.ActionSelect;
 import com.ats.script.actions.ActionWindowState;
 import com.ats.tools.ResourceContent;
 import com.ats.tools.Utils;
-import com.google.gson.Gson;
 
 @SuppressWarnings("unchecked")
 public class WebDriverEngine extends DriverEngine implements IDriverEngine {
