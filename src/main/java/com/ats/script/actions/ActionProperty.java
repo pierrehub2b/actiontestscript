@@ -69,17 +69,13 @@ public class ActionProperty extends ActionReturnVariable {
 		super.terminateExecution(ts);
 		
 		if(status.isPassed()) {
+			
 			final String attributeValue = getTestElement().getAttribute(status, name);
 			status.endDuration();
 
 			if(attributeValue == null) {
-				status.setPassed(false);
-				status.setCode(ActionStatus.ATTRIBUTE_NOT_SET);
-				status.setData(name);
-				status.setMessage("Attribute '" + name + "' not found !");
-
+				status.setError(ActionStatus.ATTRIBUTE_NOT_SET, "attribute '" + name + "' not found", name);
 				ts.getRecorder().update(ActionStatus.ATTRIBUTE_NOT_SET, status.getDuration(), name);
-				
 			}else {
 				status.setMessage(attributeValue);
 				updateVariableValue(attributeValue);

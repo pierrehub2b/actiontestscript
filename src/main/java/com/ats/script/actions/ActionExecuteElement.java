@@ -242,9 +242,7 @@ public class ActionExecuteElement extends ActionExecute {
 		if(testElement.isValidated()) {
 			status.setPassed(true);
 		}else {
-			status.setPassed(false);
-			status.setCode(ActionStatus.OBJECT_NOT_FOUND);
-			status.setMessage("Element not found");
+			status.setError(ActionStatus.OBJECT_NOT_FOUND, "element not found");
 			error = ActionStatus.OBJECT_NOT_FOUND;
 		}
 

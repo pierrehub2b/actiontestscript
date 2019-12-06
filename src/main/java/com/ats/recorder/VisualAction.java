@@ -70,12 +70,6 @@ public class VisualAction {
 		this.timeLine = System.currentTimeMillis();
 	}
 
-	/*public void addImageFrame(byte[] newScreen) {
-		if(!Arrays.equals(images.get(images.size()-1), newScreen)){
-			images.add(newScreen);
-		}
-	}*/
-
 	//--------------------------------------------------------
 	// getters and setters for serialization
 	//--------------------------------------------------------

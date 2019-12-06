@@ -140,9 +140,7 @@ public class ChannelManager {
 			}
 		}
 
-		status.setPassed(false);
-		status.setMessage("Channel [" + name + "] is not running !");
-		status.endDuration();
+		status.setError(ActionStatus.CHANNEL_NOT_FOUND, "channel [" + name + "] is not running");
 	}
 
 	public void closeChannel(ActionStatus status, String channelName){

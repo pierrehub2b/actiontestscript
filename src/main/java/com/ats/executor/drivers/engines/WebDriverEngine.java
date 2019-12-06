@@ -477,6 +477,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public ArrayList<FoundElement> findSelectOptions(TestBound dimension, TestElement element) {
+		switchToDefaultContent();
 		return findElements(false, element, "option", new ArrayList<String>(), new ArrayList<String>(), Objects::nonNull, element.getWebElement());
 	}
 
@@ -499,9 +500,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 						new Select(items.get(index).getValue()).selectByIndex(index);
 					}
 				}else {
-					status.setPassed(false);
-					status.setCode(ActionStatus.OBJECT_NOT_INTERACTABLE);
-					status.setMessage("Index not found, max length options : " + items.size());
+					status.setError(ActionStatus.OBJECT_NOT_INTERACTABLE, "index not found, max length options : " + items.size());
 				}
 
 			}else{
@@ -519,9 +518,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 				try {
 					foundOption.get().getValue().click();
 				}catch (NoSuchElementException e) {
-					status.setPassed(false);
-					status.setCode(ActionStatus.OBJECT_NOT_INTERACTABLE);
-					status.setMessage("Option not found : " + searchedValue);
+					status.setError(ActionStatus.OBJECT_NOT_INTERACTABLE, "option not found : " + searchedValue);
 				}
 			}
 			
@@ -838,9 +835,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 				switchToWindowIndex(wins, index);
 				channel.cleanHandle();
 			}else {
-				status.setPassed(false);
-				status.setCode(ActionStatus.WINDOW_NO_SWITCH);
-				status.setMessage("Cannot switch to index '" + index + "', only " + wins.length + " windows found !");
+				status.setError(ActionStatus.WINDOW_NO_SWITCH, "cannot switch to window index '" + index + "', only " + wins.length + " windows found");
 			}
 		}
 	}
@@ -906,7 +901,6 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		}catch(StaleElementReferenceException e0) {
 			throw e0;
 		}catch(Exception e1) {
-			status.setPassed(false);
 			status.setException(ActionStatus.JAVASCRIPT_ERROR, e1);
 		}
 		return null;
@@ -1053,11 +1047,12 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {
-		status.setMessage(new Gson().toJson(
-				executeScript(status, "result={size:window.getComputedStyle(arguments[0], null).getPropertyValue('font-size'), family:window.getComputedStyle(arguments[0], null).getPropertyValue('font-family'), weight:window.getComputedStyle(arguments[0], null).getPropertyValue('font-weight')};", element.getWebElement())));
-
+		
+		final WebElement we = element.getWebElement();
+		executeScript(status, "result={size:window.getComputedStyle(arguments[0], null).getPropertyValue('font-size'), family:window.getComputedStyle(arguments[0], null).getPropertyValue('font-family'), weight:window.getComputedStyle(arguments[0], null).getPropertyValue('font-weight')};", we);
+		
 		for(SendKeyData sequence : textActionList) {
-			element.getWebElement().sendKeys(sequence.getSequenceWithDigit());
+			we.sendKeys(sequence.getSequenceWithDigit());
 		}
 	}
 

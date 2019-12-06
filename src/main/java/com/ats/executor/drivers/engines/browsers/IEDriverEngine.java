@@ -112,8 +112,7 @@ public class IEDriverEngine extends WebDriverEngine {
 					element.getWebElement().sendKeys(sequence.getSequenceWithDigit());
 				}
 			}catch(Exception e) {
-				status.setPassed(false);
-				status.setMessage(e.getMessage());
+				status.setError(ActionStatus.ENTER_TEXT_FAIL, e.getMessage());
 			}
 		}
 	}	

@@ -45,6 +45,8 @@ public class ActionStatus {
 	public static final int CHANNEL_START_ERROR = -19;
 	public static final int FILE_NOT_FOUND = -20;
 	
+	public static final int NEOLOAD_POST_ERROR = -50;
+	
 	private static final String ATS_TECHNICAL_ERROR = "AtsTechnicalError";
 	private static final String ATS_FUNCTIONAL_ERROR = "AtsFunctionalError";
 

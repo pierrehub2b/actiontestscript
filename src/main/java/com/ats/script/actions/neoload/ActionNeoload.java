@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import com.ats.driver.AtsManager;
+import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
 import com.ats.script.Script;
@@ -94,14 +95,12 @@ public class ActionNeoload extends Action {
 			if(response.code() >= 200 && response.code() < 300) {
 				status.setPassed(true);
 			}else {
-				status.setPassed(false);
-				status.setMessage(response.message());
+				status.setError(ActionStatus.NEOLOAD_POST_ERROR, response.message());
 			}
 			response.close();
 			
 		} catch (IOException e) {
-			status.setPassed(false);
-			status.setMessage(e.getMessage());
+			status.setError(ActionStatus.NEOLOAD_POST_ERROR, e.getMessage());
 		}
 		
 		return status.isPassed();
