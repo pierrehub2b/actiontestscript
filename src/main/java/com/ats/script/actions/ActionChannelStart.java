@@ -25,6 +25,7 @@ import java.util.StringJoiner;
 
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
+import com.ats.executor.channels.Channel;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
 import com.ats.script.actions.neoload.ActionNeoload;
@@ -87,7 +88,11 @@ public class ActionChannelStart extends ActionChannel {
 		
 	@Override
 	protected StringBuilder getActionLogsData() {
-		return super.getActionLogsData().append(", \"app\":").append(application.getCalculated()).append("\"");
+		final Channel channel = status.getChannel();
+		return super.getActionLogsData()
+				.append(", \"app\":\"").append(application.getCalculated()).append("\"")
+				.append(", \"appVersion\":\"").append(channel.getApplicationVersion()).append("\"")
+				.append(", \"os\":\"").append(channel.getOs()).append("\"");
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

@@ -129,6 +129,20 @@ public class ActionStatus {
 		setError(code, message);
 		setData(data);
 	}
+		
+	//--------------------------------------------------------------------------------------------------------
+	//--------------------------------------------------------------------------------------------------------
+	
+	public String getFailMessage() {
+		return message + " after " + duration + " ms";
+	}
+	
+	public String getChannelApplication() {
+		if(channel == null) {
+			return "";
+		}
+		return channel.getApplication();
+	}
 
 	//----------------------------------------------------------------------------------------------------------------------
 	// Getter and setter for serialization
@@ -219,30 +233,5 @@ public class ActionStatus {
 
 	public void setCpuUsage(long cpuUsage) {
 		this.cpuUsage = cpuUsage;
-	}
-
-	public String getFailMessage() {
-		return message + " after " + duration + " ms";
-	}
-	
-	public String getChannelName() {
-		if(channel == null) {
-			return "";
-		}
-		return channel.getName();
-	}
-	
-	public String getChannelApplication() {
-		if(channel == null) {
-			return "";
-		}
-		return channel.getApplication();
-	}
-
-	public StringBuilder getChannelInfo() {
-		if(channel == null) {
-			return new StringBuilder();
-		}
-		return new StringBuilder("\n   - Channel -> ").append(channel.getName()).append("\n   - Application -> ").append(channel.getApplication());
 	}
 }

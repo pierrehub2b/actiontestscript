@@ -560,7 +560,7 @@ public class ActionTestScript extends Script implements ITest{
 					fail(atsScriptLine.toString());
 
 				}else {
-					sendInfoLog(atsScriptLine.insert(0, "Unstoppable action (").append(")").toString(), status.getMessage());
+					sendInfoLog(atsScriptLine.insert(0, "unstoppable action (").append(")").toString(), status.getMessage());
 				}
 			}
 		}

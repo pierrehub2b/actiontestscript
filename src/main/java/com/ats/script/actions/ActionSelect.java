@@ -44,8 +44,8 @@ public class ActionSelect extends ActionExecuteElement {
 		setSelectValue(new CalculatedProperty(script, data));
 	}
 
-	public ActionSelect(Script script, boolean stop, int maxTry, SearchedElement element, CalculatedProperty selectValue) {
-		super(script, stop, maxTry, element);
+	public ActionSelect(Script script, boolean stop, int maxTry, int delay, SearchedElement element, CalculatedProperty selectValue) {
+		super(script, stop, maxTry, delay, element);
 		setSelectValue(selectValue);
 	}
 	

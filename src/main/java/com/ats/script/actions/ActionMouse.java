@@ -42,8 +42,8 @@ public class ActionMouse extends ActionExecuteElement {
 		setType("undefined");
 	}
 
-	public ActionMouse(Script script, boolean stop, int maxTry, SearchedElement element, Mouse mouse) {
-		super(script, stop, maxTry, element);
+	public ActionMouse(Script script, boolean stop, int maxTry, int delay, SearchedElement element, Mouse mouse) {
+		super(script, stop, maxTry, delay, element);
 		setPosition(mouse.getPosition());
 		setType(mouse.getType());
 	}

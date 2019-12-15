@@ -23,7 +23,6 @@ import java.util.function.Predicate;
 
 import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
-import com.ats.executor.drivers.engines.IDriverEngine;
 import com.ats.generator.objects.MouseDirection;
 
 public class TestElementSystem extends TestElement {

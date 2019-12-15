@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.StringJoiner;
 import java.util.regex.Matcher;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.ProjectData;
@@ -41,6 +43,8 @@ public class SearchedElement {
 	private static final String SYSCOMP = "SYSCOMP";
 	private static final String SYSBUTTON = "SYSBUTTON";
 	public static final String IMAGE_TAG = "@IMAGE";
+	
+	public static final String INDEX_PROPERTY = "@index";
 
 	private String tag = WILD_CHAR;
 	private SearchedElement parent;
@@ -111,8 +115,8 @@ public class SearchedElement {
 	}
 
 	private void addCriteria(Script script, String data){
-		if(data.startsWith("index") || data.startsWith("@index")) {
-			this.index = Utils.string2Int(data.replaceAll("[^\\d]", ""));
+		if(data.startsWith(INDEX_PROPERTY)) {
+			this.index = Utils.string2Int(StringUtils.getDigits(data));
 		}else{
 			this.criterias.add(new CalculatedProperty(script, data));
 		}

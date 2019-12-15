@@ -50,13 +50,13 @@ public class ActionMouseKey extends ActionMouse {
 		}
 	}	
 
-	public ActionMouseKey(Script script, boolean stop, int maxTry, SearchedElement element, MouseKey mouse) {
-		super(script, stop, maxTry, element, mouse);
+	public ActionMouseKey(Script script, boolean stop, int maxTry, int delay, SearchedElement element, MouseKey mouse) {
+		super(script, stop, maxTry, delay, element, mouse);
 		key = mouse.getKey();
 	}
 
-	public ActionMouseKey(Script script, boolean stop, int maxTry, SearchedElement element, Mouse mouse) {
-		super(script, stop, maxTry, element, mouse);
+	public ActionMouseKey(Script script, boolean stop, int maxTry, int delay, SearchedElement element, Mouse mouse) {
+		super(script, stop, maxTry, delay, element, mouse);
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

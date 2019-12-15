@@ -21,6 +21,7 @@ package com.ats.generator;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.stream.Stream;
@@ -43,8 +44,6 @@ public class Generator implements ScriptProcessedEvent{
 	private ProjectData projectData;
 
 	private int remainingScripts = 0;
-
-	private String charset = ScriptLoader.DEFAULT_CHARSET;
 
 	public static void main(String[] args) {
 
@@ -138,7 +137,7 @@ public class Generator implements ScriptProcessedEvent{
 				projectData.initFolders();
 				genReport.startGenerator(remainingScripts);
 
-				lexer = new Lexer(projectData, genReport, charset);
+				lexer = new Lexer(projectData, genReport, StandardCharsets.UTF_8);
 
 			}else{
 				ATS.logInfo("Nothing to be done (no ATS files found !)");

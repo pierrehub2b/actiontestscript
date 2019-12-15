@@ -114,7 +114,6 @@ public class TestElement{
 
 	protected void setEngine(IDriverEngine engine) {
 		this.engine = engine;
-		engine.toFront();
 	}
 
 	public void dispose() {
@@ -336,6 +335,7 @@ public class TestElement{
 		}
 
 		status.endDuration();
+		ts.getRecorder().updateScreen(0, status.getDuration());
 		terminateExecution(status, ts, error, status.getDuration(), count + "", operator + " " + expected);
 	}
 
@@ -380,7 +380,7 @@ public class TestElement{
 		}
 		channel.actionTerminated(status);
 	}
-	
+
 	private boolean trySendText(ActionStatus status, ArrayList<SendKeyData> text) {
 		try {
 			engine.sendTextData(status, this, text);

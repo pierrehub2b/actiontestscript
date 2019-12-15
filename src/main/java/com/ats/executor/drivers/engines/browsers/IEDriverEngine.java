@@ -56,17 +56,23 @@ public class IEDriverEngine extends WebDriverEngine {
 		if(status.isPassed() && !"11".equals(channel.getApplicationVersion())) {
 			status.setError(ActionStatus.CHANNEL_START_ERROR, "cannot start channel with IE" + channel.getApplicationVersion() + " (Only IE11 is supported by ATS)");
 		}
+		
+		executeToFront();
 	}
 
 	@Override
 	public void toFront() {
-		channel.toFront();
-		driver.executeAsyncScript("var callback=arguments[arguments.length-1];var result=setTimeout(function(){window.focus();},1000);callback(result);");
+		channel.setWindowToFront();
+		executeToFront();
 	}
 	
 	@Override
 	public void setWindowToFront() {
 		super.setWindowToFront();
+		executeToFront();
+	}
+	
+	private void executeToFront() {
 		try {
 			driver.executeAsyncScript("var callback=arguments[arguments.length-1];var result=setTimeout(function(){window.focus();},1000);callback(result);");
 		}catch (Exception e) {}
@@ -122,6 +128,7 @@ public class IEDriverEngine extends WebDriverEngine {
 		super.switchWindow(status, index);
 		if(status.isPassed()) {
 			executeJavaScript(status, "setTimeout(function(){window.focus();},1000);", true);
+			toFront();
 			channel.sleep(2000);
 		}
 	}

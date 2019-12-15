@@ -36,8 +36,8 @@ public class ActionReturnVariable extends ActionExecuteElement {
 		setVariable(variable);
 	}
 
-	public ActionReturnVariable(Script script, boolean stop, int maxTry, SearchedElement element, Variable variable) {
-		super(script, stop, maxTry, element);
+	public ActionReturnVariable(Script script, boolean stop, int maxTry, int delay, SearchedElement element, Variable variable) {
+		super(script, stop, maxTry, delay, element);
 		setVariable(variable);
 	}
 	

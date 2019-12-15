@@ -57,8 +57,8 @@ public class ActionText extends ActionExecuteElement {
 		}
 	}
 
-	public ActionText(Script script, boolean stop, int maxTry, SearchedElement element, CalculatedValue text) {
-		super(script, stop, maxTry, element);
+	public ActionText(Script script, boolean stop, int maxTry, int delay, SearchedElement element, CalculatedValue text) {
+		super(script, stop, maxTry, delay, element);
 		setText(text);
 	}
 

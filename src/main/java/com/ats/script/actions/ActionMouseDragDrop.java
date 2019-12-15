@@ -35,8 +35,8 @@ public class ActionMouseDragDrop extends ActionMouse {
 		super(script, type, stop, options, objectArray);
 	}
 
-	public ActionMouseDragDrop(Script script, boolean stop, int maxTry, SearchedElement element, Mouse mouse) {
-		super(script, stop, maxTry, element, mouse);
+	public ActionMouseDragDrop(Script script, boolean stop, int maxTry, int delay, SearchedElement element, Mouse mouse) {
+		super(script, stop, maxTry, delay, element, mouse);
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

@@ -42,8 +42,8 @@ public class ActionScripting extends ActionReturnVariable {
 		setJsCode(new CalculatedValue(script, code));
 	}
 
-	public ActionScripting(Script script, boolean stop, int maxTry, SearchedElement element, CalculatedValue jsCode, Variable variable) {
-		super(script, stop, maxTry, element, variable);
+	public ActionScripting(Script script, boolean stop, int maxTry, int delay, SearchedElement element, CalculatedValue jsCode, Variable variable) {
+		super(script, stop, maxTry, delay, element, variable);
 		setJsCode(jsCode);
 	}
 	

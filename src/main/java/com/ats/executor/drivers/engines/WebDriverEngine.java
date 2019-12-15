@@ -52,6 +52,7 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.interactions.MoveTargetOutOfBoundsException;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.RemoteWebElement;
@@ -237,13 +238,15 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			driver.get(tempHtml.toURI().toString());
 		} catch (IOException e) {}
 
+		final String osVersion = getDesktopDriver().getOsName() + " (" + getDesktopDriver().getOsVersion() +")";
+
 		int maxTry = 10;
 		while(maxTry > 0) {
 			final DesktopWindow window = desktopDriver.getWindowByTitle(titleUid);
 			if(window != null) {
 				desktopDriver.setEngine(new DesktopDriverEngine(channel, window));
 				channel.setApplicationData(
-						"windows",
+						osVersion,
 						applicationVersion,
 						driverVersion,
 						window.getPid());
@@ -486,15 +489,15 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		final ArrayList<FoundElement> items = findSelectOptions(null, element);
 
 		if(items != null && items.size() > 0) {
-			
+
 			element.click(status, new MouseDirection());
-			
+
 			if(ActionSelect.SELECT_INDEX.equals(selectProperty.getName())){
 
 				final int index = Utils.string2Int(selectProperty.getValue().getCalculated());
 				if(items.size() > index) {
 					try {
-					items.get(index).getValue().click();
+						items.get(index).getValue().click();
 					}catch (Exception e) {
 						new Select(items.get(index).getValue()).selectByIndex(index);
 					}
@@ -520,7 +523,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 					status.setError(ActionStatus.OBJECT_NOT_INTERACTABLE, "option not found : " + searchedValue);
 				}
 			}
-			
+
 			element.click(status, new MouseDirection(new MouseDirectionData(Cartesian.LEFT, new CalculatedValue(-5)), null));
 		}
 	}
@@ -655,13 +658,18 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 					scrollAndMove(foundElement, position, offsetX, offsetY);
 					status.setNoError();
-
 					maxTry = 0;
 
 				}catch(StaleElementReferenceException e0) {
 
 					throw e0;
-
+					
+				}catch(MoveTargetOutOfBoundsException e) {
+					
+					driver.executeScript("arguments[0].scrollIntoView();", foundElement.getValue());
+					status.setNoError();
+					maxTry = 0;
+					
 				}catch(WebDriverException e) {
 					channel.sleep(500);
 					status.setException(e);
@@ -693,6 +701,8 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			throw e1;
 		}catch(ElementNotVisibleException e0) {	
 			status.setError(ActionStatus.OBJECT_NOT_VISIBLE, "element is not visible");
+		}catch(MoveTargetOutOfBoundsException e) {
+			driver.executeScript("arguments[0].click();", element.getValue());
 		}catch (Exception e) {
 			status.setException(ActionStatus.OBJECT_NOT_INTERACTABLE, e);
 		}
@@ -812,7 +822,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			wins = getWindowsHandle(index);
 			switched = switchToWindowHandle(wins[index]);
 		}
-		
+
 		if(switched) {
 			currentWindow = index;
 		}
@@ -907,7 +917,11 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public Object executeJavaScript(ActionStatus status, String javaScript, TestElement element) {
-		final Object result = runJavaScript(status, "var e=arguments[0];var result=e." + javaScript.replaceAll("this", "e") + ";", element.getWebElement());
+		return executeJavaScript(status, javaScript, element.getWebElement());
+	}
+	
+	public Object executeJavaScript(ActionStatus status, String javaScript, WebElement element) {
+		final Object result = runJavaScript(status, "var e=arguments[0];var result=e." + javaScript.replaceAll("this", "e") + ";", element);
 		if(status.isPassed() && result != null) {
 			status.setMessage(result.toString());
 		}
@@ -997,7 +1011,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 				offsetIframeX = 0.0;
 				offsetIframeY = 0.0;
 			}
-			
+
 			if(!switchToDefaultContent()) {
 				return new ArrayList<FoundElement>();
 			}
@@ -1028,13 +1042,12 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void clearText(ActionStatus status, FoundElement element) {
-				
 		try {
 			executeScript(status, "arguments[0].value='';", element.getValue());
 			status.setMessage("");
 			return;
 		}catch (StaleElementReferenceException e) {}
-		
+
 		try {
 			element.getValue().clear();
 			status.setMessage("");
@@ -1046,10 +1059,10 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {
-		
+
 		final WebElement we = element.getWebElement();
 		executeScript(status, "result={size:window.getComputedStyle(arguments[0], null).getPropertyValue('font-size'), family:window.getComputedStyle(arguments[0], null).getPropertyValue('font-family'), weight:window.getComputedStyle(arguments[0], null).getPropertyValue('font-weight')};", we);
-		
+
 		for(SendKeyData sequence : textActionList) {
 			we.sendKeys(sequence.getSequenceWithDigit());
 		}

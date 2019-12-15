@@ -124,7 +124,7 @@ public class Channel {
 
 	public void cleanHandle() {
 		winHandle = -1;
-		toFront();
+		setWindowToFront();
 	}
 	
 	public void setWinHandle(int hdl) {
@@ -171,8 +171,12 @@ public class Channel {
 	public void defineRoot(String id) {
 		getDesktopDriver().defineRoot(dimension, id);
 	}
-
+	
 	public void toFront(){
+		engine.toFront();
+	}
+
+	public void setWindowToFront(){
 		getDesktopDriver().setChannelToFront(getHandle(getDesktopDriver()), processId);
 		engine.setWindowToFront();
 	}
@@ -203,6 +207,11 @@ public class Channel {
 	}
 
 	public void setApplicationData(String os, String version, String dVersion, long pid) {
+		setApplicationData(os, version, dVersion, pid, new byte[0], "");
+	}
+	
+	public void setApplicationData(String os, String name, String version, String dVersion, long pid) {
+		setApplication(name);
 		setApplicationData(os, version, dVersion, pid, new byte[0], "");
 	}
 	
@@ -393,7 +402,7 @@ public class Channel {
 	public void setCurrent(boolean value) {
 		this.current = value;
 		if(value){
-			toFront();
+			setWindowToFront();
 		}
 	}
 

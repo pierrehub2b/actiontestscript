@@ -209,7 +209,7 @@ public abstract class DriverEngine {
 			outterBound = channel.getDimension();
 		}
 		
-		channel.toFront();
+		channel.setWindowToFront();
 		
 		byte[] screenshot = new byte[0];
 		screenshot = getDesktopDriver().getScreenshotByte(outterBound.getX(), outterBound.getY(), outterBound.getWidth(), outterBound.getHeight());

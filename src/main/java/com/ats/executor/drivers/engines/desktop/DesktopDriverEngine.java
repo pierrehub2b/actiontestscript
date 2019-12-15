@@ -155,6 +155,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 
 		String appVersion = "N/A";
 		String appBuildVersion = "N/A";
+		String appName = "";
 
 		final ArrayList<DesktopData> appInfo = desktopDriver.getVersion(applicationPath);
 		for (DesktopData data : appInfo) {
@@ -162,10 +163,12 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 				appBuildVersion = data.getValue();
 			}else if("ApplicationVersion".equals(data.getName())) {
 				appVersion = data.getValue();
+			}else if("ApplicationName".equals(data.getName())) {
+				appName = data.getValue();
 			}
 		}
 
-		channel.setApplicationData("windows", appVersion + " build(" + appBuildVersion + ")", desktopDriver.getDriverVersion(), processId);
+		channel.setApplicationData(desktopDriver.getOsName() + " (" + desktopDriver.getOsVersion() +")", appName, appVersion + " (" + appBuildVersion + ")", desktopDriver.getDriverVersion(), processId);
 
 		int maxTry = 30;
 		while(maxTry > 0){
@@ -193,7 +196,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void toFront() {
-		channel.toFront();
+		channel.setWindowToFront();
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------

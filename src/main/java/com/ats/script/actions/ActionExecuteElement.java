@@ -45,8 +45,16 @@ import com.ats.tools.logger.MessageCode;
 public class ActionExecuteElement extends ActionExecute {
 
 	private static final String TRY_LABEL = "try";
+	private static final String[] LABEL_REPLACE = new String[]{TRY_LABEL, "=", " ", "(", ")"};
+	private static final String[] LABEL_REPLACEMENT = new String[]{"", "", "", "", ""};
+	
+	private static final String DELAY_LABEL = "delay";
+	private static final String[] DELAY_REPLACE = new String[]{DELAY_LABEL, "=", " "};
+	private static final String[] DELAY_REPLACEMENT = new String[]{"", "", ""};
 
 	private int maxTry = 0;
+	private int delay = 0;
+	
 	private SearchedElement searchElement;
 	private TestElement testElement;
 
@@ -63,21 +71,24 @@ public class ActionExecuteElement extends ActionExecute {
 			setSearchElement(new SearchedElement(script, element));
 		}
 
-		Iterator<String> itr = options.iterator();
+		final Iterator<String> itr = options.iterator();
 		while (itr.hasNext())
 		{
 			final String opt = itr.next().toLowerCase();
 			if(opt.contains(TRY_LABEL)) {
-				setMaxTry(Utils.string2Int(StringUtils.replaceEach(opt, new String[]{TRY_LABEL, "=", "(", ")"}, new String[] {"", "", "", ""}).trim()));
+				setMaxTry(Utils.string2Int(StringUtils.replaceEach(opt, LABEL_REPLACE, LABEL_REPLACEMENT)));
 				itr.remove();
-				break;
+			}else if(opt.contains(DELAY_LABEL)) {
+				setDelay(Utils.string2Int(StringUtils.replaceEach(opt, DELAY_REPLACE, DELAY_REPLACEMENT)));
+				itr.remove();
 			}
 		}
 	}
 
-	public ActionExecuteElement(Script script, boolean stop, int maxTry, SearchedElement element) {
+	public ActionExecuteElement(Script script, boolean stop, int maxTry, int delay, SearchedElement element) {
 		super(script, stop);
 		setMaxTry(maxTry);
+		setDelay(delay);
 		setSearchElement(element);
 	}
 
@@ -87,9 +98,7 @@ public class ActionExecuteElement extends ActionExecute {
 
 	@Override
 	public StringBuilder getJavaCode() {
-		StringBuilder codeBuilder = super.getJavaCode();
-		codeBuilder.append(maxTry).append(", ");
-
+		final StringBuilder codeBuilder = super.getJavaCode().append(maxTry).append(", ").append(delay).append(", ");
 		if(searchElement == null){
 			codeBuilder.append("null");
 		}else {
@@ -124,20 +133,19 @@ public class ActionExecuteElement extends ActionExecute {
 			}else {
 
 				int trySearch = 0;
-				int searchMaxTry = actionMaxTry;
 
 				final Predicate<Integer> predicate = getPredicate(operator, value);
 
 				if(searchElement.isDialog()) {
-					while (trySearch < searchMaxTry) {
+					while (trySearch < actionMaxTry) {
 
-						setTestElement(new TestElementDialog(channel, searchMaxTry, searchElement, predicate));
+						setTestElement(new TestElementDialog(channel, actionMaxTry, searchElement, predicate));
 
 						if(testElement.isValidated()) {
-							trySearch = searchMaxTry;
+							trySearch = actionMaxTry;
 						}else {
 							trySearch++;
-							channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "Searching element", searchMaxTry - trySearch);
+							channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "Searching element", actionMaxTry - trySearch);
 							channel.progressiveWait(trySearch);
 						}
 					}
@@ -147,32 +155,32 @@ public class ActionExecuteElement extends ActionExecute {
 				}else {
 
 					if(searchElement.isSysComp()){
-						while (trySearch < searchMaxTry) {
+						while (trySearch < actionMaxTry) {
 
-							setTestElement(new TestElementSystem(channel, searchMaxTry, predicate, searchElement));
+							setTestElement(new TestElementSystem(channel, actionMaxTry, predicate, searchElement));
 
 							if(testElement.isValidated()) {
-								trySearch = searchMaxTry;
+								trySearch = actionMaxTry;
 							}else {
 								trySearch++;
-								channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "Searching element", searchMaxTry - trySearch);
+								channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "Searching element", actionMaxTry - trySearch);
 								channel.progressiveWait(trySearch);
 							}
 						}
 					}else {
-						while (trySearch < searchMaxTry) {
+						while (trySearch < actionMaxTry) {
 
 							if(searchElement.isImageSearch()) {
-								setTestElement(new TestElementImage(channel, searchMaxTry, predicate, searchElement));
+								setTestElement(new TestElementImage(channel, actionMaxTry, predicate, searchElement));
 							}else {
-								setTestElement(new TestElement(channel, searchMaxTry, predicate, searchElement));
+								setTestElement(new TestElement(channel, actionMaxTry, predicate, searchElement));
 							}
 
 							if(testElement.isValidated()) {
-								trySearch = searchMaxTry;
+								trySearch = actionMaxTry;
 							}else {
 								trySearch++;
-								channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "Searching element", searchMaxTry - trySearch);
+								channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "Searching element", actionMaxTry - trySearch);
 								channel.progressiveWait(trySearch);
 							}
 						}
@@ -183,6 +191,8 @@ public class ActionExecuteElement extends ActionExecute {
 			status.setElement(testElement);
 			status.setSearchDuration(testElement.getTotalSearchDuration());
 			status.setData(testElement.getCount());
+			
+			ts.getCurrentChannel().sleep(delay);
 
 			asyncExec(ts);
 
@@ -263,7 +273,7 @@ public class ActionExecuteElement extends ActionExecute {
 	
 	@Override
 	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
-		return super.getActionLogs(scriptName, scriptLine, data.append("\"duration\":").append(status.getDuration()-status.getSearchDuration()).append(", \"occurrences\":").append(status.getElement().getCount()));
+		return super.getActionLogs(scriptName, scriptLine, data.append("\"duration\":").append(status.getDuration()-status.getSearchDuration()-delay).append(", \"delay\":").append(delay).append(", \"occurrences\":").append(status.getElement().getCount()));
 	}
 
 	//--------------------------------------------------------
@@ -274,23 +284,31 @@ public class ActionExecuteElement extends ActionExecute {
 		return searchElement;
 	}
 
-	public void setSearchElement(SearchedElement elem) {
-		this.searchElement = elem;
+	public void setSearchElement(SearchedElement value) {
+		this.searchElement = value;
 	}
 
 	public int getMaxTry() {
 		return maxTry;
 	}
 
-	public void setMaxTry(int maxTry) {
-		this.maxTry = maxTry;
+	public void setMaxTry(int value) {
+		this.maxTry = value;
+	}
+	
+	public int getDelay() {
+		return delay;
+	}
+
+	public void setDelay(int value) {
+		this.delay = value;
 	}
 
 	public boolean isAsync() {
 		return async;
 	}
 
-	public void setAsync(boolean async) {
-		this.async = async;
+	public void setAsync(boolean value) {
+		this.async = value;
 	}
 }

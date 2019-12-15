@@ -43,8 +43,8 @@ public class ActionMouseScroll extends ActionMouse {
 		setValue(Utils.string2Int(value));
 	}
 
-	public ActionMouseScroll(Script script, boolean stop, int maxTry, SearchedElement element, MouseScroll mouse) {
-		super(script, stop, maxTry, element, mouse);
+	public ActionMouseScroll(Script script, boolean stop, int maxTry, int delay, SearchedElement element, MouseScroll mouse) {
+		super(script, stop, maxTry, delay, element, mouse);
 		setValue(mouse.getValue());
 	}
 

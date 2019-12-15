@@ -20,6 +20,8 @@ under the License.
 package com.ats.generator.parsers;
 
 import java.io.File;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.regex.Matcher;
@@ -47,13 +49,13 @@ import com.ats.script.actions.ActionChannelSwitch;
 import com.ats.script.actions.ActionComment;
 import com.ats.script.actions.ActionExecute;
 import com.ats.script.actions.ActionGotoUrl;
-import com.ats.script.actions.ActionScripting;
 import com.ats.script.actions.ActionMouse;
 import com.ats.script.actions.ActionMouseDragDrop;
 import com.ats.script.actions.ActionMouseKey;
 import com.ats.script.actions.ActionMouseScroll;
 import com.ats.script.actions.ActionMouseSwipe;
 import com.ats.script.actions.ActionProperty;
+import com.ats.script.actions.ActionScripting;
 import com.ats.script.actions.ActionSelect;
 import com.ats.script.actions.ActionText;
 import com.ats.script.actions.ActionWindow;
@@ -74,7 +76,7 @@ public class Lexer {
 
 	private ProjectData projectData;
 
-	private String charset = ScriptLoader.DEFAULT_CHARSET;
+	private Charset charset = StandardCharsets.UTF_8;
 
 	public int countScript = 0;
 
@@ -88,11 +90,20 @@ public class Lexer {
 		this.isGenerator = false;
 		this.report = report;
 	}
-
+	
 	public Lexer(ProjectData projectData, GeneratorReport report, String charset) {
 		this.projectData = projectData;
-		this.charset = charset;
 		this.report = report;
+		
+		try {
+			this.charset = Charset.forName(charset);
+		} catch (IllegalArgumentException e) {}
+	}
+
+	public Lexer(ProjectData projectData, GeneratorReport report, Charset charset) {
+		this.projectData = projectData;
+		this.report = report;
+		this.charset = charset;
 	}
 
 	public void addScript(){

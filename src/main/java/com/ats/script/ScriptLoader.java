@@ -46,7 +46,9 @@ public class ScriptLoader extends Script {
 	private ScriptParser parser;
 	private ScriptHeader header;
 	private String javaCode = null;
+	
 	private Charset charset;
+	
 	private ArrayList<Action> actions;
 	
 	private String projectGav = "";
@@ -57,7 +59,7 @@ public class ScriptLoader extends Script {
 		this(type, lexer, file, projectData, DEFAULT_CHARSET);
 	}
 
-	public ScriptLoader(String type, Lexer lexer, File file, ProjectData projectData, String charset){
+	public ScriptLoader(String type, Lexer lexer, File file, ProjectData projectData, Charset charset){
 
 		this.setHeader(new ScriptHeader(projectData, file));
 		this.setAtsFolder(projectData.getAtsSourceFolder().toFile());
@@ -93,12 +95,8 @@ public class ScriptLoader extends Script {
 		}
 	}
 
-	private void setCharset(String value) {
-		try {
-			this.charset = Charset.forName(value);
-		} catch (Exception e) {
-			this.charset = Charset.forName(DEFAULT_CHARSET);
-		}
+	private void setCharset(Charset value) {
+		this.charset = value;
 	}
 
 	public void addAction(Action data, boolean disabled){

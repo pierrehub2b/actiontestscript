@@ -21,6 +21,8 @@ package com.ats.script;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,7 +47,7 @@ import com.ats.tools.logger.ExecutionLogger;
 public class Script {
 
 	public static final Pattern OBJECT_PATTERN = Pattern.compile("(.*)\\[(.*)\\]", Pattern.CASE_INSENSITIVE);
-	public final static String DEFAULT_CHARSET = "UTF-8";
+	public final static Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	public final static String ATS_EXTENSION = "ats";
 	public final static String ATS_FILE_EXTENSION = "." + ATS_EXTENSION;

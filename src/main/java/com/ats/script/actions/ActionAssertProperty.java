@@ -43,8 +43,8 @@ public class ActionAssertProperty extends ActionExecuteElement {
 		setValue(new CalculatedProperty(script, data));
 	}
 
-	public ActionAssertProperty(Script script, boolean stop, int maxTry, SearchedElement element, CalculatedProperty property) {
-		super(script, stop, maxTry, element);
+	public ActionAssertProperty(Script script, boolean stop, int maxTry, int delay, SearchedElement element, CalculatedProperty property) {
+		super(script, stop, maxTry, delay, element);
 		setValue(property);
 	}
 

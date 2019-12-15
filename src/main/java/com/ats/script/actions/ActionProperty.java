@@ -40,8 +40,8 @@ public class ActionProperty extends ActionReturnVariable {
 		setName(name);
 	}
 
-	public ActionProperty(Script script, boolean stop, int maxTry, SearchedElement element, String name, Variable variable) {
-		super(script, stop, maxTry, element, variable);
+	public ActionProperty(Script script, boolean stop, int maxTry, int delay, SearchedElement element, String name, Variable variable) {
+		super(script, stop, maxTry, delay, element, variable);
 		setName(name);
 	}
 

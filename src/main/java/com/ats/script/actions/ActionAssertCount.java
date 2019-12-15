@@ -65,8 +65,8 @@ public class ActionAssertCount extends ActionExecuteElement {
 		}
 	}
 
-	public ActionAssertCount(Script script, boolean stop, int maxTry, SearchedElement element, String operator, int value) {
-		super(script, stop, maxTry, element);
+	public ActionAssertCount(Script script, boolean stop, int maxTry, int delay, SearchedElement element, String operator, int value) {
+		super(script, stop, maxTry, delay, element);
 		setOperator(operator);
 		setValue(value);
 	}
