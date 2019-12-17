@@ -24,10 +24,10 @@ import org.openqa.selenium.Point;
 
 public class TestBound {
 
-	private Double x = 0.0;
-	private Double y = 0.0;
-	private Double width = 100.0;
-	private Double height = 100.0;
+	private Double x = 0D;
+	private Double y = 0D;
+	private Double width = 10D;
+	private Double height = 10D;
 
 	public TestBound() {}
 
