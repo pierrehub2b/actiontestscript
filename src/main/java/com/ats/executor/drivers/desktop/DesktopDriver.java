@@ -388,7 +388,8 @@ public class DesktopDriver extends RemoteWebDriver {
 		Position(9),
 		Download(10),
 		ImageMobile(11),
-		CreateMobile(12);
+		CreateMobile(12),
+		ScreenshotMobile(13);
 
 		private final int type;
 		RecordType(int value){
@@ -691,6 +692,11 @@ public class DesktopDriver extends RemoteWebDriver {
 
 	public byte[] getScreenshotByte(Double x, Double y, Double w, Double h){
 		final DesktopResponse resp = sendRequestCommand(CommandType.Record, RecordType.Screenshot, x.intValue(), y.intValue(), w.intValue(), h.intValue());
+		return resp.image;
+	}
+	
+	public byte[] getMobileScreenshotByte(Double x, Double y, Double w, Double h, String url){
+		final DesktopResponse resp = sendRequestCommand(CommandType.Record, RecordType.ScreenshotMobile, x.intValue(), y.intValue(), w.intValue(), h.intValue(), url);
 		return resp.image;
 	}
 
