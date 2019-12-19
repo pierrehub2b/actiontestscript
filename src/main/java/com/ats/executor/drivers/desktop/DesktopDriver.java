@@ -261,7 +261,7 @@ public class DesktopDriver extends RemoteWebDriver {
 	// Enum types
 	//------------------------------------------------------------------------------------------------------------
 
-	public enum CommandType
+	private enum CommandType
 	{
 		Driver (0),
 		Record (1),
@@ -279,7 +279,7 @@ public class DesktopDriver extends RemoteWebDriver {
 		public String toString(){ return this.type + ""; }
 	};
 
-	public enum DriverType
+	private enum DriverType
 	{
 		Capabilities (0),
 		Application (1),
@@ -295,7 +295,7 @@ public class DesktopDriver extends RemoteWebDriver {
 		public String toString(){ return this.type + ""; }
 	};
 
-	public enum MouseType
+	private enum MouseType
 	{
 		Move (0),
 		Click (1),
@@ -315,7 +315,7 @@ public class DesktopDriver extends RemoteWebDriver {
 		public String toString(){ return this.type + ""; }
 	};
 
-	public enum KeyType
+	private enum KeyType
 	{
 		Clear (0),
 		Enter (1),
@@ -331,7 +331,7 @@ public class DesktopDriver extends RemoteWebDriver {
 		public String toString(){ return this.type + ""; }
 	};
 
-	public enum WindowType
+	private enum WindowType
 	{
 		Title (0),
 		Handle(1),
@@ -354,7 +354,7 @@ public class DesktopDriver extends RemoteWebDriver {
 		public String toString(){ return this.type + ""; }
 	};
 
-	public enum ElementType
+	private enum ElementType
 	{
 		Childs (0),
 		Parents (1),
@@ -374,7 +374,7 @@ public class DesktopDriver extends RemoteWebDriver {
 		public String toString(){ return this.type + ""; }
 	};
 
-	public enum RecordType
+	private enum RecordType
 	{
 		Stop (0),
 		Screenshot (1),
