@@ -695,9 +695,18 @@ public class DesktopDriver extends RemoteWebDriver {
 		return resp.image;
 	}
 	
-	public byte[] getMobileScreenshotByte(Double x, Double y, Double w, Double h, Double width, Double height,String url){
-		final DesktopResponse resp = sendRequestCommand(CommandType.Record, RecordType.ScreenshotMobile, x.intValue(), y.intValue(), w.intValue(), h.intValue(), width.intValue(), height.intValue(), url);
+	public void createMobileRecord(String actionType, int scriptLine, long timeline, String channelName, TestBound subDimension, String screenshotPath){
+		sendRequestCommand(CommandType.Record, RecordType.CreateMobile, actionType, scriptLine, timeline,
+				channelName, subDimension.getX().intValue(), subDimension.getY().intValue(), subDimension.getWidth().intValue(), subDimension.getHeight().intValue(), screenshotPath);
+	}
+	
+	public byte[] getMobileScreenshotByte(Double x, Double y, Double w, Double h, TestBound channelBound,String url){
+		final DesktopResponse resp = sendRequestCommand(CommandType.Record, RecordType.ScreenshotMobile, x.intValue(), y.intValue(), w.intValue(), h.intValue(), channelBound.getWidth().intValue(), channelBound.getHeight().intValue(), url);
 		return resp.image;
+	}
+	
+	public void updateMobileScreenshot(TestBound bound, boolean isRef,String url){
+		sendRequestCommand(CommandType.Record, RecordType.ImageMobile, 0, 0, bound.getWidth().intValue(), bound.getHeight().intValue(),	isRef, url); 
 	}
 
 	public DesktopResponse startVisualRecord(Channel channel, ScriptHeader script, int quality, long started) {
@@ -789,7 +798,7 @@ public class DesktopDriver extends RemoteWebDriver {
 	private final static String USER_AGENT = "AtsDesktopDriver";
 	private static final MediaType MEDIA_UTF8 = MediaType.parse("application/x-www-form-urlencoded; charset=utf-8");
 	
-	public DesktopResponse sendRequestCommand(CommandType type, Enum<?> subType, Object... data) {
+	private DesktopResponse sendRequestCommand(CommandType type, Enum<?> subType, Object... data) {
 
 		final String url = new StringBuilder(driverUrl)
 				.append("/")

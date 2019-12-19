@@ -47,8 +47,6 @@ import com.ats.executor.SendKeyData;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.desktop.DesktopDriver;
-import com.ats.executor.drivers.desktop.DesktopDriver.CommandType;
-import com.ats.executor.drivers.desktop.DesktopDriver.RecordType;
 import com.ats.executor.drivers.engines.mobiles.AndroidRootElement;
 import com.ats.executor.drivers.engines.mobiles.IosRootElement;
 import com.ats.executor.drivers.engines.mobiles.RootElement;
@@ -83,6 +81,8 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	private final static String INPUT = "input";
 	public final static String SWIPE = "swipe";
 	private final static String BUTTON = "button";
+	
+	private final static String SCREENSHOT_METHOD = "/screenshot";
 
 	private JsonParser parser = new JsonParser();
 	private JsonObject source;
@@ -406,16 +406,21 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	
 	@Override
 	public void updateScreenshot(TestBound dimension, boolean isRef) {
-		getDesktopDriver().sendRequestCommand(CommandType.Record, RecordType.ImageMobile,
-				0,0,this.channel.getSubDimension().getWidth().intValue(), this.channel.getSubDimension().getHeight().intValue(),
-				isRef,
-				this.channel.getApplicationPath()+"/screenshot"); 
+		getDesktopDriver().updateMobileScreenshot(channel.getSubDimension(), isRef, getScreenshotPath());
 	}
 	
 	@Override
+	public byte[] getScreenshot(Double x, Double y, Double width, Double height) {
+		return getDesktopDriver().getMobileScreenshotByte(x, y, width, height, channel.getSubDimension(), getScreenshotPath());
+	}
+		
+	@Override
 	public void createVisualAction(Channel channel, String actionType, int scriptLine, long timeline) {
-		getDesktopDriver().sendRequestCommand(CommandType.Record, RecordType.CreateMobile, actionType, scriptLine, timeline,
-				channel.getName(), channel.getSubDimension().getX().intValue(), channel.getSubDimension().getY().intValue(), channel.getSubDimension().getWidth().intValue(), channel.getSubDimension().getHeight().intValue(),this.channel.getApplicationPath()+"/screenshot");
+		getDesktopDriver().createMobileRecord(actionType, scriptLine, timeline,	channel.getName(), channel.getSubDimension(), getScreenshotPath());
+	}
+	
+	private String getScreenshotPath() {
+		return getApplicationPath() + SCREENSHOT_METHOD;
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------------------------------
@@ -579,10 +584,5 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	protected void setSize(Dimension dim) {
-	}
-
-	@Override
-	public byte[] getScreenshot(Double x, Double y, Double width, Double height) {
-		return getDesktopDriver().getMobileScreenshotByte(x, y, width, height, channel.getSubDimension().getWidth(), channel.getSubDimension().getHeight(), getApplicationPath() + "/screenshot");
 	}
 }
