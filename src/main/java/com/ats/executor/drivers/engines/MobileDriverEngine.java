@@ -583,6 +583,6 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public byte[] getScreenshot(Double x, Double y, Double width, Double height) {
-		return getDesktopDriver().getMobileScreenshotByte(x, y, width, height, getApplicationPath() + "/screenshot");
+		return getDesktopDriver().getMobileScreenshotByte(x+10, y+40, width, height, channel.getSubDimension().getWidth(), channel.getSubDimension().getHeight(), getApplicationPath() + "/screenshot");
 	}
 }

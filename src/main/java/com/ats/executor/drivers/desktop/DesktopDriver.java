@@ -695,8 +695,8 @@ public class DesktopDriver extends RemoteWebDriver {
 		return resp.image;
 	}
 	
-	public byte[] getMobileScreenshotByte(Double x, Double y, Double w, Double h, String url){
-		final DesktopResponse resp = sendRequestCommand(CommandType.Record, RecordType.ScreenshotMobile, x.intValue(), y.intValue(), w.intValue(), h.intValue(), url);
+	public byte[] getMobileScreenshotByte(Double x, Double y, Double w, Double h, Double width, Double height,String url){
+		final DesktopResponse resp = sendRequestCommand(CommandType.Record, RecordType.ScreenshotMobile, x.intValue(), y.intValue(), w.intValue(), h.intValue(), width.intValue(), height.intValue(), url);
 		return resp.image;
 	}
 
