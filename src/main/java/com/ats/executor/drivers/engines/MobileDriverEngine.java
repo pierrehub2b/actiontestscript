@@ -580,4 +580,9 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	protected void setSize(Dimension dim) {
 	}
+
+	@Override
+	public byte[] getScreenshot(Double x, Double y, Double width, Double height) {
+		return getDesktopDriver().getMobileScreenshotByte(x, y, width, height, getApplicationPath() + "/screenshot");
+	}
 }

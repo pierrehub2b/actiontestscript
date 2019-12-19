@@ -36,8 +36,6 @@ import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.desktop.DesktopResponse;
 import com.ats.executor.drivers.desktop.DesktopWindow;
-import com.ats.executor.drivers.desktop.DesktopDriver.CommandType;
-import com.ats.executor.drivers.desktop.DesktopDriver.RecordType;
 import com.ats.executor.drivers.engines.IDriverEngine;
 import com.ats.executor.drivers.engines.MobileDriverEngine;
 import com.ats.executor.drivers.engines.desktop.DesktopDriverEngine;
@@ -201,10 +199,7 @@ public class Channel {
 
 	private byte[] screenShot(TestBound dim) {
 		mainScript.sleep(50);
-		if(this.isMobile()) {
-			return getDesktopDriver().getMobileScreenshotByte(dim.getX(), dim.getY(), dim.getWidth(), dim.getHeight(), this.getApplicationPath()+"/screenshot");
-		}
-		return getDesktopDriver().getScreenshotByte(dim.getX(), dim.getY(), dim.getWidth(), dim.getHeight());
+		return engine.getScreenshot(dim.getX(), dim.getY(), dim.getWidth(), dim.getHeight());
 	}
 	
 	public byte[] getScreenShot(){

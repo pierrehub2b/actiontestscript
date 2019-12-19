@@ -216,4 +216,8 @@ public abstract class DriverEngine {
 
 		return template.findOccurrences(screenshot).parallelStream().map(r -> new FoundElement(channel, parent, r)).collect(Collectors.toCollection(ArrayList::new));
 	}
+	
+	public byte[] getScreenshot(Double x, Double y, Double width, Double height) {
+		return getDesktopDriver().getScreenshotByte(x, y, width, height);
+	}
 }
