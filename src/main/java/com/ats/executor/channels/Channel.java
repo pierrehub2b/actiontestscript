@@ -190,21 +190,28 @@ public class Channel {
 		return engine.getSource();
 	}
 
+	//---------------------------------------------------------------------------
+	// Screen shot management
+	//---------------------------------------------------------------------------
+	
 	public byte[] getScreenShot(TestBound dim) {
-		dim.setX(dim.getX()+dimension.getX());
-		dim.setY(dim.getY()+dimension.getY());
+		dim.setX(dim.getX() + dimension.getX());
+		dim.setY(dim.getY() + dimension.getY());
 
-		return screenShot(dim);
+		return getScreenShotEngine(dim);
 	}
-
-	private byte[] screenShot(TestBound dim) {
+	
+	public byte[] getScreenShot(){
+		return getScreenShotEngine(dimension);
+	}
+	
+	private byte[] getScreenShotEngine(TestBound dim) {
 		mainScript.sleep(50);
 		return engine.getScreenshot(dim.getX(), dim.getY(), dim.getWidth(), dim.getHeight());
 	}
 	
-	public byte[] getScreenShot(){
-		return screenShot(dimension);
-	}
+	//---------------------------------------------------------------------------
+	//---------------------------------------------------------------------------
 
 	public void setApplicationData(String os, String version, String dVersion, long pid) {
 		setApplicationData(os, version, dVersion, pid, new byte[0], "");
