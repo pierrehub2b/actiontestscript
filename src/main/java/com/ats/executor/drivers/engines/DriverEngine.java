@@ -85,7 +85,7 @@ public abstract class DriverEngine {
 		}
 	}
 	
-	public void getScreenshot(TestBound dimension, boolean isRef) {
+	public void updateScreenshot(TestBound dimension, boolean isRef) {
 		getDesktopDriver().updateVisualImage(dimension, isRef);
 	}
 	

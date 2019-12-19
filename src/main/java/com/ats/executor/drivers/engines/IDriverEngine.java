@@ -77,7 +77,7 @@ public interface IDriverEngine{
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList);
 	public void clearText(ActionStatus status, FoundElement foundElement);
 	
-	public void getScreenshot(TestBound dimension, boolean isRef);
+	public void updateScreenshot(TestBound dimension, boolean isRef);
 	public byte[] getScreenshot(Double x, Double y, Double width, Double height);
 	
 	public void createVisualAction(Channel channel, String actionType, int scriptLine, long timeline);

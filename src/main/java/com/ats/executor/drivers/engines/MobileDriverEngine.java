@@ -405,7 +405,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 	
 	@Override
-	public void getScreenshot(TestBound dimension, boolean isRef) {
+	public void updateScreenshot(TestBound dimension, boolean isRef) {
 		getDesktopDriver().sendRequestCommand(CommandType.Record, RecordType.ImageMobile,
 				0,0,this.channel.getSubDimension().getWidth().intValue(), this.channel.getSubDimension().getHeight().intValue(),
 				isRef,

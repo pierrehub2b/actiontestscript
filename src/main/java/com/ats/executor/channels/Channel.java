@@ -619,7 +619,7 @@ public class Channel {
 	}
 
 	public void updateVisualAction(boolean isRef) {
-		this.engine.getScreenshot(this.dimension, isRef);
+		this.engine.updateScreenshot(this.dimension, isRef);
 	}
 
 	public void updateVisualAction(String value) {
