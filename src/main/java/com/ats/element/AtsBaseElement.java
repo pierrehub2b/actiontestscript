@@ -25,10 +25,10 @@ public class AtsBaseElement {
 	
 	protected String id;
 	protected String tag;
-	protected Double width = 0.0;
-	protected Double height = 0.0;
-	protected Double x = 0.0;
-	protected Double y = 0.0;
+	protected Double width = 0D;
+	protected Double height = 0D;
+	protected Double x = 0D;
+	protected Double y = 0D;
 	protected Map<String, String> attributes;
 	
 	public String getId() {

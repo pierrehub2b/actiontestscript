@@ -945,6 +945,14 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		}
 		return null;
 	}
+	
+	public ArrayList<Double> getBoundingClientRect(RemoteWebElement element) {
+		try {
+			return (ArrayList<Double>) driver.executeAsyncScript("var callback=arguments[arguments.length-1], rect=arguments[0].getBoundingClientRect();var result=[rect.x+0.0001, rect.y+0.0001, rect.width+0.0001, rect.height+0.0001];callback(result);", element);
+		}catch (Exception e) {
+			return null;
+		}
+	}
 
 	//---------------------------------------------------------------------------------------------------------------------
 	// 
@@ -1020,7 +1028,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		final ArrayList<ArrayList<Object>> response = (ArrayList<ArrayList<Object>>) runJavaScript(searchElementScript, startElement, tagName, attributes, attributes.size());
 		if(response != null && response.size() > 0){
 			final ArrayList<AtsElement> elements = response.parallelStream().filter(Objects::nonNull).map(e -> new AtsElement(e)).collect(Collectors.toCollection(ArrayList::new));
-			return elements.parallelStream().filter(predicate).map(e -> new FoundElement(e, channel, initElementX + offsetIframeX, initElementY + offsetIframeY)).collect(Collectors.toCollection(ArrayList::new));
+			return elements.parallelStream().filter(predicate).map(e -> new FoundElement(this, e, channel, initElementX + offsetIframeX, initElementY + offsetIframeY)).collect(Collectors.toCollection(ArrayList::new));
 		}
 
 		return new ArrayList<FoundElement>();

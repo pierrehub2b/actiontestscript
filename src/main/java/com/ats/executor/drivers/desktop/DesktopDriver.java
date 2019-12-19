@@ -721,16 +721,18 @@ public class DesktopDriver extends RemoteWebDriver {
 
 	public void updateVisualElement(TestElement element) {
 
-		Double x = 0.0;
-		Double y = 0.0;
-		Double w = 0.0;
-		Double h = 0.0;
+		Double x = 0D;
+		Double y = 0D;
+		Double w = 0D;
+		Double h = 0D;
 
 		final int numElements = element.getFoundElements().size();
 
 		if(numElements > 0) {
-			final FoundElement elem = element.getFoundElements().get(0);
-			final TestBound bound = elem.getTestBound();
+			final TestBound bound = element
+					.getFoundElements()
+					.get(0)
+					.getTestBound();
 
 			x = bound.getX();
 			y = bound.getY();

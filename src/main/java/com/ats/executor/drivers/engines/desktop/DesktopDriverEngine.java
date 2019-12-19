@@ -279,7 +279,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public void updateDimensions() {
 		DesktopWindow win = getDesktopDriver().getWindowByHandle(channel.getHandle(desktopDriver));
-		if(win != null && win.getWidth() != 9999.99 && win.getHeight() != 9999.99){
+		if(win != null && win.getWidth() != 9898 && win.getHeight() != 9898){
 			channel.setDimensions(new TestBound(
 					win.getX(),
 					win.getY(),

@@ -36,7 +36,7 @@ public class XmlReport {
 		final File atsvFile = output.resolve(qualifiedName + ".atsv").toFile();
 
 		if(atsvFile.exists()) {
-
+			
 			final File xmlFolder = output.resolve(qualifiedName + "_xml").toFile();
 			logger.sendInfo("Create XML report", xmlFolder.getAbsolutePath());
 

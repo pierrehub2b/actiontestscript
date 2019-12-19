@@ -36,11 +36,11 @@ public class AtsElement extends AtsBaseElement {
 	private RemoteWebElement element;
 	protected boolean numeric = false;
 	protected boolean password = false;
-	private Double screenX = 0.0;
-	private Double screenY = 0.0;
+	private Double screenX = 0D;
+	private Double screenY = 0D;
 	
-	private Double boundX = 0.0;
-	private Double boundY = 0.0;
+	private Double boundX = 0D;
+	private Double boundY = 0D;
 
 	private boolean visible = true;
 	private boolean clickable = true;
@@ -53,6 +53,7 @@ public class AtsElement extends AtsBaseElement {
 	public AtsElement() {}
 
 	public AtsElement(ArrayList<Object> data) {
+
 		this.element = (RemoteWebElement) data.get(0);
 		this.tag = data.get(1).toString();
 		this.numeric = (boolean) data.get(2);
@@ -70,7 +71,7 @@ public class AtsElement extends AtsBaseElement {
 	
 	private static Double getDataValue(Object data) {
 		if(data == null) {
-			return 0.0;
+			return 0D;
 		}
 		return (Double)data;
 	}

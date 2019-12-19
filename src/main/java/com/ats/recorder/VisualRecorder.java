@@ -88,6 +88,7 @@ public class VisualRecorder implements IVisualRecorder {
 		if(channel != null) {
 			final Path path = Paths.get(outputPath);
 			
+			logger.sendInfo("Stop visual recording", scriptHeader.getQualifiedName());
 			channel.stopVisualRecord();
 			channel.saveVisualReportFile(path, scriptHeader.getQualifiedName() + Script.ATS_VISUAL_FILE_EXTENSION, logger);
 			
