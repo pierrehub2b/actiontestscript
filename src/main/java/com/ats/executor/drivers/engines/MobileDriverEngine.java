@@ -349,7 +349,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			outterBound = channel.getDimension();
 		}
 		
-		final byte[] screenshot = getDesktopDriver().getMobileScreenshotByte(0D, 0D, outterBound.getWidth(), outterBound.getHeight(), outterBound, getScreenshotPath());
+		final byte[] screenshot = getDesktopDriver().getMobileScreenshotByte(0D, 0D, outterBound.getWidth(), outterBound.getHeight(), getScreenshotPath());
 
 		return template.findOccurrences(screenshot).parallelStream().map(r -> new FoundElement(channel, parent, r)).collect(Collectors.toCollection(ArrayList::new));
 	}
@@ -421,7 +421,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	
 	@Override
 	public byte[] getScreenshot(Double x, Double y, Double width, Double height) {
-		return getDesktopDriver().getMobileScreenshotByte(x, y, width, height, channel.getSubDimension(), getScreenshotPath());
+		return getDesktopDriver().getMobileScreenshotByte(x, y, width, height, getScreenshotPath());
 	}
 		
 	@Override
