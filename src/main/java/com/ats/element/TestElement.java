@@ -127,11 +127,9 @@ public class TestElement{
 			parent = null;
 		}
 
-		if(foundElements != null) {
-			while(foundElements.size() > 0) {
-				foundElements.remove(0).dispose();
-			}
-		}	
+		while(foundElements.size() > 0) {
+			foundElements.remove(0).dispose();
+		}
 	}
 
 	public boolean isSysComp() {
@@ -190,7 +188,7 @@ public class TestElement{
 	}
 
 	private int getElementsCount() {
-		if(foundElements != null && foundElements.size() > getStartOneIndex()){
+		if(foundElements.size() > getStartOneIndex()){
 			return foundElements.size();
 		}else{
 			return 0;
@@ -238,7 +236,7 @@ public class TestElement{
 	}
 
 	public boolean isIframe() {
-		if(foundElements != null && foundElements.size() > getStartOneIndex()){
+		if(foundElements.size() > getStartOneIndex()){
 			return getFoundElement().isIframe();
 		}else{
 			return false;
