@@ -341,7 +341,17 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public ArrayList<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template) {
-		return null;
+
+		TestBound outterBound = null;
+		if(parent != null) {
+			outterBound = parent.getFoundElement().getTestScreenBound();
+		}else {
+			outterBound = channel.getDimension();
+		}
+		
+		final byte[] screenshot = getDesktopDriver().getMobileScreenshotByte(0D, 0D, outterBound.getWidth(), outterBound.getHeight(), outterBound, getScreenshotPath());
+
+		return template.findOccurrences(screenshot).parallelStream().map(r -> new FoundElement(channel, parent, r)).collect(Collectors.toCollection(ArrayList::new));
 	}
 
 	private void loadElementsByTag(AtsMobileElement root, String tag, List<AtsMobileElement> list) {

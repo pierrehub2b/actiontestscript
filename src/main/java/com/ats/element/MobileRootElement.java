@@ -22,13 +22,11 @@ public class MobileRootElement extends RemoteWebElement {
 
 	@Override
 	public String getAttribute(String name) {
-		if("width".equals(name)){
+		if("width".equals(name) || "clientWidth".equals(name)){
 			return width + "";
-		}else if("height".equals(name)) {
+		}else if("height".equals(name) || "clientHeight".equals(name)) {
 			return height + "";
 		}
 		return super.getAttribute(name);
 	}
-	
-	
 }
