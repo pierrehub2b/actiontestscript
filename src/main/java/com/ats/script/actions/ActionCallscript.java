@@ -37,6 +37,7 @@ import java.util.regex.Pattern;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.CalculatedValue;
+import com.ats.generator.variables.ConditionalValue;
 import com.ats.generator.variables.Variable;
 import com.ats.script.ProjectData;
 import com.ats.script.Script;
@@ -62,12 +63,19 @@ public class ActionCallscript extends Action {
 
 	private List<Variable> variables;
 	private List<CalculatedValue> parameters;
+
 	private int loop = 1;
 	private CalculatedValue csvFilePath = null;
 
+	private ConditionalValue condition;
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// Constructors
+	//---------------------------------------------------------------------------------------------------------------------------------
+
 	public ActionCallscript() {}
 
-	public ActionCallscript(ScriptLoader script, String name, String[] parameters, String[] returnValue, String csvFilePath) {
+	public ActionCallscript(ScriptLoader script, ArrayList<String> options, String name, String[] parameters, String[] returnValue, String csvFilePath) {
 
 		super(script);
 		this.setName(new CalculatedValue(script, name));
@@ -99,6 +107,14 @@ public class ActionCallscript extends Action {
 				variableValues.add(script.getVariable(varName.trim(), true));
 			}
 			this.setVariables(variableValues);
+		}
+
+		if(options.size() > 0) {
+			final String option = options.get(0);
+			final int operatorIndex = option.indexOf("=");
+			if(operatorIndex > 1) {
+				condition = new ConditionalValue(script, option.substring(0, operatorIndex).trim(), option.substring(operatorIndex+1).trim());
+			}
 		}
 	}
 
@@ -138,6 +154,9 @@ public class ActionCallscript extends Action {
 		this.setLoop(loop);
 	}
 
+	//---------------------------------------------------------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------------------------------------------------
+
 	private boolean setCsvFilePathData(String value) {
 		if(value != null) {
 			if(value.startsWith(ASSETS_PROTOCOLE) || value.startsWith(FILE_PROTOCOLE) || value.startsWith(HTTP_PROTOCOLE) || value.startsWith(HTTPS_PROTOCOLE)) {
@@ -156,6 +175,7 @@ public class ActionCallscript extends Action {
 	public StringBuilder getJavaCode() {
 
 		final StringBuilder codeBuilder = super.getJavaCode();
+		
 		codeBuilder.append(name.getJavaCode());
 
 		if(csvFilePath != null) {
@@ -188,7 +208,11 @@ public class ActionCallscript extends Action {
 		}
 
 		codeBuilder.append(")");
-
+		
+		if(condition != null) {
+			return condition.getJavaCode(codeBuilder);
+		}
+		
 		return codeBuilder;
 	}
 
@@ -198,77 +222,79 @@ public class ActionCallscript extends Action {
 	@Override
 	public void execute(ActionTestScript ts) {
 
-		final String scriptName = name.getCalculated();
-		
 		super.execute(ts.getCurrentChannel());
 
-		//Class<ActionTestScript> clazz = (Class<ActionTestScript>) Class.forName(name.getCalculated()); // old way still working
-		Class<ActionTestScript> clazz = classLoader.findClass(scriptName);
+		if(condition == null || condition.isPassed()) {
 
-		if(clazz == null) {
-			status.setError(MessageCode.SCRIPT_NOT_FOUND, "ATS script not found : '" + scriptName + "' (maybe a letter case issue ?)\n");
-		}else {
+			final String scriptName = name.getCalculated();
 
-			try {
+			//Class<ActionTestScript> clazz = (Class<ActionTestScript>) Class.forName(name.getCalculated()); // old way still working
+			Class<ActionTestScript> clazz = classLoader.findClass(scriptName);
 
-				ActionTestScript ats = clazz.getDeclaredConstructor().newInstance();
+			if(clazz == null) {
+				status.setError(MessageCode.SCRIPT_NOT_FOUND, "ATS script not found : '" + scriptName + "' (maybe a letter case issue ?)\n");
+			}else {
 
-				if(csvFilePath != null) {
+				try {
 
-					final String csvPath = csvFilePath.getCalculated();
-					URL csvUrl = null;
+					ActionTestScript ats = clazz.getDeclaredConstructor().newInstance();
 
-					if(csvPath.startsWith(ASSETS_PROTOCOLE)) {
-						csvUrl = getClass().getClassLoader().getResource(csvPath.replace(ASSETS_PROTOCOLE, ProjectData.ASSETS_FOLDER + File.separator));
-					}else {
-						try {
-							csvUrl = new URL(csvPath);
-						} catch (MalformedURLException e) {}
-					}
+					if(csvFilePath != null) {
 
-					if(csvUrl == null) {
-						status.setError(ActionStatus.FILE_NOT_FOUND, "CSV file not found : " + csvPath);
-						return;
-					}
+						final String csvPath = csvFilePath.getCalculated();
+						URL csvUrl = null;
 
-					try {
-
-						final List<String[]> data = Utils.loadCsvData(csvUrl);
-
-						for (String[] param : data) {
-							ts.getTopScript().sendScriptLog("Call subscript -> " + scriptName);
-
-							ats.initCalledScript(ts.getTopScript(), param, null);
-							final Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
-							testMain.invoke(ats);
+						if(csvPath.startsWith(ASSETS_PROTOCOLE)) {
+							csvUrl = getClass().getClassLoader().getResource(csvPath.replace(ASSETS_PROTOCOLE, ProjectData.ASSETS_FOLDER + File.separator));
+						}else {
+							try {
+								csvUrl = new URL(csvPath);
+							} catch (MalformedURLException e) {}
 						}
 
-					} catch (IOException e) {
-						status.setError(ActionStatus.FILE_NOT_FOUND, "CSV file IO error : " + csvPath + " -> " + e.getMessage());
+						if(csvUrl == null) {
+							status.setError(ActionStatus.FILE_NOT_FOUND, "CSV file not found : " + csvPath);
+							return;
+						}
+
+						try {
+
+							final List<String[]> data = Utils.loadCsvData(csvUrl);
+
+							for (String[] param : data) {
+								ts.getTopScript().sendScriptLog("Call subscript -> " + scriptName);
+
+								ats.initCalledScript(ts.getTopScript(), param, null);
+								final Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
+								testMain.invoke(ats);
+							}
+
+						} catch (IOException e) {
+							status.setError(ActionStatus.FILE_NOT_FOUND, "CSV file IO error : " + csvPath + " -> " + e.getMessage());
+						}
+
+					}else {
+						ats.initCalledScript(ts.getTopScript(), getCalculatedParameters(), variables);
+						Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
+						for (int i=0; i<loop; i++) {
+							ts.getTopScript().sendScriptLog("Call subscript -> " + scriptName);
+							testMain.invoke(ats);
+						}
+						status.setData(ats.getReturnValues());
 					}
 
-				}else {
-					ats.initCalledScript(ts.getTopScript(), getCalculatedParameters(), variables);
-					Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
-					for (int i=0; i<loop; i++) {
-						ts.getTopScript().sendScriptLog("Call subscript -> " + scriptName);
-						testMain.invoke(ats);
+				} catch (InstantiationException e) {
+				} catch (IllegalAccessException e) {
+				} catch (IllegalArgumentException e) {
+				} catch (InvocationTargetException e) {
+					if(e.getTargetException() instanceof AssertionError) {
+						fail(e.getCause().getMessage());
 					}
-					status.setData(ats.getReturnValues());
+				} catch (NoSuchMethodException e) {
+				} catch (SecurityException e) {
 				}
-
-			} catch (InstantiationException e) {
-			} catch (IllegalAccessException e) {
-			} catch (IllegalArgumentException e) {
-			} catch (InvocationTargetException e) {
-				if(e.getTargetException() instanceof AssertionError) {
-					fail(e.getCause().getMessage());
-				}
-			} catch (NoSuchMethodException e) {
-			} catch (SecurityException e) {
 			}
 		}
-
 		status.endDuration();
 	}
 
@@ -284,7 +310,7 @@ public class ActionCallscript extends Action {
 		}
 		return null;
 	}
-	
+
 	@Override
 	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
 		if(csvFilePath != null) {
@@ -359,4 +385,12 @@ public class ActionCallscript extends Action {
 			this.loop = 1;
 		}
 	}	
+
+	public ConditionalValue getCondition() {
+		return condition;
+	}
+
+	public void setCondition(ConditionalValue condition) {
+		this.condition = condition;
+	}
 }

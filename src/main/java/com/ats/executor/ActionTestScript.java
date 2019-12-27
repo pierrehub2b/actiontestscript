@@ -63,6 +63,7 @@ import com.ats.script.ProjectData;
 import com.ats.script.Script;
 import com.ats.script.ScriptHeader;
 import com.ats.script.actions.Action;
+import com.ats.script.actions.ActionCallscript;
 import com.ats.script.actions.ActionExecute;
 import com.ats.script.actions.ActionExecuteElement;
 import com.ats.tools.Utils;
@@ -520,6 +521,11 @@ public class ActionTestScript extends Script implements ITest{
 	}
 
 	public void exec(int line, Action action){
+		exec(action);
+		execFinished(line, action, action.getStatus(), true);
+	}
+	
+	public void exec(int line, ActionCallscript action){
 		exec(action);
 		execFinished(line, action, action.getStatus(), true);
 	}

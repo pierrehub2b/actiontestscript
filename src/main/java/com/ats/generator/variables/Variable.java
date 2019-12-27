@@ -70,6 +70,17 @@ public class Variable implements Comparable<Variable>{
 	public void setData(String value) {
 		data = value;
 	}
+	
+	//----------------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public int compareTo(Variable variable) {
+		return Boolean.valueOf(isCalculation()).compareTo(Boolean.valueOf(variable.isCalculation()));
+	}
+	
+	public boolean equals(CalculatedValue clv) {
+		return clv.getCalculated().equals(getCalculatedValue());
+	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
 	// Code Generator
@@ -135,12 +146,4 @@ public class Variable implements Comparable<Variable>{
 	public void setCalculation(boolean value) {
 		this.calculation = value;
 	}
-
-	//----------------------------------------------------------------------------------------------------------------------------
-
-	@Override
-	public int compareTo(Variable variable) {
-		return Boolean.valueOf(isCalculation()).compareTo(Boolean.valueOf(variable.isCalculation()));
-	}
-
 }
