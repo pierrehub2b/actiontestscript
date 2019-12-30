@@ -33,7 +33,7 @@ public class ConditionalValue {
 	}
 
 	public boolean isPassed() {
-		return true;
+		return variable.getCalculatedValue().equals(value.getCalculated());
 	}
 
 	public StringBuilder getJavaCode(StringBuilder builder) {
@@ -45,6 +45,20 @@ public class ConditionalValue {
 				.append(")) ")
 				.append(builder);
 		return codeBuilder;
+	}
+	
+	//--------------------------------------------------------
+	
+	public String getLogData(String scriptName) {
+		StringBuilder builder = new StringBuilder(scriptName)
+				.append(" not executed : variable '")
+				.append(variable.getName())
+				.append("' with value = '")
+				.append(variable.getCalculatedValue())
+				.append("' is not equals to '")
+				.append(value.getCalculated())
+				.append("'");
+		return builder.toString();
 	}
 
 	//--------------------------------------------------------

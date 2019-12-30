@@ -35,6 +35,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.ats.generator.variables.CalculatedValue;
+import com.ats.generator.variables.ConditionalValue;
 import com.ats.generator.variables.RandomStringValue;
 import com.ats.generator.variables.ScriptValue;
 import com.ats.generator.variables.Variable;
@@ -102,6 +103,10 @@ public class Script {
 	
 	public void sendActionLog(Action action, String testName, int line) {
 		logger.sendAction(action, testName, line); 
+	}
+	
+	public void sendConditionExecLog(String scriptName, ConditionalValue condition) {
+		logger.sendConditionExec(scriptName, condition);
 	}
 	
 	public void sendScriptLog(String value) {
