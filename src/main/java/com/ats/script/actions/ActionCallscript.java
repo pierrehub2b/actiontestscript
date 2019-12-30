@@ -175,7 +175,7 @@ public class ActionCallscript extends Action {
 	public StringBuilder getJavaCode() {
 
 		final StringBuilder codeBuilder = super.getJavaCode();
-		
+
 		codeBuilder.append(name.getJavaCode());
 
 		if(csvFilePath != null) {
@@ -208,11 +208,11 @@ public class ActionCallscript extends Action {
 		}
 
 		codeBuilder.append(")");
-		
+
 		if(condition != null) {
 			return condition.getJavaCode(codeBuilder);
 		}
-		
+
 		return codeBuilder;
 	}
 
@@ -223,78 +223,81 @@ public class ActionCallscript extends Action {
 	public void execute(ActionTestScript ts) {
 
 		super.execute(ts.getCurrentChannel());
+		final String scriptName = name.getCalculated();
+		
+		if(condition != null && !condition.isPassed()) {
+			ts.getTopScript().sendConditionExecLog(scriptName, condition);
+			status.endDuration();
+			return;
+		}
 
-		if(condition == null || condition.isPassed()) {
+		//Class<ActionTestScript> clazz = (Class<ActionTestScript>) Class.forName(name.getCalculated()); // old way still working
+		Class<ActionTestScript> clazz = classLoader.findClass(scriptName);
 
-			final String scriptName = name.getCalculated();
+		if(clazz == null) {
+			status.setError(MessageCode.SCRIPT_NOT_FOUND, "ATS script not found : '" + scriptName + "' (maybe a letter case issue ?)\n");
+		}else {
 
-			//Class<ActionTestScript> clazz = (Class<ActionTestScript>) Class.forName(name.getCalculated()); // old way still working
-			Class<ActionTestScript> clazz = classLoader.findClass(scriptName);
+			try {
 
-			if(clazz == null) {
-				status.setError(MessageCode.SCRIPT_NOT_FOUND, "ATS script not found : '" + scriptName + "' (maybe a letter case issue ?)\n");
-			}else {
+				ActionTestScript ats = clazz.getDeclaredConstructor().newInstance();
 
-				try {
+				if(csvFilePath != null) {
 
-					ActionTestScript ats = clazz.getDeclaredConstructor().newInstance();
+					final String csvPath = csvFilePath.getCalculated();
+					URL csvUrl = null;
 
-					if(csvFilePath != null) {
-
-						final String csvPath = csvFilePath.getCalculated();
-						URL csvUrl = null;
-
-						if(csvPath.startsWith(ASSETS_PROTOCOLE)) {
-							csvUrl = getClass().getClassLoader().getResource(csvPath.replace(ASSETS_PROTOCOLE, ProjectData.ASSETS_FOLDER + File.separator));
-						}else {
-							try {
-								csvUrl = new URL(csvPath);
-							} catch (MalformedURLException e) {}
-						}
-
-						if(csvUrl == null) {
-							status.setError(ActionStatus.FILE_NOT_FOUND, "CSV file not found : " + csvPath);
-							return;
-						}
-
-						try {
-
-							final List<String[]> data = Utils.loadCsvData(csvUrl);
-
-							for (String[] param : data) {
-								ts.getTopScript().sendScriptLog("Call subscript -> " + scriptName);
-
-								ats.initCalledScript(ts.getTopScript(), param, null);
-								final Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
-								testMain.invoke(ats);
-							}
-
-						} catch (IOException e) {
-							status.setError(ActionStatus.FILE_NOT_FOUND, "CSV file IO error : " + csvPath + " -> " + e.getMessage());
-						}
-
+					if(csvPath.startsWith(ASSETS_PROTOCOLE)) {
+						csvUrl = getClass().getClassLoader().getResource(csvPath.replace(ASSETS_PROTOCOLE, ProjectData.ASSETS_FOLDER + File.separator));
 					}else {
-						ats.initCalledScript(ts.getTopScript(), getCalculatedParameters(), variables);
-						Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
-						for (int i=0; i<loop; i++) {
+						try {
+							csvUrl = new URL(csvPath);
+						} catch (MalformedURLException e) {}
+					}
+
+					if(csvUrl == null) {
+						status.setError(ActionStatus.FILE_NOT_FOUND, "CSV file not found : " + csvPath);
+						return;
+					}
+
+					try {
+
+						final List<String[]> data = Utils.loadCsvData(csvUrl);
+
+						for (String[] param : data) {
 							ts.getTopScript().sendScriptLog("Call subscript -> " + scriptName);
+
+							ats.initCalledScript(ts.getTopScript(), param, null);
+							final Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
 							testMain.invoke(ats);
 						}
-						status.setData(ats.getReturnValues());
+
+					} catch (IOException e) {
+						status.setError(ActionStatus.FILE_NOT_FOUND, "CSV file IO error : " + csvPath + " -> " + e.getMessage());
 					}
 
-				} catch (InstantiationException e) {
-				} catch (IllegalAccessException e) {
-				} catch (IllegalArgumentException e) {
-				} catch (InvocationTargetException e) {
-					if(e.getTargetException() instanceof AssertionError) {
-						fail(e.getCause().getMessage());
+				}else {
+					ats.initCalledScript(ts.getTopScript(), getCalculatedParameters(), variables);
+					Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
+					for (int i=0; i<loop; i++) {
+						ts.getTopScript().sendScriptLog("Call subscript -> " + scriptName);
+						testMain.invoke(ats);
 					}
-				} catch (NoSuchMethodException e) {
-				} catch (SecurityException e) {
+					status.setData(ats.getReturnValues());
 				}
+
+			} catch (InstantiationException e) {
+			} catch (IllegalAccessException e) {
+			} catch (IllegalArgumentException e) {
+			} catch (InvocationTargetException e) {
+				if(e.getTargetException() instanceof AssertionError) {
+					fail(e.getCause().getMessage());
+				}
+			} catch (NoSuchMethodException e) {
+			} catch (SecurityException e) {
 			}
 		}
+
 		status.endDuration();
 	}
 
