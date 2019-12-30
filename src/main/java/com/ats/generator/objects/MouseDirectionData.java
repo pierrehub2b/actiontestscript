@@ -58,7 +58,7 @@ public class MouseDirectionData {
 	}
 	
 	public int getIntValue() {
-	 	return Utils.string2Int(value.getCalculated());
+	 	return value.getCalculated() != "" ? Utils.string2Int(value.getCalculated()) : Utils.string2Int(value.getData());
 	}
 	
 	//---------------------------------------------------------------------------------------------------------------------------------
