@@ -19,8 +19,13 @@ under the License.
 
 package com.ats.executor.drivers.engines;
 
+import java.awt.Graphics;
 import java.awt.Point;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -29,6 +34,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.imageio.ImageIO;
 
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.Dimension;
@@ -138,15 +145,16 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 				}
 					
 				final String driverVersion = response.get("driverVersion").getAsString();
-
+				
+				final double deviceWidth = response.get("deviceWidth").getAsDouble();
+				final double deviceHeight = response.get("deviceHeight").getAsDouble();
+				
 				final double channelWidth = response.get("channelWidth").getAsDouble();
 				final double channelHeight = response.get("channelHeight").getAsDouble();
 
 				final double channelX = response.get("channelX").getAsDouble();
 				final double channelY = response.get("channelY").getAsDouble();
 
-				final double deviceWidth = response.get("deviceWidth").getAsDouble();
-				final double deviceHeight = response.get("deviceHeight").getAsDouble();
 
 				final int screenCapturePort = response.get("screenCapturePort").getAsInt();
 
@@ -306,7 +314,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 	private AtsMobileElement getCapturedElementById(String id, boolean reload) {
 		if(reload) {
-			refreshElementMapLocation();
+			//refreshElementMapLocation();
 			return getElementById(rootElement.getValue(), id); 
 		} else if(cachedElement != null) {
 			return getElementById(cachedElement.getValue(), id); 
@@ -341,16 +349,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public ArrayList<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template) {
-
-		TestBound outterBound = null;
-		if(parent != null) {
-			outterBound = parent.getFoundElement().getTestScreenBound();
-		}else {
-			outterBound = channel.getDimension();
-		}
-		
-		final byte[] screenshot = getDesktopDriver().getMobileScreenshotByte(0D, 0D, outterBound.getWidth(), outterBound.getHeight(), getScreenshotPath());
-
+		final byte[] screenshot = getDesktopDriver().getMobileScreenshotByte(getScreenshotPath());
 		return template.findOccurrences(screenshot).parallelStream().map(r -> new FoundElement(channel, parent, r)).collect(Collectors.toCollection(ArrayList::new));
 	}
 
@@ -421,7 +420,32 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	
 	@Override
 	public byte[] getScreenshot(Double x, Double y, Double width, Double height) {
-		return getDesktopDriver().getMobileScreenshotByte(x, y, width, height, getScreenshotPath());
+		
+		ImageIO.setUseCache(false);
+		
+		byte[] result = null;
+		
+		final InputStream in = new ByteArrayInputStream(getDesktopDriver().getMobileScreenshotByte(getScreenshotPath()));
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		
+		final BufferedImage subImage = new BufferedImage(width.intValue(), height.intValue(), BufferedImage.TYPE_INT_RGB);
+		final Graphics g = subImage.getGraphics();
+		
+		try {
+		    
+			//final BufferedImage subImage = ImageIO.read(in).getSubimage(x.intValue(), y.intValue(), width.intValue(), height.intValue());
+		    g.drawImage(ImageIO.read(in), 0, 0, width.intValue(), height.intValue(), x.intValue(), y.intValue(), x.intValue() + width.intValue(), y.intValue() + height.intValue(), null);
+		    g.dispose();
+						
+			ImageIO.write(subImage, "png", baos);
+			baos.flush();
+			
+			result = baos.toByteArray();
+			baos.close();
+			
+		} catch (IOException e) {}
+		
+		return result;
 	}
 		
 	@Override

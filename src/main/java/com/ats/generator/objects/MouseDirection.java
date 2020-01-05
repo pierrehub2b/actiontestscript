@@ -67,7 +67,7 @@ public class MouseDirection {
 		}
 
 		data = Cartesian.CENTER.getData(value);
-		if(data != null) {
+		if(data != null && !"0".equals(data)) {
 			setHorizontalPos(new MouseDirectionData(Cartesian.CENTER.toString(), new CalculatedValue(script, data)));
 			return true;
 		}
@@ -85,7 +85,7 @@ public class MouseDirection {
 		}
 
 		data = Cartesian.MIDDLE.getData(value);
-		if(data != null) {
+		if(data != null && !"0".equals(data)) {
 			setVerticalPos(new MouseDirectionData(Cartesian.MIDDLE.toString(), new CalculatedValue(script, data)));
 			return true;
 		}

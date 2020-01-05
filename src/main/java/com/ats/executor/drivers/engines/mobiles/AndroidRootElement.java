@@ -24,7 +24,7 @@ public class AndroidRootElement extends RootElement {
 	@Override
 	public void tap(ActionStatus status, FoundElement element, MouseDirection position) {
 		final Rectangle rect = element.getRectangle();
-		driver.executeRequest(MobileDriverEngine.ELEMENT, element.getId(), MobileDriverEngine.TAP, (int)(driver.getOffsetX(rect, position)) + "", (int)(driver.getOffsetY(rect, position)) + "");	
+		driver.executeRequest(MobileDriverEngine.ELEMENT, element.getId(), MobileDriverEngine.TAP, (int)(element.getBoundX() + driver.getOffsetX(rect, position)) + "", (int)(element.getBoundY() + driver.getOffsetY(rect, position)) + "");	
 	}
 
 	@Override

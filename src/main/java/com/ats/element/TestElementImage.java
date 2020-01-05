@@ -58,7 +58,6 @@ public class TestElementImage extends TestElement {
 		final int halfHeight = Utils.string2Int(fe.getValue().getAttribute("clientHeight"))/2;
 
 		super.mouseClick(status, position, fe.getBoundX().intValue() - halfWidth, fe.getBoundY().intValue() - halfHeight);
-
 	}
 
 	@Override

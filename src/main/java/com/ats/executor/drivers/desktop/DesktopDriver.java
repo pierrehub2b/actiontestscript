@@ -700,8 +700,8 @@ public class DesktopDriver extends RemoteWebDriver {
 				channelName, subDimension.getX().intValue(), subDimension.getY().intValue(), subDimension.getWidth().intValue(), subDimension.getHeight().intValue(), screenshotPath);
 	}
 	
-	public byte[] getMobileScreenshotByte(Double x, Double y, Double w, Double h, String url){
-		final DesktopResponse resp = sendRequestCommand(CommandType.Record, RecordType.ScreenshotMobile, x.intValue(), y.intValue(), w.intValue(), h.intValue(), url);
+	public byte[] getMobileScreenshotByte(String url){
+		final DesktopResponse resp = sendRequestCommand(CommandType.Record, RecordType.ScreenshotMobile, url, "hires");
 		return resp.image;
 	}
 	

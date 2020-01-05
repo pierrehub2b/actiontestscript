@@ -101,8 +101,7 @@ public class TemplateMatchingSimple {
 	public static ArrayList<Rectangle> getLocations(final byte[] mainImageInBytes, final BufferedImage subImage, int maxError, int maxDiff) {
 		final InputStream in = new ByteArrayInputStream(mainImageInBytes);
 		try {
-			final BufferedImage mainImage = ImageIO.read(in);
-			return getLocations(mainImage, getVector(subImage), subImage.getWidth(), subImage.getHeight(), maxError, maxDiff);
+			return getLocations(ImageIO.read(in), getVector(subImage), subImage.getWidth(), subImage.getHeight(), maxError, maxDiff);
 		} catch (IOException e) {
 			return new ArrayList<Rectangle>();
 		}
