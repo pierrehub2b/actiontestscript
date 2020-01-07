@@ -152,13 +152,9 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 				final double channelWidth = response.get("channelWidth").getAsDouble();
 				final double channelHeight = response.get("channelHeight").getAsDouble();
 
-				final double channelX = response.get("channelX").getAsDouble();
-				final double channelY = response.get("channelY").getAsDouble();
-
-
 				final int screenCapturePort = response.get("screenCapturePort").getAsInt();
 
-				channel.setDimensions(new TestBound(0D, 0D, deviceWidth, deviceHeight), new TestBound(channelX, channelY, channelWidth, channelHeight));
+				channel.setDimensions(new TestBound(0D, 0D, deviceWidth, deviceHeight), new TestBound(0D, 0D, channelWidth, channelHeight));
 
 				response = executeRequest(APP, START, application);
 				if(response != null) {
