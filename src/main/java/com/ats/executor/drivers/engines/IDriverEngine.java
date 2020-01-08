@@ -54,7 +54,7 @@ public interface IDriverEngine{
 	public Object executeJavaScript(ActionStatus status, String script, boolean returnValue);
 	public void goToUrl(ActionStatus status, String url);
 	
-	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, ArrayList<String> attributesValues, Predicate<AtsBaseElement> searchPredicate, WebElement startElement);
+	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, ArrayList<String> attributesValues, Predicate<AtsBaseElement> searchPredicate, WebElement startElement, boolean waitAnimation);
 	public ArrayList<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template);
 	
 	public void waitAfterAction(ActionStatus status);

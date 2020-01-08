@@ -701,7 +701,7 @@ public class DesktopDriver extends RemoteWebDriver {
 	}
 	
 	public byte[] getMobileScreenshotByte(String url){
-		final DesktopResponse resp = sendRequestCommand(CommandType.Record, RecordType.ScreenshotMobile, url, "hires");
+		final DesktopResponse resp = sendRequestCommand(CommandType.Record, RecordType.ScreenshotMobile, url);
 		return resp.image;
 	}
 	

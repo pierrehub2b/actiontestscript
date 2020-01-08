@@ -262,7 +262,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testElement, String tag, ArrayList<String> attributes, ArrayList<String> attributesValues, Predicate<AtsBaseElement> predicate, WebElement startElement) {
+	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testElement, String tag, ArrayList<String> attributes, ArrayList<String> attributesValues, Predicate<AtsBaseElement> predicate, WebElement startElement, boolean waitAnimation) {
 		if(sysComp) {
 			if(SYSCOMP.equals(tag.toUpperCase())) {
 				ArrayList<FoundElement> win = new ArrayList<FoundElement>();

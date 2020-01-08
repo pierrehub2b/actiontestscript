@@ -184,7 +184,7 @@ public class TestElement{
 				attributesValues.add(property.getName() + "\t" + property.getValue().getCalculated());
 			}
 		}
-		return engine.findElements(sysComp, this, searchedTag, attributes, attributesValues, fullPredicate, null);
+		return engine.findElements(sysComp, this, searchedTag, attributes, attributesValues, fullPredicate, null, true);
 	}
 
 	private int getElementsCount() {

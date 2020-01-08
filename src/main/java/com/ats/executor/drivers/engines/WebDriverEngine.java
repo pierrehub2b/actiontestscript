@@ -480,7 +480,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public ArrayList<FoundElement> findSelectOptions(TestBound dimension, TestElement element) {
 		switchToDefaultContent();
-		return findElements(false, element, "option", new ArrayList<String>(), new ArrayList<String>(), Objects::nonNull, element.getWebElement());
+		return findElements(false, element, "option", new ArrayList<String>(), new ArrayList<String>(), Objects::nonNull, element.getWebElement(), false);
 	}
 
 	@Override
@@ -524,7 +524,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 				}
 			}
 
-			element.click(status, new MouseDirection(new MouseDirectionData(Cartesian.LEFT, new CalculatedValue(-5)), null));
+			executeJavaScript(status, "blur();", element.getWebElement());
 		}
 	}
 
@@ -990,7 +990,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	private double offsetIframeY = 0.0;
 
 	@Override
-	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, ArrayList<String> attributesValues, Predicate<AtsBaseElement> predicate, WebElement startElement) {
+	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, ArrayList<String> attributesValues, Predicate<AtsBaseElement> predicate, WebElement startElement, boolean waitAnimation) {
 
 		if(testObject.getParent() != null){
 			if(testObject.getParent().isIframe()) {
@@ -1028,7 +1028,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		final ArrayList<ArrayList<Object>> response = (ArrayList<ArrayList<Object>>) runJavaScript(searchElementScript, startElement, tagName, attributes, attributes.size());
 		if(response != null && response.size() > 0){
 			final ArrayList<AtsElement> elements = response.parallelStream().filter(Objects::nonNull).map(e -> new AtsElement(e)).collect(Collectors.toCollection(ArrayList::new));
-			return elements.parallelStream().filter(predicate).map(e -> new FoundElement(this, e, channel, initElementX + offsetIframeX, initElementY + offsetIframeY)).collect(Collectors.toCollection(ArrayList::new));
+			return elements.parallelStream().filter(predicate).map(e -> new FoundElement(this, e, channel, initElementX + offsetIframeX, initElementY + offsetIframeY, waitAnimation)).collect(Collectors.toCollection(ArrayList::new));
 		}
 
 		return new ArrayList<FoundElement>();

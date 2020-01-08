@@ -118,30 +118,32 @@ public class FoundElement{
 		this.iframes = iframes;
 	}
 	
-	public FoundElement(WebDriverEngine engine, AtsElement element, Channel channel, Double offsetX, Double offsetY) {
+	public FoundElement(WebDriverEngine engine, AtsElement element, Channel channel, Double offsetX, Double offsetY, boolean waitAnimation) {
 		this(element, channel, offsetX, offsetY);
 		
-		int maxTry = 4;
-		while((this.width < 1 || this.height < 1) && maxTry > 0) {
-			
-			channel.sleep(500);
-			
-			final ArrayList<Double> rect = engine.getBoundingClientRect(element.getElement());
-			final Double rectX = rect.get(0);
-			final Double rectY = rect.get(1);
-			final Double rectW = rect.get(2);
-			final Double rectH = rect.get(3);
-			
-			if(rectX != null && rectY != null && rectW != null && rectH != null && rectW >= 1 && rectH >=1) {
-				this.x = rectX;
-				this.y = rectY;
-				this.boundX = rectX;
-				this.boundY = rectY;
-				this.width = rectW;
-				this.height = rectH;
-			}
+		if(waitAnimation) {
+			int maxTry = 5;
+			while((this.width < 1 || this.height < 1) && maxTry > 0) {
+				
+				channel.sleep(250);
+				
+				final ArrayList<Double> rect = engine.getBoundingClientRect(element.getElement());
+				final Double rectX = rect.get(0);
+				final Double rectY = rect.get(1);
+				final Double rectW = rect.get(2);
+				final Double rectH = rect.get(3);
+				
+				if(rectX != null && rectY != null && rectW != null && rectH != null && rectW >= 1 && rectH >=1) {
+					this.x = rectX;
+					this.y = rectY;
+					this.boundX = rectX;
+					this.boundY = rectY;
+					this.width = rectW;
+					this.height = rectH;
+				}
 
-			maxTry--;
+				maxTry--;
+			}
 		}
 	}
 

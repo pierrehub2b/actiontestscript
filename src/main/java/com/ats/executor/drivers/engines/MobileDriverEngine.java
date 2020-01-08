@@ -329,7 +329,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, ArrayList<String> attributesValues, Predicate<AtsBaseElement> searchPredicate, WebElement startElement) {
+	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, ArrayList<String> attributesValues, Predicate<AtsBaseElement> searchPredicate, WebElement startElement, boolean waitAnimation) {
 
 		final List<AtsMobileElement> list = new ArrayList<AtsMobileElement>();
 

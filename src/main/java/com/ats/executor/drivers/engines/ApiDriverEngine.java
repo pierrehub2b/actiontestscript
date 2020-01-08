@@ -168,7 +168,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	}
 
 	@Override
-	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, ArrayList<String> attributesValues, Predicate<AtsBaseElement> searchPredicate, WebElement startElement) {
+	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, ArrayList<String> attributesValues, Predicate<AtsBaseElement> searchPredicate, WebElement startElement, boolean waitAnimation) {
 		return executor.findElements(channel, sysComp, testObject, tagName, attributes, searchPredicate);
 	}
 
