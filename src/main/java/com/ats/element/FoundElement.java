@@ -21,6 +21,7 @@ package com.ats.element;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -38,7 +39,7 @@ public class FoundElement{
 	public final static String DESKTOP = "desktop";
 	public final static String MOBILE = "mobile";
 	public final static String API = "api";
-		
+
 	private String id;
 
 	private Double x = 0.0;
@@ -52,7 +53,7 @@ public class FoundElement{
 
 	private Double width = 0.0;
 	private Double height = 0.0;
-	
+
 	private int centerWidth = 0;
 	private int centerHeight = 0;
 
@@ -68,7 +69,7 @@ public class FoundElement{
 	private boolean clickable = true;
 
 	private ArrayList<AtsElement> iframes;
-	
+
 	//------------------------------------------------------------------------------------------------------------------------------
 	// contructors
 	//------------------------------------------------------------------------------------------------------------------------------
@@ -77,7 +78,7 @@ public class FoundElement{
 
 	public FoundElement(Channel channel) {
 		final RemoteWebElement root = (RemoteWebElement) channel.getRootElement();
-		
+
 		this.setRemoteWebElement(root);
 		this.width = (double) root.getSize().getWidth(); //channel.getDimension().getWidth();
 		this.height = (double) root.getSize().getHeight(); //channel.getDimension().getHeight();
@@ -98,11 +99,11 @@ public class FoundElement{
 		this.width = win.getWidth();
 		this.height = win.getHeight();
 	}
-	
+
 	public FoundElement(AtsElement element, Channel channel, Double offsetX, Double offsetY) {
 
 		this(element);
-		
+
 		final Double elemX = element.getX();
 		final Double elemY = element.getY();
 
@@ -117,22 +118,21 @@ public class FoundElement{
 		this(element, channel, offsetX, offsetY);
 		this.iframes = iframes;
 	}
-	
+
 	public FoundElement(WebDriverEngine engine, AtsElement element, Channel channel, Double offsetX, Double offsetY, boolean waitAnimation) {
 		this(element, channel, offsetX, offsetY);
-		
+
 		if(waitAnimation) {
 			int maxTry = 5;
 			while((this.width < 1 || this.height < 1) && maxTry > 0) {
-				
-				channel.sleep(250);
-				
-				final ArrayList<Double> rect = engine.getBoundingClientRect(element.getElement());
+
+				final List<Double> rect = engine.getBoundingClientRect(element.getElement());
+
 				final Double rectX = rect.get(0);
 				final Double rectY = rect.get(1);
 				final Double rectW = rect.get(2);
 				final Double rectH = rect.get(3);
-				
+
 				if(rectX != null && rectY != null && rectW != null && rectH != null && rectW >= 1 && rectH >=1) {
 					this.x = rectX;
 					this.y = rectY;
@@ -140,8 +140,9 @@ public class FoundElement{
 					this.boundY = rectY;
 					this.width = rectW;
 					this.height = rectH;
+				}else {
+					channel.sleep(250);
 				}
-
 				maxTry--;
 			}
 		}
@@ -152,13 +153,13 @@ public class FoundElement{
 		this.type = DESKTOP;
 		this.visible = element.isVisible();
 		this.id = element.getId();
-		
+
 		this.password = element.isPassword();
 
 		this.tag = element.getTag();
 		this.width = element.getWidth();
 		this.height = element.getHeight();
-		
+
 		this.clickable = element.isClickable();
 
 		this.screenX = element.getX();
@@ -192,7 +193,7 @@ public class FoundElement{
 		this.tag = element.getTag();
 		this.clickable = false;
 	}
-	
+
 	public FoundElement(Channel channel, ArrayList<AtsElement> iframes, ArrayList<AtsElement> elements, Double initElementX, Double initElementY) {
 		this(elements.remove(0), iframes, channel, initElementX, initElementY);
 		if(elements.size() > 0) {
@@ -209,24 +210,24 @@ public class FoundElement{
 		this.tag = SearchedElement.IMAGE_TAG;
 		this.width = rect.getWidth();
 		this.height = rect.getHeight();
-		
+
 		final int cw = (int)(this.width/2);
 		final int ch = (int)(this.height/2);
-		
+
 		this.centerWidth = cw;
 		this.centerHeight = ch;
-		
+
 		this.x = rect.getX();
 		this.y = rect.getY();
-		
+
 		if(parent != null) {
 			this.x += parent.getFoundElement().getX();
 			this.y += parent.getFoundElement().getY();
 		}
-				
+
 		this.boundX = this.x - channel.getSubDimension().getX() + cw;
 		this.boundY = this.y - channel.getSubDimension().getY() + ch;
-		
+
 		this.screenX = this.x + channel.getDimension().getX() + cw;
 		this.screenY = this.y + channel.getDimension().getY() + ch;
 	}
@@ -238,23 +239,23 @@ public class FoundElement{
 	public int getCenterWidth() {
 		return this.centerWidth;
 	}
-	
+
 	public int getCenterHeight() {
 		return this.centerHeight;
 	}
-		
+
 	public boolean isDesktop() {
 		return DESKTOP.equals(type);
 	}
-	
+
 	public boolean isMobile() {
 		return MOBILE.equals(type);
 	}
-	
+
 	public ArrayList<AtsElement> getIframes(){
 		return iframes;
 	}
-	
+
 	public void dispose() {
 		if(parent != null) {
 			parent.dispose();
@@ -304,11 +305,11 @@ public class FoundElement{
 	public boolean isNumeric() {
 		return numeric;
 	}
-	
+
 	public boolean isPassword() {
 		return password;
 	}
-	
+
 	public boolean isActive() {
 		return visible && clickable;
 	}
@@ -429,7 +430,7 @@ public class FoundElement{
 	public TestBound getTestBound() {
 		return new TestBound(x, y, width, height);
 	}
-	
+
 	public TestBound getTestScreenBound() {
 		return new TestBound(screenX, screenY, width, height);
 	}

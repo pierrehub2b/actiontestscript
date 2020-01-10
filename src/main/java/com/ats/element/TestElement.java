@@ -22,6 +22,7 @@ package com.ats.element;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
@@ -52,7 +53,7 @@ public class TestElement{
 	private long totalSearchDuration = 0;
 
 	protected TestElement parent;
-	private ArrayList<FoundElement> foundElements = new ArrayList<FoundElement>();
+	private List<FoundElement> foundElements = new ArrayList<FoundElement>();
 
 	private int maxTry = 20;
 	private int index;
@@ -165,25 +166,29 @@ public class TestElement{
 		}
 	}
 
-	protected ArrayList<FoundElement> loadElements(SearchedElement searchedElement) {
+	protected List<FoundElement> loadElements(SearchedElement searchedElement) {
 
-		final ArrayList<String> attributes = new ArrayList<String>();
-		final ArrayList<String> attributesValues = new ArrayList<String>();
-
+		final int criteriasCount = searchedElement.getCriterias().size();
+		final String[] attributes = new String[criteriasCount];
+		final String[] attributesValues = new String[criteriasCount];
+		
 		Predicate<AtsBaseElement> fullPredicate = Objects::nonNull;
-
-		for (CalculatedProperty property : searchedElement.getCriterias()){
+		
+		for (int i=0; i<criteriasCount; i++) {
+			final CalculatedProperty property = searchedElement.getCriterias().get(i);
+			
 			criterias += "," + property.getName() + ":" + property.getValue().getCalculated();
+			
 			fullPredicate = property.getPredicate(fullPredicate);
-
-			attributes.add(property.getName());
+			attributes[i] = property.getName();
 
 			if(property.isRegexp()) {
-				attributesValues.add(property.getName());
+				attributesValues[i] = property.getName();
 			}else {
-				attributesValues.add(property.getName() + "\t" + property.getValue().getCalculated());
+				attributesValues[i] = property.getName() + "\t" + property.getValue().getCalculated();
 			}
 		}
+		
 		return engine.findElements(sysComp, this, searchedTag, attributes, attributesValues, fullPredicate, null, true);
 	}
 
@@ -287,7 +292,7 @@ public class TestElement{
 		this.totalSearchDuration = totalSearchDuration;
 	}
 
-	public ArrayList<FoundElement> getFoundElements() {
+	public List<FoundElement> getFoundElements() {
 		return foundElements;
 	}
 

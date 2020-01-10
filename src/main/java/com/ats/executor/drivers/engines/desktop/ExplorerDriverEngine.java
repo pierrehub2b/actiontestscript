@@ -29,14 +29,12 @@ import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.desktop.DesktopDriver;
-import com.ats.executor.drivers.desktop.DesktopWindow;
 
 public class ExplorerDriverEngine extends DesktopDriverEngine {
 
 	private final static int DEFAULT_WAIT = 100;
 
 	private Desktop desktop;
-	private DesktopWindow window;
 
 	public ExplorerDriverEngine(Channel channel, ActionStatus status, DesktopDriver desktopDriver, ApplicationProperties props) {
 		super(channel, DriverManager.DESKTOP_EXPLORER, desktopDriver, props, DEFAULT_WAIT);
@@ -75,11 +73,6 @@ public class ExplorerDriverEngine extends DesktopDriverEngine {
 				maxTry--;
 			}
 		}
-	}
-
-	@Override
-	public void goToUrl(ActionStatus status, String url) {
-		getDesktopDriver().gotoUrl(status, window.getHandle(), url);
 	}
 
 	@Override

@@ -1,6 +1,6 @@
 package com.ats.element;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
 
 import com.ats.executor.ActionStatus;
@@ -19,7 +19,7 @@ public class TestElementImage extends TestElement {
 	}
 
 	@Override
-	protected ArrayList<FoundElement> loadElements(SearchedElement searchedElement) {
+	protected List<FoundElement> loadElements(SearchedElement searchedElement) {
 		final TemplateMatchingSimple template = new TemplateMatchingSimple(searchedElement.getImage());
 
 		for (CalculatedProperty property : searchedElement.getCriterias()){

@@ -21,6 +21,7 @@ package com.ats.executor.drivers.engines;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.openqa.selenium.Dimension;
@@ -200,7 +201,7 @@ public abstract class DriverEngine {
 	abstract protected void setSize(Dimension dim);
 	public void toFront() {};
 	
-	public ArrayList<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template) {
+	public List<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template) {
 
 		TestBound outterBound = null;
 		if(parent != null) {

@@ -77,7 +77,6 @@ import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
-import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.actions.ActionApi;
 import com.ats.script.actions.ActionGotoUrl;
 import com.ats.script.actions.ActionSelect;
@@ -478,15 +477,15 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public ArrayList<FoundElement> findSelectOptions(TestBound dimension, TestElement element) {
+	public List<FoundElement> findSelectOptions(TestBound dimension, TestElement element) {
 		switchToDefaultContent();
-		return findElements(false, element, "option", new ArrayList<String>(), new ArrayList<String>(), Objects::nonNull, element.getWebElement(), false);
+		return findElements(false, element, "option", new String[0], new String[0], Objects::nonNull, element.getWebElement(), false);
 	}
 
 	@Override
 	public void selectOptionsItem(ActionStatus status, TestElement element, CalculatedProperty selectProperty) {
 
-		final ArrayList<FoundElement> items = findSelectOptions(null, element);
+		final List<FoundElement> items = findSelectOptions(null, element);
 
 		if(items != null && items.size() > 0) {
 
@@ -524,7 +523,10 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 				}
 			}
 
-			executeJavaScript(status, "blur();", element.getWebElement());
+			try {
+				driver.executeScript("arguments[0].blur();", element.getWebElement());
+			}catch(Exception e) {}
+			//executeJavaScript(status, "blur();", element.getWebElement());
 		}
 	}
 
@@ -663,13 +665,13 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 				}catch(StaleElementReferenceException e0) {
 
 					throw e0;
-					
+
 				}catch(MoveTargetOutOfBoundsException e) {
-					
+
 					driver.executeScript("arguments[0].scrollIntoView();", foundElement.getValue());
 					status.setNoError();
 					maxTry = 0;
-					
+
 				}catch(WebDriverException e) {
 					channel.sleep(500);
 					status.setException(e);
@@ -843,6 +845,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			if(wins.length > index) {
 				switchToWindowIndex(wins, index);
 				channel.cleanHandle();
+				getDesktopDriver().updateWindowHandle(channel);
 			}else {
 				status.setError(ActionStatus.WINDOW_NO_SWITCH, "cannot switch to window index '" + index + "', only " + wins.length + " windows found");
 			}
@@ -919,7 +922,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	public Object executeJavaScript(ActionStatus status, String javaScript, TestElement element) {
 		return executeJavaScript(status, javaScript, element.getWebElement());
 	}
-	
+
 	public Object executeJavaScript(ActionStatus status, String javaScript, WebElement element) {
 		final Object result = runJavaScript(status, "var e=arguments[0];var result=e." + javaScript.replaceAll("this", "e") + ";", element);
 		if(status.isPassed() && result != null) {
@@ -945,12 +948,12 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		}
 		return null;
 	}
-	
-	public ArrayList<Double> getBoundingClientRect(RemoteWebElement element) {
+
+	public List<Double> getBoundingClientRect(RemoteWebElement element) {
 		try {
-			return (ArrayList<Double>) driver.executeAsyncScript("var callback=arguments[arguments.length-1], rect=arguments[0].getBoundingClientRect();var result=[rect.x+0.0001, rect.y+0.0001, rect.width+0.0001, rect.height+0.0001];callback(result);", element);
+			return (List<Double>) driver.executeAsyncScript("var callback=arguments[arguments.length-1], rect=arguments[0].getBoundingClientRect();var result=[rect.x+0.0001, rect.y+0.0001, rect.width+0.0001, rect.height+0.0001];callback(result);", element);
 		}catch (Exception e) {
-			return null;
+			return List.of(0D, 0D, 1D, 1D);
 		}
 	}
 
@@ -990,7 +993,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	private double offsetIframeY = 0.0;
 
 	@Override
-	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, ArrayList<String> attributesValues, Predicate<AtsBaseElement> predicate, WebElement startElement, boolean waitAnimation) {
+	public List<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, String[] attributes, String[] attributesValues, Predicate<AtsBaseElement> predicate, WebElement startElement, boolean waitAnimation) {
 
 		if(testObject.getParent() != null){
 			if(testObject.getParent().isIframe()) {
@@ -1025,9 +1028,9 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			}
 		}
 
-		final ArrayList<ArrayList<Object>> response = (ArrayList<ArrayList<Object>>) runJavaScript(searchElementScript, startElement, tagName, attributes, attributes.size());
+		final List<List<Object>> response = (List<List<Object>>) runJavaScript(searchElementScript, startElement, tagName, attributes, attributes.length);
 		if(response != null && response.size() > 0){
-			final ArrayList<AtsElement> elements = response.parallelStream().filter(Objects::nonNull).map(e -> new AtsElement(e)).collect(Collectors.toCollection(ArrayList::new));
+			final List<AtsElement> elements = response.parallelStream().filter(Objects::nonNull).map(e -> new AtsElement(e)).collect(Collectors.toCollection(ArrayList::new));
 			return elements.parallelStream().filter(predicate).map(e -> new FoundElement(this, e, channel, initElementX + offsetIframeX, initElementY + offsetIframeY, waitAnimation)).collect(Collectors.toCollection(ArrayList::new));
 		}
 

@@ -20,6 +20,7 @@ under the License.
 package com.ats.element;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -52,7 +53,7 @@ public class AtsElement extends AtsBaseElement {
 
 	public AtsElement() {}
 
-	public AtsElement(ArrayList<Object> data) {
+	public AtsElement(List<Object> data) {
 
 		this.element = (RemoteWebElement) data.get(0);
 		this.tag = data.get(1).toString();

@@ -568,6 +568,13 @@ public class DesktopDriver extends RemoteWebDriver {
 		return sendRequestCommand(CommandType.Window, WindowType.List, pid).getWindows();
 	}
 
+	public void updateWindowHandle(Channel channel) {
+		int handle = channel.getHandle(this);
+		if(handle > 0) {
+			getEngine().setWindow(sendRequestCommand(CommandType.Window, WindowType.Handle, handle).getWindow());
+		}
+	}
+	
 	public DesktopWindow getWindowByHandle(int handle) {
 		return sendRequestCommand(CommandType.Window, WindowType.Handle, handle).getWindow();
 	}
@@ -636,17 +643,21 @@ public class DesktopDriver extends RemoteWebDriver {
 		return sendRequestCommand(CommandType.Element, ElementType.Script, element.getId(), script).getData();
 	}
 
-	public ArrayList<FoundElement> findElements(Channel channel, TestElement testElement, String tag, ArrayList<String> attributes, Predicate<AtsBaseElement> predicate) {
+	public List<FoundElement> findElements(Channel channel, TestElement testElement, String tag, String[] attributes, Predicate<AtsBaseElement> predicate) {
 
 		DesktopResponse response = null;
-		attributes.add(0, tag);
+
+		final String[] firstData = new String[2];
+		firstData[1] = tag;
 		
+		final Object[] data = Stream.concat(Stream.of(firstData), Stream.of(attributes)).toArray(String[]::new);
+				
 		if(testElement.getParent() != null){
-			attributes.add(0, testElement.getParent().getWebElementId());
-			response = sendRequestCommand(CommandType.Element, ElementType.Childs, attributes.toArray());
+			data[0] = testElement.getParent().getWebElementId();
+			response = sendRequestCommand(CommandType.Element, ElementType.Childs, data);
 		}else{
-			attributes.add(0, channel.getHandle(this)+"");
-			response = sendRequestCommand(CommandType.Element, ElementType.Find, attributes.toArray());
+			data[0] = channel.getHandle(this) + "";
+			response = sendRequestCommand(CommandType.Element, ElementType.Find, data);
 		}
 		
 		return response.getFoundElements(predicate, channel.getDimension());

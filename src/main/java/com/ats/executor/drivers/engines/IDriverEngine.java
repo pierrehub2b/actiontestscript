@@ -20,6 +20,7 @@ under the License.
 package com.ats.executor.drivers.engines;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
 
 import org.openqa.selenium.Alert;
@@ -54,8 +55,8 @@ public interface IDriverEngine{
 	public Object executeJavaScript(ActionStatus status, String script, boolean returnValue);
 	public void goToUrl(ActionStatus status, String url);
 	
-	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, ArrayList<String> attributesValues, Predicate<AtsBaseElement> searchPredicate, WebElement startElement, boolean waitAnimation);
-	public ArrayList<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template);
+	public List<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, String[] attributes, String[] attributesValues, Predicate<AtsBaseElement> searchPredicate, WebElement startElement, boolean waitAnimation);
+	public List<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template);
 	
 	public void waitAfterAction(ActionStatus status);
 	public void updateDimensions();
@@ -65,7 +66,7 @@ public interface IDriverEngine{
 	public CalculatedProperty[] getAttributes(FoundElement element, boolean reload);
 	public CalculatedProperty[] getCssAttributes(FoundElement element);
 	
-	public ArrayList<FoundElement> findSelectOptions(TestBound dimension, TestElement element);
+	public List<FoundElement> findSelectOptions(TestBound dimension, TestElement element);
 	public void selectOptionsItem(ActionStatus status, TestElement testElement, CalculatedProperty selectProperty);
 	
 	public void loadParents(FoundElement hoverElement);

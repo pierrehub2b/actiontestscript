@@ -271,7 +271,7 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 		return source;
 	}
 
-	public ArrayList<FoundElement> findElements(Channel channel, boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, Predicate<AtsBaseElement> predicate) {
+	public ArrayList<FoundElement> findElements(Channel channel, boolean sysComp, TestElement testObject, String tagName, String[] attributes, Predicate<AtsBaseElement> predicate) {
 
 		final String searchedTag = tagName.toUpperCase();
 		final ArrayList<FoundElement> result = new ArrayList<FoundElement>();

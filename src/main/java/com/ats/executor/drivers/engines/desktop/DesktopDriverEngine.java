@@ -29,6 +29,7 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
@@ -61,11 +62,11 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	private final static String PROCESS_PROTOCOL = "process://";
 	private final static int DEFAULT_WAIT = 100;
 
-	private DesktopWindow mainWindow;
+	protected DesktopWindow window;
 
 	public DesktopDriverEngine(Channel channel, DesktopWindow window) {
 		super(channel);
-		this.mainWindow = window;
+		this.window = window;
 	}
 
 	public DesktopDriverEngine(Channel channel, String application, DesktopDriver desktopDriver, ApplicationProperties props, int defaultWait) {
@@ -172,8 +173,10 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 
 		int maxTry = 30;
 		while(maxTry > 0){
-			if(channel.getHandle(desktopDriver) > 0) {
+			int handle = channel.getHandle(desktopDriver);
+			if(handle > 0) {
 				maxTry = 0;
+				window = desktopDriver.getWindowByHandle(handle);
 			}else {
 				channel.sleep(200);
 				maxTry--;
@@ -182,6 +185,10 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 
 		desktopDriver.moveWindow(channel, channel.getDimension().getPoint());
 		desktopDriver.resizeWindow(channel, channel.getDimension().getSize());
+	}
+	
+	public void setWindow(DesktopWindow window) {
+		this.window = window;
 	}
 
 	private long getProcessId(Pattern procPattern) {
@@ -262,11 +269,11 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testElement, String tag, ArrayList<String> attributes, ArrayList<String> attributesValues, Predicate<AtsBaseElement> predicate, WebElement startElement, boolean waitAnimation) {
+	public List<FoundElement> findElements(boolean sysComp, TestElement testElement, String tag, String[] attributes, String[] attributesValues, Predicate<AtsBaseElement> predicate, WebElement startElement, boolean waitAnimation) {
 		if(sysComp) {
 			if(SYSCOMP.equals(tag.toUpperCase())) {
 				ArrayList<FoundElement> win = new ArrayList<FoundElement>();
-				win.add(new FoundElement(mainWindow));
+				win.add(new FoundElement(window));
 				return win;
 			}else {
 				return getDesktopDriver().findElements(channel, testElement, tag, attributesValues, predicate);
@@ -412,7 +419,9 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public void goToUrl(ActionStatus status, String url) {} // open default browser ?
+	public void goToUrl(ActionStatus status, String url) {
+		getDesktopDriver().gotoUrl(status, window.getHandle(), url);
+	}
 
 	@Override
 	public WebElement getRootElement(Channel cnl) {

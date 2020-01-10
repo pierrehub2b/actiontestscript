@@ -130,6 +130,8 @@ public class IEDriverEngine extends WebDriverEngine {
 			executeJavaScript(status, "setTimeout(function(){window.focus();},1000);", true);
 			toFront();
 			channel.sleep(2000);
+			
+			getDesktopDriver().updateWindowHandle(channel);
 		}
 	}
 

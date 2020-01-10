@@ -329,7 +329,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public ArrayList<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, ArrayList<String> attributes, ArrayList<String> attributesValues, Predicate<AtsBaseElement> searchPredicate, WebElement startElement, boolean waitAnimation) {
+	public List<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, String[] attributes, String[] attributesValues, Predicate<AtsBaseElement> searchPredicate, WebElement startElement, boolean waitAnimation) {
 
 		final List<AtsMobileElement> list = new ArrayList<AtsMobileElement>();
 
@@ -344,7 +344,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public ArrayList<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template) {
+	public List<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template) {
 		final byte[] screenshot = getDesktopDriver().getMobileScreenshotByte(getScreenshotPath());
 		return template.findOccurrences(screenshot).parallelStream().map(r -> new FoundElement(channel, parent, r)).collect(Collectors.toCollection(ArrayList::new));
 	}
