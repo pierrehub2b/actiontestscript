@@ -80,24 +80,17 @@ public class DesktopDriver extends RemoteWebDriver {
 	private String osBuildVersion;
 
 	private String countryCode;
-
 	private String machineName;
-
 	private String screenResolution;
-
 	private String driveLetter;
 
 	private String diskTotalSize;
-
 	private String diskFreeSpace;
 
 	private String cpuArchitecture;
-
 	private String cpuCores;
-
 	private String cpuName;
 	private String cpuSocket;
-
 	private String cpuMaxClock;
 
 	private String dotNetVersion;

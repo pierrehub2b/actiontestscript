@@ -123,7 +123,7 @@ public class FoundElement{
 		this(element, channel, offsetX, offsetY);
 
 		if(waitAnimation) {
-			int maxTry = 5;
+			int maxTry = 10;
 			while((this.width < 1 || this.height < 1) && maxTry > 0) {
 
 				final List<Double> rect = engine.getBoundingClientRect(element.getElement());
@@ -141,7 +141,7 @@ public class FoundElement{
 					this.width = rectW;
 					this.height = rectH;
 				}else {
-					channel.sleep(250);
+					channel.sleep(200);
 				}
 				maxTry--;
 			}
