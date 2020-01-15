@@ -37,7 +37,7 @@ public class ActionStatus {
 	public static final int UNREACHABLE_GOTO_URL = -11;
 	public static final int UNKNOWN_HOST_GOTO_URL = -12;
 	public static final int JAVASCRIPT_ERROR = -13;
-	public static final int WINDOW_NO_SWITCH = -14;
+	public static final int WINDOW_NOT_FOUND = -14;
 	public static final int WINDOW_INDEX_OUT = -15;
 	public static final int WEB_DRIVER_ERROR = -16;
 	public static final int DRIVER_NOT_REACHABLE = -17;

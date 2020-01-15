@@ -847,7 +847,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 				channel.cleanHandle();
 				getDesktopDriver().updateWindowHandle(channel);
 			}else {
-				status.setError(ActionStatus.WINDOW_NO_SWITCH, "cannot switch to window index '" + index + "', only " + wins.length + " windows found");
+				status.setError(ActionStatus.WINDOW_NOT_FOUND, "cannot switch to window index '" + index + "', only " + wins.length + " windows found");
 			}
 		}
 	}

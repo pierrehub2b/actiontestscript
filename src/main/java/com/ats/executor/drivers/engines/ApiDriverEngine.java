@@ -203,11 +203,6 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	public void close() {
 		logStream.println("Close ATS WebService channel");
 	}
-
-	@Override
-	public CalculatedProperty[] getCssAttributes(FoundElement element) {
-		return new CalculatedProperty[0];
-	}
 	
 	@Override
 	public ArrayList<FoundElement> findSelectOptions(TestBound dimension, TestElement element) {

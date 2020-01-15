@@ -391,11 +391,6 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public CalculatedProperty[] getCssAttributes(FoundElement element) {
-		return new CalculatedProperty[0];
-	}
-
-	@Override
 	public ArrayList<FoundElement> findSelectOptions(TestBound dimension, TestElement element) {
 		return new ArrayList<FoundElement>();
 	}
