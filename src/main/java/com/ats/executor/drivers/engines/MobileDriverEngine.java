@@ -153,7 +153,8 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 				final double channelHeight = response.get("channelHeight").getAsDouble();
 
 				final int screenCapturePort = response.get("screenCapturePort").getAsInt();
-				final String udpEndPoint = response.get("udpEndPoint").getAsString();
+				
+				JsonElement udpEndPoint = response.get("udpEndPoint");
 
 				channel.setDimensions(new TestBound(0D, 0D, deviceWidth, deviceHeight), new TestBound(0D, 0D, channelWidth, channelHeight));
 
@@ -172,7 +173,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 						final String version = response.get("version").getAsString();
 
 						if(udpEndPoint != null) {
-							channel.setApplicationData(os + ":" + systemName, version, driverVersion, -1, icon, udpEndPoint + ":" + screenCapturePort);
+							channel.setApplicationData(os + ":" + systemName, version, driverVersion, -1, icon, udpEndPoint.getAsString() + ":" + screenCapturePort);
 						} else {
 							channel.setApplicationData(os + ":" + systemName, version, driverVersion, -1, icon, endPointData[0] + ":" + screenCapturePort);
 						}
