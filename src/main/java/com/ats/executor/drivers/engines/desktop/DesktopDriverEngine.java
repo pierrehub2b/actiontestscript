@@ -60,9 +60,11 @@ import com.ats.script.actions.ActionApi;
 public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 
 	private final static String PROCESS_PROTOCOL = "process://";
+	private final static String DESKTOP_TYPE = "desktop";
 	private final static int DEFAULT_WAIT = 100;
 
 	protected DesktopWindow window;
+	private int windowIndex = -1;
 
 	public DesktopDriverEngine(Channel channel, DesktopWindow window) {
 		super(channel);
@@ -98,6 +100,14 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 				return;
 			}
 
+		}else if(application.startsWith(DESKTOP_TYPE)) {
+			
+			channel.setApplicationData(desktopDriver.getOsName() + " (" + desktopDriver.getOsVersion() +")", "", desktopDriver.getDriverVersion(), 0L);
+			final FoundElement desktop = desktopDriver.getRootElement(channel);
+			channel.setDimensions(desktop.getTestScreenBound(), desktop.getTestScreenBound());
+			
+			return;
+			
 		}else {
 
 			URI fileUri = null;
@@ -240,11 +250,6 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public CalculatedProperty[] getCssAttributes(FoundElement element) {
-		return null;
-	}
-
-	@Override
 	public ArrayList<FoundElement> findSelectOptions(TestBound dimension, TestElement element) {
 		return getDesktopDriver().getChildren(dimension, element.getFoundElement().getId(), "ListItem");
 	}
@@ -305,12 +310,14 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	public void switchWindow(ActionStatus status, int index) {
 		getDesktopDriver().switchTo(channel, index);
 		channel.updateWinHandle(getDesktopDriver(), index);
+		
+		windowIndex = index;
 		status.setPassed(true);
 	}
 
 	@Override
 	public void setWindowToFront() {
-		//no window order management implemented for the moment
+		getDesktopDriver().switchTo(channel.getProcessId(), windowIndex);
 	}
 
 	@Override

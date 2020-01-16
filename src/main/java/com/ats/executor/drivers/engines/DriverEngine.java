@@ -38,6 +38,7 @@ import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.MouseDirectionData;
+import com.ats.generator.variables.CalculatedProperty;
 import com.ats.graphic.TemplateMatchingSimple;
 
 public abstract class DriverEngine {
@@ -220,5 +221,9 @@ public abstract class DriverEngine {
 	
 	public byte[] getScreenshot(Double x, Double y, Double width, Double height) {
 		return getDesktopDriver().getScreenshotByte(x, y, width, height);
+	}
+	
+	public CalculatedProperty[] getCssAttributes(FoundElement element) {
+		return new CalculatedProperty[0];
 	}
 }
