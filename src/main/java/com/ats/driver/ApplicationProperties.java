@@ -35,7 +35,7 @@ public class ApplicationProperties {
 	private String uri;
 	private int wait = -1;
 	private int check = -1;
-	private String lang = "en";
+	private String lang;
 	private String userDataDir;
 
 	public ApplicationProperties(String name) {

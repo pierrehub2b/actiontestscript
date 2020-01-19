@@ -248,7 +248,13 @@ public class ActionCallscript extends Action {
 					URL csvUrl = null;
 
 					if(csvPath.startsWith(ASSETS_PROTOCOLE)) {
-						csvUrl = getClass().getClassLoader().getResource(csvPath.replace(ASSETS_PROTOCOLE, ProjectData.ASSETS_FOLDER + File.separator));
+						
+						final String csvFilePath = csvPath.replace(ASSETS_PROTOCOLE, ProjectData.ASSETS_FOLDER + File.separator);
+						csvUrl = getClass().getClassLoader().getResource(csvFilePath);
+						if(csvUrl == null) {
+							csvUrl = getClass().getClassLoader().getResource(csvFilePath + ".csv");
+						}
+						
 					}else {
 						try {
 							csvUrl = new URL(csvPath);
