@@ -143,7 +143,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 				
 				try{
 
-					Process proc = rt.exec(args.toArray(new String[args.size()]));
+					Process proc = rt.exec(args.toArray(new String[args.size()]), null, exeFile.getParentFile());
 					StreamGobbler errorGobbler = new StreamGobbler(proc.getErrorStream(), "ERROR");            
 					StreamGobbler outputGobbler = new StreamGobbler(proc.getInputStream(), "OUTPUT");
 
