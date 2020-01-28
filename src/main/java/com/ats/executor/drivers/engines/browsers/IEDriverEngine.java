@@ -45,7 +45,7 @@ public class IEDriverEngine extends WebDriverEngine {
 	public IEDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
 		super(channel, DriverManager.IE_BROWSER, driverProcess, windowsDriver, props);
 
-		JS_SCROLL_IF_NEEDED = "var e=arguments[0], bo=arguments[1], result=[];var r=e.getBoundingClientRect();if(r.top < 0 || r.left < 0 || r.bottom > (window.innerHeight || document.documentElement.clientHeight) || r.right > (window.innerWidth || document.documentElement.clientWidth)) {e.scrollIntoView(false);r=e.getBoundingClientRect();result=[r.left+0.0001, r.top+0.0001];}";
+		JS_SCROLL_IF_NEEDED = "var e=arguments[0], bo=arguments[1], result=[];var r=e.getBoundingClientRect();if(r.top < 0 || r.left < 0 || r.bottom > (window.innerHeight || document.documentElement.clientHeight) || r.right > (window.innerWidth || document.documentElement.clientWidth)) {e.scrollIntoView(true);r=e.getBoundingClientRect();result=[r.left+0.0001, r.top+0.0001];}";
 
 		final InternetExplorerOptions ieOptions = new InternetExplorerOptions();
 		ieOptions.introduceFlakinessByIgnoringSecurityDomains();
