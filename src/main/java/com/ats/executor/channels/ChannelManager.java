@@ -42,7 +42,7 @@ public class ChannelManager {
 		this.channelsList = new ArrayList<Channel>();
 		this.driverManager = new DriverManager();
 
-		script.sendScriptLog("ATS drivers folder -> " + this.driverManager.getDriverFolderPath());
+		script.sendInfoLog("ATS drivers folder", this.driverManager.getDriverFolderPath());
 	}
 
 	public int getMaxTry() {

@@ -21,6 +21,8 @@ package com.ats.tools.logger;
 
 import java.io.PrintStream;
 
+import org.testng.Reporter;
+
 import com.ats.tools.logger.levels.LevelLoggerBase;
 import com.ats.generator.variables.ConditionalValue;
 import com.ats.script.actions.Action;
@@ -73,8 +75,9 @@ public class ExecutionLogger {
 		}
 	}
 	
-	public void sendScript(String message) {
-		levelLogger.log("SCRIPT", message);
+	public void sendExecLog(String type, String message) {
+		levelLogger.log(type, message);
+		Reporter.log("- " + message);
 	}
 	
 	public void sendAction(Action action, String testName, int line) {

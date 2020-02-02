@@ -29,6 +29,7 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.interactions.Actions;
 import org.testng.ITest;
 import org.testng.ITestContext;
+import org.testng.Reporter;
 import org.testng.SkipException;
 import org.testng.TestRunner;
 import org.testng.annotations.AfterClass;
@@ -144,8 +145,8 @@ public class ActionTestScript extends Script implements ITest{
 			final ExecutionLogger mainLogger = new ExecutionLogger(System.out, getEnvironmentValue("ats.log.level", ""));
 			setLogger(mainLogger);
 
-			sendScriptLog("Starting script -> " + testName);
-
+			sendScriptInfo("Starting script -> " + testName);
+			
 			//-----------------------------------------------------------
 			// check report output specified
 			//-----------------------------------------------------------
@@ -184,6 +185,7 @@ public class ActionTestScript extends Script implements ITest{
 
 	@AfterClass(alwaysRun=true)
 	public void afterClass() {
+
 		final StringBuilder status = 
 				new StringBuilder("Script terminated -> {\"name\":\"")
 				.append(testName)
@@ -195,7 +197,7 @@ public class ActionTestScript extends Script implements ITest{
 				.append(scriptActions)
 				.append("}");
 		
-		sendScriptLog(status.toString());
+		sendScriptInfo(status.toString());
 	}
 
 	@AfterTest(alwaysRun=true)
@@ -268,7 +270,7 @@ public class ActionTestScript extends Script implements ITest{
 	}
 
 	public void tearDown(){
-		sendScriptLog("Closing drivers ...");
+		sendInfoLog("Drivers", "closing ...");
 		getChannelManager().tearDown();
 	}
 

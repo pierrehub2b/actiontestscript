@@ -271,7 +271,7 @@ public class ActionCallscript extends Action {
 						final List<String[]> data = Utils.loadCsvData(csvUrl);
 
 						for (String[] param : data) {
-							ts.getTopScript().sendScriptLog("Call subscript -> " + scriptName);
+							ts.getTopScript().sendScriptInfo("Call subscript -> " + scriptName + " -> csv " + Arrays.toString(param));
 
 							ats.initCalledScript(ts.getTopScript(), param, null);
 							final Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
@@ -286,7 +286,7 @@ public class ActionCallscript extends Action {
 					ats.initCalledScript(ts.getTopScript(), getCalculatedParameters(), variables);
 					Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
 					for (int i=0; i<loop; i++) {
-						ts.getTopScript().sendScriptLog("Call subscript -> " + scriptName);
+						ts.getTopScript().sendScriptInfo("Call subscript -> " + scriptName + " (loop " + i + " on " + loop);
 						testMain.invoke(ats);
 					}
 					status.setData(ats.getReturnValues());

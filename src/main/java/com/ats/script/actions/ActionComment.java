@@ -95,6 +95,7 @@ public class ActionComment extends Action {
 				ts.getRecorder().update(type, comment.getCalculated());
 			}else if(LOG_TYPE.equals(type)) {
 				status.endDuration();
+				ts.getTopScript().sendCommentLog(comment.getCalculated());
 			}
 		}
 	}

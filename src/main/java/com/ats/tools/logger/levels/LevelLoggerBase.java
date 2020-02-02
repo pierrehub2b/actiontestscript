@@ -16,7 +16,7 @@ public class LevelLoggerBase {
 	
 	public LevelLoggerBase(PrintStream out, String level) {
 		this.out = out;
-		print("LOGGER", level);
+		print("LOGGER", "Level -> "  + level);
 	}
 		
 	public void log(String type, String message) {

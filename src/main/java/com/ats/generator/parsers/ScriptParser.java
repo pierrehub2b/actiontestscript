@@ -24,16 +24,17 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.Variable;
 import com.ats.generator.variables.transform.Transformer;
+import com.ats.script.ScriptHeader;
 import com.ats.script.ScriptLoader;
 
 public class ScriptParser {
 
 	public static final String ATS_SEPARATOR = "->";
+	public static final int ATS_SEPARATOR_SIZE = ATS_SEPARATOR.length();
 	public static final String ATS_ASSIGN_SEPARATOR = "=>";
 	public static final String ATS_PROPERTIES_FILE = ".atsProjectProperties";
 
@@ -45,16 +46,21 @@ public class ScriptParser {
 
 	public static final String SCRIPT_AUTHOR_LABEL = "author";
 	public static final String SCRIPT_PREREQUISITE_LABEL = "prerequisite";
+	
+	public static final String SCRIPT_ID_JIRA = "jira";
+	public static final String SCRIPT_ID_SQUASH = "squash";
+	
+	public static final int SCRIPT_ID_LENGTH = SCRIPT_ID.length();
+	public static final int SCRIPT_GROUPS_LABEL_LENGTH = SCRIPT_GROUPS_LABEL.length();
+	public static final int SCRIPT_DESCRIPTION_LABEL_LENGTH = SCRIPT_DESCRIPTION_LABEL.length();
+	public static final int SCRIPT_DATE_CREATED_LABEL_LENGTH = SCRIPT_DATE_CREATED_LABEL.length();
+	public static final int SCRIPT_RETURN_LABEL_LENGTH = SCRIPT_RETURN_LABEL.length();
 
-	private static final Pattern ID_PATTERN = Pattern.compile("^" + SCRIPT_ID + " *?\\" + ATS_SEPARATOR + "(.*)", Pattern.CASE_INSENSITIVE);
-	private static final Pattern DESCRIPTION_PATTERN = Pattern.compile("^" + SCRIPT_DESCRIPTION_LABEL + " *?\\" + ATS_SEPARATOR + "(.*)", Pattern.CASE_INSENSITIVE);
-	private static final Pattern CREATED_DATE_PATTERN = Pattern.compile("^" + SCRIPT_DATE_CREATED_LABEL + " *?\\" + ATS_SEPARATOR + "(.*)", Pattern.CASE_INSENSITIVE);
-	private static final Pattern RETURN_PATTERN = Pattern.compile("^" + SCRIPT_RETURN_LABEL + " *?\\" + ATS_SEPARATOR + "(.*)", Pattern.CASE_INSENSITIVE);
-	private static final Pattern GROUP_PATTERN = Pattern.compile("^" + SCRIPT_GROUPS_LABEL + " *?\\" + ATS_SEPARATOR + "(.*)", Pattern.CASE_INSENSITIVE);
-	private static final Pattern AUTHOR_PATTERN = Pattern.compile("^" + SCRIPT_AUTHOR_LABEL + " *?\\" + ATS_SEPARATOR + "(.*)", Pattern.CASE_INSENSITIVE);
-	private static final Pattern PREREQUISITE_PATTERN = Pattern.compile("^" + SCRIPT_PREREQUISITE_LABEL + " *?\\" + ATS_SEPARATOR + "(.*)", Pattern.CASE_INSENSITIVE);
-
-	private static final Pattern VARIABLE_PATTERN = Pattern.compile("^" + Variable.SCRIPT_LABEL + " *?\\" + ATS_SEPARATOR + "(.*)", Pattern.CASE_INSENSITIVE);
+	public static final int SCRIPT_AUTHOR_LABEL_LENGTH = SCRIPT_AUTHOR_LABEL.length();
+	public static final int SCRIPT_PREREQUISITE_LABEL_LENGTH = SCRIPT_PREREQUISITE_LABEL.length();
+	
+	public static final int SCRIPT_ID_JIRA_LENGTH = SCRIPT_ID_JIRA.length();
+	public static final int SCRIPT_ID_SQUASH_LENGTH = SCRIPT_ID_SQUASH.length();
 
 	private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss");
 
@@ -82,41 +88,51 @@ public class ScriptParser {
 		}
 		return "";
 	}
+	
+	private String getHeaderData(String data) {
+		return data.substring(data.indexOf(ATS_SEPARATOR) + ATS_SEPARATOR_SIZE).trim();
+	}
 
-	public void parse(ScriptLoader script, String data){
+	public void parse(ScriptLoader script, ScriptHeader header, String data){
 
-		Matcher m = null;
+		if(data.regionMatches(true, 0, SCRIPT_GROUPS_LABEL, 0, SCRIPT_GROUPS_LABEL_LENGTH)){
 
-		if((m = GROUP_PATTERN.matcher(data)) != null && m.find()){
+			header.parseGroups(getHeaderData(data));
 
-			script.parseGroups(getDataGroup(m, 1));
+		}else if(data.regionMatches(true, 0, SCRIPT_DESCRIPTION_LABEL, 0, SCRIPT_DESCRIPTION_LABEL_LENGTH)){
 
-		}else if((m = DESCRIPTION_PATTERN.matcher(data)) != null && m.find()){
+			header.setDescription(getHeaderData(data));
 
-			script.setDescription(getDataGroup(m, 1));
+		}else if(data.regionMatches(true, 0, SCRIPT_ID, 0, SCRIPT_ID_LENGTH)){
 
-		}else if((m = ID_PATTERN.matcher(data)) != null && m.find()){
-
-			script.setId(getDataGroup(m, 1));
+			header.setId(getHeaderData(data));
 			
-		}else if((m = CREATED_DATE_PATTERN.matcher(data)) != null && m.find()){
+		}else if(data.regionMatches(true, 0, SCRIPT_ID_SQUASH, 0, SCRIPT_ID_SQUASH_LENGTH)){
 
-			final String dateString = getDataGroup(m, 1);
+			header.setSquashId(getHeaderData(data));
+			
+		}else if(data.regionMatches(true, 0, SCRIPT_ID_JIRA, 0, SCRIPT_ID_JIRA_LENGTH)){
+
+			header.setJiraId(getHeaderData(data));
+			
+		}else if(data.regionMatches(true, 0, SCRIPT_DATE_CREATED_LABEL, 0, SCRIPT_DATE_CREATED_LABEL_LENGTH)){
+
+			final String dateString = getHeaderData(data);
 			try {
-				script.setCreatedDate(dateFormat.parse(dateString));
+				header.setCreatedAt(dateFormat.parse(dateString));
 			}catch (Exception e) {}
 
-		}else if((m = AUTHOR_PATTERN.matcher(data)) != null && m.find()){
+		}else if(data.regionMatches(true, 0, SCRIPT_AUTHOR_LABEL, 0, SCRIPT_AUTHOR_LABEL_LENGTH)){
 
-			script.setAuthor(getDataGroup(m, 1));
+			header.setAuthor(getHeaderData(data));
 
-		}else if((m = PREREQUISITE_PATTERN.matcher(data)) != null && m.find()){
+		}else if(data.regionMatches(true, 0, SCRIPT_PREREQUISITE_LABEL, 0, SCRIPT_PREREQUISITE_LABEL_LENGTH)){
 
-			script.setPrerequisite(getDataGroup(m, 1));
+			header.setPrerequisite(getHeaderData(data));
 
-		}else if((m = VARIABLE_PATTERN.matcher(data)) != null && m.find()){
+		}else if(data.regionMatches(true, 0, Variable.SCRIPT_LABEL, 0, Variable.SCRIPT_LABEL_LENGTH)){
 
-			final ArrayList<String> dataArray = new ArrayList<String>(Arrays.asList(getDataGroup(m, 1).split(ScriptParser.ATS_SEPARATOR)));
+			final ArrayList<String> dataArray = new ArrayList<String>(Arrays.asList(getHeaderData(data).split(ScriptParser.ATS_SEPARATOR)));
 
 			if(dataArray.size() > 0){
 
@@ -128,7 +144,9 @@ public class ScriptParser {
 				if(dataArray.size() > 0) {
 
 					final String nextData = dataArray.remove(0).trim();
-					if((m = Transformer.TRANSFORM_PATTERN.matcher(nextData)) != null && m.find()){
+					final Matcher m = Transformer.TRANSFORM_PATTERN.matcher(nextData);
+					
+					if(m != null && m.find()){
 
 						transformer = Transformer.createTransformer(getDataGroup(m, 1), getDataGroup(m, 2));
 
@@ -144,9 +162,9 @@ public class ScriptParser {
 				script.addVariable(name, new CalculatedValue(script, value), transformer);
 			}
 
-		}else if((m = RETURN_PATTERN.matcher(data)) != null && m.find()){
+		}else if(data.regionMatches(true, 0, SCRIPT_RETURN_LABEL, 0, SCRIPT_RETURN_LABEL.length())){
 
-			final String[] returnsData = getDataGroup(m, 1).split(ATS_SEPARATOR);
+			final String[] returnsData = getHeaderData(data).split(ATS_SEPARATOR);
 			CalculatedValue[] returns = new CalculatedValue[returnsData.length];
 
 			for(int i=0; i < returnsData.length; i++){

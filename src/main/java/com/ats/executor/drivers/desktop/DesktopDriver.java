@@ -297,7 +297,8 @@ public class DesktopDriver extends RemoteWebDriver {
 		DoubleClick (4),
 		Down (5),
 		Release (6),
-		Wheel (7);
+		Wheel (7),
+		Drag (8);
 
 		private final int type;
 		MouseType(int value){
@@ -442,6 +443,10 @@ public class DesktopDriver extends RemoteWebDriver {
 
 	public void mouseDown() {
 		sendRequestCommand(CommandType.Mouse, MouseType.Down);
+	}
+	
+	public void drag() {
+		sendRequestCommand(CommandType.Mouse, MouseType.Drag);
 	}
 
 	public void mouseRelease() {

@@ -355,9 +355,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void drag(ActionStatus status, FoundElement element, MouseDirection md, int offsetX, int offsetY) {
-		getDesktopDriver().mouseDown();
-		md.updateForDrag();
-		mouseMoveToElement(status, element, md, true, 0, 0);
+		getDesktopDriver().drag();
 	}
 
 	@Override

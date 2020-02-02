@@ -57,6 +57,9 @@ public class Script {
 
 	public final static String ATS_VISUAL_FOLDER = "visual";
 	
+	public final static String SCRIPT_LOG = "SCRIPT";
+	public final static String COMMENT_LOG = "COMMENT";
+	
 	private ArrayList<String> parameters = new ArrayList<String>();
 	private List<Variable> variables = new ArrayList<Variable>();
 	private ArrayList<CalculatedValue> returns;
@@ -108,13 +111,17 @@ public class Script {
 	public void sendConditionExecLog(String scriptName, ConditionalValue condition) {
 		logger.sendConditionExec(scriptName, condition);
 	}
-	
-	public void sendScriptLog(String value) {
-		logger.sendScript(value); 
-	}
-	
+		
 	public void sendWarningLog(String message, String value) {
 		logger.sendWarning(message, value); 
+	}
+	
+	public void sendCommentLog(String calculated) {
+		logger.sendExecLog(COMMENT_LOG, calculated);
+	}
+	
+	public void sendScriptInfo(String value) {
+		logger.sendExecLog(SCRIPT_LOG, value); 
 	}
 	
 	//---------------------------------------------------------------------------------------------------

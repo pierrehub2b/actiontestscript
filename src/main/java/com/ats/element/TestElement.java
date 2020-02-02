@@ -442,8 +442,8 @@ public class TestElement{
 		channel.actionTerminated(status);
 	}
 
-	public void drag(ActionStatus status, MouseDirection position, int offsetX, int offsetY) {
-		engine.drag(status, getFoundElement(), position, offsetX, offsetY);
+	public void drag(ActionStatus status, MouseDirection md, int offsetX, int offsetY) {
+		engine.drag(status, getFoundElement(), md, offsetX, offsetY);
 		channel.actionTerminated(status);
 	}
 

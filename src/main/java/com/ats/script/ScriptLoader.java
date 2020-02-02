@@ -29,7 +29,6 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -61,7 +60,9 @@ public class ScriptLoader extends Script {
 
 	public ScriptLoader(String type, Lexer lexer, File file, ProjectData projectData, Charset charset){
 
-		this.setHeader(new ScriptHeader(projectData, file));
+		final ScriptHeader header = new ScriptHeader(projectData, file);
+		
+		this.setHeader(header);
 		this.setAtsFolder(projectData.getAtsSourceFolder().toFile());
 		this.setCharset(charset);
 		
@@ -82,7 +83,7 @@ public class ScriptLoader extends Script {
 				.map(String::trim)
 				.filter(a -> !a.isEmpty())
 				.filter(a -> !a.startsWith("["))
-				.forEach(a -> parser.parse(this, a));
+				.forEach(a -> parser.parse(this, header, a));
 				lines.close();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -105,10 +106,6 @@ public class ScriptLoader extends Script {
 		actions.add(data);
 	}
 
-	public void parseGroups(String data) {
-		header.parseGroups(data);
-	}
-
 	//---------------------------------------------------------------------------------------------------------------------------------
 	// Java Code Generator
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -127,7 +124,7 @@ public class ScriptLoader extends Script {
 			// variables 
 			//-------------------------------------------------------------------------------------------------
 			
-			code.append("\r\n\r\n\t\t//--------------\r\n\t\t// Variables ...\r\n\t\t//--------------\r\n");
+			code.append("\r\n\r\n\t\t//   ---< Variables >---   //\r\n");
 			
 			final List<Variable> variables = getVariables();
 			Collections.sort(variables);
@@ -142,7 +139,7 @@ public class ScriptLoader extends Script {
 			// actions 
 			//-------------------------------------------------------------------------------------------------
 
-			code.append("\r\n\r\n\t\t//--------------\r\n\t\t// Actions   ...\r\n\t\t//--------------\r\n");
+			code.append("\r\n\r\n\t\t//   ---< Actions >---   //\r\n");
 
 			for(Action action : actions){
 				if(!action.isDisabled() && !action.isScriptComment()){
@@ -157,7 +154,7 @@ public class ScriptLoader extends Script {
 			final CalculatedValue[] returnValues = getReturns();
 			if(returnValues != null) {
 				
-				code.append("\r\n\r\n\t\t//--------------\r\n\t\t// Returns   ...\r\n\t\t//--------------\r\n\r\n\t\t")
+				code.append("\r\n\r\n\t\t//   ---< Return >---   //\r\n\r\n\t\t")
 				.append(ActionTestScript.JAVA_RETURNS_FUNCTION_NAME)
 				.append("(");
 
@@ -189,26 +186,6 @@ public class ScriptLoader extends Script {
 			} catch (IOException e) {
 			}
 		}
-	}
-
-	public void setId(String data) {
-		header.setId(data);
-	}
-
-	public void setDescription(String data) {
-		header.setDescription(data);
-	}
-
-	public void setAuthor(String author) {
-		header.setAuthor(author);
-	}
-
-	public void setCreatedDate(Date date) {
-		header.setCreatedAt(date);
-	}
-
-	public void setPrerequisite(String prerequisite) {
-		header.setPrerequisite(prerequisite);
 	}
 
 	//-------------------------------------------------------------------------------------------------

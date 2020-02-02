@@ -27,6 +27,7 @@ import com.ats.generator.variables.transform.Transformer;
 public class Variable implements Comparable<Variable>{
 
 	public static final String SCRIPT_LABEL = "var";
+	public static final int SCRIPT_LABEL_LENGTH = SCRIPT_LABEL.length();
 	public static final Pattern SCRIPT_PATTERN = Pattern.compile("\\$var\\s*?\\((\\w+)\\)", Pattern.CASE_INSENSITIVE);
 
 	private boolean calculation = true;

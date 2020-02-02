@@ -101,14 +101,16 @@ public class CalculatedProperty implements Comparable<CalculatedProperty>{
 		if(data == null) {
 			return false;
 		}
-		return data.trim().equals(value.getCalculated());
+		//return data.trim().equals(value.getCalculated());
+		return data.equals(value.getCalculated());
 	}
 
 	public boolean matchRegexp(String data){
 		if(data == null) {
 			return false;
 		}
-		return getRegexpPattern().matcher(data.trim()).matches();
+		//return getRegexpPattern().matcher(data.trim()).matches();
+		return getRegexpPattern().matcher(data).matches();
 	}
 
 	private Pattern getRegexpPattern(){
