@@ -153,10 +153,12 @@ public class SendKeyData {
 	}
 	
 	public String getMobileSequence() {
-		if(data.length() == 0) {
-			return EMPTY_DATA;
-		}else {
+		if(data.length() > 0) {
 			return data;
+		}else if (specialKey.length() > 0) {
+			return specialKey;
+		} else {
+			return EMPTY_DATA;
 		}
 	}
 }
