@@ -71,14 +71,14 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 		this.window = window;
 	}
 
-	public DesktopDriverEngine(Channel channel, String application, DesktopDriver desktopDriver, ApplicationProperties props, int defaultWait) {
-		super(channel, desktopDriver, application, props, DEFAULT_WAIT, 0);
+	public DesktopDriverEngine(Channel channel, DesktopDriver desktopDriver, ApplicationProperties props, int defaultWait) {
+		super(channel, desktopDriver, props, DEFAULT_WAIT, 0);
 		desktopDriver.setEngine(this);
 	}
 
 	public DesktopDriverEngine(Channel channel, ActionStatus status, String application, DesktopDriver desktopDriver, ApplicationProperties props) {
 
-		this(channel, application, desktopDriver, props, DEFAULT_WAIT);
+		this(channel, desktopDriver, props, DEFAULT_WAIT);
 
 		long processId = -1;
 

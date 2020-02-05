@@ -41,6 +41,9 @@ public class ChromiumBasedDriverEngine extends WebDriverEngine {
 		options.addArguments("--disable-notifications");
 		options.addArguments("--disable-web-security");
 		options.addArguments("--disable-dev-shm-usage");
+		
+		options.addArguments("--ignore-certificate-errors");
+		
 
 		checkProfileFolder(options, props, browserName);
 
@@ -93,8 +96,8 @@ public class ChromiumBasedDriverEngine extends WebDriverEngine {
 				new RemoteWebDriver(driverProcess.getDriverServerUrl(), options);
 			}catch(Exception ex){   
 			}
-		}else {
-			super.close();
 		}
+		
+		super.close();
 	}
 }

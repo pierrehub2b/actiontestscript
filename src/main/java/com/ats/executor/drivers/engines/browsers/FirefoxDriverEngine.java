@@ -33,7 +33,6 @@ import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
 import com.ats.executor.channels.Channel;
-import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.WebDriverEngine;
@@ -55,7 +54,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	private OkHttpClient client;
 
 	public FirefoxDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
-		super(channel, DriverManager.FIREFOX_BROWSER, driverProcess, windowsDriver, props, DEFAULT_WAIT, DEFAULT_PROPERTY_WAIT);
+		super(channel, driverProcess, windowsDriver, props, DEFAULT_WAIT, DEFAULT_PROPERTY_WAIT);
 		
 		FirefoxOptions options = new FirefoxOptions();
 		options.setCapability("acceptSslCerts ", true);
@@ -94,6 +93,8 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 			driver.quit();
 			
 		}*/
+		
+		//super.close();
 	}
 	
 	@Override

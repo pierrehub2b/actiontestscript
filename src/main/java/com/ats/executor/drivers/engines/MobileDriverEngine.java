@@ -105,7 +105,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 	public MobileDriverEngine(Channel channel, ActionStatus status, String app, DesktopDriver desktopDriver, ApplicationProperties props) {
 
-		super(channel, desktopDriver, app, props, 0, 60);
+		super(channel, desktopDriver, props, 0, 60);
 
 		if(applicationPath == null) {
 			applicationPath = app;

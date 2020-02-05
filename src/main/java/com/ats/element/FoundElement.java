@@ -265,8 +265,8 @@ public class FoundElement{
 	}
 
 	public void updatePosition(Double x, Double y, Channel channel, Double offsetX, Double offsetY) {
-		this.setX(x + channel.getSubDimension().getX() + offsetX);
-		this.setY(y + channel.getSubDimension().getY() + offsetY);
+		this.x = x + channel.getSubDimension().getX() + offsetX;
+		this.y = y + channel.getSubDimension().getY() + offsetY;
 	}
 
 	private void setRemoteWebElement(RemoteWebElement rwe){

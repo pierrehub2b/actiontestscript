@@ -37,7 +37,7 @@ public class ExplorerDriverEngine extends DesktopDriverEngine {
 	private Desktop desktop;
 
 	public ExplorerDriverEngine(Channel channel, ActionStatus status, DesktopDriver desktopDriver, ApplicationProperties props) {
-		super(channel, DriverManager.DESKTOP_EXPLORER, desktopDriver, props, DEFAULT_WAIT);
+		super(channel, desktopDriver, props, DEFAULT_WAIT);
 
 		String folderName = "";
 

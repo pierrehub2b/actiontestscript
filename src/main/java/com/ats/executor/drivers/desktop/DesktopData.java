@@ -33,10 +33,10 @@ public class DesktopData {
 	}
 
 	public String getValue() {
-		return value.substring(1);
+		return value;
 	}
 
 	public void setValue(String value) {
-		this.value = value;
+		this.value = value.substring(1);
 	}
 }

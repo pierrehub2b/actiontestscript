@@ -94,7 +94,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 
 	public ApiDriverEngine(Channel channel, ActionStatus status, String path, DesktopDriver desktopDriver, ApplicationProperties props) {
 
-		super(channel, desktopDriver, path, props, 0, 0);
+		super(channel, desktopDriver, props, 0, 0);
 
 		try {
 			

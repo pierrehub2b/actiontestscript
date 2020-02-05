@@ -83,45 +83,32 @@ public class CalculatedProperty implements Comparable<CalculatedProperty>{
 
 	public Predicate<AtsBaseElement> getPredicate(Predicate<AtsBaseElement> predicate){
 		if(isRegexp()) {
-			return predicate.and(p -> matchRegexp(p.getAttribute(name)));
+			return predicate.and(p -> regexpMatch(p.getAttribute(name)));
 		}else {
-			return predicate.and(p -> matchText(p.getAttribute(name)));
+			return predicate.and(p -> textEquals(p.getAttribute(name)));
 		}
 	}
 
 	public boolean checkProperty(String data) {
 		if(isRegexp()){
-			return matchRegexp(data);
+			return regexpMatch(data);
 		}else{
-			return matchText(data);
+			return textEquals(data);
 		}
 	}
 
-	public boolean matchText(String data){
+	public boolean textEquals(String data){
 		if(data == null) {
 			return false;
 		}
-		//return data.trim().equals(value.getCalculated());
 		return data.equals(value.getCalculated());
 	}
 
-	public boolean matchRegexp(String data){
+	public boolean regexpMatch(String data){
 		if(data == null) {
 			return false;
 		}
-		//return getRegexpPattern().matcher(data.trim()).matches();
-		return getRegexpPattern().matcher(data).matches();
-	}
-
-	private Pattern getRegexpPattern(){
-		if(regexpPattern == null){
-			try {
-				regexpPattern = Pattern.compile(value.getCalculated());
-			}catch(PatternSyntaxException e) {
-				regexpPattern = Pattern.compile("");
-			}
-		}
-		return regexpPattern;
+		return regexpPattern.matcher(data).matches();
 	}
 
 	public String getExpectedResult() {
@@ -158,6 +145,12 @@ public class CalculatedProperty implements Comparable<CalculatedProperty>{
 
 	public void setValue(CalculatedValue value) {
 		this.value = value;
+		
+		try {
+			regexpPattern = Pattern.compile(value.getCalculated());
+		}catch(PatternSyntaxException e) {
+			regexpPattern = Pattern.compile(".*");
+		}
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------------

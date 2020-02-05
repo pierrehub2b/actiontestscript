@@ -68,7 +68,7 @@ public abstract class DriverEngine {
 		this.desktopDriver = desktopDriver;
 	}
 	
-	public DriverEngine(Channel channel, DesktopDriver desktopDriver, String application, ApplicationProperties props, int defaultWait, int defaultCheck){
+	public DriverEngine(Channel channel, DesktopDriver desktopDriver, ApplicationProperties props, int defaultWait, int defaultCheck){
 		
 		this(channel);
 		this.desktopDriver = desktopDriver;

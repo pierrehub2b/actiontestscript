@@ -46,8 +46,8 @@ public class GeneratorAnt extends Task{
 	public void execute() {
 		if(destinationFolder != null && sourceFolder != null){
 
-			File destination = new File(destinationFolder);
-			File source = new File(sourceFolder);
+			final File destination = new File(destinationFolder);
+			final File source = new File(sourceFolder);
 			File report = null;
 			
 			if(reportFolder != null) {

@@ -133,10 +133,8 @@ public class AtsElement extends AtsBaseElement {
 		return null;
 	}
 
-	public void setAttributes(ArrayList<DesktopData> attributes) {
-		if(attributes != null) {
-			this.attributes = attributes.parallelStream().collect(Collectors.toMap(s -> s.getName(), s -> s.getValue()));
-		}
+	public void setAttributes(ArrayList<DesktopData> value) {
+		this.attributes = value.parallelStream().collect(Collectors.toMap(s -> s.getName(), s -> s.getValue()));
 	}
 	
 	public boolean isClickable() {

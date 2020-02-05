@@ -100,8 +100,9 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	//protected static final String JS_AUTO_SCROLL_CALC = "var e=arguments[0];var r=e.getBoundingClientRect();var top=r.top + window.pageYOffset;window.scrollTo(0, top-(window.innerHeight / 2));r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
 	//protected static final String JS_AUTO_SCROLL_MOZ = "var e=arguments[0];e.scrollIntoView({behavior:'auto',block:'center',inline:'center'});var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
 
-	protected String JS_SCROLL_IF_NEEDED = "var e=arguments[0], result=[];var r=e.getBoundingClientRect();if(r.top < 0 || r.left < 0 || r.bottom > (window.innerHeight || document.documentElement.clientHeight) || r.right > (window.innerWidth || document.documentElement.clientWidth)) {e.scrollIntoView({behavior:'instant',block:'center',inline:'nearest'});r=e.getBoundingClientRect();result=[r.left+0.0001, r.top+0.0001];}";
-
+	//protected String JS_SCROLL_IF_NEEDED = "var e=arguments[0], result=[], r=e.getBoundingClientRect(), top0=r.top, left0=r.left;if(r.top < 0 || r.left < 0 || r.bottom > (window.innerHeight || document.documentElement.clientHeight) || r.right > (window.innerWidth || document.documentElement.clientWidth)) {e.scrollIntoView({behavior:'instant',block:'center',inline:'nearest'});r=e.getBoundingClientRect();result=[r.left+0.0001, r.top+0.0001, left0+0.0001, top0+0.0001];}";
+	protected String JS_SCROLL_IF_NEEDED = "var e=arguments[0], result=[], r=e.getBoundingClientRect(), top0=r.top, left0=r.left; e.scrollIntoView({behavior:'instant',block:'center',inline:'nearest'});r=e.getBoundingClientRect();if(r.left!=left0 || r.top!=top0) {result=[r.left+0.0001, r.top+0.0001];}";
+	
 	protected static final String JS_ELEMENT_SCROLL = "var e=arguments[0];var d=arguments[1];e.scrollTop += d;var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
 	protected static final String JS_WINDOW_SCROLL = "window.scrollBy(0,arguments[0]);var result=[0.0001, 0.0001]";
 	protected static final String JS_ELEMENT_FROM_POINT = "var result=null;var e=document.elementFromPoint(arguments[0],arguments[1]);if(e){var r=e.getBoundingClientRect();result=[e, e.tagName, e.getAttribute('inputmode')=='numeric', e.getAttribute('type')=='password', r.x+0.0001, r.y+0.0001, r.width+0.0001, r.height+0.0001, r.left+0.0001, r.top+0.0001, 0.0001, 0.0001, {}];};";
@@ -128,17 +129,19 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	protected java.net.URI driverSession;
 
 	protected String searchElementScript = JS_SEARCH_ELEMENT;
+	
+	//private BrowserMobProxy proxy;
+	//private String browserName = "";
 
 	public WebDriverEngine(
 			Channel channel, 
-			String browser, 
 			DriverProcess driverProcess, 
 			DesktopDriver desktopDriver,
 			ApplicationProperties props,
 			int defaultWait,
 			int defaultPropertyWait) {
 
-		super(channel, desktopDriver, browser, props, defaultWait, defaultPropertyWait);
+		super(channel, desktopDriver, props, defaultWait, defaultPropertyWait);
 
 		this.driverProcess = driverProcess;
 	}
@@ -150,11 +153,11 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			DesktopDriver desktopDriver,
 			ApplicationProperties props) {
 
-		this(channel, browser, driverProcess, desktopDriver, props, DEFAULT_WAIT, DEFAULT_PROPERTY_WAIT);
+		this(channel, driverProcess, desktopDriver, props, DEFAULT_WAIT, DEFAULT_PROPERTY_WAIT);
 	}
 
 	public WebDriverEngine(Channel channel, DesktopDriver desktopDriver, String application, ApplicationProperties props, int defaultWait, int defaultCheck) {
-		super(channel, desktopDriver, application, props, defaultWait, defaultCheck);
+		super(channel, desktopDriver, props, defaultWait, defaultCheck);
 	}
 
 	protected DriverProcess getDriverProcess() {
@@ -178,6 +181,14 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		if(channel.isNeoload()) {
 			channel.setNeoloadDesignApi(ats.getNeoloadDesignApi());
 			cap.setCapability(CapabilityType.PROXY, ats.getNeoloadProxy().getValue());
+			
+			/*proxy = new BrowserMobProxyServer();
+			proxy.start(0);
+			proxy.newHar("ats_page_0", "ATS start page");
+					    			
+			proxy.enableHarCaptureTypes(CaptureType.REQUEST_CONTENT, CaptureType.RESPONSE_CONTENT);
+			cap.setCapability(CapabilityType.PROXY, ClientUtil.createSeleniumProxy(proxy));*/
+			
 		}else {
 			channel.setNeoload(false);
 			cap.setCapability(CapabilityType.PROXY, ats.getProxy().getValue());
@@ -259,6 +270,8 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		try {
 			driverSession = new URI(driverProcess.getDriverServerUrl() + "/session/" + driver.getSessionId().toString());
 		} catch (URISyntaxException e) {}
+		
+		
 	}
 
 	@Override
@@ -325,7 +338,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	private void updatePosition(ArrayList<Double> position, FoundElement element) {
 		if(position != null && position.size() > 1) {
 			element.updatePosition(position.get(0), position.get(1), channel, 0.0, 0.0);
-			channel.sleep(30);
+			channel.sleep(200);
 		}
 	}
 
@@ -636,6 +649,26 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			Arrays.asList(getWindowsHandle(0)).stream().sorted(Collections.reverseOrder()).forEach(s -> closeWindowHandler(s));
 			getDriverProcess().close();
 		}
+		
+		/*if(proxy != null) {
+						
+			final HarNameVersion nameVersion = new HarNameVersion("ats", AtsManager.getVersion());
+			nameVersion.setComment("browser=" + browserName + ", channel=" + channel.getName());
+			
+			final Har har = proxy.getHar();
+			har.getLog().setCreator(nameVersion);
+						
+			try {
+				final File f = new File(channel.getName() + "-" + browserName + ".har");
+				har.writeTo(f);
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+			}
+			
+			proxy.stop();
+			proxy.endHar();
+			proxy = null;
+		}*/
 	}
 
 	//-----------------------------------------------------------------------------------------------------------------------------------
