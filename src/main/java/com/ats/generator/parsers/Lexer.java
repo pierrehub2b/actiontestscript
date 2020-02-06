@@ -189,7 +189,7 @@ public class Lexer {
 				if(dataArray.size() > 0) {
 					cname = dataArray.remove(0).trim();
 				}				
-				script.addAction(new ActionChannelClose(script, cname), disabled);
+				script.addAction(new ActionChannelClose(script, cname, options.contains(ActionChannelClose.NO_STOP_LABEL)), disabled);
 
 			}else if(ActionNeoloadStart.SCRIPT_LABEL.equals(actionType) || ActionNeoloadStop.SCRIPT_LABEL.equals(actionType)){
 

@@ -143,7 +143,7 @@ public class ChannelManager {
 		status.setError(ActionStatus.CHANNEL_NOT_FOUND, "channel [" + name + "] is not running");
 	}
 
-	public void closeChannel(ActionStatus status, String channelName){
+	public void closeChannel(ActionStatus status, String channelName, boolean keepRunning){
 		Optional<Channel> cn = channelsList.stream().filter(c -> c.getName().equals(channelName)).findFirst();
 		if(cn.isPresent()) {
 			cn.get().close(status);

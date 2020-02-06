@@ -26,10 +26,15 @@ public class ActionChannelClose extends ActionChannel {
 
 	public static final String SCRIPT_CLOSE_LABEL = SCRIPT_LABEL + "close";
 	
+	public static final String NO_STOP_LABEL = "nostop";
+	
+	private boolean keepRunning = false;
+
 	public ActionChannelClose() {}
 	
-	public ActionChannelClose(Script script, String name) {
+	public ActionChannelClose(Script script, String name, boolean run) {
 		super(script, name);
+		this.keepRunning = run;
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -40,7 +45,19 @@ public class ActionChannelClose extends ActionChannel {
 		super.execute(ts);
 		
 		ts.getRecorder().update(getName());
-		ts.getChannelManager().closeChannel(status, getName());
+		ts.getChannelManager().closeChannel(status, getName(), keepRunning);
+	}
+	
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------
+	
+	public boolean isKeepRunning() {
+		return keepRunning;
+	}
+
+	public void setKeepRunning(boolean keepRunning) {
+		this.keepRunning = keepRunning;
 	}
 	
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -50,7 +67,7 @@ public class ActionChannelClose extends ActionChannel {
 	@Override
 	public StringBuilder getJavaCode() {
 		StringBuilder codeBuilder = super.getJavaCode();
-		codeBuilder.append("\"").append(getName()).append("\")");
+		codeBuilder.append("\"").append(getName()).append("\", ").append(keepRunning).append(")");
 		return codeBuilder;
 	}
 }
