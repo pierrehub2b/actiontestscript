@@ -20,7 +20,6 @@ under the License.
 package com.ats.executor.drivers;
 
 import java.util.ArrayList;
-import java.util.function.Predicate;
 
 import com.ats.driver.ApplicationProperties;
 import com.ats.driver.AtsManager;
@@ -81,7 +80,7 @@ public class DriverManager {
 	//--------------------------------------------------------------------------------------------------------------
 
 	public static void killAllDrivers() {
-		Predicate<ProcessHandle> fullPredicate = p -> p.info().command().isPresent();
+		/*Predicate<ProcessHandle> fullPredicate = p -> p.info().command().isPresent();
 		Predicate<ProcessHandle> desktop  =  p -> p.info().command().get().contains(DESKTOP_DRIVER_FILE_NAME);
 		Predicate<ProcessHandle> chrome  = p -> p.info().command().get().contains(CHROME_DRIVER_FILE_NAME);
 		Predicate<ProcessHandle> opera  =  p -> p.info().command().get().contains(OPERA_DRIVER_FILE_NAME);
@@ -99,7 +98,7 @@ public class DriverManager {
 				p2.children().parallel().forEach(p3 -> p3.destroy());
 				p2.destroy();
 			});
-		}catch (Exception e) {}
+		}catch (Exception e) {}*/
 	}
 
 	//--------------------------------------------------------------------------------------------------------------
@@ -221,7 +220,7 @@ public class DriverManager {
 					return jxEngine;
 				}
 
-				jxEngine.close();
+				jxEngine.close(false);
 				return null;
 
 			}else {
@@ -269,9 +268,9 @@ public class DriverManager {
 
 	public void tearDown(){
 
-		while(driversProcess.size() > 0) {
-			driversProcess.remove(0).close();
-		}
+		//while(driversProcess.size() > 0) {
+		//	driversProcess.remove(0).close();
+		//}
 
 		if(mobileDriverEngine != null){
 			mobileDriverEngine.tearDown();

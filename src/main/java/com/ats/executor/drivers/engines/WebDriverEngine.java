@@ -102,7 +102,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	//protected String JS_SCROLL_IF_NEEDED = "var e=arguments[0], result=[], r=e.getBoundingClientRect(), top0=r.top, left0=r.left;if(r.top < 0 || r.left < 0 || r.bottom > (window.innerHeight || document.documentElement.clientHeight) || r.right > (window.innerWidth || document.documentElement.clientWidth)) {e.scrollIntoView({behavior:'instant',block:'center',inline:'nearest'});r=e.getBoundingClientRect();result=[r.left+0.0001, r.top+0.0001, left0+0.0001, top0+0.0001];}";
 	protected String JS_SCROLL_IF_NEEDED = "var e=arguments[0], result=[], r=e.getBoundingClientRect(), top0=r.top, left0=r.left; e.scrollIntoView({behavior:'instant',block:'center',inline:'nearest'});r=e.getBoundingClientRect();if(r.left!=left0 || r.top!=top0) {result=[r.left+0.0001, r.top+0.0001];}";
-	
+
 	protected static final String JS_ELEMENT_SCROLL = "var e=arguments[0];var d=arguments[1];e.scrollTop += d;var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
 	protected static final String JS_WINDOW_SCROLL = "window.scrollBy(0,arguments[0]);var result=[0.0001, 0.0001]";
 	protected static final String JS_ELEMENT_FROM_POINT = "var result=null;var e=document.elementFromPoint(arguments[0],arguments[1]);if(e){var r=e.getBoundingClientRect();result=[e, e.tagName, e.getAttribute('inputmode')=='numeric', e.getAttribute('type')=='password', r.x+0.0001, r.y+0.0001, r.width+0.0001, r.height+0.0001, r.left+0.0001, r.top+0.0001, 0.0001, 0.0001, {}];};";
@@ -129,7 +129,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	protected java.net.URI driverSession;
 
 	protected String searchElementScript = JS_SEARCH_ELEMENT;
-	
+
 	//private BrowserMobProxy proxy;
 	//private String browserName = "";
 
@@ -181,14 +181,14 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		if(channel.isNeoload()) {
 			channel.setNeoloadDesignApi(ats.getNeoloadDesignApi());
 			cap.setCapability(CapabilityType.PROXY, ats.getNeoloadProxy().getValue());
-			
+
 			/*proxy = new BrowserMobProxyServer();
 			proxy.start(0);
 			proxy.newHar("ats_page_0", "ATS start page");
-					    			
+
 			proxy.enableHarCaptureTypes(CaptureType.REQUEST_CONTENT, CaptureType.RESPONSE_CONTENT);
 			cap.setCapability(CapabilityType.PROXY, ClientUtil.createSeleniumProxy(proxy));*/
-			
+
 		}else {
 			channel.setNeoload(false);
 			cap.setCapability(CapabilityType.PROXY, ats.getProxy().getValue());
@@ -203,7 +203,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			driver = new RemoteWebDriver(driverProcess.getDriverServerUrl(), cap);
 		}catch(Exception ex){
 			status.setTechnicalError(ActionStatus.CHANNEL_START_ERROR, ex.getMessage());
-			driverProcess.close();
+			driverProcess.close(false);
 			return;
 		}
 
@@ -270,8 +270,8 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		try {
 			driverSession = new URI(driverProcess.getDriverServerUrl() + "/session/" + driver.getSessionId().toString());
 		} catch (URISyntaxException e) {}
-		
-		
+
+
 	}
 
 	@Override
@@ -338,7 +338,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	private void updatePosition(ArrayList<Double> position, FoundElement element) {
 		if(position != null && position.size() > 1) {
 			element.updatePosition(position.get(0), position.get(1), channel, 0.0, 0.0);
-			channel.sleep(200);
+			channel.sleep(500);
 		}
 	}
 
@@ -644,27 +644,29 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public void close() {
+	public void close(boolean keepRunning) {
+
 		if(driver != null){
 			Arrays.asList(getWindowsHandle(0)).stream().sorted(Collections.reverseOrder()).forEach(s -> closeWindowHandler(s));
-			getDriverProcess().close();
 		}
-		
+
+		getDriverProcess().close(keepRunning);
+
 		/*if(proxy != null) {
-						
+
 			final HarNameVersion nameVersion = new HarNameVersion("ats", AtsManager.getVersion());
 			nameVersion.setComment("browser=" + browserName + ", channel=" + channel.getName());
-			
+
 			final Har har = proxy.getHar();
 			har.getLog().setCreator(nameVersion);
-						
+
 			try {
 				final File f = new File(channel.getName() + "-" + browserName + ".har");
 				har.writeTo(f);
 			} catch (Exception e) {
 				System.err.println(e.getMessage());
 			}
-			
+
 			proxy.stop();
 			proxy.endHar();
 			proxy = null;
@@ -1085,19 +1087,27 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public void clearText(ActionStatus status, FoundElement element) {
-		try {
-			executeScript(status, "arguments[0].value='';", element.getValue());
-			status.setMessage("");
-			return;
-		}catch (StaleElementReferenceException e) {}
+	public void clearText(ActionStatus status, TestElement te, MouseDirection md) {
 
-		try {
-			element.getValue().clear();
-			status.setMessage("");
-			return;
-		}catch(Exception e) {}
+		te.click(status, md);
+		
+		if(status.isPassed()) {
+			final FoundElement element = te.getFoundElement();
 
+			try {
+				executeScript(status, "arguments[0].value='';", element.getValue());
+				status.setMessage("");
+				return;
+			}catch (StaleElementReferenceException e) {}
+
+			try {
+				element.getValue().clear();
+				status.setMessage("");
+				return;
+			}catch(Exception e) {}
+
+		}
+		
 		status.setError(ActionStatus.ENTER_TEXT_FAIL, "clear text failed on this element");
 	}
 

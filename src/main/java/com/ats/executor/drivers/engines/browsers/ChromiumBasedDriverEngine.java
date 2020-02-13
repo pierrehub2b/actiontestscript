@@ -85,8 +85,8 @@ public class ChromiumBasedDriverEngine extends WebDriverEngine {
 	}
 
 	@Override
-	public void close() {
-		if(profileFolder != null) {
+	public void close(boolean keepRunning) {
+		if(profileFolder != null && !keepRunning) {
 			Arrays.asList(getWindowsHandle(0)).stream().sorted(Collections.reverseOrder()).forEach(s -> closeWindowHandler(s));
 
 			ChromeOptions options = new ChromeOptions();
@@ -98,6 +98,6 @@ public class ChromiumBasedDriverEngine extends WebDriverEngine {
 			}
 		}
 		
-		super.close();
+		super.close(keepRunning);
 	}
 }

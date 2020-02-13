@@ -87,7 +87,7 @@ public class ActionChannelStart extends ActionChannel {
 	}
 		
 	@Override
-	protected StringBuilder getActionLogsData() {
+	public StringBuilder getActionLogsData() {
 		final Channel channel = status.getChannel();
 		return super.getActionLogsData()
 				.append(", \"app\":\"").append(application.getCalculated()).append("\"")

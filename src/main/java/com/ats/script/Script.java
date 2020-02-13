@@ -64,6 +64,8 @@ public class Script {
 	private List<Variable> variables = new ArrayList<Variable>();
 	private ArrayList<CalculatedValue> returns;
 	
+	protected int iteration = 0;
+	
 	private Map<String, String> testExecutionVariables;
 	
 	private File projectAtsFolder;
@@ -101,7 +103,7 @@ public class Script {
 	}
 	
 	public void sendInfoLog(String message, String value) {
-		logger.sendInfo(message, value); 
+		logger.sendInfo(message, value);
 	}
 	
 	public void sendActionLog(Action action, String testName, int line) {
@@ -147,7 +149,7 @@ public class Script {
 	//-------------------------------------------------------------------------------------------------
 	//  getters and setters for serialization
 	//-------------------------------------------------------------------------------------------------
-
+	
 	public List<Variable> getVariables() {
 		return variables;
 	}
@@ -277,7 +279,12 @@ public class Script {
 	public String getEnvironmentValue(String name, String defaultValue) {
 	
 		String value = null;
-
+		
+		value = System.getProperty(name);
+		if(value != null) {
+			return value;
+		}
+		
 		if(testExecutionVariables != null) {
 			value = testExecutionVariables.get(name);
 			if(value != null) {
@@ -303,6 +310,10 @@ public class Script {
 	
 	public String getNowValue() {
 		return TimeTransformer.getNowValue();
+	}
+		
+	public int getIteration() {
+		return iteration;
 	}
 	
 	public String getAssetsUrl(String relativePath) {

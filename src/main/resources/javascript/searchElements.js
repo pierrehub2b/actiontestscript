@@ -1,29 +1,28 @@
 var parent=arguments[0], result=[];
-const tagName=arguments[1], attributes=arguments[2], attributesLen=arguments[3];	
-const screenOffsetX=(window.outerWidth-window.innerWidth)/2+window.screenX+0.0001, screenOffsetY=window.outerHeight-window.innerHeight+window.screenY+0.0001;
+const tag=arguments[1], attributes=arguments[2], attributesLen=arguments[3];	
+const scX=(window.outerWidth-window.innerWidth)/2+window.screenX+0.0001, scY=window.outerHeight-window.innerHeight+window.screenY+0.0001;
 
 if(parent == null){
 	parent = window.document;
 };
 
-const elts=parent.getElementsByTagName(tagName);
+const elts=parent.getElementsByTagName(tag);
 const eltsLength=elts.length;
 
-var addElement=function(e, t, a){
-	var rect = e.getBoundingClientRect();
-	result[result.length] = [e, t, e.getAttribute('inputmode')=='numeric',e.getAttribute('type')=='password', rect.x+0.0001, rect.y+0.0001, rect.width+0.0001, rect.height+0.0001, rect.left+0.0001, rect.top+0.0001, screenOffsetX, screenOffsetY, a];
+function addElement(e, t, r, a){
+	result[result.length] = [e, t, e.getAttribute('inputmode')=='numeric',e.getAttribute('type')=='password', r.x+0.0001, r.y+0.0001, r.width+0.0001, r.height+0.0001, r.left+0.0001, r.top+0.0001, scX, scY, a];
 };
 
 if(attributesLen == 0){
 
 	for(let h = 0; h < eltsLength; h++){
 		var e = elts[h];
-		addElement(e, e.tagName, {});
+		addElement(e, e.tagName, e.getBoundingClientRect(), {});
 	}
 
 }else{
 
-	let loop=function (e, i, arr){
+	function loop(e){
 
 		let a={};
 		const t=e.tagName;
@@ -34,7 +33,8 @@ if(attributesLen == 0){
 					a['text'] = e.textContent.replace(/\xA0/g,' ').trim();
 				}
 			}else{
-				if(attributeName == 'checked' && t == 'INPUT' && (e.type == 'radio' || e.type == 'checkbox')){
+				const type = e.type;
+				if(attributeName == 'checked' && t == 'INPUT' && (type == 'radio' || type == 'checkbox')){
 					if(e.checked == true){
 						a['checked'] = 'true';
 					}else{
@@ -56,9 +56,9 @@ if(attributesLen == 0){
 		});
 
 		if(Object.keys(a).length == attributesLen){
-			addElement(e, t, a);
+			addElement(e, t, e.getBoundingClientRect(), a);
 		}
 	};
 	
-	Array.prototype.slice.call(elts).forEach(loop);
+	Array.prototype.forEach.call(elts, loop);
 };

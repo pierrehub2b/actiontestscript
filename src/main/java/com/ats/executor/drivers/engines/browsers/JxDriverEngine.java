@@ -62,7 +62,7 @@ public class JxDriverEngine extends WebDriverEngine {
 				driver = new RemoteWebDriver(getDriverProcess().getDriverServerUrl(), capabilities);
 
 			} catch (Exception e) {
-				close();
+				close(false);
 				status.setError(ActionStatus.CHANNEL_START_ERROR, e.getMessage());
 			}
 
@@ -179,13 +179,13 @@ public class JxDriverEngine extends WebDriverEngine {
 	}
 
 	@Override
-	public void close() {
+	public void close(boolean keepRunning) {
 
 		try {
 
 			jxProcess.destroyForcibly();
 			driver.close();
-			getDriverProcess().close();
+			getDriverProcess().close(keepRunning);
 
 		}catch(Exception e) {}
 	}

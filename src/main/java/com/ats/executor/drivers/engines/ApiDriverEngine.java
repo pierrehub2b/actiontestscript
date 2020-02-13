@@ -200,7 +200,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	}
 
 	@Override
-	public void close() {
+	public void close(boolean keepRunning) {
 		logStream.println("Close ATS WebService channel");
 	}
 	
@@ -272,7 +272,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {}
 
 	@Override
-	public void clearText(ActionStatus status, FoundElement foundElement) {}
+	public void clearText(ActionStatus status, TestElement testElement, MouseDirection md) {}
 
 	@Override
 	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {}

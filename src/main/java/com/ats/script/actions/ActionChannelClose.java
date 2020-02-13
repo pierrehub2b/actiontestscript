@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.script.actions;
 
@@ -25,16 +25,16 @@ import com.ats.script.Script;
 public class ActionChannelClose extends ActionChannel {
 
 	public static final String SCRIPT_CLOSE_LABEL = SCRIPT_LABEL + "close";
-	
+
 	public static final String NO_STOP_LABEL = "nostop";
-	
+
 	private boolean keepRunning = false;
 
 	public ActionChannelClose() {}
-	
-	public ActionChannelClose(Script script, String name, boolean run) {
+
+	public ActionChannelClose(Script script, String name, boolean keepRunning) {
 		super(script, name);
-		this.keepRunning = run;
+		this.keepRunning = keepRunning;
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -43,15 +43,15 @@ public class ActionChannelClose extends ActionChannel {
 	@Override
 	public void execute(ActionTestScript ts) {
 		super.execute(ts);
-		
+
 		ts.getRecorder().update(getName());
 		ts.getChannelManager().closeChannel(status, getName(), keepRunning);
 	}
-	
+
 	//--------------------------------------------------------
 	// getters and setters for serialization
 	//--------------------------------------------------------
-	
+
 	public boolean isKeepRunning() {
 		return keepRunning;
 	}
@@ -59,7 +59,7 @@ public class ActionChannelClose extends ActionChannel {
 	public void setKeepRunning(boolean keepRunning) {
 		this.keepRunning = keepRunning;
 	}
-	
+
 	//---------------------------------------------------------------------------------------------------------------------------------
 	// Code Generator
 	//---------------------------------------------------------------------------------------------------------------------------------

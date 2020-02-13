@@ -52,6 +52,7 @@ import com.ats.driver.AtsManager;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.TestBound;
 import com.ats.executor.drivers.desktop.DesktopDriver;
+import com.ats.generator.ATS;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonPrimitive;
 import com.opencsv.CSVReader;
@@ -379,7 +380,7 @@ public class Utils {
 		htmlContent.append(titleUid);
 		htmlContent.append("</title></head><body bgcolor=\"#f2f2f2\"><div><div id=\"header\"><div class=\"clearfix\">");
 		htmlContent.append("ActionTestScript (ver. ");
-		htmlContent.append(AtsManager.getVersion());
+		htmlContent.append(ATS.VERSION);
 		htmlContent.append(")");
 		htmlContent.append("</div></div><div id=\"content-wrapper\"><div class=\"site\"><div class=\"article js-hide-during-search\"><a href=\"https://www.actiontestscript.com\"><img src=\"data:image/png;base64, ");
 
@@ -388,7 +389,7 @@ public class Utils {
 		htmlContent.append("\" alt=\"ActionTestScript\"/></a><div class=\"article-body content-body wikistyle markdown-format\"><div class=\"intro\" style=\"margin-left:30px\">");
 
 		htmlContent.append("<p><strong>ActionTestScript version : </strong>");
-		htmlContent.append(AtsManager.getVersion());
+		htmlContent.append(ATS.VERSION);
 
 		htmlContent.append("<br><strong>Browser driver version : </strong>");
 		htmlContent.append(driverVersion);

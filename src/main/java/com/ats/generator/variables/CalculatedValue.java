@@ -40,6 +40,7 @@ public class CalculatedValue{
 	private static final Pattern NOW_PATTERN = Pattern.compile("\\$now", Pattern.CASE_INSENSITIVE);
 	private static final Pattern UUID_PATTERN = Pattern.compile("\\$uuid", Pattern.CASE_INSENSITIVE);
 	private static final Pattern PGAV_PATTERN = Pattern.compile("\\$pgav", Pattern.CASE_INSENSITIVE);
+	private static final Pattern ITERATION_PATTERN = Pattern.compile("\\$iteration", Pattern.CASE_INSENSITIVE);
 	
 	public static final Pattern KEY_REGEXP = Pattern.compile("\\$key\\s?\\((\\w+)\\-?([^\\)]*)?\\)");
 	
@@ -136,7 +137,12 @@ public class CalculatedValue{
 			while (mv.find()) {
 				javaCode = javaCode.replace(mv.group(0), "\", " + ActionTestScript.JAVA_GAV_FUNCTION_NAME + "(), \"");
 			}
-
+			
+			mv = ITERATION_PATTERN.matcher(dataValue);
+			while (mv.find()) {
+				javaCode = javaCode.replace(mv.group(0), "\", " + ActionTestScript.JAVA_ITERATION_FUNCTION_NAME + "(), \"");
+			}
+			
 			mv = KEY_REGEXP.matcher(dataValue);
 			while (mv.find()) {
 				

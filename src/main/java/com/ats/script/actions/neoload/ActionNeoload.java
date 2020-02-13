@@ -22,10 +22,10 @@ package com.ats.script.actions.neoload;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import com.ats.driver.AtsManager;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
+import com.ats.generator.ATS;
 import com.ats.script.Script;
 import com.ats.script.actions.Action;
 import com.google.gson.Gson;
@@ -39,7 +39,7 @@ public class ActionNeoload extends Action {
 
 	public static final String SCRIPT_NEOLOAD_LABEL = "neoload";
 
-	private static final String USER_AGENT = "ATS-Neoload-Recoder/" + AtsManager.getVersion();
+	private static final String USER_AGENT = "ATS-Neoload-Recoder/" + ATS.VERSION;
 
 	private OkHttpClient client;
 

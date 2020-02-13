@@ -22,6 +22,7 @@ package com.ats.recorder;
 import com.ats.element.TestElement;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.script.actions.Action;
+import com.ats.script.actions.ActionChannelStart;
 
 public class VisualRecorderNull implements IVisualRecorder {
 	
@@ -66,7 +67,7 @@ public class VisualRecorderNull implements IVisualRecorder {
 	}
 
 	@Override
-	public void createVisualAction(Action action, long duration, String name, String app) {
+	public void createVisualStartChannelAction(ActionChannelStart action, long duration) {
 	}
 
 	@Override

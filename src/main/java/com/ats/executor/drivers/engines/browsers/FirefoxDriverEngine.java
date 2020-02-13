@@ -86,9 +86,11 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	}
 	
 	@Override
-	public void close() {
-		getDesktopDriver().closeWindows(channel.getProcessId());
-		getDriverProcess().close();
+	public void close(boolean keepRunning) {
+		if(!keepRunning) {
+			getDesktopDriver().closeWindows(channel.getProcessId());
+		}
+		getDriverProcess().close(keepRunning);
 		/*if(driver != null){
 			driver.quit();
 			

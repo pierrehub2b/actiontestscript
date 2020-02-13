@@ -76,7 +76,7 @@ public class ExplorerDriverEngine extends DesktopDriverEngine {
 	}
 
 	@Override
-	public void close() {
+	public void close(boolean keepRunning) {
 		getDesktopDriver().closeWindow(window.getHandle());
 	}
 }

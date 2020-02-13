@@ -70,7 +70,7 @@ public class TestElementImage extends TestElement {
 	//-------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void clearText(ActionStatus status) {
+	public void clearText(ActionStatus status, MouseDirection md) {
 		engine.getDesktopDriver().clearText();
 	}
 

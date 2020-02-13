@@ -38,10 +38,10 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Listeners;
 
-import com.ats.driver.AtsManager;
 import com.ats.element.SearchedElement;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.channels.ChannelManager;
+import com.ats.generator.ATS;
 import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.objects.mouse.Mouse;
@@ -89,7 +89,7 @@ public class ActionTestScript extends Script implements ITest{
 	private String scriptStatus;
 	private long scriptStart;
 	private int scriptActions;
-
+	
 	public ActionTestScript() {
 		init();
 	}
@@ -118,7 +118,7 @@ public class ActionTestScript extends Script implements ITest{
 
 	@BeforeSuite(alwaysRun=true)
 	public void beforeSuite() {
-		System.out.println("-------------------------[ ATS " + AtsManager.getVersion() + " execution start ]-------------------------\n");
+		System.out.println("-------------------------[ ATS " + ATS.VERSION + " execution start ]-------------------------\n");
 	}
 
 	@BeforeClass(alwaysRun=true)
@@ -158,7 +158,6 @@ public class ActionTestScript extends Script implements ITest{
 				final ScriptHeader header = getHeader();
 
 				header.setName(getTestName());
-				header.setAtsVersion(AtsManager.getVersion());
 
 				final File output = new File(runner.getOutputDirectory());
 				if(!output.exists()) {
@@ -240,11 +239,14 @@ public class ActionTestScript extends Script implements ITest{
 		return topScript;
 	}
 
-	public void initCalledScript(ActionTestScript script, String[] parameters, List<Variable> variables) {
+	public void initCalledScript(ActionTestScript script, String[] parameters, List<Variable> variables, int iteration, String scriptName, String logMessage) {
 
+		script.sendScriptInfo("Call subscript -> " + scriptName + " -> " + logMessage);
+		
 		this.topScript = script;
 		this.channelManager = script.getChannelManager();
-
+		this.iteration = iteration;
+		
 		if(parameters != null) {
 			setParameters(parameters);
 		}
@@ -397,6 +399,7 @@ public class ActionTestScript extends Script implements ITest{
 	}
 
 	//---------------------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------------
 
 	public static final String JAVA_UUID_FUNCTION_NAME = "uid";
 	public String uid() {
@@ -416,7 +419,15 @@ public class ActionTestScript extends Script implements ITest{
 	public String nw() {
 		return getNowValue();
 	}
+	
+	//---------------------------------------------------------------------------------------------
 
+	public static final String JAVA_ITERATION_FUNCTION_NAME = "itr";
+	public int itr() {
+		return getIteration();
+	}
+
+	//---------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------
 
 	public static final String JAVA_ELEMENT_FUNCTION_NAME = "el";

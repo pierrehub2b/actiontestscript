@@ -57,6 +57,7 @@ import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.mobiles.AndroidRootElement;
 import com.ats.executor.drivers.engines.mobiles.IosRootElement;
 import com.ats.executor.drivers.engines.mobiles.RootElement;
+import com.ats.generator.ATS;
 import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
@@ -102,6 +103,8 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	private MobileTestElement testElement;
 
 	private OkHttpClient client;
+	
+	private String userAgent;
 
 	public MobileDriverEngine(Channel channel, ActionStatus status, String app, DesktopDriver desktopDriver, ApplicationProperties props) {
 
@@ -127,6 +130,8 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 			this.client = new Builder().cache(null).connectTimeout(40, TimeUnit.SECONDS).writeTimeout(40, TimeUnit.SECONDS).readTimeout(40, TimeUnit.SECONDS).build();
 
+			this.userAgent = "AtsMobileDriver/" + ATS.VERSION + " (" + System.getProperty("user.name") + ")";
+			
 			JsonObject response = executeRequest(DRIVER, START);
 
 			if(response == null) {
@@ -217,7 +222,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public void close() {
+	public void close(boolean keepRunning) {
 		executeRequest(APP, STOP, channel.getApplication());
 	}
 
@@ -407,8 +412,8 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public void clearText(ActionStatus status, FoundElement element) {
-		executeRequest(ELEMENT, element.getId(), INPUT, SendKeyData.EMPTY_DATA);
+	public void clearText(ActionStatus status, TestElement te, MouseDirection md) {
+		executeRequest(ELEMENT, te.getFoundElement().getId(), INPUT, SendKeyData.EMPTY_DATA);
 	}
 	
 	@Override
@@ -566,6 +571,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 		final Request request = new Request.Builder()
 				.url(url)
+				.addHeader("User-Agent",userAgent)
 				.addHeader("Content-Type","application/x-www-form-urlencoded;charset=UTF8")
 				.post(RequestBody.
 						create(null, 

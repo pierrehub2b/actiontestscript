@@ -22,11 +22,12 @@ package com.ats.recorder;
 import com.ats.element.TestElement;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.script.actions.Action;
+import com.ats.script.actions.ActionChannelStart;
 
 public interface IVisualRecorder {
 	public void terminate();
 	public void createVisualAction(Action action);
-	public void createVisualAction(Action action, long duration, String name, String app);
+	public void createVisualStartChannelAction(ActionChannelStart action, long duration);
 	public void updateScreen(boolean ref);
 	public void updateScreen(int error, long duration);
 	public void updateScreen(int error, long duration, String value);

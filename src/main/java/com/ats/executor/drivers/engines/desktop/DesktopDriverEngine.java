@@ -21,11 +21,7 @@ package com.ats.executor.drivers.engines.desktop;
 
 import java.awt.MouseInfo;
 import java.awt.Rectangle;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -46,6 +42,7 @@ import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
+import com.ats.executor.StreamGobbler;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.desktop.DesktopData;
@@ -143,9 +140,9 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 				
 				try{
 
-					Process proc = rt.exec(args.toArray(new String[args.size()]), null, exeFile.getParentFile());
-					StreamGobbler errorGobbler = new StreamGobbler(proc.getErrorStream(), "ERROR");            
-					StreamGobbler outputGobbler = new StreamGobbler(proc.getInputStream(), "OUTPUT");
+					final Process proc = rt.exec(args.toArray(new String[args.size()]), null, exeFile.getParentFile());
+					final StreamGobbler errorGobbler = new StreamGobbler(proc.getErrorStream(), "ERROR");            
+					final StreamGobbler outputGobbler = new StreamGobbler(proc.getInputStream(), "OUTPUT");
 
 					errorGobbler.start();
 					outputGobbler.start();
@@ -301,7 +298,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public void close() {
+	public void close(boolean keepRunning) {
 		getDesktopDriver().closeWindows(channel.getProcessId());
 		getDesktopDriver().closeDriver();
 	}
@@ -390,9 +387,13 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public void clearText(ActionStatus status, FoundElement element) {
-		mouseMoveToElement(status, element, new MouseDirection(), false, 0, 0);
+	public void clearText(ActionStatus status, TestElement te, MouseDirection md) {
+		
+		final FoundElement element = te.getFoundElement();
+		
+		mouseMoveToElement(status, element, md, false, 0, 0);
 		mouseClick(status, element, null, 0, 0);
+		
 		getDesktopDriver().clearText();
 	}
 
@@ -483,32 +484,5 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	public Object executeJavaScript(ActionStatus status, String script, boolean returnValue) {
 		status.setPassed(true);
 		return null;
-	}
-
-	class StreamGobbler extends Thread
-	{
-		InputStream is;
-		String type;
-
-		StreamGobbler(InputStream is, String type)
-		{
-			this.is = is;
-			this.type = type;
-		}
-
-		public void run()
-		{
-			try
-			{
-				InputStreamReader isr = new InputStreamReader(is);
-				BufferedReader br = new BufferedReader(isr);
-				String line=null;
-				while ( (line = br.readLine()) != null)
-					System.out.println(type + ">" + line);    
-			} catch (IOException ioe)
-			{
-				ioe.printStackTrace();  
-			}
-		}
 	}
 }

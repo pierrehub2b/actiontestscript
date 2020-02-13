@@ -19,82 +19,125 @@ under the License.
 
 package com.ats.executor.drivers;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.ProcessBuilder.Redirect;
 import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.ats.executor.ActionStatus;
+import com.ats.executor.StreamGobbler;
 import com.ats.tools.Utils;
 
 public class DriverProcess {
 
 	private String name;
-	
+
 	private int port = 4444;
 	private Process process;
 	private DriverManager manager;
-	private String driverFilePath;
 
-	public DriverProcess(ActionStatus status, String name, DriverManager manager, Path driverFolderPath, String driverFileName, String[] args) {
-		
+	private boolean keepRunning = false;
+
+	public DriverProcess(ActionStatus status, String name, DriverManager manager, Path driverFolderPath, String driverName, String[] args) {
+
 		this.name = name;
 		this.manager = manager;
-		
+
 		if(DriverManager.CHROME_BROWSER.equals(name) || DriverManager.OPERA_BROWSER.equals(name)) {
 			Utils.clearDriverFolder(name);
 		}
 
-		final File driverFile = driverFolderPath.resolve(driverFileName).toFile();
+		port = getPortUsedByDriver(driverName);
+		
+		//if(port > 0) {
 
-		if(driverFile.exists()){
 			
-			port = findFreePort();
-			driverFilePath = driverFile.getAbsolutePath();
 
-			String[] arguments = {driverFilePath, "--port=" + port};
+			
+			
+		//}else {
 
-			if(args != null) {
-				arguments = Stream.of(arguments, args).flatMap(Stream::of).toArray(String[]::new);
-			}
+			final File driverFile = driverFolderPath.resolve(driverName).toFile();
 
-			final ProcessBuilder builder = new ProcessBuilder(arguments);
-			builder.redirectErrorStream(true);
-			builder.redirectInput(Redirect.INHERIT);
+			if(driverFile.exists()){
 
-			try {
-				process = builder.start();
-				Runtime.getRuntime().addShutdownHook(new Thread(process::destroy));
-			} catch (IOException e1) {
-				status.setError(ActionStatus.CHANNEL_START_ERROR, e1.getMessage());
+				port = findFreePort();
+
+				String[] arguments = {driverFile.getAbsolutePath(), "--port=" + port};
+
+				if(args != null) {
+					arguments = Stream.of(arguments, args).flatMap(Stream::of).toArray(String[]::new);
+				}
+
+				final ProcessBuilder builder = new ProcessBuilder(arguments);
+				builder.redirectErrorStream(true);
+				builder.redirectInput(Redirect.INHERIT);
+
+				try {
+
+					process = builder.start();
+					
+					final StreamGobbler errorGobbler = new StreamGobbler(process.getErrorStream(), "ERROR");            
+					final StreamGobbler outputGobbler = new StreamGobbler(process.getInputStream(), "OUTPUT");
+
+					errorGobbler.start();
+					outputGobbler.start();
+
+				} catch (IOException e1) {
+					status.setError(ActionStatus.CHANNEL_START_ERROR, e1.getMessage());
+					return;
+				}
+
+			}else{
+				status.setError(ActionStatus.CHANNEL_START_ERROR, "unable to launch driver process, driver file is missing : " + driverFile.getAbsolutePath());
 				return;
 			}
-
-		}else{
-			status.setError(ActionStatus.CHANNEL_START_ERROR, "unable to launch driver process, driver file is missing : " + driverFile.getAbsolutePath());
-			return;
-		}
+		//}
 		
+		Runtime.getRuntime().addShutdownHook(new CloseProcess(this));
 		status.setNoError();
 	}
-	
+
+	public void quit() {
+		if(process != null && process.isAlive()) {
+			if(!keepRunning) {
+				process.descendants().forEach(p -> p.destroy());
+				process.destroy();
+
+				try {
+					process.waitFor();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			process = null;
+		}
+	}
+
+	static class CloseProcess extends Thread {
+
+		private DriverProcess driver;
+		public CloseProcess(DriverProcess driver) {
+			this.driver = driver;
+		}
+
+		public void run() {
+			driver.quit();
+		}
+	}
+
 	//--------------------------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------------------------
 
 	public String getName() {
 		return name;
-	}
-	
-	public int getPort() {
-		return port;
-	}
-	
-	public String getDriverFilePath() {
-		return driverFilePath;
 	}
 
 	public URL getDriverServerUrl(){
@@ -116,22 +159,54 @@ public class DriverProcess {
 		}
 	}
 
-	//--------------------------------------------------------------------------------------------------
-	//--------------------------------------------------------------------------------------------------
+	private static int getPortUsedByDriver(String driverName) {
 
-	public void close(){
-		if(process != null){
+		final Stream<ProcessHandle> procs = ProcessHandle
+				.allProcesses()
+				.parallel()
+				.filter(p -> p.info().command().isPresent())
+				.filter(p -> p.info().command().get().contains(driverName));
 
-			process.descendants().forEach(p -> p.destroy());
-			process.destroy();
-
-			try {
-				process.waitFor();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			process = null;
+		final Optional<ProcessHandle> firstProc = procs.findFirst();
+		if(firstProc.isPresent()) {
+			return getPortUsedByProcess(firstProc.get().pid());
 		}
+		return 0;
+	}
+
+	private static int getPortUsedByProcess(long pid) {
+
+		try {
+			final Process p = Runtime.getRuntime().exec("cmd /c netstat -ano | findstr " + pid);
+			final BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+			String line;
+
+			while ((line = input.readLine()) != null) {    
+				final String[] data = line.split("\\s+");  
+				if(data.length > 1) {
+					final String[] ipPort = data[2].split(":");
+					if(ipPort.length == 2) {
+						try {
+							return Integer.parseInt(ipPort[1]);
+						}catch (NumberFormatException e) {}
+					}
+				}
+			}  
+
+		} catch (IOException e1) {}
+
+		return 0;
+	}
+
+	//--------------------------------------------------------------------------------------------------
+	//--------------------------------------------------------------------------------------------------
+
+	public void close(boolean keepRunning){
+
+		//this.keepRunning = keepRunning;
+
+		quit();
 		manager.processTerminated(this);
 	}
 }

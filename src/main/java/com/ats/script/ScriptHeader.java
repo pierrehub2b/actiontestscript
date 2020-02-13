@@ -20,13 +20,11 @@ under the License.
 package com.ats.script;
 
 import java.io.File;
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
@@ -35,6 +33,7 @@ import org.openqa.selenium.Keys;
 import org.testng.annotations.Test;
 
 import com.ats.executor.ActionTestScript;
+import com.ats.generator.ATS;
 import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.mouse.Mouse;
 import com.ats.generator.variables.Variable;
@@ -61,8 +60,6 @@ public class ScriptHeader {
 	private String prerequisite = "";
 	private Date createdAt = new Date();
 
-	private String atsVersion = "N/A";
-
 	public ScriptHeader(){} // needed for serialization
 
 	public ScriptHeader(String id, String author, String description, String prerequisites, String groups){
@@ -76,7 +73,6 @@ public class ScriptHeader {
 	public ScriptHeader(ProjectData projectData, File file){
 
 		this.projectData = projectData;
-		this.atsVersion = loadAtsVersion();
 
 		this.setProjectPath(projectData.getFolderPath());
 		this.setPath(file.getAbsolutePath());
@@ -86,17 +82,6 @@ public class ScriptHeader {
 			final Path relative = projectData.getAtsSourceFolder().relativize(file.getParentFile().toPath());
 			this.setPackageName(relative.toString().replace(File.separator, "."));
 		}catch (IllegalArgumentException e) {}
-	}
-
-	private String loadAtsVersion() {
-		InputStream resourceAsStream = this.getClass().getResourceAsStream("/version.properties");
-		Properties prop = new Properties();
-		try{
-			prop.load( resourceAsStream );
-			return prop.getProperty("version");
-		}catch(Exception e) {}
-
-		return "";
 	}
 
 	public File getTestReportFolder(Path path) {
@@ -163,10 +148,6 @@ public class ScriptHeader {
 		}
 	}
 
-	public void setAtsVersion(String version) {
-		this.atsVersion = version;
-	}
-
 	private static final String javaCode = String.join(
 			System.getProperty("line.separator")
 			, ""
@@ -227,7 +208,7 @@ public class ScriptHeader {
 				.replace("#PREREQUISITES#", StringEscapeUtils.escapeJava(prerequisite))
 				.replace("#AUTHOR_NAME#", StringEscapeUtils.escapeJava(author))
 				.replace("#GROUP_DATA#", getGroupCode())
-				.replace("#ATS_VERSION#", atsVersion)
+				.replace("#ATS_VERSION#", ATS.VERSION)
 				.replace("#GROUP_DESCRIPTION#", getDataGroups())
 				.replace("#PROJECT_GAV#", StringEscapeUtils.escapeJava(projectGav));
 

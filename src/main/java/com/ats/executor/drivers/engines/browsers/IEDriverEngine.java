@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.ie.InternetExplorerOptions;
 import org.testng.collections.Sets;
 
@@ -146,5 +147,19 @@ public class IEDriverEngine extends WebDriverEngine {
 		    }
 		}
 		return windows;
+	}
+
+	@Override
+	protected Object runJavaScript(ActionStatus status, String javaScript, Object... params) {
+		status.setPassed(true);
+		try {
+			return driver.executeScript(javaScript + ";return result;", params);
+		}catch(StaleElementReferenceException e0) {
+			status.setPassed(false);
+			throw e0;
+		}catch(Exception e1) {
+			status.setException(ActionStatus.JAVASCRIPT_ERROR, e1);
+		}
+		return null;
 	}
 }

@@ -20,8 +20,10 @@ under the License.
 package com.ats.generator;
 
 import java.io.File;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Properties;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -47,6 +49,19 @@ public class ATS {
 	private static void print(String type, String msg) {
 		System.out.println("[" + type + "] " + msg);
 	}
+	
+	private static String getAtsVersion() {
+		InputStream resourceAsStream = ATS.class.getResourceAsStream("/version.properties");
+		Properties prop = new Properties();
+		try{
+			prop.load( resourceAsStream );
+			return prop.getProperty("version");
+		}catch(Exception e) {}
+
+		return "";
+	}
+	
+	public static String VERSION = getAtsVersion();
 
 	private String[] args = null;
 	private Options options = new Options();

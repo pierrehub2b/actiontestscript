@@ -109,7 +109,7 @@ public class ChannelManager {
 				status.setChannel(newChannel);
 				status.endDuration();
 
-				mainScript.getRecorder().createVisualAction(action, status.getDuration(), name, appName);
+				mainScript.getRecorder().createVisualStartChannelAction(action, status.getDuration());
 			}
 
 			status.setData(getChannelsList());
@@ -146,7 +146,7 @@ public class ChannelManager {
 	public void closeChannel(ActionStatus status, String channelName, boolean keepRunning){
 		Optional<Channel> cn = channelsList.stream().filter(c -> c.getName().equals(channelName)).findFirst();
 		if(cn.isPresent()) {
-			cn.get().close(status);
+			cn.get().close(status, keepRunning);
 		}
 	}
 

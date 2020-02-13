@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
 
@@ -14,15 +16,16 @@ import com.ats.graphic.TemplateMatchingSimple;
 public class TestImage {
 
 	public static void main(String[] args) {
+				
 		
-		check("src\\main\\java\\test\\screen_alert.png", "src\\\\main\\\\java\\\\test\\alert_eq.png");
+		/*check("src\\main\\java\\test\\screen_alert.png", "src\\\\main\\\\java\\\\test\\alert_eq.png");
 		check("src\\main\\java\\test\\screen_alert.png", "src\\\\main\\\\java\\\\test\\alert_ext.png");
 		
 		check("src\\main\\java\\test\\screen_alert.png", "src\\\\main\\\\java\\\\test\\robot0.png");
 		check("src\\main\\java\\test\\screen_alert.png", "src\\\\main\\\\java\\\\test\\robot1.png");
 		
 		check("src\\main\\java\\test\\screen_pin.png", "src\\\\main\\\\java\\\\test\\pin0.png");
-		check("src\\main\\java\\test\\screen_pin.png", "src\\\\main\\\\java\\\\test\\pin1.png");
+		check("src\\main\\java\\test\\screen_pin.png", "src\\\\main\\\\java\\\\test\\pin1.png");*/
 		
 	}
 	

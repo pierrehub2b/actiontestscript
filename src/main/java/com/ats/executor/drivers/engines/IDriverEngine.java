@@ -45,7 +45,7 @@ public interface IDriverEngine{
 	
 	public DesktopDriver getDesktopDriver();
 	public WebElement getRootElement(Channel cnl);
-	public void close();
+	public void close(boolean keepRunning);
 
 	public String getApplicationPath();
 	public void switchWindow(ActionStatus status, int index);
@@ -76,7 +76,7 @@ public interface IDriverEngine{
 	public void scroll(FoundElement element, int delta);
 
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList);
-	public void clearText(ActionStatus status, FoundElement foundElement);
+	public void clearText(ActionStatus status, TestElement testElement, MouseDirection md);
 	
 	public void updateScreenshot(TestBound dimension, boolean isRef);
 	public byte[] getScreenshot(Double x, Double y, Double width, Double height);

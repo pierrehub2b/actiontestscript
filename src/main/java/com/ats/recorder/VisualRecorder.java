@@ -31,6 +31,7 @@ import com.ats.script.ProjectData;
 import com.ats.script.Script;
 import com.ats.script.ScriptHeader;
 import com.ats.script.actions.Action;
+import com.ats.script.actions.ActionChannelStart;
 import com.ats.tools.XmlReport;
 import com.ats.tools.logger.ExecutionLogger;
 
@@ -51,7 +52,7 @@ public class VisualRecorder implements IVisualRecorder {
 
 		this.logger = new ExecutionLogger();
 		
-		Path output = project.getReportFolder().resolve(header.getPackagePath());
+		final Path output = project.getReportFolder().resolve(header.getPackagePath());
 		output.toFile().mkdirs();
 
 		initAndStart(output, header, xml, quality);
@@ -61,7 +62,7 @@ public class VisualRecorder implements IVisualRecorder {
 		
 		this.logger = logger;
 		
-		Path output = outputFolder.toPath();
+		final Path output = outputFolder.toPath();
 		initAndStart(output, header, xml, quality);
 	}
 
@@ -109,11 +110,11 @@ public class VisualRecorder implements IVisualRecorder {
 	}
 	
 	@Override
-	public void createVisualAction(Action action, long duration, String name, String app) {
+	public void createVisualStartChannelAction(ActionChannelStart action, long duration) {
 		setChannel(action.getStatus().getChannel());
 		channel.createVisualAction(action.getClass().getName(), action.getLine(), System.currentTimeMillis() - started - duration);
 		channel.sleep(100);
-		update(0, duration, name, app);
+		update(0, duration, action.getName(), action.getActionLogsData().toString());
 	}
 	
 	@Override

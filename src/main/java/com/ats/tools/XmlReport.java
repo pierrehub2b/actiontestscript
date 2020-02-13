@@ -123,10 +123,6 @@ public class XmlReport {
 						
 						action.appendChild(document.createElement("line")).setTextContent(va.getLine() + "");
 						action.appendChild(document.createElement("timeLine")).setTextContent(va.getTimeLine() + "");
-						action.appendChild(document.createElement("cpu")).setTextContent(va.getCpu() + "");
-						action.appendChild(document.createElement("ram")).setTextContent(va.getRam() + "");
-						action.appendChild(document.createElement("netReceived")).setTextContent(va.getNetReceived() + "");
-						action.appendChild(document.createElement("netSent")).setTextContent(va.getNetSent() + "");
 						action.appendChild(document.createElement("error")).setTextContent(va.getError() + "");
 						action.appendChild(document.createElement("duration")).setTextContent(va.getDuration() + "");
 						action.appendChild(document.createElement("passed")).setTextContent((va.getError() == 0) + "");

@@ -171,14 +171,14 @@ public class TestElement{
 		final int criteriasCount = searchedElement.getCriterias().size();
 		final String[] attributes = new String[criteriasCount];
 		final String[] attributesValues = new String[criteriasCount];
-		
+
 		Predicate<AtsBaseElement> fullPredicate = Objects::nonNull;
-		
+
 		for (int i=0; i<criteriasCount; i++) {
 			final CalculatedProperty property = searchedElement.getCriterias().get(i);
-			
+
 			criterias += "," + property.getName() + ":" + property.getValue().getCalculated();
-			
+
 			fullPredicate = property.getPredicate(fullPredicate);
 			attributes[i] = property.getName();
 
@@ -188,7 +188,7 @@ public class TestElement{
 				attributesValues[i] = property.getName() + "\t" + property.getValue().getCalculated();
 			}
 		}
-		
+
 		return engine.findElements(sysComp, this, searchedTag, attributes, attributesValues, fullPredicate, null, true);
 	}
 
@@ -348,30 +348,35 @@ public class TestElement{
 	// Text ...
 	//-------------------------------------------------------------------------------------------------------------------
 
+	public void clearText(ActionStatus status, MouseDirection md) {
+		engine.clearText(status, this, md);
+	}
+	
 	public void enterText(ActionStatus status, CalculatedValue text, IVisualRecorder recorder) {
 
 		final MouseDirection md = new MouseDirection();
+		
 		String enteredText = "";
 
 		over(status, md, false, 0, 0);
 		if(status.isPassed()) {
-			click(status, md);
+
+			clearText(status, md);
+
 			if(status.isPassed()) {
-				clearText(status);
-				if(status.isPassed()) {
 
-					recorder.updateScreen(true);
+				recorder.updateScreen(true);
 
-					if(isPassword()) {
-						enteredText = "xxxxxxxxxx";
-					}else {
-						enteredText = text.getCalculated();
-					}
-
-					sendText(status, text);
+				if(isPassword()) {
+					enteredText = "xxxxxxxxxx";
+				}else {
+					enteredText = text.getCalculated();
 				}
+
+				sendText(status, text);
 			}
 		}
+		
 		status.endDuration();
 		recorder.updateTextScreen(0, status.getDuration(), enteredText, status.getMessage());
 	}
@@ -395,10 +400,6 @@ public class TestElement{
 			status.setError(ActionStatus.OBJECT_NOT_INTERACTABLE, "element is not interactable");
 			return false;
 		}
-	}
-
-	public void clearText(ActionStatus status) {
-		engine.clearText(status, getFoundElement());
 	}
 
 	//-------------------------------------------------------------------------------------------------------------------

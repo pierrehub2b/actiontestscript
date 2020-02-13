@@ -39,6 +39,7 @@ import com.ats.executor.drivers.desktop.DesktopWindow;
 import com.ats.executor.drivers.engines.IDriverEngine;
 import com.ats.executor.drivers.engines.MobileDriverEngine;
 import com.ats.executor.drivers.engines.desktop.DesktopDriverEngine;
+import com.ats.generator.ATS;
 import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.MouseDirectionData;
@@ -246,7 +247,7 @@ public class Channel {
 	public void setApplicationData(String os) {
 		this.os = os;
 		this.icon = ResourceContent.getAtsByteLogo();
-		this.driverVersion = AtsManager.getVersion();
+		this.driverVersion = ATS.VERSION;
 		this.dimension = new TestBound(0D, 0D, 1D, 1D);
 	}
 
@@ -472,16 +473,16 @@ public class Channel {
 	//----------------------------------------------------------------------------------------------------------------------
 
 	public void close(){
-		close(newActionStatus());
+		close(newActionStatus(), false);
 	}
 
-	public void close(ActionStatus status){
+	public void close(ActionStatus status, boolean keepRunning){
 
 		if(stopNeoloadRecord != null) {
 			neoloadAction(stopNeoloadRecord);
 		}
 
-		engine.close();
+		engine.close(keepRunning);
 		mainScript.getChannelManager().channelClosed(status, this);
 	}
 

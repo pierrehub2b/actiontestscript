@@ -21,7 +21,6 @@ package com.ats.driver;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -102,18 +101,6 @@ public class AtsManager {
 	
 	public static int getMaxStaleError() {
 		return MAX_STALE_ERROR;
-	}
-
-	public static String getVersion() {
-
-		final InputStream resourceAsStream = AtsManager.class.getResourceAsStream("/version.properties");
-		Properties prop = new Properties();
-		try{
-			prop.load( resourceAsStream );
-			return prop.getProperty("version");
-		}catch(Exception e) {}
-
-		return null;
 	}
 
 	public AtsManager() {

@@ -240,7 +240,8 @@ public class ActionCallscript extends Action {
 
 			try {
 
-				ActionTestScript ats = clazz.getDeclaredConstructor().newInstance();
+				final ActionTestScript ats = clazz.getDeclaredConstructor().newInstance();
+				final ActionTestScript topScript = ts.getTopScript();
 
 				if(csvFilePath != null) {
 
@@ -268,14 +269,14 @@ public class ActionCallscript extends Action {
 
 					try {
 
+						final Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
 						final List<String[]> data = Utils.loadCsvData(csvUrl);
-
+						int iteration = 0;
+						
 						for (String[] param : data) {
-							ts.getTopScript().sendScriptInfo("Call subscript -> " + scriptName + " -> csv " + Arrays.toString(param));
-
-							ats.initCalledScript(ts.getTopScript(), param, null);
-							final Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
+							ats.initCalledScript(topScript, param, null, iteration, scriptName, "csv " + Arrays.toString(param));
 							testMain.invoke(ats);
+							iteration++;
 						}
 
 					} catch (IOException e) {
@@ -283,12 +284,15 @@ public class ActionCallscript extends Action {
 					}
 
 				}else {
-					ats.initCalledScript(ts.getTopScript(), getCalculatedParameters(), variables);
-					Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
+					
+					final Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
+					final String[] parameters = getCalculatedParameters();
+					
 					for (int i=0; i<loop; i++) {
-						ts.getTopScript().sendScriptInfo("Call subscript -> " + scriptName + " (loop " + i + " on " + loop);
+						ats.initCalledScript(topScript, parameters, variables, i, scriptName, "loop " + i + " on " + loop);
 						testMain.invoke(ats);
 					}
+
 					status.setData(ats.getReturnValues());
 				}
 

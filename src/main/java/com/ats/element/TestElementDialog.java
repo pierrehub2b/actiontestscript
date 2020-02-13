@@ -114,7 +114,7 @@ public class TestElementDialog extends TestElement {
 	}
 
 	@Override
-	public void clearText(ActionStatus status) {
+	public void clearText(ActionStatus status, MouseDirection md) {
 	}
 
 	@Override
