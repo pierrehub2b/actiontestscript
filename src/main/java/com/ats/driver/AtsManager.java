@@ -62,6 +62,8 @@ public class AtsManager {
 	private static final int MAX_TRY_SEARCH = 15;
 	private static final int MAX_TRY_PROPERTY = 10;
 	private static final int MAX_TRY_WEBSERVICE = 1;
+	
+	private static final int MAX_TRY_MOBILE = 10;
 
 	private static final int SCROLL_UNIT = 120;
 	private static final int MAX_STALE_ERROR = 150;
@@ -87,6 +89,7 @@ public class AtsManager {
 	private int maxTrySearch = MAX_TRY_SEARCH;
 	private int maxTryProperty = MAX_TRY_PROPERTY;
 	private int maxTryWebservice = MAX_TRY_WEBSERVICE;
+	private int maxTryMobile = MAX_TRY_MOBILE;
 
 	private AtsProxy proxy;
 	private AtsProxy neoloadProxy;
@@ -582,6 +585,10 @@ public class AtsManager {
 
 	public int getMaxTryProperty() {
 		return maxTryProperty;
+	}
+	
+	public int getMaxTryMobile() {
+		return maxTryMobile;
 	}
 	
 	public int getMaxTryWebservice() {

@@ -61,6 +61,14 @@ public class TestElementRoot extends TestElement {
 	@Override
 	public void over(ActionStatus status, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {
 		// do nothing, this is the root, no need to scroll over the root element
+		channel.toFront();
+		channel.refreshLocation();
+		
+		final TestBound bound = channel.getDimension();
+		final int x = bound.getX().intValue();
+		final int y = bound.getY().intValue();
+		
+		super.over(status, position, desktopDragDrop, offsetX, offsetY);
 	}
 
 	@Override

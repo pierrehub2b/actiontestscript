@@ -48,7 +48,6 @@ import javax.imageio.stream.ImageOutputStream;
 import javax.net.ssl.HttpsURLConnection;
 import javax.swing.Icon;
 
-import com.ats.driver.AtsManager;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.TestBound;
 import com.ats.executor.drivers.desktop.DesktopDriver;

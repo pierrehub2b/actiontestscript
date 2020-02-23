@@ -64,6 +64,7 @@ public class Script {
 	private List<Variable> variables = new ArrayList<Variable>();
 	private ArrayList<CalculatedValue> returns;
 	
+	protected File csvFile;
 	protected int iteration = 0;
 	
 	private Map<String, String> testExecutionVariables;
@@ -314,6 +315,17 @@ public class Script {
 		
 	public int getIteration() {
 		return iteration;
+	}
+	
+	public String getCsvFilePath() {
+		if(csvFile == null) {
+			return "";
+		}
+		return csvFile.getAbsolutePath();
+	}
+	
+	public File getCsvFile() {
+		return csvFile;
 	}
 	
 	public String getAssetsUrl(String relativePath) {

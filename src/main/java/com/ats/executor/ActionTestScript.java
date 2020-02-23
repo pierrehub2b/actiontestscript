@@ -84,12 +84,12 @@ public class ActionTestScript extends Script implements ITest{
 	private String[] returnValues;
 
 	private String testName;
-	protected ScriptHeader getHeader() {return null;}
+	protected ScriptHeader getHeader() {return new ScriptHeader();}
 	
 	private String scriptStatus;
 	private long scriptStart;
 	private int scriptActions;
-	
+		
 	public ActionTestScript() {
 		init();
 	}
@@ -239,13 +239,14 @@ public class ActionTestScript extends Script implements ITest{
 		return topScript;
 	}
 
-	public void initCalledScript(ActionTestScript script, String[] parameters, List<Variable> variables, int iteration, String scriptName, String logMessage) {
+	public void initCalledScript(ActionTestScript script, String[] parameters, List<Variable> variables, int iteration, String scriptName, String logMessage, File csvFile) {
 
 		script.sendScriptInfo("Call subscript -> " + scriptName + " -> " + logMessage);
 		
 		this.topScript = script;
 		this.channelManager = script.getChannelManager();
 		this.iteration = iteration;
+		this.csvFile = csvFile;
 		
 		if(parameters != null) {
 			setParameters(parameters);

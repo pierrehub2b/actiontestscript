@@ -56,7 +56,15 @@ public class DesktopResponse {
 		}
 		return elements.stream().map(e -> new FoundElement(e, channelDimension)).collect(Collectors.toCollection(ArrayList::new));
 	}
-
+	
+	/*@Transient
+	public FoundElement getFirstElement() {
+		if(elements != null && elements.size() > 0) {
+			return new FoundElement((DesktopElement)elements.get(0));
+		}
+		return null;
+	}*/
+	
 	@Transient
 	public ArrayList<DesktopData> getData() {
 		if(data == null) {

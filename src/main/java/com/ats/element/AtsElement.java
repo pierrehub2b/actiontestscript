@@ -37,6 +37,8 @@ public class AtsElement extends AtsBaseElement {
 	private RemoteWebElement element;
 	protected boolean numeric = false;
 	protected boolean password = false;
+	protected int numChildren = 0;
+
 	private Double screenX = 0D;
 	private Double screenY = 0D;
 	
@@ -133,6 +135,15 @@ public class AtsElement extends AtsBaseElement {
 		return null;
 	}
 
+	private ArrayList<AtsElement> children;
+	public void setChildren(ArrayList<AtsElement> value) {
+		this.children = value;
+	}
+	
+	public ArrayList<AtsElement> getChildren() {
+		return children;
+	}
+
 	public void setAttributes(ArrayList<DesktopData> value) {
 		this.attributes = value.parallelStream().collect(Collectors.toMap(s -> s.getName(), s -> s.getValue()));
 	}
@@ -143,6 +154,14 @@ public class AtsElement extends AtsBaseElement {
 
 	public void setClickable(boolean clickable) {
 		this.clickable = clickable;
+	}
+	
+	public int getNumChildren() {
+		return numChildren;
+	}
+
+	public void setNumChildren(int value) {
+		this.numChildren = value;
 	}
 
 	//----------------------------------------------------------------------------------------

@@ -653,7 +653,7 @@ public class Channel {
 		getDesktopDriver().updateVisualData(value, data);
 	}
 
-	public FoundElement getElementFromMousePoint() {
+	/*public FoundElement getElementFromMousePoint() {
 		return getDesktopDriver().getElementFromMousePoint(dimension);
-	}
+	}*/
 }

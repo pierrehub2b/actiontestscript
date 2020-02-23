@@ -22,6 +22,7 @@ package com.ats.element;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -30,6 +31,7 @@ import org.openqa.selenium.remote.RemoteWebElement;
 import com.ats.element.api.AtsApiElement;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.desktop.DesktopElement;
 import com.ats.executor.drivers.desktop.DesktopWindow;
 import com.ats.executor.drivers.engines.WebDriverEngine;
 
@@ -57,7 +59,7 @@ public class FoundElement{
 	private int centerWidth = 0;
 	private int centerHeight = 0;
 
-	private String tag;
+	private String tag = "*";
 
 	private String type = HTML;
 
@@ -67,6 +69,9 @@ public class FoundElement{
 	private boolean numeric = false;
 	private boolean password = false;
 	private boolean clickable = true;
+	private ArrayList<FoundElement> children;
+
+	private boolean active = true;
 
 	private ArrayList<AtsElement> iframes;
 
@@ -91,6 +96,17 @@ public class FoundElement{
 		this.height = element.getHeight();
 		this.numeric = element.isNumeric();
 		this.password = element.isPassword();
+	}
+	
+	public FoundElement(DesktopElement element) {
+		this.setRemoteWebElement(element.getElement());
+		this.tag = element.getTag();
+		this.width = element.getWidth();
+		this.height = element.getHeight();
+		this.x = element.getX();
+		this.x = element.getY();
+		this.screenX = element.getX();
+		this.screenY = element.getY();
 	}
 
 	public FoundElement(DesktopWindow win) {
@@ -148,6 +164,31 @@ public class FoundElement{
 		}
 	}
 
+	public FoundElement(List<AtsElement> desktops) {
+
+		final AtsElement desktop = desktops.get(0);
+		
+		this.type = DESKTOP;
+		this.visible = true;
+		this.id = desktop.getId();
+
+		this.password = false;
+
+		this.tag = desktop.getTag();
+		this.width = desktop.getWidth();
+		this.height = desktop.getHeight();
+
+		this.clickable = true;
+				
+		this.active = true;
+
+		this.screenX = desktop.getX();
+		this.screenY = desktop.getY();
+
+		this.x = this.screenX;
+		this.y = this.screenY;
+	}
+	
 	public FoundElement(AtsElement element, TestBound channelDimension) {
 
 		this.type = DESKTOP;
@@ -161,12 +202,18 @@ public class FoundElement{
 		this.height = element.getHeight();
 
 		this.clickable = element.isClickable();
+				
+		this.active = this.clickable && this.visible;
 
 		this.screenX = element.getX();
 		this.screenY = element.getY();
 
 		this.x = this.screenX - channelDimension.getX();
 		this.y = this.screenY - channelDimension.getY();
+		
+		if(element.getChildren() != null) {
+			this.children = element.getChildren().stream().map(e -> new FoundElement(e, channelDimension)).collect(Collectors.toCollection(ArrayList::new));
+		}
 	}
 
 	public FoundElement(AtsMobileElement element) {
@@ -311,7 +358,11 @@ public class FoundElement{
 	}
 
 	public boolean isActive() {
-		return visible && clickable;
+		return active;
+	}
+	
+	public ArrayList<FoundElement> getChildren(){
+		return children;
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------

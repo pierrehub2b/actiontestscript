@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -224,7 +225,7 @@ public class ActionCallscript extends Action {
 
 		super.execute(ts.getCurrentChannel());
 		final String scriptName = name.getCalculated();
-		
+
 		if(condition != null && !condition.isPassed()) {
 			ts.getTopScript().sendConditionExecLog(scriptName, condition);
 			status.endDuration();
@@ -249,13 +250,13 @@ public class ActionCallscript extends Action {
 					URL csvUrl = null;
 
 					if(csvPath.startsWith(ASSETS_PROTOCOLE)) {
-						
+
 						final String csvFilePath = csvPath.replace(ASSETS_PROTOCOLE, ProjectData.ASSETS_FOLDER + File.separator);
 						csvUrl = getClass().getClassLoader().getResource(csvFilePath);
 						if(csvUrl == null) {
 							csvUrl = getClass().getClassLoader().getResource(csvFilePath + ".csv");
 						}
-						
+
 					}else {
 						try {
 							csvUrl = new URL(csvPath);
@@ -267,14 +268,19 @@ public class ActionCallscript extends Action {
 						return;
 					}
 
+					File csvFile = null;
+					try {
+						csvFile = new File(csvUrl.toURI());
+					} catch (URISyntaxException e) {}
+
 					try {
 
 						final Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
 						final List<String[]> data = Utils.loadCsvData(csvUrl);
 						int iteration = 0;
-						
-						for (String[] param : data) {
-							ats.initCalledScript(topScript, param, null, iteration, scriptName, "csv " + Arrays.toString(param));
+
+						for (String[] params : data) {
+							ats.initCalledScript(topScript, getCalculatedParameters(ats, params), null, iteration, scriptName, "csv " + Arrays.toString(params), csvFile);
 							testMain.invoke(ats);
 							iteration++;
 						}
@@ -284,12 +290,12 @@ public class ActionCallscript extends Action {
 					}
 
 				}else {
-					
+
 					final Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
 					final String[] parameters = getCalculatedParameters();
-					
-					for (int i=0; i<loop; i++) {
-						ats.initCalledScript(topScript, parameters, variables, i, scriptName, "loop " + i + " on " + loop);
+
+					for (int iteration=0; iteration<loop; iteration++) {
+						ats.initCalledScript(topScript, parameters, variables, iteration, scriptName, "loop " + iteration + " on " + loop, null);
 						testMain.invoke(ats);
 					}
 
@@ -322,6 +328,17 @@ public class ActionCallscript extends Action {
 			return calculatedParameters;
 		}
 		return null;
+	}
+
+	private String[] getCalculatedParameters(ActionTestScript ats, String[] params) {
+		int index = 0;
+		final String[] calculatedParameters = new String[params.length];
+		for(String data : params) {
+			final CalculatedValue calc = new CalculatedValue(ats, data);
+			calculatedParameters[index] = calc.getCalculated(); 
+			index++;
+		}
+		return calculatedParameters;
 	}
 
 	@Override

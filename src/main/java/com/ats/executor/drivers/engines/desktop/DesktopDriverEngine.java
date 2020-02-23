@@ -100,7 +100,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 		}else if(application.startsWith(DESKTOP_TYPE)) {
 			
 			channel.setApplicationData(desktopDriver.getOsName() + " (" + desktopDriver.getOsVersion() +")", "", desktopDriver.getDriverVersion(), 0L);
-			final FoundElement desktop = desktopDriver.getRootElement(channel);
+			final FoundElement desktop = desktopDriver.getRootElement(-1);
 			channel.setDimensions(desktop.getTestScreenBound(), desktop.getTestScreenBound());
 			
 			return;
@@ -247,7 +247,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public ArrayList<FoundElement> findSelectOptions(TestBound dimension, TestElement element) {
+	public List<FoundElement> findSelectOptions(TestBound dimension, TestElement element) {
 		return getDesktopDriver().getChildren(dimension, element.getFoundElement().getId(), "ListItem");
 	}
 
@@ -288,7 +288,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public void updateDimensions() {
 		DesktopWindow win = getDesktopDriver().getWindowByHandle(channel.getHandle(desktopDriver));
-		if(win != null && win.getWidth() != 9898 && win.getHeight() != 9898){
+		if(win != null && win.getWidth() > 0 && win.getHeight() > 0){
 			channel.setDimensions(new TestBound(
 					win.getX(),
 					win.getY(),
@@ -394,7 +394,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 		mouseMoveToElement(status, element, md, false, 0, 0);
 		mouseClick(status, element, null, 0, 0);
 		
-		getDesktopDriver().clearText();
+		getDesktopDriver().clearText(te.getWebElementId());
 	}
 
 	@Override

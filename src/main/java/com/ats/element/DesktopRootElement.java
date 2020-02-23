@@ -23,9 +23,9 @@ public class DesktopRootElement extends RemoteWebElement {
 	@Override
 	public String getAttribute(String name) {
 		if("clientWidth".equals(name)){
-			return super.getAttribute("BoundingWidth");
+			return width + "";
 		}else if("clientHeight".equals(name)) {
-			return super.getAttribute("BoundingHeight");
+			return height + "";
 		}
 		return super.getAttribute(name);
 	}
