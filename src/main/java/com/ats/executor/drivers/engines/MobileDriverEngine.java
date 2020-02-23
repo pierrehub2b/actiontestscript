@@ -53,6 +53,7 @@ import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.mobiles.AndroidRootElement;
 import com.ats.executor.drivers.engines.mobiles.IosRootElement;
@@ -132,10 +133,16 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 			this.userAgent = "AtsMobileDriver/" + ATS.VERSION + " (" + System.getProperty("user.name") + ")";
 			
-			JsonObject response = executeRequest(DRIVER, START);
-
+			int maxTry = DriverManager.ATS.getMaxTryMobile();
+			JsonObject response = null;
+			while(response == null && maxTry > 0) {
+				response = executeRequest(DRIVER, START);
+				channel.sleep(500);
+				maxTry--;
+			}
+			
 			if(response == null) {
-				status.setError(ActionStatus.CHANNEL_START_ERROR, "unable to connect to : " + applicationPath);
+				status.setError(ActionStatus.CHANNEL_START_ERROR, "unable to connect to : mobile://" + endPoint);
 			}else {
 
 				final String systemName = response.get("systemName").getAsString();
