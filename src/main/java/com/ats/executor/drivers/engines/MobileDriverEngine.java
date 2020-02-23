@@ -368,8 +368,9 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 		return template.findOccurrences(screenshot).parallelStream().map(r -> new FoundElement(channel, parent, r)).collect(Collectors.toCollection(ArrayList::new));
 	}
 
-	private void loadElementsByTag(AtsMobileElement root, String tag, List<AtsMobileElement> list) {
-
+	private void loadElementsByTag(AtsMobileElement root, String tag, List<AtsMobileElement> list) 
+	{
+		if(root == null) return;
 		if(root.checkTag(tag)) {
 			list.add(root);
 		}
