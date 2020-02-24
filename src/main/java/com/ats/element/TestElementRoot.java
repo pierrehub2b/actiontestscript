@@ -64,9 +64,9 @@ public class TestElementRoot extends TestElement {
 		channel.toFront();
 		channel.refreshLocation();
 		
-		final TestBound bound = channel.getDimension();
-		final int x = bound.getX().intValue();
-		final int y = bound.getY().intValue();
+		//final TestBound bound = channel.getDimension();
+		//final int x = bound.getX().intValue();
+		//final int y = bound.getY().intValue();
 		
 		super.over(status, position, desktopDragDrop, offsetX, offsetY);
 	}

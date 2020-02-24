@@ -331,12 +331,10 @@ public class ActionCallscript extends Action {
 	}
 
 	private String[] getCalculatedParameters(ActionTestScript ats, String[] params) {
-		int index = 0;
 		final String[] calculatedParameters = new String[params.length];
-		for(String data : params) {
-			final CalculatedValue calc = new CalculatedValue(ats, data);
-			calculatedParameters[index] = calc.getCalculated(); 
-			index++;
+		for(int i=0; i<params.length; i++) {
+			final CalculatedValue calc = new CalculatedValue(ats, params[i]);
+			calculatedParameters[i] = calc.getCalculated(); 
 		}
 		return calculatedParameters;
 	}
