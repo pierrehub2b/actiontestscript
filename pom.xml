@@ -162,11 +162,8 @@
 			<artifactId>naturalness-java</artifactId>
 			<version>${lib.naturalness.version}</version>
 		</dependency>
-<!-- 		<dependency>
-        	<groupId>net.lightbody.bmp</groupId>
-        	<artifactId>browsermob-core</artifactId>
-        	<version>2.1.5</version>
-    	</dependency> -->
+		<!-- <dependency> <groupId>net.lightbody.bmp</groupId> <artifactId>browsermob-core</artifactId> 
+			<version>2.1.5</version> </dependency> -->
 	</dependencies>
 
 	<build>
@@ -241,6 +238,17 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.7</version>
+				<extensions>true</extensions>
+				<configuration>
+					<serverId>OSSRH-37505</serverId>
+					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+					<autoReleaseAfterClose>true</autoReleaseAfterClose>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
