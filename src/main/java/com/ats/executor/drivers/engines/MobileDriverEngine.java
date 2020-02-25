@@ -420,7 +420,8 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public void clearText(ActionStatus status, TestElement te, MouseDirection md) {
+	public void clearText(ActionStatus status, TestElement te, MouseDirection md) {	
+		executeRequest(ELEMENT, te.getFoundElement().getId(), TAP, "0", "0");
 		executeRequest(ELEMENT, te.getFoundElement().getId(), INPUT, SendKeyData.EMPTY_DATA);
 	}
 	
