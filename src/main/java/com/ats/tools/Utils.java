@@ -55,6 +55,7 @@ import com.ats.generator.ATS;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonPrimitive;
 import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
 
 public class Utils {
 
@@ -324,11 +325,11 @@ public class Utils {
 	//  CSV utils
 	//-------------------------------------------------------------------------------------------------------------------------------------------
 
-	public static List<String[]> loadCsvData(String url) throws MalformedURLException, IOException{
+	public static List<String[]> loadCsvData(String url) throws MalformedURLException, IOException, CsvException{
 		return loadCsvData(new URL(url));
 	}
 
-	public static List<String[]> loadCsvData(URL url) throws IOException{
+	public static List<String[]> loadCsvData(URL url) throws IOException, CsvException{
 
 		final CSVReader reader = new CSVReader(
 				new BufferedReader(

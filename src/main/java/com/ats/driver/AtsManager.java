@@ -63,7 +63,7 @@ public class AtsManager {
 	private static final int MAX_TRY_PROPERTY = 10;
 	private static final int MAX_TRY_WEBSERVICE = 1;
 	
-	private static final int MAX_TRY_MOBILE = 10;
+	private static final int MAX_TRY_MOBILE = 5;
 
 	private static final int SCROLL_UNIT = 120;
 	private static final int MAX_STALE_ERROR = 150;

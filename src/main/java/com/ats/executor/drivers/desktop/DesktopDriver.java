@@ -151,32 +151,23 @@ public class DesktopDriver extends RemoteWebDriver {
 						this.screenWidth = data.getValue();
 					}else if("ScreenHeight".equals(data.getName())) {
 						this.screenHeight= data.getValue();
-					}
-					else if("DriveLetter".equals(data.getName())) {
+					}else if("DriveLetter".equals(data.getName())) {
 						this.driveLetter = data.getValue();
-					}
-					else if("DiskTotalSize".equals(data.getName())) {
+					}else if("DiskTotalSize".equals(data.getName())) {
 						this.diskTotalSize = data.getValue();
-					}
-					else if("DiskFreeSpace".equals(data.getName())) {
+					}else if("DiskFreeSpace".equals(data.getName())) {
 						this.diskFreeSpace = data.getValue();
-					}
-					else if("CpuSocket".equals(data.getName())) {
+					}else if("CpuSocket".equals(data.getName())) {
 						this.cpuSocket = data.getValue();
-					}
-					else if("CpuName".equals(data.getName())) {
+					}else if("CpuName".equals(data.getName())) {
 						this.cpuName = data.getValue();
-					}
-					else if("CpuArchitecture".equals(data.getName())) {
+					}else if("CpuArchitecture".equals(data.getName())) {
 						this.cpuArchitecture = data.getValue();
-					}
-					else if("CpuMaxClockSpeed".equals(data.getName())) {
+					}else if("CpuMaxClockSpeed".equals(data.getName())) {
 						this.cpuMaxClock = data.getValue();
-					}
-					else if("CpuCores".equals(data.getName())) {
+					}else if("CpuCores".equals(data.getName())) {
 						this.cpuCores = data.getValue();
-					}
-					else if("DotNetVersion".equals(data.getName())) {
+					}else if("DotNetVersion".equals(data.getName())) {
 						this.dotNetVersion = data.getValue();
 					}
 				}

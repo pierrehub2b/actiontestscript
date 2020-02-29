@@ -247,7 +247,7 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 			if(( type.contains("/json") || type.contains("/javascript")) && (jsonObjectPattern.matcher(source).matches() || jsonArrayPattern.matcher(source).matches())){
 
 				this.type = JSON_TYPE;
-				loadElementsList(new JsonParser().parse(source), "root");
+				loadElementsList(JsonParser.parseString(source), "root");
 
 				source = "{\"response\":{\"name\":\"response\",\"code\":" + response.code() + ",\"data\":" + source + "}}"; 
 

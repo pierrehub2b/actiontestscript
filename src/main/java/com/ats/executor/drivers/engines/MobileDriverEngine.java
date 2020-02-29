@@ -53,7 +53,6 @@ import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
-import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.mobiles.AndroidRootElement;
 import com.ats.executor.drivers.engines.mobiles.IosRootElement;
@@ -93,11 +92,9 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	
 	private final static String SCREENSHOT_METHOD = "/screenshot";
 
-	private JsonParser parser = new JsonParser();
 	private JsonObject source;
 
 	protected RootElement rootElement;
-	
 	protected RootElement cachedElement;
 	protected long cachedElementTime = 0L;
 	
@@ -129,17 +126,11 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			this.applicationPath = "http://" + endPoint;
 			channel.setApplication(application);
 
-			this.client = new Builder().cache(null).connectTimeout(40, TimeUnit.SECONDS).writeTimeout(40, TimeUnit.SECONDS).readTimeout(40, TimeUnit.SECONDS).build();
+			this.client = new Builder().cache(null).connectTimeout(30, TimeUnit.SECONDS).writeTimeout(30, TimeUnit.SECONDS).readTimeout(40, TimeUnit.SECONDS).build();
 
 			this.userAgent = "AtsMobileDriver/" + ATS.VERSION + " (" + System.getProperty("user.name") + ")";
 			
-			int maxTry = DriverManager.ATS.getMaxTryMobile();
-			JsonObject response = null;
-			while(response == null && maxTry > 0) {
-				response = executeRequest(DRIVER, START);
-				channel.sleep(500);
-				maxTry--;
-			}
+			JsonObject response = executeRequest(DRIVER, START);;
 			
 			if(response == null) {
 				status.setError(ActionStatus.CHANNEL_START_ERROR, "unable to connect to : mobile://" + endPoint);
@@ -166,7 +157,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 				final int screenCapturePort = response.get("screenCapturePort").getAsInt();
 				
-				JsonElement udpEndPoint = response.get("udpEndPoint");
+				final JsonElement udpEndPoint = response.get("udpEndPoint");
 
 				channel.setDimensions(new TestBound(0D, 0D, deviceWidth, deviceHeight), new TestBound(0D, 0D, channelWidth, channelHeight));
 
@@ -591,15 +582,14 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 		try {
 			final Response response = client.newCall(request).execute();
-			final JsonElement jsonResponse = parser.parse(
-					CharStreams.toString(
-							new InputStreamReader(
-									response
-									.body()
-									.byteStream(), 
-									Charsets.UTF_8)));
+			final String responseData = CharStreams.toString(
+					new InputStreamReader(
+							response
+							.body()
+							.byteStream(), 
+							Charsets.UTF_8));
 			response.close();
-			return jsonResponse.getAsJsonObject();
+			return JsonParser.parseString(responseData).getAsJsonObject();
 
 		} catch (JsonSyntaxException | IOException e) {
 			return null;

@@ -46,6 +46,7 @@ import com.ats.script.ScriptLoader;
 import com.ats.tools.AtsClassLoader;
 import com.ats.tools.Utils;
 import com.ats.tools.logger.MessageCode;
+import com.opencsv.exceptions.CsvException;
 
 public class ActionCallscript extends Action {
 
@@ -285,8 +286,10 @@ public class ActionCallscript extends Action {
 							iteration++;
 						}
 
-					} catch (IOException e) {
-						status.setError(ActionStatus.FILE_NOT_FOUND, "CSV file IO error : " + csvPath + " -> " + e.getMessage());
+					} catch (IOException e0) {
+						status.setError(ActionStatus.FILE_NOT_FOUND, "CSV file IO error : " + csvPath + " -> " + e0.getMessage());
+					} catch(CsvException e1) {
+						status.setError(ActionStatus.JAVA_EXCEPTION, "CSV load file error : " + csvPath + " -> " + e1.getMessage());
 					}
 
 				}else {

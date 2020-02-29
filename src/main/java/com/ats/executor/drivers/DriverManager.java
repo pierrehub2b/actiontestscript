@@ -71,6 +71,7 @@ public class DriverManager {
 
 	public static AtsManager ATS = new AtsManager();
 
+	private DriverProcess desktopDriver;
 	private MobileDriverEngine mobileDriverEngine;
 
 	public String getDriverFolderPath() {
@@ -104,7 +105,10 @@ public class DriverManager {
 	//--------------------------------------------------------------------------------------------------------------
 
 	public DriverProcess getDesktopDriver(ActionStatus status) {
-		return getDriverProcess(status, DESKTOP, null, DESKTOP_DRIVER_FILE_NAME);
+		if(desktopDriver == null) {
+			desktopDriver = getDriverProcess(status, DESKTOP, null, DESKTOP_DRIVER_FILE_NAME);
+		}
+		return desktopDriver;
 	}
 
 	public void processTerminated(DriverProcess dp) {
@@ -271,6 +275,11 @@ public class DriverManager {
 		//while(driversProcess.size() > 0) {
 		//	driversProcess.remove(0).close();
 		//}
+		
+		if(desktopDriver != null) {
+			desktopDriver.close(false);
+			desktopDriver = null;
+		}
 
 		if(mobileDriverEngine != null){
 			mobileDriverEngine.tearDown();
