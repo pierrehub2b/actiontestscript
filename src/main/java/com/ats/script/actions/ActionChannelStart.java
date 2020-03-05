@@ -29,6 +29,7 @@ import com.ats.executor.channels.Channel;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
 import com.ats.script.actions.neoload.ActionNeoload;
+import com.ats.script.actions.performance.ActionPerformance;
 
 public class ActionChannelStart extends ActionChannel {
 
@@ -39,6 +40,8 @@ public class ActionChannelStart extends ActionChannel {
 	private ArrayList<CalculatedValue> arguments = new ArrayList<CalculatedValue>();
 
 	private boolean neoload = false;
+	private boolean performance = false;
+	
 	private String authentication = "";
 	private String authenticationValue = "";
 	
@@ -59,6 +62,8 @@ public class ActionChannelStart extends ActionChannel {
 	private void parseOptions(Script script, String value){
 		if(ActionNeoload.SCRIPT_NEOLOAD_LABEL.equalsIgnoreCase(value)) {
 			setNeoload(true);
+		}else if(ActionPerformance.SCRIPT_PERFORMANCE_LABEL.equalsIgnoreCase(value)) {
+			setPerformance(true);
 		}else if(BASIC_AUTHENTICATION.equalsIgnoreCase(value)){
 			setAuthentication(BASIC_AUTHENTICATION);
 		}else if(BASIC_AUTHENTICATION.equalsIgnoreCase(authentication)) {
@@ -169,6 +174,14 @@ public class ActionChannelStart extends ActionChannel {
 
 	public void setNeoload(boolean value) {
 		this.neoload = value;
+	}
+	
+	public boolean isPerformance() {
+		return performance;
+	}
+
+	public void setPerformance(boolean value) {
+		this.performance = value;
 	}
 		
 	public ArrayList<CalculatedValue> getArguments() {
