@@ -488,6 +488,17 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		}
 		return null;
 	}
+	
+	@Override
+	public List<String[]> loadSelectOptions(TestElement element) {
+		final ArrayList<String[]> result = new ArrayList<String[]>();
+		final List<FoundElement> options = findSelectOptions(null, element);
+
+		if(options != null && options.size() > 0) {
+			options.stream().forEachOrdered(e -> result.add(new String[]{e.getValue().getAttribute("value"), e.getValue().getAttribute("text")}));
+		}
+		return result;
+	}
 
 	@Override
 	public List<FoundElement> findSelectOptions(TestBound dimension, TestElement element) {
@@ -1045,7 +1056,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 					switchToFrame(iframe);
 
 				}catch(WebDriverException e) {
-					return new ArrayList<FoundElement>();
+					return Collections.<FoundElement>emptyList();
 				}
 
 			}else if(startElement == null) {
@@ -1059,7 +1070,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			}
 
 			if(!switchToDefaultContent()) {
-				return new ArrayList<FoundElement>();
+				return Collections.<FoundElement>emptyList();
 			}
 		}
 
@@ -1069,7 +1080,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			return elements.parallelStream().filter(predicate).map(e -> new FoundElement(this, e, channel, initElementX + offsetIframeX, initElementY + offsetIframeY, waitAnimation)).collect(Collectors.toCollection(ArrayList::new));
 		}
 
-		return new ArrayList<FoundElement>();
+		return Collections.<FoundElement>emptyList();
 	}
 
 	@Override

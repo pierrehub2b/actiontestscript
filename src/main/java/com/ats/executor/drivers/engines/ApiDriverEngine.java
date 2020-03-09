@@ -38,6 +38,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -205,8 +206,8 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	}
 	
 	@Override
-	public ArrayList<FoundElement> findSelectOptions(TestBound dimension, TestElement element) {
-		return new ArrayList<FoundElement>();
+	public List<FoundElement> findSelectOptions(TestBound dimension, TestElement element) {
+		return Collections.<FoundElement>emptyList();
 	}
 	
 	@Override
@@ -444,5 +445,10 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 
 	@Override
 	protected void setSize(Dimension dim) {
+	}
+
+	@Override
+	public List<String[]> loadSelectOptions(TestElement element) {
+		return Collections.<String[]>emptyList();
 	}
 }

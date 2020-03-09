@@ -22,12 +22,14 @@ package com.ats.element;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
 import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 
 import com.ats.executor.ActionStatus;
@@ -189,7 +191,12 @@ public class TestElement{
 			}
 		}
 
-		return engine.findElements(sysComp, this, searchedTag, attributes, attributesValues, fullPredicate, null, true);
+		try {
+			return engine.findElements(sysComp, this, searchedTag, attributes, attributesValues, fullPredicate, null, true);
+		}catch (StaleElementReferenceException e) {
+			return Collections.<FoundElement>emptyList();
+		}
+
 	}
 
 	private int getElementsCount() {

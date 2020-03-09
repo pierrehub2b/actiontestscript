@@ -165,7 +165,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 		String appBuildVersion = "N/A";
 		String appName = "";
 
-		final ArrayList<DesktopData> appInfo = desktopDriver.getVersion(applicationPath);
+		final List<DesktopData> appInfo = desktopDriver.getVersion(applicationPath);
 		for (DesktopData data : appInfo) {
 			if("ApplicationBuildVersion".equals(data.getName())) {
 				appBuildVersion = data.getValue();
@@ -245,10 +245,21 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	public CalculatedProperty[] getAttributes(String elementId){
 		return getDesktopDriver().getElementAttributes(elementId);
 	}
-
+	
+	@Override
+	public List<String[]> loadSelectOptions(TestElement element) {
+		final ArrayList<String[]> result = new ArrayList<String[]>();
+		final List<FoundElement> options = findSelectOptions(channel.getDimension(), element);
+		
+		if(options != null && options.size() > 0) {
+			options.stream().forEachOrdered(e -> result.add(e.getItemAttribute()));
+		}
+		return result;
+	}
+	
 	@Override
 	public List<FoundElement> findSelectOptions(TestBound dimension, TestElement element) {
-		return getDesktopDriver().getChildren(dimension, element.getFoundElement().getId(), "ListItem");
+		return getDesktopDriver().getListItems(dimension, element.getFoundElement().getId());
 	}
 
 	@Override
@@ -274,9 +285,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	public List<FoundElement> findElements(boolean sysComp, TestElement testElement, String tag, String[] attributes, String[] attributesValues, Predicate<AtsBaseElement> predicate, WebElement startElement, boolean waitAnimation) {
 		if(sysComp) {
 			if(SYSCOMP.equals(tag.toUpperCase())) {
-				ArrayList<FoundElement> win = new ArrayList<FoundElement>();
-				win.add(new FoundElement(window));
-				return win;
+				return new ArrayList<FoundElement>(List.of(new FoundElement(window)));
 			}else {
 				return getDesktopDriver().findElements(channel, testElement, tag, attributesValues, predicate);
 			}
@@ -287,7 +296,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void updateDimensions() {
-		DesktopWindow win = getDesktopDriver().getWindowByHandle(channel.getHandle(desktopDriver));
+		final DesktopWindow win = getDesktopDriver().getWindowByHandle(channel.getHandle(desktopDriver));
 		if(win != null && win.getWidth() > 0 && win.getHeight() > 0){
 			channel.setDimensions(new TestBound(
 					win.getX(),

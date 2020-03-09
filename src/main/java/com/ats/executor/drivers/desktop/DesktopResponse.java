@@ -21,6 +21,7 @@ package com.ats.executor.drivers.desktop;
 
 import java.beans.Transient;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -50,25 +51,17 @@ public class DesktopResponse {
 	}
 
 	@Transient
-	public ArrayList<FoundElement> getFoundElements(TestBound channelDimension) {
+	public List<FoundElement> getFoundElements(TestBound channelDimension) {
 		if(elements == null) {
-			return new ArrayList<FoundElement>();
+			return Collections.<FoundElement>emptyList();
 		}
 		return elements.stream().map(e -> new FoundElement(e, channelDimension)).collect(Collectors.toCollection(ArrayList::new));
 	}
 	
-	/*@Transient
-	public FoundElement getFirstElement() {
-		if(elements != null && elements.size() > 0) {
-			return new FoundElement((DesktopElement)elements.get(0));
-		}
-		return null;
-	}*/
-	
 	@Transient
-	public ArrayList<DesktopData> getData() {
+	public List<DesktopData> getData() {
 		if(data == null) {
-			return new ArrayList<DesktopData>();
+			return Collections.<DesktopData>emptyList();
 		}
 		return data;
 	}
@@ -76,7 +69,7 @@ public class DesktopResponse {
 	@Transient
 	public List<DesktopWindow> getWindows() {
 		if(windows == null) {
-			return new ArrayList<DesktopWindow>();
+			return Collections.<DesktopWindow>emptyList();
 		}
 		return windows;
 	}
@@ -121,10 +114,10 @@ public class DesktopResponse {
 	}
 
 	@Transient
-	public ArrayList<FoundElement> getFoundElements(Predicate<AtsBaseElement> predicate, TestBound dimension) {
+	public List<FoundElement> getFoundElements(Predicate<AtsBaseElement> predicate, TestBound dimension) {
 		
 		if(elements == null) {
-			return new ArrayList<FoundElement>();
+			return Collections.<FoundElement>emptyList();
 		}
 		return elements.parallelStream().filter(predicate).map(e -> new FoundElement(e, dimension)).collect(Collectors.toCollection(ArrayList::new));
 	}

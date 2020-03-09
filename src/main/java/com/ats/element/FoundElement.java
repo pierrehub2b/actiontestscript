@@ -22,6 +22,7 @@ package com.ats.element;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.openqa.selenium.WebElement;
@@ -74,6 +75,8 @@ public class FoundElement{
 	private boolean active = true;
 
 	private ArrayList<AtsElement> iframes;
+	
+	private Map<String, String> attributes;
 
 	//------------------------------------------------------------------------------------------------------------------------------
 	// contructors
@@ -214,6 +217,8 @@ public class FoundElement{
 		if(element.getChildren() != null) {
 			this.children = element.getChildren().stream().map(e -> new FoundElement(e, channelDimension)).collect(Collectors.toCollection(ArrayList::new));
 		}
+		
+		this.attributes = element.attributes;
 	}
 
 	public FoundElement(AtsMobileElement element) {
@@ -283,6 +288,13 @@ public class FoundElement{
 	// end of contructors
 	//------------------------------------------------------------------------------------------------------------------------------
 
+	public String[] getItemAttribute() {
+		if(attributes != null && attributes.size() == 2) {
+			return new String[] {attributes.get("value"), attributes.get("text")};
+		}
+		return new String[0];
+	}
+	
 	public int getCenterWidth() {
 		return this.centerWidth;
 	}

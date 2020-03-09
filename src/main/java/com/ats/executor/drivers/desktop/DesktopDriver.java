@@ -25,7 +25,6 @@ import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -377,7 +376,8 @@ public class DesktopDriver extends RemoteWebDriver {
 		FromPoint(5),
 		Script(6),
 		Root(7),
-		LoadTree(8);
+		LoadTree(8),
+		ListItems(9);
 
 		private final int type;
 		ElementType(int value){
@@ -572,7 +572,7 @@ public class DesktopDriver extends RemoteWebDriver {
 		return new FoundElement(sendRequestCommand(CommandType.Window, WindowType.Handle, handle).getWindow());
 	}
 
-	public ArrayList<DesktopData> getVersion(String appPath) {
+	public List<DesktopData> getVersion(String appPath) {
 		return sendRequestCommand(CommandType.Driver, DriverType.Application, appPath).getData();
 	}
 
@@ -655,7 +655,7 @@ public class DesktopDriver extends RemoteWebDriver {
 		return sendRequestCommand(CommandType.Element, ElementType.Attributes, elementId).getAttributes();
 	}
 
-	public ArrayList<DesktopData> executeScript(ActionStatus status, String script, FoundElement element) {
+	public List<DesktopData> executeScript(ActionStatus status, String script, FoundElement element) {
 		return sendRequestCommand(CommandType.Element, ElementType.Script, element.getId(), script).getData();
 	}
 
@@ -677,6 +677,10 @@ public class DesktopDriver extends RemoteWebDriver {
 		}
 
 		return response.getFoundElements(predicate, channel.getDimension());
+	}
+	
+	public List<FoundElement> getListItems(TestBound dimension, String comboId){
+		return sendRequestCommand(CommandType.Element, ElementType.ListItems, new Object[] {comboId}).getFoundElements(dimension);
 	}
 
 	public List<FoundElement> getChildren(TestBound dimension, String comboId, String tag){

@@ -317,15 +317,7 @@ public class Channel {
 	}
 	
 	public List<String[]> findSelectOptions(TestElement element){
-				
-		final ArrayList<String[]> result = new ArrayList<String[]>();
-		final List<FoundElement> options = engine.findSelectOptions(dimension, element);
-
-		if(options != null && options.size() > 0) {
-			options.stream().forEachOrdered(e -> result.add(new String[]{e.getValue().getAttribute("value"), e.getValue().getAttribute("text")}));
-		}
-				
-		return result;
+		return engine.loadSelectOptions(element);
 	}
 
 	public String getAttribute(ActionStatus status, FoundElement element, String attributeName, int maxTry){

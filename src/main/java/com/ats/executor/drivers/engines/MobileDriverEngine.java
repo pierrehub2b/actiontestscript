@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -402,8 +403,13 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public ArrayList<FoundElement> findSelectOptions(TestBound dimension, TestElement element) {
-		return new ArrayList<FoundElement>();
+	public List<String[]> loadSelectOptions(TestElement element) {
+		return Collections.<String[]>emptyList();
+	}
+	
+	@Override
+	public List<FoundElement> findSelectOptions(TestBound dimension, TestElement element) {
+		return Collections.<FoundElement>emptyList();
 	}
 	
 	@Override

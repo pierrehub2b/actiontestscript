@@ -66,6 +66,7 @@ public interface IDriverEngine{
 	public CalculatedProperty[] getAttributes(FoundElement element, boolean reload);
 	public CalculatedProperty[] getCssAttributes(FoundElement element);
 	
+	public List<String[]> loadSelectOptions(TestElement element);
 	public List<FoundElement> findSelectOptions(TestBound dimension, TestElement element);
 	public void selectOptionsItem(ActionStatus status, TestElement testElement, CalculatedProperty selectProperty);
 	
