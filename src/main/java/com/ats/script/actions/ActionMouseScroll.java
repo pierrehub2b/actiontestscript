@@ -27,6 +27,7 @@ import com.ats.generator.objects.mouse.MouseScroll;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
 import com.ats.tools.Utils;
+import com.google.gson.JsonObject;
 
 public class ActionMouseScroll extends ActionMouse {
 
@@ -72,10 +73,10 @@ public class ActionMouseScroll extends ActionMouse {
 	}
 	
 	@Override
-	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
-		return super.getActionLogs(scriptName, scriptLine, new StringBuilder("\"value\":").append(value));
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+		data.addProperty("value", value);
+		return super.getActionLogs(scriptName, scriptLine, data);
 	}
-
 
 	//--------------------------------------------------------
 	// getters and setters for serialization

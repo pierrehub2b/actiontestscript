@@ -909,7 +909,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	protected void closeCurrentWindow() {
 		driver.close();
-		channel.sleep(200);
+		channel.sleep(500);
 	}
 
 	@Override

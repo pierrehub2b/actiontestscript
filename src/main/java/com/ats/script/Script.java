@@ -35,7 +35,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.ats.generator.variables.CalculatedValue;
-import com.ats.generator.variables.ConditionalValue;
 import com.ats.generator.variables.RandomStringValue;
 import com.ats.generator.variables.ScriptValue;
 import com.ats.generator.variables.Variable;

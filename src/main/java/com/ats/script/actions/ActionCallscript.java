@@ -46,6 +46,7 @@ import com.ats.script.ScriptLoader;
 import com.ats.tools.AtsClassLoader;
 import com.ats.tools.Utils;
 import com.ats.tools.logger.MessageCode;
+import com.google.gson.JsonObject;
 import com.opencsv.exceptions.CsvException;
 
 public class ActionCallscript extends Action {
@@ -113,9 +114,14 @@ public class ActionCallscript extends Action {
 
 		if(options.size() > 0) {
 			final String option = options.get(0);
-			final int operatorIndex = option.indexOf("=");
+			int operatorIndex = option.indexOf(ConditionalValue.EQUALS);
 			if(operatorIndex > 1) {
 				condition = new ConditionalValue(script, option.substring(0, operatorIndex).trim(), option.substring(operatorIndex+1).trim());
+			}else {
+				operatorIndex = option.indexOf(ConditionalValue.DIFFERENT);
+				if(operatorIndex > 1) {
+					condition = new ConditionalValue(script, option.substring(0, operatorIndex).trim(), option.substring(operatorIndex+2).trim(), ConditionalValue.DIFFERENT);
+				}
 			}
 		}
 	}
@@ -156,6 +162,16 @@ public class ActionCallscript extends Action {
 		this.setLoop(loop);
 	}
 
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// Logs
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	public static String getScriptLog(String testName, int line, JsonObject log) {
+		final StringBuilder sb = new StringBuilder("Callscript (")
+				.append(testName).append(":").append(line).append(") -> ").append(log.toString());
+		return sb.toString();
+	}
+	
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
 
@@ -337,8 +353,9 @@ public class ActionCallscript extends Action {
 	}
 
 	@Override
-	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
-		data.append("\"status\":\"terminated\", \"duration\":").append(status.getDuration());
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+		data.addProperty("status", "terminated");
+		data.addProperty("duration", status.getDuration());
 		return super.getActionLogs(scriptName, scriptLine, data);
 	}
 

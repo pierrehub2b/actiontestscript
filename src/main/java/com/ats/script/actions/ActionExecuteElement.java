@@ -41,6 +41,7 @@ import com.ats.script.Script;
 import com.ats.tools.Operators;
 import com.ats.tools.Utils;
 import com.ats.tools.logger.MessageCode;
+import com.google.gson.JsonObject;
 
 public class ActionExecuteElement extends ActionExecute {
 
@@ -272,8 +273,11 @@ public class ActionExecuteElement extends ActionExecute {
 	}
 	
 	@Override
-	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
-		return super.getActionLogs(scriptName, scriptLine, data.append("\"duration\":").append(status.getDuration()-status.getSearchDuration()-delay).append(", \"delay\":").append(delay).append(", \"occurrences\":").append(status.getElement().getCount()));
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+		data.addProperty("duration", status.getDuration()-status.getSearchDuration()-delay);
+		data.addProperty("delay", delay);
+		data.addProperty("occurrences", status.getElement().getCount());
+		return super.getActionLogs(scriptName, scriptLine, data);
 	}
 
 	//--------------------------------------------------------

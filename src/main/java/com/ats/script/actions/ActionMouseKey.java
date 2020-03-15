@@ -30,6 +30,7 @@ import com.ats.generator.objects.mouse.Mouse;
 import com.ats.generator.objects.mouse.MouseKey;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
+import com.google.gson.JsonObject;
 
 public class ActionMouseKey extends ActionMouse {
 
@@ -106,12 +107,11 @@ public class ActionMouseKey extends ActionMouse {
 	}
 	
 	@Override
-	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
-		if(key == null) {
-			return super.getActionLogs(scriptName, scriptLine, data);
-		}else {
-			return super.getActionLogs(scriptName, scriptLine, data.append(", \"key\":\"").append(key).append("\""));
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+		if(key != null) {
+			data.addProperty("key", key.toString());
 		}
+		return super.getActionLogs(scriptName, scriptLine, data);
 	}
 
 	//--------------------------------------------------------

@@ -30,6 +30,7 @@ import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
 import com.ats.tools.Utils;
+import com.google.gson.JsonObject;
 
 public class ActionText extends ActionExecuteElement {
 
@@ -86,8 +87,9 @@ public class ActionText extends ActionExecuteElement {
 	}
 	
 	@Override
-	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
-		return super.getActionLogs(scriptName, scriptLine, data.append("\"text\":\"").append(text.getCalculated().replaceAll("\"", "\\\"")).append("\", "));
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+		data.addProperty("text", text.getCalculated().replaceAll("\"", "\\\""));
+		return super.getActionLogs(scriptName, scriptLine, data);
 	}
 
 	//--------------------------------------------------------

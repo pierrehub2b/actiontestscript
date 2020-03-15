@@ -23,6 +23,8 @@ import static org.testng.Assert.fail;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 
 import org.openqa.selenium.Keys;
@@ -69,6 +71,8 @@ import com.ats.script.actions.ActionExecute;
 import com.ats.script.actions.ActionExecuteElement;
 import com.ats.tools.Utils;
 import com.ats.tools.logger.ExecutionLogger;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 import okhttp3.OkHttpClient;
 
@@ -140,13 +144,12 @@ public class ActionTestScript extends Script implements ITest{
 			throw new SkipException("check mode : " + testName);
 		}else {
 
-			setTestExecutionVariables(runner.getTest().getAllParameters());
+			final Map<String, String> params = runner.getTest().getAllParameters();
+			setTestExecutionVariables(params);
 
 			final ExecutionLogger mainLogger = new ExecutionLogger(System.out, getEnvironmentValue("ats.log.level", ""));
 			setLogger(mainLogger);
-
-			sendScriptInfo("Starting script -> " + testName);
-
+						
 			//-----------------------------------------------------------
 			// check report output specified
 			//-----------------------------------------------------------
@@ -167,6 +170,22 @@ public class ActionTestScript extends Script implements ITest{
 
 				setRecorder(new VisualRecorder(output, header, xml, visualQuality, mainLogger));
 			}
+			
+			final JsonObject logs = new JsonObject();
+			logs.addProperty("name", testName);
+			logs.addProperty("suite", ctx.getSuite().getName());
+			logs.addProperty("xmlReport", xml);
+			logs.addProperty("visualQuality", visualQuality);
+			
+			final JsonArray parameters = new JsonArray();
+			for(Entry<String, String>param : params.entrySet()) {
+				final JsonObject elem = new JsonObject();
+				elem.addProperty(param.getKey(), param.getValue());
+				parameters.add(elem);
+			}
+			logs.add("parameters", parameters);
+
+			sendScriptInfo("Starting script -> " + logs.toString());
 
 			//-----------------------------------------------------------
 			//-----------------------------------------------------------
@@ -184,19 +203,12 @@ public class ActionTestScript extends Script implements ITest{
 
 	@AfterClass(alwaysRun=true)
 	public void afterClass() {
-
-		final StringBuilder status = 
-				new StringBuilder("Script terminated -> {\"name\":\"")
-				.append(testName)
-				.append("\", \"duration\":")
-				.append(System.currentTimeMillis() - scriptStart)
-				.append(", \"status\":\"")
-				.append(scriptStatus)
-				.append("\", \"actions\":")
-				.append(scriptActions)
-				.append("}");
-
-		sendScriptInfo(status.toString());
+		final JsonObject logs = new JsonObject();
+		logs.addProperty("name", testName);
+		logs.addProperty("duration", System.currentTimeMillis() - scriptStart);
+		logs.addProperty("status", scriptStatus);
+		logs.addProperty("actions", scriptActions);
+		sendScriptInfo("Script terminated -> " + logs.toString());
 	}
 
 	@AfterTest(alwaysRun=true)
@@ -242,44 +254,43 @@ public class ActionTestScript extends Script implements ITest{
 
 	public void initCalledScript(ActionTestScript testScript, String testName, int line, ActionTestScript script, String[] parameters, List<Variable> variables, int iteration, int iterationMax, String scriptName, String type, File csvFile) {
 
-		String parametersData = "";
-		if(parameters != null) {
-			setParameters(parameters);
-			parametersData = String.join(", ", parameters);
-		}
-
-		final StringBuilder sb = new StringBuilder("ActionCallscript (")
-				.append(testName).append(":").append(line).append(") -> {");
-
-		if(testScript.getCondition() != null) {
-			sb.append(testScript.getCondition().getLog()).append(", ");
-			testScript.cleanCondition();
-		}
-
-		sb.append("\"status\":\"start\", \"called\":\"")
-		.append(scriptName).append("\", \"iteration\":\"")
-		.append(iteration+1).append("/")
-		.append(iterationMax).append("\" ,\"type\":\"")
-		.append(type).append("\", \"parameters\":\"")
-		.append(parametersData).append("\"");
-
-		if(csvFile != null) {
-			sb.append(", \"url\":\"").append(csvFile.getAbsolutePath()).append("\"");
-		}
-
-		sb.append("}");
-		script.sendScriptInfo(sb.toString());
-
 		this.topScript = script;
 		this.channelManager = script.getChannelManager();
 		this.iteration = iteration;
 		this.csvFile = csvFile;
+		
+		JsonObject log = new JsonObject();
+		if(testScript.getCondition() != null) {
+			log = testScript.getCondition().getLog(log);
+			testScript.cleanCondition();
+		}
 
+		log.addProperty("status", "init");
+		log.addProperty("called", scriptName);
+		log.addProperty("iteration", iteration+1 + "/" + iterationMax);
+		log.addProperty("type", type);
+
+		if(csvFile != null) {
+			log.addProperty("url", csvFile.getAbsolutePath());
+		}
+
+		if(parameters != null) {
+			setParameters(parameters);
+			if(parameters.length > 0) {
+				final JsonArray parametersArray = new JsonArray();
+				for (String s : parameters) {
+					parametersArray.add(s);
+				}
+				log.add("parameters", parametersArray);
+			}
+		}
+		
 		if(variables != null) {
 			setVariables(variables);
 		}
-
 		setTestExecutionVariables(script.getTestExecutionVariables());
+		
+		script.sendScriptInfo(ActionCallscript.getScriptLog(testName, line, log));
 	}
 
 	public ChannelManager getChannelManager() {
@@ -558,16 +569,10 @@ public class ActionTestScript extends Script implements ITest{
 
 		condition = new ConditionalValue(type, variable, calculatedValue);
 
-		if(condition.isExecGo()) {
+		if(condition.isExec()) {
 			return true;
 		}else {
-			
-			final StringBuilder sb = new StringBuilder("ActionCallscript (")
-					.append(getTestName()).append(":").append(line).append(") -> {")
-					.append(condition.getLog().append("}"));
-			
-			getTopScript().sendScriptInfo(sb.toString());
-			
+			getTopScript().sendScriptInfo(ActionCallscript.getScriptLog(getTestName(), line, condition.getLog()));
 			condition = null;
 			return false;
 		}

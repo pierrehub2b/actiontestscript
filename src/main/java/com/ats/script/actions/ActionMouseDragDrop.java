@@ -26,6 +26,7 @@ import com.ats.executor.ActionTestScript;
 import com.ats.generator.objects.mouse.Mouse;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
+import com.google.gson.JsonObject;
 
 public class ActionMouseDragDrop extends ActionMouse {
 
@@ -58,7 +59,7 @@ public class ActionMouseDragDrop extends ActionMouse {
 	}
 	
 	@Override
-	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
-		return super.getActionLogs(scriptName, scriptLine, new StringBuilder());
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+		return super.getActionLogs(scriptName, scriptLine, new JsonObject());
 	}
 }

@@ -28,6 +28,7 @@ import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
 import com.ats.tools.Utils;
+import com.google.gson.JsonObject;
 
 public class ActionAssertProperty extends ActionExecuteElement {
 
@@ -115,16 +116,12 @@ public class ActionAssertProperty extends ActionExecuteElement {
 	}
 	
 	@Override
-	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
-		
-		data.append("\"status\":\"");
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
 		if(status.isPassed()) {
-			data.append("passed\"");
+			data.addProperty("status", "passed");
 		}else {
-			data.append("failed\"");
+			data.addProperty("status", "failed");
 		}
-		data.append(", ");
-		
 		return super.getActionLogs(scriptName, scriptLine, data);
 	}
 	

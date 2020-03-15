@@ -21,6 +21,7 @@ package com.ats.generator.variables;
 
 import com.ats.executor.ActionTestScript;
 import com.ats.script.Script;
+import com.google.gson.JsonObject;
 
 public class ConditionalValue {
 
@@ -31,33 +32,50 @@ public class ConditionalValue {
 	private String operator = EQUALS;
 	private CalculatedValue value;
 	
-	private boolean execGo = false;
+	private boolean exec = false;
 
 	public ConditionalValue(Script script, String variableName, String value) {
 		this.setVariable(script.getVariable(variableName, false));
 		this.setValue(new CalculatedValue(script, value));
 	}
+	
+	public ConditionalValue(Script script, String variableName, String value, String operator) {
+		this(script, variableName, value);
+		this.setOperator(operator);
+	}
 
-	public ConditionalValue(String o, Variable v, CalculatedValue c) {
-		this.operator = o;
-		this.variable = v;
-		this.value = c;
+	public ConditionalValue(String op, Variable va, CalculatedValue cv) {
+		this.operator = op;
+		this.variable = va;
+		this.value = cv;
 	}
 	
-	public boolean isExecGo() {
-		execGo = variable.getCalculatedValue().equals(value.getCalculated());
-		execGo = (execGo && ConditionalValue.EQUALS.equals(operator)) || (!execGo && ConditionalValue.DIFFERENT.equals(operator));
-		
-		return execGo;
+	public boolean isExec() {
+		exec = variable.getCalculatedValue().equals(value.getCalculated());
+		exec = (exec && ConditionalValue.EQUALS.equals(operator)) || (!exec && ConditionalValue.DIFFERENT.equals(operator));
+		return exec;
 	}
 	
-	public StringBuilder getLog() {
-		final StringBuilder sb = new StringBuilder("\"condition\":{\"variable\":\"")
-		.append(variable.getName()).append("\", \"value\":\"").append(variable.getCalculatedValue())
-		.append("\", \"type\":\"").append(operator).append("\", \"compareTo\":\"").append(value.getCalculated())
-		.append("\", \"continue\":").append(execGo).append("}");
+	public JsonObject getLog() {
+		return getLog(new JsonObject());
+	}
+	
+	public JsonObject getLog(JsonObject log) {
 		
-		return sb;
+		final JsonObject varData = new JsonObject();
+		varData.addProperty(variable.getName(), variable.getCalculatedValue());
+		
+		final JsonObject compareData = new JsonObject();
+		compareData.addProperty("operator", operator);
+		compareData.addProperty("value", value.getCalculated());
+		
+		final JsonObject data = new JsonObject();
+		data.add("variable", varData);
+		data.add("compare", compareData);
+		data.addProperty("continue", exec);
+		
+		log.add("condition", data);
+		return log;
 	}
 
 	public StringBuilder getJavaCode(StringBuilder builder, int codeLine) {

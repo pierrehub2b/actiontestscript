@@ -28,6 +28,7 @@ import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.mouse.MouseSwipe;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
+import com.google.gson.JsonObject;
 
 public class ActionMouseSwipe extends ActionMouse {
 
@@ -73,8 +74,8 @@ public class ActionMouseSwipe extends ActionMouse {
 	}
 	
 	@Override
-	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
-		return super.getActionLogs(scriptName, scriptLine, new StringBuilder());
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+		return super.getActionLogs(scriptName, scriptLine, data);
 	}
 
 	//--------------------------------------------------------

@@ -30,6 +30,7 @@ import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
 import com.ats.script.actions.neoload.ActionNeoload;
 import com.ats.script.actions.performance.ActionPerformance;
+import com.google.gson.JsonObject;
 
 public class ActionChannelStart extends ActionChannel {
 
@@ -92,12 +93,15 @@ public class ActionChannelStart extends ActionChannel {
 	}
 		
 	@Override
-	public StringBuilder getActionLogsData() {
+	public JsonObject getActionLogsData() {
 		final Channel channel = status.getChannel();
-		return super.getActionLogsData()
-				.append(", \"app\":\"").append(application.getCalculated()).append("\"")
-				.append(", \"appVersion\":\"").append(channel.getApplicationVersion()).append("\"")
-				.append(", \"os\":\"").append(channel.getOs()).append("\"");
+		final JsonObject data = super.getActionLogsData();
+		
+		data.addProperty("app", application.getCalculated());
+		data.addProperty("appVersion", channel.getApplicationVersion());
+		data.addProperty("os", channel.getOs());
+		
+		return data;
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

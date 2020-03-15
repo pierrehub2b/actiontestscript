@@ -21,6 +21,7 @@ package com.ats.script.actions;
 
 import com.ats.executor.ActionTestScript;
 import com.ats.script.Script;
+import com.google.gson.JsonObject;
 
 public class ActionChannel extends Action{
 
@@ -41,12 +42,14 @@ public class ActionChannel extends Action{
 	}
 	
 	@Override
-	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
 		return super.getActionLogs(scriptName, scriptLine, getActionLogsData());
 	}
 	
-	protected StringBuilder getActionLogsData() {
-		return new StringBuilder("\"name\":\"").append(name).append("\"");
+	protected JsonObject getActionLogsData() {
+		JsonObject data = new JsonObject();
+		data.addProperty("name", name);
+		return data;
 	}
 
 	//--------------------------------------------------------

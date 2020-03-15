@@ -26,6 +26,7 @@ import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
+import com.google.gson.JsonObject;
 
 public class ActionComment extends Action {
 
@@ -66,8 +67,10 @@ public class ActionComment extends Action {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
-		return super.getActionLogs(scriptName, scriptLine, data.append("\"type\":\"").append(type).append("\", \"value\":\"").append(comment.getCalculated()).append("\""));
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+		data.addProperty("type", type);
+		data.addProperty("value", comment.getCalculated());
+		return super.getActionLogs(scriptName, scriptLine, data);
 	}
 
 	@Override

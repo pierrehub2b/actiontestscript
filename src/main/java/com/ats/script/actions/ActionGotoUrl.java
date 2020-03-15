@@ -22,6 +22,7 @@ package com.ats.script.actions;
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
+import com.google.gson.JsonObject;
 
 public class ActionGotoUrl extends ActionExecute {
 
@@ -69,8 +70,12 @@ public class ActionGotoUrl extends ActionExecute {
 	}
 	
 	@Override
-	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
-		return super.getActionLogs(scriptName, scriptLine, new StringBuilder("\"url\":\"").append(url.getCalculated()).append("\", \"duration\":").append(status.getDuration()));
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+		
+		data.addProperty("url", url.getCalculated());
+		data.addProperty("duration", status.getDuration());
+		
+		return super.getActionLogs(scriptName, scriptLine, data);
 	}
 
 	//--------------------------------------------------------

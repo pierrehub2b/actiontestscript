@@ -29,6 +29,7 @@ import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
 import com.ats.tools.Utils;
+import com.google.gson.JsonObject;
 
 public class ActionApi extends Action {
 
@@ -137,15 +138,11 @@ public class ActionApi extends Action {
 	}
 	
 	@Override
-	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
-		data.append("\"type\":\"")
-		.append(type)
-		.append("\", \"method\":\"")
-		.append(method.getCalculated())
-		.append("\", \"duration\":" + status.getDuration())
-		.append(", \"").append(status.getMessage()).append("\":\"")
-		.append(status.getData()).append("\"");
-
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+		data.addProperty("type", type);
+		data.addProperty("method", method.getCalculated());
+		data.addProperty("duration", status.getDuration());
+		data.addProperty(status.getMessage(), status.getData().toString());
 		return super.getActionLogs(scriptName, scriptLine, data);
 	}
 

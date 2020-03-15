@@ -23,6 +23,7 @@ import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
 import com.ats.script.Script;
+import com.google.gson.JsonObject;
 
 public class Action {
 
@@ -74,11 +75,8 @@ public class Action {
 		}
 	}
 	
-	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
-		
-		
-		
-		return new StringBuilder(getClass().getSimpleName()).append(" (").append(scriptName).append(":").append(scriptLine).append(") -> {").append(data).append("}");
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+		return new StringBuilder(getClass().getSimpleName()).append(" (").append(scriptName).append(":").append(scriptLine).append(") -> ").append(data.toString());
 	}
 
 	//--------------------------------------------------------

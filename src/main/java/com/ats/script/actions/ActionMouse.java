@@ -27,6 +27,7 @@ import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.mouse.Mouse;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
+import com.google.gson.JsonObject;
 
 public class ActionMouse extends ActionExecuteElement {
 
@@ -70,8 +71,9 @@ public class ActionMouse extends ActionExecuteElement {
 	}
 	
 	@Override
-	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
-		return super.getActionLogs(scriptName, scriptLine, data.append("\"type\":\"").append(type).append("\", "));
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+		data.addProperty("type", type);
+		return super.getActionLogs(scriptName, scriptLine, data);
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
