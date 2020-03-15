@@ -19,46 +19,68 @@ under the License.
 
 package com.ats.generator.variables;
 
+import com.ats.executor.ActionTestScript;
 import com.ats.script.Script;
 
 public class ConditionalValue {
 
+	public static final String EQUALS = "=";
+	public static final String DIFFERENT = "<>";
+
 	private Variable variable;
-	private String operator = "=";
+	private String operator = EQUALS;
 	private CalculatedValue value;
+	
+	private boolean execGo = false;
 
 	public ConditionalValue(Script script, String variableName, String value) {
 		this.setVariable(script.getVariable(variableName, false));
 		this.setValue(new CalculatedValue(script, value));
 	}
 
-	public boolean isPassed() {
-		return variable.getCalculatedValue().equals(value.getCalculated());
+	public ConditionalValue(String o, Variable v, CalculatedValue c) {
+		this.operator = o;
+		this.variable = v;
+		this.value = c;
+	}
+	
+	public boolean isExecGo() {
+		execGo = variable.getCalculatedValue().equals(value.getCalculated());
+		execGo = (execGo && ConditionalValue.EQUALS.equals(operator)) || (!execGo && ConditionalValue.DIFFERENT.equals(operator));
+		
+		return execGo;
+	}
+	
+	public StringBuilder getLog() {
+		final StringBuilder sb = new StringBuilder("\"condition\":{\"variable\":\"")
+		.append(variable.getName()).append("\", \"value\":\"").append(variable.getCalculatedValue())
+		.append("\", \"type\":\"").append(operator).append("\", \"compareTo\":\"").append(value.getCalculated())
+		.append("\", \"continue\":").append(execGo).append("}");
+		
+		return sb;
 	}
 
-	public StringBuilder getJavaCode(StringBuilder builder) {
+	public StringBuilder getJavaCode(StringBuilder builder, int codeLine) {
+
 		final StringBuilder codeBuilder = 
 				new StringBuilder("if(")
-				.append(variable.getName())
-				.append(".equals(")
-				.append(value.getJavaCode())
-				.append(")) ")
-				.append(builder);
+				.append(ActionTestScript.JAVA_CONDITION_FUNCTION).append("(")
+				.append(this.getClass().getSimpleName()).append(".");
+
+		if(DIFFERENT.equals(operator)) {
+			codeBuilder.append("DIFFERENT");
+		}else {
+			codeBuilder.append("EQUALS");
+		}
+
+		codeBuilder.append(", ")
+		.append(codeLine)
+		.append(", ")
+		.append(variable.getName()).append(", ")
+		.append(value.getJavaCode())
+		.append(")) ")
+		.append(builder);
 		return codeBuilder;
-	}
-	
-	//--------------------------------------------------------
-	
-	public String getLogData(String scriptName) {
-		StringBuilder builder = new StringBuilder(scriptName)
-				.append(" not executed : variable '")
-				.append(variable.getName())
-				.append("' with value = '")
-				.append(variable.getCalculatedValue())
-				.append("' is not equals to '")
-				.append(value.getCalculated())
-				.append("'");
-		return builder.toString();
 	}
 
 	//--------------------------------------------------------

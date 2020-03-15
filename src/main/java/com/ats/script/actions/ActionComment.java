@@ -45,12 +45,12 @@ public class ActionComment extends Action {
 		if(type.equals(LOG_TYPE) || type.equals(SCRIPT_TYPE)){
 			setType(type);
 		}
-		
+
 		String data = "";
 		if(dataArray.size() > 0){
 			data = dataArray.remove(0).trim();
 		}
-		
+
 		setComment(new CalculatedValue(script, data));
 	}
 
@@ -60,14 +60,14 @@ public class ActionComment extends Action {
 		setComment(value);
 	}
 
-	
+
 	//---------------------------------------------------------------------------------------------------------------------------------
 	// Code Generator
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
 	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
-		return super.getActionLogs(scriptName, scriptLine, data.append("\"type\":\"").append(type).append("\""));
+		return super.getActionLogs(scriptName, scriptLine, data.append("\"type\":\"").append(type).append("\", \"value\":\"").append(comment.getCalculated()).append("\""));
 	}
 
 	@Override
@@ -76,7 +76,7 @@ public class ActionComment extends Action {
 		codeBuilder.append("\"").append(getType()).append("\", ").append(comment.getJavaCode()).append(")");
 		return codeBuilder;
 	}
-	
+
 	@Override
 	public boolean isScriptComment() {
 		return SCRIPT_TYPE.equals(type);
@@ -88,15 +88,13 @@ public class ActionComment extends Action {
 	@Override
 	public void execute(ActionTestScript ts) {
 		status = new ActionStatus(ts.getCurrentChannel());
-		if(ts.getCurrentChannel() != null) {
-			if(STEP_TYPE.equals(type)) {
-				super.execute(ts);
-				status.endDuration();
-				ts.getRecorder().update(type, comment.getCalculated());
-			}else if(LOG_TYPE.equals(type)) {
-				status.endDuration();
-				ts.getTopScript().sendCommentLog(comment.getCalculated());
-			}
+		if(STEP_TYPE.equals(type)) {
+			super.execute(ts);
+			status.endDuration();
+			ts.getRecorder().update(type, comment.getCalculated());
+		}else if(LOG_TYPE.equals(type)) {
+			status.endDuration();
+			ts.getTopScript().sendCommentLog(comment.getCalculated());
 		}
 	}
 

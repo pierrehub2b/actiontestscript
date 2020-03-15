@@ -212,7 +212,7 @@ public class ActionCallscript extends Action {
 		codeBuilder.append(")");
 
 		if(condition != null) {
-			return condition.getJavaCode(codeBuilder);
+			return condition.getJavaCode(codeBuilder, getLine());
 		}
 
 		return codeBuilder;
@@ -221,20 +221,13 @@ public class ActionCallscript extends Action {
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
 
-	@Override
-	public void execute(ActionTestScript ts) {
-
+	public void execute(String testName, int line, ActionTestScript ts) {
+		
 		super.execute(ts.getCurrentChannel());
 		final String scriptName = name.getCalculated();
 
-		if(condition != null && !condition.isPassed()) {
-			ts.getTopScript().sendConditionExecLog(scriptName, condition);
-			status.endDuration();
-			return;
-		}
-
 		//Class<ActionTestScript> clazz = (Class<ActionTestScript>) Class.forName(name.getCalculated()); // old way still working
-		Class<ActionTestScript> clazz = classLoader.findClass(scriptName);
+		final Class<ActionTestScript> clazz = classLoader.findClass(scriptName);
 
 		if(clazz == null) {
 			status.setError(MessageCode.SCRIPT_NOT_FOUND, "ATS script not found : '" + scriptName + "' (maybe a letter case issue ?)\n");
@@ -278,10 +271,11 @@ public class ActionCallscript extends Action {
 
 						final Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
 						final List<String[]> data = Utils.loadCsvData(csvUrl);
+						final int iterationMax = data.size();
 						int iteration = 0;
-
+						
 						for (String[] params : data) {
-							ats.initCalledScript(topScript, getCalculatedParameters(ats, params), null, iteration, scriptName, "csv " + Arrays.toString(params), csvFile);
+							ats.initCalledScript(ts, testName, line, topScript, getCalculatedParameters(ats, params), null, iteration, iterationMax, scriptName, "csv", csvFile);
 							testMain.invoke(ats);
 							iteration++;
 						}
@@ -298,7 +292,7 @@ public class ActionCallscript extends Action {
 					final String[] parameters = getCalculatedParameters();
 
 					for (int iteration=0; iteration<loop; iteration++) {
-						ats.initCalledScript(topScript, parameters, variables, iteration, scriptName, "loop " + iteration + " on " + loop, null);
+						ats.initCalledScript(ts, testName, line, topScript, parameters, variables, iteration, loop, scriptName, "loop", null);
 						testMain.invoke(ats);
 					}
 
@@ -344,11 +338,7 @@ public class ActionCallscript extends Action {
 
 	@Override
 	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
-		if(csvFilePath != null) {
-			data.append("\"csv\":\"").append(csvFilePath.getCalculated()).append("\"");
-		}else if(parameters != null) {
-			data.append("\"parameters\":").append(parameters.size());
-		}
+		data.append("\"status\":\"terminated\", \"duration\":").append(status.getDuration());
 		return super.getActionLogs(scriptName, scriptLine, data);
 	}
 

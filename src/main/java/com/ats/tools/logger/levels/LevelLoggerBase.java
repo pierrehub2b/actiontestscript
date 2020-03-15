@@ -2,7 +2,6 @@ package com.ats.tools.logger.levels;
 
 import java.io.PrintStream;
 
-import com.ats.generator.variables.ConditionalValue;
 import com.ats.script.actions.Action;
 import com.ats.tools.logger.NullPrintStream;
 
@@ -32,6 +31,4 @@ public class LevelLoggerBase {
 	public void error(String message) {}
 	
 	public void action(Action action, String testName, int line) {}
-
-	public void conditionExec(String scriptName, ConditionalValue condition) {}
 }

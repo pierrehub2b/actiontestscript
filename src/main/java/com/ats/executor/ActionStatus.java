@@ -82,17 +82,13 @@ public class ActionStatus {
 	
 	public void endDuration() {
 		duration = System.currentTimeMillis() - startedAt;
-	}
-	
-	public void setException(Exception ex) {
-		this.passed = false;
-		this.errorType = ex.getClass().getName();
-		this.message = ex.getMessage();
-	}
+	}	
 	
 	public void setException(int code, Exception ex) {
 		this.code = code;
-		setException(ex);
+		this.passed = false;
+		this.errorType = ex.getClass().getName();
+		this.message = ex.getMessage();
 	}
 
 	public void setTechnicalError(int code, String message) {

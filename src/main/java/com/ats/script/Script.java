@@ -110,10 +110,6 @@ public class Script {
 	public void sendActionLog(Action action, String testName, int line) {
 		logger.sendAction(action, testName, line); 
 	}
-	
-	public void sendConditionExecLog(String scriptName, ConditionalValue condition) {
-		logger.sendConditionExec(scriptName, condition);
-	}
 		
 	public void sendWarningLog(String message, String value) {
 		logger.sendWarning(message, value); 

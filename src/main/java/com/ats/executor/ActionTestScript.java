@@ -50,6 +50,7 @@ import com.ats.generator.objects.mouse.MouseScroll;
 import com.ats.generator.objects.mouse.MouseSwipe;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
+import com.ats.generator.variables.ConditionalValue;
 import com.ats.generator.variables.Variable;
 import com.ats.generator.variables.transform.DateTransformer;
 import com.ats.generator.variables.transform.NumericTransformer;
@@ -85,11 +86,11 @@ public class ActionTestScript extends Script implements ITest{
 
 	private String testName;
 	protected ScriptHeader getHeader() {return new ScriptHeader();}
-	
+
 	private String scriptStatus;
 	private long scriptStart;
 	private int scriptActions;
-		
+
 	public ActionTestScript() {
 		init();
 	}
@@ -127,11 +128,11 @@ public class ActionTestScript extends Script implements ITest{
 		java.util.logging.Logger.getLogger("org.openqa.selenium").setLevel(Level.OFF);
 		java.util.logging.Logger.getLogger(Actions.class.getName()).setLevel(Level.OFF);
 		java.util.logging.Logger.getLogger(OkHttpClient.class.getName()).setLevel(Level.FINE);
-		
+
 		scriptActions = 0;
 		scriptStart = System.currentTimeMillis();
 		scriptStatus = "passed";
-		
+
 		final TestRunner runner = (TestRunner) ctx;
 		setTestName(this.getClass().getName());
 
@@ -145,7 +146,7 @@ public class ActionTestScript extends Script implements ITest{
 			setLogger(mainLogger);
 
 			sendScriptInfo("Starting script -> " + testName);
-			
+
 			//-----------------------------------------------------------
 			// check report output specified
 			//-----------------------------------------------------------
@@ -194,7 +195,7 @@ public class ActionTestScript extends Script implements ITest{
 				.append("\", \"actions\":")
 				.append(scriptActions)
 				.append("}");
-		
+
 		sendScriptInfo(status.toString());
 	}
 
@@ -214,7 +215,7 @@ public class ActionTestScript extends Script implements ITest{
 	public String getTestName() {
 		return this.getClass().getName();
 	}
-	
+
 	public void incrementAction() {
 		scriptActions++;
 	}
@@ -239,18 +240,40 @@ public class ActionTestScript extends Script implements ITest{
 		return topScript;
 	}
 
-	public void initCalledScript(ActionTestScript script, String[] parameters, List<Variable> variables, int iteration, String scriptName, String logMessage, File csvFile) {
+	public void initCalledScript(ActionTestScript testScript, String testName, int line, ActionTestScript script, String[] parameters, List<Variable> variables, int iteration, int iterationMax, String scriptName, String type, File csvFile) {
 
-		script.sendScriptInfo("Call subscript -> " + scriptName + " -> " + logMessage);
-		
+		String parametersData = "";
+		if(parameters != null) {
+			setParameters(parameters);
+			parametersData = String.join(", ", parameters);
+		}
+
+		final StringBuilder sb = new StringBuilder("ActionCallscript (")
+				.append(testName).append(":").append(line).append(") -> {");
+
+		if(testScript.getCondition() != null) {
+			sb.append(testScript.getCondition().getLog()).append(", ");
+			testScript.cleanCondition();
+		}
+
+		sb.append("\"status\":\"start\", \"called\":\"")
+		.append(scriptName).append("\", \"iteration\":\"")
+		.append(iteration+1).append("/")
+		.append(iterationMax).append("\" ,\"type\":\"")
+		.append(type).append("\", \"parameters\":\"")
+		.append(parametersData).append("\"");
+
+		if(csvFile != null) {
+			sb.append(", \"url\":\"").append(csvFile.getAbsolutePath()).append("\"");
+		}
+
+		sb.append("}");
+		script.sendScriptInfo(sb.toString());
+
 		this.topScript = script;
 		this.channelManager = script.getChannelManager();
 		this.iteration = iteration;
 		this.csvFile = csvFile;
-		
-		if(parameters != null) {
-			setParameters(parameters);
-		}
 
 		if(variables != null) {
 			setVariables(variables);
@@ -420,7 +443,7 @@ public class ActionTestScript extends Script implements ITest{
 	public String nw() {
 		return getNowValue();
 	}
-	
+
 	//---------------------------------------------------------------------------------------------
 
 	public static final String JAVA_ITERATION_FUNCTION_NAME = "itr";
@@ -528,6 +551,38 @@ public class ActionTestScript extends Script implements ITest{
 	// Actions
 	//----------------------------------------------------------------------------------------------------------
 
+	private ConditionalValue condition;
+
+	public static final String JAVA_CONDITION_FUNCTION = "condition";
+	public boolean condition(String type, int line, Variable variable, CalculatedValue calculatedValue) {
+
+		condition = new ConditionalValue(type, variable, calculatedValue);
+
+		if(condition.isExecGo()) {
+			return true;
+		}else {
+			
+			final StringBuilder sb = new StringBuilder("ActionCallscript (")
+					.append(getTestName()).append(":").append(line).append(") -> {")
+					.append(condition.getLog().append("}"));
+			
+			getTopScript().sendScriptInfo(sb.toString());
+			
+			condition = null;
+			return false;
+		}
+	}
+
+	public ConditionalValue getCondition() {
+		return condition;
+	}
+	
+	public void cleanCondition() {
+		this.condition = null;
+	}
+
+	//---------------------------------------------------------------------------------------------
+
 	public static final String JAVA_EXECUTE_FUNCTION_NAME = "exec";
 	public void exec(Action action){
 		action.execute(this);
@@ -537,10 +592,11 @@ public class ActionTestScript extends Script implements ITest{
 		exec(action);
 		execFinished(line, action, action.getStatus(), true);
 	}
-	
+
 	public void exec(int line, ActionCallscript action){
-		exec(action);
+		action.execute(getTestName(), line, this);
 		execFinished(line, action, action.getStatus(), true);
+		condition = null;
 	}
 
 	public void exec(int line, ActionExecute action){
@@ -556,7 +612,7 @@ public class ActionTestScript extends Script implements ITest{
 	private void execFinished(int line, Action action, ActionStatus status, boolean stop) {
 
 		getTopScript().incrementAction();
-		
+
 		if(status.isPassed()) {
 			getTopScript().sendActionLog(action, getTestName(), line);
 		}else {
@@ -570,7 +626,7 @@ public class ActionTestScript extends Script implements ITest{
 				if(stop) {
 
 					scriptStatus = "failed";
-					
+
 					atsScriptLine.insert(0, " (").insert(0, action.getClass().getSimpleName()).insert(0, "[ATS-ERROR] ").append(") -> ")
 					.append("{\"app\":\"").append(status.getChannelApplication()).append("\", ")
 					.append("\"errorCode\":").append(status.getCode()).append(", ")

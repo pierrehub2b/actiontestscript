@@ -60,7 +60,7 @@ public class Action {
 
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
-
+	
 	public void execute(ActionTestScript ts){
 		execute(ts.getCurrentChannel());
 		ts.getRecorder().createVisualAction(this);
@@ -75,6 +75,9 @@ public class Action {
 	}
 	
 	public StringBuilder getActionLogs(String scriptName, int scriptLine, StringBuilder data) {
+		
+		
+		
 		return new StringBuilder(getClass().getSimpleName()).append(" (").append(scriptName).append(":").append(scriptLine).append(") -> {").append(data).append("}");
 	}
 

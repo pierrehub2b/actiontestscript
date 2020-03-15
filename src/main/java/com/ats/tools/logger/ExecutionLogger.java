@@ -23,12 +23,11 @@ import java.io.PrintStream;
 
 import org.testng.Reporter;
 
-import com.ats.tools.logger.levels.LevelLoggerBase;
-import com.ats.generator.variables.ConditionalValue;
 import com.ats.script.actions.Action;
 import com.ats.tools.logger.levels.ErrorLevelLogger;
 import com.ats.tools.logger.levels.FullLevelLogger;
 import com.ats.tools.logger.levels.InfoLevelLogger;
+import com.ats.tools.logger.levels.LevelLoggerBase;
 import com.ats.tools.logger.levels.WarningLevelLogger;
 
 public class ExecutionLogger {
@@ -94,9 +93,5 @@ public class ExecutionLogger {
 
 	public void sendError(String message, String value) {
 		levelLogger.error(message + " -> " + value);
-	}
-
-	public void sendConditionExec(String scriptName, ConditionalValue condition) {
-		levelLogger.conditionExec(scriptName, condition);
 	}
 }

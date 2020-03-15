@@ -36,6 +36,7 @@ import com.ats.executor.ActionTestScript;
 import com.ats.generator.ATS;
 import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.mouse.Mouse;
+import com.ats.generator.variables.ConditionalValue;
 import com.ats.generator.variables.Variable;
 import com.ats.script.actions.Action;
 import com.ats.script.actions.neoload.ActionNeoload;
@@ -173,6 +174,7 @@ public class ScriptHeader {
 			, "import " + Cartesian.class.getName() + ";"
 			, "import " + Mouse.class.getName() + ";"
 			, "import " + Variable.class.getName() + ";"
+			, "import " + ConditionalValue.class.getName() + ";"
 			, "import " + Operators.class.getName() + ";"
 			, ""
 			, "public class #CLASS_NAME# extends " + ActionTestScript.class.getSimpleName() + "{"

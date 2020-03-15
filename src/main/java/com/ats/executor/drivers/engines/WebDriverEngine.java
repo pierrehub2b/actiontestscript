@@ -699,28 +699,20 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		if(withDesktop) {
 			desktopMoveToElement(foundElement, position,offsetX ,offsetY);
 		}else {
-
 			int maxTry = 10;
 			while(maxTry > 0) {
+				status.setNoError();
 				try {
-
 					scrollAndMove(foundElement, position, offsetX, offsetY);
-					status.setNoError();
 					maxTry = 0;
-
 				}catch(StaleElementReferenceException e0) {
-
 					throw e0;
-
 				}catch(MoveTargetOutOfBoundsException e) {
-
 					driver.executeScript("arguments[0].scrollIntoView();", foundElement.getValue());
-					status.setNoError();
 					maxTry = 0;
-
 				}catch(WebDriverException e) {
+					status.setException(ActionStatus.WEB_DRIVER_ERROR, e);
 					channel.sleep(500);
-					status.setException(e);
 					maxTry--;
 				}
 			}
@@ -1077,7 +1069,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		final List<List<Object>> response = (List<List<Object>>) runJavaScript(searchElementScript, startElement, tagName, attributes, attributes.length);
 		if(response != null && response.size() > 0){
 			final List<AtsElement> elements = response.parallelStream().filter(Objects::nonNull).map(e -> new AtsElement(e)).collect(Collectors.toCollection(ArrayList::new));
-			return elements.parallelStream().filter(predicate).map(e -> new FoundElement(this, e, channel, initElementX + offsetIframeX, initElementY + offsetIframeY, waitAnimation)).collect(Collectors.toCollection(ArrayList::new));
+			return elements.parallelStream().filter(Objects::nonNull).filter(predicate).map(e -> new FoundElement(this, e, channel, initElementX + offsetIframeX, initElementY + offsetIframeY, waitAnimation)).collect(Collectors.toCollection(ArrayList::new));
 		}
 
 		return Collections.<FoundElement>emptyList();
