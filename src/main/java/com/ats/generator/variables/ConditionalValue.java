@@ -51,8 +51,8 @@ public class ConditionalValue {
 	}
 	
 	public boolean isExec() {
-		exec = variable.getCalculatedValue().equals(value.getCalculated());
-		exec = (exec && ConditionalValue.EQUALS.equals(operator)) || (!exec && ConditionalValue.DIFFERENT.equals(operator));
+		final boolean isEquals = variable.getCalculatedValue().equals(value.getCalculated());
+		exec = (isEquals && ConditionalValue.EQUALS.equals(operator)) || (!isEquals && ConditionalValue.DIFFERENT.equals(operator));
 		return exec;
 	}
 	
