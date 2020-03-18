@@ -13,6 +13,6 @@ public class FullLevelLogger extends WarningLevelLogger {
 
 	@Override
 	public void action(Action action, String testName, int line) {
-		print("ACTION", action.getActionLogs(testName, line, new JsonObject()).toString());
+		print("ACTION", action.getActionLogs(testName, line, new JsonObject()));
 	}
 }

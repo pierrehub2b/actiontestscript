@@ -10,6 +10,6 @@ public class ErrorLevelLogger extends LevelLoggerBase {
 	
 	@Override
 	public void error(String message) {
-		print("ERROR",  message);
+		print("ERROR",  new StringBuilder(message));
 	}
 }

@@ -69,9 +69,11 @@ public class ActionText extends ActionExecuteElement {
 
 	@Override
 	public StringBuilder getJavaCode() {
-		StringBuilder codeBuilder = super.getJavaCode();
-		codeBuilder.append(", ").append(text.getJavaCode()).append(")");
-		return codeBuilder;
+		
+		String code = text.getJavaCode();
+		
+		
+		return super.getJavaCode().append(", ").append(code).append(")");
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

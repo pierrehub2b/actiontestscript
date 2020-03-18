@@ -48,14 +48,14 @@ public class ActionExecuteElement extends ActionExecute {
 	private static final String TRY_LABEL = "try";
 	private static final String[] LABEL_REPLACE = new String[]{TRY_LABEL, "=", " ", "(", ")"};
 	private static final String[] LABEL_REPLACEMENT = new String[]{"", "", "", "", ""};
-	
+
 	private static final String DELAY_LABEL = "delay";
 	private static final String[] DELAY_REPLACE = new String[]{DELAY_LABEL, "=", " "};
 	private static final String[] DELAY_REPLACEMENT = new String[]{"", "", ""};
 
 	private int maxTry = 0;
 	private int delay = 0;
-	
+
 	private SearchedElement searchElement;
 	private TestElement testElement;
 
@@ -114,51 +114,29 @@ public class ActionExecuteElement extends ActionExecute {
 	public void execute(ActionTestScript ts, String operator, int value) {
 
 		super.execute(ts);
-		final Channel channel = ts.getCurrentChannel();
+		if(status.isPassed()) {
 
-		actionMaxTry = ts.getChannelManager().getMaxTry() + maxTry;
-		if(actionMaxTry < 1) {
-			actionMaxTry = 1;
-		}
+			final Channel channel = ts.getCurrentChannel();
 
-		if(channel == null) {
+			actionMaxTry = ts.getChannelManager().getMaxTry() + maxTry;
+			if(actionMaxTry < 1) {
+				actionMaxTry = 1;
+			}
 
-			status.setPassed(false);
-			status.setCode(ActionStatus.CHANNEL_NOT_FOUND);
-			status.endDuration();
+			if(testElement == null) {
 
-		}else if(testElement == null) {
-
-			if(searchElement == null) {
-				setTestElement(new TestElementRoot(channel));
-			}else {
-
-				int trySearch = 0;
-
-				final Predicate<Integer> predicate = getPredicate(operator, value);
-
-				if(searchElement.isDialog()) {
-					while (trySearch < actionMaxTry) {
-
-						setTestElement(new TestElementDialog(channel, actionMaxTry, searchElement, predicate));
-
-						if(testElement.isValidated()) {
-							trySearch = actionMaxTry;
-						}else {
-							trySearch++;
-							channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "Searching element", actionMaxTry - trySearch);
-							channel.progressiveWait(trySearch);
-						}
-					}
-
-				}else if(searchElement.isSysButton()) {	
-					setTestElement(new TestElementSystemButton(channel, searchElement));
+				if(searchElement == null) {
+					setTestElement(new TestElementRoot(channel));
 				}else {
 
-					if(searchElement.isSysComp()){
+					int trySearch = 0;
+
+					final Predicate<Integer> predicate = getPredicate(operator, value);
+
+					if(searchElement.isDialog()) {
 						while (trySearch < actionMaxTry) {
 
-							setTestElement(new TestElementSystem(channel, actionMaxTry, predicate, searchElement));
+							setTestElement(new TestElementDialog(channel, actionMaxTry, searchElement, predicate));
 
 							if(testElement.isValidated()) {
 								trySearch = actionMaxTry;
@@ -168,37 +146,56 @@ public class ActionExecuteElement extends ActionExecute {
 								channel.progressiveWait(trySearch);
 							}
 						}
+
+					}else if(searchElement.isSysButton()) {	
+						setTestElement(new TestElementSystemButton(channel, searchElement));
 					}else {
-						while (trySearch < actionMaxTry) {
 
-							if(searchElement.isImageSearch()) {
-								setTestElement(new TestElementImage(channel, actionMaxTry, predicate, searchElement));
-							}else {
-								setTestElement(new TestElement(channel, actionMaxTry, predicate, searchElement));
+						if(searchElement.isSysComp()){
+							while (trySearch < actionMaxTry) {
+
+								setTestElement(new TestElementSystem(channel, actionMaxTry, predicate, searchElement));
+
+								if(testElement.isValidated()) {
+									trySearch = actionMaxTry;
+								}else {
+									trySearch++;
+									channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "Searching element", actionMaxTry - trySearch);
+									channel.progressiveWait(trySearch);
+								}
 							}
+						}else {
+							while (trySearch < actionMaxTry) {
 
-							if(testElement.isValidated()) {
-								trySearch = actionMaxTry;
-							}else {
-								trySearch++;
-								channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "Searching element", actionMaxTry - trySearch);
-								channel.progressiveWait(trySearch);
+								if(searchElement.isImageSearch()) {
+									setTestElement(new TestElementImage(channel, actionMaxTry, predicate, searchElement));
+								}else {
+									setTestElement(new TestElement(channel, actionMaxTry, predicate, searchElement));
+								}
+
+								if(testElement.isValidated()) {
+									trySearch = actionMaxTry;
+								}else {
+									trySearch++;
+									channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "Searching element", actionMaxTry - trySearch);
+									channel.progressiveWait(trySearch);
+								}
 							}
 						}
 					}
 				}
+
+				status.setElement(testElement);
+				status.setSearchDuration(testElement.getTotalSearchDuration());
+				status.setData(testElement.getCount());
+
+				ts.getCurrentChannel().sleep(delay);
+
+				asyncExec(ts);
+
+			}else {
+				terminateExecution(ts);
 			}
-
-			status.setElement(testElement);
-			status.setSearchDuration(testElement.getTotalSearchDuration());
-			status.setData(testElement.getCount());
-			
-			ts.getCurrentChannel().sleep(delay);
-
-			asyncExec(ts);
-
-		}else {
-			terminateExecution(ts);
 		}
 	}
 
@@ -223,6 +220,7 @@ public class ActionExecuteElement extends ActionExecute {
 	}
 
 	private int maxExecution = 0;
+	
 	@Override
 	public void execute(ActionTestScript ts) {
 		try {
@@ -271,7 +269,7 @@ public class ActionExecuteElement extends ActionExecute {
 		}
 		testElement = element;
 	}
-	
+
 	@Override
 	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
 		data.addProperty("duration", status.getDuration()-status.getSearchDuration()-delay);
@@ -299,7 +297,7 @@ public class ActionExecuteElement extends ActionExecute {
 	public void setMaxTry(int value) {
 		this.maxTry = value;
 	}
-	
+
 	public int getDelay() {
 		return delay;
 	}

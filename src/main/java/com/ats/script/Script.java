@@ -20,9 +20,11 @@ under the License.
 package com.ats.script;
 
 import java.io.File;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -109,9 +111,13 @@ public class Script {
 	public void sendActionLog(Action action, String testName, int line) {
 		logger.sendAction(action, testName, line); 
 	}
-		
+			
 	public void sendWarningLog(String message, String value) {
 		logger.sendWarning(message, value); 
+	}
+	
+	public void sendErrorLog(String message, String value) {
+		logger.sendError(message, value); 
 	}
 	
 	public void sendCommentLog(String calculated) {
@@ -321,6 +327,21 @@ public class Script {
 	
 	public File getCsvFile() {
 		return csvFile;
+	}
+	
+	public File getAssetsFile(String relativePath) {
+		if(!relativePath.startsWith("/")) {
+			relativePath = "/" + relativePath;
+		}
+		relativePath = ProjectData.ASSETS_FOLDER + relativePath;
+		
+		final URL url = getClass().getClassLoader().getResource(relativePath);
+		if(url != null) {
+			try {
+				return Paths.get(url.toURI()).toFile();
+			} catch (URISyntaxException e) {}
+		}
+		return null;
 	}
 	
 	public String getAssetsUrl(String relativePath) {

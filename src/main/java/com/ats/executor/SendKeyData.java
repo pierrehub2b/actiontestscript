@@ -25,17 +25,19 @@ import java.util.Base64;
 import org.openqa.selenium.Keys;
 
 public class SendKeyData {
-	
+
 	public static final String EMPTY_DATA = "&empty;";
-	
+
 	private static final String KEY_DOWN_SHIFT = "SHIFT";
 	private static final String KEY_DOWN_ALT = "ALT";
 	private static final String KEY_DOWN_CONTROL = "CONTROL";
+	
+	private static final String KEY_PREFIX = "$KEY-";
 
 	private String data;
 	private CharSequence chord;
 	private boolean enterKey = false;
-	private String specialKey = "";
+	private String specialKey;
 
 	public SendKeyData(String key, String spare) {
 
@@ -58,7 +60,7 @@ public class SendKeyData {
 		}else {
 			try {
 				sequence.append(Keys.valueOf(key));
-				specialKey = "$KEY-" + key;
+				specialKey = KEY_PREFIX + key;
 			}catch(IllegalArgumentException e) {}
 		}
 
@@ -66,6 +68,13 @@ public class SendKeyData {
 	}
 
 	public SendKeyData(String data) {
+		final char[] dataArray = data.toCharArray();
+		if(dataArray.length == 1) {
+			final Keys k = Keys.getKeyFromUnicode(dataArray[0]);
+			if(k != null) {
+				specialKey = KEY_PREFIX + k.name();
+			}
+		}
 		this.data = data;
 	}
 
@@ -93,7 +102,7 @@ public class SendKeyData {
 		}
 		return Keys.NUMPAD0;
 	}
-		
+
 	public String getData() {
 		return data;
 	}	
@@ -105,7 +114,7 @@ public class SendKeyData {
 	//---------------------------------------------------------------------------
 	// get sequence by driver type
 	//---------------------------------------------------------------------------
-	
+
 	public CharSequence getSequenceWithDigit() {
 
 		if(chord != null) {
@@ -125,7 +134,7 @@ public class SendKeyData {
 
 		return sequence;
 	}	
-	
+
 	public CharSequence getSequenceChar() {
 
 		if(chord != null) {
@@ -144,18 +153,18 @@ public class SendKeyData {
 
 	public String getSequenceDesktop() {
 		String sequenceData = "";
-		if(data.length() > 0) {
-			sequenceData = data;
-		}else if (specialKey.length() > 0) {
+		if (specialKey != null) {
 			sequenceData = specialKey;
+		}else if(data.length() > 0){
+			sequenceData = data;
 		}
 		return Base64.getEncoder().encodeToString(sequenceData.getBytes(StandardCharsets.UTF_8));
 	}
-	
+
 	public String getMobileSequence() {
 		if(data.length() > 0) {
 			return data;
-		}else if (specialKey.length() > 0) {
+		}else if (specialKey != null) {
 			return specialKey;
 		} else {
 			return EMPTY_DATA;

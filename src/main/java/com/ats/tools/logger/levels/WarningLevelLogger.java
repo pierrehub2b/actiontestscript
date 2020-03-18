@@ -10,6 +10,6 @@ public class WarningLevelLogger extends InfoLevelLogger {
 
 	@Override
 	public void warning(String message) {
-		print("WARNING", message);
+		print("WARNING", new StringBuilder(message));
 	}
 }

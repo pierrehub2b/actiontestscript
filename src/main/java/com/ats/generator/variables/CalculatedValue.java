@@ -229,8 +229,7 @@ public class CalculatedValue{
 
 			int end = match.start();
 			if(end > 0) {
-				final SendKeyData sendKey = new SendKeyData(s.substring(start, end));
-				chain.add(sendKey);
+				chain.add(new SendKeyData(s.substring(start, end)));
 			}
 
 			start = match.end();

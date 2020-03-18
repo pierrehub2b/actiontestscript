@@ -76,6 +76,11 @@ public class Action {
 	}
 	
 	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+		if(!status.isPassed()) {
+			data = new JsonObject();
+			data.addProperty("status", "non blocking action");
+			data.addProperty("message", status.getFailMessage());
+		}
 		return new StringBuilder(getClass().getSimpleName()).append(" (").append(scriptName).append(":").append(scriptLine).append(") -> ").append(data.toString());
 	}
 

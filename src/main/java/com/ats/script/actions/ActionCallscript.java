@@ -167,7 +167,7 @@ public class ActionCallscript extends Action {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	public static String getScriptLog(String testName, int line, JsonObject log) {
-		final StringBuilder sb = new StringBuilder("Callscript (")
+		final StringBuilder sb = new StringBuilder("Init subscript (")
 				.append(testName).append(":").append(line).append(") -> ").append(log.toString());
 		return sb.toString();
 	}
@@ -326,7 +326,8 @@ public class ActionCallscript extends Action {
 			} catch (SecurityException e) {
 			}
 		}
-
+		
+		condition = null;
 		status.endDuration();
 	}
 

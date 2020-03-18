@@ -15,15 +15,19 @@ public class LevelLoggerBase {
 	
 	public LevelLoggerBase(PrintStream out, String level) {
 		this.out = out;
-		print("LOGGER", "Level -> "  + level);
+		print("LOGGER", new StringBuilder("Level -> ").append(level));
 	}
 		
 	public void log(String type, String message) {
-		print(type, message);
+		print(type, new StringBuilder(message));
 	}
 	
-	protected void print(String type, String data) {
-		out.println("[ATS-" + type + "] " + data);
+	protected void print(String type, StringBuilder data) {
+		final StringBuilder sb = new StringBuilder("[ATS-");
+		sb.append(type)
+		.append("] ")
+		.append(data);
+		out.println(sb.toString());
 	}
 	
 	public void warning(String message) {}

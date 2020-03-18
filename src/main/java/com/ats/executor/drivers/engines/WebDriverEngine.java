@@ -482,7 +482,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			if(result != null && doubleCheckAttribute(status, result, element, attributeName)) {
 				return result;
 			}
-			channel.sendWarningLog("Property not found", tryLoop + "try");
+			channel.sendWarningLog("Property not found", tryLoop + "");
 			channel.sleep(getPropertyWait());
 			tryLoop--;
 		}

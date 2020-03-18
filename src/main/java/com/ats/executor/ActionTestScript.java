@@ -68,7 +68,6 @@ import com.ats.script.ScriptHeader;
 import com.ats.script.actions.Action;
 import com.ats.script.actions.ActionCallscript;
 import com.ats.script.actions.ActionExecute;
-import com.ats.script.actions.ActionExecuteElement;
 import com.ats.tools.Utils;
 import com.ats.tools.logger.ExecutionLogger;
 import com.google.gson.JsonArray;
@@ -91,9 +90,7 @@ public class ActionTestScript extends Script implements ITest{
 	private String testName;
 	protected ScriptHeader getHeader() {return new ScriptHeader();}
 
-	private String scriptStatus;
-	private long scriptStart;
-	private int scriptActions;
+	private ScriptStatus status;
 
 	public ActionTestScript() {
 		init();
@@ -105,6 +102,7 @@ public class ActionTestScript extends Script implements ITest{
 	}
 
 	private void init() {
+		status = new ScriptStatus();
 		topScript = this;
 		channelManager = new ChannelManager(this);
 	}
@@ -133,12 +131,11 @@ public class ActionTestScript extends Script implements ITest{
 		java.util.logging.Logger.getLogger(Actions.class.getName()).setLevel(Level.OFF);
 		java.util.logging.Logger.getLogger(OkHttpClient.class.getName()).setLevel(Level.FINE);
 
-		scriptActions = 0;
-		scriptStart = System.currentTimeMillis();
-		scriptStatus = "passed";
-
 		final TestRunner runner = (TestRunner) ctx;
 		setTestName(this.getClass().getName());
+
+		final String suiteName = ctx.getSuite().getName();
+		status = new ScriptStatus(testName, suiteName);
 
 		if("true".equalsIgnoreCase(runner.getTest().getParameter("check.mode"))) {
 			throw new SkipException("check mode : " + testName);
@@ -149,7 +146,7 @@ public class ActionTestScript extends Script implements ITest{
 
 			final ExecutionLogger mainLogger = new ExecutionLogger(System.out, getEnvironmentValue("ats.log.level", ""));
 			setLogger(mainLogger);
-						
+
 			//-----------------------------------------------------------
 			// check report output specified
 			//-----------------------------------------------------------
@@ -170,13 +167,13 @@ public class ActionTestScript extends Script implements ITest{
 
 				setRecorder(new VisualRecorder(output, header, xml, visualQuality, mainLogger));
 			}
-			
+
 			final JsonObject logs = new JsonObject();
 			logs.addProperty("name", testName);
-			logs.addProperty("suite", ctx.getSuite().getName());
+			logs.addProperty("suite", suiteName);
 			logs.addProperty("xmlReport", xml);
 			logs.addProperty("visualQuality", visualQuality);
-			
+
 			final JsonArray parameters = new JsonArray();
 			for(Entry<String, String>param : params.entrySet()) {
 				final JsonObject elem = new JsonObject();
@@ -203,12 +200,7 @@ public class ActionTestScript extends Script implements ITest{
 
 	@AfterClass(alwaysRun=true)
 	public void afterClass() {
-		final JsonObject logs = new JsonObject();
-		logs.addProperty("name", testName);
-		logs.addProperty("duration", System.currentTimeMillis() - scriptStart);
-		logs.addProperty("status", scriptStatus);
-		logs.addProperty("actions", scriptActions);
-		sendScriptInfo("Script terminated -> " + logs.toString());
+		sendScriptInfo("Script terminated -> " + status.endLogs());
 	}
 
 	@AfterTest(alwaysRun=true)
@@ -226,10 +218,6 @@ public class ActionTestScript extends Script implements ITest{
 	@Override
 	public String getTestName() {
 		return this.getClass().getName();
-	}
-
-	public void incrementAction() {
-		scriptActions++;
 	}
 
 	//----------------------------------------------------------------------------------------------------------
@@ -258,12 +246,8 @@ public class ActionTestScript extends Script implements ITest{
 		this.channelManager = script.getChannelManager();
 		this.iteration = iteration;
 		this.csvFile = csvFile;
-		
-		JsonObject log = new JsonObject();
-		if(testScript.getCondition() != null) {
-			log = testScript.getCondition().getLog(log);
-			testScript.cleanCondition();
-		}
+
+		final JsonObject log = testScript.getConditionLogs();
 
 		log.addProperty("status", "init");
 		log.addProperty("called", scriptName);
@@ -284,12 +268,12 @@ public class ActionTestScript extends Script implements ITest{
 				log.add("parameters", parametersArray);
 			}
 		}
-		
+
 		if(variables != null) {
 			setVariables(variables);
 		}
 		setTestExecutionVariables(script.getTestExecutionVariables());
-		
+
 		script.sendScriptInfo(ActionCallscript.getScriptLog(testName, line, log));
 	}
 
@@ -562,8 +546,6 @@ public class ActionTestScript extends Script implements ITest{
 	// Actions
 	//----------------------------------------------------------------------------------------------------------
 
-	private ConditionalValue condition;
-
 	public static final String JAVA_CONDITION_FUNCTION = "condition";
 	public boolean condition(String type, int line, Variable variable, CalculatedValue calculatedValue) {
 
@@ -578,70 +560,68 @@ public class ActionTestScript extends Script implements ITest{
 		}
 	}
 
-	public ConditionalValue getCondition() {
-		return condition;
-	}
-	
-	public void cleanCondition() {
-		this.condition = null;
+	private ConditionalValue condition;
+	public JsonObject getConditionLogs() {
+		JsonObject result = new JsonObject();
+		if(condition != null) {
+			result = condition.getLog(result);
+			condition = null;
+		}
+		return result;
 	}
 
 	//---------------------------------------------------------------------------------------------
 
 	public static final String JAVA_EXECUTE_FUNCTION_NAME = "exec";
-	public void exec(Action action){
-		action.execute(this);
-	}
 
 	public void exec(int line, Action action){
-		exec(action);
-		execFinished(line, action, action.getStatus(), true);
+		action.execute(this);
+		execFinished(line, action, true);
 	}
 
 	public void exec(int line, ActionCallscript action){
 		action.execute(getTestName(), line, this);
-		execFinished(line, action, action.getStatus(), true);
-		condition = null;
+		execFinished(line, action, true);
 	}
 
 	public void exec(int line, ActionExecute action){
-		exec(action);
-		execFinished(line, action, action.getStatus(), action.isStop());
+		action.execute(this);
+		execFinished(line, action, action.isStop());
 	}
 
-	public void exec(int line, ActionExecuteElement action){
-		exec(action);
-		execFinished(line, action, action.getStatus(), action.isStop());
+	private void execFinished(int line, Action action, boolean stop) {
+		getTopScript().actionFinished(line, action, stop);
 	}
 
-	private void execFinished(int line, Action action, ActionStatus status, boolean stop) {
+	private void failedAt(String actionClass, String script, int line, String app, int errorCode, String errorMessage) {
+		status.failed();
+		
+		final StringBuilder scriptLine = new StringBuilder(script).append(".").append(ATS_EXTENSION).append(":").append(line);
 
-		getTopScript().incrementAction();
+		final JsonObject logs = new JsonObject();
+		logs.addProperty("app", app);
+		logs.addProperty("errorCode", errorCode);
+		logs.addProperty("errorMessage", errorMessage);
 
-		if(status.isPassed()) {
-			getTopScript().sendActionLog(action, getTestName(), line);
+		sendErrorLog(actionClass + " (" + scriptLine.toString() + ")", logs.toString());
+		
+		if(status.isSuiteExecution()) {
+			fail("ATS " + actionClass + " execution error -> " + errorMessage + " at " + scriptLine.toString());
+		}
+	}
+	
+	public void actionFinished(int line, Action action, boolean stop) {
+		status.addAction();
+		
+		final ActionStatus actionStatus = action.getStatus();
+		
+		if(actionStatus.isPassed()) {
+			sendActionLog(action, getTestName(), line);
 		}else {
-
-			final StringBuilder atsScriptLine = new StringBuilder(getTestName()).append(".").append(ATS_EXTENSION).append(":").append(line);
-
-			if(status.getCode() == ActionStatus.CHANNEL_NOT_FOUND) {
-				atsScriptLine.insert(0, "[ATS-ERROR] No running channel, please check that 'start channel action' has been added to the script -> ");
-				fail(atsScriptLine.toString());
+			if(stop) {
+				failedAt(action.getClass().getSimpleName(), getTestName(), line, actionStatus.getChannelApplication(), actionStatus.getCode(), actionStatus.getFailMessage());
 			}else {
-				if(stop) {
-
-					scriptStatus = "failed";
-
-					atsScriptLine.insert(0, " (").insert(0, action.getClass().getSimpleName()).insert(0, "[ATS-ERROR] ").append(") -> ")
-					.append("{\"app\":\"").append(status.getChannelApplication()).append("\", ")
-					.append("\"errorCode\":").append(status.getCode()).append(", ")
-					.append("\"errorMessage\":\"").append(status.getFailMessage()).append("\"}");
-
-					fail(atsScriptLine.toString());
-
-				}else {
-					sendInfoLog(atsScriptLine.insert(0, "unstoppable action (").append(")").toString(), status.getMessage());
-				}
+				sendActionLog(action, getTestName(), line);
 			}
 		}
 	}

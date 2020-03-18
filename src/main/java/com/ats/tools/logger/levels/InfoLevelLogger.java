@@ -10,6 +10,6 @@ public class InfoLevelLogger extends ErrorLevelLogger {
 	
 	@Override
 	public void info(String message) {
-		print("INFO", message);
+		print("INFO", new StringBuilder(message));
 	}
 }

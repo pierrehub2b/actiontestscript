@@ -15,25 +15,40 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.script.actions;
 
+import com.ats.executor.ActionStatus;
+import com.ats.executor.ActionTestScript;
 import com.ats.script.Script;
 
 public class ActionExecute extends Action {
 
 	public static final String NO_FAIL_LABEL = "nofail";
-	
+
 	protected boolean stop = true;
-	
+
 	public ActionExecute() {}
-	
+
 	public ActionExecute(Script script, boolean stop) {
 		super(script);
 		setStop(stop);
 	}
-	
+
+	public void execute(ActionTestScript ts){
+		if(ts.getCurrentChannel() == null) {
+
+			setStatus(new ActionStatus(null));
+			
+			status.setError(ActionStatus.CHANNEL_NOT_FOUND, "No running channel found, please check that 'start channel action' has been added to the script");
+			status.endDuration();
+
+		}else {
+			super.execute(ts);
+		}
+	}
+
 	//---------------------------------------------------------------------------------------------------------------------------------
 	// Code Generator
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -44,7 +59,7 @@ public class ActionExecute extends Action {
 		codeBuilder.append(stop).append(", ");
 		return codeBuilder;
 	}
-	
+
 	//--------------------------------------------------------
 	// getters and setters for serialization
 	//--------------------------------------------------------

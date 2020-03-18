@@ -131,7 +131,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 			this.userAgent = "AtsMobileDriver/" + ATS.VERSION + " (" + System.getProperty("user.name") + ")";
 			
-			JsonObject response = executeRequest(DRIVER, START);;
+			JsonObject response = executeRequest(DRIVER, START);
 			
 			if(response == null) {
 				status.setError(ActionStatus.CHANNEL_START_ERROR, "unable to connect to : mobile://" + endPoint);
@@ -182,7 +182,6 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 							channel.setApplicationData(os + ":" + systemName, version, driverVersion, -1, icon, endPointData[0] + ":" + screenCapturePort);
 						}
 						
-
 						refreshElementMapLocation();
 					}else {
 						status.setError(ActionStatus.CHANNEL_START_ERROR, response.get("status").getAsString());
