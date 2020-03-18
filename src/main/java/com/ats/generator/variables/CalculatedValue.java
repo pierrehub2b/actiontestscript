@@ -43,7 +43,7 @@ public class CalculatedValue{
 	private static final Pattern ITERATION_PATTERN = Pattern.compile("\\$iteration", Pattern.CASE_INSENSITIVE);
 	
 	public static final Pattern KEY_REGEXP = Pattern.compile("\\$key\\s?\\((\\w+)\\-?([^\\)]*)?\\)");
-	
+		
 	public static final Pattern ASSET_PATTERN = Pattern.compile("\\$asset\\s*?\\(([^\\)]*)\\)", Pattern.CASE_INSENSITIVE);
 	public static final Pattern IMAGE_PATTERN = Pattern.compile("\\$image\\s*?\\(([^\\)]*)\\)", Pattern.CASE_INSENSITIVE);
 
@@ -60,16 +60,16 @@ public class CalculatedValue{
 	//-----------------------------------------------------------------------------------------------------
 
 	private Script script;
-	private String data;
+	private String data = "";
 	private String calculated;
 
-	private String javaCode = "";
+	private String rawJavaCode = "";
 	private Object[] dataList;
 
 	public CalculatedValue() {}
 
 	public CalculatedValue(String value) {
-		this.setData(value);
+		setData(value);
 	}
 	
 	public CalculatedValue(int value) {
@@ -77,115 +77,106 @@ public class CalculatedValue{
 	}
 
 	public CalculatedValue(ActionTestScript actionTestScript, Object[] data) {
-		this.dataList = data;
+		dataList = data;
 	}
 
 	public CalculatedValue(Script script, String dataValue) {
-
-		dataValue = Utils.unescapeAts(dataValue);
-		
-		this.setScript(script);
-		this.setData(dataValue);
-
-		javaCode = StringEscapeUtils.escapeJava(dataValue);
-
+		setScript(script);
 		if(dataValue.length() > 0){
-
-			Matcher mv = Variable.SCRIPT_PATTERN.matcher(dataValue);
-			while (mv.find()) {
-				final String variableName = mv.group(1);
-				dataValue = dataValue.replace(mv.group(0), script.getVariableValue(variableName));
-				javaCode = javaCode.replace(mv.group(0), "\", " + variableName + ", \"");
-			}
-
-			mv = ParameterValue.PARAMETER_PATTERN.matcher(dataValue);
-			while (mv.find()) {
-				final ParameterValue sp = new ParameterValue(mv);
-				dataValue = dataValue.replace(sp.getReplace(), script.getParameterValue(sp.getValue(), sp.getDefaultValue()));
-				javaCode = javaCode.replace(sp.getReplace(), "\", " + ActionTestScript.JAVA_PARAM_FUNCTION_NAME + sp.getCode() + ", \"");
-			}
-
-			mv = EnvironmentValue.ENV_PATTERN.matcher(dataValue);
-			while (mv.find()) {
-				final EnvironmentValue sp = new EnvironmentValue(mv);
-				dataValue = dataValue.replace(sp.getReplace(), script.getEnvironmentValue(sp.getValue(), sp.getDefaultValue()));
-				javaCode = javaCode.replace(sp.getReplace(), "\", " + ActionTestScript.JAVA_ENV_FUNCTION_NAME + sp.getCode() + ", \"");
-			}
-
-			mv = TODAY_PATTERN.matcher(dataValue);
-			while (mv.find()) {
-				final String replace = mv.group(0);
-				dataValue = dataValue.replace(replace, DateTransformer.getTodayValue());
-				javaCode = javaCode.replace(replace, "\", " + ActionTestScript.JAVA_TODAY_FUNCTION_NAME + "(), \"");
-			}
-
-			mv = NOW_PATTERN.matcher(dataValue);
-			while (mv.find()) {
-				final String replace = mv.group(0);
-				dataValue = dataValue.replace(replace, TimeTransformer.getNowValue());
-				javaCode = javaCode.replace(replace, "\", " + ActionTestScript.JAVA_NOW_FUNCTION_NAME + "(), \"");
-			}
-
-			mv = UUID_PATTERN.matcher(dataValue);
-			while (mv.find()) {
-				final String replace = mv.group(0);
-				dataValue = dataValue.replace(replace, UUID.randomUUID().toString());
-				javaCode = javaCode.replace(replace, "\", " + ActionTestScript.JAVA_UUID_FUNCTION_NAME + "(), \"");
-			}
-			
-			mv = PGAV_PATTERN.matcher(dataValue);
-			while (mv.find()) {
-				javaCode = javaCode.replace(mv.group(0), "\", " + ActionTestScript.JAVA_GAV_FUNCTION_NAME + "(), \"");
-			}
-			
-			mv = ITERATION_PATTERN.matcher(dataValue);
-			while (mv.find()) {
-				javaCode = javaCode.replace(mv.group(0), "\", " + ActionTestScript.JAVA_ITERATION_FUNCTION_NAME + "(), \"");
-			}
-			
-			mv = KEY_REGEXP.matcher(dataValue);
-			while (mv.find()) {
-				
-				final String replace = mv.group(0);
-				final String value = mv.group(1).trim().toUpperCase();
-				final String spareKey = mv.group(2);
-				
-				if(spareKey.length() > 0) {
-					javaCode = javaCode.replace(replace, "\", " + "Keys.chord(Keys." + value + ", \"" + spareKey.toLowerCase() + "\"), \"");
-				}else {
-					javaCode = javaCode.replace(replace, "\", " + "Keys." + value + ", \"");
-				}
-			}
-			
-			mv = RandomStringValue.RND_PATTERN.matcher(dataValue);
-			while (mv.find()) {
-				final RandomStringValue rds = new RandomStringValue(mv);
-				dataValue = dataValue.replace(rds.getReplace(), script.getRandomStringValue(rds.getValue(), rds.getDefaultValue()));
-				javaCode = javaCode.replace(rds.getReplace(), "\", " + ActionTestScript.JAVA_RNDSTRING_FUNCTION_NAME + rds.getCode() + ", \"");
-			}
-			
-			mv = IMAGE_PATTERN.matcher(dataValue);
-			while (mv.find()) {
-				javaCode = javaCode.replace(mv.group(0), ProjectData.getAssetsImageJavaCode(mv.group(1)));
-			}
-			
-			mv = ASSET_PATTERN.matcher(dataValue);
-			while (mv.find()) {
-				javaCode = javaCode.replace(mv.group(0), ProjectData.getAssetsJavaCode(mv.group(1)));
-			}
-
-			this.setCalculated(dataValue);
+			dataValue = Utils.unescapeAts(dataValue);
+			setData(dataValue);
+			setCalculated(initCalculated(dataValue));
 		}
+	}
+		
+	private String initCalculated(String dataValue) {
+		
+		rawJavaCode = StringEscapeUtils.escapeJava(dataValue);
+
+		Matcher mv = Variable.SCRIPT_PATTERN.matcher(dataValue);
+		while (mv.find()) {
+			final String variableName = mv.group(1);
+			dataValue = dataValue.replace(mv.group(0), script.getVariableValue(variableName));
+			rawJavaCode = rawJavaCode.replace(mv.group(0), "\", " + variableName + ", \"");
+		}
+
+		mv = ParameterValue.PARAMETER_PATTERN.matcher(dataValue);
+		while (mv.find()) {
+			final ParameterValue sp = new ParameterValue(mv);
+			dataValue = dataValue.replace(sp.getReplace(), script.getParameterValue(sp.getValue(), sp.getDefaultValue()));
+			rawJavaCode = rawJavaCode.replace(sp.getReplace(), "\", " + ActionTestScript.JAVA_PARAM_FUNCTION_NAME + sp.getCode() + ", \"");
+		}
+
+		mv = EnvironmentValue.ENV_PATTERN.matcher(dataValue);
+		while (mv.find()) {
+			final EnvironmentValue sp = new EnvironmentValue(mv);
+			dataValue = dataValue.replace(sp.getReplace(), script.getEnvironmentValue(sp.getValue(), sp.getDefaultValue()));
+			rawJavaCode = rawJavaCode.replace(sp.getReplace(), "\", " + ActionTestScript.JAVA_ENV_FUNCTION_NAME + sp.getCode() + ", \"");
+		}
+
+		mv = TODAY_PATTERN.matcher(dataValue);
+		while (mv.find()) {
+			final String replace = mv.group(0);
+			dataValue = dataValue.replace(replace, DateTransformer.getTodayValue());
+			rawJavaCode = rawJavaCode.replace(replace, "\", " + ActionTestScript.JAVA_TODAY_FUNCTION_NAME + "(), \"");
+		}
+
+		mv = NOW_PATTERN.matcher(dataValue);
+		while (mv.find()) {
+			final String replace = mv.group(0);
+			dataValue = dataValue.replace(replace, TimeTransformer.getNowValue());
+			rawJavaCode = rawJavaCode.replace(replace, "\", " + ActionTestScript.JAVA_NOW_FUNCTION_NAME + "(), \"");
+		}
+
+		mv = UUID_PATTERN.matcher(dataValue);
+		while (mv.find()) {
+			final String replace = mv.group(0);
+			dataValue = dataValue.replace(replace, UUID.randomUUID().toString());
+			rawJavaCode = rawJavaCode.replace(replace, "\", " + ActionTestScript.JAVA_UUID_FUNCTION_NAME + "(), \"");
+		}
+		
+		mv = PGAV_PATTERN.matcher(dataValue);
+		while (mv.find()) {
+			rawJavaCode = rawJavaCode.replace(mv.group(0), "\", " + ActionTestScript.JAVA_GAV_FUNCTION_NAME + "(), \"");
+		}
+		
+		mv = ITERATION_PATTERN.matcher(dataValue);
+		while (mv.find()) {
+			rawJavaCode = rawJavaCode.replace(mv.group(0), "\", " + ActionTestScript.JAVA_ITERATION_FUNCTION_NAME + "(), \"");
+		}
+					
+		mv = RandomStringValue.RND_PATTERN.matcher(dataValue);
+		while (mv.find()) {
+			final RandomStringValue rds = new RandomStringValue(mv);
+			dataValue = dataValue.replace(rds.getReplace(), script.getRandomStringValue(rds.getValue(), rds.getDefaultValue()));
+			rawJavaCode = rawJavaCode.replace(rds.getReplace(), "\", " + ActionTestScript.JAVA_RNDSTRING_FUNCTION_NAME + rds.getCode() + ", \"");
+		}
+		
+		mv = IMAGE_PATTERN.matcher(dataValue);
+		while (mv.find()) {
+			rawJavaCode = rawJavaCode.replace(mv.group(0), ProjectData.getAssetsImageJavaCode(mv.group(1)));
+		}
+		
+		mv = ASSET_PATTERN.matcher(dataValue);
+		while (mv.find()) {
+			rawJavaCode = rawJavaCode.replace(mv.group(0), ProjectData.getAssetsJavaCode(mv.group(1)));
+		}
+		
+		return dataValue;
 	}
 
 	public void dispose() {
 		script = null;
 		dataList = null;
 	}
+	
+	//-----------------------------------------------------------------------------------------------------
+	// java code
+	//-----------------------------------------------------------------------------------------------------
 
 	public String getJavaCode(){
 
-		String value = "\"" + javaCode + "\"";
+		String value = "\"" + rawJavaCode + "\"";
 
 		value = unnecessaryStartQuotes.matcher(value).replaceFirst("");
 		value = unnecessaryEndQuotes.matcher(value).replaceFirst("");
@@ -193,7 +184,27 @@ public class CalculatedValue{
 		
 		return ActionTestScript.JAVA_VALUE_FUNCTION_NAME + "(" + value + ")";
 	}
+	
+	public String getTextKeyJavaCode() {
+		final Matcher mv = KEY_REGEXP.matcher(rawJavaCode);
+		while (mv.find()) {
+			
+			final String replace = mv.group(0);
+			final String value = mv.group(1).trim().toUpperCase();
+			final String spareKey = mv.group(2);
+			
+			if(spareKey.length() > 0) {
+				rawJavaCode = rawJavaCode.replace(replace, "\", " + "Keys.chord(Keys." + value + ", \"" + spareKey.toLowerCase() + "\"), \"");
+			}else {
+				rawJavaCode = rawJavaCode.replace(replace, "\", " + "Keys." + value + ", \"");
+			}
+		}
+		return getJavaCode();
+	}
 		
+	//-----------------------------------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------------------------
+	
 	public ArrayList<SendKeyData> getCalculatedText(){
 
 		final ArrayList<SendKeyData> chainKeys = new ArrayList<SendKeyData>();

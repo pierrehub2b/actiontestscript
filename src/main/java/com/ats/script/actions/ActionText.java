@@ -36,7 +36,7 @@ public class ActionText extends ActionExecuteElement {
 
 	public static final String SCRIPT_LABEL = "keyboard";
 	public static final Pattern INSERT_PATTERN = Pattern.compile("insert\\((\\d+)\\)", Pattern.CASE_INSENSITIVE);
-
+	
 	private CalculatedValue text;
 
 	private int insert = -1;
@@ -45,7 +45,7 @@ public class ActionText extends ActionExecuteElement {
 
 	public ActionText(ScriptLoader script, boolean stop, ArrayList<String> options, String text, ArrayList<String> objectArray) {
 		super(script, stop, options, objectArray);
-		this.text = new CalculatedValue(script, text);
+		setText(new CalculatedValue(script, text));
 
 		Iterator<String> itr = options.iterator();
 		while (itr.hasNext())
@@ -69,11 +69,7 @@ public class ActionText extends ActionExecuteElement {
 
 	@Override
 	public StringBuilder getJavaCode() {
-		
-		String code = text.getJavaCode();
-		
-		
-		return super.getJavaCode().append(", ").append(code).append(")");
+		return super.getJavaCode().append(", ").append(text.getTextKeyJavaCode()).append(")");
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
