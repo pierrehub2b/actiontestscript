@@ -43,6 +43,7 @@ import java.util.stream.Stream;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.ElementNotVisibleException;
+import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.NoSuchWindowException;
@@ -288,12 +289,12 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		actionWait();
 	}
 
-	protected String[] getWindowsHandle(int index) {
+	protected String[] getWindowsHandle(int index, int tries) {
 		Set<String> list = getDriverWindowsList();
-		int maxTry = 15;
+		int maxTry = 1 + tries;
 		while(index >= list.size() && maxTry > 0) {
+			channel.sleep(1000);
 			list = getDriverWindowsList();
-			channel.sleep(500);
 			maxTry--;
 		}
 		return list.toArray(new String[list.size()]);
@@ -658,7 +659,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	public void close(boolean keepRunning) {
 
 		if(driver != null){
-			Arrays.asList(getWindowsHandle(0)).stream().sorted(Collections.reverseOrder()).forEach(s -> closeWindowHandler(s));
+			Arrays.asList(getWindowsHandle(0, 0)).stream().sorted(Collections.reverseOrder()).forEach(s -> closeWindowHandler(s));
 		}
 
 		getDriverProcess().close(keepRunning);
@@ -707,11 +708,15 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 					maxTry = 0;
 				}catch(StaleElementReferenceException e0) {
 					throw e0;
-				}catch(MoveTargetOutOfBoundsException e) {
+				}catch(JavascriptException e1) {
+					switchToDefaultContent();
+					status.setException(ActionStatus.JAVASCRIPT_ERROR, e1);
+					throw e1;
+				}catch(MoveTargetOutOfBoundsException e2) {
 					driver.executeScript("arguments[0].scrollIntoView();", foundElement.getValue());
 					maxTry = 0;
-				}catch(WebDriverException e) {
-					status.setException(ActionStatus.WEB_DRIVER_ERROR, e);
+				}catch(WebDriverException e3) {
+					status.setException(ActionStatus.WEB_DRIVER_ERROR, e3);
 					channel.sleep(500);
 					maxTry--;
 				}
@@ -859,7 +864,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 		while(!switched && maxTry > 0) {
 			channel.sleep(1000);
-			wins = getWindowsHandle(index);
+			wins = getWindowsHandle(index, 0);
 			switched = switchToWindowHandle(wins[index]);
 		}
 
@@ -870,16 +875,16 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void setWindowToFront() {
-		final String[] wins = getWindowsHandle(0);
+		final String[] wins = getWindowsHandle(0, 0);
 		if(wins.length> currentWindow) {
 			driver.switchTo().window(wins[currentWindow]);
 		}
 	}
 
 	@Override
-	public void switchWindow(ActionStatus status, int index) {
+	public void switchWindow(ActionStatus status, int index, int tries) {
 		if(index >= 0) {
-			final String[] wins = getWindowsHandle(index);
+			final String[] wins = getWindowsHandle(index, tries);
 			if(wins.length > index) {
 				switchToWindowIndex(wins, index);
 				channel.cleanHandle();
@@ -914,7 +919,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void closeWindow(ActionStatus status) {
-		final String[] list = getWindowsHandle(0);
+		final String[] list = getWindowsHandle(0, 0);
 		if(list.length > 1) {
 			if(currentWindow < list.length) {
 				closeWindowHandler(list[currentWindow]);

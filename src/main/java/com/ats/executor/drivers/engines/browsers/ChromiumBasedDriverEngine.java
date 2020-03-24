@@ -87,7 +87,7 @@ public class ChromiumBasedDriverEngine extends WebDriverEngine {
 	@Override
 	public void close(boolean keepRunning) {
 		if(profileFolder != null && !keepRunning) {
-			Arrays.asList(getWindowsHandle(0)).stream().sorted(Collections.reverseOrder()).forEach(s -> closeWindowHandler(s));
+			Arrays.asList(getWindowsHandle(0, 0)).stream().sorted(Collections.reverseOrder()).forEach(s -> closeWindowHandler(s));
 
 			ChromeOptions options = new ChromeOptions();
 			options.addArguments("user-data-dir=" + profileFolder);     

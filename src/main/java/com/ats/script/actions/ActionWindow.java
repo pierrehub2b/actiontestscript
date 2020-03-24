@@ -23,7 +23,7 @@ import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
 import com.ats.script.Script;
 
-public class ActionWindow extends Action {
+public abstract class ActionWindow extends Action {
 
 	public static final String SCRIPT_LABEL = "window-";
 

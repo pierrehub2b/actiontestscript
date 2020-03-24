@@ -281,7 +281,7 @@ public class Lexer {
 					// Window action
 					//-----------------------
 
-					script.addAction(new ActionWindowSwitch(script, Utils.string2Int(dataOne)), disabled);
+					script.addAction(new ActionWindowSwitch(script, Utils.string2Int(dataOne), options), disabled);
 
 					if(ActionWindowState.SCRIPT_CLOSE_LABEL.equals(actionType)){
 						script.addAction(new ActionWindowState(script, ActionWindowState.CLOSE), disabled);

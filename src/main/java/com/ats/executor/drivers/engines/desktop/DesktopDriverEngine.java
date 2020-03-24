@@ -47,6 +47,7 @@ import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.desktop.DesktopData;
 import com.ats.executor.drivers.desktop.DesktopDriver;
+import com.ats.executor.drivers.desktop.DesktopResponse;
 import com.ats.executor.drivers.desktop.DesktopWindow;
 import com.ats.executor.drivers.engines.DriverEngine;
 import com.ats.executor.drivers.engines.IDriverEngine;
@@ -313,12 +314,23 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public void switchWindow(ActionStatus status, int index) {
-		getDesktopDriver().switchTo(channel, index);
-		channel.updateWinHandle(getDesktopDriver(), index);
+	public void switchWindow(ActionStatus status, int index, int tries) {
 		
-		windowIndex = index;
-		status.setPassed(true);
+		DesktopResponse resp = getDesktopDriver().switchTo(channel.getProcessId(), index);
+		int maxTry = 1 + tries;
+		while(resp.errorCode == ActionStatus.WINDOW_NOT_FOUND && maxTry > 0) {
+			channel.sleep(1000);
+			resp = getDesktopDriver().switchTo(channel.getProcessId(), index);
+			maxTry--;
+		}
+		
+		if(resp.errorCode == ActionStatus.WINDOW_NOT_FOUND) {
+			status.setError(ActionStatus.WINDOW_NOT_FOUND, "windows index not found");
+		}else {
+			channel.updateWinHandle(getDesktopDriver(), index);
+			windowIndex = index;
+			status.setPassed(true);
+		}
 	}
 
 	@Override

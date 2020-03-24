@@ -20,11 +20,11 @@ under the License.
 package com.ats.script.actions;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.function.Predicate;
 
-import org.apache.commons.lang3.StringUtils;
+import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebDriverException;
 
 import com.ats.driver.AtsManager;
 import com.ats.element.SearchedElement;
@@ -39,22 +39,10 @@ import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
 import com.ats.script.Script;
 import com.ats.tools.Operators;
-import com.ats.tools.Utils;
 import com.ats.tools.logger.MessageCode;
 import com.google.gson.JsonObject;
 
-public class ActionExecuteElement extends ActionExecute {
-
-	private static final String TRY_LABEL = "try";
-	private static final String[] LABEL_REPLACE = new String[]{TRY_LABEL, "=", " ", "(", ")"};
-	private static final String[] LABEL_REPLACEMENT = new String[]{"", "", "", "", ""};
-
-	private static final String DELAY_LABEL = "delay";
-	private static final String[] DELAY_REPLACE = new String[]{DELAY_LABEL, "=", " "};
-	private static final String[] DELAY_REPLACEMENT = new String[]{"", "", ""};
-
-	private int maxTry = 0;
-	private int delay = 0;
+public class ActionExecuteElement extends ActionExecuteElementAbstract {
 
 	private SearchedElement searchElement;
 	private TestElement testElement;
@@ -65,31 +53,14 @@ public class ActionExecuteElement extends ActionExecute {
 	public ActionExecuteElement() {}
 
 	public ActionExecuteElement(Script script, boolean stop, ArrayList<String> options, ArrayList<String> element) {
-
-		super(script, stop);
-
+		super(script, stop, options);
 		if(element != null && element.size() > 0){
 			setSearchElement(new SearchedElement(script, element));
-		}
-
-		final Iterator<String> itr = options.iterator();
-		while (itr.hasNext())
-		{
-			final String opt = itr.next().toLowerCase();
-			if(opt.contains(TRY_LABEL)) {
-				setMaxTry(Utils.string2Int(StringUtils.replaceEach(opt, LABEL_REPLACE, LABEL_REPLACEMENT)));
-				itr.remove();
-			}else if(opt.contains(DELAY_LABEL)) {
-				setDelay(Utils.string2Int(StringUtils.replaceEach(opt, DELAY_REPLACE, DELAY_REPLACEMENT)));
-				itr.remove();
-			}
 		}
 	}
 
 	public ActionExecuteElement(Script script, boolean stop, int maxTry, int delay, SearchedElement element) {
-		super(script, stop);
-		setMaxTry(maxTry);
-		setDelay(delay);
+		super(script, stop, maxTry, delay);
 		setSearchElement(element);
 	}
 
@@ -99,7 +70,7 @@ public class ActionExecuteElement extends ActionExecute {
 
 	@Override
 	public StringBuilder getJavaCode() {
-		final StringBuilder codeBuilder = super.getJavaCode().append(maxTry).append(", ").append(delay).append(", ");
+		final StringBuilder codeBuilder = super.getJavaCode();
 		if(searchElement == null){
 			codeBuilder.append("null");
 		}else {
@@ -114,11 +85,18 @@ public class ActionExecuteElement extends ActionExecute {
 	public void execute(ActionTestScript ts, String operator, int value) {
 
 		super.execute(ts);
+		
 		if(status.isPassed()) {
 
 			final Channel channel = ts.getCurrentChannel();
-
-			actionMaxTry = ts.getChannelManager().getMaxTry() + maxTry;
+			
+			final int delay = getDelay();
+			if(delay > 0) {
+				ts.getTopScript().sendInfoLog("Delay before action", delay + "s");
+				channel.sleep(delay * 1000);
+			}
+			
+			actionMaxTry = ts.getChannelManager().getMaxTry() + getMaxTry();
 			if(actionMaxTry < 1) {
 				actionMaxTry = 1;
 			}
@@ -189,7 +167,7 @@ public class ActionExecuteElement extends ActionExecute {
 				status.setSearchDuration(testElement.getTotalSearchDuration());
 				status.setData(testElement.getCount());
 
-				ts.getCurrentChannel().sleep(delay);
+				ts.getCurrentChannel().sleep(getDelay());
 
 				asyncExec(ts);
 
@@ -218,15 +196,34 @@ public class ActionExecuteElement extends ActionExecute {
 		}
 		return p -> p == value;
 	}
-
-	private int maxExecution = 0;
 	
 	@Override
 	public void execute(ActionTestScript ts) {
-		try {
+		
+		int maxTry = AtsManager.getMaxStaleOrJavaScriptError();
+		while(maxTry > 0) {
+			try {
+				execute(ts, Operators.GREATER, 0);
+				return;
+			}catch(JavascriptException e) {
+				System.out.println("javascript error .... try again : " + maxTry);
+				status.setException(ActionStatus.JAVASCRIPT_ERROR, e);
+			}catch(StaleElementReferenceException e) {
+				System.out.println("stale reference error .... try again : " + maxTry);
+				status.setException(ActionStatus.WEB_DRIVER_ERROR, e);
+			}
+			
+			ts.getCurrentChannel().sleep(500);
+			setTestElement(null);
+			maxTry--;
+		}
+		
+		throw new WebDriverException("execute element error : " + status.getFailMessage());
+		
+		/*try {
 			execute(ts, Operators.GREATER, 0);
 			maxExecution = 0;
-		}catch (StaleElementReferenceException e) {
+		}catch (StaleElementReferenceException | JavascriptException e) {
 			if(maxExecution < AtsManager.getMaxStaleError()) {
 				maxExecution++;
 				ts.getCurrentChannel().sleep(200);
@@ -235,7 +232,7 @@ public class ActionExecuteElement extends ActionExecute {
 			}else {
 				throw e;
 			}
-		}
+		}*/
 	}
 
 	private void asyncExec(ActionTestScript ts) {
@@ -272,8 +269,8 @@ public class ActionExecuteElement extends ActionExecute {
 
 	@Override
 	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
-		data.addProperty("duration", status.getDuration()-status.getSearchDuration()-delay);
-		data.addProperty("delay", delay);
+		data.addProperty("duration", status.getDuration() - status.getSearchDuration() - getDelay());
+		data.addProperty("delay", getDelay());
 		data.addProperty("occurrences", status.getElement().getCount());
 		return super.getActionLogs(scriptName, scriptLine, data);
 	}
@@ -288,22 +285,6 @@ public class ActionExecuteElement extends ActionExecute {
 
 	public void setSearchElement(SearchedElement value) {
 		this.searchElement = value;
-	}
-
-	public int getMaxTry() {
-		return maxTry;
-	}
-
-	public void setMaxTry(int value) {
-		this.maxTry = value;
-	}
-
-	public int getDelay() {
-		return delay;
-	}
-
-	public void setDelay(int value) {
-		this.delay = value;
 	}
 
 	public boolean isAsync() {

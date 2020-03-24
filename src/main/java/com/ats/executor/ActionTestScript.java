@@ -169,7 +169,6 @@ public class ActionTestScript extends Script implements ITest{
 			}
 
 			final JsonObject logs = new JsonObject();
-			logs.addProperty("name", testName);
 			logs.addProperty("suite", suiteName);
 			logs.addProperty("xmlReport", xml);
 			logs.addProperty("visualQuality", visualQuality);
@@ -182,7 +181,7 @@ public class ActionTestScript extends Script implements ITest{
 			}
 			logs.add("parameters", parameters);
 
-			sendScriptInfo("Starting script -> " + logs.toString());
+			sendScriptInfo("Starting script (" + testName + ") -> " + logs.toString());
 
 			//-----------------------------------------------------------
 			//-----------------------------------------------------------
@@ -249,7 +248,6 @@ public class ActionTestScript extends Script implements ITest{
 
 		final JsonObject log = testScript.getConditionLogs();
 
-		log.addProperty("status", "init");
 		log.addProperty("called", scriptName);
 		log.addProperty("iteration", iteration+1 + "/" + iterationMax);
 		log.addProperty("type", type);

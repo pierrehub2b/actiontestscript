@@ -619,8 +619,8 @@ public class DesktopDriver extends RemoteWebDriver {
 		sendRequestCommand(CommandType.Window, WindowType.Switch, channel.getHandle(this, index));
 	}
 
-	public void switchTo(Long processId, int index) {
-		sendRequestCommand(CommandType.Window, WindowType.Switch, processId, index);
+	public DesktopResponse switchTo(Long processId, int index) {
+		return sendRequestCommand(CommandType.Window, WindowType.Switch, processId, index);
 	}
 
 	public void closeWindow(Channel channel) {

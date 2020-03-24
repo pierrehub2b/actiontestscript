@@ -502,8 +502,8 @@ public class Channel {
 		return engine.getRootElement(this);
 	}
 
-	public void switchWindow(ActionStatus status, int index){
-		engine.switchWindow(status, index);
+	public void switchWindow(ActionStatus status, int index, int tries){
+		engine.switchWindow(status, index, tries);
 		if(status.isPassed()) {
 			engine.updateDimensions();
 		}

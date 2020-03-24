@@ -134,7 +134,14 @@ public class CalculatedValue{
 			dataValue = dataValue.replace(replace, UUID.randomUUID().toString());
 			rawJavaCode = rawJavaCode.replace(replace, "\", " + ActionTestScript.JAVA_UUID_FUNCTION_NAME + "(), \"");
 		}
-		
+					
+		mv = RandomStringValue.RND_PATTERN.matcher(dataValue);
+		while (mv.find()) {
+			final RandomStringValue rds = new RandomStringValue(mv);
+			dataValue = dataValue.replace(rds.getReplace(), script.getRandomStringValue(rds.getValue(), rds.getDefaultValue()));
+			rawJavaCode = rawJavaCode.replace(rds.getReplace(), "\", " + ActionTestScript.JAVA_RNDSTRING_FUNCTION_NAME + rds.getCode() + ", \"");
+		}
+				
 		mv = PGAV_PATTERN.matcher(dataValue);
 		while (mv.find()) {
 			rawJavaCode = rawJavaCode.replace(mv.group(0), "\", " + ActionTestScript.JAVA_GAV_FUNCTION_NAME + "(), \"");
@@ -143,13 +150,6 @@ public class CalculatedValue{
 		mv = ITERATION_PATTERN.matcher(dataValue);
 		while (mv.find()) {
 			rawJavaCode = rawJavaCode.replace(mv.group(0), "\", " + ActionTestScript.JAVA_ITERATION_FUNCTION_NAME + "(), \"");
-		}
-					
-		mv = RandomStringValue.RND_PATTERN.matcher(dataValue);
-		while (mv.find()) {
-			final RandomStringValue rds = new RandomStringValue(mv);
-			dataValue = dataValue.replace(rds.getReplace(), script.getRandomStringValue(rds.getValue(), rds.getDefaultValue()));
-			rawJavaCode = rawJavaCode.replace(rds.getReplace(), "\", " + ActionTestScript.JAVA_RNDSTRING_FUNCTION_NAME + rds.getCode() + ", \"");
 		}
 		
 		mv = IMAGE_PATTERN.matcher(dataValue);

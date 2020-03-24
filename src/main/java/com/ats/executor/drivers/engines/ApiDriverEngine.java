@@ -242,7 +242,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	}
 
 	@Override
-	public void switchWindow(ActionStatus status, int index) {
+	public void switchWindow(ActionStatus status, int index, int tries) {
 	}
 
 	@Override

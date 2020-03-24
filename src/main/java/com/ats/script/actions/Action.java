@@ -25,7 +25,7 @@ import com.ats.executor.channels.Channel;
 import com.ats.script.Script;
 import com.google.gson.JsonObject;
 
-public class Action {
+public abstract class Action {
 
 	protected Script script;
 	protected int line;

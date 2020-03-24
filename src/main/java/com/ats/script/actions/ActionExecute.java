@@ -23,7 +23,7 @@ import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.script.Script;
 
-public class ActionExecute extends Action {
+public abstract class ActionExecute extends Action {
 
 	public static final String NO_FAIL_LABEL = "nofail";
 

@@ -19,8 +19,6 @@ under the License.
 
 package com.ats.script.actions;
 
-import static org.testng.Assert.fail;
-
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -63,6 +61,7 @@ public class ActionCallscript extends Action {
 	private final AtsClassLoader classLoader = new AtsClassLoader();
 
 	private CalculatedValue name;
+	private int type = -1;
 
 	private List<Variable> variables;
 	private List<CalculatedValue> parameters;
@@ -167,11 +166,11 @@ public class ActionCallscript extends Action {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	public static String getScriptLog(String testName, int line, JsonObject log) {
-		final StringBuilder sb = new StringBuilder("Init subscript (")
+		final StringBuilder sb = new StringBuilder("Subscript init (")
 				.append(testName).append(":").append(line).append(") -> ").append(log.toString());
 		return sb.toString();
 	}
-	
+
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
 
@@ -238,7 +237,7 @@ public class ActionCallscript extends Action {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	public void execute(String testName, int line, ActionTestScript ts) {
-		
+
 		super.execute(ts.getCurrentChannel());
 		final String scriptName = name.getCalculated();
 
@@ -289,7 +288,7 @@ public class ActionCallscript extends Action {
 						final List<String[]> data = Utils.loadCsvData(csvUrl);
 						final int iterationMax = data.size();
 						int iteration = 0;
-						
+
 						for (String[] params : data) {
 							ats.initCalledScript(ts, testName, line, topScript, getCalculatedParameters(ats, params), null, iteration, iterationMax, scriptName, "csv", csvFile);
 							testMain.invoke(ats);
@@ -315,18 +314,16 @@ public class ActionCallscript extends Action {
 					status.setData(ats.getReturnValues());
 				}
 
-			} catch (InstantiationException e) {
-			} catch (IllegalAccessException e) {
-			} catch (IllegalArgumentException e) {
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | NoSuchMethodException | SecurityException e) {
 			} catch (InvocationTargetException e) {
-				if(e.getTargetException() instanceof AssertionError) {
-					fail(e.getCause().getMessage());
-				}
-			} catch (NoSuchMethodException e) {
-			} catch (SecurityException e) {
+				String errorMessage = e.getTargetException().getMessage();
+				if(e.getCause() != null) {
+					errorMessage = e.getCause().getMessage();
+				}	
+				status.setError(ActionStatus.JAVA_EXCEPTION, "Callscript error (" + scriptName + ") -> " + errorMessage);
 			}
 		}
-		
+
 		condition = null;
 		status.endDuration();
 	}
@@ -431,5 +428,13 @@ public class ActionCallscript extends Action {
 
 	public void setCondition(ConditionalValue condition) {
 		this.condition = condition;
+	}
+
+	public int getType() {
+		return type;
+	}
+
+	public void setType(int type) {
+		this.type = type;
 	}
 }

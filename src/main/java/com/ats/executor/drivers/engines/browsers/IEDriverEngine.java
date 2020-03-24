@@ -125,8 +125,8 @@ public class IEDriverEngine extends WebDriverEngine {
 	}	
 
 	@Override
-	public void switchWindow(ActionStatus status, int index) {
-		super.switchWindow(status, index);
+	public void switchWindow(ActionStatus status, int index, int tries) {
+		super.switchWindow(status, index, tries);
 		if(status.isPassed()) {
 			executeJavaScript(status, "setTimeout(function(){window.focus();},1000);", true);
 			toFront();

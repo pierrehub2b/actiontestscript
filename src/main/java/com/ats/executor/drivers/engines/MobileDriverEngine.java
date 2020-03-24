@@ -471,7 +471,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	public void api(ActionStatus status, ActionApi api) {}
 
 	@Override
-	public void switchWindow(ActionStatus status, int index) {}
+	public void switchWindow(ActionStatus status, int index, int tries) {}
 
 	@Override
 	public void closeWindow(ActionStatus status) {}

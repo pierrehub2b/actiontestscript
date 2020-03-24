@@ -28,6 +28,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 import org.openqa.selenium.ElementNotInteractableException;
+import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;

@@ -48,7 +48,7 @@ public interface IDriverEngine{
 	public void close(boolean keepRunning);
 
 	public String getApplicationPath();
-	public void switchWindow(ActionStatus status, int index);
+	public void switchWindow(ActionStatus status, int index, int tries);
 	public void closeWindow(ActionStatus status);
 	public Object executeScript(ActionStatus status, String script, Object ... params);
 	public Object executeJavaScript(ActionStatus status, String script, TestElement element);
