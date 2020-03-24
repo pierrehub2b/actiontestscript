@@ -184,7 +184,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 						
 						refreshElementMapLocation();
 					}else {
-						status.setError(ActionStatus.CHANNEL_START_ERROR, response.get("status").getAsString());
+						status.setError(ActionStatus.CHANNEL_START_ERROR, response.get("message").getAsString());
 					}
 				}else {
 					status.setError(ActionStatus.CHANNEL_START_ERROR, "unable to connect to : " + application);
