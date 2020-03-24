@@ -429,31 +429,35 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public byte[] getScreenshot(Double x, Double y, Double width, Double height) {
 		
-		ImageIO.setUseCache(false);
+		final byte[] screen = getDesktopDriver().getMobileScreenshotByte(getScreenshotPath());
 		
-		byte[] result = null;
-		
-		final InputStream in = new ByteArrayInputStream(getDesktopDriver().getMobileScreenshotByte(getScreenshotPath()));
-		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		
-		final BufferedImage subImage = new BufferedImage(width.intValue(), height.intValue(), BufferedImage.TYPE_INT_RGB);
-		final Graphics g = subImage.getGraphics();
-		
-		try {
-		    
-			//final BufferedImage subImage = ImageIO.read(in).getSubimage(x.intValue(), y.intValue(), width.intValue(), height.intValue());
-		    g.drawImage(ImageIO.read(in), 0, 0, width.intValue(), height.intValue(), x.intValue(), y.intValue(), x.intValue() + width.intValue(), y.intValue() + height.intValue(), null);
-		    g.dispose();
-						
-			ImageIO.write(subImage, "png", baos);
-			baos.flush();
+		if(screen != null) {
+			ImageIO.setUseCache(false);
 			
-			result = baos.toByteArray();
-			baos.close();
+			final InputStream in = new ByteArrayInputStream(screen);
+			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			
-		} catch (IOException e) {}
-		
-		return result;
+			final BufferedImage subImage = new BufferedImage(width.intValue(), height.intValue(), BufferedImage.TYPE_INT_RGB);
+			final Graphics g = subImage.getGraphics();
+			
+			try {
+			    
+				//final BufferedImage subImage = ImageIO.read(in).getSubimage(x.intValue(), y.intValue(), width.intValue(), height.intValue());
+			    g.drawImage(ImageIO.read(in), 0, 0, width.intValue(), height.intValue(), x.intValue(), y.intValue(), x.intValue() + width.intValue(), y.intValue() + height.intValue(), null);
+			    g.dispose();
+							
+				ImageIO.write(subImage, "png", baos);
+				baos.flush();
+				
+				final byte[] result = baos.toByteArray();
+				baos.close();
+				
+				return result;
+				
+			} catch (IOException e) {}
+		}
+	
+		return new byte[1];
 	}
 		
 	@Override
