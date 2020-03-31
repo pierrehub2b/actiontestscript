@@ -74,13 +74,19 @@ public class ActionText extends ActionExecuteElement {
 
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
-
+	
 	@Override
 	public void terminateExecution(ActionTestScript ts) {
 		super.terminateExecution(ts);
 		if(status.isPassed()) {
-			status.startDuration();
-			getTestElement().enterText(status, text, ts.getRecorder());
+			
+			ts.getRecorder().updateScreen(true);
+			
+			status.startAction(this);
+			final String enteredText = getTestElement().enterText(status, text, ts.getRecorder());
+			status.endAction();
+			
+			ts.getRecorder().updateTextScreen(0, status.getDuration(), enteredText, status.getMessage());
 		}
 	}
 	

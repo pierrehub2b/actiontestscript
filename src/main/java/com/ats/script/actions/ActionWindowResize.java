@@ -22,6 +22,7 @@ package com.ats.script.actions;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.BoundData;
 import com.ats.script.Script;
+import com.google.gson.JsonObject;
 
 public class ActionWindowResize extends ActionWindow {
 
@@ -108,6 +109,29 @@ public class ActionWindowResize extends ActionWindow {
 	@Override
 	public String exec(Channel channel) {
 		return channel.setWindowBound(x, y, width, height);
+	}
+		
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+
+		if(x != null) {
+			data.addProperty("x", x.getValue());
+		}
+		
+		if(y != null) {
+			data.addProperty("y", y.getValue());
+		}
+		
+		if(width != null) {
+			data.addProperty("width", width.getValue());
+		}
+		
+		if(height != null) {
+			data.addProperty("height", height.getValue());
+		}
+		
+		data.addProperty("duration", status.getDuration());
+		return super.getActionLogs(scriptName, scriptLine, data);
 	}
 
 	//--------------------------------------------------------

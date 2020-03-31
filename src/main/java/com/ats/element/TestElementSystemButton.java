@@ -47,7 +47,9 @@ public class TestElementSystemButton extends TestElement {
 	}
 
 	@Override
-	public void enterText(ActionStatus status, CalculatedValue text, IVisualRecorder recorder) {}
+	public String enterText(ActionStatus status, CalculatedValue text, IVisualRecorder recorder) {
+		return null;
+	}
 
 	@Override
 	public void click(ActionStatus status, MouseDirection position, Keys key) {

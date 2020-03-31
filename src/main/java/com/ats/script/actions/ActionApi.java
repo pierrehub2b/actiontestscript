@@ -129,9 +129,9 @@ public class ActionApi extends Action {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void execute(ActionTestScript ts) {
+	public void execute(ActionTestScript ts, String testName, int testLine) {
 		if(ts.getCurrentChannel() != null){
-			setStatus(ts.getCurrentChannel().newActionStatus());
+			setStatus(ts.getCurrentChannel().newActionStatus(testName, testLine));
 			ts.getCurrentChannel().api(status, this);
 		}
 		status.endDuration();
@@ -141,7 +141,6 @@ public class ActionApi extends Action {
 	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
 		data.addProperty("type", type);
 		data.addProperty("method", method.getCalculated());
-		data.addProperty("duration", status.getDuration());
 		data.addProperty(status.getMessage(), status.getData().toString());
 		return super.getActionLogs(scriptName, scriptLine, data);
 	}

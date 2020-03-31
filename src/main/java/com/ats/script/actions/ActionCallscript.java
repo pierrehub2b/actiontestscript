@@ -19,6 +19,8 @@ under the License.
 
 package com.ats.script.actions;
 
+import static org.testng.Assert.fail;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -44,6 +46,7 @@ import com.ats.script.ScriptLoader;
 import com.ats.tools.AtsClassLoader;
 import com.ats.tools.Utils;
 import com.ats.tools.logger.MessageCode;
+import com.ats.tools.logger.levels.AtsFailError;
 import com.google.gson.JsonObject;
 import com.opencsv.exceptions.CsvException;
 
@@ -236,9 +239,10 @@ public class ActionCallscript extends Action {
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
 
-	public void execute(String testName, int line, ActionTestScript ts) {
+	public void execute(ActionTestScript ts, String testName, int line) {
 
-		super.execute(ts.getCurrentChannel());
+		setStatus(ts.getCurrentChannel().newActionStatus(testName, line));
+		
 		final String scriptName = name.getCalculated();
 
 		//Class<ActionTestScript> clazz = (Class<ActionTestScript>) Class.forName(name.getCalculated()); // old way still working
@@ -316,11 +320,15 @@ public class ActionCallscript extends Action {
 
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | NoSuchMethodException | SecurityException e) {
 			} catch (InvocationTargetException e) {
-				String errorMessage = e.getTargetException().getMessage();
-				if(e.getCause() != null) {
-					errorMessage = e.getCause().getMessage();
-				}	
-				status.setError(ActionStatus.JAVA_EXCEPTION, "Callscript error (" + scriptName + ") -> " + errorMessage);
+				if(e.getTargetException() instanceof AtsFailError) {
+					final AtsFailError target = (AtsFailError) e.getTargetException();
+					ts.getTopScript().addErrorStack(target.getInfo());
+					ts.getTopScript().addErrorStack(testName + ":" + line);
+					fail(target.getFullMessage());
+				}else{
+					ts.getTopScript().addErrorStack(testName + ":" + line);
+					fail(e.getTargetException().getMessage());
+				}
 			}
 		}
 
@@ -353,7 +361,6 @@ public class ActionCallscript extends Action {
 	@Override
 	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
 		data.addProperty("status", "terminated");
-		data.addProperty("duration", status.getDuration());
 		return super.getActionLogs(scriptName, scriptLine, data);
 	}
 

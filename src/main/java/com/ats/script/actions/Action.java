@@ -21,7 +21,6 @@ package com.ats.script.actions;
 
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
-import com.ats.executor.channels.Channel;
 import com.ats.script.Script;
 import com.google.gson.JsonObject;
 
@@ -62,17 +61,9 @@ public abstract class Action {
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
 	
-	public void execute(ActionTestScript ts){
-		execute(ts.getCurrentChannel());
+	public void execute(ActionTestScript ts, String testName, int testLine){
+		setStatus(ts.getCurrentChannel().newActionStatus(testName, testLine));
 		ts.getRecorder().createVisualAction(this);
-	}
-	
-	public void execute(Channel channel){
-		if(channel == null) {
-			setStatus(new ActionStatus(null));
-		}else {
-			setStatus(channel.newActionStatus());
-		}
 	}
 	
 	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
@@ -81,6 +72,7 @@ public abstract class Action {
 			data.addProperty("status", "non blocking action");
 			data.addProperty("message", status.getFailMessage());
 		}
+		data.addProperty("duration", status.getDuration());
 		return new StringBuilder(getClass().getSimpleName()).append(" (").append(scriptName).append(":").append(scriptLine).append(") -> ").append(data.toString());
 	}
 

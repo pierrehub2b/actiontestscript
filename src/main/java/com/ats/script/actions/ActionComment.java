@@ -21,7 +21,6 @@ package com.ats.script.actions;
 
 import java.util.ArrayList;
 
-import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
@@ -89,15 +88,17 @@ public class ActionComment extends Action {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void execute(ActionTestScript ts) {
-		status = new ActionStatus(ts.getCurrentChannel());
+	public void execute(ActionTestScript ts, String testName, int testLine) {
 		if(STEP_TYPE.equals(type)) {
-			super.execute(ts);
+			super.execute(ts, testName, testLine);
 			status.endDuration();
 			ts.getRecorder().update(type, comment.getCalculated());
-		}else if(LOG_TYPE.equals(type)) {
+		}else {
+			status = ts.getCurrentChannel().newActionStatus(testName, testLine);
 			status.endDuration();
-			ts.getTopScript().sendCommentLog(comment.getCalculated());
+			if(LOG_TYPE.equals(type)) {
+				ts.getTopScript().sendCommentLog(comment.getCalculated());
+			}
 		}
 	}
 

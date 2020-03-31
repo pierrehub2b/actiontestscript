@@ -26,6 +26,7 @@ import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.Variable;
 import com.ats.script.Script;
+import com.google.gson.JsonObject;
 
 public class ActionProperty extends ActionReturnVariable {
 
@@ -83,6 +84,12 @@ public class ActionProperty extends ActionReturnVariable {
 				ts.getRecorder().update(0, status.getDuration(), name, attributeValue);
 			}
 		}
+	}
+	
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+		data.addProperty("property", name);
+		return super.getActionLogs(scriptName, scriptLine, data);
 	}
 
 	//--------------------------------------------------------

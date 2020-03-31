@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.script;
 
@@ -45,6 +45,7 @@ import com.ats.generator.variables.transform.TimeTransformer;
 import com.ats.generator.variables.transform.Transformer;
 import com.ats.script.actions.Action;
 import com.ats.tools.logger.ExecutionLogger;
+import com.ats.tools.logger.levels.AtsLogger;
 
 public class Script {
 
@@ -57,25 +58,25 @@ public class Script {
 	public final static String ATS_VISUAL_FILE_EXTENSION = "." + ATS_VISUAL_EXTENSION;
 
 	public final static String ATS_VISUAL_FOLDER = "visual";
-	
+
 	public final static String SCRIPT_LOG = "SCRIPT";
 	public final static String COMMENT_LOG = "COMMENT";
-	
+
 	private ArrayList<String> parameters = new ArrayList<String>();
 	private List<Variable> variables = new ArrayList<Variable>();
 	private ArrayList<CalculatedValue> returns;
-	
+
 	protected File csvFile;
 	protected int iteration = 0;
-	
+
 	private Map<String, String> testExecutionVariables;
-	
+
 	private File projectAtsFolder;
-		
+
 	private ExecutionLogger logger = new ExecutionLogger();
 
 	public Script() {}
-	
+
 	public Script(ExecutionLogger logger) {
 		if(logger != null) {
 			setLogger(logger);
@@ -89,9 +90,9 @@ public class Script {
 	protected void setAtsFolder(File projectAtsFolder) {
 		this.projectAtsFolder = projectAtsFolder;
 	}
-	
+
 	//-------------------------------------------------------------------------------------
-	
+
 	public void sendLog(int code, String message) {
 		logger.sendLog(code, message, "");
 	}
@@ -103,55 +104,61 @@ public class Script {
 	public void sendLog(int code, String message, Object value) {
 		logger.sendLog(code, message, value);
 	}
-	
+
 	public void sendInfoLog(String message, String value) {
 		logger.sendInfo(message, value);
 	}
-	
+
 	public void sendActionLog(Action action, String testName, int line) {
 		logger.sendAction(action, testName, line); 
 	}
-			
+
 	public void sendWarningLog(String message, String value) {
 		logger.sendWarning(message, value); 
 	}
-	
+
 	public void sendErrorLog(String message, String value) {
 		logger.sendError(message, value); 
 	}
-	
+
 	public void sendCommentLog(String calculated) {
 		logger.sendExecLog(COMMENT_LOG, calculated);
 	}
-	
+
 	public void sendScriptInfo(String value) {
 		logger.sendExecLog(SCRIPT_LOG, value); 
 	}
-	
+
+	public void sendScriptFail(String value) {
+		if(value != null) {
+			logger.sendExecLog(AtsLogger.FAILED, value); 
+		}
+	}
+
 	//---------------------------------------------------------------------------------------------------
-	
+
 	public void setLogger(ExecutionLogger logger) {
 		this.logger = logger;
 	}
-	
+
 	public void sleep(int ms) {
 		try {
 			Thread.sleep(ms);
 		} catch (InterruptedException e) {}
 	}
-	
+
 	protected void setTestExecutionVariables(Map<String, String> params) {
 		this.testExecutionVariables = params;
 	}
-	
+
 	protected Map<String, String> getTestExecutionVariables() {
 		return testExecutionVariables;
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	//  getters and setters for serialization
 	//-------------------------------------------------------------------------------------------------
-	
+
 	public List<Variable> getVariables() {
 		return variables;
 	}
@@ -193,7 +200,7 @@ public class Script {
 	}
 
 	public Variable getVariable(String name, boolean noCalculation){
-		
+
 		Variable foundVar = getVariable(name);
 
 		if(foundVar == null) {
@@ -207,7 +214,7 @@ public class Script {
 
 		return foundVar;
 	}
-	
+
 	private Variable getVariable(String name) {
 		Variable found = null;
 
@@ -217,7 +224,7 @@ public class Script {
 		}
 		return found;
 	}
-		
+
 	public Variable addVariable(String name, CalculatedValue value, Transformer transformer){
 		Variable foundVar = getVariable(name);
 		if(foundVar == null) {
@@ -228,13 +235,13 @@ public class Script {
 		}
 		return foundVar;
 	}
-	
+
 	public Variable createVariable(String name, CalculatedValue value, Transformer transformer){
 		Variable newVar = new Variable(name, value, transformer);
 		variables.add(newVar);
 		return newVar;
 	}
-	
+
 	public String getVariableValue(String variableName) {
 		return getVariable(variableName, false).getValue().getCalculated();
 	}
@@ -242,58 +249,58 @@ public class Script {
 	//-------------------------------------------------------------------------------------------------
 	// variable calculation
 	//-------------------------------------------------------------------------------------------------
-	
+
 	public String getRandomStringValue(int len, String letterCase) {
-		
+
 		String baseString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 		if(RandomStringValue.LOW_KEY.equals(letterCase)) {
 			baseString = baseString.toLowerCase();
 		}else if(!RandomStringValue.UPP_KEY.equals(letterCase)) {
 			baseString += baseString.toLowerCase();
 		}
-		
+
 		List<Character> temp = baseString.chars()
-	            .mapToObj(i -> (char)i)
-	            .collect(Collectors.toList());
-		
-	    Collections.shuffle(temp, new SecureRandom());
-	    return temp.stream()
-	            .map(Object::toString)
-	            .limit(len)
-	            .collect(Collectors.joining());
+				.mapToObj(i -> (char)i)
+				.collect(Collectors.toList());
+
+		Collections.shuffle(temp, new SecureRandom());
+		return temp.stream()
+				.map(Object::toString)
+				.limit(len)
+				.collect(Collectors.joining());
 	}
-			
+
 	public ScriptValue getParameter(int index) {
 		return new ScriptValue(getParameterValue(index, ""));
 	}
-	
+
 	public String getParameterValue(int index) {
 		return getParameterValue(index, "");
 	}
-	
+
 	public String getParameterValue(int index, String defaultValue) {
 		if(parameters.size() > index) {
 			return parameters.get(index);
 		}
 		return defaultValue;
 	}
-	
+
 	public String getEnvironmentValue(String name, String defaultValue) {
-	
+
 		String value = null;
-		
+
 		value = System.getProperty(name);
 		if(value != null) {
 			return value;
 		}
-		
+
 		if(testExecutionVariables != null) {
 			value = testExecutionVariables.get(name);
 			if(value != null) {
 				return value;
 			}
 		}
-		
+
 		value = System.getenv(name);
 		if(value != null) {
 			return value;
@@ -305,36 +312,36 @@ public class Script {
 	public String getUuidValue() {
 		return UUID.randomUUID().toString();
 	}	
-	
+
 	public String getTodayValue() {
 		return DateTransformer.getTodayValue();
 	}	
-	
+
 	public String getNowValue() {
 		return TimeTransformer.getNowValue();
 	}
-		
+
 	public int getIteration() {
 		return iteration;
 	}
-	
+
 	public String getCsvFilePath() {
 		if(csvFile == null) {
 			return "";
 		}
 		return csvFile.getAbsolutePath();
 	}
-	
+
 	public File getCsvFile() {
 		return csvFile;
 	}
-	
+
 	public File getAssetsFile(String relativePath) {
 		if(!relativePath.startsWith("/")) {
 			relativePath = "/" + relativePath;
 		}
 		relativePath = ProjectData.ASSETS_FOLDER + relativePath;
-		
+
 		final URL url = getClass().getClassLoader().getResource(relativePath);
 		if(url != null) {
 			try {
@@ -343,7 +350,7 @@ public class Script {
 		}
 		return null;
 	}
-	
+
 	public String getAssetsUrl(String relativePath) {
 		final URL url = getClass().getClassLoader().getResource(relativePath);
 		if(url == null) {

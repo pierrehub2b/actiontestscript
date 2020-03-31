@@ -74,12 +74,20 @@ public class Utils {
 			return defaultValue;
 		}
 	}
+	
+	public static long string2Long(String value){
+		try {
+			return Long.parseLong(value);
+		} catch (NumberFormatException e) {
+			return 0L;
+		}
+	}
 
 	public static double string2Double(String value){
 		try {
 			return Double.parseDouble(value);
 		} catch (NumberFormatException e) {
-			return 0.0;
+			return 0D;
 		}
 	}
 

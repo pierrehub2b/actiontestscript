@@ -17,18 +17,45 @@ specific language governing permissions and limitations
 under the License.
  */
 
-package com.ats.script.actions.performance;
+package com.ats.tools.performance;
 
-import com.ats.script.Script;
+import java.util.List;
+
+import org.openqa.selenium.Proxy;
+
+import com.ats.executor.ActionStatus;
+import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.actions.Action;
 
-public class ActionPerformance extends Action {
+public class HarNoProxy implements IHarProxy {
+	
+	@Override
+	public void startRecord(ActionStatus status, List<String> whiteList, long sendBandWidth, long receiveBandWidth) {
+		status.setError(ActionStatus.PERF_NOT_STARTED, "Channel not started with \"performance\" option");
+	}
+	
+	@Override
+	public void startAction(Action action, String testLine) {
+	}
 
-	public static final String SCRIPT_PERFORMANCE_LABEL = "perf";
+	@Override
+	public Proxy startProxy() {
+		return null;
+	}
+	
+	@Override
+	public void dispose() {
+	}
 
-	public ActionPerformance() {}
+	@Override
+	public void endAction() {
+	}
 
-	public ActionPerformance(Script script) {
-		super(script);
+	@Override
+	public void resumeRecord(CalculatedValue comment) {
+	}
+
+	@Override
+	public void pauseRecord(CalculatedValue comment) {
 	}
 }

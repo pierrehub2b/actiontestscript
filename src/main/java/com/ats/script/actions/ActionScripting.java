@@ -27,6 +27,7 @@ import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.Variable;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
+import com.google.gson.JsonObject;
 
 public class ActionScripting extends ActionReturnVariable {
 
@@ -65,13 +66,13 @@ public class ActionScripting extends ActionReturnVariable {
 
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
-	
+		
 	@Override
 	public void terminateExecution(ActionTestScript ts) {
 		
 		super.terminateExecution(ts);
 		
-		status.startDuration();
+		status.startAction(this);
 		
 		if(variable != null) {
 			final Object result = getTestElement().executeScript(status, jsCode.getCalculated(), true);
@@ -82,8 +83,14 @@ public class ActionScripting extends ActionReturnVariable {
 			getTestElement().executeScript(status, jsCode.getCalculated(), false);
 		}
 	
-		status.endDuration();
+		status.endAction();
 		ts.getRecorder().updateScreen(0, status.getDuration(), jsCode.getCalculated());
+	}
+	
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+		data.addProperty("code", jsCode.getCalculated());
+		return super.getActionLogs(scriptName, scriptLine, data);
 	}
 
 	//--------------------------------------------------------

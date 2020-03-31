@@ -36,16 +36,15 @@ public abstract class ActionExecute extends Action {
 		setStop(stop);
 	}
 
-	public void execute(ActionTestScript ts){
+	public void execute(ActionTestScript ts, String testName, int testLine){
 		if(ts.getCurrentChannel() == null) {
 
-			setStatus(new ActionStatus(null));
-			
+			setStatus(new ActionStatus(null, testName, testLine));
 			status.setError(ActionStatus.CHANNEL_NOT_FOUND, "No running channel found, please check that 'start channel action' has been added to the script");
 			status.endDuration();
 
 		}else {
-			super.execute(ts);
+			super.execute(ts, testName, testLine);
 		}
 	}
 

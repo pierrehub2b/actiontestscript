@@ -41,6 +41,7 @@ public class ChannelManager {
 		this.mainScript = script;
 		this.channelsList = new ArrayList<Channel>();
 		this.driverManager = new DriverManager();
+		this.currentChannel = new EmptyChannel();
 
 		script.sendInfoLog("ATS drivers folder", this.driverManager.getDriverFolderPath());
 	}
@@ -67,10 +68,6 @@ public class ChannelManager {
 		}
 		currentChannel = channel;
 		channel.setCurrent(true);
-	}
-
-	private void noChannel() {
-		currentChannel = null;
 	}
 
 	public void closeAllChannels(){
@@ -160,7 +157,7 @@ public class ChannelManager {
 					status.setChannel(current);
 				}
 			}else{
-				noChannel();
+				currentChannel = new EmptyChannel();
 			}
 
 			status.setNoError();

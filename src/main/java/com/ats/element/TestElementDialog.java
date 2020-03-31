@@ -103,14 +103,9 @@ public class TestElementDialog extends TestElement {
 	}
 
 	@Override
-	public void enterText(ActionStatus status, CalculatedValue text, IVisualRecorder recorder) {
-
-		recorder.updateScreen(true);
-
+	public String enterText(ActionStatus status, CalculatedValue text, IVisualRecorder recorder) {
 		sendText(status, text);
-		status.endDuration();
-
-		recorder.updateScreen(0, status.getDuration(), text.getCalculated());
+		return text.getCalculated();
 	}
 
 	@Override
@@ -118,9 +113,12 @@ public class TestElementDialog extends TestElement {
 	}
 
 	@Override
-	public void sendText(ActionStatus status, CalculatedValue text) {
+	public String sendText(ActionStatus status, CalculatedValue text) {
+		final String enterText = text.getCalculated();
 		getChannel().sleep(WAIT_BOX);
-		alert.sendKeys(text.getCalculated());
+		alert.sendKeys(enterText);
+		
+		return enterText;
 	}
 
 	@Override

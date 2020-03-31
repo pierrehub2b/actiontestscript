@@ -43,9 +43,10 @@ public class TestElementRoot extends TestElement {
 	}
 
 	@Override
-	public void enterText(ActionStatus status, CalculatedValue text, IVisualRecorder recorder) {
-		channel.rootKeys(status, text.getCalculated());
-		status.endDuration();
+	public String enterText(ActionStatus status, CalculatedValue text, IVisualRecorder recorder) {
+		final String enterText = text.getCalculated();
+		channel.rootKeys(status, enterText);
+		return enterText;
 	}
 
 	@Override

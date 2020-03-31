@@ -75,11 +75,12 @@ public class TestElementImage extends TestElement {
 	}
 
 	@Override
-	public void sendText(ActionStatus status, CalculatedValue text) {
+	public String sendText(ActionStatus status, CalculatedValue text) {
 		for(SendKeyData sequence : text.getCalculatedText()) {
 			engine.getDesktopDriver().sendKeys(sequence.getSequenceDesktop());
 		}
 		channel.actionTerminated(status);
+		return text.getCalculated();
 	}
 
 	//-------------------------------------------------------------------------------------------------------------------

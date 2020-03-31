@@ -85,9 +85,9 @@ public class ActionAssertValue extends ActionExecute {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void execute(ActionTestScript ts) {
+	public void execute(ActionTestScript ts, String testName, int testLine) {
 		
-		super.execute(ts);
+		super.execute(ts, testName, testLine);
 		
 		final String value1Calculated = value1.getCalculated();
 		final String value2Calculated = value2.getCalculated();

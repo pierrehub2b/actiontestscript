@@ -27,11 +27,11 @@ import com.ats.script.actions.Action;
 import com.ats.tools.logger.levels.ErrorLevelLogger;
 import com.ats.tools.logger.levels.FullLevelLogger;
 import com.ats.tools.logger.levels.InfoLevelLogger;
-import com.ats.tools.logger.levels.LevelLoggerBase;
+import com.ats.tools.logger.levels.AtsLogger;
 import com.ats.tools.logger.levels.WarningLevelLogger;
 
 public class ExecutionLogger {
-
+	
 	private final static String ERROR_LEVEL = "error";
 	private final static String ALL_LEVEL = "all";
 	private final static String WARNING_LEVEL = "warning";
@@ -43,10 +43,10 @@ public class ExecutionLogger {
 	public static final String ANSI_YELLOW = "\u001B[33m";
 	public static final String ANSI_BLUE = "\u001B[34m";
 
-	private LevelLoggerBase levelLogger;
+	private AtsLogger levelLogger;
 
 	public ExecutionLogger() {
-		levelLogger = new LevelLoggerBase();
+		levelLogger = new AtsLogger();
 	}
 
 	public ExecutionLogger(PrintStream sysout, String verbose) {
@@ -60,7 +60,7 @@ public class ExecutionLogger {
 		}else if(ALL_LEVEL.equalsIgnoreCase(verbose)) {
 			levelLogger = new FullLevelLogger(sysout, "Error + Info + Warning + Details");
 		}else {
-			levelLogger = new LevelLoggerBase(sysout, "Disabled");
+			levelLogger = new AtsLogger(sysout, "Disabled");
 		}
 	}
 

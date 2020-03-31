@@ -40,6 +40,8 @@ import com.ats.generator.variables.ConditionalValue;
 import com.ats.generator.variables.Variable;
 import com.ats.script.actions.Action;
 import com.ats.script.actions.neoload.ActionNeoload;
+import com.ats.script.actions.performance.ActionPerformance;
+import com.ats.script.actions.performance.octoperf.ActionOctoperf;
 import com.ats.tools.Operators;
 import com.ats.tools.Utils;
 
@@ -170,6 +172,8 @@ public class ScriptHeader {
 			, "import " + ScriptHeader.class.getPackageName() + ".*;"
 			, "import " + Action.class.getPackageName() + ".*;"
 			, "import " + ActionNeoload.class.getPackageName() + ".*;"
+			, "import " + ActionPerformance.class.getPackageName() + ".*;"
+			, "import " + ActionOctoperf.class.getPackageName() + ".*;"
 			, "import " + ActionTestScript.class.getName() + ";"
 			, "import " + Cartesian.class.getName() + ";"
 			, "import " + Mouse.class.getName() + ";"

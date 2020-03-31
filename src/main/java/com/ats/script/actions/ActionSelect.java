@@ -26,6 +26,7 @@ import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
+import com.google.gson.JsonObject;
 
 public class ActionSelect extends ActionExecuteElement {
 
@@ -70,10 +71,19 @@ public class ActionSelect extends ActionExecuteElement {
 		
 		super.terminateExecution(ts);
 		
+		status.startAction(this);
 		getTestElement().select(status, selectValue);
 		
-		status.endDuration();
+		status.endAction();
 		ts.getRecorder().updateScreen(0, status.getDuration());
+	}
+	
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+		data.addProperty("select", selectValue.getValue().getCalculated());
+		data.addProperty("regexp", selectValue.isRegexp());
+		data.addProperty("name", selectValue.getName());
+		return super.getActionLogs(scriptName, scriptLine, data);
 	}
 
 	//--------------------------------------------------------

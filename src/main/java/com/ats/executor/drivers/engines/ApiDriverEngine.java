@@ -78,6 +78,7 @@ import com.ats.generator.variables.CalculatedProperty;
 import com.ats.graphic.TemplateMatchingSimple;
 import com.ats.script.ProjectData;
 import com.ats.script.actions.ActionApi;
+import com.ats.script.actions.ActionChannelStart;
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 
@@ -119,7 +120,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 				channel.getTopScriptPackage(),
 				getClass().getClassLoader());
 
-		if(channel.isNeoload()) {
+		if(channel.getPerformance() == ActionChannelStart.NEOLOAD) {
 			channel.setNeoloadDesignApi(DriverManager.ATS.getNeoloadDesignApi());
 			builder.proxy(DriverManager.ATS.getNeoloadProxy().getHttpProxy());
 		}else {

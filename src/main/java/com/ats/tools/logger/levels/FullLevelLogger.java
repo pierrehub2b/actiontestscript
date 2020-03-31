@@ -7,12 +7,14 @@ import com.google.gson.JsonObject;
 
 public class FullLevelLogger extends WarningLevelLogger {
 
+	private final static String LABEL = "ACTION";
+	
 	public FullLevelLogger(PrintStream out, String level) {
 		super(out, level);
 	}
 
 	@Override
 	public void action(Action action, String testName, int line) {
-		print("ACTION", action.getActionLogs(testName, line, new JsonObject()));
+		print(LABEL, action.getActionLogs(testName, line, new JsonObject()));
 	}
 }

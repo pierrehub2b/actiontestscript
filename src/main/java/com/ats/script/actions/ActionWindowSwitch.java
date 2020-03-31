@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.TryAndDelay;
 import com.ats.script.Script;
+import com.google.gson.JsonObject;
 
 public class ActionWindowSwitch extends ActionWindow {
 
@@ -58,6 +59,13 @@ public class ActionWindowSwitch extends ActionWindow {
 	public String exec(Channel channel) {
 		channel.switchWindow(status, num, tries);
 		return num + "";
+	}
+	
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+		data.addProperty("index", num);
+		data.addProperty("tries", tries);
+		return super.getActionLogs(scriptName, scriptLine, data);
 	}
 	
 	//--------------------------------------------------------

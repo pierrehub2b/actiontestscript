@@ -56,26 +56,28 @@ public class ActionGotoUrl extends ActionExecute {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void execute(ActionTestScript ts) {
-		super.execute(ts);
-		if(status.isPassed()) {
-			final String urlString = url.getCalculated();
+	public void execute(ActionTestScript ts, String testName, int testLine) {
 
+		super.execute(ts, testName, testLine);
+		
+		if(status.isPassed()) {
+			
+			status.startAction(this);
+			
+			final String urlString = url.getCalculated();
 			if(ts.getCurrentChannel() != null){
 				ts.getCurrentChannel().navigate(status, urlString);
 			}
-
-			status.endDuration();
+			
+			status.endAction();
+			
 			ts.getRecorder().updateScreen(0, status.getDuration(), urlString);
 		}
 	}
 
 	@Override
 	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
-
 		data.addProperty("url", url.getCalculated());
-		data.addProperty("duration", status.getDuration());
-
 		return super.getActionLogs(scriptName, scriptLine, data);
 	}
 

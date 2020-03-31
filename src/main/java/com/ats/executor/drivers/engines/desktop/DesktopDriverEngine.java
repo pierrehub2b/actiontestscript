@@ -325,7 +325,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 		}
 		
 		if(resp.errorCode == ActionStatus.WINDOW_NOT_FOUND) {
-			status.setError(ActionStatus.WINDOW_NOT_FOUND, "windows index not found");
+			status.setError(ActionStatus.WINDOW_NOT_FOUND, "cannot switch to window index '" + index + "'");
 		}else {
 			channel.updateWinHandle(getDesktopDriver(), index);
 			windowIndex = index;

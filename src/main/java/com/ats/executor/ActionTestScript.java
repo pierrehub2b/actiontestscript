@@ -70,6 +70,7 @@ import com.ats.script.actions.ActionCallscript;
 import com.ats.script.actions.ActionExecute;
 import com.ats.tools.Utils;
 import com.ats.tools.logger.ExecutionLogger;
+import com.ats.tools.logger.levels.AtsFailError;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
@@ -111,8 +112,16 @@ public class ActionTestScript extends Script implements ITest{
 		return returnValues;
 	}
 
-	private void setTestName(String name) {
+	public void updateTestName(String name) {
 		this.testName = name;
+	}
+	
+	public void scriptFail(String message) {
+		fail(message);
+	}
+		
+	public void addErrorStack(String value) {
+		status.addErrorStack(value);
 	}
 
 	//----------------------------------------------------------------------------------------------------------
@@ -132,7 +141,7 @@ public class ActionTestScript extends Script implements ITest{
 		java.util.logging.Logger.getLogger(OkHttpClient.class.getName()).setLevel(Level.FINE);
 
 		final TestRunner runner = (TestRunner) ctx;
-		setTestName(this.getClass().getName());
+		testName = this.getClass().getName();
 
 		final String suiteName = ctx.getSuite().getName();
 		status = new ScriptStatus(testName, suiteName);
@@ -210,13 +219,15 @@ public class ActionTestScript extends Script implements ITest{
 
 	@AfterMethod(alwaysRun=true)
 	public void cleanup(){
+		sendScriptFail(status.getCallscriptStack());
 		stopRecorder();
 		tearDown();
 	}
 
 	@Override
 	public String getTestName() {
-		return this.getClass().getName();
+		return testName;
+		//return this.getClass().getName();
 	}
 
 	//----------------------------------------------------------------------------------------------------------
@@ -245,6 +256,7 @@ public class ActionTestScript extends Script implements ITest{
 		this.channelManager = script.getChannelManager();
 		this.iteration = iteration;
 		this.csvFile = csvFile;
+		this.testName = getClass().getName();
 
 		final JsonObject log = testScript.getConditionLogs();
 
@@ -571,57 +583,68 @@ public class ActionTestScript extends Script implements ITest{
 	//---------------------------------------------------------------------------------------------
 
 	public static final String JAVA_EXECUTE_FUNCTION_NAME = "exec";
-
+	
 	public void exec(int line, Action action){
-		action.execute(this);
-		execFinished(line, action, true);
+		action.execute(this, getTestName(), line);
+		getTopScript().actionFinished(getTestName(), line, action, true);
 	}
-
+	
 	public void exec(int line, ActionCallscript action){
-		action.execute(getTestName(), line, this);
-		execFinished(line, action, true);
+		action.execute(this, getTestName(), line);
+		getTopScript().actionFinished(getTestName(), line, action, true);
 	}
-
+	
 	public void exec(int line, ActionExecute action){
-		action.execute(this);
-		execFinished(line, action, action.isStop());
+		action.execute(this, getTestName(), line);
+		getTopScript().actionFinished(getTestName(), line, action, action.isStop());
 	}
-
-	private void execFinished(int line, Action action, boolean stop) {
-		getTopScript().actionFinished(line, action, stop);
-	}
+		
+	//---------------------------------------------------------------------------------------------
 
 	private void failedAt(String actionClass, String script, int line, String app, int errorCode, String errorMessage) {
 		status.failed();
-		
-		final StringBuilder scriptLine = new StringBuilder(script).append(".").append(ATS_EXTENSION).append(":").append(line);
 
 		final JsonObject logs = new JsonObject();
 		logs.addProperty("app", app);
 		logs.addProperty("errorCode", errorCode);
 		logs.addProperty("errorMessage", errorMessage);
-
-		sendErrorLog(actionClass + " (" + scriptLine.toString() + ")", logs.toString());
 		
+		final StringBuilder sb = 
+				new StringBuilder(actionClass)
+				.append(" (")
+				.append(script)
+				.append(":")
+				.append(line)
+				.append(")");
+		
+		final String errorScript = sb.toString();
+		final String errorInfo = logs.toString();
+
+		sendErrorLog(errorScript, errorInfo);
+
 		if(status.isSuiteExecution()) {
-			fail("ATS " + actionClass + " execution error -> " + errorMessage + " at " + scriptLine.toString());
+			throw new AtsFailError(errorScript, errorInfo);
+		}
+	}
+
+	public void actionFinished(String testName, int line, Action action, boolean stop) {
+		status.addAction();
+
+		final ActionStatus actionStatus = action.getStatus();
+
+		if(actionStatus.isPassed()) {
+			sendActionLog(action, testName, line);
+		}else {
+			if(stop) {
+				getTopScript().failedAt(action.getClass().getSimpleName(), testName, line, actionStatus.getChannelApplication(), actionStatus.getCode(), actionStatus.getFailMessage());
+			}else {
+				sendActionLog(action, testName, line);
+			}
 		}
 	}
 	
-	public void actionFinished(int line, Action action, boolean stop) {
-		status.addAction();
-		
-		final ActionStatus actionStatus = action.getStatus();
-		
-		if(actionStatus.isPassed()) {
-			sendActionLog(action, getTestName(), line);
-		}else {
-			if(stop) {
-				failedAt(action.getClass().getSimpleName(), getTestName(), line, actionStatus.getChannelApplication(), actionStatus.getCode(), actionStatus.getFailMessage());
-			}else {
-				sendActionLog(action, getTestName(), line);
-			}
-		}
+	public void la (String message) {
+		fail(message);
 	}
 
 	//-----------------------------------------------------------------------------------------------------------
@@ -666,4 +689,5 @@ public class ActionTestScript extends Script implements ITest{
 	public void stopRecorder() {
 		topScript.setRecorder(new VisualRecorderNull());
 	}
+
 }

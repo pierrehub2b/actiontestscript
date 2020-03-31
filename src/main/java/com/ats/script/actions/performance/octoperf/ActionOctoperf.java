@@ -38,7 +38,7 @@ public class ActionOctoperf extends Action {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void execute(ActionTestScript ts) {
+	public void execute(ActionTestScript ts, String testName, int testLine) {
 
 	}
 }

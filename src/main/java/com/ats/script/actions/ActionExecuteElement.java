@@ -82,9 +82,9 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
 
-	public void execute(ActionTestScript ts, String operator, int value) {
+	public void execute(ActionTestScript ts, String testName, int testLine, String operator, int value) {
 
-		super.execute(ts);
+		super.execute(ts, testName, testLine);
 		
 		if(status.isPassed()) {
 
@@ -198,18 +198,18 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 	}
 	
 	@Override
-	public void execute(ActionTestScript ts) {
+	public void execute(ActionTestScript ts, String testName, int testLine) {
 		
 		int maxTry = AtsManager.getMaxStaleOrJavaScriptError();
 		while(maxTry > 0) {
 			try {
-				execute(ts, Operators.GREATER, 0);
+				execute(ts, testName, testLine, Operators.GREATER, 0);
 				return;
 			}catch(JavascriptException e) {
-				System.out.println("javascript error .... try again : " + maxTry);
+				ts.getTopScript().sendWarningLog("Javascript error", "try again : " + maxTry);
 				status.setException(ActionStatus.JAVASCRIPT_ERROR, e);
 			}catch(StaleElementReferenceException e) {
-				System.out.println("stale reference error .... try again : " + maxTry);
+				ts.getTopScript().sendWarningLog("StaleReference error", "try again : " + maxTry);
 				status.setException(ActionStatus.WEB_DRIVER_ERROR, e);
 			}
 			
@@ -219,20 +219,6 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 		}
 		
 		throw new WebDriverException("execute element error : " + status.getFailMessage());
-		
-		/*try {
-			execute(ts, Operators.GREATER, 0);
-			maxExecution = 0;
-		}catch (StaleElementReferenceException | JavascriptException e) {
-			if(maxExecution < AtsManager.getMaxStaleError()) {
-				maxExecution++;
-				ts.getCurrentChannel().sleep(200);
-				setTestElement(null);
-				execute(ts);
-			}else {
-				throw e;
-			}
-		}*/
 	}
 
 	private void asyncExec(ActionTestScript ts) {
@@ -269,7 +255,7 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 
 	@Override
 	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
-		data.addProperty("duration", status.getDuration() - status.getSearchDuration() - getDelay());
+		data.addProperty("searchDuration", status.getSearchDuration());
 		data.addProperty("delay", getDelay());
 		data.addProperty("occurrences", status.getElement().getCount());
 		return super.getActionLogs(scriptName, scriptLine, data);

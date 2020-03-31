@@ -79,6 +79,7 @@ import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.actions.ActionApi;
+import com.ats.script.actions.ActionChannelStart;
 import com.ats.script.actions.ActionGotoUrl;
 import com.ats.script.actions.ActionSelect;
 import com.ats.script.actions.ActionWindowState;
@@ -131,9 +132,6 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	protected String searchElementScript = JS_SEARCH_ELEMENT;
 
-	//private BrowserMobProxy proxy;
-	//private String browserName = "";
-
 	public WebDriverEngine(
 			Channel channel, 
 			DriverProcess driverProcess, 
@@ -178,21 +176,17 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		final int scriptTimeout = ats.getScriptTimeOut();
 		final int pageLoadTimeout = ats.getPageloadTimeOut();
 		final int watchdog = ats.getWatchDogTimeOut();		
-
-		if(channel.isNeoload()) {
-			channel.setNeoloadDesignApi(ats.getNeoloadDesignApi());
-			cap.setCapability(CapabilityType.PROXY, ats.getNeoloadProxy().getValue());
-
-			/*proxy = new BrowserMobProxyServer();
-			proxy.start(0);
-			proxy.newHar("ats_page_0", "ATS start page");
-
-			proxy.enableHarCaptureTypes(CaptureType.REQUEST_CONTENT, CaptureType.RESPONSE_CONTENT);
-			cap.setCapability(CapabilityType.PROXY, ClientUtil.createSeleniumProxy(proxy));*/
-
+		
+		if(channel.getPerformance() == ActionChannelStart.PERF) {
+			cap.setCapability(CapabilityType.PROXY, channel.startHarProxy(ats));
 		}else {
-			channel.setNeoload(false);
-			cap.setCapability(CapabilityType.PROXY, ats.getProxy().getValue());
+			channel.noHarProxy();
+			if(channel.getPerformance() == ActionChannelStart.NEOLOAD) {
+				channel.setNeoloadDesignApi(ats.getNeoloadDesignApi());
+				cap.setCapability(CapabilityType.PROXY, ats.getNeoloadProxy().getValue());
+			}else {
+				cap.setCapability(CapabilityType.PROXY, ats.getProxy().getValue());
+			}
 		}
 
 		cap.setCapability(CapabilityType.SUPPORTS_FINDING_BY_CSS, false);
@@ -551,7 +545,6 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			try {
 				driver.executeScript("arguments[0].blur();", element.getWebElement());
 			}catch(Exception e) {}
-			//executeJavaScript(status, "blur();", element.getWebElement());
 		}
 	}
 
@@ -657,32 +650,10 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void close(boolean keepRunning) {
-
 		if(driver != null){
 			Arrays.asList(getWindowsHandle(0, 0)).stream().sorted(Collections.reverseOrder()).forEach(s -> closeWindowHandler(s));
 		}
-
 		getDriverProcess().close(keepRunning);
-
-		/*if(proxy != null) {
-
-			final HarNameVersion nameVersion = new HarNameVersion("ats", AtsManager.getVersion());
-			nameVersion.setComment("browser=" + browserName + ", channel=" + channel.getName());
-
-			final Har har = proxy.getHar();
-			har.getLog().setCreator(nameVersion);
-
-			try {
-				final File f = new File(channel.getName() + "-" + browserName + ".har");
-				har.writeTo(f);
-			} catch (Exception e) {
-				System.err.println(e.getMessage());
-			}
-
-			proxy.stop();
-			proxy.endHar();
-			proxy = null;
-		}*/
 	}
 
 	//-----------------------------------------------------------------------------------------------------------------------------------
@@ -704,6 +675,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			while(maxTry > 0) {
 				status.setNoError();
 				try {
+					waitReady();
 					scrollAndMove(foundElement, position, offsetX, offsetY);
 					maxTry = 0;
 				}catch(StaleElementReferenceException e0) {
@@ -723,6 +695,22 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			}
 		}
 	}
+	
+	private void waitReady() {
+		/*int maxTry = 10;
+		while(inProgress() && maxTry > 0) {
+			channel.sleep(500);
+			maxTry--;
+		}*/
+	}
+
+	private boolean inProgress() {
+		final Object progress = runJavaScript("var result=ProgressForm.inProgress();");
+		if(progress != null) {
+			return progress.equals(true);
+		}
+		return false;
+	}
 
 	private void scrollAndMove(FoundElement element, MouseDirection position, int offsetX, int offsetY) {
 		scroll(element);
@@ -732,12 +720,17 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	protected void move(FoundElement element, int offsetX, int offsetY) {
-		actions.moveToElement(element.getValue(), offsetX, offsetY).perform();
+		try {
+			actions.moveToElement(element.getValue(), offsetX, offsetY).perform();
+		}catch (JavascriptException e) {
+			if(!e.getMessage().contains("elementsFromPoint")){
+				throw e;
+			}
+		}
 	}
 
 	@Override
 	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {
-
 		final Rectangle rect = element.getRectangle();
 		try {
 			click(element, getOffsetX(rect, position) + offsetX, getOffsetY(rect, position) + offsetY);
@@ -883,6 +876,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void switchWindow(ActionStatus status, int index, int tries) {
+		waitReady();
 		if(index >= 0) {
 			final String[] wins = getWindowsHandle(index, tries);
 			if(wins.length > index) {
@@ -890,7 +884,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 				channel.cleanHandle();
 				getDesktopDriver().updateWindowHandle(channel);
 			}else {
-				status.setError(ActionStatus.WINDOW_NOT_FOUND, "cannot switch to window index '" + index + "', only " + wins.length + " windows found");
+				status.setError(ActionStatus.WINDOW_NOT_FOUND, "cannot switch to window index '" + index + "', only " + wins.length + " window(s) found");
 			}
 		}
 	}

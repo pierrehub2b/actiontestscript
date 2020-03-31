@@ -90,8 +90,8 @@ public class ActionAssertCount extends ActionExecuteElement {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void execute(ActionTestScript ts) {
-		super.execute(ts, operator, value);
+	public void execute(ActionTestScript ts, String testName, int testLine) {
+		super.execute(ts, testName, testLine, operator, value);
 	}
 
 	@Override

@@ -40,7 +40,7 @@ import com.ats.generator.objects.MouseDirection;
 
 public class EdgeDriverEngine extends WebDriverEngine {
 
-	private static final String JS_WAIT_READYSTATE = "var interval=setInterval(function(){if(window.document.readyState==='complete'){clearInterval(interval);done();}},200);";
+	private static final String JS_WAIT_READYSTATE = "var interval=setInterval(function(){if(window.document.readyState==='complete'){clearInterval(interval);done();}},200)};";
 
 	public EdgeDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
 		super(channel, DriverManager.EDGE_BROWSER, driverProcess, windowsDriver, props);

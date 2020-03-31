@@ -17,18 +17,29 @@ specific language governing permissions and limitations
 under the License.
  */
 
-package com.ats.script.actions.performance;
+package com.ats.tools.logger.levels;
 
-import com.ats.script.Script;
-import com.ats.script.actions.Action;
+@SuppressWarnings("serial")
+public class AtsFailError extends AssertionError {
+	
+	private String info;
+	private String details;
+	
+	private static String getDetailedMessage(String info, String details) {
+		return AtsLogger.getAtsFailed() + info + " -> " + details;
+	}
+	
+	public AtsFailError(String info, String details) {
+		super(getDetailedMessage(info, details));
+		this.info = info;
+		this.details = details;
+	}
+	
+	public String getInfo() {
+		return info;
+	}
 
-public class ActionPerformance extends Action {
-
-	public static final String SCRIPT_PERFORMANCE_LABEL = "perf";
-
-	public ActionPerformance() {}
-
-	public ActionPerformance(Script script) {
-		super(script);
+	public String getFullMessage() {
+		return getDetailedMessage(info, details);
 	}
 }

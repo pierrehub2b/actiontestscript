@@ -21,6 +21,7 @@ package com.ats.script.actions;
 
 import com.ats.executor.channels.Channel;
 import com.ats.script.Script;
+import com.google.gson.JsonObject;
 
 public class ActionWindowState extends ActionWindow {
 
@@ -59,6 +60,12 @@ public class ActionWindowState extends ActionWindow {
 			}
 		}
 		return state;
+	}
+	
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+		data.addProperty("state", state);
+		return super.getActionLogs(scriptName, scriptLine, data);
 	}
 	
 	//--------------------------------------------------------

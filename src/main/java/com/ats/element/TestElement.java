@@ -28,7 +28,6 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 import org.openqa.selenium.ElementNotInteractableException;
-import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
@@ -360,7 +359,7 @@ public class TestElement{
 		engine.clearText(status, this, md);
 	}
 	
-	public void enterText(ActionStatus status, CalculatedValue text, IVisualRecorder recorder) {
+	public String enterText(ActionStatus status, CalculatedValue text, IVisualRecorder recorder) {
 
 		final MouseDirection md = new MouseDirection();
 		
@@ -373,7 +372,7 @@ public class TestElement{
 
 			if(status.isPassed()) {
 
-				recorder.updateScreen(true);
+				recorder.updateScreen(false);
 
 				if(isPassword()) {
 					enteredText = "xxxxxxxxxx";
@@ -384,12 +383,10 @@ public class TestElement{
 				sendText(status, text);
 			}
 		}
-		
-		status.endDuration();
-		recorder.updateTextScreen(0, status.getDuration(), enteredText, status.getMessage());
+		return enteredText;
 	}
 
-	public void sendText(ActionStatus status, CalculatedValue text) {
+	public String sendText(ActionStatus status, CalculatedValue text) {
 		final ArrayList<SendKeyData> textData = text.getCalculatedText();
 		int max = maxTry;
 		while(!trySendText(status, textData) && max > 0) {
@@ -397,6 +394,7 @@ public class TestElement{
 			max--;
 		}
 		channel.actionTerminated(status);
+		return text.getCalculated();
 	}
 
 	private boolean trySendText(ActionStatus status, ArrayList<SendKeyData> text) {

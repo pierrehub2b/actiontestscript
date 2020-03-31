@@ -66,13 +66,16 @@ import com.ats.script.actions.neoload.ActionNeoloadContainer;
 import com.ats.script.actions.neoload.ActionNeoloadRecord;
 import com.ats.script.actions.neoload.ActionNeoloadStart;
 import com.ats.script.actions.neoload.ActionNeoloadStop;
+import com.ats.script.actions.performance.ActionPerformance;
+import com.ats.script.actions.performance.ActionPerformanceRecord;
+import com.ats.script.actions.performance.ActionPerformanceStart;
 import com.ats.tools.Utils;
 
 public class Lexer {
 
 	private final Pattern ACTION_PATTERN = Pattern.compile("(.*)\\[(.*?)\\]", Pattern.CASE_INSENSITIVE);
 
-	private GeneratorReport report;//TODO create report with list of failed ATS to java conversions steps
+	private GeneratorReport report; //TODO create report with list of failed ATS to java conversions steps
 
 	private ProjectData projectData;
 
@@ -190,6 +193,16 @@ public class Lexer {
 					cname = dataArray.remove(0).trim();
 				}				
 				script.addAction(new ActionChannelClose(script, cname, options.contains(ActionChannelClose.NO_STOP_LABEL)), disabled);
+				
+			}else if(ActionPerformanceRecord.SCRIPT_LABEL.equals(actionType)){
+				
+				if(dataArray.size() > 0) {
+					script.addAction(new ActionPerformanceRecord(script, dataArray.remove(0).trim(), dataArray), disabled);
+				}
+
+			}else if(ActionPerformanceStart.SCRIPT_LABEL.equals(actionType)){
+				
+				script.addAction(new ActionPerformanceStart(script, options, dataArray), disabled);
 
 			}else if(ActionNeoloadStart.SCRIPT_LABEL.equals(actionType) || ActionNeoloadStop.SCRIPT_LABEL.equals(actionType)){
 

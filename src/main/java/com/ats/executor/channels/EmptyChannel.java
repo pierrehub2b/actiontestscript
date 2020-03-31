@@ -15,41 +15,61 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
-package com.ats.script.actions;
+package com.ats.executor.channels;
 
-import com.ats.executor.ActionTestScript;
-import com.ats.executor.channels.Channel;
-import com.ats.script.Script;
+import com.ats.executor.ActionStatus;
 
-public abstract class ActionWindow extends Action {
+public class EmptyChannel extends Channel {
+	
+	@Override
+	public ActionStatus newActionStatus(String testName, int testLine) {
+		return new ActionStatus(null, testName, testLine);
+	}
 
-	public static final String SCRIPT_LABEL = "window-";
+	@Override
+	public String getApplicationPath() {
+		return "";
+	}
 
-	public ActionWindow() {}
-
-	public ActionWindow(Script script) {
-		super(script);
+	@Override
+	public boolean isDesktop() {
+		return false;
 	}
 	
 	@Override
-	public void execute(ActionTestScript ts, String testName, int testLine) {
-		super.execute(ts, testName, testLine);
-		final Channel channel = ts.getCurrentChannel();
-		
-		String execResult = "";
-		if(channel != null){
-			execResult = exec(channel);
-		}else {
-			status.setPassed(false);
-		}
-		
-		status.endDuration();
-		ts.getRecorder().updateScreen(0, status.getDuration(), execResult);
+	public boolean isMobile() {
+		return false;
 	}
-	
-	protected String exec(Channel channel) {
+
+	@Override
+	public String getName() {
+		return "";
+	}
+
+	@Override
+	public String getAuthentication() {
+		return "";
+	}
+
+	@Override
+	public int getPerformance() {
+		return 0;
+	}
+
+	@Override
+	public boolean isCurrent() {
+		return false;
+	}
+
+	@Override
+	public byte[] getIcon() {
+		return new byte[0];
+	}
+
+	@Override
+	public String getScreenServer() {
 		return "";
 	}
 }

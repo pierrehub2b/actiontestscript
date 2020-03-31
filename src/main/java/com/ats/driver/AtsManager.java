@@ -41,6 +41,8 @@ import com.ats.executor.TestBound;
 import com.ats.generator.ATS;
 import com.ats.tools.Utils;
 
+import net.lightbody.bmp.proxy.BlacklistEntry;
+
 public class AtsManager {
 
 	public static final String ATS_FOLDER = ".actiontestscript";
@@ -62,7 +64,7 @@ public class AtsManager {
 	private static final int MAX_TRY_SEARCH = 15;
 	private static final int MAX_TRY_PROPERTY = 10;
 	private static final int MAX_TRY_WEBSERVICE = 1;
-	
+
 	private static final int MAX_TRY_MOBILE = 5;
 
 	private static final int SCROLL_UNIT = 120;
@@ -83,7 +85,7 @@ public class AtsManager {
 	private int scriptTimeOut = SCRIPT_TIMEOUT;
 	private int pageloadTimeOut = PAGELOAD_TIMEOUT;
 	private int watchDogTimeOut = WATCHDOG_TIMEOUT;
-	
+
 	private int webServiceTimeOut = WEBSERVICE_TIMEOUT;
 
 	private int maxTrySearch = MAX_TRY_SEARCH;
@@ -95,15 +97,42 @@ public class AtsManager {
 	private AtsProxy neoloadProxy;
 
 	private String neoloadDesignApi;
+	
+	private OctoperfServer octoperf;
+	private ArrayList<BlacklistEntry> blackListServers;
 
 	private List<ApplicationProperties> applicationsList = new ArrayList<ApplicationProperties>();
-	
+
 	public static int getScrollUnit() {
 		return SCROLL_UNIT;
 	}
-	
+
 	public static int getMaxStaleOrJavaScriptError() {
 		return MAX_STALE_OR_JAVASCRIPT_ERROR;
+	}
+	
+	private static String getElementText(Node node) {
+		return getElementText((Element)node);
+	}
+	
+	private static String getElementText(Element elem) {
+		return elem.getTextContent().replaceAll("\n", "").replaceAll("\r", "").trim();
+	}
+	
+	private static double getElementDouble(Element elem) {
+		final String value = elem.getTextContent().replaceAll("\n", "").replaceAll("\r", "").trim();
+		try {
+			return Double.parseDouble(value);
+		}catch(NumberFormatException e){}
+		return 0D;
+	}
+	
+	private static int getElementInt(Element elem) {
+		final String value = elem.getTextContent().replaceAll("\n", "").replaceAll("\r", "").trim();
+		try {
+			return Integer.parseInt(value);
+		}catch(NumberFormatException e){}
+		return 0;
 	}
 
 	public AtsManager() {
@@ -134,7 +163,414 @@ public class AtsManager {
 
 		final File xmlFile = propertiesPath.toFile();
 		if(xmlFile.exists()) {
-			try {
+			
+				try {
+					final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+					try {
+						final DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+						final Document doc = dBuilder.parse(xmlFile);
+
+						doc.getDocumentElement().normalize();
+
+						final NodeList executeChildren = ((Element) doc.getChildNodes().item(0)).getChildNodes();
+						for (int i = 0; i < executeChildren.getLength(); i++) {
+							if (executeChildren.item(i) instanceof Element) {
+
+								final Element type = (Element) executeChildren.item(i);
+
+								switch (type.getNodeName().toLowerCase()) {
+
+								case "performance":
+									final NodeList perfChildren = type.getChildNodes();
+									for (int j = 0; j < perfChildren.getLength(); j++) {
+										if (perfChildren.item(j) instanceof Element) {
+											
+											final Element perfElement = (Element) perfChildren.item(j);
+											switch(perfElement.getNodeName().toLowerCase()) {
+
+											case "octoperf":
+												
+												String url = null;
+												String user = null;
+												String password = null;
+												
+												NodeList nl = perfElement.getElementsByTagName("server");
+												if(nl != null) {
+													url = getElementText(nl.item(0));
+												}
+
+												nl = perfElement.getElementsByTagName("user");
+												if(nl != null) {
+													user = getElementText(nl.item(0));
+												}
+
+												nl = perfElement.getElementsByTagName("password");
+												if(nl != null) {
+													password = getElementText(nl.item(0));
+												}
+												
+												if(url != null && user != null && password != null) {
+													octoperf = new OctoperfServer(url, user, password);
+												}
+												
+												break;
+												
+											case "blacklist":
+												blackListServers = new ArrayList<BlacklistEntry>();
+												final NodeList blackList = perfElement.getElementsByTagName("url");
+												for (int k = 0; k < blackList.getLength(); k++) {
+													if (blackList.item(k) instanceof Element) {
+														blackListServers.add(new BlacklistEntry(getElementText(blackList.item(k)), 404));
+													}
+												}
+												break;
+											}
+										}
+									}
+									break;
+									
+								case "neoload":
+									final NodeList neoloadChildren = type.getChildNodes();
+									for (int j = 0; j < neoloadChildren.getLength(); j++) {
+										if (neoloadChildren.item(j) instanceof Element) {
+											final Element neoloadElement = (Element) neoloadChildren.item(j);
+
+											String host = null;
+											String port = null;
+											String api = null;
+											String apiPort = null;
+																					
+											if(neoloadElement.getTagName().equals("recorder")) {
+												final NodeList recorderChildren = neoloadElement.getChildNodes();
+												for (int k = 0; k < recorderChildren.getLength(); k++) {
+													if (recorderChildren.item(k) instanceof Element) {
+														final Element recorderElement = (Element) recorderChildren.item(k);
+														if(recorderElement.getNodeName().equals("host")) {
+															host = getElementText(recorderElement);
+														}else if(recorderElement.getNodeName().equals("port")){
+															port = getElementText(recorderElement);
+														}
+													}
+												}
+											}else if(neoloadElement.getTagName().equals("design")) {
+												final NodeList designChildren = neoloadElement.getChildNodes();
+												for (int k = 0; k < designChildren.getLength(); k++) {
+													if (designChildren.item(k) instanceof Element) {
+														final Element designElement = (Element) designChildren.item(k);
+														if(designElement.getNodeName().equals("api")) {
+															api = getElementText(designElement);
+														}else if(designElement.getNodeName().equals("port")){
+															apiPort = getElementText(designElement);
+														}
+													}
+												}
+											}
+											
+											if(host != null && port != null) {
+												neoloadProxy = new AtsProxy(host, port);
+												
+												if(api != null && apiPort != null) {
+													
+													if(!api.startsWith("/")) {
+														api = "/" + api;
+													}
+													if(!api.endsWith("/")) {
+														api = api + "/";
+													}
+													
+													neoloadDesignApi = "http://" + neoloadProxy.getHost() + ":" + apiPort + api;
+												}
+											}
+										}
+									}
+									
+									break;
+									
+								case "proxy":
+
+									final NodeList proxyChildren = type.getChildNodes();
+
+									String proxyType = null;
+									String host = null;
+									int port = 0;
+									
+									for (int j = 0; j < proxyChildren.getLength(); j++) {
+										if (proxyChildren.item(j) instanceof Element) {
+											final Element proxyElement = (Element) proxyChildren.item(j);
+											switch (proxyElement.getNodeName().toLowerCase()) {
+											case "type":
+												proxyType = getElementText(proxyElement);
+												break;
+											case "host":
+												host = getElementText(proxyElement);
+												break;
+											case "port":
+												port = getElementInt(proxyElement);
+												break;
+											}
+										}
+									}
+									
+									if(AtsProxy.AUTO.equals(proxyType)) {
+										proxy = new AtsProxy(AtsProxy.AUTO);
+									}else if(AtsProxy.DIRECT.equals(proxyType)) {
+										proxy = new AtsProxy(AtsProxy.DIRECT);
+									}else if(AtsProxy.MANUAL.equals(proxyType) && host != null && port > 0) {
+										proxy = new AtsProxy(AtsProxy.MANUAL, host, port);
+									}else {
+										proxy = new AtsProxy(AtsProxy.SYSTEM);
+									}
+									break;
+									
+								case "appbounding":
+									final NodeList boundingChildren = type.getChildNodes();
+									for (int j = 0; j < boundingChildren.getLength(); j++) {
+										if (boundingChildren.item(j) instanceof Element) {
+											final Element boundingElement = (Element) boundingChildren.item(j);
+
+											switch(boundingElement.getTagName()) {
+											case "x":
+												applicationX = getElementDouble(boundingElement);
+												break;
+											case "y":
+												applicationY = getElementDouble(boundingElement);
+												break;
+											case "width":
+												applicationWidth = getElementDouble(boundingElement);
+												break;
+											case "height":
+												applicationHeight = getElementDouble(boundingElement);
+												break;
+											}
+										}
+									}
+									break;
+									
+								case "maxtry":
+									final NodeList maxtryChildren = type.getChildNodes();
+									for (int j = 0; j < maxtryChildren.getLength(); j++) {
+										if (maxtryChildren.item(j) instanceof Element) {
+											final Element maxtryElement = (Element) maxtryChildren.item(j);
+
+											switch(maxtryElement.getTagName().toLowerCase()) {
+											case "searchelement":
+												maxTrySearch = getElementInt(maxtryElement);
+												break;
+											case "getproperty":
+												maxTryProperty = getElementInt(maxtryElement);
+												break;
+											case "webservice":
+												maxTryWebservice = getElementInt(maxtryElement);
+												break;
+											}
+										}
+									}
+									break;
+									
+								case "timeout":
+									final NodeList timeoutChildren = type.getChildNodes();
+									for (int j = 0; j < timeoutChildren.getLength(); j++) {
+										if (timeoutChildren.item(j) instanceof Element) {
+											final Element timeoutElement = (Element) timeoutChildren.item(j);
+
+											switch(timeoutElement.getTagName().toLowerCase()) {
+											case "script":
+												scriptTimeOut = getElementInt(timeoutElement);
+												break;
+											case "pageload":
+												pageloadTimeOut = getElementInt(timeoutElement);
+												break;
+											case "watchdog":
+												watchDogTimeOut = getElementInt(timeoutElement);
+												break;
+											case "webservice":
+												webServiceTimeOut = getElementInt(timeoutElement);
+												break;
+											}
+										}
+									}
+									break;
+									
+								case "browsers":
+									final NodeList browsers = type.getElementsByTagName("browser");
+									for (int j = 0; j < browsers.getLength(); j++) {
+
+										String name = null;
+										String waitAction = null;
+										String path = null;
+										String driver = null;
+										String userDataDir = null;
+										String check = null;
+										String lang = null;
+
+										if (browsers.item(j) instanceof Element) {
+											final Element browser = (Element) browsers.item(j);
+											final NodeList browserAttributes = browser.getChildNodes();
+											for (int k = 0; k < browserAttributes.getLength(); k++) {
+												if (browserAttributes.item(k) instanceof Element) {
+													final Element browserElement = (Element) browserAttributes.item(k);
+
+													switch (browserElement.getNodeName().toLowerCase()) {
+													case "name":
+														name = getElementText(browserElement);
+														break;
+													case "waitaction":
+														waitAction = getElementText(browserElement);
+														break;
+													case "driver":
+														driver = getElementText(browserElement);
+														break;
+													case "path":
+														path = getElementText(browserElement);
+														break;
+													case "userdatadir":
+														userDataDir = getElementText(browserElement);
+														break;
+													case "waitProperty":
+														check = getElementText(browserElement);
+														break;
+													case "lang":
+														lang = getElementText(browserElement);
+														break;
+													}
+												}
+											}
+											
+											if(name != null) {
+												addApplicationProperties(ApplicationProperties.BROWSER_TYPE, name, driver, path, waitAction, check, lang, userDataDir);
+											}
+										}
+									}
+									break;
+									
+								case "applications":
+									final NodeList applications = type.getElementsByTagName("application");
+									for (int j = 0; j < applications.getLength(); j++) {
+
+										String name = null;
+										String waitAction = null;
+										String path = null;
+
+										if (applications.item(j) instanceof Element) {
+											final Element application = (Element) applications.item(j);
+											final NodeList applicationAttributes = application.getChildNodes();
+											for (int k = 0; k < applicationAttributes.getLength(); k++) {
+												if (applicationAttributes.item(k) instanceof Element) {
+													final Element applicationElement = (Element) applicationAttributes.item(k);
+
+													switch (applicationElement.getNodeName().toLowerCase()) {
+													case "name":
+														name = getElementText(applicationElement);
+														break;
+													case "waitaction":
+														waitAction = getElementText(applicationElement);
+														break;
+													case "path":
+														path = getElementText(applicationElement);
+														break;
+													}
+												}
+											}
+											
+											if(name != null && path != null) {
+												addApplicationProperties(ApplicationProperties.DESKTOP_TYPE, name, path, waitAction, "", null, null);
+											}
+										}
+									}
+
+									break;
+									
+								case "mobiles":
+									final NodeList mobiles = type.getElementsByTagName("mobile");
+									for (int j = 0; j < mobiles.getLength(); j++) {
+
+										String name = null;
+										String waitAction = null;
+										String endpoint = null;
+										String packageName = null;
+
+										if (mobiles.item(j) instanceof Element) {
+											final Element mobile = (Element) mobiles.item(j);
+											final NodeList mobileAttributes = mobile.getChildNodes();
+											for (int k = 0; k < mobileAttributes.getLength(); k++) {
+												if (mobileAttributes.item(k) instanceof Element) {
+													final Element mobileElement = (Element) mobileAttributes.item(k);
+
+													switch (mobileElement.getNodeName().toLowerCase()) {
+													case "name":
+														name = getElementText(mobileElement);
+														break;
+													case "waitaction":
+														waitAction = getElementText(mobileElement);
+														break;
+													case "endpoint":
+														endpoint = getElementText(mobileElement);
+														break;
+													case "package":
+														packageName = getElementText(mobileElement);
+														break;
+													}
+												}
+											}
+											
+											if(name != null && endpoint != null && packageName != null) {
+												addApplicationProperties(ApplicationProperties.MOBILE_TYPE, name, endpoint + "/" + packageName, waitAction, "", null, null);
+											}
+										}
+									}
+									break;
+									
+								case "apis":
+									final NodeList apis = type.getElementsByTagName("api");
+									for (int j = 0; j < apis.getLength(); j++) {
+
+										String name = null;
+										String waitAction = null;
+										String url = null;
+
+										if (apis.item(j) instanceof Element) {
+											final Element api = (Element) apis.item(j);
+											final NodeList apiAttributes = api.getChildNodes();
+											for (int k = 0; k < apiAttributes.getLength(); k++) {
+												if (apiAttributes.item(k) instanceof Element) {
+													final Element apiElement = (Element) apiAttributes.item(k);
+
+													switch (apiElement.getNodeName().toLowerCase()) {
+													case "name":
+														name = getElementText(apiElement);
+														break;
+													case "waitaction":
+														waitAction = getElementText(apiElement);
+														break;
+													case "url":
+														url = getElementText(apiElement);
+														break;
+													}
+												}
+											}
+											
+											if(name != null && url != null) {
+												addApplicationProperties(ApplicationProperties.API_TYPE, name, url, waitAction, "", null, null);
+											}
+										}
+									}
+									break;
+								}
+							}
+						}
+
+					} catch (ParserConfigurationException e) {
+
+					} catch (SAXException e) {
+
+					}
+
+				} catch (IOException e) {
+
+				}
+			
+			
+			/*try {
 
 				final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 
@@ -168,7 +604,7 @@ public class AtsManager {
 													path = nodeList.item(0).getChildNodes().item(0).getNodeValue();
 												}
 											}
-											
+
 											nodeList = browserElement.getElementsByTagName("userDataDir");
 											if(nodeList != null && nodeList.getLength() > 0) {
 												if(nodeList.item(0).getChildNodes().getLength() > 0) {
@@ -258,7 +694,7 @@ public class AtsManager {
 						if(timeOut != null && timeOut.getLength() > 0) {
 							watchDogTimeOut = Utils.string2Int(timeOut.item(0).getChildNodes().item(0).getNodeValue(), WATCHDOG_TIMEOUT); 
 						}
-						
+
 						timeOut = ((Element)nl0.item(0)).getElementsByTagName("webService");
 						if(timeOut != null && timeOut.getLength() > 0) {
 							webServiceTimeOut = Utils.string2Int(timeOut.item(0).getChildNodes().item(0).getNodeValue(), WEBSERVICE_TIMEOUT);
@@ -276,7 +712,7 @@ public class AtsManager {
 						if(maxTryNode != null && maxTryNode.getLength() > 0) {
 							maxTryProperty = Utils.string2Int(maxTryNode.item(0).getChildNodes().item(0).getNodeValue(), MAX_TRY_PROPERTY);
 						}
-						
+
 						maxTryNode = ((Element)nl0.item(0)).getElementsByTagName("webService");
 						if(maxTryNode != null && maxTryNode.getLength() > 0) {
 							maxTryWebservice = Utils.string2Int(maxTryNode.item(0).getChildNodes().item(0).getNodeValue(), MAX_TRY_WEBSERVICE);
@@ -523,7 +959,7 @@ public class AtsManager {
 
 			} catch (IOException e) {
 
-			}
+			}*/
 		}
 
 		return new Properties();
@@ -562,7 +998,7 @@ public class AtsManager {
 	public int getWatchDogTimeOut() {
 		return watchDogTimeOut;
 	}
-	
+
 	public int getWebServiceTimeOut() {
 		return webServiceTimeOut;
 	}
@@ -586,15 +1022,15 @@ public class AtsManager {
 	public int getMaxTryProperty() {
 		return maxTryProperty;
 	}
-	
+
 	public int getMaxTryMobile() {
 		return maxTryMobile;
 	}
-	
+
 	public int getMaxTryWebservice() {
 		return maxTryWebservice;
 	}
-	
+
 	public String getNeoloadDesignApi() {
 		return neoloadDesignApi;
 	}
@@ -608,5 +1044,13 @@ public class AtsManager {
 
 	public AtsProxy getProxy() {
 		return proxy;
+	}
+
+	public ArrayList<BlacklistEntry> getBlackListServers() {
+		return blackListServers;
+	}
+	
+	public OctoperfServer getOctoperf() {
+		return octoperf;
 	}
 }

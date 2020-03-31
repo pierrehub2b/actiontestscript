@@ -37,8 +37,8 @@ public abstract class ActionChannel extends Action{
 	}
 
 	@Override
-	public void execute(ActionTestScript ts) {
-		super.execute(ts);
+	public void execute(ActionTestScript ts, String testName, int testLine) {
+		super.execute(ts, testName, testLine);
 	}
 	
 	@Override

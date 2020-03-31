@@ -17,18 +17,22 @@ specific language governing permissions and limitations
 under the License.
  */
 
-package com.ats.script.actions.performance;
+package com.ats.tools.performance;
 
-import com.ats.script.Script;
+import java.util.List;
+
+import org.openqa.selenium.Proxy;
+
+import com.ats.executor.ActionStatus;
+import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.actions.Action;
 
-public class ActionPerformance extends Action {
-
-	public static final String SCRIPT_PERFORMANCE_LABEL = "perf";
-
-	public ActionPerformance() {}
-
-	public ActionPerformance(Script script) {
-		super(script);
-	}
+public interface IHarProxy {
+	Proxy startProxy();
+	void dispose();
+	void startAction(Action action, String testLine);
+	void endAction();
+	void startRecord(ActionStatus status, List<String> whiteList, long sendBandWidth, long receiveBandWidth);
+	void resumeRecord(CalculatedValue comment);
+	void pauseRecord(CalculatedValue comment);
 }

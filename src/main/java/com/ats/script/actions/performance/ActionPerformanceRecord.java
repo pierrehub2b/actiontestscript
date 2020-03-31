@@ -19,7 +19,11 @@ under the License.
 
 package com.ats.script.actions.performance;
 
+import java.util.ArrayList;
+
 import com.ats.executor.ActionTestScript;
+import com.ats.executor.channels.Channel;
+import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
 
 public class ActionPerformanceRecord extends ActionPerformance {
@@ -30,11 +34,38 @@ public class ActionPerformanceRecord extends ActionPerformance {
 	public static final String RESUME = "resume";
 
 	private String type = PAUSE;
+	private CalculatedValue comment;
 
 	public ActionPerformanceRecord() {}
 
-	public ActionPerformanceRecord(Script script) {
+	public ActionPerformanceRecord(Script script, String type, ArrayList<String> dataArray) {
 		super(script);
+		setType(type);
+		
+		if(dataArray.size() > 0) {
+			setComment(new CalculatedValue(script, dataArray.remove(0).trim()));
+		}
+	}
+	
+	public ActionPerformanceRecord(Script script, String type, CalculatedValue comment) {
+		super(script);
+		setType(type);
+		setComment(comment);
+	}
+	
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// Code Generator
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public StringBuilder getJavaCode() {
+		final StringBuilder code = super.getJavaCode().append("\"").append(type).append("\", ");
+		if(comment != null) {
+			code.append(comment.getJavaCode());
+		}else {
+			code.append("null");
+		}
+		return code.append(")");
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -42,8 +73,17 @@ public class ActionPerformanceRecord extends ActionPerformance {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void execute(ActionTestScript ts) {
-
+	public void execute(ActionTestScript ts, String testName, int testLine) {
+		final Channel channel = ts.getCurrentChannel();
+		setStatus(channel.newActionStatus(testName, testLine));
+		
+		if(PAUSE.equals(type)) {
+			channel.pauseHarRecord(comment);
+		}else {
+			channel.resumeHarRecord(comment);
+		}
+		
+		status.endDuration();
 	}
 
 	//--------------------------------------------------------
@@ -60,5 +100,13 @@ public class ActionPerformanceRecord extends ActionPerformance {
 		}else {
 			this.type = PAUSE;
 		}
+	}
+	
+	public CalculatedValue getComment() {
+		return comment;
+	}
+
+	public void setComment(CalculatedValue comment) {
+		this.comment = comment;
 	}
 }

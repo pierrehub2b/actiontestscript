@@ -36,8 +36,8 @@ public class ActionChannelSwitch extends ActionChannel {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void execute(ActionTestScript ts) {
-		super.execute(ts);
+	public void execute(ActionTestScript ts, String testName, int testLine) {
+		super.execute(ts, testName, testLine);
 
 		ts.getRecorder().update(getName());
 		ts.getChannelManager().switchChannel(status, getName());

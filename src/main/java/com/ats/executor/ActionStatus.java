@@ -21,6 +21,7 @@ package com.ats.executor;
 
 import com.ats.element.TestElement;
 import com.ats.executor.channels.Channel;
+import com.ats.script.actions.Action;
 
 public class ActionStatus {
 
@@ -44,6 +45,8 @@ public class ActionStatus {
 	public static final int JAVA_EXCEPTION = -18;
 	public static final int CHANNEL_START_ERROR = -19;
 	public static final int FILE_NOT_FOUND = -20;
+	public static final int PERF_NOT_STARTED = -21;
+	public static final int PERF_NOT_RECORDING = -22;
 	
 	public static final int NEOLOAD_POST_ERROR = -50;
 	
@@ -65,11 +68,14 @@ public class ActionStatus {
 	private TestElement element = null;
 	private Object data = null;
 	
+	private String testLine;
+			
 	private String errorType = ATS_FUNCTIONAL_ERROR;
 
-	public ActionStatus(Channel channel) {
+	public ActionStatus(Channel channel, String testName, int testLine) {
 		this.channel = channel;
 		this.startedAt = System.currentTimeMillis();
+		this.testLine = testName + ":" + testLine;
 	}
 
 	public void updateDuration(long currentTime) {
@@ -83,7 +89,17 @@ public class ActionStatus {
 	public void endDuration() {
 		duration = System.currentTimeMillis() - startedAt;
 	}	
+		
+	public void startAction(Action action) {
+		startDuration();
+		channel.startHarAction(action, testLine);
+	}
 	
+	public void endAction() {
+		endDuration();
+		channel.endHarAction();
+	}
+		
 	public void setException(int code, Exception ex) {
 		this.code = code;
 		this.passed = false;
@@ -125,7 +141,7 @@ public class ActionStatus {
 		setError(code, message);
 		setData(data);
 	}
-		
+			
 	//--------------------------------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------------------------------
 	

@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.openqa.selenium.Alert;
+import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebElement;
 
 import com.ats.driver.AtsManager;
@@ -46,19 +47,23 @@ import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.ScriptHeader;
+import com.ats.script.actions.Action;
 import com.ats.script.actions.ActionApi;
 import com.ats.script.actions.ActionChannelStart;
 import com.ats.script.actions.neoload.ActionNeoload;
 import com.ats.script.actions.neoload.ActionNeoloadStop;
 import com.ats.tools.ResourceContent;
 import com.ats.tools.logger.ExecutionLogger;
+import com.ats.tools.performance.HarNoProxy;
+import com.ats.tools.performance.HarProxy;
+import com.ats.tools.performance.IHarProxy;
 
 public class Channel {
 
 	private IDriverEngine engine;
 
 	private ActionChannelStart actionStart;
-	private String application;
+	private String application = "";
 	private boolean current = false;
 
 	private ActionTestScript mainScript;
@@ -76,7 +81,7 @@ public class Channel {
 	private ArrayList<String> operations = new ArrayList<String>();
 
 	private int winHandle = -1;
-	private long processId;
+	private long processId = 0;
 
 	private String neoloadDesignApi;
 
@@ -84,6 +89,8 @@ public class Channel {
 	// Constructor
 	//----------------------------------------------------------------------------------------------------------------------
 
+	public Channel() {}
+	
 	public Channel(
 			ActionStatus status,
 			ActionTestScript script,
@@ -116,7 +123,11 @@ public class Channel {
 	}
 
 	public ActionStatus newActionStatus() {
-		return new ActionStatus(this);
+		return new ActionStatus(this, "", 0);
+	}
+	
+	public ActionStatus newActionStatus(String testName, int testLine) {
+		return new ActionStatus(this, testName, testLine);
 	}
 
 	public DesktopDriver getDesktopDriver() {
@@ -390,10 +401,12 @@ public class Channel {
 	}
 	public void setAuthentication(String value) {} // read only
 
-	public boolean isNeoload() {
-		return actionStart.isNeoload();
+	public int getPerformance() {
+		return actionStart.getPerformance();
 	}
-	public void setNeoload(boolean neoload) {} // read only
+	public void setPerformance(int value) {
+		actionStart.setPerformance(value);
+	}
 
 	public boolean isCurrent() {
 		return current;
@@ -471,8 +484,10 @@ public class Channel {
 	public void close(ActionStatus status, boolean keepRunning){
 
 		if(stopNeoloadRecord != null) {
-			neoloadAction(stopNeoloadRecord);
+			neoloadAction(stopNeoloadRecord, "", 0);
 		}
+
+		disposeHarProxy();
 
 		engine.close(keepRunning);
 		mainScript.getChannelManager().channelClosed(status, this);
@@ -568,14 +583,14 @@ public class Channel {
 	}
 
 	//----------------------------------------------------------------------------------------------------------
-	// Neoload
+	// Performance
 	//----------------------------------------------------------------------------------------------------------
-
+	
 	private ActionNeoloadStop stopNeoloadRecord = null;
 
-	public void neoloadAction(ActionNeoload action) {
-		action.execute(this);
-		if(isNeoload()) {
+	public void neoloadAction(ActionNeoload action, String testName, int testLine) {
+		action.setStatus(newActionStatus(testName, testLine));
+		if(getPerformance() == ActionChannelStart.NEOLOAD) {
 			if(neoloadDesignApi != null) {
 				action.executeRequest(this, neoloadDesignApi);
 			}else {
@@ -589,6 +604,44 @@ public class Channel {
 
 	public void setStopNeoloadRecord(ActionNeoloadStop value) {
 		this.stopNeoloadRecord = value;
+	}
+	
+	//----------------------------------------------------------------------------------------------------------
+	
+	private IHarProxy harProxy;
+	
+	public Proxy startHarProxy(AtsManager ats) {
+		harProxy = new HarProxy(getName(), getApplication(), ats.getBlackListServers());
+		return harProxy.startProxy();
+	}
+	
+	public void noHarProxy() {
+		harProxy = new HarNoProxy();
+	}
+	
+	public void startHarServer(ActionStatus status, List<String> whiteList, long sendBandWidth, long receiveBandWidth) {
+		harProxy.startRecord(status, whiteList, sendBandWidth, receiveBandWidth);
+	}
+	
+	public void pauseHarRecord(CalculatedValue comment) {
+		harProxy.pauseRecord(comment);
+	}
+	
+	public void resumeHarRecord(CalculatedValue comment) {
+		harProxy.resumeRecord(comment);
+	}
+	
+	public void startHarAction(Action action, String testLine) {
+		harProxy.startAction(action, testLine);
+	}
+	
+	public void endHarAction() {
+		harProxy.endAction();
+	}
+	
+	public void disposeHarProxy() {
+		harProxy.dispose();
+		harProxy = null;
 	}
 
 	//----------------------------------------------------------------------------------------------------------
@@ -644,8 +697,4 @@ public class Channel {
 		getDesktopDriver().updateVisualStatus(error, duration);
 		getDesktopDriver().updateVisualData(value, data);
 	}
-
-	/*public FoundElement getElementFromMousePoint() {
-		return getDesktopDriver().getElementFromMousePoint(dimension);
-	}*/
 }
