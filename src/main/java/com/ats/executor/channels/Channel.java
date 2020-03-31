@@ -608,15 +608,11 @@ public class Channel {
 	
 	//----------------------------------------------------------------------------------------------------------
 	
-	private IHarProxy harProxy;
+	private IHarProxy harProxy = new HarNoProxy();
 	
 	public Proxy startHarProxy(AtsManager ats) {
 		harProxy = new HarProxy(getName(), getApplication(), ats.getBlackListServers());
 		return harProxy.startProxy();
-	}
-	
-	public void noHarProxy() {
-		harProxy = new HarNoProxy();
 	}
 	
 	public void startHarServer(ActionStatus status, List<String> whiteList, long sendBandWidth, long receiveBandWidth) {
