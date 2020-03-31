@@ -180,7 +180,6 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		if(channel.getPerformance() == ActionChannelStart.PERF) {
 			cap.setCapability(CapabilityType.PROXY, channel.startHarProxy(ats));
 		}else {
-			channel.noHarProxy();
 			if(channel.getPerformance() == ActionChannelStart.NEOLOAD) {
 				channel.setNeoloadDesignApi(ats.getNeoloadDesignApi());
 				cap.setCapability(CapabilityType.PROXY, ats.getNeoloadProxy().getValue());
