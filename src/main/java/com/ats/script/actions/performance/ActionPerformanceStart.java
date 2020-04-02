@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
@@ -45,7 +46,8 @@ public class ActionPerformanceStart extends ActionPerformance {
 	private long sendBandWidth = 0;
 	private long receiveBandWidth = 0;
 	private List<String> whiteList = null;
-	
+	private String filters = "";
+
 	public ActionPerformanceStart() {}
 
 	public ActionPerformanceStart(Script script, ArrayList<String> options, ArrayList<String> dataArray) {
@@ -83,7 +85,9 @@ public class ActionPerformanceStart extends ActionPerformance {
 	@Override
 	public StringBuilder getJavaCode() {
 		final ArrayList<String> list = new ArrayList<String>();
-		Arrays.asList(whiteList).forEach(s -> list.add("\"" + s + "\""));
+		for(String s : whiteList) {
+			list.add("\"" + StringEscapeUtils.escapeJava(s) + "\"");
+		}
 		return super.getJavaCode().append(sendBandWidth).append("L, ").append(receiveBandWidth).append("L, new String[]{").append(String.join(", ", list)).append("})");
 	}
 
@@ -126,4 +130,12 @@ public class ActionPerformanceStart extends ActionPerformance {
 	public void setWhiteList(List<String> data) {
 		this.whiteList = data;
 	}	
+		
+	public String getFilters() {
+		return filters;
+	}
+
+	public void setFilters(String filters) {
+		this.filters = filters;
+	}
 }

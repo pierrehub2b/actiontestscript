@@ -294,7 +294,7 @@ public class ActionCallscript extends Action {
 						int iteration = 0;
 
 						for (String[] params : data) {
-							ats.initCalledScript(ts, testName, line, topScript, getCalculatedParameters(ats, params), null, iteration, iterationMax, scriptName, "csv", csvFile);
+							ats.initCalledScript(ts, testName, line, topScript, getCalculatedParameters(ts, params), null, iteration, iterationMax, scriptName, "csv", csvFile);
 							testMain.invoke(ats);
 							iteration++;
 						}

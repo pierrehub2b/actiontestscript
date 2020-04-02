@@ -27,7 +27,7 @@ import com.ats.executor.ActionStatus;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.actions.Action;
 
-public class HarNoProxy implements IHarProxy {
+public class AtsNoProxy implements IAtsProxy {
 	
 	@Override
 	public void startRecord(ActionStatus status, List<String> whiteList, long sendBandWidth, long receiveBandWidth) {
@@ -44,7 +44,7 @@ public class HarNoProxy implements IHarProxy {
 	}
 	
 	@Override
-	public void dispose() {
+	public void terminate(String channelName) {
 	}
 
 	@Override

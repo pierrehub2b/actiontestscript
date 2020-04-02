@@ -689,5 +689,4 @@ public class ActionTestScript extends Script implements ITest{
 	public void stopRecorder() {
 		topScript.setRecorder(new VisualRecorderNull());
 	}
-
 }

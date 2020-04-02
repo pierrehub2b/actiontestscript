@@ -54,9 +54,9 @@ import com.ats.script.actions.neoload.ActionNeoload;
 import com.ats.script.actions.neoload.ActionNeoloadStop;
 import com.ats.tools.ResourceContent;
 import com.ats.tools.logger.ExecutionLogger;
-import com.ats.tools.performance.HarNoProxy;
-import com.ats.tools.performance.HarProxy;
-import com.ats.tools.performance.IHarProxy;
+import com.ats.tools.performance.AtsNoProxy;
+import com.ats.tools.performance.AtsProxy;
+import com.ats.tools.performance.IAtsProxy;
 
 public class Channel {
 
@@ -487,7 +487,7 @@ public class Channel {
 			neoloadAction(stopNeoloadRecord, "", 0);
 		}
 
-		disposeHarProxy();
+		closeAtsProxy();
 
 		engine.close(keepRunning);
 		mainScript.getChannelManager().channelClosed(status, this);
@@ -608,36 +608,36 @@ public class Channel {
 	
 	//----------------------------------------------------------------------------------------------------------
 	
-	private IHarProxy harProxy = new HarNoProxy();
+	private IAtsProxy atsProxy = new AtsNoProxy();
 	
-	public Proxy startHarProxy(AtsManager ats) {
-		harProxy = new HarProxy(getName(), getApplication(), ats.getBlackListServers());
-		return harProxy.startProxy();
+	public Proxy startAtsProxy(AtsManager ats) {
+		atsProxy = new AtsProxy(getName(), getApplication(), ats.getBlackListServers());
+		return atsProxy.startProxy();
 	}
 	
 	public void startHarServer(ActionStatus status, List<String> whiteList, long sendBandWidth, long receiveBandWidth) {
-		harProxy.startRecord(status, whiteList, sendBandWidth, receiveBandWidth);
+		atsProxy.startRecord(status, whiteList, sendBandWidth, receiveBandWidth);
 	}
 	
 	public void pauseHarRecord(CalculatedValue comment) {
-		harProxy.pauseRecord(comment);
+		atsProxy.pauseRecord(comment);
 	}
 	
 	public void resumeHarRecord(CalculatedValue comment) {
-		harProxy.resumeRecord(comment);
+		atsProxy.resumeRecord(comment);
 	}
 	
 	public void startHarAction(Action action, String testLine) {
-		harProxy.startAction(action, testLine);
+		atsProxy.startAction(action, testLine);
 	}
 	
 	public void endHarAction() {
-		harProxy.endAction();
+		atsProxy.endAction();
 	}
 	
-	public void disposeHarProxy() {
-		harProxy.dispose();
-		harProxy = null;
+	public void closeAtsProxy() {
+		atsProxy.terminate(getName());
+		atsProxy = null;
 	}
 
 	//----------------------------------------------------------------------------------------------------------

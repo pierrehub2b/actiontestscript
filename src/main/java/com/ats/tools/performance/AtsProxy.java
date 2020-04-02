@@ -19,12 +19,18 @@ under the License.
 
 package com.ats.tools.performance;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.openqa.selenium.Proxy;
 
@@ -40,24 +46,29 @@ import net.lightbody.bmp.core.har.HarNameVersion;
 import net.lightbody.bmp.proxy.BlacklistEntry;
 import net.lightbody.bmp.proxy.CaptureType;
 
-public class HarProxy implements IHarProxy {
+public class AtsProxy implements IAtsProxy {
 
+	private final static int BUFFER = 2048;;
+	
 	private ProxyThread proxyThread;
 
 	private String fileName;
 	private ArrayList<String> sessionFiles = new ArrayList<String>();
 
-	private File folder;
+	private Path folderPath;
 
 	private int recording = 0;
 
-	public HarProxy(String channelName, String application, ArrayList<BlacklistEntry> blacklist) {
+	public AtsProxy(String channelName, String application, ArrayList<BlacklistEntry> blacklist) {
+
 		this.proxyThread = new ProxyThread(blacklist, application, channelName);
 
-		folder = new File("target/performance/" + channelName).getAbsoluteFile();
+		final File folder = new File("target/performance/" + channelName).getAbsoluteFile();
 		if(!folder.exists()) {
 			folder.mkdirs();
 		}
+		
+		folderPath = Paths.get(folder.toURI());
 	}
 
 	private class ProxyThread implements Runnable {
@@ -77,12 +88,20 @@ public class HarProxy implements IHarProxy {
 
 		@Override
 		public void run() {
+			
+			server.setTrustAllServers(true);
 			server.start(0);
 			proxy = ClientUtil.createSeleniumProxy(server);
-			
-			while(running) {}
 
-			server.stop();
+			while(running) {
+				Thread.yield();
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e) {}
+			}
+
+			server.abort();
+			Thread.currentThread().interrupt();
 		}
 
 		public Proxy getProxy() {
@@ -91,7 +110,6 @@ public class HarProxy implements IHarProxy {
 
 		public void stop() {
 			running = false;
-			
 		}
 
 		public void record(List<String> whiteList, long sendBandWidth, long receiveBandWidth) {
@@ -100,6 +118,7 @@ public class HarProxy implements IHarProxy {
 			}
 			server.setWriteBandwidthLimit(sendBandWidth);
 			server.setReadBandwidthLimit(receiveBandWidth);
+			
 			server.newHar("ats-channel-start", "ATS channel start");
 		}
 
@@ -147,14 +166,15 @@ public class HarProxy implements IHarProxy {
 		fileName = new Timestamp(System.currentTimeMillis()).getTime() + ".har";
 
 		int maxTry = 30;
-		new Thread(proxyThread, "harProxyThread").start();
-		
+		new Thread(proxyThread, "atsProxyThread").start();
+
 		while(proxyThread.getProxy() == null && maxTry > 0) {
 			try {
 				Thread.sleep(500);
 			} catch (InterruptedException e) {}
 			maxTry--;
 		}
+		
 		return proxyThread.getProxy();
 	}
 
@@ -169,11 +189,10 @@ public class HarProxy implements IHarProxy {
 
 	@Override
 	public void pauseRecord(CalculatedValue comment) {
-
 		if(recording == 2) {
 			if(fileName != null) {
 
-				if(proxyThread.pause(comment, Paths.get(folder.toURI()).resolve(fileName))) {
+				if(proxyThread.pause(comment, folderPath.resolve(fileName))) {
 					sessionFiles.add(fileName);
 				}
 
@@ -205,11 +224,42 @@ public class HarProxy implements IHarProxy {
 	}
 
 	@Override
-	public void dispose() {
+	public void terminate(String channelName) {
 		if(recording > 0) {
 			pauseRecord(null);
 		}
 		proxyThread.stop();
 		proxyThread = null;
+		
+		try {
+			
+	        final ZipOutputStream out = new ZipOutputStream(new FileOutputStream(folderPath.resolve("vu_" + channelName + ".zip").toFile()));
+	        for (String f : sessionFiles) {
+	        	addToZipFile(f, folderPath.resolve(f).toFile(), out);
+	        }
+
+			out.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private static void addToZipFile(String harFileName, File harFile, ZipOutputStream out) throws IOException {
+	
+		final FileInputStream fi = new FileInputStream(harFile);
+		final BufferedInputStream origin = new BufferedInputStream(fi, BUFFER);
+        final ZipEntry entry = new ZipEntry(harFileName);
+        
+        final byte data[] = new byte[BUFFER];
+        
+        out.putNextEntry(entry);
+        int count;
+        while ((count = origin.read(data, 0, BUFFER)) != -1) {
+            out.write(data, 0, count);
+            out.flush();
+        }
+        
+        origin.close();
+        out.flush();
 	}
 }

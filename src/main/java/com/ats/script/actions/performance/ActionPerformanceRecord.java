@@ -47,9 +47,13 @@ public class ActionPerformanceRecord extends ActionPerformance {
 		}
 	}
 	
-	public ActionPerformanceRecord(Script script, String type, CalculatedValue comment) {
+	public ActionPerformanceRecord(Script script, String type) {
 		super(script);
 		setType(type);
+	}
+	
+	public ActionPerformanceRecord(Script script, String type, CalculatedValue comment) {
+		this(script, type);
 		setComment(comment);
 	}
 	
@@ -59,11 +63,9 @@ public class ActionPerformanceRecord extends ActionPerformance {
 
 	@Override
 	public StringBuilder getJavaCode() {
-		final StringBuilder code = super.getJavaCode().append("\"").append(type).append("\", ");
+		final StringBuilder code = super.getJavaCode().append("\"").append(type).append("\"");
 		if(comment != null) {
-			code.append(comment.getJavaCode());
-		}else {
-			code.append("null");
+			code.append(", ").append(comment.getJavaCode());
 		}
 		return code.append(")");
 	}

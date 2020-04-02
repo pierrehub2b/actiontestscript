@@ -178,7 +178,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		final int watchdog = ats.getWatchDogTimeOut();		
 		
 		if(channel.getPerformance() == ActionChannelStart.PERF) {
-			cap.setCapability(CapabilityType.PROXY, channel.startHarProxy(ats));
+			cap.setCapability(CapabilityType.PROXY, channel.startAtsProxy(ats));
 		}else {
 			if(channel.getPerformance() == ActionChannelStart.NEOLOAD) {
 				channel.setNeoloadDesignApi(ats.getNeoloadDesignApi());

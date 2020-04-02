@@ -27,9 +27,9 @@ import com.ats.executor.ActionStatus;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.actions.Action;
 
-public interface IHarProxy {
+public interface IAtsProxy {
 	Proxy startProxy();
-	void dispose();
+	void terminate(String channelName);
 	void startAction(Action action, String testLine);
 	void endAction();
 	void startRecord(ActionStatus status, List<String> whiteList, long sendBandWidth, long receiveBandWidth);
