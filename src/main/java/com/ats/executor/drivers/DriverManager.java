@@ -114,6 +114,10 @@ public class DriverManager {
 	public void processTerminated(DriverProcess dp) {
 		driversProcess.remove(dp);
 	}
+	
+	public void initChannel(Channel channel) {
+		channel.setAtsManager(ATS);
+	}
 
 	public IDriverEngine getDriverEngine(Channel channel, ActionStatus status, DesktopDriver desktopDriver) {
 
@@ -123,7 +127,7 @@ public class DriverManager {
 		final String appName = props.getName().toLowerCase();
 		final String driverName = props.getDriver();
 
-		channel.setAtsManager(ATS);
+		initChannel(channel);
 		
 		DriverProcess driverProcess = null;
 

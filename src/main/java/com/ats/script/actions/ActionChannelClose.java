@@ -22,7 +22,7 @@ package com.ats.script.actions;
 import com.ats.executor.ActionTestScript;
 import com.ats.script.Script;
 
-public class ActionChannelClose extends ActionChannel {
+public class ActionChannelClose extends ActionChannelExist {
 
 	public static final String SCRIPT_CLOSE_LABEL = SCRIPT_LABEL + "close";
 
@@ -39,13 +39,15 @@ public class ActionChannelClose extends ActionChannel {
 
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
-
+	
 	@Override
 	public void execute(ActionTestScript ts, String testName, int testLine) {
 		super.execute(ts, testName, testLine);
-
-		ts.getRecorder().update(getName());
-		ts.getChannelManager().closeChannel(status, getName(), keepRunning);
+		if(channelEmpty) {
+			ts.getTopScript().sendWarningLog("ActionChannelClose (" + testName + ":" + testLine + ")", "Cannot close Channel '" + getName() + "', this channel is not running !");
+		}else {
+			ts.getChannelManager().closeChannel(status, getName(), keepRunning);
+		}
 	}
 
 	//--------------------------------------------------------
@@ -66,8 +68,6 @@ public class ActionChannelClose extends ActionChannel {
 
 	@Override
 	public StringBuilder getJavaCode() {
-		StringBuilder codeBuilder = super.getJavaCode();
-		codeBuilder.append("\"").append(getName()).append("\", ").append(keepRunning).append(")");
-		return codeBuilder;
+		return super.getJavaCode().append("\"").append(getName()).append("\", ").append(keepRunning).append(")");
 	}
 }

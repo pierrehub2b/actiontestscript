@@ -42,6 +42,8 @@ public class ChannelManager {
 		this.channelsList = new ArrayList<Channel>();
 		this.driverManager = new DriverManager();
 		this.currentChannel = new EmptyChannel();
+		
+		this.driverManager.initChannel(this.currentChannel);
 
 		script.sendInfoLog("ATS drivers folder", this.driverManager.getDriverFolderPath());
 	}
@@ -82,7 +84,7 @@ public class ChannelManager {
 				return cnl;
 			}
 		}
-		return null;// Channel with name : does not exists or has been closed
+		return new EmptyChannel();// Channel with name : does not exists or has been closed
 	}
 
 	public String startChannel(ActionStatus status, ActionChannelStart action){
@@ -90,7 +92,7 @@ public class ChannelManager {
 		final String name = action.getName();
 		final String appName = action.getApplication().getCalculated();
 
-		if(getChannel(name) == null){
+		if(getChannel(name) instanceof EmptyChannel){
 			
 			final Channel newChannel = new Channel(status, mainScript, driverManager, action);
 

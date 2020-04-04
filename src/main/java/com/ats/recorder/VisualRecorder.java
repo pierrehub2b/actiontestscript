@@ -100,9 +100,9 @@ public class VisualRecorder implements IVisualRecorder {
 	}
 	
 	private void setChannel(Channel channel) {
-		if(this.channel == null && channel != null) {
+		if(this.channel == null) {
 			final DesktopResponse resp = channel.startVisualRecord(scriptHeader, visualQuality, started);
-			if(resp.errorCode < 0) {
+			if(resp != null && resp.errorCode < 0) {
 				channel.sendLog(resp.errorCode, "Unable to start visual recording", resp.errorMessage);
 			}
 		}

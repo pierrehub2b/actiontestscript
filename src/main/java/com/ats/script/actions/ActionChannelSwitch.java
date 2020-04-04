@@ -22,7 +22,7 @@ package com.ats.script.actions;
 import com.ats.executor.ActionTestScript;
 import com.ats.script.Script;
 
-public class ActionChannelSwitch extends ActionChannel {
+public class ActionChannelSwitch extends ActionChannelExist {
 
 	public static final String SCRIPT_SWITCH_LABEL = SCRIPT_LABEL + "switch";
 	
@@ -38,9 +38,11 @@ public class ActionChannelSwitch extends ActionChannel {
 	@Override
 	public void execute(ActionTestScript ts, String testName, int testLine) {
 		super.execute(ts, testName, testLine);
-
-		ts.getRecorder().update(getName());
-		ts.getChannelManager().switchChannel(status, getName());
+		if(channelEmpty) {
+			ts.getTopScript().sendWarningLog("ActionChannelSwitch (" + testName + ":" + testLine + ")", "Cannot switch to Channel '" + getName() + "', this channel is not running !");
+		}else {
+			ts.getChannelManager().switchChannel(status, getName());
+		}
 	}
 	
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -49,8 +51,6 @@ public class ActionChannelSwitch extends ActionChannel {
 
 	@Override
 	public StringBuilder getJavaCode() {
-		StringBuilder codeBuilder = super.getJavaCode();
-		codeBuilder.append("\"").append(getName()).append("\")");
-		return codeBuilder;
+		return super.getJavaCode().append("\"").append(getName()).append("\")");
 	}
 }

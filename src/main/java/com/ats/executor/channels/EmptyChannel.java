@@ -20,12 +20,19 @@ under the License.
 package com.ats.executor.channels;
 
 import com.ats.executor.ActionStatus;
+import com.ats.executor.drivers.desktop.DesktopResponse;
+import com.ats.script.ScriptHeader;
 
 public class EmptyChannel extends Channel {
 	
 	@Override
 	public ActionStatus newActionStatus(String testName, int testLine) {
 		return new ActionStatus(null, testName, testLine);
+	}
+	
+	@Override
+	public DesktopResponse startVisualRecord(ScriptHeader script, int quality, long started) {
+		return null;
 	}
 
 	@Override

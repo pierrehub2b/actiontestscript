@@ -240,7 +240,6 @@ public class ActionCallscript extends Action {
 	public void execute(ActionTestScript ts, String testName, int line) {
 
 		final Channel currentChannel = ts.getCurrentChannel();
-		
 		setStatus(currentChannel.newActionStatus(testName, line));
 		
 		final String scriptName = name.getCalculated();
