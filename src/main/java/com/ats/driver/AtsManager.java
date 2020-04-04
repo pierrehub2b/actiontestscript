@@ -37,9 +37,12 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.ats.executor.ActionTestScript;
 import com.ats.executor.TestBound;
 import com.ats.generator.ATS;
+import com.ats.tools.AtsClassLoader;
 import com.ats.tools.Utils;
+import com.ats.tools.wait.IWaitGuiReady;
 
 import net.lightbody.bmp.proxy.BlacklistEntry;
 
@@ -135,6 +138,12 @@ public class AtsManager {
 		return 0;
 	}
 
+	//-----------------------------------------------------------------------------------------------
+	// Instance management
+	//-----------------------------------------------------------------------------------------------
+	
+	private AtsClassLoader atsClassLoader;
+	
 	public AtsManager() {
 
 		String atsHome = System.getProperty("ats.home");
@@ -157,7 +166,20 @@ public class AtsManager {
 		if(proxy == null) {
 			proxy = new AtsProxy(AtsProxy.SYSTEM);
 		}
+		
+		atsClassLoader = new AtsClassLoader();
 	}
+	
+	public IWaitGuiReady getWaitGuiReady() {
+		return atsClassLoader.getWaitGuiReady();
+	}
+	
+	public Class<ActionTestScript> findTestScriptClass(String name) {
+		return atsClassLoader.findClass(name);
+	}
+	
+	//-----------------------------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------------------
 
 	private Properties loadProperties(Path propertiesPath) {
 

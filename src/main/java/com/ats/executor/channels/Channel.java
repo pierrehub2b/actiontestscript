@@ -37,8 +37,10 @@ import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.desktop.DesktopResponse;
 import com.ats.executor.drivers.desktop.DesktopWindow;
+import com.ats.executor.drivers.engines.ApiDriverEngine;
 import com.ats.executor.drivers.engines.IDriverEngine;
 import com.ats.executor.drivers.engines.MobileDriverEngine;
+import com.ats.executor.drivers.engines.WebDriverEngine;
 import com.ats.executor.drivers.engines.desktop.DesktopDriverEngine;
 import com.ats.generator.ATS;
 import com.ats.generator.objects.BoundData;
@@ -84,7 +86,9 @@ public class Channel {
 	private long processId = 0;
 
 	private String neoloadDesignApi;
-
+	
+	private AtsManager atsManager;
+	
 	//----------------------------------------------------------------------------------------------------------------------
 	// Constructor
 	//----------------------------------------------------------------------------------------------------------------------
@@ -117,9 +121,35 @@ public class Channel {
 		}
 	}
 	
+	public void setAtsManager(AtsManager ats) {
+		this.atsManager = ats;
+	}
+	
+	public void waitBeforeMouseMoveToElement(WebDriverEngine webDriverEngine) {
+		atsManager.getWaitGuiReady().waitBeforeMouseMoveToElement(this, webDriverEngine);
+	}
+	
+	public void waitBeforeSwitchWindow(WebDriverEngine webDriverEngine) {
+		atsManager.getWaitGuiReady().waitBeforeSwitchWindow(this, webDriverEngine);
+	}
+	
+	public void waitBeforeSearchElement(WebDriverEngine webDriverEngine) {
+		atsManager.getWaitGuiReady().waitBeforeSearchElement(this, webDriverEngine);
+	}
+	
+	public Class<ActionTestScript> findTestScriptClass(String name){
+		return atsManager.findTestScriptClass(name);
+	}
+	
 	public String getTopScriptPackage() {
 		final String topScriptName = mainScript.getTopScript().getTestName();
-		return topScriptName.substring(0, topScriptName.lastIndexOf("."));
+		final int lastDot = topScriptName.lastIndexOf(".");
+		
+		if(lastDot > 0) {
+			return topScriptName.substring(0, lastDot);
+		}else {
+			return topScriptName;
+		}
 	}
 
 	public ActionStatus newActionStatus() {
@@ -189,7 +219,9 @@ public class Channel {
 	}
 
 	public void setWindowToFront(){
-		getDesktopDriver().setChannelToFront(getHandle(getDesktopDriver()), processId);
+		if(!(engine instanceof MobileDriverEngine) && !(engine instanceof ApiDriverEngine)) {
+			getDesktopDriver().setChannelToFront(getHandle(getDesktopDriver()), processId);
+		}
 		engine.setWindowToFront();
 	}
 

@@ -130,10 +130,8 @@ public class ActionApi extends Action {
 
 	@Override
 	public void execute(ActionTestScript ts, String testName, int testLine) {
-		if(ts.getCurrentChannel() != null){
-			setStatus(ts.getCurrentChannel().newActionStatus(testName, testLine));
-			ts.getCurrentChannel().api(status, this);
-		}
+		super.execute(ts, testName, testLine);
+		getCurrentChannel().api(status, this);
 		status.endDuration();
 	}
 	

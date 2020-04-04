@@ -18,6 +18,8 @@ public class TestImage {
 	public static void main(String[] args) {
 				
 		
+		
+		System.out.println(roots);
 		/*check("src\\main\\java\\test\\screen_alert.png", "src\\\\main\\\\java\\\\test\\alert_eq.png");
 		check("src\\main\\java\\test\\screen_alert.png", "src\\\\main\\\\java\\\\test\\alert_ext.png");
 		

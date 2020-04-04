@@ -21,6 +21,7 @@ package com.ats.script.actions;
 
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
+import com.ats.executor.channels.Channel;
 import com.ats.script.Script;
 import com.google.gson.JsonObject;
 
@@ -61,9 +62,15 @@ public abstract class Action {
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
 	
+	private Channel currentChannel;
 	public void execute(ActionTestScript ts, String testName, int testLine){
-		setStatus(ts.getCurrentChannel().newActionStatus(testName, testLine));
+		currentChannel = ts.getCurrentChannel();
+		setStatus(currentChannel.newActionStatus(testName, testLine));
 		ts.getRecorder().createVisualAction(this);
+	}
+	
+	protected Channel getCurrentChannel() {
+		return currentChannel;
 	}
 	
 	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {

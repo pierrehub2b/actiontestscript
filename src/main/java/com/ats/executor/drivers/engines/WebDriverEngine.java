@@ -131,7 +131,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	protected java.net.URI driverSession;
 
 	protected String searchElementScript = JS_SEARCH_ELEMENT;
-
+	
 	public WebDriverEngine(
 			Channel channel, 
 			DriverProcess driverProcess, 
@@ -666,7 +666,9 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean withDesktop, int offsetX, int offsetY) {
-
+		
+		channel.waitBeforeMouseMoveToElement(this);
+				
 		if(withDesktop) {
 			desktopMoveToElement(foundElement, position,offsetX ,offsetY);
 		}else {
@@ -674,7 +676,6 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			while(maxTry > 0) {
 				status.setNoError();
 				try {
-					waitReady();
 					scrollAndMove(foundElement, position, offsetX, offsetY);
 					maxTry = 0;
 				}catch(StaleElementReferenceException e0) {
@@ -693,22 +694,6 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 				}
 			}
 		}
-	}
-	
-	private void waitReady() {
-		/*int maxTry = 10;
-		while(inProgress() && maxTry > 0) {
-			channel.sleep(500);
-			maxTry--;
-		}*/
-	}
-
-	private boolean inProgress() {
-		final Object progress = runJavaScript("var result=ProgressForm.inProgress();");
-		if(progress != null) {
-			return progress.equals(true);
-		}
-		return false;
 	}
 
 	private void scrollAndMove(FoundElement element, MouseDirection position, int offsetX, int offsetY) {
@@ -875,7 +860,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void switchWindow(ActionStatus status, int index, int tries) {
-		waitReady();
+		channel.waitBeforeSwitchWindow(this);
 		if(index >= 0) {
 			final String[] wins = getWindowsHandle(index, tries);
 			if(wins.length > index) {
@@ -968,8 +953,16 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	//TODO remove this default method and add actionstatus
-	protected Object runJavaScript(String javaScript, Object ... params) {
+	public Object runJavaScript(String javaScript, Object ... params) {
 		return runJavaScript(channel.newActionStatus(), javaScript, params);
+	}
+	
+	public Object runJavaScriptResult(String javaScript) {
+		try {
+			return driver.executeAsyncScript("var result=" + javaScript + ";arguments[arguments.length-1](result);");
+		}catch(Exception e) {
+			return e.getMessage();
+		}
 	}
 
 	protected Object runJavaScript(ActionStatus status, String javaScript, Object ... params) {
@@ -1064,6 +1057,8 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			}
 		}
 
+		channel.waitBeforeSearchElement(this);
+		
 		final List<List<Object>> response = (List<List<Object>>) runJavaScript(searchElementScript, startElement, tagName, attributes, attributes.length);
 		if(response != null && response.size() > 0){
 			final List<AtsElement> elements = response.parallelStream().filter(Objects::nonNull).map(e -> new AtsElement(e)).collect(Collectors.toCollection(ArrayList::new));

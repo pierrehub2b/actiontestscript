@@ -73,7 +73,7 @@ public class DriverManager {
 
 	private DriverProcess desktopDriver;
 	private MobileDriverEngine mobileDriverEngine;
-
+		
 	public String getDriverFolderPath() {
 		return ATS.getDriversFolderPath().toFile().getAbsolutePath();
 	}
@@ -123,6 +123,8 @@ public class DriverManager {
 		final String appName = props.getName().toLowerCase();
 		final String driverName = props.getDriver();
 
+		channel.setAtsManager(ATS);
+		
 		DriverProcess driverProcess = null;
 
 		if(CHROME_BROWSER.equals(appName)) {

@@ -76,8 +76,8 @@ public class ActionAssertProperty extends ActionExecuteElement {
 			int checkValue = checkProperty(value.getName());
 			
 			while(checkValue < 0 && maxCheckTry > 0) {
-				ts.getCurrentChannel().sendWarningLog("Assert property", maxCheckTry + " try");
-				ts.getCurrentChannel().progressiveWait(getActionMaxTry() - maxCheckTry);
+				getCurrentChannel().sendWarningLog("Assert property", maxCheckTry + " try");
+				getCurrentChannel().progressiveWait(getActionMaxTry() - maxCheckTry);
 				
 				checkValue = checkProperty(value.getName());
 				maxCheckTry--;

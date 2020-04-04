@@ -15,22 +15,32 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.tools;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Enumeration;
+import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
 import com.ats.executor.ActionTestScript;
+import com.ats.tools.wait.IWaitGuiReady;
+import com.ats.tools.wait.WaitGuiReady;
+import com.ats.tools.wait.WaitGuiReadyInfo;
 
 public class AtsClassLoader extends ClassLoader{
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public Class<ActionTestScript> findClass(String name) {
-		byte[] bt = loadClassData(name);
+		byte[] bt = loadAtsScriptClass(name);
 		if(bt != null) {
 			try {
 				return (Class<ActionTestScript>)defineClass(name, bt, 0, bt.length);
@@ -39,9 +49,9 @@ public class AtsClassLoader extends ClassLoader{
 		return null;
 	}
 
-	private byte[] loadClassData(String className) {
+	private byte[] loadAtsScriptClass(String className) {
 
-		InputStream is = getClass().getClassLoader().getResourceAsStream(className.replace(".", "/")+".class");
+		final InputStream is = getClass().getClassLoader().getResourceAsStream(className.replace(".", "/")+".class");
 		if(is != null) {
 			ByteArrayOutputStream byteSt = new ByteArrayOutputStream();
 			int len = 0;
@@ -52,6 +62,106 @@ public class AtsClassLoader extends ClassLoader{
 			} catch (IOException e) {}
 
 			return byteSt.toByteArray();
+		}
+		return null;
+	}
+	
+	//------------------------------------------------------------------------------------------------------
+	// Instance management
+	//------------------------------------------------------------------------------------------------------
+		
+	private IWaitGuiReady waitGuiReady;
+	public IWaitGuiReady getWaitGuiReady() {
+		return waitGuiReady;
+	}
+
+	public AtsClassLoader() {
+		final Class<IWaitGuiReady> wait = findCustomWaitClass();
+		if(wait != null) {
+			try {
+				waitGuiReady = wait.getDeclaredConstructor().newInstance();
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException	| InvocationTargetException | NoSuchMethodException | SecurityException e) {}
+		}
+		
+		if(waitGuiReady == null) {
+			waitGuiReady = new WaitGuiReady();
+		}
+	}
+
+	private Class<IWaitGuiReady> findCustomWaitClass() {
+
+		final String classpath = System.getProperty("java.class.path");
+		final String[] files = classpath.split(System.getProperty("path.separator"));
+
+		for (String path : files) {
+			final Class<IWaitGuiReady> customWaitClass = findWaitGuiClass(path);
+			if(customWaitClass != null) {
+				return customWaitClass;
+			}
+		}
+		return null;
+	}
+
+	private Class<IWaitGuiReady> findWaitGuiClass(String filePath){
+		File f = new File(filePath);
+		if(f.exists()) {
+			return findWaitGuiClass(f);
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	private Class<IWaitGuiReady> findWaitGuiClass(File file) {
+		if(file.exists()) {
+			if (file.isDirectory()) {
+				for (File child : file.listFiles()) {
+					return findWaitGuiClass(child);
+				}
+			} else if (file.getName().toLowerCase().endsWith(".jar")) {
+
+				JarFile jar = null;
+
+				try {
+					jar = new JarFile(file);
+				} catch (Exception ex) {}
+
+				if (jar != null) {
+
+					try {
+						final Manifest man = jar.getManifest();
+						if(man == null) {
+							return null;
+						}else {
+							Attributes attr = man.getMainAttributes();
+							final String atsType = attr.getValue("Ats-Type");
+							if(atsType == null || !"WaitGuiReady".equals(atsType)) {
+								return null;
+							}
+						}
+					} catch (IOException e1) {
+						return null;
+					}
+					
+					final Enumeration<JarEntry> entries = jar.entries();
+					while (entries.hasMoreElements()) {
+
+						final String entryName = entries.nextElement().getName();
+
+						if (entryName.endsWith(".class")) {
+							final String className = entryName.replace('/', '.').substring(0, entryName.length() - 6);
+							try
+							{
+								final Class<?> c = loadClass(className);
+								if(c.isAnnotationPresent(WaitGuiReadyInfo.class)) {
+									if(IWaitGuiReady.class.isAssignableFrom(c)) {
+										return (Class<IWaitGuiReady>) c;
+									}
+								}
+							}catch(ClassNotFoundException | NoClassDefFoundError e) {}
+						}
+					}
+				}
+			}
 		}
 		return null;
 	}

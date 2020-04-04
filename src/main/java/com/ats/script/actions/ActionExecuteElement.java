@@ -88,7 +88,7 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 		
 		if(status.isPassed()) {
 
-			final Channel channel = ts.getCurrentChannel();
+			final Channel channel = getCurrentChannel();
 			
 			final int delay = getDelay();
 			if(delay > 0) {

@@ -37,13 +37,13 @@ import java.util.regex.Pattern;
 
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
+import com.ats.executor.channels.Channel;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.ConditionalValue;
 import com.ats.generator.variables.Variable;
 import com.ats.script.ProjectData;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
-import com.ats.tools.AtsClassLoader;
 import com.ats.tools.Utils;
 import com.ats.tools.logger.MessageCode;
 import com.ats.tools.logger.levels.AtsFailError;
@@ -60,8 +60,6 @@ public class ActionCallscript extends Action {
 	private static final String FILE_PROTOCOLE = "file:///";
 	private static final String HTTP_PROTOCOLE = "http://";
 	private static final String HTTPS_PROTOCOLE = "https://";
-
-	private final AtsClassLoader classLoader = new AtsClassLoader();
 
 	private CalculatedValue name;
 	private int type = -1;
@@ -241,12 +239,14 @@ public class ActionCallscript extends Action {
 
 	public void execute(ActionTestScript ts, String testName, int line) {
 
-		setStatus(ts.getCurrentChannel().newActionStatus(testName, line));
+		final Channel currentChannel = ts.getCurrentChannel();
+		
+		setStatus(currentChannel.newActionStatus(testName, line));
 		
 		final String scriptName = name.getCalculated();
 
 		//Class<ActionTestScript> clazz = (Class<ActionTestScript>) Class.forName(name.getCalculated()); // old way still working
-		final Class<ActionTestScript> clazz = classLoader.findClass(scriptName);
+		final Class<ActionTestScript> clazz = currentChannel.findTestScriptClass(scriptName);
 
 		if(clazz == null) {
 			status.setError(MessageCode.SCRIPT_NOT_FOUND, "ATS script not found : '" + scriptName + "' (maybe a letter case issue ?)\n");

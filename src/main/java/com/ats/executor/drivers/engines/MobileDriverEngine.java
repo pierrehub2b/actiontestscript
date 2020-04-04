@@ -90,7 +90,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	private final static String INPUT = "input";
 	public final static String SWIPE = "swipe";
 	private final static String BUTTON = "button";
-	
+
 	private final static String SCREENSHOT_METHOD = "/screenshot";
 
 	private JsonObject source;
@@ -98,11 +98,11 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	protected RootElement rootElement;
 	protected RootElement cachedElement;
 	protected long cachedElementTime = 0L;
-	
+
 	private MobileTestElement testElement;
 
 	private OkHttpClient client;
-	
+
 	private String userAgent;
 
 	public MobileDriverEngine(Channel channel, ActionStatus status, String app, DesktopDriver desktopDriver, ApplicationProperties props) {
@@ -130,16 +130,16 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			this.client = new Builder().cache(null).connectTimeout(30, TimeUnit.SECONDS).writeTimeout(30, TimeUnit.SECONDS).readTimeout(40, TimeUnit.SECONDS).build();
 
 			this.userAgent = "AtsMobileDriver/" + ATS.VERSION + " (" + System.getProperty("user.name") + ")";
-			
+
 			JsonObject response = executeRequest(DRIVER, START);
-			
+
 			if(response == null) {
 				status.setError(ActionStatus.CHANNEL_START_ERROR, "unable to connect to : mobile://" + endPoint);
 			}else {
 
 				final String systemName = response.get("systemName").getAsString();
 				final String os = response.get("os").getAsString();
-				
+
 				if (os.equals("ios")) {
 					rootElement = new IosRootElement(this);
 					cachedElement = new IosRootElement(this);
@@ -147,17 +147,17 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 					rootElement = new AndroidRootElement(this);
 					cachedElement = new AndroidRootElement(this);
 				}
-					
+
 				final String driverVersion = response.get("driverVersion").getAsString();
-				
+
 				final double deviceWidth = response.get("deviceWidth").getAsDouble();
 				final double deviceHeight = response.get("deviceHeight").getAsDouble();
-				
+
 				final double channelWidth = response.get("channelWidth").getAsDouble();
 				final double channelHeight = response.get("channelHeight").getAsDouble();
 
 				final int screenCapturePort = response.get("screenCapturePort").getAsInt();
-				
+
 				final JsonElement udpEndPoint = response.get("udpEndPoint");
 
 				channel.setDimensions(new TestBound(0D, 0D, deviceWidth, deviceHeight), new TestBound(0D, 0D, channelWidth, channelHeight));
@@ -181,7 +181,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 						} else {
 							channel.setApplicationData(os + ":" + systemName, version, driverVersion, -1, icon, endPointData[0] + ":" + screenCapturePort);
 						}
-						
+
 						refreshElementMapLocation();
 					}else {
 						status.setError(ActionStatus.CHANNEL_START_ERROR, response.get("message").getAsString());
@@ -192,13 +192,13 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			}
 		}
 	}
-	
+
 	@Override
 	public WebElement getRootElement(Channel cnl) {
 		refreshElementMapLocation();
 		return new MobileRootElement(rootElement.getValue());
 	}
-	
+
 	@Override
 	public TestElement getTestElementRoot() {
 		refreshElementMapLocation();
@@ -210,7 +210,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 		source = executeRequest(CAPTURE);
 		rootElement.refresh(source);
 	}
-	
+
 	protected void loadCapturedElement() {
 		long current = System.currentTimeMillis();
 		if(cachedElement == null || current - 2500 > cachedElementTime) {
@@ -277,12 +277,14 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	private void loadList(AtsMobileElement element, ArrayList<AtsMobileElement> list) {
-		for (int i=0; i<element.getChildren().length; i++) {
-			if(element.getChildren() != null) {
-				AtsMobileElement child = element.getChildren()[i];
-
-				list.add(child);
-				loadList(child, list);
+		final AtsMobileElement[] children = element.getChildren();
+		if(children != null) {
+			for (int i=0; i<children.length; i++) {
+				if(element.getChildren() != null) {
+					final AtsMobileElement child = element.getChildren()[i];
+					list.add(child);
+					loadList(child, list);
+				}
 			}
 		}
 	}
@@ -372,7 +374,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	//-------------------------------------------------------------------------------------------------------------
-	
+
 	@Override
 	public void buttonClick(String type) {
 		executeRequest(BUTTON, type);
@@ -405,12 +407,12 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	public List<String[]> loadSelectOptions(TestElement element) {
 		return Collections.<String[]>emptyList();
 	}
-	
+
 	@Override
 	public List<FoundElement> findSelectOptions(TestBound dimension, TestElement element) {
 		return Collections.<FoundElement>emptyList();
 	}
-	
+
 	@Override
 	public void selectOptionsItem(ActionStatus status, TestElement element, CalculatedProperty selectProperty) {
 	}
@@ -420,51 +422,51 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 		mouseClick(status, te.getFoundElement(), md, 0, 0);
 		executeRequest(ELEMENT, te.getFoundElement().getId(), INPUT, SendKeyData.EMPTY_DATA);
 	}
-	
+
 	@Override
 	public void updateScreenshot(TestBound dimension, boolean isRef) {
 		getDesktopDriver().updateMobileScreenshot(channel.getSubDimension(), isRef, getScreenshotPath());
 	}
-	
+
 	@Override
 	public byte[] getScreenshot(Double x, Double y, Double width, Double height) {
-		
+
 		final byte[] screen = getDesktopDriver().getMobileScreenshotByte(getScreenshotPath());
-		
+
 		if(screen != null) {
 			ImageIO.setUseCache(false);
-			
+
 			final InputStream in = new ByteArrayInputStream(screen);
 			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			
+
 			final BufferedImage subImage = new BufferedImage(width.intValue(), height.intValue(), BufferedImage.TYPE_INT_RGB);
 			final Graphics g = subImage.getGraphics();
-			
+
 			try {
-			    
+
 				//final BufferedImage subImage = ImageIO.read(in).getSubimage(x.intValue(), y.intValue(), width.intValue(), height.intValue());
-			    g.drawImage(ImageIO.read(in), 0, 0, width.intValue(), height.intValue(), x.intValue(), y.intValue(), x.intValue() + width.intValue(), y.intValue() + height.intValue(), null);
-			    g.dispose();
-							
+				g.drawImage(ImageIO.read(in), 0, 0, width.intValue(), height.intValue(), x.intValue(), y.intValue(), x.intValue() + width.intValue(), y.intValue() + height.intValue(), null);
+				g.dispose();
+
 				ImageIO.write(subImage, "png", baos);
 				baos.flush();
-				
+
 				final byte[] result = baos.toByteArray();
 				baos.close();
-				
+
 				return result;
-				
+
 			} catch (IOException e) {}
 		}
-	
+
 		return new byte[1];
 	}
-		
+
 	@Override
 	public void createVisualAction(Channel channel, String actionType, int scriptLine, long timeline) {
 		getDesktopDriver().createMobileRecord(actionType, scriptLine, timeline,	channel.getName(), channel.getSubDimension(), getScreenshotPath());
 	}
-	
+
 	private String getScreenshotPath() {
 		return getApplicationPath() + SCREENSHOT_METHOD;
 	}
@@ -528,7 +530,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	public Alert switchToAlert() {
 		return null;
 	}
-	
+
 	@Override
 	public String getTitle() {
 		return "";

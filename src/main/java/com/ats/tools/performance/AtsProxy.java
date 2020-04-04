@@ -225,9 +225,11 @@ public class AtsProxy implements IAtsProxy {
 
 	@Override
 	public void terminate(String channelName) {
+		
 		if(recording > 0) {
 			pauseRecord(null);
 		}
+		
 		proxyThread.stop();
 		proxyThread = null;
 		
