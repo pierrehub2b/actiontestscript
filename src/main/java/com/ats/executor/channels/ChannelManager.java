@@ -22,6 +22,7 @@ package com.ats.executor.channels;
 import java.util.ArrayList;
 import java.util.Optional;
 
+import com.ats.driver.AtsManager;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.drivers.DriverManager;
@@ -29,6 +30,8 @@ import com.ats.script.actions.ActionChannelStart;
 
 public class ChannelManager {
 
+	public static AtsManager ATS = new AtsManager();
+	
 	private Channel currentChannel;
 	private ArrayList<Channel> channelsList;
 
@@ -41,15 +44,13 @@ public class ChannelManager {
 		this.mainScript = script;
 		this.channelsList = new ArrayList<Channel>();
 		this.driverManager = new DriverManager();
-		this.currentChannel = new EmptyChannel();
-		
-		this.driverManager.initChannel(this.currentChannel);
+		this.currentChannel = new EmptyChannel(ATS);
 
-		script.sendInfoLog("ATS drivers folder", this.driverManager.getDriverFolderPath());
+		script.sendInfoLog("ATS drivers folder", ATS.getDriversFolderPath().toFile().getAbsolutePath());
 	}
 
 	public int getMaxTry() {
-		return DriverManager.ATS.getMaxTrySearch();
+		return ATS.getMaxTrySearch();
 	}
 
 	public Channel getCurrentChannel(){
@@ -84,7 +85,7 @@ public class ChannelManager {
 				return cnl;
 			}
 		}
-		return new EmptyChannel();// Channel with name : does not exists or has been closed
+		return new EmptyChannel(ATS);// Channel with name : does not exists or has been closed
 	}
 
 	public String startChannel(ActionStatus status, ActionChannelStart action){
@@ -94,7 +95,7 @@ public class ChannelManager {
 
 		if(getChannel(name) instanceof EmptyChannel){
 			
-			final Channel newChannel = new Channel(status, mainScript, driverManager, action);
+			final Channel newChannel = new Channel(ATS, status, mainScript, driverManager, action);
 
 			if(status.isPassed()) {
 
@@ -159,7 +160,7 @@ public class ChannelManager {
 					status.setChannel(current);
 				}
 			}else{
-				currentChannel = new EmptyChannel();
+				currentChannel = new EmptyChannel(ATS);
 			}
 
 			status.setNoError();

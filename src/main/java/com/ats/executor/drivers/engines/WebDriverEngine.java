@@ -69,7 +69,7 @@ import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
-import com.ats.executor.drivers.DriverManager;
+import com.ats.executor.channels.ChannelManager;
 import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.desktop.DesktopWindow;
@@ -131,7 +131,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	protected java.net.URI driverSession;
 
 	protected String searchElementScript = JS_SEARCH_ELEMENT;
-	
+
 	public WebDriverEngine(
 			Channel channel, 
 			DriverProcess driverProcess, 
@@ -169,14 +169,14 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	protected void launchDriver(ActionStatus status, MutableCapabilities cap, String profilePath) {
 
-		final AtsManager ats = DriverManager.ATS;
+		final AtsManager ats = ChannelManager.ATS;
 		final int maxTrySearch = ats.getMaxTrySearch();
 		final int maxTryProperty = ats.getMaxTryProperty();
 
 		final int scriptTimeout = ats.getScriptTimeOut();
 		final int pageLoadTimeout = ats.getPageloadTimeOut();
 		final int watchdog = ats.getWatchDogTimeOut();		
-		
+
 		if(channel.getPerformance() == ActionChannelStart.PERF) {
 			cap.setCapability(CapabilityType.PROXY, channel.startAtsProxy(ats));
 		}else {
@@ -482,7 +482,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		}
 		return null;
 	}
-	
+
 	@Override
 	public List<String[]> loadSelectOptions(TestElement element) {
 		final ArrayList<String[]> result = new ArrayList<String[]>();
@@ -651,6 +651,8 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	public void close(boolean keepRunning) {
 		if(driver != null){
 			Arrays.asList(getWindowsHandle(0, 0)).stream().sorted(Collections.reverseOrder()).forEach(s -> closeWindowHandler(s));
+			driver.quit();
+			channel.sleep(1000);
 		}
 		getDriverProcess().close(keepRunning);
 	}
@@ -666,9 +668,9 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean withDesktop, int offsetX, int offsetY) {
-		
+
 		channel.waitBeforeMouseMoveToElement(this);
-				
+
 		if(withDesktop) {
 			desktopMoveToElement(foundElement, position,offsetX ,offsetY);
 		}else {
@@ -892,7 +894,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	protected void closeCurrentWindow() {
 		driver.close();
-		channel.sleep(500);
+		channel.sleep(300);
 	}
 
 	@Override
@@ -956,7 +958,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	public Object runJavaScript(String javaScript, Object ... params) {
 		return runJavaScript(channel.newActionStatus(), javaScript, params);
 	}
-	
+
 	public Object runJavaScriptResult(String javaScript) {
 		try {
 			return driver.executeAsyncScript("var result=" + javaScript + ";arguments[arguments.length-1](result);");
@@ -1058,7 +1060,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		}
 
 		channel.waitBeforeSearchElement(this);
-		
+
 		final List<List<Object>> response = (List<List<Object>>) runJavaScript(searchElementScript, startElement, tagName, attributes, attributes.length);
 		if(response != null && response.size() > 0){
 			final List<AtsElement> elements = response.parallelStream().filter(Objects::nonNull).map(e -> new AtsElement(e)).collect(Collectors.toCollection(ArrayList::new));
@@ -1086,7 +1088,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	public void clearText(ActionStatus status, TestElement te, MouseDirection md) {
 
 		te.click(status, md);
-		
+
 		if(status.isPassed()) {
 			final FoundElement element = te.getFoundElement();
 
@@ -1103,7 +1105,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			}catch(Exception e) {}
 
 		}
-		
+
 		status.setError(ActionStatus.ENTER_TEXT_FAIL, "clear text failed on this element");
 	}
 

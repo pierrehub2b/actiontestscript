@@ -22,9 +22,9 @@ package com.ats.executor.drivers;
 import java.util.ArrayList;
 
 import com.ats.driver.ApplicationProperties;
-import com.ats.driver.AtsManager;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
+import com.ats.executor.channels.ChannelManager;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.ApiDriverEngine;
 import com.ats.executor.drivers.engines.IDriverEngine;
@@ -69,14 +69,8 @@ public class DriverManager {
 
 	private ArrayList<DriverProcess> driversProcess = new ArrayList<DriverProcess>();
 
-	public static AtsManager ATS = new AtsManager();
-
 	private DriverProcess desktopDriver;
 	private MobileDriverEngine mobileDriverEngine;
-		
-	public String getDriverFolderPath() {
-		return ATS.getDriversFolderPath().toFile().getAbsolutePath();
-	}
 
 	//--------------------------------------------------------------------------------------------------------------
 
@@ -114,20 +108,14 @@ public class DriverManager {
 	public void processTerminated(DriverProcess dp) {
 		driversProcess.remove(dp);
 	}
-	
-	public void initChannel(Channel channel) {
-		channel.setAtsManager(ATS);
-	}
 
 	public IDriverEngine getDriverEngine(Channel channel, ActionStatus status, DesktopDriver desktopDriver) {
 
 		final String application = channel.getApplication();
-		final ApplicationProperties props = ATS.getApplicationProperties(application);
+		final ApplicationProperties props = ChannelManager.ATS.getApplicationProperties(application);
 
 		final String appName = props.getName().toLowerCase();
 		final String driverName = props.getDriver();
-
-		initChannel(channel);
 		
 		DriverProcess driverProcess = null;
 
@@ -225,7 +213,7 @@ public class DriverManager {
 		}else if(JX_BROWSER.equals(appName)) {
 			if(driverName != null && props.getUri() != null) {
 
-				final JxDriverEngine jxEngine = new JxDriverEngine(this, appName, ATS.getDriversFolderPath(), driverName, channel, status, desktopDriver, props);
+				final JxDriverEngine jxEngine = new JxDriverEngine(this, appName, ChannelManager.ATS.getDriversFolderPath(), driverName, channel, status, desktopDriver, props);
 				if(status.isPassed()) {
 					return jxEngine;
 				}
@@ -267,7 +255,7 @@ public class DriverManager {
 			}
 		}
 
-		final DriverProcess proc = new DriverProcess(status, name, this, ATS.getDriversFolderPath(), driverName, null);
+		final DriverProcess proc = new DriverProcess(status, name, this, ChannelManager.ATS.getDriversFolderPath(), driverName, null);
 		if(status.isPassed()) {
 			driversProcess.add(proc);
 			return proc;

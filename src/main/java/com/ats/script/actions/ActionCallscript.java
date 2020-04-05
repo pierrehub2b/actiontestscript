@@ -243,9 +243,7 @@ public class ActionCallscript extends Action {
 		setStatus(currentChannel.newActionStatus(testName, line));
 		
 		final String scriptName = name.getCalculated();
-
-		//Class<ActionTestScript> clazz = (Class<ActionTestScript>) Class.forName(name.getCalculated()); // old way still working
-		final Class<ActionTestScript> clazz = currentChannel.findTestScriptClass(scriptName);
+		final Class<ActionTestScript> clazz = currentChannel.loadTestScriptClass(scriptName);
 
 		if(clazz == null) {
 			status.setError(MessageCode.SCRIPT_NOT_FOUND, "ATS script not found : '" + scriptName + "' (maybe a letter case issue ?)\n");

@@ -38,12 +38,26 @@ import com.ats.tools.wait.WaitGuiReadyInfo;
 public class AtsClassLoader extends ClassLoader{
 
 	@SuppressWarnings("unchecked")
+	public Class<ActionTestScript> loadTestScriptClass(String name) {
+		
+		Class<ActionTestScript> testScriptClass;
+		
+		try {
+			testScriptClass = (Class<ActionTestScript>) loadClass(name);
+		} catch (ClassNotFoundException e) {
+			testScriptClass = (Class<ActionTestScript>) findClass(name);
+		}
+		
+		return testScriptClass;
+		
+	}
+	
 	@Override
-	public Class<ActionTestScript> findClass(String name) {
+	public Class<?> findClass(String name) {
 		byte[] bt = loadAtsScriptClass(name);
 		if(bt != null) {
 			try {
-				return (Class<ActionTestScript>)defineClass(name, bt, 0, bt.length);
+				return defineClass(name, bt, 0, bt.length);
 			}catch(NoClassDefFoundError e) {}
 		}
 		return null;
@@ -51,18 +65,26 @@ public class AtsClassLoader extends ClassLoader{
 
 	private byte[] loadAtsScriptClass(String className) {
 
-		final InputStream is = getClass().getClassLoader().getResourceAsStream(className.replace(".", "/")+".class");
+		final InputStream is = getClass().getClassLoader().getResourceAsStream(className.replace(".", "/") + ".class");
 		if(is != null) {
-			ByteArrayOutputStream byteSt = new ByteArrayOutputStream();
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			int len = 0;
 			try {
 				while((len = is.read())!=-1){
-					byteSt.write(len);
+					bos.write(len);
 				}
 			} catch (IOException e) {}
 
-			return byteSt.toByteArray();
+			final byte[] data = bos.toByteArray();
+			
+			try {
+				bos.close();
+				is.close();
+			} catch (IOException e) {}
+			
+			return data;
 		}
+		
 		return null;
 	}
 	

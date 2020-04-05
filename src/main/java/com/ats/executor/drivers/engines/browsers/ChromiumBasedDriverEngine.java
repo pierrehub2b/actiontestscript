@@ -1,13 +1,15 @@
 package com.ats.executor.drivers.engines.browsers;
 
 import java.io.File;
-import java.util.Arrays;
+import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.remote.RemoteWebDriver;
 
 import com.ats.driver.ApplicationProperties;
 import com.ats.executor.ActionStatus;
@@ -16,6 +18,9 @@ import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.WebDriverEngine;
 import com.ats.tools.Utils;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class ChromiumBasedDriverEngine extends WebDriverEngine {
 
@@ -24,10 +29,10 @@ public class ChromiumBasedDriverEngine extends WebDriverEngine {
 	public ChromiumBasedDriverEngine(Channel channel, ActionStatus status, String browser, DriverProcess driverProcess, DesktopDriver desktopDriver, ApplicationProperties props) {
 		super(channel, browser, driverProcess, desktopDriver, props);
 	}
-	
+
 	protected ChromeOptions initOptions(ApplicationProperties props, String browserName) {
-		
-		ChromeOptions options = new ChromeOptions();
+
+		final ChromeOptions options = new ChromeOptions();
 		options.addArguments("--no-sandbox");
 		options.addArguments("--no-default-browser-check");
 		options.addArguments("--test-type");
@@ -43,7 +48,6 @@ public class ChromiumBasedDriverEngine extends WebDriverEngine {
 		options.addArguments("--disable-dev-shm-usage");
 		
 		options.addArguments("--ignore-certificate-errors");
-		
 
 		checkProfileFolder(options, props, browserName);
 
@@ -60,44 +64,82 @@ public class ChromiumBasedDriverEngine extends WebDriverEngine {
 
 		options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
 		options.setExperimentalOption("useAutomationExtension", false);
-		
-		Map<String, Object> prefs = new HashMap<String, Object>();
+
+		final Map<String, Object> prefs = new HashMap<String, Object>();
 		prefs.put("credentials_enable_service", false);
 		prefs.put("profile.password_manager_enabled", false);
 		options.setExperimentalOption("prefs", prefs);
-		
+
 		return options;
 	}
 
 	private void checkProfileFolder(ChromeOptions options, ApplicationProperties props, String browser) {
-
 		final String atsProfileFolder = props.getUserDataDir();
 		if(atsProfileFolder != null) {
 			if("default".equals(atsProfileFolder) || "disabled".equals(atsProfileFolder) || "no".equals(atsProfileFolder)) {
 				return;
 			}
+			
 			profileFolder = new File(atsProfileFolder).getAbsolutePath();
+
+			final Path atsProfilePath = Paths.get(profileFolder);
+			if(atsProfilePath.toFile().exists()) {
+				final Path localStatePath = atsProfilePath.resolve("Local State");
+				if(localStatePath.toFile().exists()) {
+					try {
+						final JsonObject localStateObject = JsonParser.parseString(new String(Files.readAllBytes(localStatePath))).getAsJsonObject();
+
+						final JsonObject metrics = localStateObject.get("user_experience_metrics").getAsJsonObject();
+						if(metrics != null) {
+							final JsonObject stability = metrics.get("stability").getAsJsonObject();
+							if(stability != null) {
+								if(!stability.get("exited_cleanly").getAsBoolean()) {
+									stability.remove("exited_cleanly");
+									stability.addProperty("exited_cleanly", true);
+
+									metrics.remove("stability");
+									metrics.add("stability", stability);
+
+									localStateObject.remove("user_experience_metrics");
+									localStateObject.add("user_experience_metrics", metrics);
+
+									final FileWriter fileWriter = new FileWriter(localStatePath.toFile());
+									new Gson().toJson(localStateObject, fileWriter);
+									fileWriter.close();
+								}
+							}
+						}
+					} catch (Exception e) {	}
+				}
+
+				final Path preferencesPath = atsProfilePath.resolve("Default").resolve("Preferences");
+				if(preferencesPath.toFile().exists()) {
+					try {
+						final JsonObject PreferencesObject = JsonParser.parseString(new String(Files.readAllBytes(preferencesPath))).getAsJsonObject();
+
+						final JsonObject profile = PreferencesObject.get("profile").getAsJsonObject();
+						if(profile != null) {
+							
+							if(!"Normal".equals(profile.get("exit_type").getAsString())) {
+
+								profile.remove("exit_type");
+								profile.addProperty("exit_type", "Normal");
+
+								PreferencesObject.remove("profile");
+								PreferencesObject.add("profile", profile);
+
+								final FileWriter fileWriter = new FileWriter(preferencesPath.toFile());
+								new Gson().toJson(PreferencesObject, fileWriter);
+								fileWriter.close();
+							}
+						}
+					} catch (Exception e) {	}
+				}
+			}
+
 		}else {
 			profileFolder = Utils.createDriverFolder(browser).getAbsolutePath();
 		}
-		
 		options.addArguments("--user-data-dir=" + profileFolder);
-	}
-
-	@Override
-	public void close(boolean keepRunning) {
-		if(profileFolder != null && !keepRunning) {
-			Arrays.asList(getWindowsHandle(0, 0)).stream().sorted(Collections.reverseOrder()).forEach(s -> closeWindowHandler(s));
-
-			ChromeOptions options = new ChromeOptions();
-			options.addArguments("user-data-dir=" + profileFolder);     
-			options.addArguments("--no-startup-window");
-			try {
-				new RemoteWebDriver(driverProcess.getDriverServerUrl(), options);
-			}catch(Exception ex){   
-			}
-		}
-		
-		super.close(keepRunning);
 	}
 }

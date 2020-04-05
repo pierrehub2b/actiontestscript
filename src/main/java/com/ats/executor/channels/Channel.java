@@ -71,7 +71,7 @@ public class Channel {
 	private ActionTestScript mainScript;
 
 	private int scrollUnit = AtsManager.getScrollUnit();
-	private TestBound dimension = DriverManager.ATS.getApplicationBound();
+	private TestBound dimension = ChannelManager.ATS.getApplicationBound();
 	private TestBound subDimension = new TestBound();
 
 	private String applicationVersion = "";
@@ -86,27 +86,34 @@ public class Channel {
 	private long processId = 0;
 
 	private String neoloadDesignApi;
-	
+
 	private AtsManager atsManager;
-	
+
 	//----------------------------------------------------------------------------------------------------------------------
 	// Constructor
 	//----------------------------------------------------------------------------------------------------------------------
 
 	public Channel() {}
 	
+	public Channel(AtsManager atsManager) {
+		this.atsManager = atsManager;
+	}
+
 	public Channel(
+			AtsManager atsManager,
 			ActionStatus status,
 			ActionTestScript script,
 			DriverManager driverManager, 
 			ActionChannelStart action) {
+
+		this(atsManager);
 
 		final DesktopDriver desktopDriver = new DesktopDriver(status, driverManager);
 
 		if(status.isPassed()) {
 
 			status.setChannel(this);
-			
+
 			this.mainScript = script;
 			this.current = true;
 			this.actionStart = action;
@@ -120,31 +127,30 @@ public class Channel {
 			}
 		}
 	}
-	
-	public void setAtsManager(AtsManager ats) {
-		this.atsManager = ats;
-	}
-	
+
 	public void waitBeforeMouseMoveToElement(WebDriverEngine webDriverEngine) {
 		atsManager.getWaitGuiReady().waitBeforeMouseMoveToElement(this, webDriverEngine);
 	}
-	
+
 	public void waitBeforeSwitchWindow(WebDriverEngine webDriverEngine) {
 		atsManager.getWaitGuiReady().waitBeforeSwitchWindow(this, webDriverEngine);
 	}
-	
+
 	public void waitBeforeSearchElement(WebDriverEngine webDriverEngine) {
 		atsManager.getWaitGuiReady().waitBeforeSearchElement(this, webDriverEngine);
 	}
-	
-	public Class<ActionTestScript> findTestScriptClass(String name){
-		return atsManager.findTestScriptClass(name);
+
+	public Class<ActionTestScript> loadTestScriptClass(String name){
+		return atsManager.loadTestScriptClass(name);
 	}
-	
+
+	//----------------------------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------------------------------------------
+
 	public String getTopScriptPackage() {
 		final String topScriptName = mainScript.getTopScript().getTestName();
 		final int lastDot = topScriptName.lastIndexOf(".");
-		
+
 		if(lastDot > 0) {
 			return topScriptName.substring(0, lastDot);
 		}else {
@@ -155,7 +161,7 @@ public class Channel {
 	public ActionStatus newActionStatus() {
 		return new ActionStatus(this, "", 0);
 	}
-	
+
 	public ActionStatus newActionStatus(String testName, int testLine) {
 		return new ActionStatus(this, testName, testLine);
 	}
@@ -168,11 +174,11 @@ public class Channel {
 		winHandle = -1;
 		setWindowToFront();
 	}
-	
+
 	public void setWinHandle(int hdl) {
 		winHandle = hdl;
 	}
-	
+
 	public void updateWinHandle(DesktopDriver drv, int index) {
 		winHandle = getHandle(drv, index);
 	}
@@ -200,7 +206,7 @@ public class Channel {
 		setDimension(dim1);
 		setSubDimension(dim2);
 	}
-	
+
 	public double getOffsetY() {
 		return dimension.getHeight() - subDimension.getHeight();
 	}
@@ -209,11 +215,11 @@ public class Channel {
 		refreshLocation();
 		engine.refreshElementMapLocation();
 	}
-	
+
 	public void defineRoot(String id) {
 		getDesktopDriver().defineRoot(dimension, id);
 	}
-	
+
 	public void toFront(){
 		engine.toFront();
 	}
@@ -237,35 +243,35 @@ public class Channel {
 	//---------------------------------------------------------------------------
 	// Screen shot management
 	//---------------------------------------------------------------------------
-	
+
 	public byte[] getScreenShot(TestBound dim) {
 		dim.setX(dim.getX() + dimension.getX());
 		dim.setY(dim.getY() + dimension.getY());
 
 		return getScreenShotEngine(dim);
 	}
-	
+
 	public byte[] getScreenShot(){
 		return getScreenShotEngine(dimension);
 	}
-	
+
 	private byte[] getScreenShotEngine(TestBound dim) {
 		mainScript.sleep(50);
 		return engine.getScreenshot(dim.getX(), dim.getY(), dim.getWidth(), dim.getHeight());
 	}
-	
+
 	//---------------------------------------------------------------------------
 	//---------------------------------------------------------------------------
 
 	public void setApplicationData(String os, String version, String dVersion, long pid) {
 		setApplicationData(os, version, dVersion, pid, new byte[0], "");
 	}
-	
+
 	public void setApplicationData(String os, String name, String version, String dVersion, long pid) {
 		setApplication(name);
 		setApplicationData(os, version, dVersion, pid, new byte[0], "");
 	}
-	
+
 	public void setApplicationData(String os, String version, String dVersion, long pid, long handle) {
 		setApplicationData(os, version, dVersion, pid, new byte[0], "");
 		this.winHandle = (int) handle;
@@ -274,7 +280,7 @@ public class Channel {
 	public String getAuthenticationValue() {
 		return actionStart.getAuthenticationValue();
 	}
-	
+
 	public ArrayList<CalculatedValue> getArguments() {
 		return actionStart.getArguments();
 	}
@@ -340,7 +346,7 @@ public class Channel {
 	public FoundElement getElementFromPoint(Boolean syscomp, Double x, Double y){
 		return engine.getElementFromPoint(syscomp, x, y);
 	}
-	
+
 	public FoundElement getElementFromRect(Boolean syscomp, Double x, Double y, Double w, Double h){
 		return engine.getElementFromRect(syscomp, x, y, w, h);
 	}
@@ -358,13 +364,13 @@ public class Channel {
 	public CalculatedProperty[] getAttributes(FoundElement element){
 		return engine.getAttributes(element, false);
 	}
-	
+
 	public List<String[]> findSelectOptions(TestElement element){
 		return engine.loadSelectOptions(element);
 	}
 
 	public String getAttribute(ActionStatus status, FoundElement element, String attributeName, int maxTry){
-		return engine.getAttribute(status, element, attributeName, maxTry + DriverManager.ATS.getMaxTryProperty());
+		return engine.getAttribute(status, element, attributeName, maxTry + ChannelManager.ATS.getMaxTryProperty());
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------
@@ -374,7 +380,7 @@ public class Channel {
 	public void sendLog(int code, String message, Object value) {
 		mainScript.sendLog(code, message, value);
 	}
-	
+
 	public void sendWarningLog(String message, String value) {
 		mainScript.sendWarningLog(message, value);
 	}
@@ -413,11 +419,11 @@ public class Channel {
 		return engine instanceof DesktopDriverEngine;
 	}
 	public void setDesktop(boolean value) {} // read only
-	
+
 	public boolean isMobile() {
 		return engine instanceof MobileDriverEngine;
 	}
-	
+
 	public void setMobile(boolean value) {} // read only
 
 	public String getName() {
@@ -544,7 +550,7 @@ public class Channel {
 	//----------------------------------------------------------------------------------------------------------
 	// driver actions
 	//----------------------------------------------------------------------------------------------------------
-	
+
 	public WebElement getRootElement() {
 		return engine.getRootElement(this);
 	}
@@ -604,7 +610,7 @@ public class Channel {
 	public void scroll(int delta) {
 		engine.scroll(delta*scrollUnit);
 	}
-	
+
 	public void scroll(FoundElement foundElement, int delta) {
 		engine.scroll(foundElement, delta*scrollUnit);
 	}
@@ -617,7 +623,7 @@ public class Channel {
 	//----------------------------------------------------------------------------------------------------------
 	// Performance
 	//----------------------------------------------------------------------------------------------------------
-	
+
 	private ActionNeoloadStop stopNeoloadRecord = null;
 
 	public void neoloadAction(ActionNeoload action, String testName, int testLine) {
@@ -637,36 +643,36 @@ public class Channel {
 	public void setStopNeoloadRecord(ActionNeoloadStop value) {
 		this.stopNeoloadRecord = value;
 	}
-	
+
 	//----------------------------------------------------------------------------------------------------------
-	
+
 	private IAtsProxy atsProxy = new AtsNoProxy();
-	
+
 	public Proxy startAtsProxy(AtsManager ats) {
 		atsProxy = new AtsProxy(getName(), getApplication(), ats.getBlackListServers());
 		return atsProxy.startProxy();
 	}
-	
+
 	public void startHarServer(ActionStatus status, List<String> whiteList, long sendBandWidth, long receiveBandWidth) {
 		atsProxy.startRecord(status, whiteList, sendBandWidth, receiveBandWidth);
 	}
-	
+
 	public void pauseHarRecord(CalculatedValue comment) {
 		atsProxy.pauseRecord(comment);
 	}
-	
+
 	public void resumeHarRecord(CalculatedValue comment) {
 		atsProxy.resumeRecord(comment);
 	}
-	
+
 	public void startHarAction(Action action, String testLine) {
 		atsProxy.startAction(action, testLine);
 	}
-	
+
 	public void endHarAction() {
 		atsProxy.endAction();
 	}
-	
+
 	public void closeAtsProxy() {
 		atsProxy.terminate(getName());
 		atsProxy = null;

@@ -174,8 +174,8 @@ public class AtsManager {
 		return atsClassLoader.getWaitGuiReady();
 	}
 	
-	public Class<ActionTestScript> findTestScriptClass(String name) {
-		return atsClassLoader.findClass(name);
+	public Class<ActionTestScript> loadTestScriptClass(String name) {
+		return atsClassLoader.loadTestScriptClass(name);
 	}
 	
 	//-----------------------------------------------------------------------------------------------
@@ -459,6 +459,21 @@ public class AtsManager {
 											}
 											
 											if(name != null) {
+												if(userDataDir != null && userDataDir.length() > 0) {
+													File userProfileDir = new File(userDataDir);
+													if(!userProfileDir.exists()) {
+														final Path userDataPath = Paths.get(userDataDir);
+														if(userDataPath.isAbsolute()) {
+															userProfileDir = userDataPath.toFile();
+														}else {
+															userProfileDir = Paths.get(System.getProperty("user.home"), ".AtsDrivers", "user_profile", userDataDir).toFile();	
+														}
+														userProfileDir.mkdirs();
+													}
+													userDataDir = userProfileDir.getAbsolutePath();
+												}else {
+													userDataDir = null;
+												}
 												addApplicationProperties(ApplicationProperties.BROWSER_TYPE, name, driver, path, waitAction, check, lang, userDataDir);
 											}
 										}

@@ -68,7 +68,7 @@ import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
-import com.ats.executor.drivers.DriverManager;
+import com.ats.executor.channels.ChannelManager;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.webservices.ApiExecutor;
 import com.ats.executor.drivers.engines.webservices.RestApiExecutor;
@@ -111,8 +111,8 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 			
 		} catch (FileNotFoundException e1) {}
 
-		final int maxTry = DriverManager.ATS.getMaxTryWebservice();
-		final int timeout = DriverManager.ATS.getWebServiceTimeOut();
+		final int maxTry = ChannelManager.ATS.getMaxTryWebservice();
+		final int timeout = ChannelManager.ATS.getWebServiceTimeOut();
 
 		final Builder builder = createHttpBuilder(
 				timeout, 
@@ -121,10 +121,10 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 				getClass().getClassLoader());
 
 		if(channel.getPerformance() == ActionChannelStart.NEOLOAD) {
-			channel.setNeoloadDesignApi(DriverManager.ATS.getNeoloadDesignApi());
-			builder.proxy(DriverManager.ATS.getNeoloadProxy().getHttpProxy());
+			channel.setNeoloadDesignApi(ChannelManager.ATS.getNeoloadDesignApi());
+			builder.proxy(ChannelManager.ATS.getNeoloadProxy().getHttpProxy());
 		}else {
-			builder.proxy(DriverManager.ATS.getProxy().getHttpProxy());
+			builder.proxy(ChannelManager.ATS.getProxy().getHttpProxy());
 		}
 
 		final OkHttpClient client = builder.build();
