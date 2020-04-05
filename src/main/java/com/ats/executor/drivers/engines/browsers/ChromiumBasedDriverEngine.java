@@ -136,7 +136,6 @@ public class ChromiumBasedDriverEngine extends WebDriverEngine {
 					} catch (Exception e) {	}
 				}
 			}
-
 		}else {
 			profileFolder = Utils.createDriverFolder(browser).getAbsolutePath();
 		}
