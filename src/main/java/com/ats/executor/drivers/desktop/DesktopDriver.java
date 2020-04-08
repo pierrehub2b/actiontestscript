@@ -403,7 +403,8 @@ public class DesktopDriver extends RemoteWebDriver {
 		Download(10),
 		ImageMobile(11),
 		CreateMobile(12),
-		ScreenshotMobile(13);
+		ScreenshotMobile(13),
+		Flush(14);
 
 		private final int type;
 		RecordType(int value){
@@ -729,6 +730,10 @@ public class DesktopDriver extends RemoteWebDriver {
 	public void createMobileRecord(String actionType, int scriptLine, long timeline, String channelName, TestBound subDimension, String screenshotPath){
 		sendRequestCommand(CommandType.Record, RecordType.CreateMobile, actionType, scriptLine, timeline,
 				channelName, subDimension.getX().intValue(), subDimension.getY().intValue(), subDimension.getWidth().intValue(), subDimension.getHeight().intValue(), screenshotPath);
+	}
+	
+	public void flushActions() {
+		sendRequestCommand(CommandType.Record, RecordType.Flush);
 	}
 
 	public byte[] getMobileScreenshotByte(String url){

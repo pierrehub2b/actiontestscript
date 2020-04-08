@@ -83,6 +83,7 @@ public interface IDriverEngine{
 	public byte[] getScreenshot(Double x, Double y, Double width, Double height);
 	
 	public void createVisualAction(Channel channel, String actionType, int scriptLine, long timeline);
+	public void flushVisualAction(Channel channel);
 	public String setWindowBound(BoundData x, BoundData y, BoundData width, BoundData height);
 	
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY);
