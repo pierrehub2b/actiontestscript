@@ -31,15 +31,7 @@ import com.ats.script.ProjectData;
 import com.ats.script.Script;
 import com.ats.script.ScriptHeader;
 import com.ats.script.actions.Action;
-import com.ats.script.actions.ActionAssertCount;
-import com.ats.script.actions.ActionAssertProperty;
-import com.ats.script.actions.ActionAssertValue;
-import com.ats.script.actions.ActionChannelClose;
 import com.ats.script.actions.ActionChannelStart;
-import com.ats.script.actions.ActionChannelSwitch;
-import com.ats.script.actions.ActionComment;
-import com.ats.script.actions.ActionMouseKey;
-import com.ats.script.actions.ActionProperty;
 import com.ats.tools.XmlReport;
 import com.ats.tools.logger.ExecutionLogger;
 
@@ -129,19 +121,6 @@ public class VisualRecorder implements IVisualRecorder {
 	public void createVisualAction(Action action) {
 		setChannel(action.getStatus().getChannel());
 		channel.createVisualAction(action.getClass().getName(), action.getLine(), System.currentTimeMillis() - started);
-		
-		if(channel.isMobile() && !(
-							action.getClass().getName().equals(ActionChannelStart.class.getName()) 
-						||  action.getClass().getName().equals(ActionChannelClose.class.getName()) 
-						||  action.getClass().getName().equals(ActionChannelSwitch.class.getName()) 
-						||  action.getClass().getName().equals(ActionComment.class.getName()) 
-						||  action.getClass().getName().equals(ActionAssertCount.class.getName()) 
-						||  action.getClass().getName().equals(ActionAssertProperty.class.getName())
-						||  action.getClass().getName().equals(ActionAssertValue.class.getName())
-						||  action.getClass().getName().equals(ActionProperty.class.getName())
-				)) {
-			channel.flushVisualAction();
-		}
 	}
 	
 	@Override

@@ -403,8 +403,7 @@ public class DesktopDriver extends RemoteWebDriver {
 		Download(10),
 		ImageMobile(11),
 		CreateMobile(12),
-		ScreenshotMobile(13),
-		Flush(14);
+		ScreenshotMobile(13);
 
 		private final int type;
 		RecordType(int value){
@@ -732,8 +731,9 @@ public class DesktopDriver extends RemoteWebDriver {
 				channelName, subDimension.getX().intValue(), subDimension.getY().intValue(), subDimension.getWidth().intValue(), subDimension.getHeight().intValue(), screenshotPath);
 	}
 	
-	public void flushActions() {
-		sendRequestCommand(CommandType.Record, RecordType.Flush);
+	public void createVisualAction(Channel channel, String actionType, int scriptLine, long timeline) {
+		sendRequestCommand(CommandType.Record, RecordType.Create, actionType, scriptLine, timeline,
+				channel.getName(), channel.getDimension().getX().intValue(), channel.getDimension().getY().intValue(), channel.getDimension().getWidth().intValue(), channel.getDimension().getHeight().intValue());
 	}
 
 	public byte[] getMobileScreenshotByte(String url){
@@ -747,11 +747,6 @@ public class DesktopDriver extends RemoteWebDriver {
 
 	public DesktopResponse startVisualRecord(Channel channel, ScriptHeader script, int quality, long started) {
 		return sendRequestCommand(CommandType.Record, RecordType.Start, script.getId(), script.getQualifiedName(), script.getDescription(), script.getAuthor(), script.getJoinedGroups(), script.getPrerequisite(), quality, started);
-	}
-
-	public void createVisualAction(Channel channel, String actionType, int scriptLine, long timeline) {
-		sendRequestCommand(CommandType.Record, RecordType.Create, actionType, scriptLine, timeline,
-				channel.getName(), channel.getDimension().getX().intValue(), channel.getDimension().getY().intValue(), channel.getDimension().getWidth().intValue(), channel.getDimension().getHeight().intValue());
 	}
 
 	public void updateVisualImage(TestBound dimension, boolean isRef) {

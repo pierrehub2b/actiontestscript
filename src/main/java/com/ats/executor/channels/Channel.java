@@ -698,10 +698,6 @@ public class Channel {
 		this.engine.createVisualAction(this, actionName, scriptLine, timeline);
 	}
 	
-	public void flushVisualAction() {
-		this.engine.flushVisualAction(this);
-	}
-
 	public void updateVisualAction(boolean isRef) {
 		this.engine.updateScreenshot(this.dimension, isRef);
 	}

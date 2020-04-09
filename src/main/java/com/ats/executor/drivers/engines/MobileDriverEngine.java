@@ -466,11 +466,6 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	public void createVisualAction(Channel channel, String actionType, int scriptLine, long timeline) {
 		getDesktopDriver().createMobileRecord(actionType, scriptLine, timeline,	channel.getName(), channel.getSubDimension(), getScreenshotPath());
 	}
-	
-	@Override
-	public void flushVisualAction(Channel channel) {
-		getDesktopDriver().flushActions();
-	}
 
 	private String getScreenshotPath() {
 		return getApplicationPath() + SCREENSHOT_METHOD;

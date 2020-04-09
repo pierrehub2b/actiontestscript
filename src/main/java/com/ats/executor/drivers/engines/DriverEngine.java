@@ -94,10 +94,6 @@ public abstract class DriverEngine {
 	public void createVisualAction(Channel channel, String actionType, int scriptLine, long timeline) {
 		getDesktopDriver().createVisualAction(channel, actionType, scriptLine, timeline);
 	}
-	
-	public void flushVisualAction(Channel channel) {
-		getDesktopDriver().flushActions();
-	}
 
 	public TestElement getTestElementRoot() {
 		return new TestElement(channel);
