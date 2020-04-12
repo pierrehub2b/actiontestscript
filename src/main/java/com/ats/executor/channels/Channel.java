@@ -705,7 +705,7 @@ public class Channel {
 	public void createVisualAction(String actionName, int scriptLine, long timeline) {
 		this.engine.createVisualAction(this, actionName, scriptLine, timeline);
 	}
-
+	
 	public void updateVisualAction(boolean isRef) {
 		this.engine.updateScreenshot(this.dimension, isRef);
 	}
