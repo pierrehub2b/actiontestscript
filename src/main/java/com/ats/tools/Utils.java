@@ -21,24 +21,20 @@ package com.ats.tools;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -52,10 +48,9 @@ import com.ats.executor.ActionStatus;
 import com.ats.executor.TestBound;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.generator.ATS;
+import com.ats.generator.variables.parameter.ParameterDataFile;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonPrimitive;
-import com.opencsv.CSVReader;
-import com.opencsv.exceptions.CsvException;
 
 public class Utils {
 
@@ -74,7 +69,7 @@ public class Utils {
 			return defaultValue;
 		}
 	}
-	
+
 	public static long string2Long(String value){
 		try {
 			return Long.parseLong(value);
@@ -260,24 +255,24 @@ public class Utils {
 			return false;
 		}
 	}
-	
+
 	public static String removeExtension(String s) {
 
-	    String separator = System.getProperty("file.separator");
-	    String filename;
+		String separator = System.getProperty("file.separator");
+		String filename;
 
-	    int lastSeparatorIndex = s.lastIndexOf(separator);
-	    if (lastSeparatorIndex == -1) {
-	        filename = s;
-	    } else {
-	        filename = s.substring(lastSeparatorIndex + 1);
-	    }
+		int lastSeparatorIndex = s.lastIndexOf(separator);
+		if (lastSeparatorIndex == -1) {
+			filename = s;
+		} else {
+			filename = s.substring(lastSeparatorIndex + 1);
+		}
 
-	    int extensionIndex = filename.lastIndexOf(".");
-	    if (extensionIndex == -1)
-	        return filename;
+		int extensionIndex = filename.lastIndexOf(".");
+		if (extensionIndex == -1)
+			return filename;
 
-	    return filename.substring(0, extensionIndex);
+		return filename.substring(0, extensionIndex);
 	}
 
 	//-------------------------------------------------------------------------------------------------------------------------------------------
@@ -306,7 +301,7 @@ public class Utils {
 
 		return null;
 	}
-	
+
 	public static byte[] loadImage(URL url) {
 
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -330,24 +325,15 @@ public class Utils {
 	}
 
 	//-------------------------------------------------------------------------------------------------------------------------------------------
-	//  CSV utils
+	//  JSON CSV utils
 	//-------------------------------------------------------------------------------------------------------------------------------------------
 
-	public static List<String[]> loadCsvData(String url) throws MalformedURLException, IOException, CsvException{
-		return loadCsvData(new URL(url));
+	public static ParameterDataFile loadData(String url) throws MalformedURLException{
+		return loadData(new URL(url));
 	}
 
-	public static List<String[]> loadCsvData(URL url) throws IOException, CsvException{
-
-		final CSVReader reader = new CSVReader(
-				new BufferedReader(
-						new InputStreamReader(url.openStream(), StandardCharsets.UTF_8)));
-		
-		final List<String[]> result = reader.readAll();
-		
-		reader.close();
-		
-		return result;
+	public static ParameterDataFile loadData(URL url){
+		return new ParameterDataFile(url);
 	}
 
 	//-------------------------------------------------------------------------------------------------------------------------------------------
@@ -434,12 +420,12 @@ public class Utils {
 			htmlContent.append("<br><strong>  - Binary path : </strong>");
 			htmlContent.append(browserPath);
 		}
-		
+
 		if(profilePath != null) {
 			htmlContent.append("<br><strong>  - Profile path : </strong>");
 			htmlContent.append(profilePath);
 		}
-		
+
 		htmlContent.append("<br><strong>  - Start position : </strong>");
 		htmlContent.append(testBound.getX().intValue());
 		htmlContent.append(" x ");

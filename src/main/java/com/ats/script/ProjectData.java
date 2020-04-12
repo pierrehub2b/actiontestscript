@@ -69,7 +69,7 @@ public class ProjectData {
 	private Path reportDestinationFolderPath;
 
 	public static ProjectData getProjectData(File sourceFolder, File destinationFolder, File reportFolder) {
-		final File xmlDataFile = checkLtfProjectFolder(sourceFolder);
+		final File xmlDataFile = checkAtsProjectFolder(sourceFolder);
 		if(xmlDataFile != null) {
 			return new ProjectData(xmlDataFile, destinationFolder, reportFolder);
 		}else {
@@ -89,13 +89,13 @@ public class ProjectData {
 		return getAssetsJavaCode(pathBuilder.toString());
 	}
 
-	private static File checkLtfProjectFolder(File f){
+	private static File checkAtsProjectFolder(File f){
 		if(f != null){
 			final File xmlPropertiesFile = f.toPath().resolve(ScriptParser.ATS_PROPERTIES_FILE).toFile();
 			if(xmlPropertiesFile.exists()){
 				return xmlPropertiesFile;
 			}else{
-				return checkLtfProjectFolder(f.getParentFile());
+				return checkAtsProjectFolder(f.getParentFile());
 			}
 		}
 		return null;
@@ -106,10 +106,14 @@ public class ProjectData {
 	//create project from current source folder
 	public ProjectData(File f) {
 		if(f.isDirectory()) {
-			folder = f;
+			this.folder = f;
 		}else if(f.isFile()) {
-			folder = f.getParentFile();
+			this.folder = f.getParentFile();
 		}
+		this.folderPath = folder.getPath();
+		
+		setJavaDestinationFolderPath(getTargetFolderPath().resolve(TARGET_FOLDER_GENERATED));
+		setReportDestinationFolderPath(getTargetFolderPath().resolve(TARGET_FOLDER_REPORT));
 	}
 
 	public ProjectData(File xmlPropertiesFile, File generatedJavaFolder, File reportFolder) {
@@ -120,17 +124,25 @@ public class ProjectData {
 		parseXmlFile(xmlPropertiesFile);
 
 		if(generatedJavaFolder != null) {
-			this.javaDestinationFolderPath = generatedJavaFolder.toPath();
+			setJavaDestinationFolderPath(generatedJavaFolder.toPath());
 		}else {
-			this.javaDestinationFolderPath = getTargetFolderPath().resolve(TARGET_FOLDER_GENERATED);
+			setJavaDestinationFolderPath(getTargetFolderPath().resolve(TARGET_FOLDER_GENERATED));
 		}
-		this.javaDestinationFolderPath.toFile().mkdirs();
 
 		if(reportFolder != null) {
-			this.reportDestinationFolderPath = reportFolder.toPath();
+			setReportDestinationFolderPath(reportFolder.toPath());
 		}else {
-			this.reportDestinationFolderPath = getTargetFolderPath().resolve(TARGET_FOLDER_REPORT);
+			setReportDestinationFolderPath(getTargetFolderPath().resolve(TARGET_FOLDER_REPORT));
 		}
+	}
+	
+	private void setJavaDestinationFolderPath(Path p) {
+		this.javaDestinationFolderPath = p;
+		this.javaDestinationFolderPath.toFile().mkdirs();
+	}
+	
+	private void setReportDestinationFolderPath(Path p) {
+		this.reportDestinationFolderPath = p;
 		this.reportDestinationFolderPath.toFile().mkdirs();
 	}
 
@@ -140,8 +152,8 @@ public class ProjectData {
 		
 		final Path targetFolderPath = getTargetFolderPath();
 
-		javaDestinationFolderPath = targetFolderPath.resolve(TARGET_FOLDER_GENERATED);
-		reportDestinationFolderPath = targetFolderPath.resolve(TARGET_FOLDER_REPORT);
+		setJavaDestinationFolderPath(targetFolderPath.resolve(TARGET_FOLDER_GENERATED));
+		setReportDestinationFolderPath(targetFolderPath.resolve(TARGET_FOLDER_REPORT));
 	}
 
 	public void initFolders() {

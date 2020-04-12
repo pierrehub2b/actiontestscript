@@ -38,7 +38,6 @@ import java.util.stream.Collectors;
 
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.RandomStringValue;
-import com.ats.generator.variables.ScriptValue;
 import com.ats.generator.variables.Variable;
 import com.ats.generator.variables.transform.DateTransformer;
 import com.ats.generator.variables.transform.TimeTransformer;
@@ -62,7 +61,7 @@ public class Script {
 	public final static String SCRIPT_LOG = "SCRIPT";
 	public final static String COMMENT_LOG = "COMMENT";
 
-	private ArrayList<String> parameters = new ArrayList<String>();
+	private ArrayList<ArrayList<String>> parameters = new ArrayList<ArrayList<String>>();
 	private List<Variable> variables = new ArrayList<Variable>();
 	private ArrayList<CalculatedValue> returns;
 
@@ -167,12 +166,12 @@ public class Script {
 		this.variables = data;
 	}
 
-	public String[] getParameters() {
-		return parameters.toArray(new String[parameters.size()]);
+	public ArrayList<ArrayList<String>> getParameters() {
+		return parameters;
 	}
 
-	public void setParameters(String[] data) {
-		this.parameters = new ArrayList<String>(Arrays.asList(data));
+	public void setParameters(ArrayList<ArrayList<String>> data) {
+		this.parameters = data;
 	}
 
 	public CalculatedValue[] getReturns() {
@@ -270,17 +269,37 @@ public class Script {
 				.collect(Collectors.joining());
 	}
 
-	public ScriptValue getParameter(int index) {
-		return new ScriptValue(getParameterValue(index, ""));
+	//public ScriptValue getParameter(String name) {
+	//	return new ScriptValue(getParameterValue(name, ""));
+	//}
+
+	public String getParameterValue(String name) {
+		return getParameterValue(name, "");
 	}
 
+	public String getParameterValue(String name, String defaultValue) {
+
+		try {
+			int index = Integer.parseInt(name);
+			return getParameterValue(index, defaultValue);
+		}catch (NumberFormatException e) {}
+
+		for(ArrayList<String> item : parameters) {
+			if(name.equals(item.get(0))){
+				return item.get(1);
+			}
+		}
+		
+		return defaultValue;
+	}
+	
 	public String getParameterValue(int index) {
 		return getParameterValue(index, "");
 	}
-
+	
 	public String getParameterValue(int index, String defaultValue) {
 		if(parameters.size() > index) {
-			return parameters.get(index);
+			return parameters.get(index).get(1);
 		}
 		return defaultValue;
 	}

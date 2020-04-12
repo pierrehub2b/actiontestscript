@@ -66,7 +66,6 @@ import com.ats.script.actions.neoload.ActionNeoloadContainer;
 import com.ats.script.actions.neoload.ActionNeoloadRecord;
 import com.ats.script.actions.neoload.ActionNeoloadStart;
 import com.ats.script.actions.neoload.ActionNeoloadStop;
-import com.ats.script.actions.performance.ActionPerformance;
 import com.ats.script.actions.performance.ActionPerformanceRecord;
 import com.ats.script.actions.performance.ActionPerformanceStart;
 import com.ats.tools.Utils;

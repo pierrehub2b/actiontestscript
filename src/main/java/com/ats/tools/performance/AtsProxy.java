@@ -83,13 +83,12 @@ public class AtsProxy implements IAtsProxy {
 			this.harNameVersion.setComment("application=" + application + ", channel=" + channelName);
 			this.server = new BrowserMobProxyServer();
 			this.server.setBlacklist(blacklist);
-			this.server.enableHarCaptureTypes(CaptureType.REQUEST_HEADERS, CaptureType.REQUEST_COOKIES, CaptureType.REQUEST_CONTENT, CaptureType.RESPONSE_HEADERS, CaptureType.RESPONSE_COOKIES, CaptureType.RESPONSE_CONTENT);
+			this.server.enableHarCaptureTypes(CaptureType.REQUEST_HEADERS, CaptureType.REQUEST_CONTENT, CaptureType.RESPONSE_HEADERS, CaptureType.RESPONSE_CONTENT);
 		}
 
 		@Override
 		public void run() {
 			
-			server.setTrustAllServers(true);
 			server.start(0);
 			proxy = ClientUtil.createSeleniumProxy(server);
 
@@ -113,12 +112,18 @@ public class AtsProxy implements IAtsProxy {
 		}
 
 		public void record(List<String> whiteList, long sendBandWidth, long receiveBandWidth) {
-			if(whiteList.size() > 0) {
+			if(whiteList != null && whiteList.size() > 0) {
 				server.whitelistRequests(whiteList, 200);
 			}
-			server.setWriteBandwidthLimit(sendBandWidth);
-			server.setReadBandwidthLimit(receiveBandWidth);
 			
+			if(sendBandWidth > 0) {
+				server.setWriteBandwidthLimit(sendBandWidth);
+			}
+
+			if(receiveBandWidth > 0) {
+				server.setReadBandwidthLimit(receiveBandWidth);
+			}
+
 			server.newHar("ats-channel-start", "ATS channel start");
 		}
 
@@ -156,7 +161,7 @@ public class AtsProxy implements IAtsProxy {
 		}
 
 		public void endAction() {
-			server.endPage();
+			//server.endPage();
 		}
 	}
 

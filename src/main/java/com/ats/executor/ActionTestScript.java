@@ -22,6 +22,7 @@ package com.ats.executor;
 import static org.testng.Assert.fail;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -250,7 +251,7 @@ public class ActionTestScript extends Script implements ITest{
 		return topScript;
 	}
 
-	public void initCalledScript(ActionTestScript testScript, String testName, int line, ActionTestScript script, String[] parameters, List<Variable> variables, int iteration, int iterationMax, String scriptName, String type, File csvFile) {
+	public void initCalledScript(ActionTestScript testScript, String testName, int line, ActionTestScript script, ArrayList<ArrayList<String>> parameters, List<Variable> variables, int iteration, int iterationMax, String scriptName, String type, File csvFile) {
 
 		this.topScript = script;
 		this.channelManager = script.getChannelManager();
@@ -270,10 +271,12 @@ public class ActionTestScript extends Script implements ITest{
 
 		if(parameters != null) {
 			setParameters(parameters);
-			if(parameters.length > 0) {
+			if(parameters.size() > 0) {
 				final JsonArray parametersArray = new JsonArray();
-				for (String s : parameters) {
-					parametersArray.add(s);
+				for (ArrayList<String> s : parameters) {
+					final JsonObject p = new JsonObject();
+					p.addProperty(s.get(0), s.get(1));
+					parametersArray.add(p);
 				}
 				log.add("parameters", parametersArray);
 			}
@@ -335,6 +338,15 @@ public class ActionTestScript extends Script implements ITest{
 	//---------------------------------------------------------------------------------------------
 
 	public static final String JAVA_PARAM_FUNCTION_NAME = "prm";
+	
+	public String prm(String name) {
+		return getParameterValue(name);
+	}
+
+	public String prm(String name, String defaultValue) {
+		return getParameterValue(name, defaultValue);
+	}
+	
 	public String prm(int index) {
 		return getParameterValue(index);
 	}

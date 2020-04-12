@@ -995,6 +995,8 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public void goToUrl(ActionStatus status, String url) {
 
+		channel.waitBeforeGotoUrl(this);
+		
 		if(ActionGotoUrl.REFRESH.equals(url)) {
 			driver.navigate().refresh();
 		}else if(ActionGotoUrl.NEXT.equals(url)) {
@@ -1112,6 +1114,8 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {
 
+		channel.waitBeforeEnterText(this);
+		
 		final WebElement we = element.getWebElement();
 		executeScript(status, "result={size:window.getComputedStyle(arguments[0], null).getPropertyValue('font-size'), family:window.getComputedStyle(arguments[0], null).getPropertyValue('font-family'), weight:window.getComputedStyle(arguments[0], null).getPropertyValue('font-weight')};", we);
 

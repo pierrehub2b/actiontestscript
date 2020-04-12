@@ -70,7 +70,7 @@ public class ScriptLoader extends Script {
 
 		if(ATS_EXTENSION.equals(type)){
 
-			this.setParameters(new String[0]);
+			this.setParameters(new ArrayList<ArrayList<String>>());
 			this.setVariables(new ArrayList<Variable>());
 
 			this.actions = new ArrayList<Action>();

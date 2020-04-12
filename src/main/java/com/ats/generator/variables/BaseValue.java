@@ -21,6 +21,8 @@ package com.ats.generator.variables;
 
 import java.util.regex.Matcher;
 
+import org.apache.commons.text.StringEscapeUtils;
+
 public class BaseValue {
 
 	protected String value;
@@ -31,7 +33,7 @@ public class BaseValue {
 	
 	public BaseValue(Matcher m) {
 		replace = m.group(0);
-		value = m.group(1).trim();
+		value = StringEscapeUtils.escapeJava(m.group(1).trim());
 		codeValue = value;
 		defaultValue = m.group(2).trim();
 	}

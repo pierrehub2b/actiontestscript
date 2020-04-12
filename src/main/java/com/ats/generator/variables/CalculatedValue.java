@@ -90,7 +90,7 @@ public class CalculatedValue{
 	}
 		
 	private String initCalculated(String dataValue) {
-		
+				
 		rawJavaCode = StringEscapeUtils.escapeJava(dataValue);
 
 		Matcher mv = Variable.SCRIPT_PATTERN.matcher(dataValue);

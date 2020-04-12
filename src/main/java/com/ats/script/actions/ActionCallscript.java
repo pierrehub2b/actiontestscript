@@ -22,7 +22,6 @@ package com.ats.script.actions;
 import static org.testng.Assert.fail;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -41,6 +40,7 @@ import com.ats.executor.channels.Channel;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.ConditionalValue;
 import com.ats.generator.variables.Variable;
+import com.ats.generator.variables.parameter.ParameterDataFile;
 import com.ats.script.ProjectData;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
@@ -48,7 +48,6 @@ import com.ats.tools.Utils;
 import com.ats.tools.logger.MessageCode;
 import com.ats.tools.logger.levels.AtsFailError;
 import com.google.gson.JsonObject;
-import com.opencsv.exceptions.CsvException;
 
 public class ActionCallscript extends Action {
 
@@ -68,7 +67,7 @@ public class ActionCallscript extends Action {
 	private List<CalculatedValue> parameters;
 
 	private int loop = 1;
-	private CalculatedValue csvFilePath = null;
+	private CalculatedValue parameterFilePath = null;
 
 	private ConditionalValue condition;
 
@@ -83,10 +82,10 @@ public class ActionCallscript extends Action {
 		super(script);
 		this.setName(new CalculatedValue(script, name));
 
-		if(!setCsvFilePathData(csvFilePath)) {
+		if(!setParameterFilePathData(csvFilePath)) {
 			if(parameters.length > 0) {
 				final String firstParam = parameters[0].trim();
-				if(!setCsvFilePathData(firstParam)) {
+				if(!setParameterFilePathData(firstParam)) {
 					final ArrayList<CalculatedValue> paramsValues = new ArrayList<CalculatedValue>();
 					for(String param : parameters){
 
@@ -149,7 +148,7 @@ public class ActionCallscript extends Action {
 
 	public ActionCallscript(Script script, CalculatedValue name, CalculatedValue csvFilePath) {
 		this(script, name);
-		this.setCsvFilePath(csvFilePath);
+		this.setParameterFilePath(csvFilePath);
 	}
 
 	public ActionCallscript(Script script, CalculatedValue name, CalculatedValue[] parameters, int loop) {
@@ -175,10 +174,10 @@ public class ActionCallscript extends Action {
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
 
-	private boolean setCsvFilePathData(String value) {
+	private boolean setParameterFilePathData(String value) {
 		if(value != null) {
 			if(value.startsWith(ASSETS_PROTOCOLE) || value.startsWith(FILE_PROTOCOLE) || value.startsWith(HTTP_PROTOCOLE) || value.startsWith(HTTPS_PROTOCOLE)) {
-				this.setCsvFilePath(new CalculatedValue(script, value));
+				this.setParameterFilePath(new CalculatedValue(script, value));
 				return true;
 			}
 		}
@@ -196,9 +195,9 @@ public class ActionCallscript extends Action {
 
 		codeBuilder.append(name.getJavaCode());
 
-		if(csvFilePath != null) {
+		if(parameterFilePath != null) {
 			codeBuilder.append(", ")
-			.append(csvFilePath.getJavaCode());
+			.append(parameterFilePath.getJavaCode());
 		}else {
 			if(parameters != null){
 				final StringJoiner joiner = new StringJoiner(", ");
@@ -254,9 +253,9 @@ public class ActionCallscript extends Action {
 				final ActionTestScript ats = clazz.getDeclaredConstructor().newInstance();
 				final ActionTestScript topScript = ts.getTopScript();
 
-				if(csvFilePath != null) {
+				if(parameterFilePath != null) {
 
-					final String csvPath = csvFilePath.getCalculated();
+					final String csvPath = parameterFilePath.getCalculated();
 					URL csvUrl = null;
 
 					if(csvPath.startsWith(ASSETS_PROTOCOLE)) {
@@ -278,34 +277,36 @@ public class ActionCallscript extends Action {
 						return;
 					}
 
-					File csvFile = null;
-					try {
-						csvFile = new File(csvUrl.toURI());
-					} catch (URISyntaxException e) {}
+					final ParameterDataFile data = Utils.loadData(csvUrl);
+					
+					if(data.noError()) {
 
-					try {
-
+						File csvFile = null;
+						try {
+							csvFile = new File(csvUrl.toURI());
+						} catch (URISyntaxException e) {}
+						
 						final Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
-						final List<String[]> data = Utils.loadCsvData(csvUrl);
 						final int iterationMax = data.size();
 						int iteration = 0;
 
-						for (String[] params : data) {
-							ats.initCalledScript(ts, testName, line, topScript, getCalculatedParameters(ts, params), null, iteration, iterationMax, scriptName, "csv", csvFile);
+						for (ArrayList<ArrayList<String>> params : data.getData()) {
+							
+							params.forEach(p -> p.set(1, new CalculatedValue(ts, p.get(1)).getCalculated()));
+							ats.initCalledScript(ts, testName, line, topScript, params, null, iteration, iterationMax, scriptName, "dataFile", csvFile);
+							
 							testMain.invoke(ats);
 							iteration++;
 						}
 
-					} catch (IOException e0) {
-						status.setError(ActionStatus.FILE_NOT_FOUND, "CSV file IO error : " + csvPath + " -> " + e0.getMessage());
-					} catch(CsvException e1) {
-						status.setError(ActionStatus.JAVA_EXCEPTION, "CSV load file error : " + csvPath + " -> " + e1.getMessage());
+					}else {
+						status.setError(ActionStatus.JAVA_EXCEPTION, "Data load file error : " + csvPath + " -> " + data.getError());
 					}
 
 				}else {
 
 					final Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
-					final String[] parameters = getCalculatedParameters();
+					final ArrayList<ArrayList<String>> parameters = getCalculatedParameters();
 
 					for (int iteration=0; iteration<loop; iteration++) {
 						ats.initCalledScript(ts, testName, line, topScript, parameters, variables, iteration, loop, scriptName, "loop", null);
@@ -333,26 +334,13 @@ public class ActionCallscript extends Action {
 		status.endDuration();
 	}
 
-	private String[] getCalculatedParameters() {
+	private ArrayList<ArrayList<String>> getCalculatedParameters() {
 		if(parameters != null) {
-			int index = 0;
-			final String[] calculatedParameters = new String[parameters.size()];
-			for(CalculatedValue calc : parameters) {
-				calculatedParameters[index] = calc.getCalculated();
-				index++;
-			}
-			return calculatedParameters;
+			final ArrayList<ArrayList<String>> result = new ArrayList<ArrayList<String>>();
+			parameters.forEach(p -> result.add(new ArrayList<String>(Arrays.asList("", p.getCalculated()))));
+			return result;
 		}
 		return null;
-	}
-
-	private String[] getCalculatedParameters(ActionTestScript ats, String[] params) {
-		final String[] calculatedParameters = new String[params.length];
-		for(int i=0; i<params.length; i++) {
-			final CalculatedValue calc = new CalculatedValue(ats, params[i]);
-			calculatedParameters[i] = calc.getCalculated(); 
-		}
-		return calculatedParameters;
 	}
 
 	@Override
@@ -380,7 +368,7 @@ public class ActionCallscript extends Action {
 	public void setVariables(List<Variable> value) {
 		this.variables = value;
 		if(value != null) {
-			this.csvFilePath = null;
+			this.parameterFilePath = null;
 			this.loop = 1;
 		}
 	}
@@ -392,7 +380,7 @@ public class ActionCallscript extends Action {
 	public void setParameters(List<CalculatedValue> value) {
 		this.parameters = value;
 		if(value != null) {
-			this.csvFilePath = null;
+			this.parameterFilePath = null;
 		}
 	}
 
@@ -407,18 +395,18 @@ public class ActionCallscript extends Action {
 		}
 
 		if(loop > 1) {
-			this.csvFilePath = null;
+			this.parameterFilePath = null;
 			this.variables = null;
 		}
 		this.loop = loop;
 	}
 
-	public CalculatedValue getCsvFilePath() {
-		return csvFilePath;
+	public CalculatedValue getParameterFilePath() {
+		return parameterFilePath;
 	}
 
-	public void setCsvFilePath(CalculatedValue value) {
-		this.csvFilePath = value;
+	public void setParameterFilePath(CalculatedValue value) {
+		this.parameterFilePath = value;
 		if(value != null) {
 			this.parameters = null;
 			this.variables = null;

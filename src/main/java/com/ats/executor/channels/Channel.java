@@ -139,6 +139,14 @@ public class Channel {
 	public void waitBeforeSearchElement(WebDriverEngine webDriverEngine) {
 		atsManager.getWaitGuiReady().waitBeforeSearchElement(this, webDriverEngine);
 	}
+	
+	public void waitBeforeEnterText(WebDriverEngine webDriverEngine) {
+		atsManager.getWaitGuiReady().waitBeforeEnterText(this, webDriverEngine);
+	}
+
+	public void waitBeforeGotoUrl(WebDriverEngine webDriverEngine) {
+		atsManager.getWaitGuiReady().waitBeforeGotoUrl(this, webDriverEngine);
+	}
 
 	public Class<ActionTestScript> loadTestScriptClass(String name){
 		return atsManager.loadTestScriptClass(name);
