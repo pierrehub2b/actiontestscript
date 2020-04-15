@@ -19,9 +19,7 @@ under the License.
 
 package com.ats.script.actions;
 
-import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
-import com.ats.executor.channels.EmptyChannel;
 import com.ats.script.Script;
 
 public abstract class ActionExecute extends Action {
@@ -39,11 +37,7 @@ public abstract class ActionExecute extends Action {
 
 	public void execute(ActionTestScript ts, String testName, int testLine){
 		super.execute(ts, testName, testLine);
-		if(getCurrentChannel() instanceof EmptyChannel) {
-			setStatus(new ActionStatus(null, testName, testLine));
-			status.setError(ActionStatus.CHANNEL_NOT_FOUND, "No running channel found, please check that 'start channel action' has been added to the script");
-			status.endDuration();
-		}
+		getCurrentChannel().checkStatus(this, testName, testLine);
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

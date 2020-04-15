@@ -90,6 +90,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	private final static String INPUT = "input";
 	public final static String SWIPE = "swipe";
 	private final static String BUTTON = "button";
+	private final static String SCRIPTING = "scripting";
 
 	private final static String SCREENSHOT_METHOD = "/screenshot";
 
@@ -399,7 +400,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {
 		for(SendKeyData sequence : textActionList) {	
-			executeRequest(ELEMENT, element.getFoundElement().getId(), INPUT, sequence.getMobileSequence()		);
+			executeRequest(ELEMENT, element.getFoundElement().getId(), INPUT, sequence.getMobileSequence());
 		}
 	}
 
@@ -484,7 +485,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public Object executeScript(ActionStatus status, String script, Object... params) {
-		return null;
+		return executeRequest(SCRIPTING, script);
 	}
 
 	@Override

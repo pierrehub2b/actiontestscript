@@ -19,10 +19,14 @@ under the License.
 
 package com.ats.executor.channels;
 
+import java.nio.file.Path;
+
 import com.ats.driver.AtsManager;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.drivers.desktop.DesktopResponse;
 import com.ats.script.ScriptHeader;
+import com.ats.script.actions.ActionExecute;
+import com.ats.tools.logger.ExecutionLogger;
 
 public class EmptyChannel extends Channel {
 	
@@ -33,10 +37,25 @@ public class EmptyChannel extends Channel {
 	public EmptyChannel(AtsManager ats) {
 		super(ats);
 	}
-
+	
 	@Override
-	public ActionStatus newActionStatus(String testName, int testLine) {
-		return new ActionStatus(null, testName, testLine);
+	public void checkStatus(ActionExecute actionExecute, String testName, int testLine) {
+		final ActionStatus status = newActionStatus(testName, testLine);
+		status.setError(ActionStatus.CHANNEL_NOT_FOUND, "No running channel found, please check that 'start channel action' has been added to the script");
+		status.endDuration();
+		actionExecute.setStatus(status);
+	}
+	
+	@Override
+	public void stopVisualRecord() {
+	}
+	
+	@Override
+	public void saveVisualReportFile(Path path, String fileName, ExecutionLogger logger) {
+	}
+	
+	@Override
+	public void createVisualAction(String actionName, int scriptLine, long timeline) {
 	}
 	
 	@Override

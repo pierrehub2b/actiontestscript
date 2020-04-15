@@ -43,11 +43,11 @@ public class ParameterDataFile{
 
 	public static final String CSV_TYPE = "csv";
 	public static final String JSON_TYPE = "json";
+	public static final String JSON_SIMPLE_TYPE = "jsonSimple";
 	public static final String JSON_COMPLEX_TYPE = "jsonComplex";
 
 	private String dataType = CSV_TYPE;
-	private ArrayList<ArrayList<ArrayList<String>>> data = new ArrayList<ArrayList<ArrayList<String>>>();
-	private ArrayList<String> colsName = new ArrayList<String>();
+	private ArrayList<ParameterList> data = new ArrayList<ParameterList>();
 
 	private String error = "";
 	private boolean editable = true;
@@ -75,13 +75,16 @@ public class ParameterDataFile{
 
 				final JsonArray jsonArray = jsonElement.getAsJsonArray();
 
+				int iteration = 0;
 				for (JsonElement line : jsonArray) {
 
 					if(line.isJsonObject()) {
-						final ArrayList<ArrayList<String>> newLine = new ArrayList<ArrayList<String>>();
-						line.getAsJsonObject().entrySet().forEach(e -> newLine.add(new ArrayList<String>(Arrays.asList(e.getKey(), e.getValue().getAsString()))));
+						final ParameterList newLine = new ParameterList(iteration);
+						final AtomicInteger colIndex = new AtomicInteger(0);
+						line.getAsJsonObject().entrySet().forEach(e -> newLine.addParameter(new Parameter(colIndex.getAndIncrement(), e.getKey(), e.getValue().getAsString())));
 						data.add(newLine);
 					}
+					iteration++;
 				}
 
 			}else if(jsonElement.isJsonObject()) {
@@ -89,9 +92,39 @@ public class ParameterDataFile{
 				this.dataType = JSON_TYPE;
 
 				final JsonObject jsonObject = jsonElement.getAsJsonObject();
-				final AtomicInteger colIndex = new AtomicInteger(0);
+				
+				if(jsonObject.has("paramNames") && jsonObject.has("paramValues") && jsonObject.size() == 2) {
+					
+					try {
+						final JsonArray paramNames = jsonObject.get("paramNames").getAsJsonArray();
+						final JsonArray paramValues = jsonObject.get("paramValues").getAsJsonArray();
+							
+						if(paramNames.size() == paramValues.size()) {
+							for (int i = 0; i<paramValues.size(); i++){
+								final JsonArray iterations = paramValues.get(i).getAsJsonArray();
+								
+								for (int j = 0; j<iterations.size(); j++){
+									
+									String paramName = "";
+									if(i < paramNames.size()) {
+										paramName = paramNames.get(i).getAsString();
+									}
+																		
+									if(data.size() < j+1) {
+										data.add(new ParameterList(j));
+									}
+									final ParameterList row = data.get(j);
+									row.addParameter(new Parameter(j, paramName, iterations.get(j).getAsString()));
+								}
+							}
 
-				jsonObject.keySet().forEach(c -> addLine(data, colsName, jsonObject, c, colIndex.getAndIncrement()));
+							return;
+						}
+					}catch(IllegalStateException e) {}
+				}
+				
+				this.dataType = JSON_SIMPLE_TYPE;
+				parseJsonObject(jsonObject);
 			}
 
 		}else {
@@ -100,54 +133,42 @@ public class ParameterDataFile{
 				final List<String[]> csvList = reader.readAll();
 				reader.close();
 				csvList.forEach(l -> addCsvLine(data, l));
-
-				if(data.size() > 0) {
-					for (ArrayList<String> cols : data.get(0)) {
-						colsName.add(cols.get(0));
-					}
-				}
-
 			} catch (IOException | CsvException e) {
 				error = e.getMessage();
 			}
 		}
+	}
+	
+	private void parseJsonObject(JsonObject jsonObject) {
+		final AtomicInteger colIndex = new AtomicInteger(0);
+		jsonObject.keySet().forEach(c -> addCol(data, jsonObject, c, colIndex.getAndIncrement()));
 	}
 
 	public boolean noError() {
 		return error == null || error.isEmpty();
 	}
 
-	private static void addLine(ArrayList<ArrayList<ArrayList<String>>> list, ArrayList<String> colsName, JsonObject obj, String colName, int colIndex) {
-
-		colsName.add(colName);
+	private static void addCol(ArrayList<ParameterList> list, JsonObject obj, String colName, int colIndex) {
 
 		final JsonArray data = obj.get(colName).getAsJsonArray();
-		final int dataSize = data.size();
 		final AtomicInteger line = new AtomicInteger(0);
 
-		data.forEach(e -> addLine(list, e, line.getAndIncrement(), dataSize, colName, colIndex));
+		data.forEach(e -> addLine(list, e, line.getAndIncrement(), data, colName, colIndex));
 	}
 
-	private static void addLine(ArrayList<ArrayList<ArrayList<String>>> list, JsonElement elem, int line, int dataSize, String colName, int colIndex) {
+	private static void addLine(ArrayList<ParameterList> list, JsonElement elem, int line, JsonArray data, String colName, int colIndex) {
 		if(elem != null && elem.isJsonPrimitive()) {
 			if(list.size() < line + 1){
-				list.add(new ArrayList<ArrayList<String>>());
+				list.add(new ParameterList(line));
 			}
-			final ArrayList<ArrayList<String>> currentLine = list.get(line);
-
-			if(currentLine.size() < colIndex + 1) {
-				currentLine.add(new ArrayList<String>());
-			}
-			final ArrayList<String> currentCol = currentLine.get(colIndex);
-
-			currentCol.add(colName);
-			currentCol.add(elem.getAsString());
+			final ParameterList currentLine = list.get(line);
+			currentLine.addParameter(new Parameter(colIndex, colName, data.get(line).getAsString()));
 		}
 	}
 
-	private static void addCsvLine(ArrayList<ArrayList<ArrayList<String>>> result, String[] line) {
+	private static void addCsvLine(ArrayList<ParameterList> result, String[] line) {
 		final AtomicInteger col = new AtomicInteger(0);
-		result.add(new ArrayList<ArrayList<String>>(Arrays.stream(line).map(l -> new ArrayList<String>(Arrays.asList("p" + col.getAndIncrement(), l))).collect(Collectors.toList())));
+		result.add(new ParameterList(result.size(), Arrays.stream(line).map(l -> new Parameter(col.getAndIncrement(), l)).collect(Collectors.toList())));
 	}
 
 	private static JsonElement getJsonElement(String content) {
@@ -162,8 +183,10 @@ public class ParameterDataFile{
 		return data.size();
 	}
 
-	//-------------------------------------------------------------------------------------------------------
-
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------
+	
 	public String getDataType() {
 		return dataType;
 	}
@@ -171,21 +194,13 @@ public class ParameterDataFile{
 	public void setDataType(String type) {
 		this.dataType = type;
 	}
-
-	public ArrayList<ArrayList<ArrayList<String>>> getData() {
+	
+	public ArrayList<ParameterList> getData() {
 		return data;
 	}
 
-	public void setData(ArrayList<ArrayList<ArrayList<String>>> list) {
+	public void setData(ArrayList<ParameterList> list) {
 		this.data = list;
-	}
-
-	public ArrayList<String> getColsName() {
-		return colsName;
-	}
-
-	public void setColsName(ArrayList<String> colsName) {
-		this.colsName = colsName;
 	}
 
 	public String getError() {

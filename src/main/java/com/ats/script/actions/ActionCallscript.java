@@ -29,7 +29,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,7 +39,9 @@ import com.ats.executor.channels.Channel;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.ConditionalValue;
 import com.ats.generator.variables.Variable;
+import com.ats.generator.variables.parameter.Parameter;
 import com.ats.generator.variables.parameter.ParameterDataFile;
+import com.ats.generator.variables.parameter.ParameterList;
 import com.ats.script.ProjectData;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
@@ -63,8 +64,8 @@ public class ActionCallscript extends Action {
 	private CalculatedValue name;
 	private int type = -1;
 
-	private List<Variable> variables;
-	private List<CalculatedValue> parameters;
+	private ArrayList<Variable> variables;
+	private ParameterList parameters;
 
 	private int loop = 1;
 	private CalculatedValue parameterFilePath = null;
@@ -200,15 +201,7 @@ public class ActionCallscript extends Action {
 			.append(parameterFilePath.getJavaCode());
 		}else {
 			if(parameters != null){
-				final StringJoiner joiner = new StringJoiner(", ");
-				for (CalculatedValue value : parameters){
-					joiner.add(value.getJavaCode());
-				}
-				codeBuilder.append(", ")
-				.append(ActionTestScript.JAVA_PARAM_FUNCTION_NAME)
-				.append("(")
-				.append(joiner.toString())
-				.append(")");
+				parameters.getJavaCode(codeBuilder);
 			}
 
 			if(loop > 1) {
@@ -290,10 +283,10 @@ public class ActionCallscript extends Action {
 						final int iterationMax = data.size();
 						int iteration = 0;
 
-						for (ArrayList<ArrayList<String>> params : data.getData()) {
+						for (ParameterList row : data.getData()) {
 							
-							params.forEach(p -> p.set(1, new CalculatedValue(ts, p.get(1)).getCalculated()));
-							ats.initCalledScript(ts, testName, line, topScript, params, null, iteration, iterationMax, scriptName, "dataFile", csvFile);
+							row.updateCalculated(ts);
+							ats.initCalledScript(ts, testName, line, topScript, row, null, iteration, iterationMax, scriptName, "dataFile", csvFile);
 							
 							testMain.invoke(ats);
 							iteration++;
@@ -306,7 +299,6 @@ public class ActionCallscript extends Action {
 				}else {
 
 					final Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
-					final ArrayList<ArrayList<String>> parameters = getCalculatedParameters();
 
 					for (int iteration=0; iteration<loop; iteration++) {
 						ats.initCalledScript(ts, testName, line, topScript, parameters, variables, iteration, loop, scriptName, "loop", null);
@@ -334,15 +326,6 @@ public class ActionCallscript extends Action {
 		status.endDuration();
 	}
 
-	private ArrayList<ArrayList<String>> getCalculatedParameters() {
-		if(parameters != null) {
-			final ArrayList<ArrayList<String>> result = new ArrayList<ArrayList<String>>();
-			parameters.forEach(p -> result.add(new ArrayList<String>(Arrays.asList("", p.getCalculated()))));
-			return result;
-		}
-		return null;
-	}
-
 	@Override
 	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
 		data.addProperty("status", "terminated");
@@ -361,11 +344,11 @@ public class ActionCallscript extends Action {
 		this.name = name;
 	}
 
-	public List<Variable> getVariables() {
+	public ArrayList<Variable> getVariables() {
 		return variables;
 	}
 
-	public void setVariables(List<Variable> value) {
+	public void setVariables(ArrayList<Variable> value) {
 		this.variables = value;
 		if(value != null) {
 			this.parameterFilePath = null;
@@ -373,17 +356,26 @@ public class ActionCallscript extends Action {
 		}
 	}
 
-	public List<CalculatedValue> getParameters() {
+	public ParameterList getParameters() {
 		return parameters;
 	}
 
-	public void setParameters(List<CalculatedValue> value) {
+	public void setParameters(ParameterList value) {
 		this.parameters = value;
 		if(value != null) {
 			this.parameterFilePath = null;
 		}
 	}
-
+	
+	public void setParameters(ArrayList<CalculatedValue> calcs) {
+		parameters = new ParameterList(0);
+		int i = 0;
+		for(CalculatedValue calc : calcs) {
+			parameters.addParameter(new Parameter(i, calc));
+			i++;
+		}
+	}
+	
 	public int getLoop() {
 		return loop;
 	}

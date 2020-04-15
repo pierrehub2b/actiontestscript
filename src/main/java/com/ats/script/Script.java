@@ -38,7 +38,9 @@ import java.util.stream.Collectors;
 
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.RandomStringValue;
+import com.ats.generator.variables.ScriptValue;
 import com.ats.generator.variables.Variable;
+import com.ats.generator.variables.parameter.ParameterList;
 import com.ats.generator.variables.transform.DateTransformer;
 import com.ats.generator.variables.transform.TimeTransformer;
 import com.ats.generator.variables.transform.Transformer;
@@ -61,7 +63,7 @@ public class Script {
 	public final static String SCRIPT_LOG = "SCRIPT";
 	public final static String COMMENT_LOG = "COMMENT";
 
-	private ArrayList<ArrayList<String>> parameters = new ArrayList<ArrayList<String>>();
+	private ParameterList parameterList;
 	private List<Variable> variables = new ArrayList<Variable>();
 	private ArrayList<CalculatedValue> returns;
 
@@ -166,12 +168,12 @@ public class Script {
 		this.variables = data;
 	}
 
-	public ArrayList<ArrayList<String>> getParameters() {
-		return parameters;
+	public ParameterList getParameterList() {
+		return parameterList;
 	}
 
-	public void setParameters(ArrayList<ArrayList<String>> data) {
-		this.parameters = data;
+	public void setParameterList(ParameterList data) {
+		this.parameterList = data;
 	}
 
 	public CalculatedValue[] getReturns() {
@@ -268,10 +270,22 @@ public class Script {
 				.limit(len)
 				.collect(Collectors.joining());
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	// parameters
+	//-------------------------------------------------------------------------------------------------
 
-	//public ScriptValue getParameter(String name) {
-	//	return new ScriptValue(getParameterValue(name, ""));
-	//}
+	public String[] getParameters() {
+		return parameterList.getParameters();
+	}
+	
+	public ScriptValue getParameter(String name) {
+		return new ScriptValue(getParameterValue(name, ""));
+	}
+	
+	public ScriptValue getParameter(int index) {
+		return new ScriptValue(getParameterValue(index, ""));
+	}
 
 	public String getParameterValue(String name) {
 		return getParameterValue(name, "");
@@ -284,13 +298,7 @@ public class Script {
 			return getParameterValue(index, defaultValue);
 		}catch (NumberFormatException e) {}
 
-		for(ArrayList<String> item : parameters) {
-			if(name.equals(item.get(0))){
-				return item.get(1);
-			}
-		}
-		
-		return defaultValue;
+		return parameterList.getParameterValue(name, defaultValue);
 	}
 	
 	public String getParameterValue(int index) {
@@ -298,11 +306,11 @@ public class Script {
 	}
 	
 	public String getParameterValue(int index, String defaultValue) {
-		if(parameters.size() > index) {
-			return parameters.get(index).get(1);
-		}
-		return defaultValue;
+		return parameterList.getParameterValue(index, defaultValue);
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 
 	public String getEnvironmentValue(String name, String defaultValue) {
 
