@@ -63,6 +63,8 @@ public class ActionCallscript extends Action {
 
 	private CalculatedValue name;
 	private int type = -1;
+	
+	private ArrayList<Variable> scriptVariables;
 
 	private ArrayList<Variable> variables;
 	private ParameterList parameters;
@@ -420,5 +422,13 @@ public class ActionCallscript extends Action {
 
 	public void setType(int type) {
 		this.type = type;
+	}
+
+	public ArrayList<Variable> getScriptVariables() {
+		return scriptVariables;
+	}
+
+	public void setScriptVariables(ArrayList<Variable> scriptVariable) {
+		this.scriptVariables = scriptVariable;
 	}
 }

@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.generator.variables.parameter;
 
@@ -57,7 +57,7 @@ public class ParameterDataFile{
 	public ParameterDataFile(URL url) {
 
 		this.editable = !url.getProtocol().startsWith("http");
-		
+
 		String content = null;
 		try {
 			final InputStreamReader stream = new InputStreamReader(url.openStream(), StandardCharsets.UTF_8);
@@ -68,77 +68,86 @@ public class ParameterDataFile{
 			return;
 		}
 
-		final JsonElement jsonElement = getJsonElement(content);
-		if(jsonElement != null) {
-			if(jsonElement.isJsonArray()) {
-				this.dataType = JSON_COMPLEX_TYPE;
-
-				final JsonArray jsonArray = jsonElement.getAsJsonArray();
-
-				int iteration = 0;
-				for (JsonElement line : jsonArray) {
-
-					if(line.isJsonObject()) {
-						final ParameterList newLine = new ParameterList(iteration);
-						final AtomicInteger colIndex = new AtomicInteger(0);
-						line.getAsJsonObject().entrySet().forEach(e -> newLine.addParameter(new Parameter(colIndex.getAndIncrement(), e.getKey(), e.getValue().getAsString())));
-						data.add(newLine);
-					}
-					iteration++;
-				}
-
-			}else if(jsonElement.isJsonObject()) {
-
-				this.dataType = JSON_TYPE;
-
-				final JsonObject jsonObject = jsonElement.getAsJsonObject();
-				
-				if(jsonObject.has("paramNames") && jsonObject.has("paramValues") && jsonObject.size() == 2) {
-					
-					try {
-						final JsonArray paramNames = jsonObject.get("paramNames").getAsJsonArray();
-						final JsonArray paramValues = jsonObject.get("paramValues").getAsJsonArray();
-							
-						if(paramNames.size() == paramValues.size()) {
-							for (int i = 0; i<paramValues.size(); i++){
-								final JsonArray iterations = paramValues.get(i).getAsJsonArray();
-								
-								for (int j = 0; j<iterations.size(); j++){
-									
-									String paramName = "";
-									if(i < paramNames.size()) {
-										paramName = paramNames.get(i).getAsString();
-									}
-																		
-									if(data.size() < j+1) {
-										data.add(new ParameterList(j));
-									}
-									final ParameterList row = data.get(j);
-									row.addParameter(new Parameter(j, paramName, iterations.get(j).getAsString()));
-								}
-							}
-
-							return;
-						}
-					}catch(IllegalStateException e) {}
-				}
-				
-				this.dataType = JSON_SIMPLE_TYPE;
-				parseJsonObject(jsonObject);
-			}
-
+		if(url.getPath().endsWith(".csv")) {
+			readCsvData(content);
 		}else {
-			final CSVReader reader = new CSVReader(new StringReader(content));
-			try {
-				final List<String[]> csvList = reader.readAll();
-				reader.close();
-				csvList.forEach(l -> addCsvLine(data, l));
-			} catch (IOException | CsvException e) {
-				error = e.getMessage();
+
+			final JsonElement jsonElement = getJsonElement(content);
+			if(jsonElement != null) {
+				if(jsonElement.isJsonArray()) {
+					this.dataType = JSON_COMPLEX_TYPE;
+
+					final JsonArray jsonArray = jsonElement.getAsJsonArray();
+
+					int iteration = 0;
+					for (JsonElement line : jsonArray) {
+
+						if(line.isJsonObject()) {
+							final ParameterList newLine = new ParameterList(iteration);
+							final AtomicInteger colIndex = new AtomicInteger(0);
+							line.getAsJsonObject().entrySet().forEach(e -> newLine.addParameter(new Parameter(colIndex.getAndIncrement(), e.getKey(), e.getValue().getAsString())));
+							data.add(newLine);
+						}
+						iteration++;
+					}
+
+				}else if(jsonElement.isJsonObject()) {
+
+					this.dataType = JSON_TYPE;
+
+					final JsonObject jsonObject = jsonElement.getAsJsonObject();
+
+					if(jsonObject.has("paramNames") && jsonObject.has("paramValues") && jsonObject.size() == 2) {
+
+						try {
+							final JsonArray paramNames = jsonObject.get("paramNames").getAsJsonArray();
+							final JsonArray paramValues = jsonObject.get("paramValues").getAsJsonArray();
+
+							if(paramNames.size() == paramValues.size()) {
+								for (int i = 0; i<paramValues.size(); i++){
+									final JsonArray iterations = paramValues.get(i).getAsJsonArray();
+
+									for (int j = 0; j<iterations.size(); j++){
+
+										String paramName = "";
+										if(i < paramNames.size()) {
+											paramName = paramNames.get(i).getAsString();
+										}
+
+										if(data.size() < j+1) {
+											data.add(new ParameterList(j));
+										}
+										final ParameterList row = data.get(j);
+										row.addParameter(new Parameter(j, paramName, iterations.get(j).getAsString()));
+									}
+								}
+
+								return;
+							}
+						}catch(IllegalStateException e) {}
+					}
+
+					this.dataType = JSON_SIMPLE_TYPE;
+					parseJsonObject(jsonObject);
+				}
+
+			}else {
+				readCsvData(content);
 			}
 		}
 	}
-	
+
+	private void readCsvData(String content) {
+		final CSVReader reader = new CSVReader(new StringReader(content));
+		try {
+			final List<String[]> csvList = reader.readAll();
+			reader.close();
+			csvList.forEach(l -> addCsvLine(data, l));
+		} catch (IOException | CsvException e) {
+			error = e.getMessage();
+		}
+	}
+
 	private void parseJsonObject(JsonObject jsonObject) {
 		final AtomicInteger colIndex = new AtomicInteger(0);
 		jsonObject.keySet().forEach(c -> addCol(data, jsonObject, c, colIndex.getAndIncrement()));
@@ -186,7 +195,7 @@ public class ParameterDataFile{
 	//--------------------------------------------------------
 	// getters and setters for serialization
 	//--------------------------------------------------------
-	
+
 	public String getDataType() {
 		return dataType;
 	}
@@ -194,7 +203,7 @@ public class ParameterDataFile{
 	public void setDataType(String type) {
 		this.dataType = type;
 	}
-	
+
 	public ArrayList<ParameterList> getData() {
 		return data;
 	}

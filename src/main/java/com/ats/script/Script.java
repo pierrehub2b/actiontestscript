@@ -276,6 +276,9 @@ public class Script {
 	//-------------------------------------------------------------------------------------------------
 
 	public String[] getParameters() {
+		if(parameterList == null) {
+			return new String[0];
+		}
 		return parameterList.getParameters();
 	}
 	
@@ -293,6 +296,10 @@ public class Script {
 
 	public String getParameterValue(String name, String defaultValue) {
 
+		if(parameterList == null) {
+			return "";
+		}
+		
 		try {
 			int index = Integer.parseInt(name);
 			return getParameterValue(index, defaultValue);
@@ -306,6 +313,9 @@ public class Script {
 	}
 	
 	public String getParameterValue(int index, String defaultValue) {
+		if(parameterList == null) {
+			return defaultValue;
+		}
 		return parameterList.getParameterValue(index, defaultValue);
 	}
 	

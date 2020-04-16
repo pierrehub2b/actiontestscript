@@ -22,6 +22,7 @@ package com.ats.executor;
 import static org.testng.Assert.fail;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -408,6 +409,11 @@ public class ActionTestScript extends Script implements ITest{
 
 	public void returnValues(String... values) {
 		returnValues = values;
+		updateVariables();
+	}
+	
+	public void returnValues(Object... values) {
+		returnValues = Arrays.stream(values).map(Object::toString).toArray(String[]::new);
 		updateVariables();
 	}
 

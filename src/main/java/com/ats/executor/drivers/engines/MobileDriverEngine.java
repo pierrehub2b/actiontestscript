@@ -153,7 +153,6 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 				final double deviceWidth = response.get("deviceWidth").getAsDouble();
 				final double deviceHeight = response.get("deviceHeight").getAsDouble();
-
 				final double channelWidth = response.get("channelWidth").getAsDouble();
 				final double channelHeight = response.get("channelHeight").getAsDouble();
 
