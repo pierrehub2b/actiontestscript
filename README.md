@@ -1,5 +1,5 @@
 # ActionTestScript
-
+[![Build Status](https://travis-ci.org/pierrehub2b/actiontestscript.svg?branch=master)](https://travis-ci.org/pierrehub2b/actiontestscript)
 ActionTestScript is a structured and readable testing language used to create reliable and performant GUI automated tests campaigns.
 Tests scripts are defined by a sequence of 'actions' executed on web or desktop application.
 Scripts written in ATS are converted into java classes and then executed using Selenium and TestNG frameworks.
