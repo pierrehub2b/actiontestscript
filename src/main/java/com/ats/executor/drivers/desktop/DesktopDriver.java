@@ -441,8 +441,8 @@ public class DesktopDriver extends RemoteWebDriver {
 		sendRequestCommand(CommandType.Keyboard, KeyType.Clear, elemId);
 	}
 
-	public void sendKeys(String data) {
-		sendRequestCommand(CommandType.Keyboard, KeyType.Enter, data);
+	public void sendKeys(String data, String elemId) {
+		sendRequestCommand(CommandType.Keyboard, KeyType.Enter, data, elemId);
 	}
 
 	public void mouseMove(int x, int y) {
