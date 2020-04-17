@@ -368,7 +368,7 @@ public class TestElement{
 		over(status, md, false, 0, 0);
 		if(status.isPassed()) {
 
-			clearText(status, md);
+			
 
 			if(status.isPassed()) {
 
@@ -380,6 +380,10 @@ public class TestElement{
 					enteredText = text.getCalculated();
 				}
 
+				
+				if(!text.getCalculated().startsWith("$key")) {
+					clearText(status, md);
+				}
 				sendText(status, text);
 			}
 		}
