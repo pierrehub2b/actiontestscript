@@ -7,3 +7,9 @@ install:
 cache:
   directories:
   - $HOME/.m2
+  
+ notifications:
+  email:
+    - pierre.huber@agilitest.com
+    - gabriel.gil@agilitest.com
+    - anthony.dhierre@agilitest.com
