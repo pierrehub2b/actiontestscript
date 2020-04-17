@@ -158,10 +158,13 @@ public class AtsProxy implements IAtsProxy {
 
 		public void startAction(String testLine, String simpleName) {
 			server.newPage(testLine, simpleName);
+			server.newHar();
+			server.getCurrentHarPage().setComment(testLine);
+
 		}
 
 		public void endAction() {
-			//server.endPage();
+			server.endPage();
 		}
 	}
 
