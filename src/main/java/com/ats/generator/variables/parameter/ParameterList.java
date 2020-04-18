@@ -87,6 +87,13 @@ public class ParameterList {
 		}
 		return result;
 	}
+	
+	public int getParametersSize() {
+		if(list != null) {
+			return list.size();
+		}
+		return 0;
+	}
 
 	//--------------------------------------------------------
 	// getters and setters for serialization

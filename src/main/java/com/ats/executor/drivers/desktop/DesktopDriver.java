@@ -709,7 +709,7 @@ public class DesktopDriver extends RemoteWebDriver {
 
 		@Override
 		public void run() {
-			this.driver.setElementMapLocation(this.driver.getWebElementsListByHandle(this.channelDimension, this.handle));
+			driver.setElementMapLocation(driver.getWebElementsListByHandle(channelDimension, handle));
 		}
 	}
 

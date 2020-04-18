@@ -70,7 +70,7 @@ public class ActionCallscript extends Action {
 	private ParameterList parameters;
 
 	private int loop = 1;
-	private CalculatedValue parameterFilePath = null;
+	private CalculatedValue parameterFilePath;
 
 	private ConditionalValue condition;
 
@@ -351,8 +351,8 @@ public class ActionCallscript extends Action {
 	}
 
 	public void setVariables(ArrayList<Variable> value) {
-		this.variables = value;
-		if(value != null) {
+		if(value != null && value.size() > 0) {
+			this.variables = value;
 			this.parameterFilePath = null;
 			this.loop = 1;
 		}
@@ -363,8 +363,8 @@ public class ActionCallscript extends Action {
 	}
 
 	public void setParameters(ParameterList value) {
-		this.parameters = value;
-		if(value != null) {
+		if(value != null && value.getParametersSize() > 0) {
+			this.parameters = value;
 			this.parameterFilePath = null;
 		}
 	}
