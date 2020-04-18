@@ -1,5 +1,5 @@
 language: java
-jdk: openjdk12
+jdk: openjdk10
 
 install:
  - mvn install -Dgpg.skip=true
