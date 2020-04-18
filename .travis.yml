@@ -8,7 +8,7 @@ cache:
   directories:
   - $HOME/.m2
   
- notifications:
+notifications:
   email:
     - pierre.huber@agilitest.com
     - gabriel.gil@agilitest.com
