@@ -19,29 +19,33 @@ under the License.
 
 package com.ats.executor.channels;
 
+import java.nio.file.Path;
+
 import com.ats.driver.AtsManager;
+import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.drivers.desktop.DesktopResponse;
+import com.ats.generator.objects.MouseDirectionData;
 import com.ats.script.ScriptHeader;
+import com.ats.script.actions.ActionExecute;
+import com.ats.tools.logger.ExecutionLogger;
 
 public class EmptyChannel extends Channel {
-	
-	public EmptyChannel() {
-		super(ChannelManager.ATS);
-	}
 	
 	public EmptyChannel(AtsManager ats) {
 		super(ats);
 	}
-
-	@Override
-	public ActionStatus newActionStatus(String testName, int testLine) {
-		return new ActionStatus(null, testName, testLine);
-	}
 	
+	public EmptyChannel() {
+		this(ChannelManager.ATS);
+	}
+		
 	@Override
-	public DesktopResponse startVisualRecord(ScriptHeader script, int quality, long started) {
-		return null;
+	public void checkStatus(ActionExecute actionExecute, String testName, int testLine) {
+		final ActionStatus status = newActionStatus(testName, testLine);
+		status.setError(ActionStatus.CHANNEL_NOT_FOUND, "No running channel found, please check that 'start channel action' has been added to the script");
+		status.endDuration();
+		actionExecute.setStatus(status);
 	}
 
 	@Override
@@ -87,5 +91,58 @@ public class EmptyChannel extends Channel {
 	@Override
 	public String getScreenServer() {
 		return "";
+	}
+	
+	//----------------------------------------------------------------------------------------------------------
+	// Override Visual reporting
+	//----------------------------------------------------------------------------------------------------------
+
+	@Override
+	public DesktopResponse startVisualRecord(ScriptHeader script, int quality, long started) {
+		return null;
+	}
+
+	@Override
+	public void stopVisualRecord() {
+	}
+
+	@Override
+	public void saveVisualReportFile(Path path, String fileName, ExecutionLogger logger) {
+	}
+
+	@Override
+	public void createVisualAction(String actionName, int scriptLine, long timeline) {
+	}
+	
+	@Override
+	public void updateVisualAction(boolean isRef) {
+	}
+
+	@Override
+	public void updateVisualAction(String value) {
+	}
+
+	@Override
+	public void updateVisualAction(String value, String data) {
+	}
+
+	@Override
+	public void updateVisualAction(String type, MouseDirectionData hdir, MouseDirectionData vdir) {
+	}
+
+	@Override
+	public void updateVisualAction(TestElement element) {
+	}
+
+	@Override
+	public void updateVisualAction(int error, long duration) {
+	}
+
+	@Override
+	public void updateVisualAction(int error, long duration, String value) {
+	}
+
+	@Override
+	public void updateVisualAction(int error, long duration, String value, String data) {
 	}
 }

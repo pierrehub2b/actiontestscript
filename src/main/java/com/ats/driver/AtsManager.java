@@ -71,7 +71,7 @@ public class AtsManager {
 	private static final int MAX_TRY_MOBILE = 5;
 
 	private static final int SCROLL_UNIT = 120;
-	private static final int MAX_STALE_OR_JAVASCRIPT_ERROR = 10;
+	private static final int MAX_STALE_OR_JAVASCRIPT_ERROR = 20;
 
 	//-----------------------------------------------------------------------------------------------------
 	//-----------------------------------------------------------------------------------------------------

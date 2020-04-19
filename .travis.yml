@@ -1,9 +1,15 @@
 language: java
-jdk: openjdk10
+jdk: openjdk12
 
 install:
- - mvn install -Dgpg.skip=true
+ - mvn clean install -Dgpg.skip=true
  
 cache:
   directories:
   - $HOME/.m2
+  
+notifications:
+  email:
+    - pierre.huber@agilitest.com
+    - gabriel.gil@agilitest.com
+    - anthony.dhierre@agilitest.com

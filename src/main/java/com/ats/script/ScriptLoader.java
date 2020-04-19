@@ -38,6 +38,7 @@ import com.ats.generator.parsers.Lexer;
 import com.ats.generator.parsers.ScriptParser;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.Variable;
+import com.ats.generator.variables.parameter.ParameterList;
 import com.ats.script.actions.Action;
 
 public class ScriptLoader extends Script {
@@ -70,7 +71,7 @@ public class ScriptLoader extends Script {
 
 		if(ATS_EXTENSION.equals(type)){
 
-			this.setParameters(new ArrayList<ArrayList<String>>());
+			this.setParameterList(new ParameterList(0));
 			this.setVariables(new ArrayList<Variable>());
 
 			this.actions = new ArrayList<Action>();

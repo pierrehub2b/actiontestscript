@@ -22,7 +22,7 @@ package com.ats.executor;
 import static org.testng.Assert.fail;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -55,6 +55,8 @@ import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.ConditionalValue;
 import com.ats.generator.variables.Variable;
+import com.ats.generator.variables.parameter.Parameter;
+import com.ats.generator.variables.parameter.ParameterList;
 import com.ats.generator.variables.transform.DateTransformer;
 import com.ats.generator.variables.transform.NumericTransformer;
 import com.ats.generator.variables.transform.RegexpTransformer;
@@ -251,7 +253,7 @@ public class ActionTestScript extends Script implements ITest{
 		return topScript;
 	}
 
-	public void initCalledScript(ActionTestScript testScript, String testName, int line, ActionTestScript script, ArrayList<ArrayList<String>> parameters, List<Variable> variables, int iteration, int iterationMax, String scriptName, String type, File csvFile) {
+	public void initCalledScript(ActionTestScript testScript, String testName, int line, ActionTestScript script, ParameterList parameters, List<Variable> variables, int iteration, int iterationMax, String scriptName, String type, File csvFile) {
 
 		this.topScript = script;
 		this.channelManager = script.getChannelManager();
@@ -270,13 +272,13 @@ public class ActionTestScript extends Script implements ITest{
 		}
 
 		if(parameters != null) {
-			setParameters(parameters);
-			if(parameters.size() > 0) {
+			setParameterList(parameters);
+			if(parameters.getList().size() > 0) {
 				final JsonArray parametersArray = new JsonArray();
-				for (ArrayList<String> s : parameters) {
-					final JsonObject p = new JsonObject();
-					p.addProperty(s.get(0), s.get(1));
-					parametersArray.add(p);
+				for (Parameter p : parameters.getList()) {
+					final JsonObject jo = new JsonObject();
+					jo.addProperty(p.getName(), p.getCalculated());
+					parametersArray.add(jo);
 				}
 				log.add("parameters", parametersArray);
 			}
@@ -407,6 +409,11 @@ public class ActionTestScript extends Script implements ITest{
 
 	public void returnValues(String... values) {
 		returnValues = values;
+		updateVariables();
+	}
+	
+	public void returnValues(Object... values) {
+		returnValues = Arrays.stream(values).map(Object::toString).toArray(String[]::new);
 		updateVariables();
 	}
 

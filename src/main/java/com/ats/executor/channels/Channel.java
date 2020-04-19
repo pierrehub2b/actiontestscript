@@ -52,6 +52,7 @@ import com.ats.script.ScriptHeader;
 import com.ats.script.actions.Action;
 import com.ats.script.actions.ActionApi;
 import com.ats.script.actions.ActionChannelStart;
+import com.ats.script.actions.ActionExecute;
 import com.ats.script.actions.neoload.ActionNeoload;
 import com.ats.script.actions.neoload.ActionNeoloadStop;
 import com.ats.tools.ResourceContent;
@@ -246,6 +247,9 @@ public class Channel {
 
 	public String getSource(){
 		return engine.getSource();
+	}
+	
+	public void checkStatus(ActionExecute actionExecute, String testName, int testLine) {
 	}
 
 	//---------------------------------------------------------------------------

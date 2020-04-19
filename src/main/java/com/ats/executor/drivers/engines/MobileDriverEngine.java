@@ -153,7 +153,6 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 				final double deviceWidth = response.get("deviceWidth").getAsDouble();
 				final double deviceHeight = response.get("deviceHeight").getAsDouble();
-
 				final double channelWidth = response.get("channelWidth").getAsDouble();
 				final double channelHeight = response.get("channelHeight").getAsDouble();
 
@@ -400,7 +399,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {
 		for(SendKeyData sequence : textActionList) {	
-			executeRequest(ELEMENT, element.getFoundElement().getId(), INPUT, sequence.getMobileSequence()		);
+			executeRequest(ELEMENT, element.getFoundElement().getId(), INPUT, sequence.getMobileSequence());
 		}
 	}
 

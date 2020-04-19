@@ -37,26 +37,29 @@ public class SendKeyData {
 	private String data;
 	private CharSequence chord;
 	private boolean enterKey = false;
+	private Keys downKey;
 	private String specialKey;
 
 	public SendKeyData(String key, String spare) {
 
 		this.data = spare;
-
+		this.downKey = null;
 		StringBuffer sequence = new StringBuffer();
 
 		if(spare != null && spare.length() > 0) {
 
 			if(KEY_DOWN_SHIFT.equals(key)) {
 				sequence.append(Keys.SHIFT);
+				downKey = Keys.SHIFT;
 			}else if(KEY_DOWN_ALT.equals(key)) {
 				sequence.append(Keys.ALT);
+				downKey = Keys.ALT;
 			}else if(KEY_DOWN_CONTROL.equals(key)) {
 				sequence.append(Keys.CONTROL);
 				this.enterKey = true;
+				downKey = Keys.CONTROL;
 			}
 			sequence.append(spare.toLowerCase());
-
 		}else {
 			try {
 				sequence.append(Keys.valueOf(key));
@@ -109,6 +112,10 @@ public class SendKeyData {
 
 	public boolean isEnterKey() {
 		return enterKey;
+	}
+	
+	public Keys getDownKey() {
+		return downKey;
 	}
 
 	//---------------------------------------------------------------------------

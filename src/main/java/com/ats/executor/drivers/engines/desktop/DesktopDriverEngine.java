@@ -421,7 +421,13 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {
 		for(SendKeyData sequence : textActionList) {
-			getDesktopDriver().sendKeys(sequence.getSequenceDesktop());
+			if(sequence.getDownKey() != null) {
+				getDesktopDriver().keyDown(sequence.getDownKey().getCodePoint());
+				getDesktopDriver().sendKeys(sequence.getSequenceDesktop(), element.getWebElementId());
+				getDesktopDriver().keyUp(sequence.getDownKey().getCodePoint());
+			} else {
+				getDesktopDriver().sendKeys(sequence.getSequenceDesktop(), element.getWebElementId());
+			}
 		}
 	}
 
