@@ -90,6 +90,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	private final static String INPUT = "input";
 	public final static String SWIPE = "swipe";
 	private final static String BUTTON = "button";
+	private final static String SCRIPTING = "scripting";
 
 	private final static String SCREENSHOT_METHOD = "/screenshot";
 
@@ -484,7 +485,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public Object executeScript(ActionStatus status, String script, Object... params) {
-		return null;
+		return executeRequest(SCRIPTING, script);
 	}
 
 	@Override
@@ -619,11 +620,12 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public Object executeJavaScript(ActionStatus status, String script, TestElement element) {
+
 		return null;
 	}
 	@Override
 	public Object executeJavaScript(ActionStatus status, String script, boolean returnValue) {
-		return null;
+		return executeRequest(SCRIPTING, script);
 	}
 
 	@Override

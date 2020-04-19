@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.mariuszgromada.math:MathParser.org-mXparser:4.4.2">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/mariuszgromada/math/MathParser.org-mXparser/4.4.2/MathParser.org-mXparser-4.4.2.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/mariuszgromada/math/MathParser.org-mXparser/4.4.2/MathParser.org-mXparser-4.4.2-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/mariuszgromada/math/MathParser.org-mXparser/4.4.2/MathParser.org-mXparser-4.4.2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
