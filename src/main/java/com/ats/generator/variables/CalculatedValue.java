@@ -25,6 +25,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.text.StringEscapeUtils;
+import org.openqa.selenium.Keys;
 
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.SendKeyData;
@@ -214,14 +215,24 @@ public class CalculatedValue{
 			addTextChain(chainKeys, calculated);
 			
 		}else {	
-			
+			String strValue = "";
 			if(dataList != null) {
 				for(Object obj : dataList) {
 					if (obj instanceof Variable) {
-						chainKeys.add(new SendKeyData(((Variable)obj).getCalculatedValue()));
-					}else {
+						strValue += ((Variable)obj).getCalculatedValue();
+					} else if(obj instanceof Keys) {
+						if(strValue != "") {
+							chainKeys.add(new SendKeyData(strValue));
+							strValue = "";
+						}
 						chainKeys.add(new SendKeyData(obj.toString()));
+					} else {
+						strValue += obj.toString();
 					}
+				}
+				if(strValue != "") {
+					chainKeys.add(new SendKeyData(strValue));
+					strValue = "";
 				}
 			}else {
 				chainKeys.add(new SendKeyData(data));
