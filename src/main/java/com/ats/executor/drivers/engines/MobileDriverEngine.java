@@ -484,7 +484,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public Object executeScript(ActionStatus status, String script, Object... params) {
-		return executeRequest(SCRIPTING, script);
+		return null;
 	}
 
 	@Override
@@ -619,9 +619,9 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public Object executeJavaScript(ActionStatus status, String script, TestElement element) {
-
-		return null;
+		return executeRequest(SCRIPTING, script);
 	}
+
 	@Override
 	public Object executeJavaScript(ActionStatus status, String script, boolean returnValue) {
 		return executeRequest(SCRIPTING, script);
