@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.generator;
 
@@ -37,7 +37,7 @@ public class GeneratorAnt extends Task{
 	public void setSourceFolder(String src) {
 		sourceFolder = src;
 	}
-	
+
 	String reportFolder;
 	public void setReportFolder(String report) {
 		reportFolder = report;
@@ -49,29 +49,32 @@ public class GeneratorAnt extends Task{
 			final File destination = new File(destinationFolder);
 			final File source = new File(sourceFolder);
 			File report = null;
-			
+
 			if(reportFolder != null) {
 				report = new File(reportFolder);
 			}
 
 			if(source.exists()){
-				
+
 				log("Start Script Generator");
 				log(" - Source folder -> " + sourceFolder);
 				log(" - Destination folder -> " + destination);
-				
+
 				ProjectData projectData = ProjectData.getProjectData(source, destination, report);
-				
-				Generator generator = new Generator(projectData);
-				GeneratorReport generatorReport = generator.launch();
-				
-				log("Script Generator executed in " + generatorReport.getGenerationEllapsedTime() + " ms");
-				log(" - Main scripts -> " + generatorReport.getGeneratedScriptsCount());
-				
+				if(projectData.isValidated()) {
+					Generator generator = new Generator(projectData);
+					GeneratorReport generatorReport = generator.launch();
+
+					log("Script Generator executed in " + generatorReport.getGenerationEllapsedTime() + " ms");
+					log(" - Main scripts -> " + generatorReport.getGeneratedScriptsCount());
+				}else {
+					throw new BuildException("Source folder [" + sourceFolder + "] does not exists !");
+				}
+
 			}else{
 				throw new BuildException("Source folder [" + sourceFolder + "] does not exists !");
 			}
-			
+
 		}else{
 			throw new BuildException("'destinationFolder' and 'sourceFolder' cannot be null or empty !");
 		}

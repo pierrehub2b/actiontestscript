@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.script;
 
@@ -43,7 +43,7 @@ public class ProjectData {
 	public static final String TARGET_FOLDER = "target";
 	public static final String LOGS_FOLDER = "logs";
 	private static final String TARGET_FOLDER_REPORT = "report";
-	
+
 	public static final String TARGET_FOLDER_GENERATED = "generated";
 	public static final String TARGET_FOLDER_CLASSES = "classes";
 
@@ -52,7 +52,7 @@ public class ProjectData {
 	public static final String CERTS_FOLDER = "certs";
 	public static final String RESOURCES_FOLDER = "resources";
 	public static final String IMAGES_FOLDER = "images";
-	
+
 	private static final String SRC_FOLDER_MAIN = "main";
 	private static final String SRC_FOLDER_ATS = "ats";
 	private static final String SRC_FOLDER_JAVA = "java";
@@ -64,7 +64,7 @@ public class ProjectData {
 	private String folderPath = "";
 
 	private File folder;
-		
+
 	private Path javaDestinationFolderPath;
 	private Path reportDestinationFolderPath;
 
@@ -76,13 +76,13 @@ public class ProjectData {
 			return new ProjectData(sourceFolder);
 		}
 	}
-	
+
 	public static String getAssetsJavaCode(String path) {
 		final StringBuilder pathBuilder = new StringBuilder("\", ");
 		pathBuilder.append(ActionTestScript.JAVA_EMBEDED_FUNCTION_NAME).append("(\"").append(ASSETS_FOLDER).append("/").append(path).append("\"), \"");
 		return pathBuilder.toString();
 	}
-	
+
 	public static String getAssetsImageJavaCode(String path) {
 		final StringBuilder pathBuilder = new StringBuilder(RESOURCES_FOLDER);
 		pathBuilder.append("/").append(IMAGES_FOLDER).append("/").append(path);
@@ -105,15 +105,17 @@ public class ProjectData {
 
 	//create project from current source folder
 	public ProjectData(File f) {
-		if(f.isDirectory()) {
-			this.folder = f;
-		}else if(f.isFile()) {
-			this.folder = f.getParentFile();
+		if(f.exists()) {
+			if(f.isDirectory()) {
+				this.folder = f;
+			}else if(f.isFile()) {
+				this.folder = f.getParentFile();
+			}
+			this.folderPath = folder.getPath();
+
+			setJavaDestinationFolderPath(getTargetFolderPath().resolve(TARGET_FOLDER_GENERATED));
+			setReportDestinationFolderPath(getTargetFolderPath().resolve(TARGET_FOLDER_REPORT));
 		}
-		this.folderPath = folder.getPath();
-		
-		setJavaDestinationFolderPath(getTargetFolderPath().resolve(TARGET_FOLDER_GENERATED));
-		setReportDestinationFolderPath(getTargetFolderPath().resolve(TARGET_FOLDER_REPORT));
 	}
 
 	public ProjectData(File xmlPropertiesFile, File generatedJavaFolder, File reportFolder) {
@@ -136,11 +138,15 @@ public class ProjectData {
 		}
 	}
 	
+	public boolean isValidated() {
+		return folder != null;
+	}
+
 	private void setJavaDestinationFolderPath(Path p) {
 		this.javaDestinationFolderPath = p;
 		this.javaDestinationFolderPath.toFile().mkdirs();
 	}
-	
+
 	private void setReportDestinationFolderPath(Path p) {
 		this.reportDestinationFolderPath = p;
 		this.reportDestinationFolderPath.toFile().mkdirs();
@@ -149,7 +155,7 @@ public class ProjectData {
 	public void synchronize() {
 
 		folder = new File(folderPath);
-		
+
 		final Path targetFolderPath = getTargetFolderPath();
 
 		setJavaDestinationFolderPath(targetFolderPath.resolve(TARGET_FOLDER_GENERATED));
@@ -173,7 +179,7 @@ public class ProjectData {
 			if(xmlNode != null){
 				setDomain(xmlNode.getTextContent());
 			}
-			
+
 			xmlNode = doc.getElementsByTagName("name").item(0);
 			if(xmlNode != null){
 				setName(xmlNode.getTextContent());
@@ -200,19 +206,23 @@ public class ProjectData {
 			System.err.println(e.getMessage());
 		}
 	}
-		
+
 	public Path getTargetFolderPath() {
 		return folder.toPath().resolve(TARGET_FOLDER);
 	}
 	
+	public Path getAssetsFolderPath() {
+		return getSourceFolderPath().resolve(ASSETS_FOLDER);
+	}
+
 	private Path getSourceFolderPath() {
 		return folder.toPath().resolve(SRC_FOLDER);
 	}
-	
+
 	private Path getSourceMainFolderPath() {
 		return getSourceFolderPath().resolve(SRC_FOLDER_MAIN);
 	}
-	
+
 	public Path getAtsSourceFolder() {
 		return getSourceMainFolderPath().resolve(SRC_FOLDER_ATS);
 	}
@@ -220,7 +230,7 @@ public class ProjectData {
 	public Path getJavaSourceFolder() {
 		return getSourceMainFolderPath().resolve(SRC_FOLDER_JAVA);
 	}
-	
+
 	public Path getJavaDestinationFolder() {
 		return javaDestinationFolderPath;
 	}
@@ -232,7 +242,7 @@ public class ProjectData {
 	public File getJavaFile(String qualifiedPath) {
 		return getJavaDestinationFolder().resolve(qualifiedPath).toFile();
 	}
-	
+
 	public String getGav() {
 		return domain + "." + name + "(" + version + ")";
 	}
