@@ -161,7 +161,7 @@ public class AtsProxy implements IAtsProxy {
 			server.newHar();
 			server.getCurrentHarPage().setComment(testLine);
 			
-			server.getHar().
+			//server.getHar().
 			
 
 		}
