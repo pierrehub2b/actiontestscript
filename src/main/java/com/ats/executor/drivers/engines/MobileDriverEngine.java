@@ -619,7 +619,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public Object executeJavaScript(ActionStatus status, String script, TestElement element) {
-		return executeRequest(SCRIPTING, script);
+		return executeRequest(ELEMENT, element.getFoundElement().getId(), SCRIPTING, script);
 	}
 
 	@Override
