@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.generator;
 
@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -55,99 +56,119 @@ public class Generator implements ScriptProcessedEvent{
 
 		final ProjectData projectData = ProjectData.getProjectData(arguments.getProjectFolder(), arguments.getDestinationFolder(), arguments.getReportFolder());
 
-		final Generator generator = new Generator(projectData);
-		final GeneratorReport report = generator.launch();
+		if(projectData.isValidated()) {
 
-		ATS.logInfo(StringUtils.repeat("-", 72));
-		ATS.logInfo("ATS Generator finished :");
-		ATS.logInfo("- Java files generated -> " + report.getGeneratedScriptsCount());
-		ATS.logInfo("- Ellapsed time -> " + report.getGenerationEllapsedTime() + " ms");
-		ATS.logInfo(StringUtils.repeat("-", 72));
+			final Generator generator = new Generator(projectData);
+			final GeneratorReport report = generator.launch();
 
-		if(arguments.isCompile()) {
+			ATS.logInfo(StringUtils.repeat("-", 72));
+			ATS.logInfo("ATS Generator finished :");
+			ATS.logInfo("- Java files generated -> " + report.getGeneratedScriptsCount());
+			ATS.logInfo("- Ellapsed time -> " + report.getGenerationEllapsedTime() + " ms");
+			ATS.logInfo(StringUtils.repeat("-", 72));
 
-			final String targetFolderPath = projectData.getTargetFolderPath().toFile().getAbsolutePath();
-			
-			ATS.logInfo("Compile generated java files into folder -> " + targetFolderPath + "/" + ProjectData.TARGET_FOLDER_CLASSES);
-			
-			StringBuilder xmlBuilder = new StringBuilder();
-			xmlBuilder.append("<project basedir=\"");
-			xmlBuilder.append(targetFolderPath);
-			xmlBuilder.append("\" default=\"compile\">");
-			xmlBuilder.append("<copy todir=\"");
-			xmlBuilder.append(ProjectData.TARGET_FOLDER_CLASSES);
-			xmlBuilder.append("\"><fileset dir=\"../");
-			xmlBuilder.append(ProjectData.SRC_FOLDER);
-			xmlBuilder.append("\" includes=\"");
-			xmlBuilder.append(ProjectData.ASSETS_FOLDER);
-			xmlBuilder.append("/**\"/></copy>");
-			xmlBuilder.append("<property name=\"lib.dir\" value=\"lib\"/>");
-			xmlBuilder.append("<target name=\"compile\"><mkdir dir=\"");
-			xmlBuilder.append(ProjectData.TARGET_FOLDER_CLASSES);
-			xmlBuilder.append("\"/><javac includeantruntime=\"true\" srcdir=\"");
-			xmlBuilder.append(ProjectData.TARGET_FOLDER_GENERATED);
-			xmlBuilder.append("\" destdir=\"");
-			xmlBuilder.append(ProjectData.TARGET_FOLDER_CLASSES);
-			xmlBuilder.append("\"/></target></project>");
-			
-			try {
-				File tempXml = File.createTempFile("ant_", ".xml");
-				tempXml.deleteOnExit();
+			if(arguments.isCompile()) {
 
-				Files.write(tempXml.toPath(), xmlBuilder.toString().getBytes());
+				final String targetFolderPath = projectData.getTargetFolderPath().toFile().getAbsolutePath();
 
-				new AntCompiler(tempXml);
+				ATS.logInfo("Compile generated java files into folder -> " + targetFolderPath + "/" + ProjectData.TARGET_FOLDER_CLASSES);
 
-			} catch (IOException e) {}
+				StringBuilder xmlBuilder = new StringBuilder();
+				xmlBuilder.append("<project basedir=\"");
+				xmlBuilder.append(targetFolderPath);
+				xmlBuilder.append("\" default=\"compile\">");
+				xmlBuilder.append("<copy todir=\"");
+				xmlBuilder.append(ProjectData.TARGET_FOLDER_CLASSES);
+				xmlBuilder.append("\"><fileset dir=\"../");
+				xmlBuilder.append(ProjectData.SRC_FOLDER);
+				xmlBuilder.append("\" includes=\"");
+				xmlBuilder.append(ProjectData.ASSETS_FOLDER);
+				xmlBuilder.append("/**\"/></copy>");
+				xmlBuilder.append("<property name=\"lib.dir\" value=\"lib\"/>");
+				xmlBuilder.append("<target name=\"compile\"><mkdir dir=\"");
+				xmlBuilder.append(ProjectData.TARGET_FOLDER_CLASSES);
+				xmlBuilder.append("\"/><javac includeantruntime=\"true\" srcdir=\"");
+				xmlBuilder.append(ProjectData.TARGET_FOLDER_GENERATED);
+				xmlBuilder.append("\" destdir=\"");
+				xmlBuilder.append(ProjectData.TARGET_FOLDER_CLASSES);
+				xmlBuilder.append("\"/></target></project>");
+
+				try {
+					File tempXml = File.createTempFile("ant_", ".xml");
+					tempXml.deleteOnExit();
+
+					Files.write(tempXml.toPath(), xmlBuilder.toString().getBytes());
+
+					new AntCompiler(tempXml);
+
+				} catch (IOException e) {}
+			}
+		}else {
+			ATS.logInfo("No valid Ats project found at -> " + arguments.getProjectFolder());
 		}
 	}
 
+	public Generator(String projectPath){
+		this(new File(projectPath));
+	}
+
 	public Generator(File atsFile){
-		this(new ProjectData(atsFile));
+		this(ProjectData.getProjectData(atsFile, null, null));
 	}
 
 	public Generator(ProjectData project){
 
-		projectData = project;
-		projectData.initFolders();
+		if(init(project) && remainingScripts > 0){
 
-		genReport = new GeneratorReport();
+			projectData.initFolders();
+			genReport.startGenerator(remainingScripts);
 
-		final File atsSourceFolder = projectData.getAtsSourceFolder().toFile();
+			lexer = new Lexer(projectData, genReport, StandardCharsets.UTF_8);
 
-		if(atsSourceFolder.exists()){
+		}else{
+			ATS.logInfo("Nothing to be done (no ATS files found !)");
+		}
+	}
 
-			filesList = new ArrayList<File>();
+	private boolean init(ProjectData pdata) {
 
-			if(atsSourceFolder.isDirectory()){
-				try {
-					Files.find(atsSourceFolder.toPath(), 99999, (p, bfa) -> bfa.isRegularFile()).forEach(p -> addAtsFile(p.toFile()));
-				} catch (IOException e) {
-					e.printStackTrace();
+		filesList = new ArrayList<File>();
+
+		if(pdata.isValidated()) {
+			genReport = new GeneratorReport();
+			projectData = pdata;
+
+			final File atsSourceFolder = projectData.getAtsSourceFolder().toFile();
+
+			if(atsSourceFolder.exists()){
+				if(atsSourceFolder.isDirectory()){
+					try {
+						Files.find(atsSourceFolder.toPath(), 99999, (p, bfa) -> bfa.isRegularFile()).forEach(p -> addAtsFile(p.toFile()));
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+
+				}else if(atsSourceFolder.isFile()){
+					addAtsFile(atsSourceFolder);
 				}
 
-			}else if(atsSourceFolder.isFile()){
-				addAtsFile(atsSourceFolder);
+				remainingScripts = filesList.size();
 			}
-
-			remainingScripts = filesList.size();
-
-			if(remainingScripts > 0){
-
-				projectData.initFolders();
-				genReport.startGenerator(remainingScripts);
-
-				lexer = new Lexer(projectData, genReport, StandardCharsets.UTF_8);
-
-			}else{
-				ATS.logInfo("Nothing to be done (no ATS files found !)");
-			}
+			return true;
+		}else {
+			return false;
 		}
 	}
 
 	private void addAtsFile(File f) {
 		if(f.getName().toLowerCase().endsWith(ScriptLoader.ATS_FILE_EXTENSION) && f.getName().length() > ScriptLoader.ATS_FILE_EXTENSION.length() + 1) {
 			filesList.add(f);
+		}
+	}
+
+	private void addDataFile(ArrayList<File> list, File f) {
+		if(f.getName().toLowerCase().endsWith(".csv") || f.getName().toLowerCase().endsWith(".json")) {
+			list.add(f);
 		}
 	}
 
@@ -174,6 +195,37 @@ public class Generator implements ScriptProcessedEvent{
 		sc.generateJavaFile(projectData.getGav());
 	}
 
+	public ArrayList<String> findSubscriptRef(String calledScript){
+		final ArrayList<String> result = new ArrayList<String>();
+		for(File f : filesList) {
+			final ScriptLoader sc = lexer.loadScript(f, new ScriptProcessedNotifier(this));
+			if(sc.isSubscriptCalled(calledScript)) {
+				result.add(sc.getHeader().getQualifiedName());
+			}
+		}
+
+		final ArrayList<File> dataFiles = new ArrayList<File>();
+		try {
+			Files.find(projectData.getAssetsFolderPath(), 99999, (p, bfa) -> bfa.isRegularFile()).forEach(p -> addDataFile(dataFiles, p.toFile()));
+
+			for(File f : dataFiles) {
+				Scanner scanner = new Scanner(f);
+				while (scanner.hasNext()) {
+					final String line = scanner.next();
+					if(line.contains(calledScript)) {
+						result.add(f.getCanonicalPath());
+					}
+				}
+				scanner.close();
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return result;
+	}
+
 	@Override
 	public void scriptProcessed() {
 		remainingScripts--;
@@ -181,4 +233,6 @@ public class Generator implements ScriptProcessedEvent{
 		//int percent = (int)(10000-(double)remainingScripts/(double)totalScript*10000)/100;
 		//log.info("Generator in progress : " + percent + " % done");
 	}
+
+
 }

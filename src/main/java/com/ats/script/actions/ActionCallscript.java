@@ -177,6 +177,10 @@ public class ActionCallscript extends Action {
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
 
+	public boolean isSubscriptCalled(String scriptName) {
+		return name.getCalculated().equals(scriptName);
+	}
+	
 	private boolean setParameterFilePathData(String value) {
 		if(value != null) {
 			if(value.startsWith(ASSETS_PROTOCOLE) || value.startsWith(FILE_PROTOCOLE) || value.startsWith(HTTP_PROTOCOLE) || value.startsWith(HTTPS_PROTOCOLE)) {

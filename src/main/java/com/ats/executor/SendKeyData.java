@@ -169,10 +169,10 @@ public class SendKeyData {
 	}
 
 	public String getMobileSequence() {
-		if(data.length() > 0) {
-			return data;
-		}else if (specialKey != null) {
+		if (specialKey != null) {
 			return specialKey;
+		} else if(data.length() > 0) {
+			return data;
 		} else {
 			return EMPTY_DATA;
 		}

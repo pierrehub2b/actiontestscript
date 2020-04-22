@@ -40,6 +40,7 @@ import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.Variable;
 import com.ats.generator.variables.parameter.ParameterList;
 import com.ats.script.actions.Action;
+import com.ats.script.actions.ActionCallscript;
 
 public class ScriptLoader extends Script {
 
@@ -105,6 +106,17 @@ public class ScriptLoader extends Script {
 		data.setDisabled(disabled);
 		data.setLine(actions.size());
 		actions.add(data);
+	}
+	
+	public boolean isSubscriptCalled(String scriptName) {
+		for (Action action : actions) {
+			if(action instanceof ActionCallscript) {
+				if(((ActionCallscript)action).isSubscriptCalled(scriptName)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
