@@ -775,9 +775,10 @@ public class DesktopDriver extends RemoteWebDriver {
 		final int numElements = element.getFoundElements().size();
 
 		if(numElements > 0) {
+			int i = element.getIndex() == 0 ? 0 : element.getIndex() - 1;
 			final TestBound bound = element
 					.getFoundElements()
-					.get(0)
+					.get(i)
 					.getTestBound();
 
 			x = bound.getX();
