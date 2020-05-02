@@ -62,8 +62,6 @@ public class ActionGotoUrl extends ActionExecute {
 		
 		if(status.isPassed()) {
 			
-			status.startAction(this);
-			
 			final String urlString = url.getCalculated();
 			if(ts.getCurrentChannel() != null){
 				ts.getCurrentChannel().navigate(status, urlString);

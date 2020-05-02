@@ -55,11 +55,12 @@ import com.ats.script.actions.ActionChannelStart;
 import com.ats.script.actions.ActionExecute;
 import com.ats.script.actions.neoload.ActionNeoload;
 import com.ats.script.actions.neoload.ActionNeoloadStop;
+import com.ats.script.actions.performance.octoperf.ActionOctoperfVirtualUser;
 import com.ats.tools.ResourceContent;
 import com.ats.tools.logger.ExecutionLogger;
-import com.ats.tools.performance.AtsNoProxy;
-import com.ats.tools.performance.AtsProxy;
-import com.ats.tools.performance.IAtsProxy;
+import com.ats.tools.performance.proxy.AtsNoProxy;
+import com.ats.tools.performance.proxy.AtsProxy;
+import com.ats.tools.performance.proxy.IAtsProxy;
 
 public class Channel {
 
@@ -661,20 +662,20 @@ public class Channel {
 	private IAtsProxy atsProxy = new AtsNoProxy();
 
 	public Proxy startAtsProxy(AtsManager ats) {
-		atsProxy = new AtsProxy(getName(), getApplication(), ats.getBlackListServers());
+		atsProxy = new AtsProxy(getName(), getApplication(), ats.getBlackListServers(), ats.getTrafficIdle(), ats.getOctoperf());
 		return atsProxy.startProxy();
 	}
 
-	public void startHarServer(ActionStatus status, List<String> whiteList, long sendBandWidth, long receiveBandWidth) {
-		atsProxy.startRecord(status, whiteList, sendBandWidth, receiveBandWidth);
+	public void startHarServer(ActionStatus status, List<String> whiteList, int trafficIddle, int latency, long sendBandWidth, long receiveBandWidth) {
+		atsProxy.startRecord(status, whiteList, trafficIddle, latency, sendBandWidth, receiveBandWidth);
 	}
 
-	public void pauseHarRecord(CalculatedValue comment) {
-		atsProxy.pauseRecord(comment);
+	public void pauseHarRecord() {
+		atsProxy.pauseRecord();
 	}
 
-	public void resumeHarRecord(CalculatedValue comment) {
-		atsProxy.resumeRecord(comment);
+	public void resumeHarRecord() {
+		atsProxy.resumeRecord();
 	}
 
 	public void startHarAction(Action action, String testLine) {
@@ -683,6 +684,10 @@ public class Channel {
 
 	public void endHarAction() {
 		atsProxy.endAction();
+	}
+	
+	public void sendToOctoperfServer(ActionOctoperfVirtualUser action) {
+		atsProxy.sendToOctoperfServer(this, action);
 	}
 
 	public void closeAtsProxy() {

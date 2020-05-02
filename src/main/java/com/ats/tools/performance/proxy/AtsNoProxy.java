@@ -17,22 +17,50 @@ specific language governing permissions and limitations
 under the License.
  */
 
-package com.ats.tools.performance;
+package com.ats.tools.performance.proxy;
 
 import java.util.List;
 
 import org.openqa.selenium.Proxy;
 
 import com.ats.executor.ActionStatus;
-import com.ats.generator.variables.CalculatedValue;
+import com.ats.executor.channels.Channel;
 import com.ats.script.actions.Action;
+import com.ats.script.actions.performance.octoperf.ActionOctoperfVirtualUser;
 
-public interface IAtsProxy {
-	Proxy startProxy();
-	void terminate(String channelName);
-	void startAction(Action action, String testLine);
-	void endAction();
-	void startRecord(ActionStatus status, List<String> whiteList, long sendBandWidth, long receiveBandWidth);
-	void resumeRecord(CalculatedValue comment);
-	void pauseRecord(CalculatedValue comment);
+public class AtsNoProxy implements IAtsProxy {
+	
+	@Override
+	public void startRecord(ActionStatus status, List<String> whiteList, int trafficIddle, int latency, long sendBandWidth, long receiveBandWidth) {
+		status.setError(ActionStatus.PERF_NOT_STARTED, "Channel not started with \"performance\" option");
+	}
+	
+	@Override
+	public void startAction(Action action, String testLine) {
+	}
+
+	@Override
+	public Proxy startProxy() {
+		return null;
+	}
+	
+	@Override
+	public void terminate(String channelName) {
+	}
+
+	@Override
+	public void endAction() {
+	}
+
+	@Override
+	public void resumeRecord() {
+	}
+
+	@Override
+	public void pauseRecord() {
+	}
+
+	@Override
+	public void sendToOctoperfServer(Channel channel, ActionOctoperfVirtualUser action) {
+	}
 }

@@ -81,8 +81,7 @@ public class ActionText extends ActionExecuteElement {
 		if(status.isPassed()) {
 			
 			ts.getRecorder().updateScreen(true);
-			
-			status.startAction(this);
+
 			final String enteredText = getTestElement().enterText(status, text, ts.getRecorder());
 			status.endAction();
 			

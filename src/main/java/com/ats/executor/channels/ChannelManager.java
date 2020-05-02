@@ -47,6 +47,9 @@ public class ChannelManager {
 		this.currentChannel = new EmptyChannel(ATS);
 
 		script.sendInfoLog("ATS drivers folder", ATS.getDriversFolderPath().toFile().getAbsolutePath());
+		if(ATS.getError() != null) {
+			script.sendInfoLog("ActionTestScript properties file found, but an error occured !", ATS.getError());
+		}
 	}
 
 	public int getMaxTry() {

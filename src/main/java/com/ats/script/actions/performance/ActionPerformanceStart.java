@@ -36,15 +36,20 @@ import com.ats.tools.Utils;
 public class ActionPerformanceStart extends ActionPerformance {
 
 	public static final String SCRIPT_LABEL = ActionPerformance.SCRIPT_PERFORMANCE_LABEL + "-start";
-	
-	public static final String SEND_LABEL = "send";
-	public static final String RECEIVE_LABEL = "receive";
-	
-	private static final String[] LABEL_REPLACE = new String[]{SEND_LABEL, RECEIVE_LABEL, "=", " "};
-	private static final String[] LABEL_REPLACEMENT = new String[]{"", "", "", ""};
-	
-	private long sendBandWidth = 0;
-	private long receiveBandWidth = 0;
+
+	public static final String SEND_LABEL = "upload";
+	public static final String RECEIVE_LABEL = "download";
+	public static final String IDLE_LABEL = "idle";
+	public static final String LATENCY_LABEL = "latency";
+
+	private static final String[] LABEL_REPLACE = new String[]{SEND_LABEL, RECEIVE_LABEL, IDLE_LABEL, LATENCY_LABEL, "=", " "};
+	private static final String[] LABEL_REPLACEMENT = new String[]{"", "", "", "", "", ""};
+
+	private long sendBandWidth = 0L;
+	private long receiveBandWidth = 0L;
+	private int latency = 0;
+	private int trafficIdle = 0;
+
 	private List<String> whiteList = null;
 	private String filters = "";
 
@@ -55,14 +60,15 @@ public class ActionPerformanceStart extends ActionPerformance {
 		setWhiteList(dataArray.stream().map(String :: trim).collect(Collectors.toList()));
 		loadBandwidthValues(options);
 	}
-	
-	public ActionPerformanceStart(Script script, long sbw, long rbw, String[] whiteList) {
+
+	public ActionPerformanceStart(Script script, int iddle, int ltcy, long sbw, long rbw, String[] whiteList) {
 		super(script);
+		setTrafficIdle(iddle);
 		setSendBandWidth(sbw);
 		setReceiveBandWidth(rbw);
 		setWhiteList(Arrays.asList(whiteList));
 	}
-	
+
 	private void loadBandwidthValues(ArrayList<String> options) {
 		final Iterator<String> itr = options.iterator();
 		while (itr.hasNext())
@@ -70,14 +76,16 @@ public class ActionPerformanceStart extends ActionPerformance {
 			final String opt = itr.next().toLowerCase();
 			if(opt.contains(SEND_LABEL)) {
 				sendBandWidth = Utils.string2Long(StringUtils.replaceEach(opt, LABEL_REPLACE, LABEL_REPLACEMENT));
-				itr.remove();
 			}else if(opt.contains(RECEIVE_LABEL)) {
 				receiveBandWidth = Utils.string2Long(StringUtils.replaceEach(opt, LABEL_REPLACE, LABEL_REPLACEMENT));
-				itr.remove();
+			}else if(opt.contains(LATENCY_LABEL)) {
+				latency = Utils.string2Int(StringUtils.replaceEach(opt, LABEL_REPLACE, LABEL_REPLACEMENT));
+			}else if(opt.contains(IDLE_LABEL)) {
+				trafficIdle = Utils.string2Int(StringUtils.replaceEach(opt, LABEL_REPLACE, LABEL_REPLACEMENT));
 			}
 		}
 	}
-	
+
 	//---------------------------------------------------------------------------------------------------------------------------------
 	// Code Generator
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -88,7 +96,7 @@ public class ActionPerformanceStart extends ActionPerformance {
 		for(String s : whiteList) {
 			list.add("\"" + StringEscapeUtils.escapeJava(s) + "\"");
 		}
-		return super.getJavaCode().append(sendBandWidth).append("L, ").append(receiveBandWidth).append("L, new String[]{").append(String.join(", ", list)).append("})");
+		return super.getJavaCode().append(trafficIdle).append(", ").append(latency).append(", ").append(sendBandWidth).append("L, ").append(receiveBandWidth).append("L, new String[]{").append(String.join(", ", list)).append("})");
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -99,14 +107,30 @@ public class ActionPerformanceStart extends ActionPerformance {
 	public void execute(ActionTestScript ts, String testName, int testLine) {
 		final Channel channel = ts.getCurrentChannel();
 		setStatus(channel.newActionStatus(testName, testLine));
-		channel.startHarServer(status, whiteList, sendBandWidth, receiveBandWidth);
+		channel.startHarServer(status, whiteList, trafficIdle, latency, sendBandWidth, receiveBandWidth);
 		status.endDuration();
 	}
 
 	//--------------------------------------------------------
 	// getters and setters for serialization
 	//--------------------------------------------------------	
-	
+
+	public int getLatency() {
+		return latency;
+	}
+
+	public void setLatency(int latency) {
+		this.latency = latency;
+	}
+
+	public int getTrafficIdle() {
+		return trafficIdle;
+	}
+
+	public void setTrafficIdle(int value) {
+		this.trafficIdle = value;
+	}
+
 	public long getSendBandWidth() {
 		return sendBandWidth;
 	}
@@ -122,7 +146,7 @@ public class ActionPerformanceStart extends ActionPerformance {
 	public void setReceiveBandWidth(long value) {
 		this.receiveBandWidth = value;
 	}
-	
+
 	public List<String> getWhiteList() {
 		return whiteList;
 	}
@@ -130,7 +154,7 @@ public class ActionPerformanceStart extends ActionPerformance {
 	public void setWhiteList(List<String> data) {
 		this.whiteList = data;
 	}	
-		
+
 	public String getFilters() {
 		return filters;
 	}

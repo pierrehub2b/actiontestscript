@@ -68,6 +68,7 @@ import com.ats.script.actions.neoload.ActionNeoloadStart;
 import com.ats.script.actions.neoload.ActionNeoloadStop;
 import com.ats.script.actions.performance.ActionPerformanceRecord;
 import com.ats.script.actions.performance.ActionPerformanceStart;
+import com.ats.script.actions.performance.octoperf.ActionOctoperfVirtualUser;
 import com.ats.tools.Utils;
 
 public class Lexer {
@@ -92,11 +93,11 @@ public class Lexer {
 		this.isGenerator = false;
 		this.report = report;
 	}
-	
+
 	public Lexer(ProjectData projectData, GeneratorReport report, String charset) {
 		this.projectData = projectData;
 		this.report = report;
-		
+
 		try {
 			this.charset = Charset.forName(charset);
 		} catch (IllegalArgumentException e) {}
@@ -134,9 +135,9 @@ public class Lexer {
 	//---------------------------------------------------------------------------------------------------------------
 
 	public void createAction(ScriptLoader script, String data, boolean disabled){
-		
+
 		final ArrayList<String> dataArray = new ArrayList<String>(Arrays.asList(data.split(ScriptParser.ATS_SEPARATOR)));
-				
+
 		if(dataArray.size() > 0){
 
 			String actionType = StringUtils.trim(dataArray.remove(0));
@@ -192,16 +193,22 @@ public class Lexer {
 					cname = dataArray.remove(0).trim();
 				}				
 				script.addAction(new ActionChannelClose(script, cname, options.contains(ActionChannelClose.NO_STOP_LABEL)), disabled);
-				
+
 			}else if(ActionPerformanceRecord.SCRIPT_LABEL.equals(actionType)){
-				
+
 				if(dataArray.size() > 0) {
-					script.addAction(new ActionPerformanceRecord(script, dataArray.remove(0).trim(), dataArray), disabled);
+					script.addAction(new ActionPerformanceRecord(script, dataArray.remove(0).trim()), disabled);
 				}
 
 			}else if(ActionPerformanceStart.SCRIPT_LABEL.equals(actionType)){
-				
+
 				script.addAction(new ActionPerformanceStart(script, options, dataArray), disabled);
+
+			}else if(ActionOctoperfVirtualUser.SCRIPT_OCTOPERF_LABEL.equals(actionType)){
+
+				if(dataArray.size() > 0) {
+					script.addAction(new ActionOctoperfVirtualUser(script, options, dataArray), disabled);
+				}
 
 			}else if(ActionNeoloadStart.SCRIPT_LABEL.equals(actionType) || ActionNeoloadStop.SCRIPT_LABEL.equals(actionType)){
 
@@ -318,7 +325,7 @@ public class Lexer {
 
 						script.addAction(new ActionScripting(script, stopExec, options, jsCode, variable, dataArray), disabled);
 					}
-					
+
 				}else if(ActionProperty.SCRIPT_LABEL.equals(actionType)){
 
 					//-----------------------

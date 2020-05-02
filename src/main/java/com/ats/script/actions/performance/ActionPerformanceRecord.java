@@ -19,11 +19,8 @@ under the License.
 
 package com.ats.script.actions.performance;
 
-import java.util.ArrayList;
-
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
-import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
 
 public class ActionPerformanceRecord extends ActionPerformance {
@@ -34,40 +31,21 @@ public class ActionPerformanceRecord extends ActionPerformance {
 	public static final String RESUME = "resume";
 
 	private String type = PAUSE;
-	private CalculatedValue comment;
 
 	public ActionPerformanceRecord() {}
 
-	public ActionPerformanceRecord(Script script, String type, ArrayList<String> dataArray) {
-		super(script);
-		setType(type);
-		
-		if(dataArray.size() > 0) {
-			setComment(new CalculatedValue(script, dataArray.remove(0).trim()));
-		}
-	}
-	
 	public ActionPerformanceRecord(Script script, String type) {
 		super(script);
 		setType(type);
 	}
-	
-	public ActionPerformanceRecord(Script script, String type, CalculatedValue comment) {
-		this(script, type);
-		setComment(comment);
-	}
-	
+
 	//---------------------------------------------------------------------------------------------------------------------------------
 	// Code Generator
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
 	public StringBuilder getJavaCode() {
-		final StringBuilder code = super.getJavaCode().append("\"").append(type).append("\"");
-		if(comment != null) {
-			code.append(", ").append(comment.getJavaCode());
-		}
-		return code.append(")");
+		return super.getJavaCode().append("\"").append(type).append("\"").append(")");
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -80,9 +58,9 @@ public class ActionPerformanceRecord extends ActionPerformance {
 		setStatus(channel.newActionStatus(testName, testLine));
 		
 		if(PAUSE.equals(type)) {
-			channel.pauseHarRecord(comment);
+			channel.pauseHarRecord();
 		}else {
-			channel.resumeHarRecord(comment);
+			channel.resumeHarRecord();
 		}
 		
 		status.endDuration();
@@ -102,13 +80,5 @@ public class ActionPerformanceRecord extends ActionPerformance {
 		}else {
 			this.type = PAUSE;
 		}
-	}
-	
-	public CalculatedValue getComment() {
-		return comment;
-	}
-
-	public void setComment(CalculatedValue comment) {
-		this.comment = comment;
 	}
 }

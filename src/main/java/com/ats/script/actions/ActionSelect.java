@@ -70,8 +70,6 @@ public class ActionSelect extends ActionExecuteElement {
 	public void terminateExecution(ActionTestScript ts) {
 		
 		super.terminateExecution(ts);
-		
-		status.startAction(this);
 		getTestElement().select(status, selectValue);
 		
 		status.endAction();

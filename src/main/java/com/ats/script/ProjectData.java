@@ -20,9 +20,16 @@ under the License.
 package com.ats.script;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -33,6 +40,8 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import com.ats.executor.ActionTestScript;
+import com.ats.generator.GeneratorReport;
+import com.ats.generator.parsers.Lexer;
 import com.ats.generator.parsers.ScriptParser;
 import com.ats.tools.Utils;
 
@@ -55,6 +64,7 @@ public class ProjectData {
 
 	private static final String SRC_FOLDER_MAIN = "main";
 	private static final String SRC_FOLDER_ATS = "ats";
+	private static final String SRC_FOLDER_SUBSCRIPTS = "subscripts";
 	private static final String SRC_FOLDER_JAVA = "java";
 
 	private String name = "";
@@ -137,7 +147,7 @@ public class ProjectData {
 			setReportDestinationFolderPath(getTargetFolderPath().resolve(TARGET_FOLDER_REPORT));
 		}
 	}
-	
+
 	public boolean isValidated() {
 		return folder != null;
 	}
@@ -210,7 +220,7 @@ public class ProjectData {
 	public Path getTargetFolderPath() {
 		return folder.toPath().resolve(TARGET_FOLDER);
 	}
-	
+
 	public Path getAssetsFolderPath() {
 		return getSourceFolderPath().resolve(ASSETS_FOLDER);
 	}
@@ -247,6 +257,114 @@ public class ProjectData {
 		return domain + "." + name + "(" + version + ")";
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	//  load scripts
+	//-------------------------------------------------------------------------------------------------
+
+	public ArrayList<File> getAtsScripts() {
+		return getAtsScripts(getAtsSourceFolder().toFile());
+	}
+	
+	public ArrayList<File> getAtsScripts(File startFolder) {
+
+		final FileFilter atsFilefilter = new FileFilter() {
+			public boolean accept(File file) {
+				if (file.getName().toLowerCase().endsWith(ScriptLoader.ATS_FILE_EXTENSION) || file.isDirectory()) {
+					return true;
+				}
+				return false;
+			}
+		};
+
+		final ArrayList<File> result = new ArrayList<File>();
+		walk(result, startFolder, atsFilefilter);
+
+		return result;
+	}
+	
+	public List<ScriptInfo> loadScriptsHeader() {
+
+		final ArrayList<File> files = getAtsScriptsWithoutSubscripts();
+		final Lexer lexer = new Lexer(this, new GeneratorReport(), ScriptLoader.DEFAULT_CHARSET);
+
+		final Stream<File> stream = files.parallelStream();
+		List<ScriptInfo> result = stream.map(s -> new ScriptInfo(lexer, s)).collect(Collectors.toList());
+		stream.close();
+
+		return result;
+	}
+	
+	public List<ScriptInfo> loadScriptsHeader(File atsFolder) {
+
+		final ArrayList<File> files = getAtsScripts(atsFolder);
+		final Lexer lexer = new Lexer(this, new GeneratorReport(), ScriptLoader.DEFAULT_CHARSET);
+
+		final Stream<File> stream = files.parallelStream();
+		final List<ScriptInfo> result = stream.map(s -> new ScriptInfo(lexer, s)).collect(Collectors.toList());
+		stream.close();
+
+		return result;
+	}
+
+	private ArrayList<File> getAtsScriptsWithoutSubscripts() {
+
+		final File subscriptsFolder = getAtsSourceFolder().resolve(SRC_FOLDER_SUBSCRIPTS).toFile();
+		final FileFilter atsFilefilter = new FileFilter() {
+			public boolean accept(File file) {
+				if(file.isDirectory()) {
+					if(subscriptsFolder.compareTo(file) != 0) {
+						return true;
+					}
+				}else if(file.getName().toLowerCase().endsWith(ScriptLoader.ATS_FILE_EXTENSION)) {
+					return true;
+				}
+				return false;
+			}
+		};
+
+		final ArrayList<File> result = new ArrayList<File>();
+		sortedWalk(result, getAtsSourceFolder().toFile(), atsFilefilter);
+
+		return result;
+	}
+
+	private void walk(ArrayList<File> list, File dir, FileFilter filter) {
+		final File[] files = dir.listFiles(filter);
+		for (File f : files) {
+			if(f.isDirectory()) {
+				walk(list, f, filter);
+			}else {
+				list.add(f);
+			}
+		}
+	}
+	
+	private void sortedWalk(ArrayList<File> list, File dir, FileFilter filter) {
+		final File[] files = dir.listFiles(filter);
+		Arrays.sort(files, new DirectoryBeforeFileComparator());
+		
+		for (File f : files) {
+			if(f.isDirectory()) {
+				walk(list, f, filter);
+			}else {
+				list.add(f);
+			}
+		}
+	}
+	
+	public final static class DirectoryBeforeFileComparator implements Comparator<File> {
+	    @Override
+	    public int compare(File o1, File o2) {
+	        if (o1.isDirectory() && !o2.isDirectory()) {
+	            return 1;
+	        }
+	        if (!o1.isDirectory() && o2.isDirectory()) {
+	            return -1;
+	        }
+	        return o1.compareTo(o2);
+	    }
+	}
+	
 	//-------------------------------------------------------------------------------------------------
 	//  getters and setters for serialization
 	//-------------------------------------------------------------------------------------------------
