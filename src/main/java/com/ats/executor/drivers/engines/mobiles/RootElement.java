@@ -3,6 +3,7 @@ package com.ats.executor.drivers.engines.mobiles;
 import com.ats.element.AtsMobileElement;
 import com.ats.element.FoundElement;
 import com.ats.element.MobileTestElement;
+import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.drivers.engines.MobileDriverEngine;
 import com.ats.generator.objects.MouseDirection;
@@ -27,5 +28,7 @@ public abstract class RootElement {
 	abstract public void refresh(JsonObject jsonObject);
 	abstract public void tap(ActionStatus status, FoundElement element, MouseDirection position);
 	abstract public void swipe(MobileTestElement testElement, int hDirection, int vDirection);
+	abstract public Object scripting(String script, FoundElement element);
+	abstract public Object scripting(String script);
 	abstract public MobileTestElement getCurrentElement(FoundElement element, MouseDirection position);
 }

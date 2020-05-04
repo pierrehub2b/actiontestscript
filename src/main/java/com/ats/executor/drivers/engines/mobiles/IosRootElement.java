@@ -7,10 +7,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 
-import com.ats.element.AtsMobileElement;
-import com.ats.element.FoundElement;
-import com.ats.element.MobileTestElement;
-import com.ats.element.StructDebugDescription;
+import com.ats.element.*;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.drivers.engines.MobileDriverEngine;
 import com.ats.generator.objects.MouseDirection;
@@ -63,6 +60,21 @@ public class IosRootElement extends RootElement {
 		driver.executeRequest(MobileDriverEngine.ELEMENT, testElement.getId(), MobileDriverEngine.SWIPE,
 				testElement.getOffsetX() + "", testElement.getOffsetY() + "", hDirection + "", +vDirection + "",
 				testElement.getCoordinates());
+	}
+
+	@Override
+	public Object scripting(String script, FoundElement element) {
+		final StringBuilder coordinates = new StringBuilder().append(element.getX()).append(";").append(element.getY())
+				.append(";").append(element.getWidth()).append(";").append(element.getHeight()).append(";")
+				.append(getRatioWidth()).append(";").append(getRatioHeight());
+
+		return driver.executeRequest(MobileDriverEngine.ELEMENT, element.getId(), MobileDriverEngine.SCRIPTING,
+				"0", "0", coordinates.toString(), script);
+	}
+
+	@Override
+	public Object scripting(String script) {
+		return scripting(script, getValue().getFoundElement());
 	}
 
 	@Override
