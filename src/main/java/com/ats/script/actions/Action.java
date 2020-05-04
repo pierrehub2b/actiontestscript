@@ -63,10 +63,12 @@ public abstract class Action {
 	//---------------------------------------------------------------------------------------------------------------------------------
 	
 	private Channel currentChannel;
-	public void execute(ActionTestScript ts, String testName, int testLine){
+	public void execute(ActionTestScript ts, String testName, int line){
 		currentChannel = ts.getCurrentChannel();
-		setStatus(currentChannel.newActionStatus(testName, testLine));
+		status = currentChannel.newActionStatus(testName, line);
+		
 		ts.getRecorder().createVisualAction(this);
+		currentChannel.startHarAction(this, status.getTestLine());
 	}
 	
 	protected Channel getCurrentChannel() {

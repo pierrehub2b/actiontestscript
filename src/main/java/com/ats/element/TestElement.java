@@ -368,8 +368,6 @@ public class TestElement{
 		over(status, md, false, 0, 0);
 		if(status.isPassed()) {
 
-			
-
 			if(status.isPassed()) {
 
 				recorder.updateScreen(false);

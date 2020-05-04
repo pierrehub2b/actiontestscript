@@ -21,7 +21,6 @@ package com.ats.executor;
 
 import com.ats.element.TestElement;
 import com.ats.executor.channels.Channel;
-import com.ats.script.actions.Action;
 
 public class ActionStatus {
 
@@ -47,6 +46,8 @@ public class ActionStatus {
 	public static final int FILE_NOT_FOUND = -20;
 	public static final int PERF_NOT_STARTED = -21;
 	public static final int PERF_NOT_RECORDING = -22;
+	
+	public static final int OCTOPERF_FILE_ERROR = -30;
 	
 	public static final int NEOLOAD_POST_ERROR = -50;
 	
@@ -77,6 +78,10 @@ public class ActionStatus {
 		this.startedAt = System.currentTimeMillis();
 		this.testLine = testName + ":" + testLine;
 	}
+	
+	public String getTestLine() {
+		return testLine;
+	}
 
 	public void updateDuration(long currentTime) {
 		duration += System.currentTimeMillis() - currentTime;
@@ -89,15 +94,10 @@ public class ActionStatus {
 	public void endDuration() {
 		duration = System.currentTimeMillis() - startedAt;
 	}	
-		
-	public void startAction(Action action) {
-		startDuration();
-		channel.startHarAction(action, testLine);
-	}
 	
 	public void endAction() {
-		endDuration();
 		channel.endHarAction();
+		endDuration();
 	}
 		
 	public void setException(int code, Exception ex) {

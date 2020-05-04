@@ -109,7 +109,7 @@ public class Script {
 	public void sendInfoLog(String message, String value) {
 		logger.sendInfo(message, value);
 	}
-
+	
 	public void sendActionLog(Action action, String testName, int line) {
 		logger.sendAction(action, testName, line); 
 	}

@@ -101,7 +101,7 @@ public class ActionMouseKey extends ActionMouse {
 				}
 			}
 			
-			status.endDuration();
+			status.endAction();
 			ts.getRecorder().updateScreen(0, status.getDuration());
 		}
 	}

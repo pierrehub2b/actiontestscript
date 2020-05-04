@@ -26,6 +26,7 @@ public final class MessageCode {
 	public static final int ACTION_IN_PROGRESS = 51;
 	public static final int PROPERTY_TRY_ASSERT = 52;
 	public static final int PROPERTY_NOT_FOUND = 53;
+	public static final int UPLOAD_FILE = 54;	
 	
 	public static final int CHANNEL_STATUS = 100;
 	

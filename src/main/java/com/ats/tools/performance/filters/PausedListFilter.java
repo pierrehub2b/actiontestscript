@@ -17,28 +17,15 @@ specific language governing permissions and limitations
 under the License.
  */
 
-package com.ats.script.actions.performance.octoperf;
+package com.ats.tools.performance.filters;
 
-import com.ats.executor.ActionTestScript;
-import com.ats.script.Script;
-import com.ats.script.actions.Action;
+import java.util.List;
 
-public class ActionOctoperf extends Action {
+import com.browserup.harreader.model.HarEntry;
 
-	public static final String SCRIPT_OCTOPERF_LABEL = "octoperf";
-
-	public ActionOctoperf() {}
-
-	public ActionOctoperf(Script script) {
-		super(script);
-	}
-
-	//---------------------------------------------------------------------------------------------------------------------------------
-	// Execution
-	//---------------------------------------------------------------------------------------------------------------------------------
-
+public class PausedListFilter extends UrlBaseFilter {
 	@Override
-	public void execute(ActionTestScript ts, String testName, int testLine) {
-
+	protected void process(HarEntry entry, List<HarEntry> savedEntries) {
+		// do not save entries
 	}
 }

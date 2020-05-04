@@ -131,39 +131,17 @@ public class Generator implements ScriptProcessedEvent{
 	}
 
 	private boolean init(ProjectData pdata) {
-
-		filesList = new ArrayList<File>();
-
 		if(pdata.isValidated()) {
+
 			genReport = new GeneratorReport();
 			projectData = pdata;
 
-			final File atsSourceFolder = projectData.getAtsSourceFolder().toFile();
+			filesList = projectData.getAtsScripts();
+			remainingScripts = filesList.size();
 
-			if(atsSourceFolder.exists()){
-				if(atsSourceFolder.isDirectory()){
-					try {
-						Files.find(atsSourceFolder.toPath(), 99999, (p, bfa) -> bfa.isRegularFile()).forEach(p -> addAtsFile(p.toFile()));
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-
-				}else if(atsSourceFolder.isFile()){
-					addAtsFile(atsSourceFolder);
-				}
-
-				remainingScripts = filesList.size();
-			}
 			return true;
-		}else {
-			return false;
 		}
-	}
-
-	private void addAtsFile(File f) {
-		if(f.getName().toLowerCase().endsWith(ScriptLoader.ATS_FILE_EXTENSION) && f.getName().length() > ScriptLoader.ATS_FILE_EXTENSION.length() + 1) {
-			filesList.add(f);
-		}
+		return false;
 	}
 
 	private void addDataFile(ArrayList<File> list, File f) {

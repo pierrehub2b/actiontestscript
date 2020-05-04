@@ -42,9 +42,8 @@ import com.ats.executor.TestBound;
 import com.ats.generator.ATS;
 import com.ats.tools.AtsClassLoader;
 import com.ats.tools.Utils;
+import com.ats.tools.performance.external.OctoperfApi;
 import com.ats.tools.wait.IWaitGuiReady;
-
-import net.lightbody.bmp.proxy.BlacklistEntry;
 
 public class AtsManager {
 
@@ -72,6 +71,8 @@ public class AtsManager {
 
 	private static final int SCROLL_UNIT = 120;
 	private static final int MAX_STALE_OR_JAVASCRIPT_ERROR = 20;
+	
+	private static final int CAPTURE_PROXY_TRAFFIC_IDLE = 3;
 
 	//-----------------------------------------------------------------------------------------------------
 	//-----------------------------------------------------------------------------------------------------
@@ -101,10 +102,13 @@ public class AtsManager {
 
 	private String neoloadDesignApi;
 	
-	private OctoperfServer octoperf;
-	private ArrayList<BlacklistEntry> blackListServers;
+	private OctoperfApi octoperf;
+	private ArrayList<String> blackListServers;
+	private int trafficIdle = CAPTURE_PROXY_TRAFFIC_IDLE;
 
 	private List<ApplicationProperties> applicationsList = new ArrayList<ApplicationProperties>();
+	
+	private String error;
 
 	public static int getScrollUnit() {
 		return SCROLL_UNIT;
@@ -119,7 +123,11 @@ public class AtsManager {
 	}
 	
 	private static String getElementText(Element elem) {
-		return elem.getTextContent().replaceAll("\n", "").replaceAll("\r", "").trim();
+		final String textContent = elem.getTextContent();
+		if(textContent != null && textContent.length() > 0) {
+			return textContent.replaceAll("\n", "").replaceAll("\r", "").trim();
+		}
+		return null;
 	}
 	
 	private static double getElementDouble(Element elem) {
@@ -210,39 +218,48 @@ public class AtsManager {
 											final Element perfElement = (Element) perfChildren.item(j);
 											switch(perfElement.getNodeName().toLowerCase()) {
 
+											case "idle":
+												trafficIdle = getElementInt(perfElement);
+												break;
 											case "octoperf":
 												
-												String url = null;
-												String user = null;
-												String password = null;
+												String host = null;
+												String apiKey = null;
+												String workspaceName = null;
+												String projectName = null;
 												
-												NodeList nl = perfElement.getElementsByTagName("server");
+												NodeList nl = perfElement.getElementsByTagName("host");
 												if(nl != null) {
-													url = getElementText(nl.item(0));
+													host = getElementText(nl.item(0));
 												}
 
-												nl = perfElement.getElementsByTagName("user");
+												nl = perfElement.getElementsByTagName("apiKey");
 												if(nl != null) {
-													user = getElementText(nl.item(0));
-												}
-
-												nl = perfElement.getElementsByTagName("password");
-												if(nl != null) {
-													password = getElementText(nl.item(0));
+													apiKey = getElementText(nl.item(0));
 												}
 												
-												if(url != null && user != null && password != null) {
-													octoperf = new OctoperfServer(url, user, password);
+												nl = perfElement.getElementsByTagName("workspaceName");
+												if(nl != null) {
+													workspaceName = getElementText(nl.item(0));
+												}
+												
+												nl = perfElement.getElementsByTagName("projectName");
+												if(nl != null) {
+													projectName = getElementText(nl.item(0));
+												}
+												
+												if(host != null && apiKey != null) {
+													octoperf = new OctoperfApi(host, apiKey, workspaceName, projectName);
 												}
 												
 												break;
 												
 											case "blacklist":
-												blackListServers = new ArrayList<BlacklistEntry>();
+												blackListServers = new ArrayList<String>();
 												final NodeList blackList = perfElement.getElementsByTagName("url");
 												for (int k = 0; k < blackList.getLength(); k++) {
 													if (blackList.item(k) instanceof Element) {
-														blackListServers.add(new BlacklistEntry(getElementText(blackList.item(k)), 404));
+														blackListServers.add(getElementText(blackList.item(k)));
 													}
 												}
 												break;
@@ -597,13 +614,13 @@ public class AtsManager {
 						}
 
 					} catch (ParserConfigurationException e) {
-
+						error = e.getMessage();
 					} catch (SAXException e) {
-
+						error = e.getMessage();
 					}
 
 				} catch (IOException e) {
-
+					error = e.getMessage();
 				}
 			
 			
@@ -1014,6 +1031,10 @@ public class AtsManager {
 	// Getters
 	//------------------------------------------------------------------------------------------------------------------
 
+	public String getError() {
+		return error;
+	}
+	
 	public ApplicationProperties getApplicationProperties(String name) {
 		for (int i=0; i < this.applicationsList.size(); i++) {
 			final ApplicationProperties properties = this.applicationsList.get(i);
@@ -1083,11 +1104,15 @@ public class AtsManager {
 		return proxy;
 	}
 
-	public ArrayList<BlacklistEntry> getBlackListServers() {
+	public ArrayList<String> getBlackListServers() {
 		return blackListServers;
 	}
 	
-	public OctoperfServer getOctoperf() {
+	public OctoperfApi getOctoperf() {
 		return octoperf;
+	}
+
+	public int getTrafficIdle() {
+		return trafficIdle;
 	}
 }

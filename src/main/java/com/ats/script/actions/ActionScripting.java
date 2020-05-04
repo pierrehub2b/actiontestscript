@@ -71,9 +71,7 @@ public class ActionScripting extends ActionReturnVariable {
 	public void terminateExecution(ActionTestScript ts) {
 		
 		super.terminateExecution(ts);
-		
-		status.startAction(this);
-		
+
 		if(variable != null) {
 			final Object result = getTestElement().executeScript(status, jsCode.getCalculated(), true);
 			if(result != null) {
