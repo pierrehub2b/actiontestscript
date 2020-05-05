@@ -19,7 +19,6 @@ under the License.
 
 package com.ats.tools.performance.proxy;
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 

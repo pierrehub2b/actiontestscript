@@ -33,6 +33,7 @@ public class StopExecutionThread extends Thread{
 		this.inputStream = in;
 	}
 
+	@Override
 	public void run() {
 		Scanner scanner = new Scanner(inputStream);
 		while (true) {

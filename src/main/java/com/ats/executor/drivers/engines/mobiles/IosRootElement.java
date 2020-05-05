@@ -38,8 +38,8 @@ public class IosRootElement extends RootElement {
 				.append(";").append(element.getWidth()).append(";").append(element.getHeight()).append(";")
 				.append(getRatioWidth()).append(";").append(getRatioHeight());
 
-		return new MobileTestElement(element.getId(), (int) (driver.getOffsetX(rect, position)),
-				(int) (driver.getOffsetY(rect, position)), coordinates.toString());
+		return new MobileTestElement(element.getId(), (driver.getOffsetX(rect, position)),
+				(driver.getOffsetY(rect, position)), coordinates.toString());
 	}
 
 	@Override
@@ -51,7 +51,7 @@ public class IosRootElement extends RootElement {
 				.append(getRatioWidth()).append(";").append(getRatioHeight());
 
 		driver.executeRequest(MobileDriverEngine.ELEMENT, element.getId(), MobileDriverEngine.TAP,
-				(int) (driver.getOffsetX(rect, position)) + "", (int) (driver.getOffsetY(rect, position)) + "",
+				(driver.getOffsetX(rect, position)) + "", (driver.getOffsetY(rect, position)) + "",
 				coordinates.toString());
 	}
 

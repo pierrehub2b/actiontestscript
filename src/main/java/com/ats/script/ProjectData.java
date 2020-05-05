@@ -268,8 +268,9 @@ public class ProjectData {
 	public ArrayList<File> getAtsScripts(File startFolder) {
 
 		final FileFilter atsFilefilter = new FileFilter() {
+			@Override
 			public boolean accept(File file) {
-				if (file.getName().toLowerCase().endsWith(ScriptLoader.ATS_FILE_EXTENSION) || file.isDirectory()) {
+				if (file.getName().toLowerCase().endsWith(Script.ATS_FILE_EXTENSION) || file.isDirectory()) {
 					return true;
 				}
 				return false;
@@ -285,7 +286,7 @@ public class ProjectData {
 	public List<ScriptInfo> loadScriptsHeader() {
 
 		final ArrayList<File> files = getAtsScriptsWithoutSubscripts();
-		final Lexer lexer = new Lexer(this, new GeneratorReport(), ScriptLoader.DEFAULT_CHARSET);
+		final Lexer lexer = new Lexer(this, new GeneratorReport(), Script.DEFAULT_CHARSET);
 
 		final Stream<File> stream = files.parallelStream();
 		List<ScriptInfo> result = stream.map(s -> new ScriptInfo(lexer, s)).collect(Collectors.toList());
@@ -297,7 +298,7 @@ public class ProjectData {
 	public List<ScriptInfo> loadScriptsHeader(File atsFolder) {
 
 		final ArrayList<File> files = getAtsScripts(atsFolder);
-		final Lexer lexer = new Lexer(this, new GeneratorReport(), ScriptLoader.DEFAULT_CHARSET);
+		final Lexer lexer = new Lexer(this, new GeneratorReport(), Script.DEFAULT_CHARSET);
 
 		final Stream<File> stream = files.parallelStream();
 		final List<ScriptInfo> result = stream.map(s -> new ScriptInfo(lexer, s)).collect(Collectors.toList());
@@ -310,12 +311,13 @@ public class ProjectData {
 
 		final File subscriptsFolder = getAtsSourceFolder().resolve(SRC_FOLDER_SUBSCRIPTS).toFile();
 		final FileFilter atsFilefilter = new FileFilter() {
+			@Override
 			public boolean accept(File file) {
 				if(file.isDirectory()) {
 					if(subscriptsFolder.compareTo(file) != 0) {
 						return true;
 					}
-				}else if(file.getName().toLowerCase().endsWith(ScriptLoader.ATS_FILE_EXTENSION)) {
+				}else if(file.getName().toLowerCase().endsWith(Script.ATS_FILE_EXTENSION)) {
 					return true;
 				}
 				return false;
