@@ -81,6 +81,7 @@ public abstract class Action {
 			data.addProperty("status", "non blocking action");
 			data.addProperty("message", status.getFailMessage());
 		}
+		data.addProperty("passed", status.isPassed());
 		data.addProperty("duration", status.getDuration());
 		return new StringBuilder(getClass().getSimpleName()).append(" (").append(scriptName).append(":").append(scriptLine).append(") -> ").append(data.toString());
 	}

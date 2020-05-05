@@ -117,11 +117,8 @@ public class ActionAssertProperty extends ActionExecuteElement {
 	
 	@Override
 	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
-		if(status.isPassed()) {
-			data.addProperty("status", "passed");
-		}else {
-			data.addProperty("status", "failed");
-		}
+		data.addProperty("property", value.getName());
+		data.addProperty("value", attributeValue);
 		return super.getActionLogs(scriptName, scriptLine, data);
 	}
 	

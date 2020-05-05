@@ -28,6 +28,7 @@ import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
 import com.ats.tools.Operators;
+import com.google.gson.JsonObject;
 
 public class ActionAssertValue extends ActionExecute {
 
@@ -63,6 +64,13 @@ public class ActionAssertValue extends ActionExecute {
 			return true;
 		}
 		return false;
+	}
+	
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+		data.addProperty("value1", value1.getCalculated());
+		data.addProperty("value2", value2.getCalculated());
+		return super.getActionLogs(scriptName, scriptLine, data);
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

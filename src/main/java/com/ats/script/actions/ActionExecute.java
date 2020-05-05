@@ -21,6 +21,7 @@ package com.ats.script.actions;
 
 import com.ats.executor.ActionTestScript;
 import com.ats.script.Script;
+import com.google.gson.JsonObject;
 
 public abstract class ActionExecute extends Action {
 
@@ -39,6 +40,12 @@ public abstract class ActionExecute extends Action {
 	public void execute(ActionTestScript ts, String testName, int testLine){
 		super.execute(ts, testName, testLine);
 		getCurrentChannel().checkStatus(this, testName, testLine);
+	}
+	
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+		data.addProperty("passed", status.isPassed());
+		return super.getActionLogs(scriptName, scriptLine, data);
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
