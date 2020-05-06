@@ -27,9 +27,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -235,16 +237,34 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 		ArrayList<AtsMobileElement> listElements = new ArrayList<AtsMobileElement>();
 
-		loadList(cachedElement.getValue(), listElements);
+		loadList(cachedElement.getValue(), listElements, "A");
 
 		final int mouseX = (int)(channel.getSubDimension().getX() + x);
 		final int mouseY = (int)(channel.getSubDimension().getY() + y);
 
 		AtsMobileElement element = cachedElement.getValue();
+		
+		Collections.sort(listElements, new Comparator<AtsMobileElement>() {
+		    public int compare(AtsMobileElement o1, AtsMobileElement o2) {
+	            return o1.getPositionInDom().compareTo(o2.getPositionInDom());
+	        }
+		});
 
 		for (int i=0; i<listElements.size(); i++) {
 			AtsMobileElement child = listElements.get(i);
-			if(child.getRect().contains(new Point(mouseX, mouseY)) && element.getRect().contains(child.getRect())){
+			int coordinateX = child.getX().intValue();
+			int coordinateY = child.getY().intValue();
+			int coordinateW = child.getWidth().intValue();
+			int coordinateH = child.getHeight().intValue();
+			
+			if(child.getRect().contains(new Point(mouseX, mouseY)) && 
+				(
+					element.getRect().contains(new Point(coordinateX,coordinateY)) ||
+					element.getRect().contains(new Point(coordinateX + coordinateW,coordinateY)) ||
+					element.getRect().contains(new Point(coordinateX + coordinateW, coordinateY + coordinateH)) ||
+					element.getRect().contains(new Point(coordinateX, coordinateY + coordinateH))
+				)
+			){
 				element = child;
 			}
 		}
@@ -259,12 +279,18 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 		ArrayList<AtsMobileElement> listElements = new ArrayList<AtsMobileElement>();
 
-		loadList(cachedElement.getValue(), listElements);
+		loadList(cachedElement.getValue(), listElements, "A");
 
 		final int mouseX = (int)(channel.getSubDimension().getX() + x);
 		final int mouseY = (int)(channel.getSubDimension().getY() + y);
 
 		AtsMobileElement element = cachedElement.getValue();
+		
+		Collections.sort(listElements, new Comparator<AtsMobileElement>() {
+		    public int compare(AtsMobileElement o1, AtsMobileElement o2) {
+	            return o1.getPositionInDom().compareTo(o2.getPositionInDom());
+	        }
+		});
 
 		for (int i=0; i<listElements.size(); i++) {
 			AtsMobileElement child = listElements.get(i);
@@ -276,17 +302,23 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 		return element.getFoundElement();
 	}
 
-	private void loadList(AtsMobileElement element, ArrayList<AtsMobileElement> list) {
+	private void loadList(AtsMobileElement element, ArrayList<AtsMobileElement> list, String order) {
 		final AtsMobileElement[] children = element.getChildren();
 		if(children != null) {
 			for (int i=0; i<children.length; i++) {
 				if(element.getChildren() != null) {
 					final AtsMobileElement child = element.getChildren()[i];
+					String newOrder = order  + getCharForNumber(i+1);
+					child.setPositionInDom(newOrder);
 					list.add(child);
-					loadList(child, list);
+					loadList(child, list, newOrder);
 				}
 			}
 		}
+	}
+	
+	private String getCharForNumber(int i) {
+	    return i > 0 && i < 27 ? String.valueOf((char)(i + 64)) : "Z";
 	}
 
 	@Override
