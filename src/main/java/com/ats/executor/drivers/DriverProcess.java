@@ -128,6 +128,7 @@ public class DriverProcess {
 			this.driver = driver;
 		}
 
+		@Override
 		public void run() {
 			driver.quit();
 		}

@@ -572,6 +572,7 @@ public class Channel {
 		engine.switchWindow(status, index, tries);
 		if(status.isPassed()) {
 			engine.updateDimensions();
+			updateWinHandle(getDesktopDriver(), index);
 		}
 	}
 

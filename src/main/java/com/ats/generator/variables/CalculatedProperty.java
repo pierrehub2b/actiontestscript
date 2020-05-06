@@ -155,6 +155,7 @@ public class CalculatedProperty implements Comparable<CalculatedProperty>{
 
 	//----------------------------------------------------------------------------------------------------------------------------
 
+	@Override
 	public String toString() {
 		return name;
 	}

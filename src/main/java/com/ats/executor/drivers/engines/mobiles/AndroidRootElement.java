@@ -5,7 +5,6 @@ import java.awt.Rectangle;
 import com.ats.element.AtsMobileElement;
 import com.ats.element.FoundElement;
 import com.ats.element.MobileTestElement;
-import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.drivers.engines.MobileDriverEngine;
 import com.ats.generator.objects.MouseDirection;
@@ -47,6 +46,6 @@ public class AndroidRootElement extends RootElement {
 	@Override
 	public MobileTestElement getCurrentElement(FoundElement element, MouseDirection position) {
 		final Rectangle rect = element.getRectangle();
-		return new MobileTestElement(element.getId(), (int)(driver.getOffsetX(rect, position)), (int)(driver.getOffsetY(rect, position)));
+		return new MobileTestElement(element.getId(), (driver.getOffsetX(rect, position)), (driver.getOffsetY(rect, position)));
 	}
 }

@@ -40,10 +40,7 @@ import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
 
-import org.openqa.selenium.Alert;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 
 import com.ats.driver.ApplicationProperties;
 import com.ats.element.AtsBaseElement;
@@ -651,15 +648,45 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public Object executeJavaScript(ActionStatus status, String script, TestElement element) {
-		return rootElement.scripting(script, element.getFoundElement());
-		// return executeRequest(ELEMENT, element.getFoundElement().getId(), SCRIPTING, script);
+		final JsonObject result = (JsonObject)rootElement.scripting(script, element.getFoundElement());
+
+		int code = result.get("status").getAsInt();
+		String message = result.get("message").getAsString();
+
+		if (ActionStatus.JAVASCRIPT_ERROR == code) {
+			status.setError(ActionStatus.JAVASCRIPT_ERROR, message);
+		} else {
+			status.setNoError(message);
+		}
+		return result;
 	}
 
 	@Override
 	public Object executeJavaScript(ActionStatus status, String script, boolean returnValue) {
-		return rootElement.scripting(script);
-		// return executeRequest(ELEMENT, "[root]", SCRIPTING, script);
+		final JsonObject result = (JsonObject)rootElement.scripting(script);
+
+		int code = result.get("status").getAsInt();
+		String message = result.get("message").getAsString();
+
+		if (ActionStatus.JAVASCRIPT_ERROR == code) {
+			status.setError(ActionStatus.JAVASCRIPT_ERROR, message);
+		} else {
+			status.setNoError(message);
+		}
+		return result;
 	}
+
+	/* private Object handleJsonObject(JsonObject jsonObject, ActionStatus status) {
+		int code = jsonObject.get("status").getAsInt();
+		String message = jsonObject.get("message").getAsString();
+
+		if (ActionStatus.JAVASCRIPT_ERROR == code) {
+			status.setError(ActionStatus.JAVASCRIPT_ERROR, message);
+		} else {
+			status.setNoError(message);
+		}
+		return jsonObject;
+	} */
 
 	@Override
 	protected void setPosition(org.openqa.selenium.Point pt) {

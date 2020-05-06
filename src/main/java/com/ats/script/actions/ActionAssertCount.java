@@ -29,6 +29,7 @@ import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
 import com.ats.tools.Operators;
 import com.ats.tools.Utils;
+import com.google.gson.JsonObject;
 
 public class ActionAssertCount extends ActionExecuteElement {
 
@@ -100,6 +101,13 @@ public class ActionAssertCount extends ActionExecuteElement {
 		status.getElement().setFoundElements(null);
 	}
 
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+		data.addProperty("operator", operator);
+		data.addProperty("occurrences", value);
+		return super.getActionLogs(scriptName, scriptLine, data);
+	}
+	
 	//--------------------------------------------------------
 	// getters and setters for serialization
 	//--------------------------------------------------------

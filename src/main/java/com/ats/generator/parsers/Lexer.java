@@ -37,6 +37,7 @@ import com.ats.generator.variables.EnvironmentValue;
 import com.ats.generator.variables.ParameterValue;
 import com.ats.generator.variables.Variable;
 import com.ats.script.ProjectData;
+import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
 import com.ats.script.actions.ActionApi;
 import com.ats.script.actions.ActionAssertCount;
@@ -125,7 +126,7 @@ public class Lexer {
 
 	private ScriptLoader getScript(File f) {
 		if(f.exists() && f.isFile()){
-			return new ScriptLoader(ScriptLoader.ATS_EXTENSION, this, f, projectData, charset);
+			return new ScriptLoader(Script.ATS_EXTENSION, this, f, projectData, charset);
 		}
 		return null;
 	}
