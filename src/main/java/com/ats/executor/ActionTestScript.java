@@ -94,19 +94,14 @@ public class ActionTestScript extends Script implements ITest{
 	private String testName;
 	protected ScriptHeader getHeader() {return new ScriptHeader();}
 
-	private ScriptStatus status;
+	private ScriptStatus status = new ScriptStatus();
 
 	public ActionTestScript() {
-		init();
+		this(null);
 	}
-
+	
 	public ActionTestScript(ExecutionLogger logger) {
 		super(logger);
-		init();
-	}
-
-	private void init() {
-		status = new ScriptStatus();
 		topScript = this;
 		channelManager = new ChannelManager(this);
 	}

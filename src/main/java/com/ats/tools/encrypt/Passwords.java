@@ -33,7 +33,11 @@ import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.engines.AESEngine;
@@ -62,27 +66,7 @@ public class Passwords implements Serializable {
 		this.file = path.resolve("passwords.crypto").toFile();
 		
 		if(this.file.exists()) {
-
-			try {
-				
-				byte[] fileContent = Base64.getDecoder().decode(Files.readAllBytes(file.toPath()));
-
-				ByteArrayInputStream bis = new ByteArrayInputStream(fileContent);
-
-				byte[] key = new byte[keyLen];
-				bis.read(key, 0, keyLen);
-
-				byte[] bytes = decrypt(key, bis.readAllBytes());
-
-				final ByteArrayInputStream byteStream = new ByteArrayInputStream(bytes);
-				final ObjectInputStream objStream = new ObjectInputStream(byteStream);
-
-				final Passwords pass = (Passwords) objStream.readObject();
-				this.data = pass.data;
-				this.masterKey = pass.masterKey;
-
-			} catch (IOException | ClassNotFoundException e) {}
-
+			load();
 		}else {
 			save();
 		}
@@ -91,30 +75,71 @@ public class Passwords implements Serializable {
 	public void setPassword(String key, String value) {
 		data.put(key, value.getBytes());
 		save();
+		load();
 	}
 
 	public String getPassword(String key) {
 		if(data.containsKey(key)) {
-			return new String(decrypt(masterKey, data.get(key)));
+			return new String(data.get(key)).replaceAll("\0", "");
 		}
 		return null;
+	}
+	
+	public PasswordData[] getDataList() {
+		
+		final List<String> keySet = data.keySet().stream().collect(Collectors.toList());
+		Collections.sort(keySet, (o1, o2) -> o1.compareTo(o2));
+
+		final PasswordData[] result = new PasswordData[data.size()];
+		int loop = 0;
+		for(String key : keySet) {
+			result[loop] = new PasswordData(key, getPassword(key));
+			loop++;
+		}
+		return result;
+	}
+	
+	public void clear() {
+		data.clear();
 	}
 
 	//-----------------------------------------------------------------------------------------------------------
 	//
 	//-----------------------------------------------------------------------------------------------------------
 
-	private void save() {
-
+	private void load() {
 		try {
+			
+			byte[] fileContent = Base64.getDecoder().decode(Files.readAllBytes(file.toPath()));
 
+			ByteArrayInputStream bis = new ByteArrayInputStream(fileContent);
+
+			byte[] key = new byte[keyLen];
+			bis.read(key, 0, keyLen);
+
+			byte[] bytes = decrypt(key, bis.readAllBytes());
+
+			final ByteArrayInputStream byteStream = new ByteArrayInputStream(bytes);
+			final ObjectInputStream objStream = new ObjectInputStream(byteStream);
+
+			final Passwords pass = (Passwords) objStream.readObject();
+			this.data = pass.data;
+			this.masterKey = pass.masterKey;
+
+		} catch (IOException | ClassNotFoundException e) {}
+		
+		data.replaceAll((k, v) -> decrypt(masterKey, v));
+	}
+	
+	private void save() {
+		try {
 			final byte[] randomKey = new byte[keyLen];
 			masterKey = new byte[keyLen];
 
 			final SecureRandom random = SecureRandom.getInstanceStrong();
 			random.nextBytes(randomKey);
 			random.nextBytes(masterKey);
-
+			
 			data.replaceAll((k, v) -> encrypt(masterKey, v));
 
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -124,7 +149,6 @@ public class Passwords implements Serializable {
 			final byte[] dataBytes = encrypt(randomKey, bos.toByteArray());
 			out.close();
 			bos.close();
-
 
 			bos = new ByteArrayOutputStream();
 			bos.write(randomKey);
