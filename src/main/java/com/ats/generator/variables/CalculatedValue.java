@@ -218,9 +218,16 @@ public class CalculatedValue{
 			String strValue = "";
 			if(dataList != null) {
 				for(Object obj : dataList) {
+
+					byte[] b = obj.toString().getBytes();
+					Boolean isKey = false;
+					if(b[0] < 65) {
+						isKey = true;
+					}
+					
 					if (obj instanceof Variable) {
 						strValue += ((Variable)obj).getCalculatedValue();
-					} else if(obj instanceof Keys) {
+					} else if(obj instanceof Keys || isKey) {
 						if(strValue != "") {
 							chainKeys.add(new SendKeyData(strValue));
 							strValue = "";
