@@ -622,13 +622,17 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 				.append(type)
 				.toString();
 
-		final RequestBody body = RequestBody.create(null, Stream.of(data).map(Object::toString).collect(Collectors.joining("\n")));
-		final Request request = new Request.Builder()
-				.url(url)
-				.addHeader("User-Agent",userAgent)
+		final Request.Builder requestBuilder = new Request.Builder();
+		requestBuilder.url(url);
+
+		if (token != null) {
+			requestBuilder.addHeader("Token", token);
+		}
+
+		final Request request = requestBuilder
+				.addHeader("User-Agent", userAgent)
 				.addHeader("Content-Type","application/x-www-form-urlencoded;charset=UTF8")
-				.addHeader("Token", token)
-				.post(body)
+				.post(RequestBody.create(null, Stream.of(data).map(Object::toString).collect(Collectors.joining("\n"))))
 				.build();
 
 		try {
