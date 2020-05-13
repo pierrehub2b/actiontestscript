@@ -102,6 +102,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	private OkHttpClient client;
 
 	private String userAgent;
+	private String token;
 
 	public MobileDriverEngine(Channel channel, ActionStatus status, String app, DesktopDriver desktopDriver, ApplicationProperties props) {
 
@@ -130,63 +131,72 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			this.userAgent = "AtsMobileDriver/" + ATS.VERSION + " (" + System.getProperty("user.name") + ")";
 
 			JsonObject response = executeRequest(DRIVER, START);
-
-			if(response == null) {
+			if (response == null) {
 				status.setError(ActionStatus.CHANNEL_START_ERROR, "unable to connect to : mobile://" + endPoint);
-			}else {
-
-				final String systemName = response.get("systemName").getAsString();
-				final String os = response.get("os").getAsString();
-
-				if (os.equals("ios")) {
-					rootElement = new IosRootElement(this);
-					cachedElement = new IosRootElement(this);
-				} else {
-					rootElement = new AndroidRootElement(this);
-					cachedElement = new AndroidRootElement(this);
-				}
-
-				final String driverVersion = response.get("driverVersion").getAsString();
-
-				final double deviceWidth = response.get("deviceWidth").getAsDouble();
-				final double deviceHeight = response.get("deviceHeight").getAsDouble();
-				final double channelWidth = response.get("channelWidth").getAsDouble();
-				final double channelHeight = response.get("channelHeight").getAsDouble();
-
-				final int screenCapturePort = response.get("screenCapturePort").getAsInt();
-
-				final JsonElement udpEndPoint = response.get("udpEndPoint");
-
-				channel.setDimensions(new TestBound(0D, 0D, deviceWidth, deviceHeight), new TestBound(0D, 0D, channelWidth, channelHeight));
-
-				response = executeRequest(APP, START, application);
-				if(response != null) {
-					if(response.get("status").getAsInt() == 0) {
-						final String base64 = response.get("icon").getAsString();
-						byte[] icon = new byte[0];
-						if(base64.length() > 0) {
-							try {
-								icon = Base64.getDecoder().decode(base64);
-							}catch(Exception e) {}
-						}
-
-						final String[] endPointData = endPoint.split(":");
-						final String version = response.get("version").getAsString();
-
-						if(udpEndPoint != null) {
-							channel.setApplicationData(os + ":" + systemName, version, driverVersion, -1, icon, udpEndPoint.getAsString() + ":" + screenCapturePort);
-						} else {
-							channel.setApplicationData(os + ":" + systemName, version, driverVersion, -1, icon, endPointData[0] + ":" + screenCapturePort);
-						}
-
-						refreshElementMapLocation();
-					}else {
-						status.setError(ActionStatus.CHANNEL_START_ERROR, response.get("message").getAsString());
-					}
-				}else {
-					status.setError(ActionStatus.CHANNEL_START_ERROR, "unable to connect to : " + application);
-				}
+				return;
 			}
+
+			// handle driver start error
+			if (response.get("status").getAsInt() != 0) {
+				status.setError(ActionStatus.CHANNEL_START_ERROR, response.get("message").getAsString());
+				return;
+			}
+
+			this.token = response.get("token").getAsString();
+			final String systemName = response.get("systemName").getAsString();
+			final String os = response.get("os").getAsString();
+
+			if (os.equals("ios")) {
+				rootElement = new IosRootElement(this);
+				cachedElement = new IosRootElement(this);
+			} else {
+				rootElement = new AndroidRootElement(this);
+				cachedElement = new AndroidRootElement(this);
+			}
+
+			final String driverVersion = response.get("driverVersion").getAsString();
+
+			final double deviceWidth = response.get("deviceWidth").getAsDouble();
+			final double deviceHeight = response.get("deviceHeight").getAsDouble();
+			final double channelWidth = response.get("channelWidth").getAsDouble();
+			final double channelHeight = response.get("channelHeight").getAsDouble();
+
+			final int screenCapturePort = response.get("screenCapturePort").getAsInt();
+
+			final JsonElement udpEndPoint = response.get("udpEndPoint");
+
+			channel.setDimensions(new TestBound(0D, 0D, deviceWidth, deviceHeight), new TestBound(0D, 0D, channelWidth, channelHeight));
+
+			response = executeRequest(APP, START, application);
+			if (response == null) {
+				status.setError(ActionStatus.CHANNEL_START_ERROR, "unable to connect to : " + application);
+				return;
+			}
+
+			// handle app start error
+			if (response.get("status").getAsInt() != 0) {
+				status.setError(ActionStatus.CHANNEL_START_ERROR, response.get("message").getAsString());
+				return;
+			}
+
+			final String base64 = response.get("icon").getAsString();
+			byte[] icon = new byte[0];
+			if (base64.length() > 0) {
+				try {
+					icon = Base64.getDecoder().decode(base64);
+				}catch(Exception e) {}
+			}
+
+			final String[] endPointData = endPoint.split(":");
+			final String version = response.get("version").getAsString();
+
+			if(udpEndPoint != null) {
+				channel.setApplicationData(os + ":" + systemName, version, driverVersion, -1, icon, udpEndPoint.getAsString() + ":" + screenCapturePort);
+			} else {
+				channel.setApplicationData(os + ":" + systemName, version, driverVersion, -1, icon, endPointData[0] + ":" + screenCapturePort);
+			}
+
+			refreshElementMapLocation();
 		}
 	}
 
@@ -222,7 +232,10 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	public void tearDown() {
-		executeRequest(DRIVER, STOP);
+		JsonObject jsonObject = executeRequest(DRIVER, STOP);
+		if (jsonObject != null) {
+			this.token = null;
+		}
 	}
 
 	@Override
@@ -320,9 +333,9 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	private AtsMobileElement getCapturedElementById(String id, boolean reload) {
 		if(reload) {
 			//refreshElementMapLocation();
-			return getElementById(rootElement.getValue(), id); 
+			return getElementById(rootElement.getValue(), id);
 		} else if(cachedElement != null) {
-			return getElementById(cachedElement.getValue(), id); 
+			return getElementById(cachedElement.getValue(), id);
 		} else {
 			return null;
 		}
@@ -358,7 +371,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 		return template.findOccurrences(screenshot).parallelStream().map(r -> new FoundElement(channel, parent, r)).collect(Collectors.toCollection(ArrayList::new));
 	}
 
-	private void loadElementsByTag(AtsMobileElement root, String tag, List<AtsMobileElement> list) 
+	private void loadElementsByTag(AtsMobileElement root, String tag, List<AtsMobileElement> list)
 	{
 		if(root == null) return;
 		if(root.checkTag(tag)) {
@@ -395,7 +408,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {
-		for(SendKeyData sequence : textActionList) {	
+		for(SendKeyData sequence : textActionList) {
 			executeRequest(ELEMENT, element.getFoundElement().getId(), INPUT, sequence.getMobileSequence());
 		}
 	}
@@ -415,7 +428,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public void clearText(ActionStatus status, TestElement te, MouseDirection md) {	
+	public void clearText(ActionStatus status, TestElement te, MouseDirection md) {
 		mouseClick(status, te.getFoundElement(), md, 0, 0);
 		executeRequest(ELEMENT, te.getFoundElement().getId(), INPUT, SendKeyData.EMPTY_DATA);
 	}
@@ -577,15 +590,13 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 				.append(type)
 				.toString();
 
+		final RequestBody body = RequestBody.create(null, Stream.of(data).map(Object::toString).collect(Collectors.joining("\n")));
 		final Request request = new Request.Builder()
 				.url(url)
 				.addHeader("User-Agent",userAgent)
 				.addHeader("Content-Type","application/x-www-form-urlencoded;charset=UTF8")
-				.post(RequestBody.
-						create(null, 
-								Stream.of(data).
-								map(Object::toString).
-								collect(Collectors.joining("\n"))))
+				.addHeader("Token", token)
+				.post(body)
 				.build();
 
 		try {
@@ -593,8 +604,8 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			final String responseData = CharStreams.toString(
 					new InputStreamReader(
 							response
-							.body()
-							.byteStream(), 
+									.body()
+									.byteStream(),
 							Charsets.UTF_8));
 			response.close();
 			return JsonParser.parseString(responseData).getAsJsonObject();
