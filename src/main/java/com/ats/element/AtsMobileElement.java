@@ -38,6 +38,7 @@ public class AtsMobileElement extends AtsBaseElement {
 
 	private AtsMobileElement parent;
 	private AtsMobileElement[] children;
+	private String positionInDom;
 
 	private Rectangle rect;
 	public Rectangle getRect() {
@@ -57,7 +58,16 @@ public class AtsMobileElement extends AtsBaseElement {
 		this.y = y;
 		this.attributes = attributes;
 	}
-		
+	
+	public void setPositionInDom(String value) {
+		this.positionInDom = value;
+	}
+	
+	public String getPositionInDom() {
+		return this.positionInDom;
+	}
+	
+	
 	public boolean isClickable() {
 		return clickable;
 	}

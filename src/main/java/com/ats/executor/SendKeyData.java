@@ -72,13 +72,31 @@ public class SendKeyData {
 
 	public SendKeyData(String data) {
 		final char[] dataArray = data.toCharArray();
-		if(dataArray.length == 1) {
-			final Keys k = Keys.getKeyFromUnicode(dataArray[0]);
+		StringBuffer sequence = new StringBuffer();
+		for (char val : dataArray) 
+		{ 
+			final Keys k = Keys.getKeyFromUnicode(val);
+			
 			if(k != null) {
-				specialKey = KEY_PREFIX + k.name();
+				switch(k.name())
+				{
+					case "CONTROL":
+						this.enterKey = true;
+						downKey = Keys.CONTROL;
+						break;
+					case "SHIFT":
+						downKey = Keys.SHIFT;
+						break;
+					case "ALT":
+						downKey = Keys.ALT;
+						break;
+				}
+			} else {
+				sequence.append(val);
+				this.data = String.valueOf(val);
 			}
 		}
-		this.data = data;
+		chord = sequence;
 	}
 
 	private Keys getNumpad(char d) {
