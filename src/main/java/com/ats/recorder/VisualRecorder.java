@@ -32,6 +32,14 @@ import com.ats.script.Script;
 import com.ats.script.ScriptHeader;
 import com.ats.script.actions.Action;
 import com.ats.script.actions.ActionChannelStart;
+import com.ats.script.actions.ActionGotoUrl;
+import com.ats.script.actions.ActionMouse;
+import com.ats.script.actions.ActionMouseKey;
+import com.ats.script.actions.ActionMouseScroll;
+import com.ats.script.actions.ActionWindowState;
+import com.ats.script.actions.ActionWindowSwitch;
+import com.ats.script.actions.ActionScripting;
+import com.ats.script.actions.ActionMouseDragDrop;
 import com.ats.tools.XmlReport;
 import com.ats.tools.logger.ExecutionLogger;
 
@@ -109,10 +117,19 @@ public class VisualRecorder implements IVisualRecorder {
 		this.channel = channel;
 	}
 	
+	private boolean isSyncAction(String actionName) {
+		if(actionName == ActionMouse.class.getName() || actionName == ActionGotoUrl.class.getName() || actionName == ActionMouseKey.class.getName() ||  actionName == ActionMouseScroll.class.getName()
+				|| actionName == ActionScripting.class.getName() || actionName == ActionWindowState.class.getName() || actionName == ActionWindowSwitch.class.getName() || actionName == ActionMouseDragDrop.class.getName()
+				) {
+			return true;
+		}
+		return false;
+	}
+	
 	@Override
 	public void createVisualStartChannelAction(ActionChannelStart action, long duration) {
 		setChannel(action.getStatus().getChannel());
-		channel.createVisualAction(action.getClass().getName(), action.getLine(), System.currentTimeMillis() - started - duration);
+		channel.createVisualAction(action.getClass().getName(), action.getLine(), System.currentTimeMillis() - started - duration, isSyncAction(action.getClass().getName()));
 		channel.sleep(100);
 		update(0, duration, action.getName(), action.getActionLogsData().toString());
 	}
@@ -120,7 +137,7 @@ public class VisualRecorder implements IVisualRecorder {
 	@Override
 	public void createVisualAction(Action action) {
 		setChannel(action.getStatus().getChannel());
-		channel.createVisualAction(action.getClass().getName(), action.getLine(), System.currentTimeMillis() - started);
+		channel.createVisualAction(action.getClass().getName(), action.getLine(), System.currentTimeMillis() - started, isSyncAction(action.getClass().getName()));
 	}
 	
 	@Override
@@ -176,26 +193,26 @@ public class VisualRecorder implements IVisualRecorder {
 	@Override
 	public void updateScreen(int error, long duration) {
 		update(error, duration);
-		updateScreen(false);
+		//updateScreen(false);
 	}
 	
 	@Override
 	public void updateScreen(int error, long duration, String value) {
 		update(error, duration, value);
-		updateScreen(false);
+		//updateScreen(false);
 	}
 	
 	@Override
 	public void updateTextScreen(int error, long duration, String value, String data) {
 		update(error, duration, value, data);
-		updateScreen(false);
+		//updateScreen(false);
 	}
 	
 	@Override
 	public void updateScreen(int error, long duration, String type, MouseDirection position) {
 		update(error, duration);
 		update(type, position);
-		updateScreen(false);
+		//updateScreen(false);
 	}
 	
 	//-----------------------------------------------------------------------------------------------------------------------------------

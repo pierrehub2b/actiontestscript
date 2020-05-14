@@ -111,7 +111,7 @@ public class EmptyChannel extends Channel {
 	}
 
 	@Override
-	public void createVisualAction(String actionName, int scriptLine, long timeline) {
+	public void createVisualAction(String actionName, int scriptLine, long timeline, boolean sync) {
 	}
 	
 	@Override
