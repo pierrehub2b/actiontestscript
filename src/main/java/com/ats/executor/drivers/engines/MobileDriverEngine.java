@@ -27,7 +27,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
@@ -40,7 +39,10 @@ import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
 
-import org.openqa.selenium.*;
+import org.openqa.selenium.Alert;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebElement;
 
 import com.ats.driver.ApplicationProperties;
 import com.ats.element.AtsBaseElement;
