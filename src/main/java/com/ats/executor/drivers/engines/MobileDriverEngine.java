@@ -106,6 +106,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	private OkHttpClient client;
 
 	private String userAgent;
+	private String token;
 
 	public MobileDriverEngine(Channel channel, ActionStatus status, String app, DesktopDriver desktopDriver, ApplicationProperties props) {
 
@@ -145,7 +146,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 				return;
 			}
 
-			channel.token = response.get("token").getAsString();
+			// this.token = response.get("token").getAsString();
 			final String systemName = response.get("systemName").getAsString();
 			final String os = response.get("os").getAsString();
 
@@ -231,13 +232,14 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void close(boolean keepRunning) {
-		executeRequest(APP, STOP, channel.getApplication());
+		tearDown();
+		// executeRequest(APP, STOP, channel.getApplication());
 	}
 
 	public void tearDown() {
 		JsonObject jsonObject = executeRequest(DRIVER, STOP);
 		if (jsonObject != null) {
-			channel.token = null;
+			token = null;
 		}
 	}
 
@@ -626,8 +628,8 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 		final Request.Builder requestBuilder = new Request.Builder();
 		requestBuilder.url(url);
 
-		if (channel.token != null) {
-			requestBuilder.addHeader("Token", channel.token);
+		if (token != null) {
+			requestBuilder.addHeader("Token", token);
 		}
 
 		final Request request = requestBuilder

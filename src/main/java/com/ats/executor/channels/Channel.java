@@ -90,7 +90,6 @@ public class Channel {
 	private String neoloadDesignApi;
 
 	private AtsManager atsManager;
-	public String token;
 
 	//----------------------------------------------------------------------------------------------------------------------
 	// Constructor
