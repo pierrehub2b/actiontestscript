@@ -73,6 +73,7 @@ public class SendKeyData {
 	public SendKeyData(String data) {
 		final char[] dataArray = data.toCharArray();
 		StringBuffer sequence = new StringBuffer();
+		this.data = "";
 		for (char val : dataArray) 
 		{ 
 			final Keys k = Keys.getKeyFromUnicode(val);
@@ -93,7 +94,7 @@ public class SendKeyData {
 				}
 			} else {
 				sequence.append(val);
-				this.data = String.valueOf(val);
+				this.data += String.valueOf(val);
 			}
 		}
 		chord = sequence;
