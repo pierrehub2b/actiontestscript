@@ -32,13 +32,17 @@ import com.ats.script.Script;
 import com.ats.script.ScriptHeader;
 import com.ats.script.actions.Action;
 import com.ats.script.actions.ActionChannelStart;
+import com.ats.script.actions.ActionChannelSwitch;
 import com.ats.script.actions.ActionGotoUrl;
 import com.ats.script.actions.ActionMouse;
 import com.ats.script.actions.ActionMouseKey;
 import com.ats.script.actions.ActionMouseScroll;
+import com.ats.script.actions.ActionMouseSwipe;
 import com.ats.script.actions.ActionWindowState;
 import com.ats.script.actions.ActionWindowSwitch;
 import com.ats.script.actions.ActionScripting;
+import com.ats.script.actions.ActionText;
+import com.ats.script.actions.ActionWindowResize;
 import com.ats.script.actions.ActionMouseDragDrop;
 import com.ats.tools.XmlReport;
 import com.ats.tools.logger.ExecutionLogger;
@@ -118,9 +122,10 @@ public class VisualRecorder implements IVisualRecorder {
 	}
 	
 	private boolean isSyncAction(String actionName) {
-		if(actionName == ActionMouse.class.getName() || actionName == ActionGotoUrl.class.getName() || actionName == ActionMouseKey.class.getName() ||  actionName == ActionMouseScroll.class.getName()
-				|| actionName == ActionScripting.class.getName() || actionName == ActionWindowState.class.getName() || actionName == ActionWindowSwitch.class.getName() || actionName == ActionMouseDragDrop.class.getName()
-				) {
+		if(actionName == ActionMouse.class.getName() || actionName == ActionGotoUrl.class.getName() || actionName == ActionMouseKey.class.getName() ||  actionName == ActionMouseScroll.class.getName() || actionName == ActionText.class.getName()
+			|| actionName == ActionScripting.class.getName() || actionName == ActionWindowState.class.getName() || actionName == ActionWindowSwitch.class.getName() || actionName == ActionMouseDragDrop.class.getName() || actionName == ActionMouseSwipe.class.getName()
+			|| actionName == ActionChannelSwitch.class.getName() || actionName == ActionWindowResize.class.getName()
+		) {
 			return true;
 		}
 		return false;
