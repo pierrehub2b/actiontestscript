@@ -252,10 +252,9 @@ public class DriverManager {
 
 		for (MobileDriverEngine engine: mobileDrivers)
 		{
-			if (engine.endPoint.equals(endPoint)) {
-				String token = engine.token;
+			if (engine.getEndPoint().equals(endPoint)) {
 				mobileDrivers.remove(engine);
-				return token;
+				return engine.getToken();
 			}
 		}
 
@@ -299,10 +298,8 @@ public class DriverManager {
 			desktopDriver = null;
 		}
 
-		for (MobileDriverEngine engine: mobileDrivers)
-		{
-			engine.tearDown();
-			mobileDrivers.remove(engine);
+		while(mobileDrivers.size() > 0) {
+			mobileDrivers.remove(0).tearDown();
 		}
 
 		/* if(mobileDriverEngine != null){

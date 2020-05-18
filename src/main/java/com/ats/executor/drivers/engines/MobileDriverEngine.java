@@ -106,9 +106,11 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	private OkHttpClient client;
 
 	private String userAgent;
-	private String token;
 
-	public MobileDriverEngine(Channel channel, ActionStatus status, String app, DesktopDriver desktopDriver, ApplicationProperties props) {
+	private String token;
+	private String endPoint;
+
+	public MobileDriverEngine(Channel channel, ActionStatus status, String app, DesktopDriver desktopDriver, ApplicationProperties props, String token) {
 
 		super(channel, desktopDriver, props, 0, 60);
 
@@ -124,7 +126,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 		final String[] appData = applicationPath.split("/");
 		if(appData.length > 1) {
 
-			final String endPoint = appData[0];
+			endPoint = appData[0];
 			final String application = appData[1];
 
 			this.applicationPath = "http://" + endPoint;
@@ -132,7 +134,12 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 			this.client = new Builder().cache(null).connectTimeout(30, TimeUnit.SECONDS).writeTimeout(30, TimeUnit.SECONDS).readTimeout(40, TimeUnit.SECONDS).build();
 
-			this.userAgent = "AtsMobileDriver/" + ATS.VERSION + " (" + System.getProperty("user.name") + ")";
+			this.userAgent = "AtsMobileDriver/" + ATS.VERSION + "," + System.getProperty("user.name") + ",";
+
+			//---------------------------------------------------------
+			//???????????
+			//---------------------------------------------------------
+			this.token = token;
 
 			JsonObject response = executeRequest(DRIVER, START);
 			if (response == null) {
@@ -146,7 +153,11 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 				return;
 			}
 
+			//---------------------------------------------------------
+			//???????????
+			//---------------------------------------------------------
 			this.token = response.get("token").getAsString();
+			
 			final String systemName = response.get("systemName").getAsString();
 			final String os = response.get("os").getAsString();
 
@@ -233,6 +244,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public void close(boolean keepRunning) {
 		executeRequest(APP, STOP, channel.getApplication());
+		this.channel = null;
 	}
 
 	public void tearDown() {
@@ -255,11 +267,11 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 		final int mouseY = (int)(channel.getSubDimension().getY() + y);
 
 		AtsMobileElement element = cachedElement.getValue();
-		
+
 		Collections.sort(listElements, new Comparator<AtsMobileElement>() {
-		    public int compare(AtsMobileElement o1, AtsMobileElement o2) {
-	            return o1.getPositionInDom().compareTo(o2.getPositionInDom());
-	        }
+			public int compare(AtsMobileElement o1, AtsMobileElement o2) {
+				return o1.getPositionInDom().compareTo(o2.getPositionInDom());
+			}
 		});
 
 		for (int i=0; i<listElements.size(); i++) {
@@ -268,15 +280,15 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			int coordinateY = child.getY().intValue();
 			int coordinateW = child.getWidth().intValue();
 			int coordinateH = child.getHeight().intValue();
-			
+
 			if(child.getRect().contains(new Point(mouseX, mouseY)) && 
-				(
-					element.getRect().contains(new Point(coordinateX,coordinateY)) ||
-					element.getRect().contains(new Point(coordinateX + coordinateW,coordinateY)) ||
-					element.getRect().contains(new Point(coordinateX + coordinateW, coordinateY + coordinateH)) ||
-					element.getRect().contains(new Point(coordinateX, coordinateY + coordinateH))
-				)
-			){
+					(
+							element.getRect().contains(new Point(coordinateX,coordinateY)) ||
+							element.getRect().contains(new Point(coordinateX + coordinateW,coordinateY)) ||
+							element.getRect().contains(new Point(coordinateX + coordinateW, coordinateY + coordinateH)) ||
+							element.getRect().contains(new Point(coordinateX, coordinateY + coordinateH))
+							)
+					){
 				element = child;
 			}
 		}
@@ -297,11 +309,11 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 		final int mouseY = (int)(channel.getSubDimension().getY() + y);
 
 		AtsMobileElement element = cachedElement.getValue();
-		
+
 		Collections.sort(listElements, new Comparator<AtsMobileElement>() {
-		    public int compare(AtsMobileElement o1, AtsMobileElement o2) {
-	            return o1.getPositionInDom().compareTo(o2.getPositionInDom());
-	        }
+			public int compare(AtsMobileElement o1, AtsMobileElement o2) {
+				return o1.getPositionInDom().compareTo(o2.getPositionInDom());
+			}
 		});
 
 		for (int i=0; i<listElements.size(); i++) {
@@ -312,6 +324,14 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 		}
 
 		return element.getFoundElement();
+	}
+
+	public String getToken() {
+		return token;
+	}
+
+	public String getEndPoint() {
+		return endPoint;
 	}
 
 	private void loadList(AtsMobileElement element, ArrayList<AtsMobileElement> list, String order) {
@@ -328,9 +348,9 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			}
 		}
 	}
-	
+
 	private String getCharForNumber(int i) {
-	    return i > 0 && i < 27 ? String.valueOf((char)(i + 64)) : "Z";
+		return i > 0 && i < 27 ? String.valueOf((char)(i + 64)) : "Z";
 	}
 
 	@Override
@@ -642,8 +662,8 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			final String responseData = CharStreams.toString(
 					new InputStreamReader(
 							response
-									.body()
-									.byteStream(),
+							.body()
+							.byteStream(),
 							Charsets.UTF_8));
 			response.close();
 			return JsonParser.parseString(responseData).getAsJsonObject();
