@@ -131,8 +131,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			channel.setApplication(application);
 
 			this.client = new Builder().cache(null).connectTimeout(30, TimeUnit.SECONDS).writeTimeout(30, TimeUnit.SECONDS).readTimeout(40, TimeUnit.SECONDS).build();
-
-			this.userAgent = "AtsMobileDriver/" + ATS.VERSION + " (" + System.getProperty("user.name") + ")";
+			this.userAgent = "AtsMobileDriver/" + ATS.VERSION + "," + System.getProperty("user.name") + ",";
 
 			JsonObject response = executeRequest(DRIVER, START);
 			if (response == null) {
