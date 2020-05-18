@@ -106,9 +106,10 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	private OkHttpClient client;
 
 	private String userAgent;
-	private String token;
+	public String token;
+	public String endPoint;
 
-	public MobileDriverEngine(Channel channel, ActionStatus status, String app, DesktopDriver desktopDriver, ApplicationProperties props) {
+	public MobileDriverEngine(Channel channel, ActionStatus status, String app, DesktopDriver desktopDriver, ApplicationProperties props, String token) {
 
 		super(channel, desktopDriver, props, 0, 60);
 
@@ -125,6 +126,8 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 		if(appData.length > 1) {
 
 			final String endPoint = appData[0];
+			this.endPoint = endPoint;
+
 			final String application = appData[1];
 
 			this.applicationPath = "http://" + endPoint;
@@ -133,6 +136,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			this.client = new Builder().cache(null).connectTimeout(30, TimeUnit.SECONDS).writeTimeout(30, TimeUnit.SECONDS).readTimeout(40, TimeUnit.SECONDS).build();
 
 			this.userAgent = "AtsMobileDriver/" + ATS.VERSION + " (" + System.getProperty("user.name") + ")";
+            this.token = token;
 
 			JsonObject response = executeRequest(DRIVER, START);
 			if (response == null) {
@@ -146,7 +150,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 				return;
 			}
 
-			// this.token = response.get("token").getAsString();
+			this.token = response.get("token").getAsString();
 			final String systemName = response.get("systemName").getAsString();
 			final String os = response.get("os").getAsString();
 
@@ -232,8 +236,8 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void close(boolean keepRunning) {
-		tearDown();
-		// executeRequest(APP, STOP, channel.getApplication());
+		executeRequest(APP, STOP, channel.getApplication());
+		this.channel = null;
 	}
 
 	public void tearDown() {
