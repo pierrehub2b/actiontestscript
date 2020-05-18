@@ -68,9 +68,10 @@ public class DriverManager {
 	public static final String HTTPS = "https";
 
 	private ArrayList<DriverProcess> driversProcess = new ArrayList<DriverProcess>();
+	private ArrayList<MobileDriverEngine> mobileDrivers = new ArrayList<MobileDriverEngine>();
 
 	private DriverProcess desktopDriver;
-	private MobileDriverEngine mobileDriverEngine;
+	// private MobileDriverEngine mobileDriverEngine;
 
 	//--------------------------------------------------------------------------------------------------------------
 
@@ -226,16 +227,39 @@ public class DriverManager {
 				return null;
 			}
 
-		}else if(props.isMobile() || application.startsWith(MOBILE + "://")){
-			mobileDriverEngine = new MobileDriverEngine(channel, status, application, desktopDriver, props);
+		} else if (props.isMobile() || application.startsWith(MOBILE + "://")) {
+			String token = getChannelToken(application);
+			MobileDriverEngine mobileDriverEngine = new MobileDriverEngine(channel, status, application, desktopDriver, props, token);
+			mobileDrivers.add(mobileDriverEngine);
 			return mobileDriverEngine;			
-		}else if(props.isApi() || application.startsWith(HTTP + "://") || application.startsWith(HTTPS + "://")) {	
+		} else if (props.isApi() || application.startsWith(HTTP + "://") || application.startsWith(HTTPS + "://")) {
 			return new ApiDriverEngine(channel, status, application, desktopDriver, props);
-		}else if(DESKTOP_EXPLORER.equals(appName)) {
+		} else if (DESKTOP_EXPLORER.equals(appName)) {
 			return new ExplorerDriverEngine(channel, status, desktopDriver, props);
 		}
 
 		return new DesktopDriverEngine(channel, status, application, desktopDriver, props);
+	}
+
+	private String getChannelToken(String applicationPath) {
+		final int start = applicationPath.indexOf("://");
+		if(start > -1) {
+			applicationPath = applicationPath.substring(start + 3);
+		}
+
+		final String[] appData = applicationPath.split("/");
+		final String endPoint = appData[0];
+
+		for (MobileDriverEngine engine: mobileDrivers)
+		{
+			if (engine.endPoint.equals(endPoint)) {
+				String token = engine.token;
+				mobileDrivers.remove(engine);
+				return token;
+			}
+		}
+
+		return null;
 	}
 
 	private String getDriverName(String driverName, String defaultName) {
@@ -275,9 +299,15 @@ public class DriverManager {
 			desktopDriver = null;
 		}
 
-		if(mobileDriverEngine != null){
+		for (MobileDriverEngine engine: mobileDrivers)
+		{
+			engine.tearDown();
+			mobileDrivers.remove(engine);
+		}
+
+		/* if(mobileDriverEngine != null){
 			mobileDriverEngine.tearDown();
 			mobileDriverEngine = null;
-		}
+		} */
 	}
 }

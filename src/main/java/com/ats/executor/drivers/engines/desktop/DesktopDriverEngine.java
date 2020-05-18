@@ -28,13 +28,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
+import org.mariuszgromada.math.mxparser.mathcollection.BooleanAlgebra;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
-
 import com.ats.driver.ApplicationProperties;
 import com.ats.element.AtsBaseElement;
 import com.ats.element.DesktopRootElement;
@@ -140,15 +142,34 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 				Runtime rt = Runtime.getRuntime();
 				
 				try{
+					String line;
+					boolean alreadyStarted = false; 
+					String programExe = exeFile.getAbsolutePath().substring(exeFile.getAbsolutePath().lastIndexOf("\\")+1);
+					Process p = Runtime.getRuntime().exec
+						    (System.getenv("windir") +"\\system32\\"+"tasklist.exe");
+					BufferedReader input =
+				            new BufferedReader(new InputStreamReader(p.getInputStream()));
+				    while ((line = input.readLine()) != null) {
+				    	if(line.startsWith(programExe)) {
+				    		alreadyStarted = true;
+				    		String[] splitted = line.split("\\s+");
+				    		processId = Long.parseLong(splitted[1]);
+				    		break;
+				    	}
+				    }
+				    input.close();
+					
+				    if(!alreadyStarted) {
+				    	final Process proc = rt.exec(args.toArray(new String[args.size()]), null, exeFile.getParentFile());
+				    	final StreamGobbler errorGobbler = new StreamGobbler(proc.getErrorStream(), "ERROR");            
+						final StreamGobbler outputGobbler = new StreamGobbler(proc.getInputStream(), "OUTPUT");
+						
+						errorGobbler.start();
+						outputGobbler.start();
+						
+				    	processId = proc.pid();
+				    }
 
-					final Process proc = rt.exec(args.toArray(new String[args.size()]), null, exeFile.getParentFile());
-					final StreamGobbler errorGobbler = new StreamGobbler(proc.getErrorStream(), "ERROR");            
-					final StreamGobbler outputGobbler = new StreamGobbler(proc.getInputStream(), "OUTPUT");
-
-					errorGobbler.start();
-					outputGobbler.start();
-
-					processId = proc.pid();
 					status.setNoError();
 
 				} catch (Exception e) {

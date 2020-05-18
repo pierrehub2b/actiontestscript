@@ -155,6 +155,7 @@ public class ChannelManager {
 
 	public void channelClosed(ActionStatus status, Channel channel){
 		status.startDuration();
+
 		if(channelsList.remove(channel)) {
 			if(channelsList.size() > 0){
 				if(channel.isCurrent()) {
