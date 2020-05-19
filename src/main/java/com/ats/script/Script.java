@@ -45,6 +45,7 @@ import com.ats.generator.variables.transform.DateTransformer;
 import com.ats.generator.variables.transform.TimeTransformer;
 import com.ats.generator.variables.transform.Transformer;
 import com.ats.script.actions.Action;
+import com.ats.tools.encrypt.Passwords;
 import com.ats.tools.logger.ExecutionLogger;
 import com.ats.tools.logger.levels.AtsLogger;
 
@@ -66,14 +67,13 @@ public class Script {
 	private ParameterList parameterList;
 	private List<Variable> variables = new ArrayList<Variable>();
 	private ArrayList<CalculatedValue> returns;
+	
+	private Passwords passwords;
 
 	protected File csvFile;
 	protected int iteration = 0;
 
 	private Map<String, String> testExecutionVariables;
-
-	private File projectAtsFolder;
-
 	private ExecutionLogger logger = new ExecutionLogger();
 
 	public Script() {}
@@ -82,14 +82,6 @@ public class Script {
 		if(logger != null) {
 			setLogger(logger);
 		}
-	}
-
-	public File getProjectAtsFolder() {
-		return projectAtsFolder;
-	}
-
-	protected void setAtsFolder(File projectAtsFolder) {
-		this.projectAtsFolder = projectAtsFolder;
 	}
 
 	//-------------------------------------------------------------------------------------
@@ -390,9 +382,16 @@ public class Script {
 
 	public String getAssetsUrl(String relativePath) {
 		final URL url = getClass().getClassLoader().getResource(relativePath);
-		if(url == null) {
-			return "";
+		if(url != null) {
+			return "file://" + url.getPath();
 		}
-		return "file://" + url.getPath();
+		return "";
+	}
+	
+	public String getPassword(String name) {
+		if(passwords == null) {
+			passwords = new Passwords(getAssetsFile(""));
+		}
+		return passwords.getPassword(name);
 	}
 }

@@ -87,11 +87,11 @@ public class ActionTestScript extends Script implements ITest{
 	protected ActionTestScript topScript;
 	private ChannelManager channelManager;
 
-	private ProjectData projectData;
-
 	private String[] returnValues;
 
 	private String testName;
+	private ProjectData projectData;
+	
 	protected ScriptHeader getHeader() {return new ScriptHeader();}
 
 	private ScriptStatus status = new ScriptStatus();
@@ -447,6 +447,14 @@ public class ActionTestScript extends Script implements ITest{
 	public static final String JAVA_UUID_FUNCTION_NAME = "uid";
 	public String uid() {
 		return getUuidValue();
+	}
+	
+	//---------------------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_PASSWORD_FUNCTION_NAME = "pass";
+	public String pass(String name) {
+		return getPassword(name);
 	}
 
 	//---------------------------------------------------------------------------------------------

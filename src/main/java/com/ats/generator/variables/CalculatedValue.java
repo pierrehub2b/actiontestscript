@@ -47,6 +47,8 @@ public class CalculatedValue{
 		
 	public static final Pattern ASSET_PATTERN = Pattern.compile("\\$asset\\s*?\\(([^\\)]*)\\)", Pattern.CASE_INSENSITIVE);
 	public static final Pattern IMAGE_PATTERN = Pattern.compile("\\$image\\s*?\\(([^\\)]*)\\)", Pattern.CASE_INSENSITIVE);
+	
+	private static final Pattern PASSWORD_DATA = Pattern.compile("\\$pass\\s*?\\(([^\\)]*)\\)", Pattern.CASE_INSENSITIVE);
 
 	//-----------------------------------------------------------------------------------------------------
 	// variable and parameter management
@@ -66,6 +68,8 @@ public class CalculatedValue{
 
 	private String rawJavaCode = "";
 	private Object[] dataList;
+	
+	private boolean crypted = false;
 
 	public CalculatedValue() {}
 
@@ -92,13 +96,15 @@ public class CalculatedValue{
 		
 	private String initCalculated(String dataValue) {
 				
+		crypted = false;
 		rawJavaCode = StringEscapeUtils.escapeJava(dataValue);
 
 		Matcher mv = Variable.SCRIPT_PATTERN.matcher(dataValue);
 		while (mv.find()) {
+			final String replace = mv.group(0);
 			final String variableName = mv.group(1);
-			dataValue = dataValue.replace(mv.group(0), script.getVariableValue(variableName));
-			rawJavaCode = rawJavaCode.replace(mv.group(0), "\", " + variableName + ", \"");
+			dataValue = dataValue.replace(replace, script.getVariableValue(variableName));
+			rawJavaCode = rawJavaCode.replace(replace, "\", " + variableName + ", \"");
 		}
 
 		mv = ParameterValue.PARAMETER_PATTERN.matcher(dataValue);
@@ -163,7 +169,22 @@ public class CalculatedValue{
 			rawJavaCode = rawJavaCode.replace(mv.group(0), ProjectData.getAssetsJavaCode(mv.group(1)));
 		}
 		
+		mv = PASSWORD_DATA.matcher(dataValue);
+		while (mv.find()) {
+			crypted = true;
+			
+			final String replace = mv.group(0);
+			final String passwordName = mv.group(1);
+			
+			dataValue = dataValue.replace(replace, script.getPassword(passwordName));
+			rawJavaCode = rawJavaCode.replace(replace, "\", " + ActionTestScript.JAVA_PASSWORD_FUNCTION_NAME + "(\"" + passwordName + "\"), \"");
+		}
+		
 		return dataValue;
+	}
+	
+	public boolean isCrypted() {
+		return crypted;
 	}
 
 	public void dispose() {
@@ -214,6 +235,7 @@ public class CalculatedValue{
 			
 			addTextChain(chainKeys, calculated);
 			
+			
 		}else {	
 			String strValue = "";
 			if(dataList != null) {
@@ -221,7 +243,7 @@ public class CalculatedValue{
 
 					byte[] b = obj.toString().getBytes();
 					Boolean isKey = false;
-					if(b[0] < 65) {
+					if(b.length > 0 && b[0] < 65) {
 						isKey = true;
 					}
 					

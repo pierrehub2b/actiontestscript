@@ -51,6 +51,8 @@ import org.bouncycastle.crypto.params.KeyParameter;
 public class Passwords implements Serializable {
 
 	private static final long serialVersionUID = -2364261599407176796L;
+	
+	private static final String FILE_NAME = "passwords.crypto";
 
 	private transient static BufferedBlockCipher cipher = new PaddedBufferedBlockCipher(new CBCBlockCipher(new AESEngine()));
 	
@@ -59,15 +61,24 @@ public class Passwords implements Serializable {
 	private int keyLen = 16;
 	private byte[] masterKey;
 	private HashMap<String, byte[]> data = new HashMap<String, byte[]>();
+	
+	public Passwords(Path assetsPath) {
 
-	public Passwords(Path path) {
-
-		this.file = path.resolve("passwords.crypto").toFile();
+		file = assetsPath.resolve("secret").resolve(FILE_NAME).toFile();
 		
-		if(this.file.exists()) {
+		if(file.exists()) {
 			load();
 		}else {
 			save();
+		}
+	}
+	
+	public Passwords(File assetsFolder) {
+		file = assetsFolder.toPath().resolve("secret").resolve(FILE_NAME).toFile();
+		if(file.exists()) {
+			load();
+		}else {
+			file = null;
 		}
 	}
 
@@ -78,7 +89,7 @@ public class Passwords implements Serializable {
 	}
 
 	public String getPassword(String key) {
-		if(data.containsKey(key)) {
+		if(file != null && data.containsKey(key)) {
 			return new String(data.get(key)).replaceAll("\0", "");
 		}
 		return null;

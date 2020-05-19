@@ -362,8 +362,6 @@ public class TestElement{
 	public String enterText(ActionStatus status, CalculatedValue text, IVisualRecorder recorder) {
 
 		final MouseDirection md = new MouseDirection();
-		
-		String enteredText = "";
 
 		over(status, md, false, 0, 0);
 		if(status.isPassed()) {
@@ -372,20 +370,19 @@ public class TestElement{
 
 				recorder.updateScreen(false);
 
-				if(isPassword()) {
-					enteredText = "xxxxxxxxxx";
-				}else {
-					enteredText = text.getCalculated();
-				}
-
-				
 				if(!text.getCalculated().startsWith("$key")) {
 					clearText(status, md);
 				}
-				sendText(status, text);
+				
+				final String enteredText = sendText(status, text);
+				if(isPassword() || text.isCrypted()) {
+					return "######";
+				}else {
+					return enteredText;
+				}
 			}
 		}
-		return enteredText;
+		return "";
 	}
 
 	public String sendText(ActionStatus status, CalculatedValue text) {

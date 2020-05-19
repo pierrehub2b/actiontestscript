@@ -117,11 +117,11 @@ public class ProjectData {
 	public ProjectData(File f) {
 		if(f.exists()) {
 			if(f.isDirectory()) {
-				this.folder = f;
+				folder = f;
 			}else if(f.isFile()) {
-				this.folder = f.getParentFile();
+				folder = f.getParentFile();
 			}
-			this.folderPath = folder.getPath();
+			folderPath = folder.getPath();
 
 			setJavaDestinationFolderPath(getTargetFolderPath().resolve(TARGET_FOLDER_GENERATED));
 			setReportDestinationFolderPath(getTargetFolderPath().resolve(TARGET_FOLDER_REPORT));
@@ -130,8 +130,8 @@ public class ProjectData {
 
 	public ProjectData(File xmlPropertiesFile, File generatedJavaFolder, File reportFolder) {
 
-		this.folder = xmlPropertiesFile.getParentFile();
-		this.folderPath = xmlPropertiesFile.getParent();
+		folder = xmlPropertiesFile.getParentFile();
+		folderPath = xmlPropertiesFile.getParent();
 
 		parseXmlFile(xmlPropertiesFile);
 

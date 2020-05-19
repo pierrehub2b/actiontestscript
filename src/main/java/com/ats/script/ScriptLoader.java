@@ -65,9 +65,7 @@ public class ScriptLoader extends Script {
 		final ScriptHeader header = new ScriptHeader(projectData, file);
 		
 		this.setHeader(header);
-		this.setAtsFolder(projectData.getAtsSourceFolder().toFile());
 		this.setCharset(charset);
-		
 		this.projectGav = projectData.getGav();
 
 		if(ATS_EXTENSION.equals(type)){
