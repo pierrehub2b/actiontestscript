@@ -21,22 +21,22 @@ package com.ats.executor.drivers.engines.desktop;
 
 import java.awt.MouseInfo;
 import java.awt.Rectangle;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 
-import org.mariuszgromada.math.mxparser.mathcollection.BooleanAlgebra;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
+
 import com.ats.driver.ApplicationProperties;
 import com.ats.element.AtsBaseElement;
 import com.ats.element.DesktopRootElement;
