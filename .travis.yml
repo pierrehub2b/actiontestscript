@@ -9,7 +9,10 @@ cache:
   - $HOME/.m2
   
 notifications:
-  email:
+  email:  
+    recipients:
     - pierre.huber@agilitest.com
     - gabriel.gil@agilitest.com
     - anthony.dhierre@agilitest.com
+    on_success: always  
+    on_failure: always
