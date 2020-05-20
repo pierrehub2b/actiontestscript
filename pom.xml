@@ -45,6 +45,17 @@
 			</roles>
 			<timezone>Europe/Paris</timezone>
 		</developer>
+		<developer>
+			<id>antho</id>
+			<name>Anthony D'Hierre</name>
+			<email>anthony.dhierre@agilitest.com</email>
+			<organization>ActionTestScript</organization>
+			<organizationUrl>http://www.actiontestscript.com</organizationUrl>
+			<roles>
+				<role>developer</role>
+			</roles>
+			<timezone>Europe/Paris</timezone>
+		</developer>
 	</developers>
 
 	<scm>

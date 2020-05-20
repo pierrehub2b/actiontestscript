@@ -11,8 +11,8 @@ cache:
 notifications:
   email:  
     recipients:
-    - pierre.huber@agilitest.com
-    - gabriel.gil@agilitest.com
+    - pierrehuber@yahoo.com
+    - gabriel.gil@outlook.fr
     - anthony.dhierre@agilitest.com
     on_success: always  
     on_failure: always
