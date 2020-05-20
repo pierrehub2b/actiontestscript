@@ -41,7 +41,7 @@ public class PasswordsTest {
 				
 		final Passwords readPasswords = new Passwords(folder);
 		for(int i = 0; i< names.length; i++) {
-			assertEquals(readPasswords.getPassword(names[i]), values[i]+"t");
+			assertEquals(readPasswords.getPassword(names[i]), values[i]);
 		}
 		
 		folder.deleteOnExit();
