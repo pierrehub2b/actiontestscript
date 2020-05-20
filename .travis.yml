@@ -16,3 +16,13 @@ notifications:
     -  anthony.dhierre@agilitest.com
     on_success: always  
     on_failure: always
+    
+ notifications:
+  slack: agilitest:85oNsb19dYUjvX76NZxqoJz0
+  email:
+    recipients:
+      - pierrehuber@yahoo.com
+      - gabriel.gil@outlook.fr
+      - anthony.dhierre@agilitest.com
+    on_success: always
+    on_failure: always
