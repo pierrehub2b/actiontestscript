@@ -7,15 +7,6 @@ install:
 cache:
   directories:
   - $HOME/.m2
-  
-notifications:
-  email:  
-    recipients:
-    -  pierrehuber@yahoo.com
-    -  gabriel.gil@outlook.fr
-    -  anthony.dhierre@agilitest.com
-    on_success: always  
-    on_failure: always
     
  notifications:
   slack: agilitest:85oNsb19dYUjvX76NZxqoJz0
