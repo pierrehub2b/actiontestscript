@@ -65,7 +65,6 @@ public class Passwords implements Serializable {
 	public Passwords(Path assetsPath) {
 
 		file = assetsPath.resolve("secret").resolve(FILE_NAME).toFile();
-		
 		if(file.exists()) {
 			load();
 		}else {
@@ -143,6 +142,9 @@ public class Passwords implements Serializable {
 	
 	private void save() {
 		try {
+			
+			file.getParentFile().mkdirs();			
+			
 			final byte[] randomKey = new byte[keyLen];
 			masterKey = new byte[keyLen];
 
@@ -168,7 +170,10 @@ public class Passwords implements Serializable {
 			outfile.write(Base64.getEncoder().encode(bos.toByteArray()));
 			outfile.close();
 
-		} catch (NoSuchAlgorithmException | IOException e) {} 
+		} catch (NoSuchAlgorithmException | IOException e) {
+			
+			System.out.println(e.getMessage());
+		} 
 	}
 
 	private static byte[] encrypt(byte[] key, byte[] data) {
