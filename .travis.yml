@@ -14,5 +14,5 @@ notifications:
     - pierrehuber@yahoo.com
     - gabriel.gil@outlook.fr
     - anthony.dhierre@agilitest.com
-    on_success: always  
+    on_success: change  
     on_failure: always
