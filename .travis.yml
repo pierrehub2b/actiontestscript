@@ -8,5 +8,12 @@ cache:
   directories:
   - $HOME/.m2
     
+deploy:
+  provider: releases
+  api_key: "b763e2c61af285d06bd997209a117a00175ca57d"
+  file: "ats-automated-testing-1.7.0.jar"
+  skip_cleanup: true
+  draft: true
+  
 notifications:
   slack: agilitest:89arTDhysVkKJ7TGJ2qw6Xwv
