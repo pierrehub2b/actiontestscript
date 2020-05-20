@@ -10,5 +10,3 @@ cache:
     
  notifications:
   slack: agilitest:85oNsb19dYUjvX76NZxqoJz0
-  on_success: always
-  on_failure: always
