@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.text.StringEscapeUtils;
 import org.openqa.selenium.Keys;
 
+import com.ats.crypto.Password;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.SendKeyData;
 import com.ats.generator.variables.transform.DateTransformer;
@@ -96,7 +97,6 @@ public class CalculatedValue{
 		
 	private String initCalculated(String dataValue) {
 				
-		crypted = false;
 		rawJavaCode = StringEscapeUtils.escapeJava(dataValue);
 
 		Matcher mv = Variable.SCRIPT_PATTERN.matcher(dataValue);
@@ -172,12 +172,7 @@ public class CalculatedValue{
 		mv = PASSWORD_DATA.matcher(dataValue);
 		while (mv.find()) {
 			crypted = true;
-			
-			final String replace = mv.group(0);
-			final String passwordName = mv.group(1);
-			
-			dataValue = dataValue.replace(replace, script.getPassword(passwordName));
-			rawJavaCode = rawJavaCode.replace(replace, "\", " + ActionTestScript.JAVA_PASSWORD_FUNCTION_NAME + "(\"" + passwordName + "\"), \"");
+			rawJavaCode = rawJavaCode.replace(mv.group(0), "\", new " + Password.class.getCanonicalName() + "(this, \"" + mv.group(1) + "\"), \"");
 		}
 		
 		return dataValue;
@@ -227,38 +222,49 @@ public class CalculatedValue{
 	//-----------------------------------------------------------------------------------------------------
 	//-----------------------------------------------------------------------------------------------------
 	
+	public void refresh(ActionTestScript script) {
+		if(calculated != null){
+			final Matcher mv = PASSWORD_DATA.matcher(calculated);
+			while (mv.find()) {
+				crypted = true;
+				calculated = calculated.replace(mv.group(0), script.getPassword(mv.group(1)));
+			}
+		}
+	}
+	
 	public ArrayList<SendKeyData> getCalculatedText(){
 
 		final ArrayList<SendKeyData> chainKeys = new ArrayList<SendKeyData>();
 		
 		if(calculated != null){
-			
 			addTextChain(chainKeys, calculated);
-			
-			
 		}else {	
 			String strValue = "";
 			if(dataList != null) {
 				for(Object obj : dataList) {
 
-					byte[] b = obj.toString().getBytes();
-					Boolean isKey = false;
-					if(b.length > 0 && b[0] < 65) {
-						isKey = true;
-					}
-					
 					if (obj instanceof Variable) {
 						strValue += ((Variable)obj).getCalculatedValue();
-					} else if(obj instanceof Keys || isKey) {
-						if(strValue != "") {
-							chainKeys.add(new SendKeyData(strValue));
-							strValue = "";
+					}else if(obj instanceof Password) {
+						crypted = true;
+						strValue += ((Password)obj).getValue();
+					}else {
+						
+						final byte[] b = obj.toString().getBytes();
+						final boolean isKey = b.length > 0 && b[0] < 65;
+						
+						if(obj instanceof Keys || isKey) {
+							if(strValue != "") {
+								chainKeys.add(new SendKeyData(strValue));
+								strValue = "";
+							}
+							chainKeys.add(new SendKeyData(obj.toString()));
+						} else {
+							strValue += obj.toString();
 						}
-						chainKeys.add(new SendKeyData(obj.toString()));
-					} else {
-						strValue += obj.toString();
 					}
 				}
+				
 				if(strValue != "") {
 					chainKeys.add(new SendKeyData(strValue));
 					strValue = "";

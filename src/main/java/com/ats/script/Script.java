@@ -45,7 +45,6 @@ import com.ats.generator.variables.transform.DateTransformer;
 import com.ats.generator.variables.transform.TimeTransformer;
 import com.ats.generator.variables.transform.Transformer;
 import com.ats.script.actions.Action;
-import com.ats.tools.encrypt.Passwords;
 import com.ats.tools.logger.ExecutionLogger;
 import com.ats.tools.logger.levels.AtsLogger;
 
@@ -67,12 +66,10 @@ public class Script {
 	private ParameterList parameterList;
 	private List<Variable> variables = new ArrayList<Variable>();
 	private ArrayList<CalculatedValue> returns;
-	
-	private Passwords passwords;
 
 	protected File csvFile;
 	protected int iteration = 0;
-
+	
 	private Map<String, String> testExecutionVariables;
 	private ExecutionLogger logger = new ExecutionLogger();
 
@@ -386,12 +383,5 @@ public class Script {
 			return "file://" + url.getPath();
 		}
 		return "";
-	}
-	
-	public String getPassword(String name) {
-		if(passwords == null) {
-			passwords = new Passwords(getAssetsFile(""));
-		}
-		return passwords.getPassword(name);
 	}
 }

@@ -250,9 +250,8 @@ public class ActionCallscript extends Action {
 
 			try {
 
-				final ActionTestScript ats = clazz.getDeclaredConstructor().newInstance();
-				final ActionTestScript topScript = ts.getTopScript();
-
+				final ActionTestScript ats = clazz.getDeclaredConstructor(ActionTestScript.class).newInstance(ts.getTopScript());
+				
 				if(parameterFilePath != null) {
 
 					final String csvPath = parameterFilePath.getCalculated();
@@ -293,7 +292,7 @@ public class ActionCallscript extends Action {
 						for (ParameterList row : data.getData()) {
 							
 							row.updateCalculated(ts);
-							ats.initCalledScript(ts, testName, line, topScript, row, null, iteration, iterationMax, scriptName, "dataFile", csvFile);
+							ats.initCalledScript(ts, testName, line, row, null, iteration, iterationMax, scriptName, "dataFile", csvFile);
 							
 							testMain.invoke(ats);
 							iteration++;
@@ -308,7 +307,7 @@ public class ActionCallscript extends Action {
 					final Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
 
 					for (int iteration=0; iteration<loop; iteration++) {
-						ats.initCalledScript(ts, testName, line, topScript, parameters, variables, iteration, loop, scriptName, "loop", null);
+						ats.initCalledScript(ts, testName, line, parameters, variables, iteration, loop, scriptName, "loop", null);
 						testMain.invoke(ats);
 					}
 
@@ -316,6 +315,7 @@ public class ActionCallscript extends Action {
 				}
 
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | NoSuchMethodException | SecurityException e) {
+				fail(e.getMessage());
 			} catch (InvocationTargetException e) {
 				if(e.getTargetException() instanceof AtsFailError) {
 					final AtsFailError target = (AtsFailError) e.getTargetException();

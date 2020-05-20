@@ -17,7 +17,7 @@ specific language governing permissions and limitations
 under the License.
  */
 
-package com.ats.tools.encrypt;
+package com.ats.crypto;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -92,7 +92,7 @@ public class Passwords implements Serializable {
 		if(file != null && data.containsKey(key)) {
 			return new String(data.get(key)).replaceAll("\0", "");
 		}
-		return null;
+		return "";
 	}
 	
 	public PasswordData[] getDataList() {

@@ -376,7 +376,7 @@ public class TestElement{
 				
 				final String enteredText = sendText(status, text);
 				if(isPassword() || text.isCrypted()) {
-					return "######";
+					return "########";
 				}else {
 					return enteredText;
 				}

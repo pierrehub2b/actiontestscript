@@ -41,6 +41,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Listeners;
 
+import com.ats.crypto.Passwords;
 import com.ats.element.SearchedElement;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.channels.ChannelManager;
@@ -86,6 +87,7 @@ public class ActionTestScript extends Script implements ITest{
 
 	protected ActionTestScript topScript;
 	private ChannelManager channelManager;
+	private Passwords passwords;
 
 	private String[] returnValues;
 
@@ -97,17 +99,39 @@ public class ActionTestScript extends Script implements ITest{
 	private ScriptStatus status = new ScriptStatus();
 
 	public ActionTestScript() {
-		this(null);
+		super(null);
+		init(new Passwords(getAssetsFile("")));
 	}
 	
 	public ActionTestScript(ExecutionLogger logger) {
 		super(logger);
-		topScript = this;
-		channelManager = new ChannelManager(this);
+		init(null);
+	}
+	
+	public ActionTestScript(ActionTestScript topScript) {
+		init(topScript, topScript.getChannelManager(), topScript.getPasswords());
+	}
+	
+	private void init(Passwords passwords) {
+		init(this, new ChannelManager(this), passwords);
+	}
+	
+	private void init(ActionTestScript topScript, ChannelManager channelManager, Passwords passwords) {
+		this.topScript = topScript;
+		this.channelManager = channelManager;
+		this.passwords = passwords;
 	}
 
 	public String[] getReturnValues() {
 		return returnValues;
+	}
+		
+	public Passwords getPasswords() {
+		return passwords;
+	}
+	
+	public String getPassword(String name) {
+		return passwords.getPassword(name);
 	}
 
 	public void updateTestName(String name) {
@@ -248,10 +272,8 @@ public class ActionTestScript extends Script implements ITest{
 		return topScript;
 	}
 
-	public void initCalledScript(ActionTestScript testScript, String testName, int line, ActionTestScript script, ParameterList parameters, List<Variable> variables, int iteration, int iterationMax, String scriptName, String type, File csvFile) {
+	public void initCalledScript(ActionTestScript testScript, String testName, int line, ParameterList parameters, List<Variable> variables, int iteration, int iterationMax, String scriptName, String type, File csvFile) {
 
-		this.topScript = script;
-		this.channelManager = script.getChannelManager();
 		this.iteration = iteration;
 		this.csvFile = csvFile;
 		this.testName = getClass().getName();
@@ -282,9 +304,9 @@ public class ActionTestScript extends Script implements ITest{
 		if(variables != null) {
 			setVariables(variables);
 		}
-		setTestExecutionVariables(script.getTestExecutionVariables());
+		setTestExecutionVariables(topScript.getTestExecutionVariables());
 
-		script.sendScriptInfo(ActionCallscript.getScriptLog(testName, line, log));
+		topScript.sendScriptInfo(ActionCallscript.getScriptLog(testName, line, log));
 	}
 
 	public ChannelManager getChannelManager() {
@@ -297,6 +319,7 @@ public class ActionTestScript extends Script implements ITest{
 	public void setProjectData(ProjectData value) {
 		projectData = value;
 		projectData.synchronize();
+		passwords = new Passwords(projectData.getAssetsFolderPath().toFile());
 	}
 
 	public void tearDown(){
@@ -449,14 +472,6 @@ public class ActionTestScript extends Script implements ITest{
 		return getUuidValue();
 	}
 	
-	//---------------------------------------------------------------------------------------------
-	//---------------------------------------------------------------------------------------------
-
-	public static final String JAVA_PASSWORD_FUNCTION_NAME = "pass";
-	public String pass(String name) {
-		return getPassword(name);
-	}
-
 	//---------------------------------------------------------------------------------------------
 
 	public static final String JAVA_TODAY_FUNCTION_NAME = "td";

@@ -1,4 +1,4 @@
-package com.ats.tools.encrypt;
+package com.ats.crypto;
 
 public class PasswordData {
 
