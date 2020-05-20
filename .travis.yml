@@ -7,13 +7,6 @@ install:
 cache:
   directories:
   - $HOME/.m2
-    
-deploy:
-  provider: releases
-  api_key: 23ecab9148be96c654442249232cec07d83eb1a2
-  file: ats-automated-testing-1.7.1.jar
-  skip_cleanup: true
-  draft: true
   
 notifications:
   slack: agilitest:89arTDhysVkKJ7TGJ2qw6Xwv
