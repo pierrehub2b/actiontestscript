@@ -10,7 +10,7 @@ cache:
     
 deploy:
   provider: releases
-  api_key: bc37af8921f6a21e00a88056e81b963c68f65aaf
+  api_key: 23ecab9148be96c654442249232cec07d83eb1a2
   file: ats-automated-testing-1.7.1.jar
   skip_cleanup: true
   draft: true
