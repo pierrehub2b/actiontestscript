@@ -7,11 +7,6 @@ install:
 cache:
   directories:
   - $HOME/.m2
-    
-deploy:
-  provider: rubygems
-  api_key: "56b18993970d27a09baf43735e5ed882"
-  gem: actiontestscript
   
 notifications:
   slack: agilitest:89arTDhysVkKJ7TGJ2qw6Xwv
