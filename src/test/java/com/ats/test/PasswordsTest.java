@@ -16,8 +16,8 @@ import com.ats.crypto.Passwords;
 
 public class PasswordsTest {
 	
-	private final static String[] names = new String[] {"passw1", "passw2", "specials", "name1"};
-	private final static String[] values = new String[] {"cryptedValue", "", "é&#')@à'", "very_long_password_value_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"};
+	private final static String[] names = new String[] {"passw1", "passw2", "specials", "numbers", "name1"};
+	private final static String[] values = new String[] {"cryptedValue", "", "é&#')@à'", "1235456789", "very_long_password_value_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"};
 
 	@Rule
 	public TemporaryFolder tempFolder = new TemporaryFolder();
