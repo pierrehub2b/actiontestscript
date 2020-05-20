@@ -8,5 +8,5 @@ cache:
   directories:
   - $HOME/.m2
     
- notifications:
-  slack: agilitest:85oNsb19dYUjvX76NZxqoJz0
+notifications:
+  slack: agilitest:89arTDhysVkKJ7TGJ2qw6Xwv
