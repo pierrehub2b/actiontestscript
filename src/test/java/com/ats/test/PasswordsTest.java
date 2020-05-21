@@ -1,13 +1,11 @@
 package com.ats.test;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -24,13 +22,11 @@ public class PasswordsTest {
 	@Rule
 	public TemporaryFolder tempFolder = new TemporaryFolder();
 	
-	@Before
-	public void setUp() {
-	}
-
-	@After
-	public void tearDown() {
-	}
+	/*
+	 * @Before public void setUp() { }
+	 * 
+	 * @After public void tearDown() { }
+	 */
 
 	@Test
 	public void createPasswordsFile() throws IOException {
