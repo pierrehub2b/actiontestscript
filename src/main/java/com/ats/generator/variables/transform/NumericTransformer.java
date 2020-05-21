@@ -64,6 +64,9 @@ public class NumericTransformer extends Transformer {
 
 		formatter.setGroupingSize(0);
 		data = StringUtils.replace(data, " ", "");
+		if(data.length() == 0) {
+			return "0";
+		}
 	
 		if(decimal > -1) {
 			data = "round(" + data + "," + decimal + ")";

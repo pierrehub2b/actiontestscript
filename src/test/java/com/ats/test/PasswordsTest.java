@@ -16,8 +16,6 @@ import com.ats.executor.ActionTestScript;
 
 public class PasswordsTest {
 	
-	private final static String[] names = new String[] {"passw1", "passw2", "specials", "numbers", "name1"};
-	private final static String[] values = new String[] {"cryptedValue", "", "é&#')@à'", "1235456789", "very_long_password_value_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"};
 
 	@Rule
 	public TemporaryFolder tempFolder = new TemporaryFolder();
@@ -30,6 +28,9 @@ public class PasswordsTest {
 
 	@Test
 	public void createPasswordsFile() throws IOException {
+
+		final String[] names = new String[] {"passw1", "passw2", "specials", "numbers", "name1"};
+		final String[] values = new String[] {"cryptedValue", "", "é&#')@à'", "1235456789", "very_long_password_value_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"};
 
 		final File folder = tempFolder.newFolder();
 		final Passwords setPasswords = new Passwords(folder.toPath());

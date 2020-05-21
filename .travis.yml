@@ -1,7 +1,11 @@
 language: java
 jdk: openjdk12
+branches:
+  only:
+    - master
+before_install: mvn clean package
 install:
-- mvn clean install -Dgpg.skip=true
+- mvn install -Dgpg.skip=true
 cache:
   directories:
   - "$HOME/.m2"
@@ -15,4 +19,5 @@ deploy:
   file: /home/travis/build/pierrehub2b/actiontestscript/target/*.jar
   on:
     repo: pierrehub2b/actiontestscript
+    branch: master
   skip_cleanup: 'true'

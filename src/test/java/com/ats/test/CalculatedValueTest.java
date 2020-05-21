@@ -11,9 +11,11 @@ import org.junit.rules.TemporaryFolder;
 
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.CalculatedValue;
+import com.ats.generator.variables.Variable;
+import com.ats.generator.variables.transform.NumericTransformer;
 
 public class CalculatedValueTest {
-
+	
 	@Rule
 	public TemporaryFolder tempFolder = new TemporaryFolder();
 	
@@ -31,6 +33,23 @@ public class CalculatedValueTest {
 		
 		assertTrue(calc.getCalculated().matches("\\d\\d\\d\\d-\\d\\d-\\d\\d xx \\d\\d:\\d\\d:\\d\\d"));
 		assertTrue(calc.getCalculated().matches("\\d\\d\\d\\d-\\d\\d-\\d\\d xxx \\d\\d:\\d\\d:\\d\\d")==false);
+	}
+	
+	@Test
+	public void transformValues() throws IOException {
+		
+		final String[] values = new String[] {"0.000001", "9.99999", "9.000001", "-99999.99999", "99", "0", "", "x", "999999999999999"};
+		final String[] rounded = new String[] {"0.000", "10.000", "9.000", "-100000.000", "99.000", "0.000", "0", "NaN", "999999999999999.000"};
+
+		final ActionTestScript script = new ActionTestScript(tempFolder.newFolder());
+		
+		for(int i = 0; i< values.length; i++) {
+			Variable v = script.createVariable("transformedVariable" + i, new CalculatedValue(script, values[i]), new NumericTransformer(3));
+			assertEquals(v.getCalculatedValue(), rounded[i]);
+		}
+
+
+
 	}
 	
 	@Test
