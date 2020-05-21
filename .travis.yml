@@ -1,12 +1,17 @@
 language: java
 jdk: openjdk12
-
 install:
- - mvn clean install -Dgpg.skip=true
- 
+- mvn clean install -Dgpg.skip=true
 cache:
   directories:
-  - $HOME/.m2
-  
+  - "$HOME/.m2"
 notifications:
   slack: agilitest:89arTDhysVkKJ7TGJ2qw6Xwv
+deploy:
+  provider: releases
+  api_key:
+    secure: ZN3veFTvprsC+G5YPblMc/w6yZuLWYBGfyaISPZV7eyuwBNdhgEnIMEiprq0uojSO/bQoNpnt/DS0z+yge74aF3aEv5sk/Sz+d7McgWsgBG3w2Kx+FDZzVtFw6i1AjgJlwai0wzQ6ifiza9V34n/5NnqaU6Hc97IBLHuQstJUcA41fkRCWmAcBegd7CADWBBTL7K9oCmOWKTcNJIizmqXgF1W2BDkOCTs0E9DXLwMCasGXRtHnp4Mmdd5uZq4dqDZFirvivJ3kswx85GvIrEcG+oh9ZtqnKE/ojS5VbrJ3tl6dTihindao77s1nXqci8X1efXM4f3vAOmSv/MjlCEq/OtfhWVS4Th9WPryXUWd/T+XOi+8yYk8ljNq766XvS8YFmY1lKXKZIDQ5r8scj0IpiEMN11GBj2vDLfhQPW1iTHI56o+mAxWnjUPFDywAaCNiebk85/qrXGmYu3WFO2VUZMejBQ1iS2OByMZhggkxwTjo6Ut9g1ej4Phlkn0EhWlRP7ckcwx/izn+LgV6XNye6jv2isOSg47CoDZf+Bn5GSK28/LADritVrN2qKMyDtbGGnMfPhOgAArkt4z3a/AnpZPvxWmqsEFMc2ns4rkMPFgBxEperVTddVRACwhbN+e2RRjnLMvD/5CuEhg/lIUrjZ5q1eVCLhN5xRhJpjso=
+  file: ats-automated-testing-1.7.1.jar
+  on:
+    repo: pierrehub2b/actiontestscript
+  skip_cleanup: 'true'
