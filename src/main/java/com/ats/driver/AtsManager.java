@@ -169,8 +169,9 @@ public class AtsManager {
 			properties = loadProperties(atsFolderPath.resolve(ATS_PROPERTIES_FILE));
 			driversFolderPath = atsFolderPath.resolve(DRIVERS_FOLDER);
 		}else {
-			ATS.logError("ATS folder not found -> " + atsHome);
-			System.exit(0);
+			driversFolderPath = Paths.get("");
+			ATS.logWarn("ATS driver folder not found -> " + atsHome);
+			//System.exit(0);
 		}
 
 		if(proxy == null) {
