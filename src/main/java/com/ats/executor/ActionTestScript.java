@@ -103,6 +103,11 @@ public class ActionTestScript extends Script implements ITest{
 		init(new Passwords(getAssetsFile("")));
 	}
 	
+	public ActionTestScript(File assetsFolder) {
+		super(null);
+		init(new Passwords(assetsFolder.toPath()));
+	}
+	
 	public ActionTestScript(ExecutionLogger logger) {
 		super(logger);
 		init(null);
