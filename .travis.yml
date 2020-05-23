@@ -3,9 +3,6 @@ jdk: openjdk12
 env:
   global:
     - COVER_STATUS=no
-branches:
-  only:
-  - master
 install:
 - mvn install -Dgpg.skip=true
 cache:
