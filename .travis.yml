@@ -10,7 +10,7 @@ cache:
   - "$HOME/.m2"
 script:
   - mvn clean package
-  - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered, "/", instructions, "instructions covered"; print 100*covered/instructions, "% covered" }' target/site/jacoco/jacoco.csv
+  - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered, "/", instructions, "instructions covered ,"(", 100*covered/instructions , "% covered)" }' target/site/jacoco/jacoco.csv
 notifications:
   slack:
     matrix:
