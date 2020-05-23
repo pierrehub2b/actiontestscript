@@ -14,6 +14,7 @@ import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.Variable;
 import com.ats.generator.variables.transform.NumericTransformer;
+import com.ats.generator.variables.transform.RegexpTransformer;
 
 public class CalculatedValueTest {
 
@@ -110,5 +111,21 @@ public class CalculatedValueTest {
 
 		Variable v5 = script.createVariable("var5", new CalculatedValue(script, "$var(var3)$var(var4)"), null);
 		assertEquals(v5.getCalculatedValue(), value1 + value2 + value1 + value2 + value1 + value2);
+	}
+	
+	@Test
+	public void regexpTransformation() throws IOException {
+
+		final String[] values = new String[] {"valuexxx56endvalue", "xxxsearched:value-end"};
+		final String[] regexps = new String[] {".*(\\d\\d).*", ".*searched:(.*)-end"};
+		final String[] asserts = new String[] {"56", "value"};
+				
+		final ActionTestScript script = new ActionTestScript(tempFolder.newFolder());
+		
+		for(int i = 0 ; i < values.length; i++) {
+			final CalculatedValue calc = new CalculatedValue(script, values[i]);
+			final Variable var = script.createVariable("var" + i, calc, new RegexpTransformer(regexps[i], 1));
+			assertEquals(var.getCalculatedValue(), asserts[i]);
+		}
 	}
 }
