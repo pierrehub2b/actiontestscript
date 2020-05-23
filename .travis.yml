@@ -20,8 +20,8 @@ notifications:
     template:
       - "Project : *%{repository_name}* ,  build (<%{build_url}|#%{build_number}>), commit (<%{compare_url}|%{commit}>)"
       - "Branch : %{branch}"
-      - "Commit : %{author} _'%{commit_message}'_"
-      - "Status: *%{result}* ,  executed in : %{duration}"
+      - "Commit : %{author}  `%{commit_message}`"
+      - "Status: *%{result}*  _(executed in : %{duration})_"
 deploy:
   provider: releases
   api_key:
