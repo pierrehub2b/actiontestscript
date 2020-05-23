@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.generator.variables;
 
@@ -43,12 +43,12 @@ public class CalculatedValue{
 	private static final Pattern UUID_PATTERN = Pattern.compile("\\$uuid", Pattern.CASE_INSENSITIVE);
 	private static final Pattern PGAV_PATTERN = Pattern.compile("\\$pgav", Pattern.CASE_INSENSITIVE);
 	private static final Pattern ITERATION_PATTERN = Pattern.compile("\\$iteration", Pattern.CASE_INSENSITIVE);
-	
+
 	public static final Pattern KEY_REGEXP = Pattern.compile("\\$key\\s?\\((\\w+)\\-?([^\\)]*)?\\)");
-		
+
 	public static final Pattern ASSET_PATTERN = Pattern.compile("\\$asset\\s*?\\(([^\\)]*)\\)", Pattern.CASE_INSENSITIVE);
 	public static final Pattern IMAGE_PATTERN = Pattern.compile("\\$image\\s*?\\(([^\\)]*)\\)", Pattern.CASE_INSENSITIVE);
-	
+
 	private static final Pattern PASSWORD_DATA = Pattern.compile("\\$pass\\s*?\\(([^\\)]*)\\)", Pattern.CASE_INSENSITIVE);
 
 	//-----------------------------------------------------------------------------------------------------
@@ -69,7 +69,7 @@ public class CalculatedValue{
 
 	private String rawJavaCode = "";
 	private Object[] dataList;
-	
+
 	private boolean crypted = false;
 
 	public CalculatedValue() {}
@@ -77,7 +77,7 @@ public class CalculatedValue{
 	public CalculatedValue(String value) {
 		setData(value);
 	}
-	
+
 	public CalculatedValue(int value) {
 		this(value + "");
 	}
@@ -94,9 +94,9 @@ public class CalculatedValue{
 			setCalculated(initCalculated(dataValue));
 		}
 	}
-		
+
 	private String initCalculated(String dataValue) {
-				
+
 		rawJavaCode = StringEscapeUtils.escapeJava(dataValue);
 
 		Matcher mv = Variable.SCRIPT_PATTERN.matcher(dataValue);
@@ -141,43 +141,43 @@ public class CalculatedValue{
 			dataValue = dataValue.replace(replace, UUID.randomUUID().toString());
 			rawJavaCode = rawJavaCode.replace(replace, "\", " + ActionTestScript.JAVA_UUID_FUNCTION_NAME + "(), \"");
 		}
-					
+
 		mv = RandomStringValue.RND_PATTERN.matcher(dataValue);
 		while (mv.find()) {
 			final RandomStringValue rds = new RandomStringValue(mv);
 			dataValue = dataValue.replace(rds.getReplace(), script.getRandomStringValue(rds.getValue(), rds.getDefaultValue()));
 			rawJavaCode = rawJavaCode.replace(rds.getReplace(), "\", " + ActionTestScript.JAVA_RNDSTRING_FUNCTION_NAME + rds.getCode() + ", \"");
 		}
-				
+
 		mv = PGAV_PATTERN.matcher(dataValue);
 		while (mv.find()) {
 			rawJavaCode = rawJavaCode.replace(mv.group(0), "\", " + ActionTestScript.JAVA_GAV_FUNCTION_NAME + "(), \"");
 		}
-		
+
 		mv = ITERATION_PATTERN.matcher(dataValue);
 		while (mv.find()) {
 			rawJavaCode = rawJavaCode.replace(mv.group(0), "\", " + ActionTestScript.JAVA_ITERATION_FUNCTION_NAME + "(), \"");
 		}
-		
+
 		mv = IMAGE_PATTERN.matcher(dataValue);
 		while (mv.find()) {
 			rawJavaCode = rawJavaCode.replace(mv.group(0), ProjectData.getAssetsImageJavaCode(mv.group(1)));
 		}
-		
+
 		mv = ASSET_PATTERN.matcher(dataValue);
 		while (mv.find()) {
 			rawJavaCode = rawJavaCode.replace(mv.group(0), ProjectData.getAssetsJavaCode(mv.group(1)));
 		}
-		
+
 		mv = PASSWORD_DATA.matcher(dataValue);
 		while (mv.find()) {
 			crypted = true;
 			rawJavaCode = rawJavaCode.replace(mv.group(0), "\", new " + Password.class.getCanonicalName() + "(this, \"" + mv.group(1) + "\"), \"");
 		}
-		
+
 		return dataValue;
 	}
-	
+
 	public boolean isCrypted() {
 		return crypted;
 	}
@@ -186,7 +186,7 @@ public class CalculatedValue{
 		script = null;
 		dataList = null;
 	}
-	
+
 	//-----------------------------------------------------------------------------------------------------
 	// java code
 	//-----------------------------------------------------------------------------------------------------
@@ -198,18 +198,18 @@ public class CalculatedValue{
 		value = unnecessaryStartQuotes.matcher(value).replaceFirst("");
 		value = unnecessaryEndQuotes.matcher(value).replaceFirst("");
 		value = unnecessaryMiddleQuotes.matcher(value).replaceAll("");
-		
+
 		return ActionTestScript.JAVA_VALUE_FUNCTION_NAME + "(" + value + ")";
 	}
-	
+
 	public String getTextKeyJavaCode() {
 		final Matcher mv = KEY_REGEXP.matcher(rawJavaCode);
 		while (mv.find()) {
-			
+
 			final String replace = mv.group(0);
 			final String value = mv.group(1).trim().toUpperCase();
 			final String spareKey = mv.group(2);
-			
+
 			if(spareKey.length() > 0) {
 				rawJavaCode = rawJavaCode.replace(replace, "\", " + "Keys.chord(Keys." + value + ", \"" + spareKey.toLowerCase() + "\"), \"");
 			}else {
@@ -218,26 +218,33 @@ public class CalculatedValue{
 		}
 		return getJavaCode();
 	}
-		
+
 	//-----------------------------------------------------------------------------------------------------
 	//-----------------------------------------------------------------------------------------------------
-	
-	public void refresh(ActionTestScript script) {
-		if(calculated != null){
-			final Matcher mv = PASSWORD_DATA.matcher(calculated);
-			while (mv.find()) {
-				crypted = true;
-				calculated = calculated.replace(mv.group(0), script.getPassword(mv.group(1)));
-			}
+
+	private String uncrypt(ActionTestScript script, String value) {
+		final Matcher mv = PASSWORD_DATA.matcher(value);
+		while (mv.find()) {
+			crypted = true;
+			value = value.replace(mv.group(0), script.getPassword(mv.group(1)));
 		}
+		return value;
+	}	
+
+	private void addTextChain(ActionTestScript script, ArrayList<SendKeyData> list, String value) {
+		list.add(new SendKeyData(uncrypt(script, value)));
 	}
-	
-	public ArrayList<SendKeyData> getCalculatedText(){
+
+	private void addTextChain(ArrayList<SendKeyData> list, String value1, String value2) {
+		list.add(new SendKeyData(value1, value2));
+	}
+
+	public ArrayList<SendKeyData> getCalculatedText(ActionTestScript script){
 
 		final ArrayList<SendKeyData> chainKeys = new ArrayList<SendKeyData>();
-		
+
 		if(calculated != null){
-			addTextChain(chainKeys, calculated);
+			addCalculatedTextChain(script, chainKeys, calculated);
 		}else {	
 			String strValue = "";
 			if(dataList != null) {
@@ -249,35 +256,35 @@ public class CalculatedValue{
 						crypted = true;
 						strValue += ((Password)obj).getValue();
 					}else {
-						
+
 						final byte[] b = obj.toString().getBytes();
 						final boolean isKey = b.length > 0 && b[0] < 65;
-						
+
 						if(obj instanceof Keys || isKey) {
 							if(strValue != "") {
-								chainKeys.add(new SendKeyData(strValue));
+								addTextChain(script, chainKeys, strValue);
 								strValue = "";
 							}
-							chainKeys.add(new SendKeyData(obj.toString()));
+							addTextChain(script, chainKeys, obj.toString());
 						} else {
 							strValue += obj.toString();
 						}
 					}
 				}
-				
+
 				if(strValue != "") {
-					chainKeys.add(new SendKeyData(strValue));
+					addTextChain(script, chainKeys, strValue);
 					strValue = "";
 				}
 			}else {
-				chainKeys.add(new SendKeyData(data));
+				addTextChain(script, chainKeys, data);
 			}
 		}
-		
+
 		return chainKeys;
 	}
-	
-	private void addTextChain(ArrayList<SendKeyData> chain, String s){
+
+	private void addCalculatedTextChain(ActionTestScript script, ArrayList<SendKeyData> chain, String s){
 
 		int start = 0;		
 
@@ -286,22 +293,17 @@ public class CalculatedValue{
 
 			int end = match.start();
 			if(end > 0) {
-				chain.add(new SendKeyData(s.substring(start, end)));
+				addTextChain(script, chain, s.substring(start, end));
 			}
 
 			start = match.end();
-			chain.add(new SendKeyData(match.group(1), match.group(2)));
+			addTextChain(chain, match.group(1), match.group(2));
 		}
 
-		SendKeyData sendKey = null;
 		if(start == 0) {
-			sendKey = new SendKeyData(s);
+			addTextChain(script, chain, s);
 		}else if(start != s.length()){
-			sendKey = new SendKeyData(s.substring(start));
-		}
-		
-		if(sendKey != null) {
-			chain.add(sendKey);
+			addTextChain(script, chain, s.substring(start));
 		}
 	}
 
@@ -327,11 +329,11 @@ public class CalculatedValue{
 		}
 		return calculated;
 	}
-	
+
 	public void setCalculated(String value) {
 		this.calculated = value;
 	}
-	
+
 	public String getData() {
 		return data;
 	}

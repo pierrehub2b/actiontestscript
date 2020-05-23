@@ -22,12 +22,12 @@ package com.ats.element;
 import java.util.Base64;
 
 import com.ats.executor.ActionStatus;
+import com.ats.executor.ActionTestScript;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
-import com.ats.recorder.IVisualRecorder;
 
 public class TestElementRoot extends TestElement {
 
@@ -43,7 +43,7 @@ public class TestElementRoot extends TestElement {
 	}
 
 	@Override
-	public String enterText(ActionStatus status, CalculatedValue text, IVisualRecorder recorder) {
+	public String enterText(ActionStatus status, CalculatedValue text, ActionTestScript script) {
 		final String enterText = text.getCalculated();
 		channel.rootKeys(status, enterText);
 		return enterText;

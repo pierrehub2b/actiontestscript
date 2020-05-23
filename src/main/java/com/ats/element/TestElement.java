@@ -359,7 +359,7 @@ public class TestElement{
 		engine.clearText(status, this, md);
 	}
 	
-	public String enterText(ActionStatus status, CalculatedValue text, IVisualRecorder recorder) {
+	public String enterText(ActionStatus status, CalculatedValue text, ActionTestScript script) {
 
 		final MouseDirection md = new MouseDirection();
 
@@ -374,7 +374,7 @@ public class TestElement{
 					clearText(status, md);
 				}
 				
-				final String enteredText = sendText(status, text);
+				final String enteredText = sendText(script, status, text);
 				if(isPassword() || text.isCrypted()) {
 					return "########";
 				}else {
@@ -385,8 +385,8 @@ public class TestElement{
 		return "";
 	}
 
-	public String sendText(ActionStatus status, CalculatedValue text) {
-		final ArrayList<SendKeyData> textData = text.getCalculatedText();
+	public String sendText(ActionTestScript script, ActionStatus status, CalculatedValue text) {
+		final ArrayList<SendKeyData> textData = text.getCalculatedText(script);
 		int max = maxTry;
 		while(!trySendText(status, textData) && max > 0) {
 			channel.sleep(100);

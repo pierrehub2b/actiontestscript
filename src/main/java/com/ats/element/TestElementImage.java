@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import com.ats.executor.ActionStatus;
+import com.ats.executor.ActionTestScript;
 import com.ats.executor.SendKeyData;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.MouseDirection;
@@ -75,8 +76,8 @@ public class TestElementImage extends TestElement {
 	}
 
 	@Override
-	public String sendText(ActionStatus status, CalculatedValue text) {
-		for(SendKeyData sequence : text.getCalculatedText()) {
+	public String sendText(ActionTestScript script, ActionStatus status, CalculatedValue text) {
+		for(SendKeyData sequence : text.getCalculatedText(script)) {
 			engine.getDesktopDriver().sendKeys(sequence.getSequenceDesktop(), "");
 		}
 		channel.actionTerminated(status);

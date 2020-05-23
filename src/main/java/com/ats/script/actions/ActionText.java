@@ -82,7 +82,7 @@ public class ActionText extends ActionExecuteElement {
 			
 			ts.getRecorder().updateScreen(true);
 
-			final String enteredText = getTestElement().enterText(status, text, ts.getRecorder());
+			final String enteredText = getTestElement().enterText(status, text, ts);
 			status.endAction();
 			
 			ts.getRecorder().updateTextScreen(0, status.getDuration(), enteredText, status.getMessage());

@@ -28,11 +28,11 @@ import org.openqa.selenium.Alert;
 import org.openqa.selenium.NoAlertPresentException;
 
 import com.ats.executor.ActionStatus;
+import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
-import com.ats.recorder.IVisualRecorder;
 
 public class TestElementDialog extends TestElement {
 
@@ -103,8 +103,8 @@ public class TestElementDialog extends TestElement {
 	}
 
 	@Override
-	public String enterText(ActionStatus status, CalculatedValue text, IVisualRecorder recorder) {
-		sendText(status, text);
+	public String enterText(ActionStatus status, CalculatedValue text, ActionTestScript script) {
+		sendText(script, status, text);
 		return text.getCalculated();
 	}
 
@@ -113,7 +113,7 @@ public class TestElementDialog extends TestElement {
 	}
 
 	@Override
-	public String sendText(ActionStatus status, CalculatedValue text) {
+	public String sendText(ActionTestScript script, ActionStatus status, CalculatedValue text) {
 		final String enterText = text.getCalculated();
 		getChannel().sleep(WAIT_BOX);
 		alert.sendKeys(enterText);

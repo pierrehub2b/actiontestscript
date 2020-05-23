@@ -14,7 +14,7 @@ public class Password {
 	
 	@Override
 	public String toString() {
-		return "$PASSWORD(" + name + ")";
+		return "$pass(" + name + ")";
 	}
 	
 	public String getValue() {

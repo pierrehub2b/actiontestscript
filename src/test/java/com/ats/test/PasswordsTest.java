@@ -1,6 +1,6 @@
 package com.ats.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +13,7 @@ import org.junit.rules.TemporaryFolder;
 import com.ats.crypto.Password;
 import com.ats.crypto.Passwords;
 import com.ats.executor.ActionTestScript;
+import com.ats.generator.variables.CalculatedValue;
 
 public class PasswordsTest {
 	
@@ -67,5 +68,25 @@ public class PasswordsTest {
 		
 		assertEquals(pass.getValue(), passwordValue);
 		assertEquals(script.getPassword(passwordName), passwordValue);
+	}
+	
+	@Test
+	public void passwordInVariable() throws IOException {
+		
+		final String passwordName = "passw1";
+		String passwordValue = UUID.randomUUID().toString();
+		
+		final ActionTestScript script = new ActionTestScript(tempFolder.newFolder());
+		
+		final Passwords passwords = script.getPasswords();
+		passwords.setPassword(passwordName, passwordValue);
+		
+		CalculatedValue calc1 = new CalculatedValue(script, "$pass(passw1)");
+		script.createVariable("var1", calc1, null);
+		
+		CalculatedValue calc2 = new CalculatedValue(script, "$var(var1)");
+		
+		assertEquals(calc2.getCalculatedText(script).get(0).getData(), passwordValue);
+
 	}
 }

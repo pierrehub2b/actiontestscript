@@ -87,7 +87,6 @@ public class ActionTestScript extends Script implements ITest{
 
 	protected ActionTestScript topScript;
 	private ChannelManager channelManager;
-	private Passwords passwords;
 
 	private String[] returnValues;
 
@@ -135,10 +134,6 @@ public class ActionTestScript extends Script implements ITest{
 		return passwords;
 	}
 	
-	public String getPassword(String name) {
-		return passwords.getPassword(name);
-	}
-
 	public void updateTestName(String name) {
 		this.testName = name;
 	}

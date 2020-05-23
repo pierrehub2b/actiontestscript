@@ -22,11 +22,11 @@ package com.ats.element;
 import org.openqa.selenium.Keys;
 
 import com.ats.executor.ActionStatus;
+import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
-import com.ats.recorder.IVisualRecorder;
 
 public class TestElementSystemButton extends TestElement {
 
@@ -47,7 +47,7 @@ public class TestElementSystemButton extends TestElement {
 	}
 
 	@Override
-	public String enterText(ActionStatus status, CalculatedValue text, IVisualRecorder recorder) {
+	public String enterText(ActionStatus status, CalculatedValue text, ActionTestScript script) {
 		return null;
 	}
 

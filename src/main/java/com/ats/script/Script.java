@@ -36,6 +36,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.ats.crypto.Passwords;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.RandomStringValue;
 import com.ats.generator.variables.ScriptValue;
@@ -72,6 +73,7 @@ public class Script {
 	
 	private Map<String, String> testExecutionVariables;
 	private ExecutionLogger logger = new ExecutionLogger();
+	protected Passwords passwords;
 
 	public Script() {}
 
@@ -79,6 +81,10 @@ public class Script {
 		if(logger != null) {
 			setLogger(logger);
 		}
+	}
+	
+	public String getPassword(String name) {
+		return passwords.getPassword(name);
 	}
 
 	//-------------------------------------------------------------------------------------
