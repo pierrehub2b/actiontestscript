@@ -13,7 +13,7 @@ cache:
   - "$HOME/.m2"
 script:
   - mvn clean package
-  - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered, "/", instructions, "instructions covered (", 100*covered/instructions , "% covered )" }' target/site/jacoco/jacoco.csv > $TRAVIS_BUILD_DIR/target/site/jacoco/cover_status.txt
+  - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print <html>covered, "/", instructions, "instructions covered (", 100*covered/instructions , "% covered )</html>" }' target/site/jacoco/jacoco.csv > $TRAVIS_BUILD_DIR/target/site/jacoco/cover-status.html
 notifications:
   slack:
     matrix:
@@ -24,7 +24,7 @@ notifications:
     on_failure: always
     template:
       - "Project : *%{repository_name}* ,  build (<%{build_url}|#%{build_number}>), commit (<%{compare_url}|%{commit}>)"
-      - "Branch : %{branch} , https://swiftkey.com/en/united-states-emoji/"
+      - "Branch : %{branch} , https://raw.githubusercontent.com/pierrehub2b/actiontestscript/gh-pages/cover-status.html"
       - "Commit : %{author} -> `%{commit_message}`"
       - "Status: *%{result}*  _(executed in : %{duration})_"
 deploy:
