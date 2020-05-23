@@ -13,7 +13,7 @@ cache:
   - "$HOME/.m2"
 script:
   - mvn clean package
-  - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print \<html\>covered, "/", instructions, "instructions covered (", 100*covered/instructions , "% covered )\</html\>" }' target/site/jacoco/jacoco.csv > $TRAVIS_BUILD_DIR/target/site/jacoco/cover-status.html
+  - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print "<html>",covered, "/", instructions, "instructions covered (", 100*covered/instructions , "% covered )</html>" }' target/site/jacoco/jacoco.csv > $TRAVIS_BUILD_DIR/target/site/jacoco/cover-status.html
 notifications:
   slack:
     matrix:
