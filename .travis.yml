@@ -24,7 +24,7 @@ notifications:
     on_failure: always
     template:
       - "Project : *%{repository_name}* ,  build (<%{build_url}|#%{build_number}>), commit (<%{compare_url}|%{commit}>)"
-      - "Branch : %{branch} , https://raw.githubusercontent.com/pierrehub2b/actiontestscript/gh-pages/cover-status.html"
+      - "Branch : %{branch} , <https://raw.githubusercontent.com/pierrehub2b/actiontestscript/gh-pages/cover-status.html|Cover status>"
       - "Commit : %{author} -> `%{commit_message}`"
       - "Status: *%{result}*  _(executed in : %{duration})_"
 deploy:
