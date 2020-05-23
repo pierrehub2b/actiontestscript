@@ -13,7 +13,7 @@ cache:
   - "$HOME/.m2"
 script:
   - mvn clean package
-  - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print "Covered code -> ",covered,"/",instructions,"\nCoverage -> ",100*covered/instructions,"%" }' target/site/jacoco/jacoco.csv > $TRAVIS_BUILD_DIR/target/site/jacoco/cover-status.html
+  - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print "Covered code -> ",covered,"/",instructions,"\nCoverage -> ",100*covered/instructions,"%" }' target/site/jacoco/jacoco.csv > $TRAVIS_BUILD_DIR/target/site/jacoco/cover-status.txt
 notifications:
   slack:
     matrix:
@@ -24,7 +24,7 @@ notifications:
     on_failure: always
     template:
       - "Project : *%{repository_name}* ,  build (<%{build_url}|#%{build_number}>), commit (<%{compare_url}|%{commit}>)"
-      - "Branch : %{branch} , <https://raw.githubusercontent.com/pierrehub2b/actiontestscript/gh-pages/cover-status.html|Test coverage>"
+      - "Branch : %{branch} , <https://raw.githubusercontent.com/pierrehub2b/actiontestscript/gh-pages/cover-status.txt|Test coverage>"
       - "Commit : %{author} -> `%{commit_message}`"
       - "Status: *%{result}*  _(executed in : %{duration})_"
 deploy:
