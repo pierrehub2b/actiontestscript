@@ -18,9 +18,10 @@ notifications:
     on_success: always
     on_failure: always
     template:
-      - "Repo %{repository_slug} %{result} build (<%{build_url}|#%{build_number}>) for commit (<%{compare_url}|%{commit}>) on branch %{branch}."
-      - "Execution time: %{duration}"
-      - "Message: %{message}"
+      - "Project : %{repository_name} build (<%{build_url}|#%{build_number}>), commit (<%{compare_url}|%{commit}>)"
+      - "Branch : %{branch}"
+      - "Commit : %{author} -> %{commit_message}"
+      - "Status: %{result}, executed in : %{duration}"
 deploy:
   provider: releases
   api_key:
