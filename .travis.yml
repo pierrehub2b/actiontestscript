@@ -28,7 +28,7 @@ notifications:
       - "Commit : %{author} -> `%{commit_message}`"
       - "Status: *%{result}*  _(executed in : %{duration})_"
 deploy:
-  provider: pages
+  - provider: pages
     github_token: $GITHUB_TOKEN
     local_dir: $TRAVIS_BUILD_DIR/target/site/jacoco
-  skip_cleanup: 'true'
+    skip_cleanup: 'true'
