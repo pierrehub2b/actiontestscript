@@ -15,9 +15,12 @@ notifications:
     - agilitest:89arTDhysVkKJ7TGJ2qw6Xwv
     rooms:
       secure: GblO7S/YBWEg+pHrL3a4Sgkmps7SlH3HAi++J4t5oSJ+cLjMBAtpiLVmUYZkRySSnYKRPfD8tJZfQKF9nxu1PfSyEkEhUl/4xWAuRaeK5apyLBf19Rzg+t6dYJg4FZN0TXA6VT3QvNmKDSUSxXDJ9XMJDhg8FTLdmIPzhRfHVB4CB1+vsuU1OH44BTTS7xuP7g8oSjkPDooyYo44fOFS+NMibE0G8xbbLH3qXudBEU6IGc/zNoAhcr8hTTQ4yHGaQnsGjZrQzv5x+VvUQAGxfjMypi+tES6GRI1jG6ZEGlkJf/I/xjWHptnqMsXS7tvsawFvruLKBwwkjYl/B9G1nRU8tISXHnoCvtHFmr4kc4m/BFAMGkyt9B3X/fQTl0ewBw0ZDTBFSjjP/RDo5ahzeT3cJXFQQZQULPLMT+ubt0UXUoX66toHm4WMaHagTVBsqSmS4esRdmgy2shpVUboi1gPhuwD/3SFnL65+hoazTBn7pQipjo+fGrehtb2+J+w/0TUbDmD6TTnmSmxgJDpiK5gpOfNw5huYXMAz+hMMCPcSnWi7dVdkMHfiqJ6eyuipKmccEBRv8OelMXXQtTgy/KQj3z0Tg7i+U/k9jGTmo3f+TNsEMzQWsNKv9ka/IJbAymmwi7pam0cjoXp/zcsjKuaL9WI1eEwdRVscXTqjZ8=
-  template:
-  - 'Build *<%{build_url}|#%{build_number}>* (<%{compare_url}|%{commit}>) of %{repository_slug}@%{branch} '
-  - by _%{author}_ %{result} in %{duration}
+    on_success: always
+    on_failure: always
+    template:
+      - "Repo %{repository_slug} %{result} build (<%{build_url}|#%{build_number}>) for commit (<%{compare_url}|%{commit}>) on branch %{branch}."
+      - "Execution time: %{duration}"
+      - "Message: %{message}"
 deploy:
   provider: releases
   api_key:
