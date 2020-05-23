@@ -88,4 +88,27 @@ public class CalculatedValueTest {
 		CalculatedValue calc4 = new CalculatedValue(script, "-- $var(var1) -- $var(var2) --");
 		assertEquals(calc4.getCalculated(), "-- " + value1 + " -- " + value2 + " --");
 	}
+	
+	@Test
+	public void valuesInceptions() throws IOException {
+
+		final ActionTestScript script = new ActionTestScript(tempFolder.newFolder());
+		final String value1 = "value1";
+		final String value2 = "value2";
+
+		CalculatedValue calc1 = new CalculatedValue(script, value1);
+		script.createVariable("var1", calc1, null);
+		
+		CalculatedValue calc2 = new CalculatedValue(script, value2);
+		script.createVariable("var2", calc2, null);
+		
+		script.createVariable("var3", new CalculatedValue(script, "$var(var1)$var(var2)"), null);
+		
+		Variable v4 = script.createVariable("var4", new CalculatedValue(script, "$var(var1)$var(var2)$var(var3)"), null);
+
+		assertEquals(v4.getCalculatedValue(), value1 + value2 + value1 + value2);
+
+		Variable v5 = script.createVariable("var5", new CalculatedValue(script, "$var(var3)$var(var4)"), null);
+		assertEquals(v5.getCalculatedValue(), value1 + value2 + value1 + value2 + value1 + value2);
+	}
 }
