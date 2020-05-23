@@ -12,8 +12,9 @@ cache:
 notifications:
   slack: agilitest:89arTDhysVkKJ7TGJ2qw6Xwv
   template:
-  - "%{repository_slug} (%{commit}) : %{message}"
-  - "Build details: %{build_url}"
+    - "Repo %{repository_slug} %{result} build (<%{build_url}|#%{build_number}>) for commit (<%{compare_url}|%{commit}>) on branch %{branch}."
+    - "Execution time: %{duration}"
+    - "Message: %{message}"
 deploy:
   provider: releases
   api_key:
