@@ -3,14 +3,14 @@ jdk: openjdk12
 branches:
   only:
   - master
-before_install: mvn clean package
 install:
 - mvn install -Dgpg.skip=true
 cache:
   directories:
   - "$HOME/.m2"
-after_script:
-  - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered, "/", instructions, " instructions covered"; print 100*covered/instructions, "% covered" }' target/site/jacoco/jacoco.csv
+script:
+  - mvn clean package
+  - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered, "/", instructions, "instructions covered"; print 100*covered/instructions, "% covered" }' target/site/jacoco/jacoco.csv
 notifications:
   slack:
     matrix:
