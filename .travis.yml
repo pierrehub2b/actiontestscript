@@ -2,7 +2,7 @@ language: java
 jdk: openjdk12
 branches:
   only:
-    - master
+  - master
 before_install: mvn clean package
 install:
 - mvn install -Dgpg.skip=true
@@ -10,17 +10,20 @@ cache:
   directories:
   - "$HOME/.m2"
 notifications:
-  slack: agilitest:89arTDhysVkKJ7TGJ2qw6Xwv
+  slack:
+    matrix:
+    - agilitest:89arTDhysVkKJ7TGJ2qw6Xwv
+    rooms:
+      secure: GblO7S/YBWEg+pHrL3a4Sgkmps7SlH3HAi++J4t5oSJ+cLjMBAtpiLVmUYZkRySSnYKRPfD8tJZfQKF9nxu1PfSyEkEhUl/4xWAuRaeK5apyLBf19Rzg+t6dYJg4FZN0TXA6VT3QvNmKDSUSxXDJ9XMJDhg8FTLdmIPzhRfHVB4CB1+vsuU1OH44BTTS7xuP7g8oSjkPDooyYo44fOFS+NMibE0G8xbbLH3qXudBEU6IGc/zNoAhcr8hTTQ4yHGaQnsGjZrQzv5x+VvUQAGxfjMypi+tES6GRI1jG6ZEGlkJf/I/xjWHptnqMsXS7tvsawFvruLKBwwkjYl/B9G1nRU8tISXHnoCvtHFmr4kc4m/BFAMGkyt9B3X/fQTl0ewBw0ZDTBFSjjP/RDo5ahzeT3cJXFQQZQULPLMT+ubt0UXUoX66toHm4WMaHagTVBsqSmS4esRdmgy2shpVUboi1gPhuwD/3SFnL65+hoazTBn7pQipjo+fGrehtb2+J+w/0TUbDmD6TTnmSmxgJDpiK5gpOfNw5huYXMAz+hMMCPcSnWi7dVdkMHfiqJ6eyuipKmccEBRv8OelMXXQtTgy/KQj3z0Tg7i+U/k9jGTmo3f+TNsEMzQWsNKv9ka/IJbAymmwi7pam0cjoXp/zcsjKuaL9WI1eEwdRVscXTqjZ8=
   template:
-    - "Repo %{repository_slug} %{result} build (<%{build_url}|#%{build_number}>) for commit (<%{compare_url}|%{commit}>) on branch %{branch}."
-    - "Execution time: %{duration}"
-    - "Message: %{message}"
+  - 'Build *<%{build_url}|#%{build_number}>* (<%{compare_url}|%{commit}>) of %{repository_slug}@%{branch} '
+  - by _%{author}_ %{result} in %{duration}
 deploy:
   provider: releases
   api_key:
     secure: ZN3veFTvprsC+G5YPblMc/w6yZuLWYBGfyaISPZV7eyuwBNdhgEnIMEiprq0uojSO/bQoNpnt/DS0z+yge74aF3aEv5sk/Sz+d7McgWsgBG3w2Kx+FDZzVtFw6i1AjgJlwai0wzQ6ifiza9V34n/5NnqaU6Hc97IBLHuQstJUcA41fkRCWmAcBegd7CADWBBTL7K9oCmOWKTcNJIizmqXgF1W2BDkOCTs0E9DXLwMCasGXRtHnp4Mmdd5uZq4dqDZFirvivJ3kswx85GvIrEcG+oh9ZtqnKE/ojS5VbrJ3tl6dTihindao77s1nXqci8X1efXM4f3vAOmSv/MjlCEq/OtfhWVS4Th9WPryXUWd/T+XOi+8yYk8ljNq766XvS8YFmY1lKXKZIDQ5r8scj0IpiEMN11GBj2vDLfhQPW1iTHI56o+mAxWnjUPFDywAaCNiebk85/qrXGmYu3WFO2VUZMejBQ1iS2OByMZhggkxwTjo6Ut9g1ej4Phlkn0EhWlRP7ckcwx/izn+LgV6XNye6jv2isOSg47CoDZf+Bn5GSK28/LADritVrN2qKMyDtbGGnMfPhOgAArkt4z3a/AnpZPvxWmqsEFMc2ns4rkMPFgBxEperVTddVRACwhbN+e2RRjnLMvD/5CuEhg/lIUrjZ5q1eVCLhN5xRhJpjso=
   file_glob: true
-  file: /home/travis/build/pierrehub2b/actiontestscript/target/*.jar
+  file: "/home/travis/build/pierrehub2b/actiontestscript/target/*.jar"
   on:
     repo: pierrehub2b/actiontestscript
     branch: master
