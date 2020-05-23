@@ -11,6 +11,9 @@ cache:
   - "$HOME/.m2"
 notifications:
   slack: agilitest:89arTDhysVkKJ7TGJ2qw6Xwv
+  template:
+  - "%{repository_slug} (%{commit}) : %{message}"
+  - "Build details: %{build_url}"
 deploy:
   provider: releases
   api_key:
