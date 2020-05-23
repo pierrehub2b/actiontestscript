@@ -22,7 +22,7 @@ notifications:
     template:
       - "Project : *%{repository_name}*  _(build <%{build_url}|#%{build_number}>, commit <%{compare_url}|%{commit}>)_"
       - "Status: %{result}  _(executed in : %{duration})_"
-      - "Branch : %{branch}  _(Tests <https://raw.githubusercontent.com/pierrehub2b/actiontestscript/gh-pages/cover-status.txt|coverage>)_"
+      - "Branch : %{branch}  _(<https://raw.githubusercontent.com/pierrehub2b/actiontestscript/gh-pages/cover-status.txt|test coverage>)_"
       - "Commit : %{author}  `%{commit_message}`"
 deploy:
   - provider: pages
