@@ -9,6 +9,8 @@ install:
 cache:
   directories:
   - "$HOME/.m2"
+after_script:
+  - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered, "/", instructions, " instructions covered"; print 100*covered/instructions, "% covered" }' target/site/jacoco/jacoco.csv
 notifications:
   slack:
     matrix:
@@ -20,7 +22,7 @@ notifications:
     template:
       - "Project : *%{repository_name}* ,  build (<%{build_url}|#%{build_number}>), commit (<%{compare_url}|%{commit}>)"
       - "Branch : %{branch}"
-      - "Commit : %{author}  >%{commit_message}"
+      - "Commit : %{author} -> `%{commit_message}`"
       - "Status: *%{result}*  _(executed in : %{duration})_"
 deploy:
   provider: releases
