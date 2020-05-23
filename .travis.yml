@@ -10,7 +10,7 @@ cache:
   - "$HOME/.m2"
 script:
   - mvn clean package
-  - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered, "/", instructions, "instructions covered (", 100*covered/instructions , "% covered)" }' target/site/jacoco/jacoco.csv
+  - COVER_STATUS = $(awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered, "/", instructions, "instructions covered (", 100*covered/instructions , "% covered )" }' target/site/jacoco/jacoco.csv)
 notifications:
   slack:
     matrix:
@@ -21,7 +21,7 @@ notifications:
     on_failure: always
     template:
       - "Project : *%{repository_name}* ,  build (<%{build_url}|#%{build_number}>), commit (<%{compare_url}|%{commit}>)"
-      - "Branch : %{branch}"
+      - "Branch : %{branch}"   $COVER_STATUS
       - "Commit : %{author} -> `%{commit_message}`"
       - "Status: *%{result}*  _(executed in : %{duration})_"
 deploy:
