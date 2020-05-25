@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 
 public class EnvironmentValue extends BaseValue {
 
-	public static final Pattern ENV_PATTERN = Pattern.compile("\\$env\\s*?\\((\\w+),?(\\s*?[^\\)]*)?\\)", Pattern.CASE_INSENSITIVE);
+	public static final Pattern ENV_PATTERN = Pattern.compile("\\$env\\s*?\\(([\\w.]+),?(\\s*?[^\\)]*)?\\)", Pattern.CASE_INSENSITIVE);
 	
 	public EnvironmentValue(Matcher m) {
 		super(m);

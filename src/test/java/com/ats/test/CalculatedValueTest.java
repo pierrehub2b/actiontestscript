@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.UUID;
+import java.util.regex.Matcher;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -12,6 +13,7 @@ import org.junit.rules.TemporaryFolder;
 
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.CalculatedValue;
+import com.ats.generator.variables.EnvironmentValue;
 import com.ats.generator.variables.Variable;
 import com.ats.generator.variables.transform.NumericTransformer;
 import com.ats.generator.variables.transform.RegexpTransformer;
@@ -127,5 +129,21 @@ public class CalculatedValueTest {
 			final Variable var = script.createVariable("var" + i, calc, new RegexpTransformer(regexps[i], 1));
 			assertEquals(var.getCalculatedValue(), asserts[i]);
 		}
+	}
+	
+	@Test
+	public void envGroupExtract() throws IOException {
+		
+		Matcher mv = EnvironmentValue.ENV_PATTERN.matcher("$env(br.alpha, ok)");
+		mv.find();
+		EnvironmentValue sp = new EnvironmentValue(mv);
+		
+		assertEquals(sp.getCode(), "(\"br.alpha\", \"ok\")");
+		
+		mv = EnvironmentValue.ENV_PATTERN.matcher("$env(br, ok)");
+		mv.find();
+		sp = new EnvironmentValue(mv);
+		
+		assertEquals(sp.getCode(), "(\"br\", \"ok\")");
 	}
 }
