@@ -250,8 +250,9 @@ public class ActionCallscript extends Action {
 
 			try {
 
-				final ActionTestScript ats = clazz.getDeclaredConstructor(ActionTestScript.class).newInstance(ts.getTopScript());
-				
+				final ActionTestScript ats = clazz.getDeclaredConstructor().newInstance();
+				ats.setTopScript(ts.getTopScript());
+								
 				if(parameterFilePath != null) {
 
 					final String csvPath = parameterFilePath.getCalculated();

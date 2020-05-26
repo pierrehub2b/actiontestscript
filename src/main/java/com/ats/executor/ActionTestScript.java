@@ -113,6 +113,10 @@ public class ActionTestScript extends Script implements ITest{
 	}
 	
 	public ActionTestScript(ActionTestScript topScript) {
+		setTopScript(topScript);
+	}
+	
+	public void setTopScript(ActionTestScript topScript) {
 		init(topScript, topScript.getChannelManager(), topScript.getPasswords());
 	}
 	
