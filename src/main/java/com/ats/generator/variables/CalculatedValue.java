@@ -25,7 +25,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.text.StringEscapeUtils;
-import org.openqa.selenium.Keys;
 
 import com.ats.crypto.Password;
 import com.ats.executor.ActionTestScript;
@@ -145,7 +144,7 @@ public class CalculatedValue{
 		mv = RandomStringValue.RND_PATTERN.matcher(dataValue);
 		while (mv.find()) {
 			final RandomStringValue rds = new RandomStringValue(mv);
-			dataValue = dataValue.replace(rds.getReplace(), script.getRandomStringValue(rds.getValue(), rds.getDefaultValue()));
+			dataValue = dataValue.replace(rds.getReplace(), rds.exec());
 			rawJavaCode = rawJavaCode.replace(rds.getReplace(), "\", " + ActionTestScript.JAVA_RNDSTRING_FUNCTION_NAME + rds.getCode() + ", \"");
 		}
 
@@ -202,23 +201,6 @@ public class CalculatedValue{
 		return ActionTestScript.JAVA_VALUE_FUNCTION_NAME + "(" + value + ")";
 	}
 
-	public String getTextKeyJavaCode() {
-		final Matcher mv = KEY_REGEXP.matcher(rawJavaCode);
-		while (mv.find()) {
-
-			final String replace = mv.group(0);
-			final String value = mv.group(1).trim().toUpperCase();
-			final String spareKey = mv.group(2);
-
-			if(spareKey.length() > 0) {
-				rawJavaCode = rawJavaCode.replace(replace, "\", " + "Keys.chord(Keys." + value + ", \"" + spareKey.toLowerCase() + "\"), \"");
-			}else {
-				rawJavaCode = rawJavaCode.replace(replace, "\", " + "Keys." + value + ", \"");
-			}
-		}
-		return getJavaCode();
-	}
-
 	//-----------------------------------------------------------------------------------------------------
 	//-----------------------------------------------------------------------------------------------------
 
@@ -242,69 +224,30 @@ public class CalculatedValue{
 	public ArrayList<SendKeyData> getCalculatedText(ActionTestScript script){
 
 		final ArrayList<SendKeyData> chainKeys = new ArrayList<SendKeyData>();
-
-		if(calculated != null){
-			addCalculatedTextChain(script, chainKeys, calculated);
-		}else {	
-			String strValue = "";
-			if(dataList != null) {
-				for(Object obj : dataList) {
-
-					if (obj instanceof Variable) {
-						strValue += ((Variable)obj).getCalculatedValue();
-					}else if(obj instanceof Password) {
-						crypted = true;
-						strValue += ((Password)obj).getValue();
-					}else {
-
-						final byte[] b = obj.toString().getBytes();
-						final boolean isKey = b.length > 0 && b[0] < 65;
-
-						if(obj instanceof Keys || isKey) {
-							if(strValue != "") {
-								addTextChain(script, chainKeys, strValue);
-								strValue = "";
-							}
-							addTextChain(script, chainKeys, obj.toString());
-						} else {
-							strValue += obj.toString();
-						}
-					}
-				}
-
-				if(strValue != "") {
-					addTextChain(script, chainKeys, strValue);
-					strValue = "";
-				}
-			}else {
-				addTextChain(script, chainKeys, data);
-			}
-		}
-
-		return chainKeys;
-	}
-
-	private void addCalculatedTextChain(ActionTestScript script, ArrayList<SendKeyData> chain, String s){
-
+		
+		final String calc = getCalculated();
+		
 		int start = 0;		
 
-		final Matcher match = KEY_REGEXP.matcher(s);
+		final Matcher match = KEY_REGEXP.matcher(calc);
 		while(match.find()) {
 
 			int end = match.start();
 			if(end > 0) {
-				addTextChain(script, chain, s.substring(start, end));
+				addTextChain(script, chainKeys, calc.substring(start, end));
 			}
 
 			start = match.end();
-			addTextChain(chain, match.group(1), match.group(2));
+			addTextChain(chainKeys, match.group(1), match.group(2));
 		}
 
 		if(start == 0) {
-			addTextChain(script, chain, s);
-		}else if(start != s.length()){
-			addTextChain(script, chain, s.substring(start));
+			addTextChain(script, chainKeys, calc);
+		}else if(start != calc.length()){
+			addTextChain(script, chainKeys, calc.substring(start));
 		}
+
+		return chainKeys;
 	}
 
 	//--------------------------------------------------------

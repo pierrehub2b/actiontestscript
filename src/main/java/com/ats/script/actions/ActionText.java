@@ -69,7 +69,7 @@ public class ActionText extends ActionExecuteElement {
 
 	@Override
 	public StringBuilder getJavaCode() {
-		return super.getJavaCode().append(", ").append(text.getTextKeyJavaCode()).append(")");
+		return super.getJavaCode().append(", ").append(text.getJavaCode()).append(")");
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

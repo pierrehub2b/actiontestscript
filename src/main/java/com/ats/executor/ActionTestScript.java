@@ -55,6 +55,7 @@ import com.ats.generator.objects.mouse.MouseSwipe;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.ConditionalValue;
+import com.ats.generator.variables.RandomStringValue;
 import com.ats.generator.variables.Variable;
 import com.ats.generator.variables.parameter.Parameter;
 import com.ats.generator.variables.parameter.ParameterList;
@@ -443,11 +444,11 @@ public class ActionTestScript extends Script implements ITest{
 
 	public static final String JAVA_RNDSTRING_FUNCTION_NAME = "rds";
 	public String rds(int len) {
-		return getRandomStringValue(len, null);
+		return new RandomStringValue(10, null).exec();
 	}
 
-	public String rds(int len, String upp) {
-		return getRandomStringValue(len, upp);
+	public String rds(int len, String type) {
+		return new RandomStringValue(len, type).exec();
 	}
 
 	//---------------------------------------------------------------------------------------------
