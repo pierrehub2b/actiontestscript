@@ -70,7 +70,7 @@ public class Script {
 
 	protected File csvFile;
 	protected int iteration = 0;
-	
+
 	private Map<String, String> testExecutionVariables;
 	private ExecutionLogger logger = new ExecutionLogger();
 	protected Passwords passwords;
@@ -82,7 +82,7 @@ public class Script {
 			setLogger(logger);
 		}
 	}
-	
+
 	public String getPassword(String name) {
 		return passwords.getPassword(name);
 	}
@@ -104,7 +104,7 @@ public class Script {
 	public void sendInfoLog(String message, String value) {
 		logger.sendInfo(message, value);
 	}
-	
+
 	public void sendActionLog(Action action, String testName, int line) {
 		logger.sendAction(action, testName, line); 
 	}
@@ -246,16 +246,22 @@ public class Script {
 	// variable calculation
 	//-------------------------------------------------------------------------------------------------
 
-	public String getRandomStringValue(int len, String letterCase) {
+	public String getRandomStringValue(int len, String type) {
 
-		String baseString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-		if(RandomStringValue.LOW_KEY.equals(letterCase)) {
-			baseString = baseString.toLowerCase();
-		}else if(!RandomStringValue.UPP_KEY.equals(letterCase)) {
-			baseString += baseString.toLowerCase();
+		String baseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		if(!RandomStringValue.UPP_KEY.equals(type)){
+			if(RandomStringValue.NUM_KEY.equals(type)){
+				baseChars = "0123456789";
+			}else if(RandomStringValue.LOW_KEY.equals(type)){
+				baseChars = baseChars.toLowerCase();
+			}else if(type != null && type.length() > 0){
+				baseChars = type;
+			}else{
+				baseChars += baseChars.toLowerCase();
+			}
 		}
 
-		List<Character> temp = baseString.chars()
+		List<Character> temp = baseChars.chars()
 				.mapToObj(i -> (char)i)
 				.collect(Collectors.toList());
 
@@ -265,7 +271,7 @@ public class Script {
 				.limit(len)
 				.collect(Collectors.joining());
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	// parameters
 	//-------------------------------------------------------------------------------------------------
@@ -276,11 +282,11 @@ public class Script {
 		}
 		return parameterList.getParameters();
 	}
-	
+
 	public ScriptValue getParameter(String name) {
 		return new ScriptValue(getParameterValue(name, ""));
 	}
-	
+
 	public ScriptValue getParameter(int index) {
 		return new ScriptValue(getParameterValue(index, ""));
 	}
@@ -294,7 +300,7 @@ public class Script {
 		if(parameterList == null) {
 			return "";
 		}
-		
+
 		try {
 			int index = Integer.parseInt(name);
 			return getParameterValue(index, defaultValue);
@@ -302,18 +308,18 @@ public class Script {
 
 		return parameterList.getParameterValue(name, defaultValue);
 	}
-	
+
 	public String getParameterValue(int index) {
 		return getParameterValue(index, "");
 	}
-	
+
 	public String getParameterValue(int index, String defaultValue) {
 		if(parameterList == null) {
 			return defaultValue;
 		}
 		return parameterList.getParameterValue(index, defaultValue);
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	//-------------------------------------------------------------------------------------------------
 

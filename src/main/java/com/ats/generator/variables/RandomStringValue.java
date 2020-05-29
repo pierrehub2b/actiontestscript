@@ -26,14 +26,15 @@ import com.ats.tools.Utils;
 
 public class RandomStringValue extends BaseValue {
 
-	public static final Pattern RND_PATTERN = Pattern.compile("\\$rndstring\\s*?\\((\\d+),?(\\w{0,3}?[^\\)]*)?\\)", Pattern.CASE_INSENSITIVE);
+	public static final Pattern RND_PATTERN = Pattern.compile("\\$rnd(?:string)?\\s*?\\((\\d+),?(\\w{0,3}?[^\\)]*)?\\)", Pattern.CASE_INSENSITIVE);
 	
 	public static final String UPP_KEY = "upp";
 	public static final String LOW_KEY = "low";
+	public static final String NUM_KEY = "num";
 	
 	public RandomStringValue(Matcher m) {
 		super(m);
-		if(!UPP_KEY.equals(defaultValue) && !LOW_KEY.equals(defaultValue)) {
+		if(!UPP_KEY.equals(defaultValue) && !LOW_KEY.equals(defaultValue) && !NUM_KEY.equals(defaultValue)) {
 			defaultValue = "";
 		}
 	}

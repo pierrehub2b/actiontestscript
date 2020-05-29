@@ -446,8 +446,8 @@ public class ActionTestScript extends Script implements ITest{
 		return getRandomStringValue(len, null);
 	}
 
-	public String rds(int len, String upp) {
-		return getRandomStringValue(len, upp);
+	public String rds(int len, String type) {
+		return getRandomStringValue(len, type);
 	}
 
 	//---------------------------------------------------------------------------------------------

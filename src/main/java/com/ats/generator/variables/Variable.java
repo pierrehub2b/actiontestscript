@@ -53,6 +53,11 @@ public class Variable implements Comparable<Variable>{
 	public static final String formatVariableName(String value){
 		return value.replaceAll("[^A-Za-z0-9_]", "");
 	}
+	
+	@Override
+	public String toString() {
+		return getCalculatedValue();
+	}
 
 	public String getCalculatedValue() {
 

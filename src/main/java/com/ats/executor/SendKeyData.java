@@ -157,7 +157,6 @@ public class SendKeyData {
 				sequence.append(c);
 			}
 		}
-
 		return sequence;
 	}	
 
