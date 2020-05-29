@@ -146,4 +146,20 @@ public class CalculatedValueTest {
 		
 		assertEquals(sp.getCode(), "(\"br\", \"ok\")");
 	}
+	
+	@Test
+	public void rndTestLength() throws IOException {
+		
+		final String[] codes = new String[] {"$rnd(10)", "$rnd(100)", "$rnd(15,upp)", "$rnd(8,low)", "$rnd(6,num)", "$rnd(28,num)", "$rnd(12,abcdef)"};
+		final String[] matches = new String[] {"[a-zA-Z]+", "[a-zA-Z]+", "[A-Z]+", "[a-z]+", "[0-9]+", "[0-9]+", "[a-f]+"};
+		final int[] lengths = new int[] {10, 100, 15, 8, 6, 28, 12};
+		
+		final ActionTestScript script = new ActionTestScript(tempFolder.newFolder());
+		
+		for(int i = 0 ; i < codes.length; i++) {
+			final Variable rnd = script.createVariable("rnd"+i, new CalculatedValue(script, codes[i]), null);
+			final String result = rnd.getCalculatedValue();
+			assertTrue(result.length() == lengths[i] && result.matches(matches[i]));
+		}
+	}
 }

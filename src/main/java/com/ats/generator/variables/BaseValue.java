@@ -32,10 +32,14 @@ public class BaseValue {
 	protected String defaultValue;
 	
 	public BaseValue(Matcher m) {
+		this(StringEscapeUtils.escapeJava(m.group(1).trim()), m.group(2).trim());
 		replace = m.group(0);
-		value = StringEscapeUtils.escapeJava(m.group(1).trim());
-		codeValue = value;
-		defaultValue = m.group(2).trim();
+	}
+	
+	public BaseValue(String value, String defaultValue) {
+		this.value = value;
+		this.codeValue = value;
+		this.defaultValue = defaultValue;
 	}
 	
 	public String getReplace() {

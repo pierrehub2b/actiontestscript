@@ -144,7 +144,7 @@ public class CalculatedValue{
 		mv = RandomStringValue.RND_PATTERN.matcher(dataValue);
 		while (mv.find()) {
 			final RandomStringValue rds = new RandomStringValue(mv);
-			dataValue = dataValue.replace(rds.getReplace(), script.getRandomStringValue(rds.getValue(), rds.getDefaultValue()));
+			dataValue = dataValue.replace(rds.getReplace(), rds.exec());
 			rawJavaCode = rawJavaCode.replace(rds.getReplace(), "\", " + ActionTestScript.JAVA_RNDSTRING_FUNCTION_NAME + rds.getCode() + ", \"");
 		}
 
@@ -224,7 +224,6 @@ public class CalculatedValue{
 	public ArrayList<SendKeyData> getCalculatedText(ActionTestScript script){
 
 		final ArrayList<SendKeyData> chainKeys = new ArrayList<SendKeyData>();
-		//addCalculatedTextChain(script, chainKeys, getCalculated());
 		
 		final String calc = getCalculated();
 		
@@ -247,42 +246,9 @@ public class CalculatedValue{
 		}else if(start != calc.length()){
 			addTextChain(script, chainKeys, calc.substring(start));
 		}
-				
-		/*if(calculated != null){
-			addCalculatedTextChain(script, chainKeys, calculated);
-		}else if(dataList != null && dataList.length > 0) {
-			for(Object obj : dataList) {
-				addCalculatedTextChain(script, chainKeys, obj.toString());
-			}
-		}else {	
-			addCalculatedTextChain(script, chainKeys, data);
-		}*/
 
 		return chainKeys;
 	}
-
-	/*private void addCalculatedTextChain(ActionTestScript script, ArrayList<SendKeyData> chain, String s){
-
-		int start = 0;		
-
-		final Matcher match = KEY_REGEXP.matcher(s);
-		while(match.find()) {
-
-			int end = match.start();
-			if(end > 0) {
-				addTextChain(script, chain, s.substring(start, end));
-			}
-
-			start = match.end();
-			addTextChain(chain, match.group(1), match.group(2));
-		}
-
-		if(start == 0) {
-			addTextChain(script, chain, s);
-		}else if(start != s.length()){
-			addTextChain(script, chain, s.substring(start));
-		}
-	}*/
 
 	//--------------------------------------------------------
 	// getters and setters for serialization

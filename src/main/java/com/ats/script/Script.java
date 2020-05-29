@@ -25,20 +25,16 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import com.ats.crypto.Passwords;
 import com.ats.generator.variables.CalculatedValue;
-import com.ats.generator.variables.RandomStringValue;
 import com.ats.generator.variables.ScriptValue;
 import com.ats.generator.variables.Variable;
 import com.ats.generator.variables.parameter.ParameterList;
@@ -240,36 +236,6 @@ public class Script {
 
 	public String getVariableValue(String variableName) {
 		return getVariable(variableName, false).getValue().getCalculated();
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	// variable calculation
-	//-------------------------------------------------------------------------------------------------
-
-	public String getRandomStringValue(int len, String type) {
-
-		String baseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-		if(!RandomStringValue.UPP_KEY.equals(type)){
-			if(RandomStringValue.NUM_KEY.equals(type)){
-				baseChars = "0123456789";
-			}else if(RandomStringValue.LOW_KEY.equals(type)){
-				baseChars = baseChars.toLowerCase();
-			}else if(type != null && type.length() > 0){
-				baseChars = type;
-			}else{
-				baseChars += baseChars.toLowerCase();
-			}
-		}
-
-		List<Character> temp = baseChars.chars()
-				.mapToObj(i -> (char)i)
-				.collect(Collectors.toList());
-
-		Collections.shuffle(temp, new SecureRandom());
-		return temp.stream()
-				.map(Object::toString)
-				.limit(len)
-				.collect(Collectors.joining());
 	}
 
 	//-------------------------------------------------------------------------------------------------

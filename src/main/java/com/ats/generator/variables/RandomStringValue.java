@@ -19,6 +19,7 @@ under the License.
 
 package com.ats.generator.variables;
 
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,18 +29,44 @@ public class RandomStringValue extends BaseValue {
 
 	public static final Pattern RND_PATTERN = Pattern.compile("\\$rnd(?:string)?\\s*?\\((\\d+),?(\\w{0,3}?[^\\)]*)?\\)", Pattern.CASE_INSENSITIVE);
 	
-	public static final String UPP_KEY = "upp";
-	public static final String LOW_KEY = "low";
-	public static final String NUM_KEY = "num";
+	private static final String UPP_KEY = "upp";
+	private static final String LOW_KEY = "low";
+	private static final String NUM_KEY = "num";
 	
 	public RandomStringValue(Matcher m) {
 		super(m);
-		if(!UPP_KEY.equals(defaultValue) && !LOW_KEY.equals(defaultValue) && !NUM_KEY.equals(defaultValue)) {
-			defaultValue = "";
-		}
+	}
+
+	public RandomStringValue(int len, String type) {
+		super(len + "", type);
 	}
 
 	public int getValue() {
 		return Utils.string2Int(value, 10);
+	}
+	
+	public String exec() {
+		
+		final int len = Utils.string2Int(value, 10);
+		String baseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		if(!UPP_KEY.equals(defaultValue)){
+			if(NUM_KEY.equals(defaultValue)){
+				baseChars = "0123456789";
+			}else if(LOW_KEY.equals(defaultValue)){
+				baseChars = baseChars.toLowerCase();
+			}else if(defaultValue != null && defaultValue.length() > 0){
+				baseChars = defaultValue;
+			}else{
+				baseChars += baseChars.toLowerCase();
+			}
+		}
+		
+		final StringBuilder result = new StringBuilder();
+        final Random rnd = new Random();
+        while (result.length() < len) { // length of the random string.
+            int index = (int) (rnd.nextFloat() * baseChars.length());
+            result.append(baseChars.charAt(index));
+        }
+        return result.toString();
 	}
 }
