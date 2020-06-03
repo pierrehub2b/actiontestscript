@@ -203,11 +203,6 @@
 			<artifactId>jackson-databind</artifactId>
 			<version>${lib.jackson.databind}</version>
 		</dependency>
-		<dependency>
-	  		<groupId>com.offbytwo.jenkins</groupId>
-	  		<artifactId>jenkins-client</artifactId>
-	  		<version>0.3.8</version>
-		</dependency>
 	</dependencies>
 
 	<build>
