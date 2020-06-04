@@ -444,7 +444,7 @@ public class ActionTestScript extends Script implements ITest{
 
 	public static final String JAVA_RNDSTRING_FUNCTION_NAME = "rds";
 	public String rds(int len) {
-		return new RandomStringValue(10, null).exec();
+		return new RandomStringValue(len, null).exec();
 	}
 
 	public String rds(int len, String type) {

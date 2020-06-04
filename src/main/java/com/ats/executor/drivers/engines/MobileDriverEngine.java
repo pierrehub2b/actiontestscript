@@ -39,7 +39,6 @@ import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
 
-import org.openqa.selenium.Alert;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
@@ -47,6 +46,7 @@ import org.openqa.selenium.WebElement;
 import com.ats.driver.ApplicationProperties;
 import com.ats.element.AtsBaseElement;
 import com.ats.element.AtsMobileElement;
+import com.ats.element.DialogBox;
 import com.ats.element.FoundElement;
 import com.ats.element.MobileRootElement;
 import com.ats.element.MobileTestElement;
@@ -584,7 +584,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	public void rightClick() {}
 
 	@Override
-	public Alert switchToAlert() {
+	public DialogBox switchToAlert() {
 		return null;
 	}
 

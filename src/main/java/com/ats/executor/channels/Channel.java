@@ -23,11 +23,11 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.openqa.selenium.Alert;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebElement;
 
 import com.ats.driver.AtsManager;
+import com.ats.element.DialogBox;
 import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
@@ -594,7 +594,7 @@ public class Channel {
 		return engine.executeScript(status, script, params);
 	}	
 
-	public Alert switchToAlert() {
+	public DialogBox switchToAlert() {
 		return engine.switchToAlert();
 	}
 

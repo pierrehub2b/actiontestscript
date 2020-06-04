@@ -377,7 +377,9 @@ public class DesktopDriver extends RemoteWebDriver {
 		Script(6),
 		Root(7),
 		LoadTree(8),
-		ListItems(9);
+		ListItems(9), 
+		DialogBox(10),
+		SetValue(11);
 
 		private final int type;
 		ElementType(int value){
@@ -695,7 +697,12 @@ public class DesktopDriver extends RemoteWebDriver {
 		final DesktopResponse resp = sendRequestCommand(CommandType.Element, ElementType.Attributes, elementId, attribute);
 		return resp.getFirstAttribute();
 	}
-
+	
+	public List<FoundElement> getDialogBox(TestBound dimension) {
+		final DesktopResponse resp = sendRequestCommand(CommandType.Element, ElementType.DialogBox);
+		return resp.getFoundElements(dimension);
+	}
+	
 	private static class LoadMapElement	implements Runnable {
 		final TestBound channelDimension;
 		final int handle;

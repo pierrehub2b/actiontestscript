@@ -40,7 +40,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.openqa.selenium.Alert;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.JavascriptException;
@@ -63,6 +62,7 @@ import com.ats.driver.ApplicationProperties;
 import com.ats.driver.AtsManager;
 import com.ats.element.AtsBaseElement;
 import com.ats.element.AtsElement;
+import com.ats.element.DialogBox;
 import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
@@ -1082,8 +1082,9 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public Alert switchToAlert() {
-		return driver.switchTo().alert();
+	public DialogBox switchToAlert() {
+		channel.sleep(500);
+		return new DialogBox(driver.switchTo().alert());
 	}
 
 	@Override

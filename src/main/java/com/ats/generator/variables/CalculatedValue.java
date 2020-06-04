@@ -249,6 +249,13 @@ public class CalculatedValue{
 
 		return chainKeys;
 	}
+	
+	public String getDataListItem() {
+		if(dataList.length > 0) {
+			return dataList[0].toString();
+		}
+		return "";
+	}
 
 	//--------------------------------------------------------
 	// getters and setters for serialization

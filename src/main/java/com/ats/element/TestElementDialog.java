@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 
-import org.openqa.selenium.Alert;
 import org.openqa.selenium.NoAlertPresentException;
 
 import com.ats.executor.ActionStatus;
@@ -36,12 +35,11 @@ import com.ats.generator.variables.CalculatedValue;
 
 public class TestElementDialog extends TestElement {
 
-	private static final int WAIT_BOX = 500;
 	private static final String ACCEPT = "accept";
 	private static final String DISMISS = "dismiss";
 
-	private Alert alert = null;
-	private String alertAction = ACCEPT;
+	private DialogBox alert = null;
+	private String alertAction = null;
 
 	public TestElementDialog() {}
 
@@ -68,22 +66,18 @@ public class TestElementDialog extends TestElement {
 		this.setDialogBox();
 
 		if(properties.size() > 0) {
-			alertAction = properties.get(0).getValue().getData();
-			if(!ACCEPT.equals(alertAction) && !DISMISS.equals(alertAction)) {
-				alertAction = ACCEPT;
-			}
+			alertAction = properties.get(0).getValue().getDataListItem();
 		}
 
 		try {
 
-			getChannel().sleep(WAIT_BOX);
 			alert = getChannel().switchToAlert();
 
 			setFoundElements(new ArrayList<FoundElement>(Arrays.asList(new FoundElement())));
 			setCount(1);
 
 		}catch(NoAlertPresentException ex) {
-			getChannel().sleep(WAIT_BOX);
+			getChannel().sleep(500);
 			setCount(0);
 		}
 	}
@@ -115,29 +109,40 @@ public class TestElementDialog extends TestElement {
 	@Override
 	public String sendText(ActionTestScript script, ActionStatus status, CalculatedValue text) {
 		final String enterText = text.getCalculated();
-		getChannel().sleep(WAIT_BOX);
+		getChannel().sleep(alert.getWaitBox());
 		alert.sendKeys(enterText);
+		
+		if(ACCEPT.equals(alertAction)) {
+			alert.accept(status);
+		}else if(DISMISS.equals(alertAction)) {
+			alert.dismiss(status);
+		}
 		
 		return enterText;
 	}
 
 	@Override
 	public String getAttribute(ActionStatus status, String name) {
-		getChannel().sleep(WAIT_BOX);
+		getChannel().sleep(alert.getWaitBox());
+		if("title".equals(name.toLowerCase())) {
+			return alert.getTitle();
+		}
 		return alert.getText();
 	}
 
 	@Override
 	public void click(ActionStatus status, MouseDirection position) {
 
-		getChannel().sleep(WAIT_BOX);
+		getChannel().sleep(alert.getWaitBox());
 		if(DISMISS.equals(alertAction)) {
-			alert.dismiss();
+			alert.dismiss(status);
+		}else if(ACCEPT.equals(alertAction)) {
+			alert.accept(status);
 		}else {
-			alert.accept();
+			alert.defaultButton(status);
 		}
 		
-		getChannel().sleep(WAIT_BOX);
+		getChannel().sleep(alert.getWaitBox());
 		getChannel().switchToDefaultContent();
 
 		status.setPassed(true);
@@ -145,6 +150,6 @@ public class TestElementDialog extends TestElement {
 
 	@Override
 	public CalculatedProperty[] getAttributes(boolean reload) {
-		return new CalculatedProperty[] {new CalculatedProperty("text", alert.getText())};
+		return alert.getAttributes();
 	}
 }

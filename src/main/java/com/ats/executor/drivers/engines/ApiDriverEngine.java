@@ -53,7 +53,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.openqa.selenium.Alert;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
@@ -62,6 +61,7 @@ import org.xml.sax.SAXException;
 
 import com.ats.driver.ApplicationProperties;
 import com.ats.element.AtsBaseElement;
+import com.ats.element.DialogBox;
 import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
@@ -301,7 +301,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	public void rightClick() {}
 
 	@Override
-	public Alert switchToAlert() {
+	public DialogBox switchToAlert() {
 		return null;
 	}
 

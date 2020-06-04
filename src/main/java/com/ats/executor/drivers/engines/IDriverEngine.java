@@ -23,11 +23,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-import org.openqa.selenium.Alert;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
 import com.ats.element.AtsBaseElement;
+import com.ats.element.DialogBox;
 import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
@@ -98,7 +98,7 @@ public interface IDriverEngine{
 	public void keyUp(Keys key);
 	public void moveByOffset(int hDirection, int vDirection);
 
-	public Alert switchToAlert();
+	public DialogBox switchToAlert();
 	public boolean switchToDefaultContent();
 	public void setWindowToFront();
 	public void switchToFrameId(String id);

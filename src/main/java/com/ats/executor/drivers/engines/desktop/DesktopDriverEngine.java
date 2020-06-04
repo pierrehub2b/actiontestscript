@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-import org.openqa.selenium.Alert;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
@@ -40,6 +39,7 @@ import org.openqa.selenium.WebElement;
 import com.ats.driver.ApplicationProperties;
 import com.ats.element.AtsBaseElement;
 import com.ats.element.DesktopRootElement;
+import com.ats.element.DialogBox;
 import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
@@ -496,8 +496,8 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public Alert switchToAlert() {
-		return null;
+	public DialogBox switchToAlert() {
+		return new DesktopAlert(this, channel.getDimension());
 	}
 
 	@Override
@@ -532,5 +532,9 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	public Object executeJavaScript(ActionStatus status, String script, boolean returnValue) {
 		status.setPassed(true);
 		return null;
+	}
+
+	public List<FoundElement> getDialogBox() {
+		return getDesktopDriver().getDialogBox(channel.getDimension());
 	}
 }
