@@ -319,7 +319,7 @@ public class OctoperfApi {
 
 	private static JsonObject createJsonData(String userId, String name, String description) {
 
-		String currentDate = Instant.now().toString();
+		final String currentDate = Instant.now().toString();
 
 		final JsonObject obj = new JsonObject();
 		obj.addProperty("created", currentDate);

@@ -51,6 +51,7 @@ public class ParameterDataFile{
 
 	private String error = "";
 	private boolean editable = true;
+	private int maxCols = 0;
 
 	public ParameterDataFile() {}
 
@@ -142,6 +143,8 @@ public class ParameterDataFile{
 		try {
 			final List<String[]> csvList = reader.readAll();
 			reader.close();
+			
+			setMaxCols(data.size());
 			csvList.forEach(l -> addCsvLine(data, l));
 		} catch (IOException | CsvException e) {
 			error = e.getMessage();
@@ -226,5 +229,15 @@ public class ParameterDataFile{
 
 	public void setEditable(boolean editable) {
 		this.editable = editable;
+	}
+
+	public int getMaxCols() {
+		return maxCols;
+	}
+
+	public void setMaxCols(int maxCols) {
+		if(maxCols > this.maxCols) {
+			this.maxCols = maxCols;
+		}
 	}
 }

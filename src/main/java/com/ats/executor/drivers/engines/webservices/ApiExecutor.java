@@ -170,7 +170,7 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 	}
 
 	private void refresh(Channel channel) {
-		if(lastAction != null) {
+		if(lastAction != null && !lastAction.isUseCache()) {
 			execute(channel.newActionStatus(), lastAction);
 		}
 	}
@@ -258,7 +258,7 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 				source = "<ats_response><code>" + response.code() + "</code><data><![CDATA[" + source + "]]></data></ats_response>";
 			}
 		}
-
+		
 		this.source = source;
 	}
 
@@ -276,7 +276,7 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 		final String searchedTag = tagName.toUpperCase();
 		final ArrayList<FoundElement> result = new ArrayList<FoundElement>();
 
-		if(testObject.getParent() == null){
+		if(testObject.getParent() != null){
 			refresh(channel);
 		}else {
 			Optional<AtsApiElement> parentElement = atsElements.stream().filter(e -> e.getId().equals(testObject.getParent().getFoundElement().getId())).findFirst();

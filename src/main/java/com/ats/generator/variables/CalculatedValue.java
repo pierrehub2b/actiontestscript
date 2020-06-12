@@ -251,7 +251,7 @@ public class CalculatedValue{
 	}
 	
 	public String getDataListItem() {
-		if(dataList.length > 0) {
+		if(dataList != null && dataList.length > 0) {
 			return dataList[0].toString();
 		}
 		return "";

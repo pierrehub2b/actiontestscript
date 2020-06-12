@@ -27,7 +27,6 @@ import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
-import com.ats.tools.Utils;
 import com.google.gson.JsonObject;
 
 public class ActionAssertProperty extends ActionExecuteElement {
@@ -103,13 +102,13 @@ public class ActionAssertProperty extends ActionExecuteElement {
 		}else {
 							
 			final boolean passed = value.checkProperty(attributeValue);
-			final String shortAttribute = Utils.truncateString(attributeValue, 200);
+			final String shortAttribute = value.getShortActualValue();
 			
 			if(passed) {
 				status.setNoError(shortAttribute);
 				return 0;
 			}else {
-				status.setError(ActionStatus.ATTRIBUTE_CHECK_FAIL, "expected result '" + value.getExpectedResult() + "'", new String[]{shortAttribute, value.getValue().getCalculated()});
+				status.setError(ActionStatus.ATTRIBUTE_CHECK_FAIL, value.getExpectedResultLogs(), new String[]{shortAttribute, value.getValue().getCalculated()});
 				return ActionStatus.ATTRIBUTE_CHECK_FAIL;
 			}
 		}

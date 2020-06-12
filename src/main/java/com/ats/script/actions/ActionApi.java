@@ -44,9 +44,12 @@ public class ActionApi extends Action {
 
 	public static final String SOAP = "SOAP";
 	public static final String REST = "REST";
+	
+	private static final String CACHE_LABEL = "cache";
 
 	private CalculatedValue method;
 	private CalculatedValue data;
+	private boolean useCache = false;
 
 	private List<CalculatedProperty> header;
 
@@ -56,7 +59,7 @@ public class ActionApi extends Action {
 
 	public ActionApi() {}
 
-	public ActionApi(Script script, String type, String port, String method, String headerData, ArrayList<String> data) {
+	public ActionApi(Script script, String type, String options, String method, String headerData, ArrayList<String> data) {
 		super(script);
 
 		setType(type.substring(SCRIPT_LABEL_LENGTH));
@@ -71,17 +74,23 @@ public class ActionApi extends Action {
 			setData(new CalculatedValue(script, data.get(0).trim()));
 		}
 		
-		this.port = Utils.string2Int(port, -1);
+		if(options.contains(CACHE_LABEL)) {
+			this.useCache = true;
+			options.replace(CACHE_LABEL, "");
+		}
+		
+		this.port = Utils.string2Int(options.replace(",", ""), -1);
 	}
 	
 	public ActionApi(Script script, String type, CalculatedValue method, CalculatedValue data) {
-		this(script, type, -1, method, data, new CalculatedProperty[0]);
+		this(script, type, -1, false, method, data, new CalculatedProperty[0]);
 	}
 
-	public ActionApi(Script script, String type, int port, CalculatedValue method, CalculatedValue data, CalculatedProperty ... headerData) {
+	public ActionApi(Script script, String type, int port, boolean cache, CalculatedValue method, CalculatedValue data, CalculatedProperty ... headerData) {
 		super(script);
 		setType(type);
 		setPort(port);
+		setUseCache(cache);
 		setMethod(method);
 		setData(data);
 		setHeader(new ArrayList<CalculatedProperty>(Arrays.asList(headerData)));
@@ -99,6 +108,8 @@ public class ActionApi extends Action {
 		.append(type)
 		.append("\", ")
 		.append(port)
+		.append(", ")
+		.append(useCache)
 		.append(", ")
 		.append(method.getJavaCode())
 		.append(", ");
@@ -189,5 +200,13 @@ public class ActionApi extends Action {
 
 	public void setData(CalculatedValue value) {
 		this.data = value;
+	}
+
+	public boolean isUseCache() {
+		return useCache;
+	}
+
+	public void setUseCache(boolean value) {
+		this.useCache = value;
 	}
 }

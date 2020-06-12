@@ -28,6 +28,7 @@ import com.ats.element.AtsBaseElement;
 import com.ats.executor.ActionTestScript;
 import com.ats.script.Script;
 import com.ats.tools.Operators;
+import com.ats.tools.Utils;
 
 public class CalculatedProperty implements Comparable<CalculatedProperty>{
 
@@ -89,8 +90,10 @@ public class CalculatedProperty implements Comparable<CalculatedProperty>{
 		}
 	}
 
+	private String actualValue;
 	public boolean checkProperty(String data) {
-		if(isRegexp()){
+		this.actualValue = data;
+		if(regexp){
 			return regexpMatch(data);
 		}else{
 			return textEquals(data);
@@ -110,10 +113,30 @@ public class CalculatedProperty implements Comparable<CalculatedProperty>{
 		}
 		return regexpPattern.matcher(data).matches();
 	}
+	
+	public String getExpectedResultLogs() {
+		
+		final StringBuilder builder = new StringBuilder("property '");
+		builder.append(name).append("' with actual value '").append(actualValue);
+		
+		if(regexp) {
+			builder.append("' do not match '");
+		}else {
+			builder.append("' is not equals to '");
+		}
+		
+		builder.append(value.getCalculated()).append("'");
 
+		return builder.toString();
+	}
+	
+	public String getShortActualValue() {
+		return Utils.truncateString(actualValue, 200);
+	}
+	
 	public String getExpectedResult() {
 		final String result = getName();
-		if(isRegexp()) {
+		if(regexp) {
 			return result + " match " + getValue().getCalculated();
 		}else {
 			return result + " == " + getValue().getCalculated();
