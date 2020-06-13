@@ -35,7 +35,6 @@ public class SendKeyData {
 	private static final String KEY_PREFIX = "$KEY-";
 
 	private String data;
-	private CharSequence chord;
 	private boolean enterKey = false;
 	private Keys downKey;
 	private String specialKey;
@@ -66,8 +65,6 @@ public class SendKeyData {
 				specialKey = KEY_PREFIX + key;
 			}catch(IllegalArgumentException e) {}
 		}
-
-		chord = sequence;
 	}
 
 	public SendKeyData(String data) {
@@ -97,7 +94,6 @@ public class SendKeyData {
 				this.data += String.valueOf(val);
 			}
 		}
-		chord = sequence;
 	}
 
 	private Keys getNumpad(char d) {
@@ -143,10 +139,6 @@ public class SendKeyData {
 
 	public CharSequence getSequenceWithDigit() {
 
-		if(chord != null) {
-			return chord;
-		}
-
 		StringBuffer sequence = new StringBuffer();
 
 		for (int i = 0, n = data.length(); i < n; i++) {
@@ -162,11 +154,7 @@ public class SendKeyData {
 
 	public CharSequence getSequenceChar() {
 
-		if(chord != null) {
-			return chord;
-		}
-
-		StringBuffer sequence = new StringBuffer();
+		final StringBuffer sequence = new StringBuffer();
 
 		for (int i = 0, n = data.length(); i < n; i++) {
 			char c = data.charAt(i);
