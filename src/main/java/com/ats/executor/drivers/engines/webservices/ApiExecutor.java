@@ -276,7 +276,7 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 		final String searchedTag = tagName.toUpperCase();
 		final ArrayList<FoundElement> result = new ArrayList<FoundElement>();
 
-		if(testObject.getParent() != null){
+		if(testObject.getParent() == null){
 			refresh(channel);
 		}else {
 			Optional<AtsApiElement> parentElement = atsElements.stream().filter(e -> e.getId().equals(testObject.getParent().getFoundElement().getId())).findFirst();

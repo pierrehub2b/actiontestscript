@@ -456,7 +456,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {
 		for(SendKeyData sequence : textActionList) {
-			executeRequest(ELEMENT, element.getFoundElement().getId(), INPUT, sequence.getMobileSequence());
+			executeRequest(ELEMENT, element.getFoundElement().getId(), INPUT, sequence.getSequenceMobile());
 		}
 	}
 

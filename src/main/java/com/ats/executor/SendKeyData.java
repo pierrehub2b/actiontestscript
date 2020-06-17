@@ -37,8 +37,10 @@ public class SendKeyData {
 	private String data;
 	private boolean enterKey = false;
 	private Keys downKey;
-	private String specialKey;
-
+	
+	private String specialKeyString;
+	private StringBuffer specialKeys;
+	
 	public SendKeyData(String key, String spare) {
 
 		this.data = spare;
@@ -62,8 +64,12 @@ public class SendKeyData {
 		}else {
 			try {
 				sequence.append(Keys.valueOf(key));
-				specialKey = KEY_PREFIX + key;
+				specialKeyString = KEY_PREFIX + key;
 			}catch(IllegalArgumentException e) {}
+		}
+		
+		if(sequence.length() > 0) {
+			specialKeys = sequence;
 		}
 	}
 
@@ -139,7 +145,11 @@ public class SendKeyData {
 
 	public CharSequence getSequenceWithDigit() {
 
-		StringBuffer sequence = new StringBuffer();
+		if(specialKeys != null) {
+			return specialKeys;
+		}
+		
+		final StringBuffer sequence = new StringBuffer();
 
 		for (int i = 0, n = data.length(); i < n; i++) {
 			char c = data.charAt(i);
@@ -166,17 +176,17 @@ public class SendKeyData {
 
 	public String getSequenceDesktop() {
 		String sequenceData = "";
-		if (specialKey != null) {
-			sequenceData = specialKey;
+		if (specialKeyString != null) {
+			sequenceData = specialKeyString;
 		}else if(data.length() > 0){
 			sequenceData = data;
 		}
 		return Base64.getEncoder().encodeToString(sequenceData.getBytes(StandardCharsets.UTF_8));
 	}
 
-	public String getMobileSequence() {
-		if (specialKey != null) {
-			return specialKey;
+	public String getSequenceMobile() {
+		if (specialKeyString != null) {
+			return specialKeyString;
 		} else if(data.length() > 0) {
 			return data;
 		} else {
