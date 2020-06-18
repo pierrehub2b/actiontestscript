@@ -166,11 +166,14 @@ public class SendKeyData {
 
 		final StringBuffer sequence = new StringBuffer();
 
+		if(data.isEmpty() && !specialKeyString.isEmpty()) {
+			return specialKeys;
+		}
+
 		for (int i = 0, n = data.length(); i < n; i++) {
 			char c = data.charAt(i);
 			sequence.append(c);
 		}
-
 		return sequence;
 	}	
 
