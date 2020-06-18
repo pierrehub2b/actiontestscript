@@ -105,7 +105,7 @@ public class AtsProxy implements IAtsProxy {
 			}else {
 				if(whitelistUrls != null && whitelistUrls.size() > 0) {
 					currentUrlFilter = new WhiteListFilter(whitelistUrls);
-				}else if(blacklistUrls.size() > 0) {
+				}else if(blacklistUrls != null && blacklistUrls.size() > 0) {
 					currentUrlFilter = new BlackListFilter(blacklistUrls);
 				}else {
 					currentUrlFilter = new UrlBaseFilter();
