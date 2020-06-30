@@ -3,6 +3,9 @@ package com.ats.element;
 import java.util.List;
 import java.util.function.Predicate;
 
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.remote.RemoteWebElement;
+
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.SendKeyData;
@@ -44,20 +47,28 @@ public class TestElementImage extends TestElement {
 	@Override
 	public void over(ActionStatus status, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {
 		final FoundElement fe = getFoundElement();
-		int halfWidth = Utils.string2Int(fe.getValue().getAttribute("clientWidth"))/2;
-		int halfHeight = Utils.string2Int(fe.getValue().getAttribute("clientHeight"))/2;
-		super.over(status, position, desktopDragDrop, fe.getBoundY().intValue(), fe.getBoundX().intValue());
+		JavascriptExecutor js = (JavascriptExecutor) ((RemoteWebElement) fe.getValue()).getWrappedDriver();
+		
+		int halfWidth = Utils.string2Int(js.executeScript("return window.innerWidth").toString())/2;
+		int halfHeight = Utils.string2Int(js.executeScript("return window.innerHeight").toString())/2;
+		
+		super.over(status, position, desktopDragDrop, fe.getBoundX().intValue() - halfWidth, fe.getBoundY().intValue()- halfHeight);
 	}
 
 	@Override
 	protected void mouseClick(ActionStatus status, MouseDirection position, int offsetX, int offsetY) {
 		final FoundElement fe = getFoundElement();
-		int halfWidth = Utils.string2Int(fe.getValue().getAttribute("clientHeight"))/2;
-		int halfHeight = Utils.string2Int(fe.getValue().getAttribute("clientWidth"))/2;
-		//super.mouseClick(status, position, fe.getBoundY().intValue() - halfWidth, fe.getBoundX().intValue() - halfHeight);
+
+		if(!channel.isMobile()) {
+			JavascriptExecutor js = (JavascriptExecutor) ((RemoteWebElement) fe.getValue()).getWrappedDriver();
+			
+			int halfWidth = Utils.string2Int(js.executeScript("return window.innerWidth").toString())/2;
+			int halfHeight = Utils.string2Int(js.executeScript("return window.innerHeight").toString())/2;
+			
+			super.mouseClick(status, position, fe.getBoundX().intValue() - halfWidth, fe.getBoundY().intValue()- halfHeight);
+			return;
+		}
 		
-		//ok pour mobile mais pas sur Web, la récupération de clientWidth & clientHeight renvoie des mauvaises valeurs
-		//pareil pour les autres click (qui passent par le over juste au dessus).
 		super.mouseClick(status, position, 0, 0);
 	}
 

@@ -363,7 +363,7 @@ public class TestElement{
 
 		final MouseDirection md = new MouseDirection();
 
-		over(status, md, false, 0, 0);
+		mouseClick(status, md, 0, 0);
 		if(status.isPassed()) {
 
 			if(status.isPassed()) {
