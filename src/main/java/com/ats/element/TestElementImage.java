@@ -94,6 +94,33 @@ public class TestElementImage extends TestElement {
 		channel.actionTerminated(status);
 		return text.getCalculated();
 	}
+	
+	@Override
+	public String enterText(ActionStatus status, CalculatedValue text, ActionTestScript script) {
+
+		final MouseDirection md = new MouseDirection();
+
+		mouseClick(status, md, 0, 0);
+		if(status.isPassed()) {
+
+			if(status.isPassed()) {
+
+				recorder.updateScreen(false);
+
+				if(!text.getCalculated().startsWith("$key")) {
+					clearText(status, md);
+				}
+				
+				final String enteredText = sendText(script, status, text);
+				if(isPassword() || text.isCrypted()) {
+					return "########";
+				}else {
+					return enteredText;
+				}
+			}
+		}
+		return "";
+	}
 
 	//-------------------------------------------------------------------------------------------------------------------
 	// Drag drop ...
