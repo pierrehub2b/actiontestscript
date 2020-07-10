@@ -537,4 +537,9 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	public List<FoundElement> getDialogBox() {
 		return getDesktopDriver().getDialogBox(channel.getDimension());
 	}
+	
+	@Override
+	public int getNumWindows() {
+		return getDesktopDriver().getWindowsByPid(channel.getProcessId()).size();
+	}
 }

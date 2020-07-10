@@ -108,6 +108,7 @@ public interface IDriverEngine{
 	public int getCurrentWindow();
 	public void windowState(ActionStatus status, Channel channel, String state);
 	public String getTitle();
+	public int getNumWindows();
 	public void toFront();
 
 }

@@ -1153,4 +1153,13 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			getDesktopDriver().windowState(status, channel, state);
 		}
 	}
+
+	@Override
+	public int getNumWindows() {
+		try {
+			return driver.getWindowHandles().size();
+		}catch (WebDriverException e) {
+			return 1;
+		}
+	}
 }

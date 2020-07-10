@@ -23,7 +23,6 @@ import java.util.Base64;
 
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
-import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
@@ -31,6 +30,14 @@ import com.ats.generator.variables.CalculatedValue;
 
 public class TestElementRoot extends TestElement {
 
+	private final static String SOURCE = "source";
+	private final static String VERSION = "version";
+	private final static String RECTANGLE = "rectangle";
+	private final static String TITLE = "title";
+	private final static String PROCESS_ID = "process-id";
+	private final static String SCREEN_SHOT = "screenshot";
+	private final static String WINDOWS = "windows";
+	
 	public TestElementRoot() {}
 
 	public TestElementRoot(Channel channel) {
@@ -65,28 +72,26 @@ public class TestElementRoot extends TestElement {
 		channel.toFront();
 		channel.refreshLocation();
 		
-		//final TestBound bound = channel.getDimension();
-		//final int x = bound.getX().intValue();
-		//final int y = bound.getY().intValue();
-		
 		super.over(status, position, desktopDragDrop, offsetX, offsetY);
 	}
 
 	@Override
 	public String getAttribute(ActionStatus status, String name) {
 		switch (name.toLowerCase()) {
-		case "source":
+		case SOURCE:
 			return engine.getSource();
-		case "rectangle":
-			return getRectangle();
-		case "screenshot":
+		case RECTANGLE:
+			return channel.getBoundDimension();
+		case SCREEN_SHOT:
 			return Base64.getEncoder().encodeToString(channel.getScreenShot());
-		case "version":
+		case VERSION:
 			return channel.getApplicationVersion();
-		case "processid":
-			return channel.getProcessId() + "";
-		case "title":
+		case PROCESS_ID:
+			return String.valueOf(channel.getProcessId());
+		case TITLE:
 			return engine.getTitle();
+		case WINDOWS:
+			return String.valueOf(engine.getNumWindows());
 		default :
 			return engine.getAttribute(status, getFoundElement(), name, 5);
 		}
@@ -95,18 +100,14 @@ public class TestElementRoot extends TestElement {
 	@Override
 	public CalculatedProperty[] getAttributes(boolean reload) {
 		
-		final CalculatedProperty[] props = new CalculatedProperty[5];
-		props[0] = new CalculatedProperty("source", "[...]");
-		props[1] = new CalculatedProperty("version", channel.getApplicationVersion());
-		props[2] = new CalculatedProperty("rectangle", getRectangle());
-		props[3] = new CalculatedProperty("processId", channel.getProcessId() + "");
-		props[4] = new CalculatedProperty("title", engine.getTitle());
+		final CalculatedProperty[] props = new CalculatedProperty[6];
+		props[0] = new CalculatedProperty(SOURCE, "[...]");
+		props[1] = new CalculatedProperty(VERSION, channel.getApplicationVersion());
+		props[2] = new CalculatedProperty(RECTANGLE, channel.getBoundDimension());
+		props[3] = new CalculatedProperty(PROCESS_ID, String.valueOf(channel.getProcessId()));
+		props[4] = new CalculatedProperty(TITLE, engine.getTitle());
+		props[5] = new CalculatedProperty(WINDOWS, String.valueOf(engine.getNumWindows()));
 		
 		return props;
-	}
-	
-	private String getRectangle() {
-		final TestBound bound = channel.getDimension();
-		return bound.getX().intValue() + "," + bound.getY().intValue() + "," + bound.getWidth().intValue() + "," + bound.getHeight().intValue();
 	}
 }

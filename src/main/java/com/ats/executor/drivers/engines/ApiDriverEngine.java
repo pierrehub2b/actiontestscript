@@ -452,4 +452,9 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	public List<String[]> loadSelectOptions(TestElement element) {
 		return Collections.<String[]>emptyList();
 	}
+
+	@Override
+	public int getNumWindows() {
+		return 0;
+	}
 }

@@ -725,4 +725,9 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	protected void setSize(Dimension dim) {
 	}
+	
+	@Override
+	public int getNumWindows() {
+		return 1;
+	}
 }

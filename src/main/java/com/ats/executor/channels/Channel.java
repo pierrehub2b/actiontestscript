@@ -509,6 +509,10 @@ public class Channel {
 	public void setDimension(TestBound dimension) {
 		this.dimension = dimension;
 	}
+	
+	public String getBoundDimension() {
+		return dimension.getX().intValue() + "," + dimension.getY().intValue() + "," + dimension.getWidth().intValue() + "," + dimension.getHeight().intValue();
+	}
 
 	public void setProcessId(Long value) {
 	}
