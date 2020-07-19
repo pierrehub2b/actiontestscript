@@ -15,8 +15,12 @@ public class MsEdgeDriverEngine extends ChromiumBasedDriverEngine {
 	public MsEdgeDriverEngine(Channel channel, ActionStatus status, String browser, DriverProcess driverProcess, DesktopDriver desktopDriver, ApplicationProperties props) {
 		super(channel, status, DriverManager.MSEDGE_BROWSER, driverProcess, desktopDriver, props);
 		
-		ChromeOptions options = initOptions(props, DriverManager.MSEDGE_BROWSER);
+		final ChromeOptions options = initOptions(props, DriverManager.MSEDGE_BROWSER);
 		options.setCapability(CapabilityType.BROWSER_NAME, "MicrosoftEdge");
+		options.setExperimentalOption("excludeSwitches", new String[]{"enable-automation"});
+		
 		launchDriver(status, options, profileFolder);
+		
+		//desktopDriver.findElements(channel, testElement, "ClassName", attributesValues, predicate);
 	}
 }

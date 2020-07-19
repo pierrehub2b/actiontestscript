@@ -19,16 +19,13 @@ under the License.
 
 package com.ats.executor.drivers;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.ProcessBuilder.Redirect;
 import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.ats.executor.ActionStatus;
@@ -54,53 +51,44 @@ public class DriverProcess {
 			Utils.clearDriverFolder(name);
 		}
 
-		port = getPortUsedByDriver(driverName);
-		
-		//if(port > 0) {
+		//port = getPortUsedByDriver(driverName);
 
-			
+		final File driverFile = driverFolderPath.resolve(driverName).toFile();
 
-			
-			
-		//}else {
+		if(driverFile.exists()){
 
-			final File driverFile = driverFolderPath.resolve(driverName).toFile();
+			port = findFreePort();
 
-			if(driverFile.exists()){
+			String[] arguments = {driverFile.getAbsolutePath(), "--port=" + port};
 
-				port = findFreePort();
+			if(args != null) {
+				arguments = Stream.of(arguments, args).flatMap(Stream::of).toArray(String[]::new);
+			}
 
-				String[] arguments = {driverFile.getAbsolutePath(), "--port=" + port};
+			final ProcessBuilder builder = new ProcessBuilder(arguments);
+			builder.redirectErrorStream(true);
+			builder.redirectInput(Redirect.INHERIT);
 
-				if(args != null) {
-					arguments = Stream.of(arguments, args).flatMap(Stream::of).toArray(String[]::new);
-				}
+			try {
 
-				final ProcessBuilder builder = new ProcessBuilder(arguments);
-				builder.redirectErrorStream(true);
-				builder.redirectInput(Redirect.INHERIT);
+				process = builder.start();
 
-				try {
+				final StreamGobbler errorGobbler = new StreamGobbler(process.getErrorStream(), "ERROR");            
+				final StreamGobbler outputGobbler = new StreamGobbler(process.getInputStream(), "OUTPUT");
 
-					process = builder.start();
-					
-					final StreamGobbler errorGobbler = new StreamGobbler(process.getErrorStream(), "ERROR");            
-					final StreamGobbler outputGobbler = new StreamGobbler(process.getInputStream(), "OUTPUT");
+				errorGobbler.start();
+				outputGobbler.start();
 
-					errorGobbler.start();
-					outputGobbler.start();
-
-				} catch (IOException e1) {
-					status.setError(ActionStatus.CHANNEL_START_ERROR, e1.getMessage());
-					return;
-				}
-
-			}else{
-				status.setError(ActionStatus.CHANNEL_START_ERROR, "unable to launch driver process, driver file is missing : " + driverFile.getAbsolutePath());
+			} catch (IOException e1) {
+				status.setError(ActionStatus.CHANNEL_START_ERROR, e1.getMessage());
 				return;
 			}
-		//}
-		
+
+		}else{
+			status.setError(ActionStatus.CHANNEL_START_ERROR, "unable to launch driver process, driver file is missing : " + driverFile.getAbsolutePath());
+			return;
+		}
+
 		Runtime.getRuntime().addShutdownHook(new CloseProcess(this));
 		status.setNoError();
 	}
@@ -160,7 +148,7 @@ public class DriverProcess {
 		}
 	}
 
-	private static int getPortUsedByDriver(String driverName) {
+	/*private static int getPortUsedByDriver(String driverName) {
 
 		final Stream<ProcessHandle> procs = ProcessHandle
 				.allProcesses()
@@ -173,9 +161,9 @@ public class DriverProcess {
 			return getPortUsedByProcess(firstProc.get().pid());
 		}
 		return 0;
-	}
+	}*/
 
-	private static int getPortUsedByProcess(long pid) {
+	/*private static int getPortUsedByProcess(long pid) {
 
 		try {
 			final Process p = Runtime.getRuntime().exec("cmd /c netstat -ano | findstr " + pid);
@@ -198,7 +186,7 @@ public class DriverProcess {
 		} catch (IOException e1) {}
 
 		return 0;
-	}
+	}*/
 
 	//--------------------------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------------------------
