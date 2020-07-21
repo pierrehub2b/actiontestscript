@@ -81,7 +81,31 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
-
+	
+	@Override
+	public void execute(ActionTestScript ts, String testName, int testLine) {
+		
+		int maxTry = AtsManager.getMaxStaleOrJavaScriptError();
+		while(maxTry > 0) {
+			try {
+				execute(ts, testName, testLine, Operators.GREATER, 0);
+				return;
+			} catch(JavascriptException e) {
+				ts.getTopScript().sendWarningLog("Javascript error", "try again : " + maxTry);
+				status.setException(ActionStatus.JAVASCRIPT_ERROR, e);
+			} catch(StaleElementReferenceException e) {
+				ts.getTopScript().sendWarningLog("StaleReference error", "try again : " + maxTry);
+				status.setException(ActionStatus.WEB_DRIVER_ERROR, e);
+			}
+			
+			ts.getCurrentChannel().sleep(500);
+			setTestElement(null);
+			maxTry--;
+		}
+		
+		throw new WebDriverException("execute element error : " + status.getFailMessage());
+	}
+	
 	public void execute(ActionTestScript ts, String testName, int testLine, String operator, int value) {
 
 		super.execute(ts, testName, testLine);
@@ -176,11 +200,7 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 			}
 		}
 	}
-
-	public int getActionMaxTry() {
-		return actionMaxTry;
-	}
-
+	
 	private Predicate<Integer> getPredicate(String operator, int value) {
 		switch (operator) {
 		case Operators.DIFFERENT :
@@ -195,30 +215,6 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 			return p -> p <= value;
 		}
 		return p -> p == value;
-	}
-	
-	@Override
-	public void execute(ActionTestScript ts, String testName, int testLine) {
-		
-		int maxTry = AtsManager.getMaxStaleOrJavaScriptError();
-		while(maxTry > 0) {
-			try {
-				execute(ts, testName, testLine, Operators.GREATER, 0);
-				return;
-			}catch(JavascriptException e) {
-				ts.getTopScript().sendWarningLog("Javascript error", "try again : " + maxTry);
-				status.setException(ActionStatus.JAVASCRIPT_ERROR, e);
-			}catch(StaleElementReferenceException e) {
-				ts.getTopScript().sendWarningLog("StaleReference error", "try again : " + maxTry);
-				status.setException(ActionStatus.WEB_DRIVER_ERROR, e);
-			}
-			
-			ts.getCurrentChannel().sleep(500);
-			setTestElement(null);
-			maxTry--;
-		}
-		
-		throw new WebDriverException("execute element error : " + status.getFailMessage());
 	}
 
 	private void asyncExec(ActionTestScript ts) {
@@ -242,16 +238,7 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 		testElement.terminateExecution(status, ts, error, status.getDuration());
 	}
 
-	public TestElement getTestElement() {
-		return testElement;
-	}
 
-	private void setTestElement(TestElement element) {
-		if(testElement != null) {
-			testElement.dispose();
-		}
-		testElement = element;
-	}
 
 	@Override
 	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
@@ -272,7 +259,22 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 	public void setSearchElement(SearchedElement value) {
 		this.searchElement = value;
 	}
-
+	
+	public TestElement getTestElement() {
+		return testElement;
+	}
+	
+	private void setTestElement(TestElement element) {
+		if (testElement != null) {
+			testElement.dispose();
+		}
+		testElement = element;
+	}
+	
+	public int getActionMaxTry() {
+		return actionMaxTry;
+	}
+	
 	public boolean isAsync() {
 		return async;
 	}

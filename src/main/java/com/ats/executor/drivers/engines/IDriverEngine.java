@@ -62,6 +62,7 @@ public interface IDriverEngine{
 	public void updateDimensions();
 	public FoundElement getElementFromPoint(Boolean syscomp, Double x, Double y);
 	public FoundElement getElementFromRect(Boolean syscomp, Double x, Double y, Double w, Double h);
+	public void setAttribute(ActionStatus status, FoundElement element, String attributeName, String attributeValue, int maxTry);
 	public String getAttribute(ActionStatus status, FoundElement element, String attributeName, int maxTry);
 	public CalculatedProperty[] getAttributes(FoundElement element, boolean reload);
 	public CalculatedProperty[] getCssAttributes(FoundElement element);
@@ -91,6 +92,9 @@ public interface IDriverEngine{
 	public void rightClick();
 	public void middleClick(ActionStatus status, MouseDirection position, TestElement element);
 	public void buttonClick(String id);
+	public void buttonClick(ArrayList<String> ids);
+	public void tap(int count, FoundElement element);
+	public void press(int duration, ArrayList<String> paths, FoundElement element);
 	
 	public void drag(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY);
 	public void drop(MouseDirection md, boolean desktopDragDrop);

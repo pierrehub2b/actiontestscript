@@ -39,8 +39,6 @@ public class TryAndDelay {
 	private int maxTry = 0;
 	private int delay = 0;
 	
-	public TryAndDelay() {}
-
 	public TryAndDelay(int maxTry, int delay) {
 		setMaxTry(maxTry);
 		setDelay(delay);
@@ -86,11 +84,7 @@ public class TryAndDelay {
 	}
 	
 	public void setMaxTry(int maxTry) {
-		if(maxTry > -10) {
-			this.maxTry = maxTry;
-		}else {
-			this.maxTry = -10;
-		}
+		this.maxTry = Math.max(maxTry, -10);
 	}
 	
 	public int getDelay() {
@@ -98,10 +92,6 @@ public class TryAndDelay {
 	}
 	
 	public void setDelay(int delay) {
-		if(delay > 0) {
-			this.delay = delay;
-		}else {
-			this.delay = 0;
-		}
+		this.delay = Math.max(delay, 0);
 	}
 }

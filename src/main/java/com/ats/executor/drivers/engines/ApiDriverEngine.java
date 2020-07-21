@@ -53,6 +53,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.xml.parsers.ParserConfigurationException;
 
+import com.ats.script.actions.ActionGesturePress;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
@@ -179,7 +180,10 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	public List<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template) {
 		return null;
 	}
-
+	
+	@Override
+	public void setAttribute(ActionStatus status, FoundElement element, String attributeName, String attributeValue, int maxTry) { }
+	
 	@Override
 	public String getAttribute(ActionStatus status, FoundElement element, String attributeName, int maxTry) {
 		return executor.getElementAttribute(element.getId(), attributeName, maxTry);
@@ -241,7 +245,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	public FoundElement getElementFromRect(Boolean syscomp, Double x, Double y, Double w, Double h) {
 		return null;
 	}
-
+	
 	@Override
 	public void switchWindow(ActionStatus status, int index, int tries) {
 	}
@@ -313,10 +317,18 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 
 	@Override
 	public void buttonClick(String id) {}
+	
+	@Override
+	public void buttonClick(ArrayList<String> ids) {}
+	
+	@Override
+	public void tap(int count, FoundElement element) {}
+	
+	@Override
+	public void press(int duration, ArrayList<String> paths, FoundElement element) {}
 
 	@Override
-	public void windowState(ActionStatus status, Channel channel, String state) {
-	}
+	public void windowState(ActionStatus status, Channel channel, String state) {}
 
 	@Override
 	public Object executeJavaScript(ActionStatus status, String script, TestElement element) {

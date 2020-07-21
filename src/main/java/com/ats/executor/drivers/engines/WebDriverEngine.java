@@ -40,6 +40,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.ats.script.actions.*;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.JavascriptException;
@@ -78,11 +79,6 @@ import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
-import com.ats.script.actions.ActionApi;
-import com.ats.script.actions.ActionChannelStart;
-import com.ats.script.actions.ActionGotoUrl;
-import com.ats.script.actions.ActionSelect;
-import com.ats.script.actions.ActionWindowState;
 import com.ats.tools.ResourceContent;
 import com.ats.tools.Utils;
 
@@ -397,7 +393,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			return loadElement(new ArrayList<AtsElement>(), x, y, w, h, initElementX, initElementY);
 		}
 	}
-
+	
 	private FoundElement loadElement(ArrayList<AtsElement> iframes, Double x, Double y, Double w, Double h, Double offsetX, Double offsetY) {
 
 		final ArrayList<Object> objectData = (ArrayList<Object>)runJavaScript(JS_ELEMENT_FROM_RECT, x - offsetX, y - offsetY, w, h);
@@ -467,7 +463,12 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	private RemoteWebElement getWebElement(FoundElement element) {
 		return element.getRemoteWebElement(driver);
 	}
-
+	
+	@Override
+	public void setAttribute(ActionStatus status, FoundElement element, String attributeName, String attributeValue, int maxTry) {
+	
+	}
+	
 	@Override
 	public String getAttribute(ActionStatus status, FoundElement element, String attributeName, int maxTry) {
 		int tryLoop = maxTry;
@@ -1140,7 +1141,16 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void buttonClick(String id) {}
-
+	
+	@Override
+	public void buttonClick(ArrayList<String> ids) {}
+	
+	@Override
+	public void tap(int count, FoundElement element) {}
+	
+	@Override
+	public void press(int duration, ArrayList<String> paths, FoundElement element) {}
+	
 	@Override
 	public void windowState(ActionStatus status, Channel channel, String state) {
 		if(ActionWindowState.MAXIMIZE.equals(state)) {

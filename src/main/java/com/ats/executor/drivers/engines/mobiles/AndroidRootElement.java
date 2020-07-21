@@ -1,6 +1,7 @@
 package com.ats.executor.drivers.engines.mobiles;
 
 import java.awt.Rectangle;
+import java.util.ArrayList;
 
 import com.ats.element.AtsMobileElement;
 import com.ats.element.FoundElement;
@@ -26,7 +27,17 @@ public class AndroidRootElement extends RootElement {
 		final Rectangle rect = element.getRectangle();
 		driver.executeRequest(MobileDriverEngine.ELEMENT, element.getId(), MobileDriverEngine.TAP, (int)(element.getBoundX() + driver.getOffsetX(rect, position)) + "", (int)(element.getBoundY() + driver.getOffsetY(rect, position)) + "");	
 	}
-
+	
+	@Override
+	public void tap(FoundElement element, int count) {
+		driver.executeRequest(MobileDriverEngine.ELEMENT, element.getId(), MobileDriverEngine.TAP, String.valueOf(count));
+	}
+	
+	@Override
+	public void press(FoundElement element, ArrayList<String> paths, int duration) {
+		driver.executeRequest(MobileDriverEngine.ELEMENT, element.getId(), MobileDriverEngine.PRESS, String.valueOf(paths));
+	}
+	
 	@Override
 	public void swipe(MobileTestElement testElement, int hDirection, int vDirection) {
 		driver.executeRequest(MobileDriverEngine.ELEMENT, testElement.getId(), MobileDriverEngine.SWIPE, testElement.getOffsetX() + "", testElement.getOffsetY() + "", hDirection + "", + vDirection + "");

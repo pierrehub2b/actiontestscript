@@ -9,6 +9,8 @@ import com.ats.generator.objects.MouseDirection;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
+import java.util.ArrayList;
+
 public abstract class RootElement {
 
 	protected Gson gson = new Gson();
@@ -26,6 +28,8 @@ public abstract class RootElement {
 
 	abstract public void refresh(JsonObject jsonObject);
 	abstract public void tap(ActionStatus status, FoundElement element, MouseDirection position);
+	abstract public void tap(FoundElement element, int count);
+	abstract public void press(FoundElement element, ArrayList<String> paths, int duration);
 	abstract public void swipe(MobileTestElement testElement, int hDirection, int vDirection);
 	abstract public Object scripting(String script, FoundElement element);
 	abstract public Object scripting(String script);

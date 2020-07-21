@@ -39,6 +39,7 @@ import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
 
+import com.ats.script.actions.ActionGesturePress;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
@@ -88,10 +89,12 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	private final static String CAPTURE = "capture";
 	public final static String ELEMENT = "element";
 	public final static String TAP = "tap";
+	public final static String PRESS = "press";
 	private final static String INPUT = "input";
 	public final static String SWIPE = "swipe";
 	private final static String BUTTON = "button";
 	public final static String SCRIPTING = "scripting";
+	public final static String SET_PROP = "sysprop-set";
 
 	private final static String SCREENSHOT_METHOD = "/screenshot";
 
@@ -318,7 +321,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 		return element.getFoundElement();
 	}
-
+	
 	public String getToken() {
 		return token;
 	}
@@ -387,6 +390,11 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			return null;
 		}
 	}
+	
+	@Override
+	public void setAttribute(ActionStatus status, FoundElement element, String attributeName, String attributeValue, int maxTry) {
+		executeRequest(SET_PROP, attributeName, attributeValue);
+	}
 
 	@Override
 	public String getAttribute(ActionStatus status, FoundElement element, String attributeName, int maxTry) {
@@ -436,7 +444,21 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	public void buttonClick(String type) {
 		executeRequest(BUTTON, type);
 	}
-
+	
+	@Override
+	public void buttonClick(ArrayList<String> ids) { }
+	
+	@Override
+	public void tap(int count, FoundElement element) {
+		rootElement.tap(element, count);
+	}
+	
+	@Override
+	public void press(int duration, ArrayList<String> paths, FoundElement element) {
+		rootElement.press(element, paths, duration);
+		
+	}
+	
 	@Override
 	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {
 		cachedElementTime = 0L;
@@ -500,7 +522,6 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			final Graphics g = subImage.getGraphics();
 
 			try {
-
 				//final BufferedImage subImage = ImageIO.read(in).getSubimage(x.intValue(), y.intValue(), width.intValue(), height.intValue());
 				g.drawImage(ImageIO.read(in), 0, 0, width.intValue(), height.intValue(), x.intValue(), y.intValue(), x.intValue() + width.intValue(), y.intValue() + height.intValue(), null);
 				g.dispose();

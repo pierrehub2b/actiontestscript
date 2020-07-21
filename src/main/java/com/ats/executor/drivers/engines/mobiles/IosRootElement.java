@@ -15,10 +15,9 @@ import com.google.gson.JsonObject;
 
 public class IosRootElement extends RootElement {
 
-	private String regexSpaces = "^\\s+";
-	private String regexBraces = "[{},]+";
-	private String regexBracesAndSpaces = "[\\s{},]+";
-
+	private final String regexSpaces = "^\\s+";
+	private final String regexBraces = "[{},]+";
+	
 	private Double deviceWidth = 0.0;
 	private Double deviceHeight = 0.0;
 
@@ -33,28 +32,34 @@ public class IosRootElement extends RootElement {
 	public MobileTestElement getCurrentElement(FoundElement element, MouseDirection position) {
 
 		final Rectangle rect = element.getRectangle();
-
-		final StringBuilder coordinates = new StringBuilder().append(element.getX()).append(";").append(element.getY())
-				.append(";").append(element.getWidth()).append(";").append(element.getHeight()).append(";")
-				.append(getRatioWidth()).append(";").append(getRatioHeight());
-
+		
+		String coordinates = element.getX() + ";" + element.getY() +
+				";" + element.getWidth() + ";" + element.getHeight() + ";" +
+				getRatioWidth() + ";" + getRatioHeight();
 		return new MobileTestElement(element.getId(), (driver.getOffsetX(rect, position)),
-				(driver.getOffsetY(rect, position)), coordinates.toString());
+				(driver.getOffsetY(rect, position)), coordinates);
 	}
 
 	@Override
 	public void tap(ActionStatus status, FoundElement element, MouseDirection position) {
 		final Rectangle rect = element.getRectangle();
-
-		final StringBuilder coordinates = new StringBuilder().append(element.getX()).append(";").append(element.getY())
-				.append(";").append(element.getWidth()).append(";").append(element.getHeight()).append(";")
-				.append(getRatioWidth()).append(";").append(getRatioHeight());
-
-		driver.executeRequest(MobileDriverEngine.ELEMENT, element.getId(), MobileDriverEngine.TAP,
-				(driver.getOffsetX(rect, position)) + "", (driver.getOffsetY(rect, position)) + "",
-				coordinates.toString());
+		
+		String coordinates = element.getX() + ";" + element.getY() +
+				";" + element.getWidth() + ";" + element.getHeight() + ";" +
+				getRatioWidth() + ";" + getRatioHeight();
+		driver.executeRequest(MobileDriverEngine.ELEMENT, element.getId(), MobileDriverEngine.TAP, (driver.getOffsetX(rect, position)) + "", (driver.getOffsetY(rect, position)) + "", coordinates);
 	}
-
+	
+	@Override
+	public void tap(FoundElement element, int count) {
+		driver.executeRequest(MobileDriverEngine.ELEMENT, element.getId(), MobileDriverEngine.TAP, String.valueOf(count));
+	}
+	
+	@Override
+	public void press(FoundElement element, ArrayList<String> paths, int duration) {
+		driver.executeRequest(MobileDriverEngine.ELEMENT, element.getId(), MobileDriverEngine.TAP, String.valueOf(paths), String.valueOf(duration));
+	}
+	
 	@Override
 	public void swipe(MobileTestElement testElement, int hDirection, int vDirection) {
 		driver.executeRequest(MobileDriverEngine.ELEMENT, testElement.getId(), MobileDriverEngine.SWIPE,
@@ -64,12 +69,12 @@ public class IosRootElement extends RootElement {
 
 	@Override
 	public Object scripting(String script, FoundElement element) {
-		final StringBuilder coordinates = new StringBuilder().append(element.getX()).append(";").append(element.getY())
-				.append(";").append(element.getWidth()).append(";").append(element.getHeight()).append(";")
-				.append(getRatioWidth()).append(";").append(getRatioHeight());
-
+		
+		String coordinates = element.getX() + ";" + element.getY() +
+				";" + element.getWidth() + ";" + element.getHeight() + ";" +
+				getRatioWidth() + ";" + getRatioHeight();
 		return driver.executeRequest(MobileDriverEngine.ELEMENT, element.getId(), MobileDriverEngine.SCRIPTING,
-				"0", "0", coordinates.toString(), script);
+				"0", "0", coordinates, script);
 	}
 
 	@Override
@@ -93,13 +98,14 @@ public class IosRootElement extends RootElement {
 		Double width = 0.0;
 		Double height = 0.0;
 
-		final ArrayList<StructDebugDescription> structDebug = new ArrayList<StructDebugDescription>();
-
-		for (int i = 0; i < debugDescriptionArray.length; i++) {
-			int level = countSpaces(debugDescriptionArray[i]);
-			if (level >= 4 && !debugDescriptionArray[i].contains("Application, pid:")) {
-				String trimmedLine = debugDescriptionArray[i].replaceAll(regexSpaces, "");
+		final ArrayList<StructDebugDescription> structDebug = new ArrayList<>();
+		
+		for (String item : debugDescriptionArray) {
+			int level = countSpaces(item);
+			if (level >= 4 && !item.contains("Application, pid:")) {
+				String trimmedLine = item.replaceAll(regexSpaces, "");
 				if (trimmedLine.startsWith("Window (Main)")) {
+					String regexBracesAndSpaces = "[\\s{},]+";
 					final String[] arraySize = trimmedLine.split(regexBracesAndSpaces);
 					width = Double.parseDouble(arraySize[arraySize.length - 2]);
 					height = Double.parseDouble(arraySize[arraySize.length - 1]);
@@ -109,7 +115,7 @@ public class IosRootElement extends RootElement {
 		}
 
 		// calculate ratio
-		if (height != deviceHeight || width != deviceWidth) {
+		if (!height.equals(deviceHeight) || !width.equals(deviceWidth)) {
 			ratioHeight = deviceHeight / height;
 			ratioWidth = deviceWidth / width;
 			width = width * ratioWidth;
@@ -117,7 +123,7 @@ public class IosRootElement extends RootElement {
 		}
 
 		final AtsMobileElement domStructure = new AtsMobileElement(UUID.randomUUID().toString(), "root", width, height,
-				0.0, 0.0, false, new HashMap<String, String>());
+				0.0, 0.0, false, new HashMap<>());
 
 		int currentIndex = 0;
 		for (StructDebugDescription structDebugDescription : structDebug) {
@@ -125,11 +131,11 @@ public class IosRootElement extends RootElement {
 			final String tag = structDebugDescription.getContent().split(regexBraces)[0].replaceAll(regexSpaces, "");
 			final String[] arraySize = structDebugDescription.getContent().split(regexBraces);
 
-			final ArrayList<String> stringArray = new ArrayList<String>();
-
-			for (int i = 0; i < arraySize.length; i++) {
-				if (!arraySize[i].replaceAll(regexSpaces, "").equals("")) {
-					stringArray.add(arraySize[i]);
+			final ArrayList<String> stringArray = new ArrayList<>();
+			
+			for (String s : arraySize) {
+				if (!s.replaceAll(regexSpaces, "").equals("")) {
+					stringArray.add(s);
 				}
 			}
 
@@ -174,7 +180,7 @@ public class IosRootElement extends RootElement {
 		}
 
 		final AtsMobileElement[] firstChilds = domStructure.getChildren();
-		if (firstChilds != null && firstChilds.length >= 0) {
+		if (firstChilds != null) {
 			final AtsMobileElement[] frontElements = firstChilds[0].getChildren();
 			if (frontElements != null && frontElements.length > 1) {
 
@@ -194,11 +200,11 @@ public class IosRootElement extends RootElement {
 	}
 
 	public boolean checkConsistancy(AtsMobileElement[] child, boolean val) {
-		for (int i = 0; i < child.length; i++) {
-			if (child[i] != null && child[i].getChildren().length > 0) {
-				val = checkConsistancy(child[i].getChildren(), val);
+		for (AtsMobileElement atsMobileElement : child) {
+			if (atsMobileElement != null && atsMobileElement.getChildren().length > 0) {
+				val = checkConsistancy(atsMobileElement.getChildren(), val);
 			} else {
-				if (child[i] != null && !child[i].getTag().equalsIgnoreCase("other")) {
+				if (atsMobileElement != null && !atsMobileElement.getTag().equalsIgnoreCase("other")) {
 					val = true;
 				}
 			}
@@ -282,7 +288,7 @@ public class IosRootElement extends RootElement {
 	}
 
 	private Map<String, String> getAttributes(String str) {
-		TreeMap<String, String> result = new TreeMap<String, String>();
+		TreeMap<String, String> result = new TreeMap<>();
 		String[] arraySize = str.split(regexBraces);
 
 		if (arraySize[0].contains("checkbox")) {
@@ -341,7 +347,7 @@ public class IosRootElement extends RootElement {
 	}
 
 	private String cleanAttribute(String str) {
-		return str.split(":")[str.split(":").length - 1].replace("\'", "").replaceAll(regexSpaces, "");
+		return str.split(":")[str.split(":").length - 1].replace("'", "").replaceAll(regexSpaces, "");
 	}
 
 	private int countSpaces(String str) {

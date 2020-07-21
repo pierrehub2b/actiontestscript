@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+import com.ats.script.actions.ActionGesturePress;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
@@ -258,6 +259,11 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	public String getAttribute(ActionStatus status, FoundElement element, String attributeName, int maxTry) {
 		return getDesktopDriver().getElementAttribute(element.getId(), attributeName);
 	}
+	
+	@Override
+	public void setAttribute(ActionStatus status, FoundElement element, String attributeName, String attributeValue, int maxTry) {
+	
+	}
 
 	@Override
 	public CalculatedProperty[] getAttributes(FoundElement element, boolean reload){
@@ -302,7 +308,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	public FoundElement getElementFromRect(Boolean syscomp, Double x, Double y, Double w, Double h){
 		return getDesktopDriver().getElementFromRect(x, y, w, h);
 	}
-
+	
 	@Override
 	public List<FoundElement> findElements(boolean sysComp, TestElement testElement, String tag, String[] attributes, String[] attributesValues, Predicate<AtsBaseElement> predicate, WebElement startElement, boolean waitAnimation) {
 		if(sysComp) {
@@ -517,7 +523,16 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void buttonClick(String id) {}
-
+	
+	@Override
+	public void buttonClick(ArrayList<String> ids) {}
+	
+	@Override
+	public void tap(int count, FoundElement element) {}
+	
+	@Override
+	public void press(int duration, ArrayList<String> paths, FoundElement element) {}
+	
 	@Override
 	public void windowState(ActionStatus status, Channel channel, String state) {
 		getDesktopDriver().windowState(status, channel, state);

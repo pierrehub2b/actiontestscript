@@ -479,7 +479,15 @@ public class TestElement{
 	public void rightClick() {
 		engine.rightClick();
 	}
-
+	
+	public void tap(int count) {
+		engine.tap(count, getFoundElement());
+	}
+	
+	public void press(int duration, ArrayList<String> paths) {
+		engine.press(duration, paths, getFoundElement());
+	}
+	
 	//-------------------------------------------------------------------------------------------------------------------
 	// Attributes
 	//-------------------------------------------------------------------------------------------------------------------

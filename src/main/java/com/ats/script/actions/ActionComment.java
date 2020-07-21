@@ -59,8 +59,7 @@ public class ActionComment extends Action {
 		setType(type);
 		setComment(value);
 	}
-
-
+	
 	//---------------------------------------------------------------------------------------------------------------------------------
 	// Code Generator
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -89,11 +88,11 @@ public class ActionComment extends Action {
 
 	@Override
 	public void execute(ActionTestScript ts, String testName, int testLine) {
-		if(STEP_TYPE.equals(type)) {
+		if (STEP_TYPE.equals(type)) {
 			super.execute(ts, testName, testLine);
 			status.endDuration();
 			ts.getRecorder().update(type, comment.getCalculated());
-		}else {
+		} else {
 			status = ts.getCurrentChannel().newActionStatus(testName, testLine);
 			status.endDuration();
 			if(LOG_TYPE.equals(type)) {

@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.ats.script.actions.*;
 import org.apache.commons.lang3.StringUtils;
 
 import com.ats.generator.GeneratorReport;
@@ -39,30 +40,6 @@ import com.ats.generator.variables.Variable;
 import com.ats.script.ProjectData;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
-import com.ats.script.actions.ActionApi;
-import com.ats.script.actions.ActionAssertCount;
-import com.ats.script.actions.ActionAssertProperty;
-import com.ats.script.actions.ActionAssertValue;
-import com.ats.script.actions.ActionCallscript;
-import com.ats.script.actions.ActionChannelClose;
-import com.ats.script.actions.ActionChannelStart;
-import com.ats.script.actions.ActionChannelSwitch;
-import com.ats.script.actions.ActionComment;
-import com.ats.script.actions.ActionExecute;
-import com.ats.script.actions.ActionGotoUrl;
-import com.ats.script.actions.ActionMouse;
-import com.ats.script.actions.ActionMouseDragDrop;
-import com.ats.script.actions.ActionMouseKey;
-import com.ats.script.actions.ActionMouseScroll;
-import com.ats.script.actions.ActionMouseSwipe;
-import com.ats.script.actions.ActionProperty;
-import com.ats.script.actions.ActionScripting;
-import com.ats.script.actions.ActionSelect;
-import com.ats.script.actions.ActionText;
-import com.ats.script.actions.ActionWindow;
-import com.ats.script.actions.ActionWindowResize;
-import com.ats.script.actions.ActionWindowState;
-import com.ats.script.actions.ActionWindowSwitch;
 import com.ats.script.actions.neoload.ActionNeoloadContainer;
 import com.ats.script.actions.neoload.ActionNeoloadRecord;
 import com.ats.script.actions.neoload.ActionNeoloadStart;
@@ -137,12 +114,11 @@ public class Lexer {
 
 	public void createAction(ScriptLoader script, String data, boolean disabled){
 
-		final ArrayList<String> dataArray = new ArrayList<String>(Arrays.asList(data.split(ScriptParser.ATS_SEPARATOR)));
+ 		final ArrayList<String> dataArray = new ArrayList<String>(Arrays.asList(data.split(ScriptParser.ATS_SEPARATOR)));
 
 		if(dataArray.size() > 0){
 
 			String actionType = StringUtils.trim(dataArray.remove(0));
-
 			String optionsFlat;
 			ArrayList<String> options;
 			boolean stopExec;
@@ -153,13 +129,31 @@ public class Lexer {
 				optionsFlat = matcher.group(2).trim();
 				options = new ArrayList<>(Arrays.asList(optionsFlat.split(",")));
 				stopExec = !options.removeIf(s -> s.equalsIgnoreCase(ActionExecute.NO_FAIL_LABEL));
-			}else {
+			} else {
 				optionsFlat = "";
-				options = new ArrayList<String>();
+				options = new ArrayList<>();
 				stopExec = true;
 			}
-
-			if(Mouse.OVER.equals(actionType)){ 
+			
+			if (ActionSysButton.SCRIPT_LABEL.equals(actionType)) {
+				
+				//-----------------------
+				// Sys button action
+				//-----------------------
+				
+				script.addAction(new ActionSysButton(script, dataArray), disabled);
+				
+			} else if (ActionGesturePress.SCRIPT_LABEL.equals(actionType)) {
+				
+				//-----------------------
+				// gesture press action
+				//-----------------------
+				
+				String elementInfo = StringUtils.trim(dataArray.remove(dataArray.size() - 1));
+				ArrayList<String> elements = new ArrayList<>(Arrays.asList(elementInfo));
+				script.addAction(new ActionGesturePress(script, stopExec, options, dataArray, elements), disabled);
+				
+			} else if (Mouse.OVER.equals(actionType)) {
 
 				//-----------------------
 				// Mouse over action
@@ -167,7 +161,7 @@ public class Lexer {
 
 				script.addAction(new ActionMouse(script, Mouse.OVER, stopExec, options, dataArray), disabled);
 
-			}else if(Mouse.DRAG.equals(actionType) || Mouse.DROP.equals(actionType)){
+			} else if(Mouse.DRAG.equals(actionType) || Mouse.DROP.equals(actionType)){
 
 				//-----------------------
 				// Drag drop action
@@ -175,7 +169,7 @@ public class Lexer {
 
 				script.addAction(new ActionMouseDragDrop(script, actionType, stopExec, options, dataArray), disabled);
 
-			}else if(actionType.startsWith(Mouse.CLICK)){
+			} else if(actionType.startsWith(Mouse.CLICK)){
 
 				//-----------------------
 				// Mouse button action
@@ -242,7 +236,15 @@ public class Lexer {
 
 				String dataOne = dataArray.remove(0).trim();
 
-				if(ActionChannelSwitch.SCRIPT_SWITCH_LABEL.equals(actionType)){	
+				if (ActionGestureTap.SCRIPT_LABEL.equals(actionType)) {
+					
+					//-----------------------
+					// Gesture tap action
+					//-----------------------
+					
+					script.addAction(new ActionGestureTap(script, dataOne, stopExec, options, dataArray), disabled);
+					
+				} else if(ActionChannelSwitch.SCRIPT_SWITCH_LABEL.equals(actionType)){
 
 					//-----------------------
 					// Channel switch
@@ -365,9 +367,9 @@ public class Lexer {
 						returnValues = callscriptData[1].split(",");
 					}
 
-					if(dataArray.size() > 0) {
+					if (dataArray.size() > 0) {
 						csvFilePath = dataArray.remove(0).trim();
-					}else {
+					} else {
 
 						matcher = ACTION_PATTERN.matcher(dataOne);
 						if (matcher.find()){

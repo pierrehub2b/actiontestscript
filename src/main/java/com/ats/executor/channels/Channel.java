@@ -637,7 +637,11 @@ public class Channel {
 		engine.mouseMoveToElement(status, foundElement, position, false, 0, 0);
 		actionTerminated(status);
 	}
-
+	
+	public void buttonClick(ArrayList<String> ids) {
+		engine.buttonClick(ids);
+	}
+	
 	//----------------------------------------------------------------------------------------------------------
 	// Performance
 	//----------------------------------------------------------------------------------------------------------
