@@ -58,7 +58,7 @@ public class SearchedElement {
 	
 	public SearchedElement(String tag) {
 		this.tag = tag;
-		this.criterias = new ArrayList<>();
+		this.criterias = new ArrayList<CalculatedProperty>();
 	}
 
 	public SearchedElement(Script script, ArrayList<String> elements) {
@@ -66,7 +66,7 @@ public class SearchedElement {
 		final String value = elements.remove(0);
 		final Matcher objectMatcher = Script.OBJECT_PATTERN.matcher(value);
 
-		setCriterias(new ArrayList<>());
+		setCriterias(new ArrayList<CalculatedProperty>());
 
 		if (objectMatcher.find()) {
 

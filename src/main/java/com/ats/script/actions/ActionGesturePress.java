@@ -40,6 +40,8 @@ public class ActionGesturePress extends ActionExecuteElement {
 	private ArrayList<String> paths;
 	private int duration;
 	
+	public ActionGesturePress() {}
+	
 	public ActionGesturePress(Script script, boolean stop, ArrayList<String> options, ArrayList<String> paths, ArrayList<String> elements) {
 		super(script, stop, options, elements);
 		// parsePaths(parameters);

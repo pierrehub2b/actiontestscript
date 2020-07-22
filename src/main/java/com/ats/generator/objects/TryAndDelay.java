@@ -39,6 +39,8 @@ public class TryAndDelay {
 	private int maxTry = 0;
 	private int delay = 0;
 	
+	public TryAndDelay() {}
+	
 	public TryAndDelay(int maxTry, int delay) {
 		setMaxTry(maxTry);
 		setDelay(delay);

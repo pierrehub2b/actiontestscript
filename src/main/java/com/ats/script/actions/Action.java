@@ -28,11 +28,16 @@ import com.google.gson.JsonObject;
 public abstract class Action {
 
 	protected Script script;
+	protected ActionStatus status;
 	protected int line;
 	protected boolean disabled = false;
 	
-	protected ActionStatus status;
-
+	private Channel currentChannel;
+	
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// Constructors
+	//---------------------------------------------------------------------------------------------------------------------------------
+	
 	public Action(){}
 
 	public Action(Script script){
@@ -62,17 +67,12 @@ public abstract class Action {
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
 	
-	private Channel currentChannel;
 	public void execute(ActionTestScript ts, String testName, int line){
 		currentChannel = ts.getCurrentChannel();
 		status = currentChannel.newActionStatus(testName, line);
 		
 		ts.getRecorder().createVisualAction(this);
 		currentChannel.startHarAction(this, status.getTestLine());
-	}
-	
-	protected Channel getCurrentChannel() {
-		return currentChannel;
 	}
 	
 	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
@@ -120,5 +120,9 @@ public abstract class Action {
 
 	public void setStatus(ActionStatus status) {
 		this.status = status;
+	}
+	
+	protected Channel getCurrentChannel() {
+		return currentChannel;
 	}
 }

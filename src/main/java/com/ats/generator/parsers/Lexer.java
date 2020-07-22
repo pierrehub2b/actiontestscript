@@ -131,7 +131,7 @@ public class Lexer {
 				stopExec = !options.removeIf(s -> s.equalsIgnoreCase(ActionExecute.NO_FAIL_LABEL));
 			} else {
 				optionsFlat = "";
-				options = new ArrayList<>();
+				options = new ArrayList<String>();
 				stopExec = true;
 			}
 			
@@ -150,7 +150,7 @@ public class Lexer {
 				//-----------------------
 				
 				String elementInfo = StringUtils.trim(dataArray.remove(dataArray.size() - 1));
-				ArrayList<String> elements = new ArrayList<>(Arrays.asList(elementInfo));
+				ArrayList<String> elements = new ArrayList<String>(Arrays.asList(elementInfo));
 				script.addAction(new ActionGesturePress(script, stopExec, options, dataArray, elements), disabled);
 				
 			} else if (Mouse.OVER.equals(actionType)) {
