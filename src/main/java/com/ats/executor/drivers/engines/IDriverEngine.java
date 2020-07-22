@@ -62,7 +62,7 @@ public interface IDriverEngine{
 	public void updateDimensions();
 	public FoundElement getElementFromPoint(Boolean syscomp, Double x, Double y);
 	public FoundElement getElementFromRect(Boolean syscomp, Double x, Double y, Double w, Double h);
-	public void setAttribute(ActionStatus status, FoundElement element, String attributeName, String attributeValue, int maxTry);
+	public void setAttribute(String attributeName, String attributeValue);
 	public String getAttribute(ActionStatus status, FoundElement element, String attributeName, int maxTry);
 	public CalculatedProperty[] getAttributes(FoundElement element, boolean reload);
 	public CalculatedProperty[] getCssAttributes(FoundElement element);

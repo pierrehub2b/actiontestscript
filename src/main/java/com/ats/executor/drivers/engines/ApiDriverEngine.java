@@ -182,9 +182,6 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	}
 	
 	@Override
-	public void setAttribute(ActionStatus status, FoundElement element, String attributeName, String attributeValue, int maxTry) { }
-	
-	@Override
 	public String getAttribute(ActionStatus status, FoundElement element, String attributeName, int maxTry) {
 		return executor.getElementAttribute(element.getId(), attributeName, maxTry);
 	}
@@ -244,6 +241,11 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	@Override
 	public FoundElement getElementFromRect(Boolean syscomp, Double x, Double y, Double w, Double h) {
 		return null;
+	}
+	
+	@Override
+	public void setAttribute(String attributeName, String attributeValue) {
+	
 	}
 	
 	@Override

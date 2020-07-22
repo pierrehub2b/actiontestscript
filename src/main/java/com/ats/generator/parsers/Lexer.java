@@ -235,7 +235,15 @@ public class Lexer {
 
 				String dataOne = dataArray.remove(0).trim();
 
-				if (ActionGestureTap.SCRIPT_LABEL.equals(actionType)) {
+				if (ActionSetProperty.SCRIPT_LABEL.equals(actionType)) {
+					
+					//-----------------------
+					// Set prop action
+					//-----------------------
+					String value = dataArray.remove(0).trim();
+					script.addAction(new ActionSetProperty(script, dataOne, value), disabled);
+					
+				} else if (ActionGestureTap.SCRIPT_LABEL.equals(actionType)) {
 					
 					//-----------------------
 					// Gesture tap action
