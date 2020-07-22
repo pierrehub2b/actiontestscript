@@ -124,6 +124,7 @@ public class Channel {
 
 			if(status.isPassed()) {
 				this.refreshLocation();
+				this.engine.started(status);
 			}else {
 				status.setChannel(null);
 			}
