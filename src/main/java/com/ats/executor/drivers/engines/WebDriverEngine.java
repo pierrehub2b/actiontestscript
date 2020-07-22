@@ -223,6 +223,12 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 				if(driverVersion != null) {
 					driverVersion = driverVersion.replaceFirst("\\(.*\\)", "").trim();
 				}
+			}else if("msedge".equals(entry.getKey())) {
+				Map<String, String> msedgeData = (Map<String, String>) entry.getValue();
+				driverVersion = msedgeData.get("msedgedriverVersion");
+				if(driverVersion != null) {
+					driverVersion = driverVersion.replaceFirst("\\(.*\\)", "").trim();
+				}
 			}else if("moz:geckodriverVersion".equals(entry.getKey())) {
 				driverVersion = entry.getValue().toString();
 			}
