@@ -28,7 +28,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.ats.script.actions.*;
-import org.apache.commons.lang3.StringUtils;
 
 import com.ats.generator.GeneratorReport;
 import com.ats.generator.events.ScriptProcessedNotifier;
@@ -118,14 +117,14 @@ public class Lexer {
 
 		if(dataArray.size() > 0){
 
-			String actionType = StringUtils.trim(dataArray.remove(0));
+			String actionType = dataArray.remove(0).trim();
 			String optionsFlat;
 			ArrayList<String> options;
 			boolean stopExec;
 
 			Matcher matcher = ACTION_PATTERN.matcher(actionType);
 			if (matcher.find()){
-				actionType = StringUtils.lowerCase(StringUtils.trim(matcher.group(1)));
+				actionType = matcher.group(1).trim().toLowerCase();
 				optionsFlat = matcher.group(2).trim();
 				options = new ArrayList<>(Arrays.asList(optionsFlat.split(",")));
 				stopExec = !options.removeIf(s -> s.equalsIgnoreCase(ActionExecute.NO_FAIL_LABEL));
@@ -149,7 +148,7 @@ public class Lexer {
 				// gesture press action
 				//-----------------------
 				
-				String elementInfo = StringUtils.trim(dataArray.remove(dataArray.size() - 1));
+				String elementInfo = dataArray.remove(dataArray.size() - 1).trim();
 				ArrayList<String> elements = new ArrayList<String>(Arrays.asList(elementInfo));
 				script.addAction(new ActionGesturePress(script, stopExec, options, dataArray, elements), disabled);
 				
