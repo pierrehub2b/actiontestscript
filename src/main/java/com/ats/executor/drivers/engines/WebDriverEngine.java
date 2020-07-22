@@ -137,7 +137,6 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			int defaultPropertyWait) {
 
 		super(channel, desktopDriver, props, defaultWait, defaultPropertyWait);
-
 		this.driverProcess = driverProcess;
 	}
 
@@ -260,8 +259,6 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		try {
 			driverSession = new URI(driverProcess.getDriverServerUrl() + "/session/" + driver.getSessionId().toString());
 		} catch (URISyntaxException e) {}
-
-
 	}
 
 	@Override

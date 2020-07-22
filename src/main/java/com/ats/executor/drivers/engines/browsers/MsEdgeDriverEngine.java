@@ -1,14 +1,19 @@
 package com.ats.executor.drivers.engines.browsers;
 
+import java.util.Collections;
+
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.CapabilityType;
 
 import com.ats.driver.ApplicationProperties;
+import com.ats.element.SearchedElement;
+import com.ats.element.TestElementSystem;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
+import com.ats.generator.variables.CalculatedProperty;
 
 public class MsEdgeDriverEngine extends ChromiumBasedDriverEngine {
 
@@ -17,10 +22,17 @@ public class MsEdgeDriverEngine extends ChromiumBasedDriverEngine {
 		
 		final ChromeOptions options = initOptions(props, DriverManager.MSEDGE_BROWSER);
 		options.setCapability(CapabilityType.BROWSER_NAME, "MicrosoftEdge");
-		options.setExperimentalOption("excludeSwitches", new String[]{"enable-automation"});
+		options.setExperimentalOption("useAutomationExtension", false);
+		options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
 		
 		launchDriver(status, options, profileFolder);
-		
-		//desktopDriver.findElements(channel, testElement, "ClassName", attributesValues, predicate);
+	}
+	
+	@Override
+	public void started(ActionStatus status) {
+		final TestElementSystem closInfobarButton = new TestElementSystem(channel, 1, p -> p == 1, new SearchedElement(new SearchedElement(new SearchedElement(0, "syscomp", new CalculatedProperty[] {}), 0, "Group", new CalculatedProperty[] {new CalculatedProperty("ClassName", "InfoBarContainerView")}), 0, "Button", new CalculatedProperty[] {}));
+		if(closInfobarButton.getCount() == 1) {
+			closInfobarButton.executeScript(status, "Invoke()", false);
+		}
 	}
 }

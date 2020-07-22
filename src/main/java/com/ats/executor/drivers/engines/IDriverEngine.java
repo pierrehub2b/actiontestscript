@@ -43,6 +43,7 @@ import com.ats.script.actions.ActionApi;
 
 public interface IDriverEngine{
 	
+	public void started(ActionStatus status);
 	public DesktopDriver getDesktopDriver();
 	public WebElement getRootElement(Channel cnl);
 	public void close(boolean keepRunning);
@@ -114,5 +115,4 @@ public interface IDriverEngine{
 	public String getTitle();
 	public int getNumWindows();
 	public void toFront();
-
 }

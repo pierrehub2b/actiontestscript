@@ -31,6 +31,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import com.ats.driver.ApplicationProperties;
 import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
+import com.ats.executor.ActionStatus;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.desktop.DesktopDriver;
@@ -85,6 +86,10 @@ public abstract class DriverEngine {
 		if(propertyWait == -1) {
 			propertyWait = defaultCheck;
 		}
+	}
+	
+	public void started(ActionStatus status) {
+		//nothing to do by default
 	}
 	
 	public void updateScreenshot(TestBound dimension, boolean isRef) {
