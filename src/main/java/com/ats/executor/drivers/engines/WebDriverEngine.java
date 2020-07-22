@@ -397,6 +397,9 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		}
 	}
 	
+	@Override
+	public void setAttribute(String attributeName, String attributeValue) { }
+	
 	private FoundElement loadElement(ArrayList<AtsElement> iframes, Double x, Double y, Double w, Double h, Double offsetX, Double offsetY) {
 
 		final ArrayList<Object> objectData = (ArrayList<Object>)runJavaScript(JS_ELEMENT_FROM_RECT, x - offsetX, y - offsetY, w, h);
@@ -465,11 +468,6 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	private RemoteWebElement getWebElement(FoundElement element) {
 		return element.getRemoteWebElement(driver);
-	}
-	
-	@Override
-	public void setAttribute(ActionStatus status, FoundElement element, String attributeName, String attributeValue, int maxTry) {
-	
 	}
 	
 	@Override

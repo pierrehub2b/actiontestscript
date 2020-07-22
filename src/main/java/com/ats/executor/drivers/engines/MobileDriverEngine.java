@@ -392,7 +392,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 	
 	@Override
-	public void setAttribute(ActionStatus status, FoundElement element, String attributeName, String attributeValue, int maxTry) {
+	public void setAttribute(String attributeName, String attributeValue) {
 		executeRequest(SET_PROP, attributeName, attributeValue);
 	}
 
