@@ -27,6 +27,8 @@ import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import org.xml.sax.SAXException;
 import javax.xml.parsers.*;
+import javax.xml.transform.*;
+import javax.xml.transform.stream.*;
 import java.io.*;
 
 public class SuitePdfGenerator {
@@ -34,11 +36,12 @@ public class SuitePdfGenerator {
     public static String patternDOCTYPE = "<!DOCTYPE[^<>]*(?:<![^<>]*>[^<>]*)*>";
     public static String patternXML = "\\<\\?xml[^<>]*(?:<![^<>]*>[^<>]*)*>";
 	
-	public static void main(String[] args) throws ParserConfigurationException, SAXException {
+	public static void main(String[] args) throws ParserConfigurationException, SAXException, TransformerException, IOException {
 		String fopDir = System.getProperty("fop", null);
 		String xmlPath = System.getProperty("xml", null);
 		String xslPath = System.getProperty("xsl", null);
 		String pdfPath = System.getProperty("pdf", null);
+		String name = System.getProperty("name", null);
 		
 		String basePath = new File(xmlPath.split(";")[1]).getParentFile().getParentFile().getAbsolutePath();
 		
@@ -69,14 +72,28 @@ public class SuitePdfGenerator {
 
 		if (fopDir == null || xmlPath == null || xslPath == null || pdfPath == null) { return; }
 		
+		String xmlUrl = generateReportXml(xmlPath, basePath);
 		try {
-			String xmlUrl = generateReportXml(xmlPath, basePath);
 			String command = String.format("java -cp %s;%s org.apache.fop.cli.Main -xml %s -xsl %s -pdf %s",
 					fopDir + "\\build\\fop.jar", fopDir + "\\lib\\*", xmlUrl, xslPath, pdfPath);
 			Runtime.getRuntime().exec("cmd /c " + command);
 		} catch (IOException e1) {
 			return;
 		}
+		
+		//HTML reports
+		try {
+			String styleSheetHtmlDetail = Resources.toString(ResourceContent.class.getResource("/Reports/campaign_html_stylesheet.xml"), Charsets.UTF_8);
+			String styleSheetHtml = createEmptyStylesheetHtml(styleSheetHtmlDetail,basePath);
+			TransformerFactory tFactory = TransformerFactory.newInstance();
+		    Transformer transformer = tFactory.newTransformer(new StreamSource(styleSheetHtml));
+
+		    transformer.transform(new StreamSource(xmlUrl), new StreamResult(basePath + File.separator + "report_"+ name + ".html"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 	
 	public static void copyImageToTempFolder(String name, String basePath) throws IOException {
@@ -90,6 +107,18 @@ public class SuitePdfGenerator {
 	
 	public static String createEmptyStylesheet(String xmlSource,String basePath) throws IOException {	
 		String path = basePath + File.separator + "campaign_pdf_stylesheet.xml";
+		File f = new File(path);
+        f.setWritable(true);
+        f.setReadable(true);
+        FileWriter fw = new FileWriter(f);
+        fw.write(xmlSource);
+	    fw.close();
+
+        return f.getAbsolutePath();
+	}
+	
+	public static String createEmptyStylesheetHtml(String xmlSource,String basePath) throws IOException {	
+		String path = basePath + File.separator + "campaign_html_stylesheet.xml";
 		File f = new File(path);
         f.setWritable(true);
         f.setReadable(true);

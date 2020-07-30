@@ -27,16 +27,23 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 
 public class TestPdfGenerator {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws TransformerException {
 		String fopDir = System.getProperty("fop", null);
 		String xmlPath = System.getProperty("xml", null);
 		String xslPath = System.getProperty("xsl", null);
-		String pdfPath = System.getProperty("pdf", null);
+		String name = System.getProperty("name", null);
+		File f = new File(xmlPath);
 		
 		if (fopDir == null || !(new File(fopDir).exists())) {
 			Map<String, String> map = System.getenv();
@@ -62,14 +69,40 @@ public class TestPdfGenerator {
 			}
 		}
 
-		if (fopDir == null || xmlPath == null || xslPath == null || pdfPath == null) { return; }
+		if (fopDir == null || xmlPath == null || xslPath == null) { return; }
 		String command = String.format("java -cp %s;%s org.apache.fop.cli.Main -xml %s -xsl %s -pdf %s",
-				fopDir + "\\build\\fop.jar", fopDir + "\\lib\\*", xmlPath, xslPath, pdfPath);
+				fopDir + "\\build\\fop.jar", fopDir + "\\lib\\*", xmlPath, xslPath, f.getParentFile().getAbsolutePath() + File.separator + f.getParentFile().getName() + ".pdf");
 		try {
 			Runtime.getRuntime().exec("cmd /c " + command);
 		} catch (IOException e) {
 			System.out.println(e);
 		}
+		
+		//HTML reports
+		try {
+			String path = f.getParentFile().getAbsolutePath();
+			String styleSheetHtmlDetail = Resources.toString(ResourceContent.class.getResource("/Reports/test_html_stylesheet.xml"), Charsets.UTF_8);
+			String styleSheetHtml = createEmptyStylesheetHtml(styleSheetHtmlDetail,path);
+			TransformerFactory tFactory = TransformerFactory.newInstance();
+		    Transformer transformer = tFactory.newTransformer(new StreamSource(styleSheetHtml));
+
+		    transformer.transform(new StreamSource(xmlPath), new StreamResult(path + File.separator + f.getParentFile().getName() + ".html"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public static String createEmptyStylesheetHtml(String xmlSource,String basePath) throws IOException {	
+		String path = basePath + File.separator + "test_html_stylesheet.xml";
+		File f = new File(path);
+        f.setWritable(true);
+        f.setReadable(true);
+        FileWriter fw = new FileWriter(f);
+        fw.write(xmlSource);
+	    fw.close();
+
+        return f.getAbsolutePath();
 	}
 	
 	public static void copyImageToTempFolder(String name, String xmlPath) throws IOException {
@@ -77,7 +110,7 @@ public class TestPdfGenerator {
 		String path = f.getParentFile().getAbsolutePath();
 		byte[] aByteArray = Resources.toByteArray(ResourceContent.class.getResource("/Reports/" + name + ".png"));
 		final File file = new File(path + File.separator + name + ".png");
-        final FileOutputStream fileOut = new FileOutputStream(file );
+        final FileOutputStream fileOut = new FileOutputStream(file);
         fileOut.write(aByteArray);
         fileOut.flush();
         fileOut.close();

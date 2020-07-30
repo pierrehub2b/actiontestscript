@@ -62,7 +62,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
           </TD>
 	  <TD class="align-middle text-center">
 	    <xsl:text disable-output-escaping="yes">&lt;A href=&quot;</xsl:text>
-	    <xsl:value-of select="concat('../report/report_',@name,'.pdf')"/>
+	    <xsl:value-of select="concat('../',@name,'/report_',@name,'.pdf')"/>
 	    <xsl:text disable-output-escaping="yes">&quot; class=&quot;btn btn-secondary btn-sm &quot; role=&quot;button&quot; aria-pressed=&quot;true&quot;&gt;PDF report&lt;/a&gt;</xsl:text>
 	  </TD>
 
@@ -279,14 +279,14 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     </xsl:choose>
     <TD class="align-middle text-center">
       <xsl:text disable-output-escaping="yes">&lt;A href=&quot;</xsl:text>
-      <xsl:value-of select="concat('../',$test_file,'/',$test_file,'.html')"/>
+      <xsl:value-of select="concat($test_file,'/',$test_file,'.html')"/>
       <xsl:text disable-output-escaping="yes">&quot; class=&quot;btn btn-secondary btn-sm &quot; role=&quot;button&quot; aria-pressed=&quot;true&quot;&gt;HTML report&lt;/a&gt;</xsl:text>
     </TD>
     <xsl:choose>
       <xsl:when test="$xml_reports = 'true'">
 	<TD class="align-middle text-center">
 	  <xsl:text disable-output-escaping="yes">&lt;A href=&quot;</xsl:text>
-	  <xsl:value-of select="concat('../',$test_file,'/',$test_file,'.pdf')"/>
+	  <xsl:value-of select="concat($test_file,'/',$test_file,'.pdf')"/>
 	  <xsl:text disable-output-escaping="yes">&quot; class=&quot;btn btn-secondary btn-sm &quot; role=&quot;button&quot; aria-pressed=&quot;true&quot;&gt;PDF report&lt;/a&gt;</xsl:text>
 	</TD>
       </xsl:when>
@@ -295,7 +295,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
       <xsl:when test="$atsv_reports &gt; 0">
 	<TD class="align-middle text-center">
 	  <xsl:text disable-output-escaping="yes">&lt;A href=&quot;</xsl:text>
-	  <xsl:value-of select="concat('../',$atsv_test_file,'.atsv')"/>
+	  <xsl:value-of select="concat($atsv_test_file,'.atsv')"/>
 	  <xsl:text disable-output-escaping="yes">&quot; class=&quot;btn btn-secondary btn-sm &quot; role=&quot;button&quot; aria-pressed=&quot;true&quot;&gt;ATSV report&lt;/a&gt;</xsl:text>
 	</TD>
       </xsl:when>
