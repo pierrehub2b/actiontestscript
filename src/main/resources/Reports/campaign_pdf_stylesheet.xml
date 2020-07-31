@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:fo="http://www.w3.org/1999/XSL/Format" exclude-result-prefixes="fo" xmlns:fox="http://xmlgraphics.apache.org/fop/extensions">
+  <xsl:output method="xml" version="1.0" omit-xml-declaration="no" indent="yes"/>
+  <!-- ========================= -->
+  <!-- Calculations    -->
+  <!-- ========================= -->
+  <xsl:variable name="nbtests" select="count(//report/tests/ats)"/>
+  <xsl:variable name="nbkos" select="count(//report/tests/ats/actions/action[passed = 'false'])"/>
+  <xsl:variable name="nbpassed" select="$nbtests - $nbkos"/>  
+  <!-- ========================= -->
+  <!-- Appel du template: ats -->
+  <!-- ========================= -->
+  <xsl:template match="report">
+    <fo:root xmlns:fo="http://www.w3.org/1999/XSL/Format">
+      <fo:layout-master-set>
+        <fo:simple-page-master master-name="landscapeA4-head" page-height="21cm" page-width="29.7cm" margin-top="2cm" margin-bottom="1cm" margin-left="2cm" margin-right="2cm">
+          <fo:region-body margin="0mm 0mm 0mm 0mm" />
+          <fo:region-after extent="1cm" />
+        </fo:simple-page-master>
+        <fo:simple-page-master master-name="landscapeA4-body" page-height="21cm" page-width="29.7cm" margin-top="2cm" margin-left="2cm" margin-right="2cm">
+          <fo:region-body margin="0mm 0mm 0mm 0mm" />
+          <fo:region-after extent="1cm" />
+        </fo:simple-page-master>
+      </fo:layout-master-set>
+      <xsl:apply-templates/>
+    </fo:root>
+  </xsl:template>
+  
+  <!-- ========================= -->
+  <!-- child element: suite     -->
+  <!-- ========================= -->
+  <xsl:template match="suite">    
+    <fo:page-sequence master-reference="landscapeA4-head">
+      <fo:static-content flow-name="xsl-region-after">
+        <fo:block text-align="center" vertical-align="bottom">
+          Page <fo:page-number/>
+        </fo:block>
+      </fo:static-content>
+      <fo:flow flow-name="xsl-region-body">
+        <fo:block font-size="16pt" font-family="Helvetica" margin="0cm 0cm 1cm 1cm" border-style="solid" fox:border-radius="16pt" border-width="10" border-color="lightblue" padding="16pt" text-align="center">
+            <fo:table table-layout="fixed" width="100%">
+              <fo:table-column column-width="6cm"/>
+              <fo:table-column column-width="15.5cm"/>
+              <fo:table-body>
+                <fo:table-row>
+                  <fo:table-cell>
+                    <fo:block text-align="left" font-weight="bold">
+                      <fo:external-graphic src="agilitest.png"/>
+                    </fo:block>
+                  </fo:table-cell>
+                  <fo:table-cell padding-before="30pt" padding-after="30pt" >
+                    <fo:block display-align="center" text-align="left" font-weight="bold">
+                      ActionTestScript - Campaign Result
+                    </fo:block>
+                  </fo:table-cell>
+                </fo:table-row>
+              </fo:table-body>
+            </fo:table>
+            <fo:block padding="3mm">
+            </fo:block>
+            <fo:table table-layout="fixed" width="100%" font-size="16pt" border-style="solid" border-width="2" border-color="black">
+              <fo:table-column column-width="21cm"/>
+              <fo:table-body>
+                <fo:table-row>
+                  <fo:table-cell padding-before="5pt">
+                    <fo:block text-align="left" font-weight="bold">
+                      <xsl:value-of select="@name"/>
+                    </fo:block>
+                  </fo:table-cell>
+                </fo:table-row>
+              </fo:table-body>
+            </fo:table>
+            <fo:block padding="3mm">
+            </fo:block>
+            <fo:table table-layout="fixed" width="100%">
+              <fo:table-column column-width="8cm"/>
+              <fo:table-column column-width="13.5cm"/>
+              <fo:table-body>
+                <fo:table-row>
+                  <fo:table-cell>
+                    <fo:block text-align="left" font-weight="bold">
+                      Parameters :
+                    </fo:block>
+                  </fo:table-cell>
+                  <fo:table-cell>
+                    <fo:block text-align="left" font-weight="bold">
+		      <xsl:apply-templates select="parameter"/>
+                    </fo:block>
+                </fo:table-cell>
+                </fo:table-row>
+		<xsl:apply-templates select="test"/>
+              </fo:table-body>
+            </fo:table>
+        </fo:block>
+        <fo:block padding="3mm">
+        </fo:block>
+        <fo:block font-size="12pt" font-family="Helvetica" margin="0cm 0cm 1cm 1cm" border-style="solid" fox:border-radius="16pt" border-width="10" border-color="lightblue" text-align="center">
+          <fo:table table-layout="fixed" width="100%">
+            <fo:table-column column-width="21cm"/>
+            <fo:table-body>
+              <fo:table-row>
+                <fo:table-cell>
+                  <fo:block>
+                    <xsl:choose>
+                      <xsl:when test="$nbkos &gt; 0">
+                        <fo:block>
+                          <fo:external-graphic src="false.png"/>
+                        </fo:block>
+                      </xsl:when>
+                      <xsl:when test="$nbkos = 0">
+                        <fo:block>
+                          <fo:external-graphic src="true.png"/>
+                        </fo:block>
+                      </xsl:when>
+                    </xsl:choose>
+                  </fo:block>
+                </fo:table-cell>
+              </fo:table-row>
+            </fo:table-body>
+          </fo:table>
+	  <fo:table table-layout="fixed" width="100%">
+	    <fo:table-column column-width="7cm"/>
+	    <fo:table-column column-width="7cm"/>
+	    <fo:table-column column-width="7cm"/>
+            <fo:table-body>
+	      <fo:table-row>
+		<fo:table-cell>
+                  <fo:block display-align="center" text-align="center">
+                    Nb tests :
+                    <xsl:value-of select="$nbtests"/>                  
+                  </fo:block>
+		</fo:table-cell>
+		<fo:table-cell>
+                  <fo:block display-align="center" text-align="center">
+                    Nb passed :
+                    <xsl:value-of select="$nbpassed"/>                                     
+                  </fo:block>
+		</fo:table-cell>
+		<fo:table-cell>
+                  <fo:block display-align="center" text-align="center">
+                    Nb KOs :
+                    <xsl:value-of select="$nbkos"/>
+                  </fo:block>
+		</fo:table-cell>
+	      </fo:table-row>
+            </fo:table-body>
+          </fo:table>
+	</fo:block>
+      </fo:flow>
+    </fo:page-sequence>
+  </xsl:template>    
+  <!-- ========================= -->
+  <!-- child element: test     -->
+  <!-- ========================= -->
+  <xsl:template match="test">
+    <fo:table-row>
+      <xsl:apply-templates select="groups"/>
+      <xsl:apply-templates select="packages"/>
+      <xsl:apply-templates select="classes"/>
+    </fo:table-row>
+  </xsl:template>
+  <!-- ========================= -->
+  <!-- child element: groups     -->
+  <!-- ========================= -->
+  <xsl:template match="groups">
+      <fo:table-cell>
+        <fo:block text-align="left" font-weight="bold">
+          Groups :
+        </fo:block>
+      </fo:table-cell>
+      <fo:table-cell>
+        <fo:block text-align="left">
+	  <xsl:apply-templates select="run"/>
+        </fo:block>
+      </fo:table-cell>
+  </xsl:template> 
+  <!-- ========================= -->
+  <!-- child element: run     -->
+  <!-- ========================= -->
+  <xsl:template match="run">
+    <xsl:apply-templates select="include"/>
+    <xsl:apply-templates select="exclude"/>
+  </xsl:template>
+  <!-- ========================= -->
+  <!-- child element: packages     -->
+  <!-- ========================= -->
+  <xsl:template match="packages">
+      <fo:table-cell>
+        <fo:block text-align="left" font-weight="bold">
+          Packages :
+        </fo:block>
+      </fo:table-cell>
+      <fo:table-cell>
+        <fo:block text-align="left">
+	  <xsl:apply-templates select="package"/>
+        </fo:block>
+      </fo:table-cell>
+  </xsl:template> 
+  <!-- ========================= -->
+  <!-- child element: package     -->
+  <!-- ========================= -->
+  <xsl:template match="package">
+    <xsl:apply-templates select="include"/>
+    <xsl:apply-templates select="exclude"/>
+  </xsl:template>
+  <!-- ========================= -->
+  <!-- child element: include     -->
+  <!-- ========================= -->
+  <xsl:template match="include">
+    <fo:block text-align="left" font-weight="bold">
+      <xsl:value-of select="@name"/>
+    </fo:block>
+  </xsl:template>
+  <!-- ========================= -->
+  <!-- child element: exclude     -->
+  <!-- ========================= -->
+  <xsl:template match="exclude">
+    <fo:block text-align="left">
+      <fo:inline text-decoration="line-through">
+	<xsl:value-of select="@name"/>
+      </fo:inline>
+    </fo:block>
+  </xsl:template>
+  <!-- ========================= -->
+  <!-- child element: classes     -->
+  <!-- ========================= -->
+  <xsl:template match="classes">
+      <fo:table-cell>
+        <fo:block text-align="left" font-weight="bold">
+          Tests :
+        </fo:block>
+      </fo:table-cell>
+      <fo:table-cell>
+        <fo:block text-align="left">
+	  <xsl:apply-templates select="class"/>
+        </fo:block>
+      </fo:table-cell>
+  </xsl:template> 
+  <!-- ========================= -->
+  <!-- child element: class     -->
+  <!-- ========================= -->
+  <xsl:template match="class">
+    <fo:block text-align="left" font-weight="bold">
+      <xsl:value-of select="@name"/>
+    </fo:block>
+  </xsl:template>
+  <!-- ========================= -->
+  <!-- child element: tests     -->
+  <!-- ========================= -->
+  <xsl:template match="tests">
+    <fo:page-sequence master-reference="landscapeA4-body">
+      <fo:static-content flow-name="xsl-region-after">
+        <fo:block text-align="center" vertical-align="bottom">
+          Page <fo:page-number/>
+        </fo:block>
+      </fo:static-content>
+      <fo:flow flow-name="xsl-region-body">
+        <fo:block-container width="25.5cm" height="17cm" left="0" top="0" position="absolute" padding-left="0.1cm">
+          <fo:block> 
+            <fo:table table-layout="fixed" width="100%">
+              <fo:table-column column-width="5cm"/>
+              <fo:table-column column-width="5.5cm"/>
+              <fo:table-column column-width="5.5cm"/>
+              <fo:table-column column-width="5cm"/>
+              <fo:table-column column-width="5cm"/>
+              <fo:table-body>
+                <fo:table-row>
+                  <fo:table-cell border-width="2px" border-style="solid">
+                    <fo:block display-align="center" text-align="center" font-weight="bold">
+                      Name
+                    </fo:block>
+                  </fo:table-cell>
+                  <fo:table-cell border-width="2px" border-style="solid">
+                    <fo:block display-align="center" text-align="center" font-weight="bold">
+                      OS
+                    </fo:block>
+                  </fo:table-cell>
+                  <fo:table-cell border-width="2px" border-style="solid">
+                    <fo:block display-align="center" text-align="center" font-weight="bold">
+                      Version Context
+                    </fo:block>
+                  </fo:table-cell>
+                  <fo:table-cell border-width="2px" border-style="solid">
+                    <fo:block display-align="center" text-align="center" font-weight="bold">
+                      Duration (ms)
+                    </fo:block>
+                  </fo:table-cell>
+                  <fo:table-cell border-width="2px" border-style="solid">
+                    <fo:block display-align="center" text-align="center" font-weight="bold">
+                      Result
+                    </fo:block>
+                  </fo:table-cell>
+                </fo:table-row>
+		<xsl:apply-templates select="ats"/>
+              </fo:table-body>
+            </fo:table>
+          </fo:block>
+        </fo:block-container>
+      </fo:flow>
+    </fo:page-sequence>
+  </xsl:template>
+  <!-- ========================= -->
+  <!-- child element: ats     -->
+  <!-- ========================= -->
+  <xsl:template match="ats">
+  <xsl:variable name="test_result" select="count(actions/action[passed = 'false'])"/>
+    <fo:table-row border-width="2px" border-style="solid">
+      <xsl:apply-templates select="script"/>
+      <xsl:apply-templates select="actions"/>
+      <fo:table-cell border-width="2px" border-style="solid">
+	<fo:block display-align="center" text-align="left">
+	  <xsl:value-of select="sum(actions/action/duration)" />
+	</fo:block>
+      </fo:table-cell>
+      <fo:table-cell border-width="2px" border-style="solid">
+	<fo:block display-align="center" text-align="center">
+	  <xsl:choose>
+            <xsl:when test="$test_result &gt; 0">
+              <fo:block>
+                <fo:external-graphic src="false.png"/>
+              </fo:block>
+            </xsl:when>
+            <xsl:when test="$test_result = 0">
+              <fo:block>
+                <fo:external-graphic src="true.png"/>
+              </fo:block>
+            </xsl:when>
+          </xsl:choose>
+	</fo:block>
+      </fo:table-cell>
+    </fo:table-row>
+  </xsl:template>
+  <!-- ========================= -->
+  <!-- child element: script     -->
+  <!-- ========================= -->
+  <xsl:template match="script">
+    <fo:table-cell border-width="2px" border-style="solid">
+      <fo:block display-align="center" text-align="left">
+	<xsl:value-of select="@testName"/>
+      </fo:block>
+    </fo:table-cell>
+    <fo:table-cell border-width="2px" border-style="solid">
+      <fo:block display-align="center" text-align="left">
+	<xsl:value-of select="@osInfo"/>
+      </fo:block>
+    </fo:table-cell>
+  </xsl:template>
+  <!-- ========================= -->
+  <!-- child element: actions     -->
+  <!-- ========================= -->
+  <xsl:template match="actions">
+    <xsl:variable name="comment" select="//action[@type='com.ats.script.actions.ActionComment'][1]/data"/>
+    <fo:table-cell border-width="2px" border-style="solid">
+      <fo:block display-align="center" text-align="left">
+	<xsl:value-of select="$comment"/>
+      </fo:block>
+    </fo:table-cell>
+  </xsl:template>
+</xsl:stylesheet>
+
+

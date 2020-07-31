@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="1.0"
+xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <xsl:output method="html" version="5.0" encoding="UTF-8" indent="yes"/>
+  <!-- ========================= -->
+  <!-- Calculations    -->
+  <!-- ========================= -->
+  <xsl:variable name="nbtests" select="count(//report/tests/ats)"/>
+  <xsl:variable name="nbkos" select="count(//report/tests/ats/actions/action[passed = 'false'])"/>
+  <xsl:variable name="nbpassed" select="$nbtests - $nbkos"/>  
+  <xsl:variable name="xml_reports" select="//report/suite/parameter[@name='xml.report']/@value"/>
+  <xsl:variable name="atsv_reports" select="//report/suite/parameter[@name='visual.report']/@value"/>
+  <xsl:variable name="ats_loglevel" select="//report/suite/parameter[@name='ats.log.level']/@value"/>
+  <!-- ========================= -->
+  <!-- Appel du template: ats -->
+  <!-- ========================= -->
+  <xsl:template match="report">
+    <HTML LANG="en">
+      <HEAD>
+	<META charset="utf-8"/>
+	<META name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+	<META name="description" content=""/>
+	<TITLE>Agilitest campaign reporting</TITLE>
+	<LINK rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous"/>
+	<LINK rel="stylesheet" href="../report.css"/>
+      </HEAD>
+      <BODY class="py-4">
+	<DIV class="container">
+	  <xsl:apply-templates/>
+	</DIV>
+      </BODY>
+    </HTML>
+  </xsl:template>
+  <!-- ========================= -->
+  <!-- child element: suite     -->
+  <!-- ========================= -->
+  <xsl:template match="suite">
+    <TABLE class="execution table table-borderless">
+      <TBODY>
+	<TR>
+	  <TH class="align-middle text-center">
+            <IMG src="agilitest.png"/>
+	  </TH>
+	  <TH class="align-middle text-center">
+            <H1>
+	      ActionTestScript - Campaign Result
+	    </H1>
+	  </TH>
+	</TR>
+      </TBODY>
+    </TABLE>
+    <TABLE class="execution table table-bordered table-hover">
+      <TBODY>
+	<TR>
+	  <TD class="w-25 p-3">
+            Execution : 
+          </TD>
+	  <TD>
+	    <H3>
+              <xsl:value-of select="@name"/>
+	    </H3>
+          </TD>
+	  <TD class="align-middle text-center">
+	    <xsl:text disable-output-escaping="yes">&lt;A href=&quot;</xsl:text>
+	    <xsl:value-of select="concat('../',@name,'/report_',@name,'.pdf')"/>
+	    <xsl:text disable-output-escaping="yes">&quot; class=&quot;btn btn-secondary btn-sm &quot; role=&quot;button&quot; aria-pressed=&quot;true&quot;&gt;PDF report&lt;/a&gt;</xsl:text>
+	  </TD>
+
+        </TR>
+	<TR>
+	  <TD class="w-25 p-3">
+            Parameters :
+          </TD>
+	  <TD COLSPAN="2">
+            <xsl:choose>
+	      <xsl:when test="$xml_reports = 'true'">
+		XML/PDF Report generation
+		<BR/>
+	      </xsl:when>
+	    </xsl:choose>
+            <xsl:choose>
+	      <xsl:when test="$atsv_reports &gt; 0">
+		ATSV Report level : 
+		<xsl:value-of select="$atsv_reports"/>
+		<BR/>
+	      </xsl:when>
+	    </xsl:choose>
+	    ATS log level : 
+            <xsl:value-of select="$ats_loglevel"/>
+	    <BR/>
+          </TD>
+        </TR>
+	<xsl:apply-templates select="test"/>
+      </TBODY>
+    </TABLE>
+    <TABLE class="result table table-bordered table-hover">
+      <THEAD>
+	<TR>
+          <xsl:choose>
+            <xsl:when test="$nbkos &gt; 0">
+	      <TD class="test-failed" COLSPAN="3" STYLE="text-align: center;">
+                <IMG src="false.png"/>
+	      </TD>
+            </xsl:when>
+            <xsl:when test="$nbkos = 0">
+	      <TD class="test-passed" COLSPAN="3" STYLE="text-align: center;">
+                <IMG src="true.png"/>
+	      </TD>
+	    </xsl:when>
+          </xsl:choose>
+        </TR>
+      </THEAD>
+      <TBODY>
+	<TR>
+	  <TD>
+            Nb tests :
+            <xsl:value-of select="$nbtests"/>                  
+          </TD>
+	  <TD>
+            Nb passed :
+            <xsl:value-of select="$nbpassed"/>                                     
+          </TD>
+	  <TD>
+            Nb KOs :
+            <xsl:value-of select="$nbkos"/>
+          </TD>
+        </TR>
+      </TBODY>
+    </TABLE>
+  </xsl:template>    
+  <!-- ========================= -->
+  <!-- child element: test     -->
+  <!-- ========================= -->
+  <xsl:template match="test">
+    <TR>
+      <xsl:apply-templates select="groups"/>
+      <xsl:apply-templates select="packages"/>
+      <xsl:apply-templates select="classes"/>
+    </TR>
+  </xsl:template>
+  <!-- ========================= -->
+  <!-- child element: groups     -->
+  <!-- ========================= -->
+  <xsl:template match="groups">
+    <TD>
+      Groups :
+    </TD>
+    <TD>
+      <xsl:apply-templates select="run"/>
+    </TD>
+  </xsl:template> 
+  <!-- ========================= -->
+  <!-- child element: run     -->
+  <!-- ========================= -->
+  <xsl:template match="run">
+    <xsl:apply-templates select="include"/>
+    <xsl:apply-templates select="exclude"/>
+  </xsl:template>
+  <!-- ========================= -->
+  <!-- child element: packages     -->
+  <!-- ========================= -->
+  <xsl:template match="packages">
+    <TD>
+      Packages :
+    </TD>
+    <TD>
+      <xsl:apply-templates select="package"/>
+    </TD>
+  </xsl:template> 
+  <!-- ========================= -->
+  <!-- child element: package     -->
+  <!-- ========================= -->
+  <xsl:template match="package">
+    <xsl:apply-templates select="include"/>
+    <xsl:apply-templates select="exclude"/>
+  </xsl:template>
+  <!-- ========================= -->
+  <!-- child element: include     -->
+  <!-- ========================= -->
+  <xsl:template match="include">
+    <xsl:value-of select="@name"/>
+  </xsl:template>
+  <!-- ========================= -->
+  <!-- child element: exclude     -->
+  <!-- ========================= -->
+  <xsl:template match="exclude">
+    <xsl:value-of select="@name"/>
+  </xsl:template>
+  <!-- ========================= -->
+  <!-- child element: classes     -->
+  <!-- ========================= -->
+  <xsl:template match="classes">
+    <TD class="w-25 p-3">
+      Tests :
+    </TD>
+    <TD COLSPAN="2">
+      <xsl:apply-templates select="class"/>
+    </TD>
+  </xsl:template> 
+  <!-- ========================= -->
+  <!-- child element: class     -->
+  <!-- ========================= -->
+  <xsl:template match="class">
+    <SPAN>
+      <xsl:value-of select="@name"/>
+      <xsl:text> </xsl:text>
+    </SPAN>
+  </xsl:template>
+  <!-- ========================= -->
+  <!-- child element: tests     -->
+  <!-- ========================= -->
+  <xsl:template match="tests">
+    <TABLE class="results table table-bordered table-hover">
+      <THEAD>
+	<TR>
+	  <TH class="w-25 p-3">
+            Name
+	  </TH>
+	  <TH class="w-25 p-3">
+            OS
+	  </TH>
+	  <TH class="w-auto p-3">
+            Version context
+	  </TH>
+	  <TH class="w-auto p-3">
+            Duration (ms)
+	  </TH>
+	  <TH class="w-auto p-3">
+            Result
+	  </TH>
+	  <TH class="w-25 p-3">
+	    HTML Report
+	  </TH>
+	  <xsl:choose>
+	    <xsl:when test="$xml_reports = 'true'">
+	      <TH class="w-25 p-3">
+		Pdf Reports
+	      </TH>
+	    </xsl:when>
+	  </xsl:choose>
+	  <xsl:choose>
+	    <xsl:when test="$atsv_reports &gt; 0">
+	      <TH class="w-25 p-3">
+		ATSV Reports
+	      </TH>
+	    </xsl:when>
+	  </xsl:choose>
+	</TR>
+      </THEAD>
+      <TBODY>
+	<xsl:apply-templates select="ats"/>
+      </TBODY>
+    </TABLE>
+  </xsl:template>
+  <!-- ========================= -->
+  <!-- child element: ats     -->
+  <!-- ========================= -->
+  <xsl:template match="ats">
+  <xsl:variable name="test_result" select="count(actions/action[passed = 'false'])"/>
+  <xsl:variable name="test_file" select="concat(script[1]/@testName, '_xml')"/>
+  <xsl:variable name="atsv_test_file" select="script[1]/@testName"/>
+  <TR>
+    <xsl:apply-templates select="script"/>
+    <xsl:apply-templates select="actions"/>
+    <TD>
+      <xsl:value-of select="sum(actions/action/duration)" />
+    </TD>
+    <xsl:choose>
+      <xsl:when test="$test_result &gt; 0">
+	<TD class="test-failed">
+          <IMG src="false.png"/>
+	</TD>
+      </xsl:when>
+      <xsl:when test="$test_result = 0">
+	<TD class="test-passed">
+          <IMG src="true.png"/>
+	</TD>
+      </xsl:when>
+    </xsl:choose>
+    <TD class="align-middle text-center">
+      <xsl:text disable-output-escaping="yes">&lt;A href=&quot;</xsl:text>
+      <xsl:value-of select="concat($test_file,'/',$test_file,'.html')"/>
+      <xsl:text disable-output-escaping="yes">&quot; class=&quot;btn btn-secondary btn-sm &quot; role=&quot;button&quot; aria-pressed=&quot;true&quot;&gt;HTML report&lt;/a&gt;</xsl:text>
+    </TD>
+    <xsl:choose>
+      <xsl:when test="$xml_reports = 'true'">
+	<TD class="align-middle text-center">
+	  <xsl:text disable-output-escaping="yes">&lt;A href=&quot;</xsl:text>
+	  <xsl:value-of select="concat($test_file,'/',$test_file,'.pdf')"/>
+	  <xsl:text disable-output-escaping="yes">&quot; class=&quot;btn btn-secondary btn-sm &quot; role=&quot;button&quot; aria-pressed=&quot;true&quot;&gt;PDF report&lt;/a&gt;</xsl:text>
+	</TD>
+      </xsl:when>
+    </xsl:choose>
+    <xsl:choose>
+      <xsl:when test="$atsv_reports &gt; 0">
+	<TD class="align-middle text-center">
+	  <xsl:text disable-output-escaping="yes">&lt;A href=&quot;</xsl:text>
+	  <xsl:value-of select="concat($atsv_test_file,'.atsv')"/>
+	  <xsl:text disable-output-escaping="yes">&quot; class=&quot;btn btn-secondary btn-sm &quot; role=&quot;button&quot; aria-pressed=&quot;true&quot;&gt;ATSV report&lt;/a&gt;</xsl:text>
+	</TD>
+      </xsl:when>
+    </xsl:choose>
+  </TR>
+  </xsl:template>
+  <!-- ========================= -->
+  <!-- child element: script     -->
+  <!-- ========================= -->
+  <xsl:template match="script">
+    <TD>
+      <xsl:value-of select="@testName"/>
+    </TD>
+    <TD>
+      <xsl:value-of select="@osInfo"/>
+    </TD>
+  </xsl:template>
+  <!-- ========================= -->
+  <!-- child element: actions     -->
+  <!-- ========================= -->
+  <xsl:template match="actions">
+    <xsl:variable name="comment" select="action[@type='com.ats.script.actions.ActionComment'][1]/data"/>
+    <TD>
+      <SPAN>
+	<xsl:value-of select="substring-after($comment,'&lt;&lt; VERSION CONTEXT &gt;&gt;&lt;br&gt;')" disable-output-escaping="yes"/>
+      </SPAN>
+    </TD>
+  </xsl:template>
+</xsl:stylesheet>
+
+
