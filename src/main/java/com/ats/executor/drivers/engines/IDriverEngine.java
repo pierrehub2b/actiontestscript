@@ -63,10 +63,12 @@ public interface IDriverEngine{
 	public void updateDimensions();
 	public FoundElement getElementFromPoint(Boolean syscomp, Double x, Double y);
 	public FoundElement getElementFromRect(Boolean syscomp, Double x, Double y, Double w, Double h);
-	public void setAttribute(String attributeName, String attributeValue);
 	public String getAttribute(ActionStatus status, FoundElement element, String attributeName, int maxTry);
 	public CalculatedProperty[] getAttributes(FoundElement element, boolean reload);
 	public CalculatedProperty[] getCssAttributes(FoundElement element);
+	
+	public void setSysProperty(String propertyName, String propertyValue);
+	public String getSysProperty(ActionStatus status, String propertyName);
 	
 	public List<String[]> loadSelectOptions(TestElement element);
 	public List<FoundElement> findSelectOptions(TestBound dimension, TestElement element);

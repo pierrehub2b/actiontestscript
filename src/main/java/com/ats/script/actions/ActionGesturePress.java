@@ -24,6 +24,9 @@ import com.ats.executor.ActionTestScript;
 import com.ats.script.Script;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ActionGesturePress extends ActionExecuteElement {
 	
@@ -68,10 +71,10 @@ public class ActionGesturePress extends ActionExecuteElement {
 		parseOptions(options);
 	}
 	
-	public ActionGesturePress(Script script, boolean stop, int maxTry, int delay, SearchedElement element, int duration, ArrayList<String> paths) {
+	public ActionGesturePress(Script script, boolean stop, int maxTry, int delay, SearchedElement element, int duration, String[] paths) {
 		super(script, stop, maxTry, delay, element);
 		setDuration(duration);
-		setPaths(paths);
+		setPaths(new ArrayList<>(Arrays.asList(paths)));
 	}
 	
 	private void parseOptions(ArrayList<String> options) {
@@ -90,7 +93,13 @@ public class ActionGesturePress extends ActionExecuteElement {
 	@Override
 	public StringBuilder getJavaCode() {
 		StringBuilder codeBuilder = super.getJavaCode();
-		codeBuilder.append(", ").append(duration).append(", ").append(paths);
+		codeBuilder.append(", ").append(duration).append(", ").append("new String[]{");
+
+		List<String> myFinalList = getPaths().stream().map(path -> "\"" + path.trim() +"\"").collect(Collectors.toList());
+		String test = String.join(",", myFinalList);
+		codeBuilder.append(test);
+		
+		codeBuilder.append("}").append(")");
 		return codeBuilder;
 	}
 	

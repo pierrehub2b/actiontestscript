@@ -190,7 +190,17 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	public CalculatedProperty[] getAttributes(FoundElement element, boolean reload) {
 		return executor.getElementAttributes(element.getId());
 	}
-
+	
+	@Override
+	public void setSysProperty(String propertyName, String propertyValue) {
+	
+	}
+	
+	@Override
+	public String getSysProperty(ActionStatus status, String propertyName) {
+		return null;
+	}
+	
 	@Override
 	public void refreshElementMapLocation() {}
 
@@ -241,11 +251,6 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	@Override
 	public FoundElement getElementFromRect(Boolean syscomp, Double x, Double y, Double w, Double h) {
 		return null;
-	}
-	
-	@Override
-	public void setAttribute(String attributeName, String attributeValue) {
-	
 	}
 	
 	@Override

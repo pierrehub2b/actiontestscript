@@ -20,27 +20,39 @@ under the License.
 package com.ats.script.actions;
 
 import com.ats.executor.ActionTestScript;
+import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ActionSysButton extends Action {
 	
 	public static final String SCRIPT_LABEL = "sysbutton";
 	
-	public static final String SOUND_UP = "sound-up";
+	/* public static final String SOUND_UP = "sound-up";
 	public static final String SOUND_DOWN = "sound-down";
 	public static final String POWER = "power";
 	public static final String BACK = "back";
 	public static final String HOME = "home";
 	public static final String MENU = "menu";
-	public static final String PREVIEW = "preview";
+	public static final String PREVIEW = "preview"; */
 	
 	private ArrayList<String> buttonTypes;
 	
-	public ActionSysButton(ScriptLoader script, ArrayList<String> buttonTypes) {
+	public ActionSysButton() { }
+	
+	public ActionSysButton(Script script, ArrayList<String> buttonTypes) {
 		super(script);
 		setButtonTypes(buttonTypes);
+	}
+	
+	public ActionSysButton(Script script, String[] buttonTypes) {
+		super(script);
+		ArrayList<String> list = new ArrayList<>(Arrays.asList(buttonTypes));
+		setButtonTypes(list);
 	}
 	
 	@Override
@@ -58,8 +70,14 @@ public class ActionSysButton extends Action {
 	@Override
 	public StringBuilder getJavaCode() {
 		StringBuilder builder = super.getJavaCode();
-		builder.append(", ");
-		builder.append(buttonTypes);
+		builder.append("new String[]{");
+		
+		List<String> myFinalList = getButtonTypes().stream().map(b -> "\"" + b.trim() +"\"").collect(Collectors.toList());
+		String test = String.join(",", myFinalList);
+		builder.append(test);
+		
+		builder.append("}").append(")");
+		
 		return builder;
 	}
 	

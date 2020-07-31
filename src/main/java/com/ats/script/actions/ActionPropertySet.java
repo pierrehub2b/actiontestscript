@@ -3,16 +3,16 @@ package com.ats.script.actions;
 import com.ats.executor.ActionTestScript;
 import com.ats.script.Script;
 
-public class ActionSetProperty extends Action {
+public class ActionPropertySet extends Action {
 	
 	public static final String SCRIPT_LABEL = "system-set";
 	
 	private String name;
 	private String value;
 	
-	public ActionSetProperty() { }
+	public ActionPropertySet() { }
 	
-	public ActionSetProperty(Script script, String name, String value) {
+	public ActionPropertySet(Script script, String name, String value) {
 		super(script);
 		setName(name);
 		setValue(value);
@@ -21,15 +21,14 @@ public class ActionSetProperty extends Action {
 	@Override
 	public StringBuilder getJavaCode() {
 		StringBuilder builder = super.getJavaCode();
-		builder.append(", ").append(name).append(", ").append(value);
+		builder.append("\"" + name + "\"").append(", ").append("\"" + value + "\"").append(")");
 		return builder;
 	}
 	
 	@Override
 	public void execute(ActionTestScript ts, String testName, int line) {
 		super.execute(ts, testName, line);
-		ts.getCurrentChannel().setAttribute(getName(), getValue());
-		
+		ts.getCurrentChannel().setSysProperty(getName(), getValue());
 	}
 	
 	public String getName() { return name; }

@@ -22,6 +22,7 @@ package com.ats.script.actions;
 import java.util.ArrayList;
 
 import com.ats.element.SearchedElement;
+import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.Variable;
@@ -29,55 +30,54 @@ import com.ats.script.Script;
 import com.google.gson.JsonObject;
 
 public class ActionProperty extends ActionReturnVariable {
-
+	
 	public static final String SCRIPT_LABEL = "property";
-
+	
 	private String name;
-
+	
 	public ActionProperty() {}
-
+	
 	public ActionProperty(Script script, boolean stop, ArrayList<String> options, String name, Variable variable, ArrayList<String> objectArray) {
 		super(script, stop, options, objectArray, variable);
 		setName(name);
 	}
-
+	
 	public ActionProperty(Script script, boolean stop, int maxTry, int delay, SearchedElement element, String name, Variable variable) {
 		super(script, stop, maxTry, delay, element, variable);
 		setName(name);
 	}
-
+	
 	//---------------------------------------------------------------------------------------------------------------------------------
 	// Code Generator
 	//---------------------------------------------------------------------------------------------------------------------------------
-
+	
 	@Override
 	public StringBuilder getJavaCode() {
 		StringBuilder codeBuilder = super.getJavaCode();
 		codeBuilder.append(", \"")
-		.append(name)
-		.append("\", ")
-		.append(variable.getName())
-		.append(")");
+				.append(name)
+				.append("\", ")
+				.append(variable.getName())
+				.append(")");
 		return codeBuilder;
 	}
-
+	
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
-
+	
 	@Override
 	public void terminateExecution(ActionTestScript ts) {
-
 		super.terminateExecution(ts);
 		
-		if(status.isPassed()) {
+		if (status.isPassed()) {
 			
 			final String attributeValue = getTestElement().getAttribute(status, name);
 			status.endDuration();
-
-			if(attributeValue == null) {
+			
+			if (attributeValue == null) {
 				status.setError(ActionStatus.ATTRIBUTE_NOT_SET, "attribute '" + name + "' not found", name);
 				ts.getRecorder().update(ActionStatus.ATTRIBUTE_NOT_SET, status.getDuration(), name);
-			}else {
+			} else {
 				status.setMessage(attributeValue);
 				updateVariableValue(attributeValue);
 				
@@ -91,15 +91,15 @@ public class ActionProperty extends ActionReturnVariable {
 		data.addProperty("property", name);
 		return super.getActionLogs(scriptName, scriptLine, data);
 	}
-
+	
 	//--------------------------------------------------------
 	// getters and setters for serialization
 	//--------------------------------------------------------
-
+	
 	public String getName() {
 		return name;
 	}
-
+	
 	public void setName(String value) {
 		this.name = value;
 	}

@@ -397,9 +397,6 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		}
 	}
 	
-	@Override
-	public void setAttribute(String attributeName, String attributeValue) { }
-	
 	private FoundElement loadElement(ArrayList<AtsElement> iframes, Double x, Double y, Double w, Double h, Double offsetX, Double offsetY) {
 
 		final ArrayList<Object> objectData = (ArrayList<Object>)runJavaScript(JS_ELEMENT_FROM_RECT, x - offsetX, y - offsetY, w, h);
@@ -555,6 +552,14 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		final String current = getAttribute(status, element, attributeName);
 		return current != null && current.equals(verify);
 	}
+	
+	@Override
+	public void setSysProperty(String propertyName, String propertyValue) { }
+	
+	@Override
+	public String getSysProperty(ActionStatus status, String propertyName) {
+		return null;
+	}
 
 	private String getAttribute(ActionStatus status, FoundElement element, String attributeName) {
 
@@ -606,7 +611,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	public CalculatedProperty[] getCssAttributes(FoundElement element){
 		return getCssAttributes(getWebElement(element));
 	}
-
+	
 	private CalculatedProperty[] getCssAttributes(RemoteWebElement element){
 		return getAttributesList(element, JS_ELEMENT_CSS);
 	}

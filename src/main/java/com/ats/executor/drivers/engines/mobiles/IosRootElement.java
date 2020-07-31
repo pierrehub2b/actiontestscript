@@ -30,24 +30,23 @@ public class IosRootElement extends RootElement {
 
 	@Override
 	public MobileTestElement getCurrentElement(FoundElement element, MouseDirection position) {
-
 		final Rectangle rect = element.getRectangle();
-		
-		String coordinates = element.getX() + ";" + element.getY() +
-				";" + element.getWidth() + ";" + element.getHeight() + ";" +
-				getRatioWidth() + ";" + getRatioHeight();
-		return new MobileTestElement(element.getId(), (driver.getOffsetX(rect, position)),
-				(driver.getOffsetY(rect, position)), coordinates);
+		String coordinates = element.getX() + ";" + element.getY() + ";" + element.getWidth() + ";" + element.getHeight() + ";" + getRatioWidth() + ";" + getRatioHeight();
+		return new MobileTestElement(element.getId(), (driver.getOffsetX(rect, position)), (driver.getOffsetY(rect, position)), coordinates);
 	}
 
 	@Override
 	public void tap(ActionStatus status, FoundElement element, MouseDirection position) {
 		final Rectangle rect = element.getRectangle();
-		
-		String coordinates = element.getX() + ";" + element.getY() +
-				";" + element.getWidth() + ";" + element.getHeight() + ";" +
-				getRatioWidth() + ";" + getRatioHeight();
-		driver.executeRequest(MobileDriverEngine.ELEMENT, element.getId(), MobileDriverEngine.TAP, (driver.getOffsetX(rect, position)) + "", (driver.getOffsetY(rect, position)) + "", coordinates);
+		String coordinates = element.getX() + ";" + element.getY() + ";" + element.getWidth() + ";" + element.getHeight() + ";" + getRatioWidth() + ";" + getRatioHeight();
+		driver.executeRequest(
+				MobileDriverEngine.ELEMENT,
+				element.getId(),
+				MobileDriverEngine.TAP,
+				(driver.getOffsetX(rect, position)) + "",
+				(driver.getOffsetY(rect, position)) + "",
+				coordinates
+		);
 	}
 	
 	@Override
@@ -62,19 +61,13 @@ public class IosRootElement extends RootElement {
 	
 	@Override
 	public void swipe(MobileTestElement testElement, int hDirection, int vDirection) {
-		driver.executeRequest(MobileDriverEngine.ELEMENT, testElement.getId(), MobileDriverEngine.SWIPE,
-				testElement.getOffsetX() + "", testElement.getOffsetY() + "", hDirection + "", +vDirection + "",
-				testElement.getCoordinates());
+		driver.executeRequest(MobileDriverEngine.ELEMENT, testElement.getId(), MobileDriverEngine.SWIPE, testElement.getOffsetX() + "", testElement.getOffsetY() + "", hDirection + "", +vDirection + "", testElement.getCoordinates());
 	}
 
 	@Override
 	public Object scripting(String script, FoundElement element) {
-		
-		String coordinates = element.getX() + ";" + element.getY() +
-				";" + element.getWidth() + ";" + element.getHeight() + ";" +
-				getRatioWidth() + ";" + getRatioHeight();
-		return driver.executeRequest(MobileDriverEngine.ELEMENT, element.getId(), MobileDriverEngine.SCRIPTING,
-				"0", "0", coordinates, script);
+		String coordinates = element.getX() + ";" + element.getY() + ";" + element.getWidth() + ";" + element.getHeight() + ";" + getRatioWidth() + ";" + getRatioHeight();
+		return driver.executeRequest(MobileDriverEngine.ELEMENT, element.getId(), MobileDriverEngine.SCRIPTING, "0", "0", coordinates, script);
 	}
 
 	@Override
@@ -147,14 +140,14 @@ public class IosRootElement extends RootElement {
 			final double currentX = Double.parseDouble(stringArray.get(firstSizeIndex)) * ratioWidth;
 			final double currentY = Double.parseDouble(stringArray.get(firstSizeIndex + 1)) * ratioHeight;
 			final double currentWidth = Double.parseDouble(stringArray.get(firstSizeIndex + 2)) * ratioWidth;
-			final double currentheight = Double.parseDouble(stringArray.get(firstSizeIndex + 3)) * ratioHeight;
+			final double currentHeight = Double.parseDouble(stringArray.get(firstSizeIndex + 3)) * ratioHeight;
 
 			if (currentX < 0.0 || currentX > height) {
 				continue;
 			}
 
 			final AtsMobileElement currentAtsMobileElement = new AtsMobileElement(
-					structDebugDescription.getUuid().toString(), tag, currentWidth, currentheight, currentX, currentY,
+					structDebugDescription.getUuid().toString(), tag, currentWidth, currentHeight, currentX, currentY,
 					true, getAttributes(structDebugDescription.getContent()));
 
 			if (structDebugDescription.getLevel() == 1) {
@@ -185,7 +178,7 @@ public class IosRootElement extends RootElement {
 			if (frontElements != null && frontElements.length > 1) {
 
 				final AtsMobileElement child = frontElements[frontElements.length - 1];
-				final boolean containsElements = checkConsistancy(child.getChildren(), false);
+				final boolean containsElements = checkConsistency(child.getChildren(), false);
 
 				if (containsElements) {
 					domStructure.getChildren()[0].setChildren(child.getChildren());
@@ -199,10 +192,10 @@ public class IosRootElement extends RootElement {
 		this.value = domStructure;
 	}
 
-	public boolean checkConsistancy(AtsMobileElement[] child, boolean val) {
+	public boolean checkConsistency(AtsMobileElement[] child, boolean val) {
 		for (AtsMobileElement atsMobileElement : child) {
 			if (atsMobileElement != null && atsMobileElement.getChildren().length > 0) {
-				val = checkConsistancy(atsMobileElement.getChildren(), val);
+				val = checkConsistency(atsMobileElement.getChildren(), val);
 			} else {
 				if (atsMobileElement != null && !atsMobileElement.getTag().equalsIgnoreCase("other")) {
 					val = true;

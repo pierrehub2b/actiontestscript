@@ -264,7 +264,17 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	public CalculatedProperty[] getAttributes(FoundElement element, boolean reload){
 		return getAttributes(element.getId());
 	}
-
+	
+	@Override
+	public void setSysProperty(String propertyName, String propertyValue) {
+	
+	}
+	
+	@Override
+	public String getSysProperty(ActionStatus status, String propertyName) {
+		return null;
+	}
+	
 	public CalculatedProperty[] getAttributes(String elementId){
 		return getDesktopDriver().getElementAttributes(elementId);
 	}
@@ -303,9 +313,6 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	public FoundElement getElementFromRect(Boolean syscomp, Double x, Double y, Double w, Double h){
 		return getDesktopDriver().getElementFromRect(x, y, w, h);
 	}
-	
-	@Override
-	public void setAttribute(String attributeName, String attributeValue) { }
 	
 	@Override
 	public List<FoundElement> findElements(boolean sysComp, TestElement testElement, String tag, String[] attributes, String[] attributesValues, Predicate<AtsBaseElement> predicate, WebElement startElement, boolean waitAnimation) {

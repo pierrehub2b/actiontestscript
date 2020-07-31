@@ -19,39 +19,8 @@ under the License.
 
 package com.ats.executor.drivers.engines;
 
-import java.awt.Graphics;
-import java.awt.Point;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.imageio.ImageIO;
-
-import com.ats.script.actions.ActionGesturePress;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebElement;
-
 import com.ats.driver.ApplicationProperties;
-import com.ats.element.AtsBaseElement;
-import com.ats.element.AtsMobileElement;
-import com.ats.element.DialogBox;
-import com.ats.element.FoundElement;
-import com.ats.element.MobileRootElement;
-import com.ats.element.MobileTestElement;
-import com.ats.element.TestElement;
+import com.ats.element.*;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
 import com.ats.executor.TestBound;
@@ -72,12 +41,25 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
-
 import okhttp3.OkHttpClient;
 import okhttp3.OkHttpClient.Builder;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebElement;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.util.List;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
@@ -87,29 +69,30 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	private final static String STOP = "stop";
 	private final static String SWITCH = "switch";
 	private final static String CAPTURE = "capture";
+	private final static String INPUT = "input";
+	private final static String BUTTON = "button";
 	public final static String ELEMENT = "element";
 	public final static String TAP = "tap";
 	public final static String PRESS = "press";
-	private final static String INPUT = "input";
 	public final static String SWIPE = "swipe";
-	private final static String BUTTON = "button";
+	public final static String PINCH = "pinch";
+	public final static String ROTATE = "rotate";
 	public final static String SCRIPTING = "scripting";
 	public final static String SET_PROP = "sysprop-set";
+	public final static String GET_PROP = "sysprop-get";
+	public final static String SYS_BUTTON = "sysbutton";
 
 	private final static String SCREENSHOT_METHOD = "/screenshot";
-
+	
 	private JsonObject source;
+	private MobileTestElement testElement;
+	private OkHttpClient client;
 
 	protected RootElement rootElement;
 	protected RootElement cachedElement;
 	protected long cachedElementTime = 0L;
-
-	private MobileTestElement testElement;
-
-	private OkHttpClient client;
-
+	
 	private String userAgent;
-
 	private String token;
 	private String endPoint;
 
@@ -195,7 +178,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			if (base64.length() > 0) {
 				try {
 					icon = Base64.getDecoder().decode(base64);
-				}catch(Exception e) {}
+				}catch(Exception ignored) {}
 			}
 
 			final String[] endPointData = endPoint.split(":");
@@ -232,7 +215,9 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	protected void loadCapturedElement() {
 		long current = System.currentTimeMillis();
 		if(cachedElement == null || current - 2500 > cachedElementTime) {
-			cachedElement.refresh(executeRequest(CAPTURE));
+			if (cachedElement != null) {
+				cachedElement.refresh(executeRequest(CAPTURE));
+			}
 			cachedElementTime = System.currentTimeMillis();
 		}
 	}
@@ -264,27 +249,22 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 		AtsMobileElement element = cachedElement.getValue();
 
-		Collections.sort(listElements, new Comparator<AtsMobileElement>() {
-			public int compare(AtsMobileElement o1, AtsMobileElement o2) {
-				return o1.getPositionInDom().compareTo(o2.getPositionInDom());
-			}
-		});
-
-		for (int i=0; i<listElements.size(); i++) {
-			AtsMobileElement child = listElements.get(i);
+		listElements.sort(Comparator.comparing(AtsMobileElement::getPositionInDom));
+		
+		for (AtsMobileElement child : listElements) {
 			int coordinateX = child.getX().intValue();
 			int coordinateY = child.getY().intValue();
 			int coordinateW = child.getWidth().intValue();
 			int coordinateH = child.getHeight().intValue();
-
-			if(child.getRect().contains(new Point(mouseX, mouseY)) && 
+			
+			if (child.getRect().contains(new Point(mouseX, mouseY)) &&
 					(
-							element.getRect().contains(new Point(coordinateX,coordinateY)) ||
-							element.getRect().contains(new Point(coordinateX + coordinateW,coordinateY)) ||
-							element.getRect().contains(new Point(coordinateX + coordinateW, coordinateY + coordinateH)) ||
-							element.getRect().contains(new Point(coordinateX, coordinateY + coordinateH))
-							)
-					){
+							element.getRect().contains(new Point(coordinateX, coordinateY)) ||
+									element.getRect().contains(new Point(coordinateX + coordinateW, coordinateY)) ||
+									element.getRect().contains(new Point(coordinateX + coordinateW, coordinateY + coordinateH)) ||
+									element.getRect().contains(new Point(coordinateX, coordinateY + coordinateH))
+					)
+			) {
 				element = child;
 			}
 		}
@@ -306,15 +286,10 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 		AtsMobileElement element = cachedElement.getValue();
 
-		Collections.sort(listElements, new Comparator<AtsMobileElement>() {
-			public int compare(AtsMobileElement o1, AtsMobileElement o2) {
-				return o1.getPositionInDom().compareTo(o2.getPositionInDom());
-			}
-		});
-
-		for (int i=0; i<listElements.size(); i++) {
-			AtsMobileElement child = listElements.get(i);
-			if(child.getRect().contains(new Point(mouseX, mouseY)) && child.getRect().getWidth() <= w && child.getRect().getHeight() <= h  && element.getRect().contains(child.getRect())){
+		listElements.sort(Comparator.comparing(AtsMobileElement::getPositionInDom));
+		
+		for (AtsMobileElement child : listElements) {
+			if (child.getRect().contains(new Point(mouseX, mouseY)) && child.getRect().getWidth() <= w && child.getRect().getHeight() <= h && element.getRect().contains(child.getRect())) {
 				element = child;
 			}
 		}
@@ -353,7 +328,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	public void loadParents(FoundElement element) {
 		final AtsMobileElement atsElement = getCapturedElementById(element.getId(), false);
 		if(atsElement != null) {
-			FoundElement currentParent = null;
+			FoundElement currentParent;
 			AtsMobileElement parent = atsElement.getParent();
 			if(parent != null) {
 
@@ -379,21 +354,15 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 		}
 		return new CalculatedProperty[0];
 	}
-
+	
 	private AtsMobileElement getCapturedElementById(String id, boolean reload) {
-		if(reload) {
-			//refreshElementMapLocation();
+		if (reload) {
 			return getElementById(rootElement.getValue(), id);
 		} else if(cachedElement != null) {
 			return getElementById(cachedElement.getValue(), id);
 		} else {
 			return null;
 		}
-	}
-	
-	@Override
-	public void setAttribute(String attributeName, String attributeValue) {
-		executeRequest(SET_PROP, attributeName, attributeValue);
 	}
 
 	@Override
@@ -417,7 +386,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			loadElementsByTag(getElementById(testObject.getParent().getWebElementId()), tagName, list);
 		}
 
-		return list.parallelStream().filter(searchPredicate).map(e -> new FoundElement(e)).collect(Collectors.toCollection(ArrayList::new));
+		return list.parallelStream().filter(searchPredicate).map(FoundElement::new).collect(Collectors.toCollection(ArrayList::new));
 	}
 
 	@Override
@@ -446,7 +415,9 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 	
 	@Override
-	public void buttonClick(ArrayList<String> ids) { }
+	public void buttonClick(ArrayList<String> ids) {
+		executeRequest(SYS_BUTTON, ids.toArray(new String[0]));
+	}
 	
 	@Override
 	public void tap(int count, FoundElement element) {
@@ -456,7 +427,6 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public void press(int duration, ArrayList<String> paths, FoundElement element) {
 		rootElement.press(element, paths, duration);
-		
 	}
 	
 	@Override
@@ -484,12 +454,12 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public List<String[]> loadSelectOptions(TestElement element) {
-		return Collections.<String[]>emptyList();
+		return Collections.emptyList();
 	}
 
 	@Override
 	public List<FoundElement> findSelectOptions(TestBound dimension, TestElement element) {
-		return Collections.<FoundElement>emptyList();
+		return Collections.emptyList();
 	}
 
 	@Override
@@ -534,7 +504,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 				return result;
 
-			} catch (IOException e) {}
+			} catch (IOException ignored) {}
 		}
 
 		return new byte[1];
@@ -653,10 +623,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 	public JsonObject executeRequest(String type, String ... data) {
 
-		final String url = new StringBuilder(applicationPath)
-				.append("/")
-				.append(type)
-				.toString();
+		final String url = applicationPath + "/" + type;
 
 		final Request.Builder requestBuilder = new Request.Builder();
 		requestBuilder.url(url);
@@ -673,15 +640,9 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 		try {
 			final Response response = client.newCall(request).execute();
-			final String responseData = CharStreams.toString(
-					new InputStreamReader(
-							response
-							.body()
-							.byteStream(),
-							Charsets.UTF_8));
+			final String responseData = CharStreams.toString(new InputStreamReader(response.body().byteStream(), Charsets.UTF_8));
 			response.close();
 			return JsonParser.parseString(responseData).getAsJsonObject();
-
 		} catch (JsonSyntaxException | IOException e) {
 			return null;
 		}
@@ -694,58 +655,53 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public void windowState(ActionStatus status, Channel channel, String state) {
+	public void windowState(ActionStatus status, Channel channel, String state) { }
+	
+	@Override
+	public void setSysProperty(String propertyName, String propertyValue) {
+		executeRequest(SET_PROP, propertyName, propertyValue);
 	}
-
+	
+	@Override
+	public String getSysProperty(ActionStatus status, String propertyName) {
+		JsonObject result = executeRequest(GET_PROP, propertyName);
+		
+		int code = result.get("status").getAsInt();
+		String message = result.get("message").getAsString();
+		
+		return code != 0 ? null : message;
+	}
+	
 	@Override
 	public Object executeJavaScript(ActionStatus status, String script, TestElement element) {
 		final JsonObject result = (JsonObject)rootElement.scripting(script, element.getFoundElement());
-
-		int code = result.get("status").getAsInt();
-		String message = result.get("message").getAsString();
-
-		if (ActionStatus.JAVASCRIPT_ERROR == code) {
-			status.setError(ActionStatus.JAVASCRIPT_ERROR, message);
-		} else {
-			status.setNoError(message);
-		}
-		return result;
+		return handleResult(status, result);
 	}
 
 	@Override
 	public Object executeJavaScript(ActionStatus status, String script, boolean returnValue) {
 		final JsonObject result = (JsonObject)rootElement.scripting(script);
-
+		return handleResult(status, result);
+	}
+	
+	private Object handleResult(ActionStatus status, JsonObject result) {
 		int code = result.get("status").getAsInt();
 		String message = result.get("message").getAsString();
-
-		if (ActionStatus.JAVASCRIPT_ERROR == code) {
-			status.setError(ActionStatus.JAVASCRIPT_ERROR, message);
-		} else {
+		
+		if (code == 0) {
 			status.setNoError(message);
+		} else {
+			status.setError(ActionStatus.JAVASCRIPT_ERROR, message);
 		}
+		
 		return result;
 	}
-
-	/* private Object handleJsonObject(JsonObject jsonObject, ActionStatus status) {
-		int code = jsonObject.get("status").getAsInt();
-		String message = jsonObject.get("message").getAsString();
-
-		if (ActionStatus.JAVASCRIPT_ERROR == code) {
-			status.setError(ActionStatus.JAVASCRIPT_ERROR, message);
-		} else {
-			status.setNoError(message);
-		}
-		return jsonObject;
-	} */
+	
+	@Override
+	protected void setPosition(org.openqa.selenium.Point pt) { }
 
 	@Override
-	protected void setPosition(org.openqa.selenium.Point pt) {
-	}
-
-	@Override
-	protected void setSize(Dimension dim) {
-	}
+	protected void setSize(Dimension dim) { }
 	
 	@Override
 	public int getNumWindows() {

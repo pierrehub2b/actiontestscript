@@ -93,7 +93,8 @@ public class TestElementRoot extends TestElement {
 		case WINDOWS:
 			return String.valueOf(engine.getNumWindows());
 		default :
-			return engine.getAttribute(status, getFoundElement(), name, 5);
+			return engine.getSysProperty(status, name);
+			// return engine.getAttribute(status, getFoundElement(), name, 5);
 		}
 	}
 

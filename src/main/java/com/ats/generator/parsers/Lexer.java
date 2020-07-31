@@ -235,15 +235,7 @@ public class Lexer {
 
 				String dataOne = dataArray.remove(0).trim();
 
-				if (ActionSetProperty.SCRIPT_LABEL.equals(actionType)) {
-					
-					//-----------------------
-					// Set prop action
-					//-----------------------
-					String value = dataArray.remove(0).trim();
-					script.addAction(new ActionSetProperty(script, dataOne, value), disabled);
-					
-				} else if (ActionGestureTap.SCRIPT_LABEL.equals(actionType)) {
+				if (ActionGestureTap.SCRIPT_LABEL.equals(actionType)) {
 					
 					//-----------------------
 					// Gesture tap action
@@ -336,7 +328,7 @@ public class Lexer {
 						script.addAction(new ActionScripting(script, stopExec, options, jsCode, variable, dataArray), disabled);
 					}
 
-				}else if(ActionProperty.SCRIPT_LABEL.equals(actionType)){
+				} else if(ActionProperty.SCRIPT_LABEL.equals(actionType)){
 
 					//-----------------------
 					// Property action
@@ -350,7 +342,15 @@ public class Lexer {
 						script.addAction(new ActionProperty(script, stopExec, options, propertyName, variable, dataArray), disabled);
 					}
 
-				}else if(actionType.contains(ActionSelect.SCRIPT_LABEL_SELECT)){
+				} else if (ActionPropertySet.SCRIPT_LABEL.equals(actionType)) {
+					
+					//-----------------------
+					// Set prop action
+					//-----------------------
+					String value = dataArray.remove(0).trim();
+					script.addAction(new ActionPropertySet(script, dataOne, value), disabled);
+					
+				}  else if(actionType.contains(ActionSelect.SCRIPT_LABEL_SELECT)){
 
 					//-----------------------
 					// Select action

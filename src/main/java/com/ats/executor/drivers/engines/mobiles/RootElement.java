@@ -15,11 +15,10 @@ public abstract class RootElement {
 
 	protected Gson gson = new Gson();
 	protected AtsMobileElement value;
-	
 	protected MobileDriverEngine driver;
 	
-	public RootElement(MobileDriverEngine drv) {
-		this.driver = drv;
+	public RootElement(MobileDriverEngine driver) {
+		this.driver = driver;
 	}
 	
 	public AtsMobileElement getValue() {
@@ -30,6 +29,8 @@ public abstract class RootElement {
 	abstract public void tap(ActionStatus status, FoundElement element, MouseDirection position);
 	abstract public void tap(FoundElement element, int count);
 	abstract public void press(FoundElement element, ArrayList<String> paths, int duration);
+	// abstract public void pinch(FoundElement element, int percent, int duration);
+	// abstract public void rotate(FoundElement element, int percent, int duration);
 	abstract public void swipe(MobileTestElement testElement, int hDirection, int vDirection);
 	abstract public Object scripting(String script, FoundElement element);
 	abstract public Object scripting(String script);

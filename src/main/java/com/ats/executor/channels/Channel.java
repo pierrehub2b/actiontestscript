@@ -387,8 +387,12 @@ public class Channel {
 		return engine.getAttribute(status, element, attributeName, maxTry + ChannelManager.ATS.getMaxTryProperty());
 	}
 	
-	public void setAttribute(String attributeName, String attributeValue) {
-		engine.setAttribute(attributeName, attributeValue);
+	public void setSysProperty(String attributeName, String attributeValue) {
+		engine.setSysProperty(attributeName, attributeValue);
+	}
+	
+	public String getSysProperty(ActionStatus status, String propertyName) {
+		return engine.getSysProperty(status, propertyName);
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------

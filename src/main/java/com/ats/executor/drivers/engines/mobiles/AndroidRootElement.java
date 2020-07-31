@@ -13,8 +13,8 @@ import com.google.gson.JsonObject;
 
 public class AndroidRootElement extends RootElement {
 
-	public AndroidRootElement(MobileDriverEngine drv) {
-		super(drv);
+	public AndroidRootElement(MobileDriverEngine driver) {
+		super(driver);
 	}
 	
 	@Override
@@ -35,7 +35,7 @@ public class AndroidRootElement extends RootElement {
 	
 	@Override
 	public void press(FoundElement element, ArrayList<String> paths, int duration) {
-		driver.executeRequest(MobileDriverEngine.ELEMENT, element.getId(), MobileDriverEngine.PRESS, String.valueOf(paths));
+		driver.executeRequest(MobileDriverEngine.ELEMENT, element.getId(), MobileDriverEngine.PRESS, String.join(":", paths));
 	}
 	
 	@Override
@@ -52,8 +52,7 @@ public class AndroidRootElement extends RootElement {
 	public Object scripting(String script) {
 		return scripting(script, getValue().getFoundElement());
 	}
-
-
+	
 	@Override
 	public MobileTestElement getCurrentElement(FoundElement element, MouseDirection position) {
 		final Rectangle rect = element.getRectangle();

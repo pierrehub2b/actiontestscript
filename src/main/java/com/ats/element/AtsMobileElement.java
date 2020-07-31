@@ -42,7 +42,7 @@ public class AtsMobileElement extends AtsBaseElement {
 
 	private Rectangle rect;
 	public Rectangle getRect() {
-		if(rect == null) {
+		if (rect == null) {
 			rect = new Rectangle(x.intValue(), y.intValue(), width.intValue(), height.intValue());
 		}
 		return rect;

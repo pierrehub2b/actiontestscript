@@ -121,7 +121,7 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 			}
 			
 			actionMaxTry = ts.getChannelManager().getMaxTry() + getMaxTry();
-			if(actionMaxTry < 1) {
+			if (actionMaxTry < 1) {
 				actionMaxTry = 1;
 			}
 

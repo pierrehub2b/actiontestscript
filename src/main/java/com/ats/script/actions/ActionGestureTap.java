@@ -69,7 +69,7 @@ public class ActionGestureTap extends ActionExecuteElement {
 	@Override
 	public StringBuilder getJavaCode() {
 		StringBuilder codeBuilder = super.getJavaCode();
-		codeBuilder.append(", ") .append(count);
+		codeBuilder.append(", ") .append(count).append(")");
 		return codeBuilder;
 	}
 	
