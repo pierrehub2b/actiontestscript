@@ -299,6 +299,10 @@
             Criterias :
             <xsl:value-of select="element/criterias"/>            
           </fo:block>
+          <fo:block>
+            Data :
+            <xsl:value-of select="data"/>           
+          </fo:block>
         </fo:block-container>
       </fo:flow>
     </fo:page-sequence>
