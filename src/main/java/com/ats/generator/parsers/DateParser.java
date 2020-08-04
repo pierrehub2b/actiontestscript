@@ -32,6 +32,7 @@ public final class DateParser {
 	public static String getJavaCode(String data) {
 		
 		String code = JAVA_DATE_START_FUNCTION;
+		if(data == null) return code + JAVA_DATE_END_FUNCTION;
 		
 		final Matcher dateMatcher = DATE_PATTERN.matcher(data);
 		
