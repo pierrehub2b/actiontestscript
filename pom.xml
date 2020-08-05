@@ -232,6 +232,7 @@
 						<include>**/PasswordsTest.java</include>
 						<include>**/CalculatedValueTest.java</include>
 						<include>**/DateParserTest.java</include>
+						<include>**/LexerTest.java</include>
 					</includes>
 				</configuration>
 				<executions>
@@ -298,8 +299,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.0</version>
 				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
+					<source>11</source>
+					<target>11</target>
 				</configuration>
 			</plugin>
 			<plugin>
