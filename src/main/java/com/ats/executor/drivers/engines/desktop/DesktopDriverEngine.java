@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-import com.ats.script.actions.ActionGesturePress;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
@@ -271,7 +270,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 	
 	@Override
-	public String getSysProperty(ActionStatus status, String propertyName) {
+	public String getSysProperty(ActionStatus status, String propertyName, FoundElement element) {
 		return null;
 	}
 	

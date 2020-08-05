@@ -46,6 +46,7 @@ public class ChromiumBasedDriverEngine extends WebDriverEngine {
 		options.addArguments("--disable-notifications");
 		options.addArguments("--disable-web-security");
 		options.addArguments("--disable-dev-shm-usage");
+		options.addArguments("--disable-popup-blocking");
 		
 		options.addArguments("--ignore-certificate-errors");
 

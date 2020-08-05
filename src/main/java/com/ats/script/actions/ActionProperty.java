@@ -22,7 +22,6 @@ package com.ats.script.actions;
 import java.util.ArrayList;
 
 import com.ats.element.SearchedElement;
-import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.Variable;

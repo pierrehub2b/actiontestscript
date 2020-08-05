@@ -19,14 +19,13 @@ under the License.
 
 package com.ats.script.actions;
 
-import com.ats.executor.ActionTestScript;
-import com.ats.script.Script;
-import com.ats.script.ScriptLoader;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.ats.executor.ActionTestScript;
+import com.ats.script.Script;
 
 public class ActionSysButton extends Action {
 	

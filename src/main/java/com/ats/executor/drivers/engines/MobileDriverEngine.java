@@ -663,7 +663,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 	
 	@Override
-	public String getSysProperty(ActionStatus status, String propertyName) {
+	public String getSysProperty(ActionStatus status, String propertyName, FoundElement element) {
 		JsonObject result = executeRequest(GET_PROP, propertyName);
 		
 		int code = result.get("status").getAsInt();
