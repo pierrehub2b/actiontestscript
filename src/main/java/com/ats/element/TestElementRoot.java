@@ -41,7 +41,7 @@ public class TestElementRoot extends TestElement {
 	public TestElementRoot() {}
 
 	public TestElementRoot(Channel channel) {
-		super(channel);
+		super(channel, 1, 0);
 		setCriterias("root");
 	}	
 
@@ -93,8 +93,8 @@ public class TestElementRoot extends TestElement {
 		case WINDOWS:
 			return String.valueOf(engine.getNumWindows());
 		default :
-			return engine.getSysProperty(status, name);
-			// return engine.getAttribute(status, getFoundElement(), name, 5);
+			reloadFoundElements();
+			return engine.getSysProperty(status, name, getFoundElement());
 		}
 	}
 
@@ -110,5 +110,11 @@ public class TestElementRoot extends TestElement {
 		props[5] = new CalculatedProperty(WINDOWS, String.valueOf(engine.getNumWindows()));
 		
 		return props;
+	}
+
+	@Override
+	public CalculatedProperty[] getCssAttributes() {
+		reloadFoundElements();
+		return super.getCssAttributes();
 	}
 }

@@ -40,7 +40,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.ats.script.actions.*;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.JavascriptException;
@@ -79,6 +78,11 @@ import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
+import com.ats.script.actions.ActionApi;
+import com.ats.script.actions.ActionChannelStart;
+import com.ats.script.actions.ActionGotoUrl;
+import com.ats.script.actions.ActionSelect;
+import com.ats.script.actions.ActionWindowState;
 import com.ats.tools.ResourceContent;
 import com.ats.tools.Utils;
 
@@ -442,13 +446,14 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public WebElement getRootElement(Channel cnl) {
+		
 		int maxTry = 20;
-
 		WebElement body = getHtmlView();
 
 		while(body == null && maxTry > 0) {
-			maxTry--;
+			cnl.sleep(200);
 			body = getHtmlView();
+			maxTry--;
 		}
 
 		return body;
@@ -557,8 +562,8 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	public void setSysProperty(String propertyName, String propertyValue) { }
 	
 	@Override
-	public String getSysProperty(ActionStatus status, String propertyName) {
-		return null;
+	public String getSysProperty(ActionStatus status, String propertyName, FoundElement element) {
+		return getAttribute(status, element, propertyName);
 	}
 
 	private String getAttribute(ActionStatus status, FoundElement element, String attributeName) {

@@ -392,7 +392,7 @@ public class Channel {
 	}
 	
 	public String getSysProperty(ActionStatus status, String propertyName) {
-		return engine.getSysProperty(status, propertyName);
+		return engine.getSysProperty(status, propertyName, null);
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------

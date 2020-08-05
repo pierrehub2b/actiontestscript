@@ -53,7 +53,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.xml.parsers.ParserConfigurationException;
 
-import com.ats.script.actions.ActionGesturePress;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
@@ -197,7 +196,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	}
 	
 	@Override
-	public String getSysProperty(ActionStatus status, String propertyName) {
+	public String getSysProperty(ActionStatus status, String propertyName, FoundElement element) {
 		return null;
 	}
 	

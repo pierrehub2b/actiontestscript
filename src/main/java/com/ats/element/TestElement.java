@@ -70,10 +70,14 @@ public class TestElement{
 	public TestElement() {}
 
 	public TestElement(Channel channel) {
-		this.channel = channel;
+		this(channel, 1, 0);
 		this.foundElements = new ArrayList<FoundElement>(Arrays.asList(new FoundElement(channel)));
-		this.count = 1;
-		this.index = 0;
+	}
+	
+	public TestElement(Channel channel, int count, int index) {
+		this.channel = channel;
+		this.count = count;
+		this.index = index;
 		this.occurrences = p -> true;
 		this.engine = channel.getDriverEngine();
 	}
@@ -117,6 +121,10 @@ public class TestElement{
 
 	protected void setEngine(IDriverEngine engine) {
 		this.engine = engine;
+	}
+	
+	protected void reloadFoundElements() {
+		this.foundElements = new ArrayList<FoundElement>(Arrays.asList(new FoundElement(channel)));
 	}
 
 	public void dispose() {
