@@ -79,7 +79,6 @@ public class ActionProperty extends ActionReturnVariable {
 			} else {
 				status.setMessage(attributeValue);
 				updateVariableValue(attributeValue);
-				
 				ts.getRecorder().update(0, status.getDuration(), name, attributeValue);
 			}
 		}
