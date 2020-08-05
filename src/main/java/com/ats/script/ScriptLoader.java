@@ -55,6 +55,12 @@ public class ScriptLoader extends Script {
 	private String projectGav = "";
 
 	public ScriptLoader(){}
+	
+	public ScriptLoader(Lexer lexer){
+		this.actions = new ArrayList<Action>();
+		this.parser = new ScriptParser(lexer);
+		this.parser.addScript();
+	}
 
 	public ScriptLoader(String type, Lexer lexer, File file, ProjectData projectData){
 		this(type, lexer, file, projectData, DEFAULT_CHARSET);
