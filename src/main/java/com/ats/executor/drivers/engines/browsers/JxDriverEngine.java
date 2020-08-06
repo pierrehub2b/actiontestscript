@@ -24,7 +24,7 @@ import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.desktop.DesktopWindow;
 import com.ats.executor.drivers.engines.WebDriverEngine;
-import com.ats.executor.drivers.engines.desktop.DesktopDriverEngine;
+import com.ats.executor.drivers.engines.DesktopDriverEngine;
 import com.ats.tools.Utils;
 
 public class JxDriverEngine extends WebDriverEngine {

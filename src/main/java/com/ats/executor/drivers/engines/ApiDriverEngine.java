@@ -197,7 +197,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	
 	@Override
 	public String getSysProperty(ActionStatus status, String propertyName, FoundElement element) {
-		return null;
+		return executor.getElementAttribute(element.getId(), propertyName, 5);
 	}
 	
 	@Override
