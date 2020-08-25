@@ -29,6 +29,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -53,6 +54,8 @@ import com.google.gson.JsonObject;
 public class ActionCallscript extends Action {
 
 	public static final String SCRIPT_LABEL = "subscript";
+	private static final int RND_INDEX_VALUE = -1;
+	private static final int NO_INDEX_VALUE = -2;
 
 	private static final String SCRIPT_LOOP = "loop";
 	public static final Pattern LOOP_REGEXP = Pattern.compile(SCRIPT_LOOP + " ?\\((\\d+)\\)", Pattern.CASE_INSENSITIVE);
@@ -63,13 +66,14 @@ public class ActionCallscript extends Action {
 
 	private CalculatedValue name;
 	private int type = -1;
-	
+
 	private ArrayList<Variable> scriptVariables;
 
 	private ArrayList<Variable> variables;
 	private ParameterList parameters;
 
 	private int loop = 1;
+	private int parameterFileIndex = NO_INDEX_VALUE;
 	private CalculatedValue parameterFilePath;
 
 	private ConditionalValue condition;
@@ -80,12 +84,21 @@ public class ActionCallscript extends Action {
 
 	public ActionCallscript() {}
 
-	public ActionCallscript(ScriptLoader script, ArrayList<String> options, String name, String[] parameters, String[] returnValue, String csvFilePath) {
+	public ActionCallscript(ScriptLoader script, ArrayList<String> options, String name, String[] parameters, String[] returnValue, String csvFilePath, List<String> dataArray) {
 
 		super(script);
 		this.setName(new CalculatedValue(script, name));
 
-		if(!setParameterFilePathData(csvFilePath)) {
+		if(setParameterFilePathData(csvFilePath)) {
+			if(dataArray != null && dataArray.size() > 0) {
+				final String l = dataArray.remove(0);
+				if(l.contains("rnd") || l.contains("random")) {
+					this.parameterFileIndex = RND_INDEX_VALUE;
+				}else {
+					this.parameterFileIndex = Utils.string2Int(l, NO_INDEX_VALUE);
+				}
+			}
+		}else {
 			if(parameters.length > 0) {
 				final String firstParam = parameters[0].trim();
 				if(!setParameterFilePathData(firstParam)) {
@@ -149,9 +162,10 @@ public class ActionCallscript extends Action {
 		this.setVariables(new ArrayList<Variable>(Arrays.asList(variables)));
 	}
 
-	public ActionCallscript(Script script, CalculatedValue name, CalculatedValue csvFilePath) {
+	public ActionCallscript(Script script, CalculatedValue name, CalculatedValue csvFilePath, int index) {
 		this(script, name);
 		this.setParameterFilePath(csvFilePath);
+		this.setParameterFileIndex(index);
 	}
 
 	public ActionCallscript(Script script, CalculatedValue name, CalculatedValue[] parameters, int loop) {
@@ -180,7 +194,7 @@ public class ActionCallscript extends Action {
 	public boolean isSubscriptCalled(String scriptName) {
 		return name.getCalculated().equals(scriptName);
 	}
-	
+
 	private boolean setParameterFilePathData(String value) {
 		if(value != null) {
 			if(value.startsWith(ASSETS_PROTOCOLE) || value.startsWith(FILE_PROTOCOLE) || value.startsWith(HTTP_PROTOCOLE) || value.startsWith(HTTPS_PROTOCOLE)) {
@@ -204,7 +218,9 @@ public class ActionCallscript extends Action {
 
 		if(parameterFilePath != null) {
 			codeBuilder.append(", ")
-			.append(parameterFilePath.getJavaCode());
+			.append(parameterFilePath.getJavaCode())
+			.append(", ")
+			.append(parameterFileIndex);
 		}else {
 			if(parameters != null){
 				parameters.getJavaCode(codeBuilder);
@@ -240,7 +256,7 @@ public class ActionCallscript extends Action {
 
 		final Channel currentChannel = ts.getCurrentChannel();
 		setStatus(currentChannel.newActionStatus(testName, line));
-		
+
 		final String scriptName = name.getCalculated();
 		final Class<ActionTestScript> clazz = currentChannel.loadTestScriptClass(scriptName);
 
@@ -252,7 +268,7 @@ public class ActionCallscript extends Action {
 
 				final ActionTestScript ats = clazz.getDeclaredConstructor().newInstance();
 				ats.setTopScript(ts.getTopScript());
-								
+
 				if(parameterFilePath != null) {
 
 					final String csvPath = parameterFilePath.getCalculated();
@@ -278,25 +294,34 @@ public class ActionCallscript extends Action {
 					}
 
 					final ParameterDataFile data = Utils.loadData(csvUrl);
-					
-					if(data.noError()) {
+
+					if(data.noError() && data.getSize() > 0) {
 
 						File csvFile = null;
 						try {
 							csvFile = new File(csvUrl.toURI());
 						} catch (URISyntaxException e) {}
-						
+
 						final Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
-						final int iterationMax = data.size();
+						final int iterationMax = data.getSize();
 						int iteration = 0;
 
-						for (ParameterList row : data.getData()) {
-							
-							row.updateCalculated(ts);
-							ats.initCalledScript(ts, testName, line, row, null, iteration, iterationMax, scriptName, "dataFile", csvFile);
-							
-							testMain.invoke(ats);
-							iteration++;
+						if(parameterFileIndex > NO_INDEX_VALUE ) {
+
+							int selectedIndex = parameterFileIndex;
+							if(selectedIndex == RND_INDEX_VALUE) {
+								selectedIndex = (int)(Math.random() * iterationMax);
+							}
+
+							final ParameterList row = data.getData(selectedIndex);
+							if(row != null) {
+								callScriptWithParametersFile(testMain, ats, ts, testName, line, row, 0, 1, scriptName, csvFile);
+							}
+						}else {
+							for (ParameterList row : data.getData()) {
+								callScriptWithParametersFile(testMain, ats, ts, testName, line, row, iteration, iterationMax, scriptName, csvFile);
+								iteration++;
+							}
 						}
 
 					}else {
@@ -308,7 +333,7 @@ public class ActionCallscript extends Action {
 					final Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
 
 					for (int iteration=0; iteration<loop; iteration++) {
-						ats.initCalledScript(ts, testName, line, parameters, variables, iteration, loop, scriptName, "loop", null);
+						ats.initCalledScript(ts, testName, line, parameters, variables, iteration, loop, scriptName, SCRIPT_LOOP, null);
 						testMain.invoke(ats);
 					}
 
@@ -332,6 +357,12 @@ public class ActionCallscript extends Action {
 
 		condition = null;
 		status.endDuration();
+	}
+	
+	private void callScriptWithParametersFile(Method testMain, ActionTestScript ats, ActionTestScript ts, String testName, int line, ParameterList row, int iteration, int iterationMax, String scriptName, File csvFile) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		row.updateCalculated(ts);
+		ats.initCalledScript(ts, testName, line, row, null, iteration, iterationMax, scriptName, "dataFile", csvFile);
+		testMain.invoke(ats);
 	}
 
 	@Override
@@ -374,7 +405,7 @@ public class ActionCallscript extends Action {
 			this.parameterFilePath = null;
 		}
 	}
-	
+
 	public void setParameters(ArrayList<CalculatedValue> calcs) {
 		parameters = new ParameterList(0);
 		int i = 0;
@@ -383,7 +414,7 @@ public class ActionCallscript extends Action {
 			i++;
 		}
 	}
-	
+
 	public int getLoop() {
 		return loop;
 	}
@@ -399,6 +430,14 @@ public class ActionCallscript extends Action {
 			this.variables = null;
 		}
 		this.loop = loop;
+	}
+
+	public int getParameterFileIndex() {
+		return parameterFileIndex;
+	}
+
+	public void setParameterFileIndex(int parameterFileIndex) {
+		this.parameterFileIndex = parameterFileIndex;
 	}
 
 	public CalculatedValue getParameterFilePath() {

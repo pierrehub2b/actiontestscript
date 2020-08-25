@@ -83,7 +83,7 @@ public class ActionMouse extends ActionExecuteElement {
 
 	@Override
 	public StringBuilder getJavaCode() {
-		StringBuilder codeBuilder = super.getJavaCode();
+		final StringBuilder codeBuilder = super.getJavaCode();
 		codeBuilder.append(", ")
 		.append(ActionTestScript.JAVA_MOUSE_FUNCTION_NAME)
 		.append("(")

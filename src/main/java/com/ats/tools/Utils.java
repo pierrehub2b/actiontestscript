@@ -64,24 +64,24 @@ public class Utils {
 
 	public static int string2Int(String value, int defaultValue){
 		try {
-			return Integer.parseInt(value);
-		} catch (NumberFormatException e) {
+			return Integer.parseInt(value.replaceAll("\\s", ""));
+		} catch (NullPointerException | NumberFormatException e) {
 			return defaultValue;
 		}
 	}
 
 	public static long string2Long(String value){
 		try {
-			return Long.parseLong(value);
-		} catch (NumberFormatException e) {
+			return Long.parseLong(value.replaceAll("\\s", ""));
+		} catch (NullPointerException | NumberFormatException e) {
 			return 0L;
 		}
 	}
 
 	public static double string2Double(String value){
 		try {
-			return Double.parseDouble(value);
-		} catch (NumberFormatException e) {
+			return Double.parseDouble(value.replaceAll("\\s", ""));
+		} catch (NullPointerException | NumberFormatException e) {
 			return 0D;
 		}
 	}

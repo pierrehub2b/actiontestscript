@@ -399,7 +399,7 @@ public class Lexer {
 						}	
 					}
 
-					script.addAction(new ActionCallscript(script, options, dataOne, parameters, returnValues, csvFilePath), disabled);
+					script.addAction(new ActionCallscript(script, options, dataOne, parameters, returnValues, csvFilePath, dataArray), disabled);
 
 				}else if(ActionComment.SCRIPT_LABEL.equals(actionType)){
 

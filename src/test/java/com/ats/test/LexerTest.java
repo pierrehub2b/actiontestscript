@@ -69,7 +69,7 @@ public class LexerTest {
 			expectedScript.addAction(new ActionMouse(expectedScript, Mouse.OVER, true, new ArrayList<>(), new ArrayList<>(Arrays.asList("IMG [src =~ .*Test_Automation_Interface.png]"))), i == 0);
 			expectedScript.addAction(new ActionChannelClose(expectedScript, "myFirstChannel", false), i == 0);
 			expectedScript.addAction(new ActionChannelSwitch(expectedScript, "newChannel"), i == 0);
-			expectedScript.addAction(new ActionCallscript(expectedScript, new ArrayList<>(), "ScriptATS", new String[0], new String[0], null), i == 0);
+			expectedScript.addAction(new ActionCallscript(expectedScript, new ArrayList<>(), "ScriptATS", new String[0], new String[0], null, null), i == 0);
 			expectedScript.addAction(new ActionAssertProperty(expectedScript, true, new ArrayList<>(), "id = test", new ArrayList<>()), i == 0);
 			expectedScript.addAction(new ActionAssertCount(expectedScript, true, new ArrayList<>(), "1", new ArrayList<>(Arrays.asList("INPUT [name = q]"))), i == 0);
 			expectedScript.addAction(new ActionAssertValue(expectedScript, true, "test = azerty"), i == 0);

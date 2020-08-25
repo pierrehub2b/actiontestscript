@@ -143,7 +143,7 @@ public class ParameterDataFile{
 		try {
 			final List<String[]> csvList = reader.readAll();
 			reader.close();
-			
+
 			setMaxCols(data.size());
 			csvList.forEach(l -> addCsvLine(data, l));
 		} catch (IOException | CsvException e) {
@@ -191,8 +191,17 @@ public class ParameterDataFile{
 		}
 	}
 
-	public int size() {
+	public int getSize() {
 		return data.size();
+	}
+
+	public ParameterList getData(int index) {
+		if(getSize() > index) {
+			return data.get(index);
+		}else if(getSize() > 0) {
+			return data.get(0);
+		}
+		return null;
 	}
 
 	//--------------------------------------------------------

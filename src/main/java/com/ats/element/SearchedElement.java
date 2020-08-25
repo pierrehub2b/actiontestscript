@@ -184,7 +184,7 @@ public class SearchedElement {
 
 	public String getJavaCode() {
 
-		StringBuilder codeBuilder = new StringBuilder(ActionTestScript.JAVA_ELEMENT_FUNCTION_NAME);
+		final StringBuilder codeBuilder = new StringBuilder(ActionTestScript.JAVA_ELEMENT_FUNCTION_NAME);
 		codeBuilder.append("(");
 
 		if(parent != null){
@@ -200,11 +200,10 @@ public class SearchedElement {
 
 			codeBuilder.append("\", ");
 
-			StringJoiner joiner = new StringJoiner(", ");
+			final StringJoiner joiner = new StringJoiner(", ");
 			for (CalculatedProperty criteria : criterias){
 				joiner.add(criteria.getJavaCode());
 			}
-
 			codeBuilder.append(joiner.toString());
 
 		}else{

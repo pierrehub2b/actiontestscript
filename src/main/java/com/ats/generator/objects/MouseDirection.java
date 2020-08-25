@@ -22,6 +22,7 @@ package com.ats.generator.objects;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.CalculatedValue;
@@ -34,8 +35,8 @@ public class MouseDirection {
 
 	public MouseDirection() {}
 
-	public MouseDirection(Script script, ArrayList<String> options, boolean canBeEmpty) {
-		Iterator<String> itr = options.iterator();
+	public MouseDirection(Script script, List<String> options, boolean canBeEmpty) {
+		final Iterator<String> itr = options.iterator();
 		while (itr.hasNext()){
 			if(addPosition(script, itr.next())){
 				itr.remove();
