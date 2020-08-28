@@ -58,7 +58,7 @@ public class TestPdfGenerator {
 
 		if (xslPath == null || !(new File(xslPath).exists())) {
 			try {
-				final String styleSheet = Resources.toString(ResourceContent.class.getResource("/Reports/test_pdf_stylesheet.xml"), Charsets.UTF_8);
+				final String styleSheet = Resources.toString(ResourceContent.class.getResource("/reports/test_pdf_stylesheet.xml"), Charsets.UTF_8);
 				xslPath = createEmptyStylesheet(styleSheet,xmlPath);
 				copyImageToTempFolder("false",xmlPath);
 				copyImageToTempFolder("true",xmlPath);
@@ -81,7 +81,7 @@ public class TestPdfGenerator {
 		//HTML reports
 		try {
 			String path = f.getParentFile().getAbsolutePath();
-			String styleSheetHtmlDetail = Resources.toString(ResourceContent.class.getResource("/Reports/test_html_stylesheet.xml"), Charsets.UTF_8);
+			String styleSheetHtmlDetail = Resources.toString(ResourceContent.class.getResource("/reports/test_html_stylesheet.xml"), Charsets.UTF_8);
 			String styleSheetHtml = createEmptyStylesheetHtml(styleSheetHtmlDetail,path);
 			TransformerFactory tFactory = TransformerFactory.newInstance();
 		    Transformer transformer = tFactory.newTransformer(new StreamSource(styleSheetHtml));
@@ -108,7 +108,7 @@ public class TestPdfGenerator {
 	public static void copyImageToTempFolder(String name, String xmlPath) throws IOException {
 		File f = new File(xmlPath);
 		String path = f.getParentFile().getAbsolutePath();
-		byte[] aByteArray = Resources.toByteArray(ResourceContent.class.getResource("/Reports/" + name + ".png"));
+		byte[] aByteArray = Resources.toByteArray(ResourceContent.class.getResource("/reports/" + name + ".png"));
 		final File file = new File(path + File.separator + name + ".png");
         final FileOutputStream fileOut = new FileOutputStream(file);
         fileOut.write(aByteArray);
