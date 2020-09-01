@@ -36,7 +36,7 @@ import javax.xml.transform.stream.StreamSource;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 
-public class TestPdfGenerator {
+public class ScriptReportGenerator {
 
 	public static void main(String[] args) throws TransformerException {
 		String fopDir = System.getProperty("fop", null);

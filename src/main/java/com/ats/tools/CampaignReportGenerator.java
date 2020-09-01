@@ -31,7 +31,7 @@ import javax.xml.transform.*;
 import javax.xml.transform.stream.*;
 import java.io.*;
 
-public class SuitePdfGenerator {
+public class CampaignReportGenerator {
 	
     public static String patternDOCTYPE = "<!DOCTYPE[^<>]*(?:<![^<>]*>[^<>]*)*>";
     public static String patternXML = "\\<\\?xml[^<>]*(?:<![^<>]*>[^<>]*)*>";
@@ -43,7 +43,7 @@ public class SuitePdfGenerator {
 		String pdfPath = System.getProperty("pdf", null);
 		String name = System.getProperty("name", null);
 		
-		String basePath = new File(xmlPath.split(";")[1]).getParentFile().getParentFile().getAbsolutePath();
+		String basePath = new File(xmlPath.split(";")[1].split(",")[0]).getParentFile().getParentFile().getAbsolutePath();
 		
 		if (fopDir == null || !(new File(fopDir).exists())) {
 			Map<String, String> map = System.getenv();
@@ -136,15 +136,19 @@ public class SuitePdfGenerator {
         FileWriter fw = new FileWriter(f);
         fw.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><report>");
         
-        String[] paths = xmlPath.split(";");
-        for (int i = 0; i < paths.length; i++) {
-        	String content = Files.asCharSource(new File(paths[i]), Charsets.UTF_8).read();
-			fw.write(content.replaceAll(patternDOCTYPE, "").replaceAll(patternXML, ""));
-			if(i == 0) { fw.write("<tests>"); };
-		}
-        fw.write("</tests></report>");
+        String[] paths = xmlPath.split(",");
+        for (int j = 0; j<paths.length;j++) {
+        	String[] scripts = paths[j].split(";");
+        	fw.write("<suite>");
+        	for (int i = 0; i < scripts.length; i++) {
+            	String content = Files.asCharSource(new File(scripts[i]), Charsets.UTF_8).read();
+    			fw.write(content.replaceAll(patternDOCTYPE, "").replaceAll(patternXML, ""));
+    			if(i == 0) { fw.write("<tests>"); };
+    		}
+        	fw.write("</tests></suite>");
+        } 
+        fw.write("</report>");
 	    fw.close();
-
         return f.getAbsolutePath();
 	}
 }
