@@ -25,6 +25,22 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 	<LINK rel="stylesheet" href="../report.css"/>
       </HEAD>
       <BODY class="py-4">
+
+          <TABLE class="execution table table-borderless">
+              <TBODY>
+                  <TR>
+                      <TH class="align-middle text-center">
+                          <IMG src="agilitest.png"/>
+                      </TH>
+                      <TH class="align-middle text-center">
+                          <H1>
+                              ActionTestScript - Campaign Result
+                          </H1>
+                      </TH>
+                  </TR>
+              </TBODY>
+          </TABLE>
+
 	<DIV class="container">
 	  <xsl:apply-templates/>
 	</DIV>
@@ -35,20 +51,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <!-- child element: suite     -->
   <!-- ========================= -->
   <xsl:template match="suite">
-    <TABLE class="execution table table-borderless">
-      <TBODY>
-	<TR>
-	  <TH class="align-middle text-center">
-            <IMG src="agilitest.png"/>
-	  </TH>
-	  <TH class="align-middle text-center">
-            <H1>
-	      ActionTestScript - Campaign Result
-	    </H1>
-	  </TH>
-	</TR>
-      </TBODY>
-    </TABLE>
+      <hr />
     <TABLE class="execution table table-bordered table-hover">
       <TBODY>
 	<TR>
@@ -60,11 +63,11 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
               <xsl:value-of select="@name"/>
 	    </H3>
           </TD>
-	  <TD class="align-middle text-center">
+	  <!--<TD class="align-middle text-center">
 	    <xsl:text disable-output-escaping="yes">&lt;A href=&quot;</xsl:text>
 	    <xsl:value-of select="concat('../',@name,'/report_',@name,'.pdf')"/>
 	    <xsl:text disable-output-escaping="yes">&quot; class=&quot;btn btn-secondary btn-sm &quot; role=&quot;button&quot; aria-pressed=&quot;true&quot;&gt;PDF report&lt;/a&gt;</xsl:text>
-	  </TD>
+	  </TD>-->
 
         </TR>
 	<TR>
@@ -257,8 +260,8 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <!-- ========================= -->
   <xsl:template match="ats">
   <xsl:variable name="test_result" select="count(actions/action[passed = 'false'])"/>
-  <xsl:variable name="test_file" select="concat(script[1]/@testName, '_xml')"/>
-  <xsl:variable name="atsv_test_file" select="script[1]/@testName"/>
+  <xsl:variable name="test_file" select="concat(script[1]/@suiteName, '/', script[1]/@testName, '_xml/', script[1]/@testName, '_xml')"/>
+  <xsl:variable name="atsv_test_file" select="concat(script[1]/@suiteName, '/', script[1]/@testName)"/>
   <TR>
     <xsl:apply-templates select="script"/>
     <xsl:apply-templates select="actions"/>
@@ -279,14 +282,14 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     </xsl:choose>
     <TD class="align-middle text-center">
       <xsl:text disable-output-escaping="yes">&lt;A href=&quot;</xsl:text>
-      <xsl:value-of select="concat($test_file,'/',$test_file,'.html')"/>
+      <xsl:value-of select="concat($test_file,'.html')"/>
       <xsl:text disable-output-escaping="yes">&quot; class=&quot;btn btn-secondary btn-sm &quot; role=&quot;button&quot; aria-pressed=&quot;true&quot;&gt;HTML report&lt;/a&gt;</xsl:text>
     </TD>
     <xsl:choose>
       <xsl:when test="$xml_reports = 'true'">
 	<TD class="align-middle text-center">
 	  <xsl:text disable-output-escaping="yes">&lt;A href=&quot;</xsl:text>
-	  <xsl:value-of select="concat($test_file,'/',$test_file,'.pdf')"/>
+	  <xsl:value-of select="concat($test_file,'.pdf')"/>
 	  <xsl:text disable-output-escaping="yes">&quot; class=&quot;btn btn-secondary btn-sm &quot; role=&quot;button&quot; aria-pressed=&quot;true&quot;&gt;PDF report&lt;/a&gt;</xsl:text>
 	</TD>
       </xsl:when>

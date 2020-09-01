@@ -43,7 +43,7 @@ public class CampaignReportGenerator {
 		String pdfPath = System.getProperty("pdf", null);
 		String name = System.getProperty("name", null);
 		
-		String basePath = new File(xmlPath.split(";")[1].split(",")[0]).getParentFile().getParentFile().getAbsolutePath();
+		String basePath = new File(pdfPath).getParentFile().getAbsolutePath();
 		
 		if (fopDir == null || !(new File(fopDir).exists())) {
 			Map<String, String> map = System.getenv();
@@ -77,6 +77,7 @@ public class CampaignReportGenerator {
 			String command = String.format("java -cp %s;%s org.apache.fop.cli.Main -xml %s -xsl %s -pdf %s",
 					fopDir + "\\build\\fop.jar", fopDir + "\\lib\\*", xmlUrl, xslPath, pdfPath);
 			Runtime.getRuntime().exec("cmd /c " + command);
+			System.out.println(command);
 		} catch (IOException e1) {
 			return;
 		}
@@ -88,7 +89,7 @@ public class CampaignReportGenerator {
 			TransformerFactory tFactory = TransformerFactory.newInstance();
 		    Transformer transformer = tFactory.newTransformer(new StreamSource(styleSheetHtml));
 
-		    transformer.transform(new StreamSource(xmlUrl), new StreamResult(basePath + File.separator + "report_"+ name + ".html"));
+		    transformer.transform(new StreamSource(xmlUrl), new StreamResult(basePath + File.separator + name + ".html"));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -137,15 +138,19 @@ public class CampaignReportGenerator {
         fw.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><report>");
         
         String[] paths = xmlPath.split(",");
+        String currentSuite = "";
         for (int j = 0; j<paths.length;j++) {
         	String[] scripts = paths[j].split(";");
-        	fw.write("<suite>");
         	for (int i = 0; i < scripts.length; i++) {
-            	String content = Files.asCharSource(new File(scripts[i]), Charsets.UTF_8).read();
-    			fw.write(content.replaceAll(patternDOCTYPE, "").replaceAll(patternXML, ""));
-    			if(i == 0) { fw.write("<tests>"); };
+        		var currentFile = new File(scripts[i]);
+            	String content = Files.asCharSource(currentFile, Charsets.UTF_8).read();
+				if(i == 0) {
+					currentSuite = currentFile.getName().replace(".xml", "");
+				}
+    			fw.write(content.replaceAll(patternDOCTYPE, "").replaceAll(patternXML, "").replace("<script", "<script suiteName=\"" + currentSuite + "\""));
+    			if(i == 0) { fw.write("<tests>"); }
     		}
-        	fw.write("</tests></suite>");
+        	fw.write("</tests>");
         } 
         fw.write("</report>");
 	    fw.close();
