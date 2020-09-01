@@ -44,6 +44,9 @@ import com.ats.recorder.IVisualRecorder;
 
 public class TestElement{
 
+	public final static String CLIENT_WIDTH = "clientWidth";
+	public final static String CLIENT_HEIGTH = "clientHeight";
+	
 	protected Channel channel;
 	protected IDriverEngine engine;
 
