@@ -35,6 +35,7 @@ import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.desktop.DesktopElement;
 import com.ats.executor.drivers.desktop.DesktopWindow;
 import com.ats.executor.drivers.engines.WebDriverEngine;
+import com.ats.tools.Utils;
 
 public class FoundElement{
 
@@ -375,6 +376,16 @@ public class FoundElement{
 	
 	public ArrayList<FoundElement> getChildren(){
 		return children;
+	}
+	
+	public int getMiddleX() {
+		final Double sc = getScreenX() - getX() + (getWidth()/2);
+		return sc.intValue() - (Utils.string2Int(getValue().getAttribute(TestElement.CLIENT_WIDTH)) /2);
+	}
+	
+	public int getMiddleY() {
+		final Double sc = getScreenY() - getY() + (getHeight()/2);
+		return sc.intValue() - (Utils.string2Int(getValue().getAttribute(TestElement.CLIENT_HEIGTH)) /2);
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------
