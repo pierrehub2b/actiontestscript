@@ -22,10 +22,10 @@ public class MobileRootElement extends RemoteWebElement {
 
 	@Override
 	public String getAttribute(String name) {
-		if("width".equals(name) || "clientWidth".equals(name)){
-			return width + "";
-		}else if("height".equals(name) || "clientHeight".equals(name)) {
-			return height + "";
+		if("width".equals(name) || TestElement.CLIENT_WIDTH.equals(name)){
+			return String.valueOf(width);
+		}else if("height".equals(name) || TestElement.CLIENT_HEIGTH.equals(name)) {
+			return String.valueOf(height);
 		}
 		return super.getAttribute(name);
 	}

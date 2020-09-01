@@ -22,10 +22,10 @@ public class DesktopRootElement extends RemoteWebElement {
 
 	@Override
 	public String getAttribute(String name) {
-		if("clientWidth".equals(name)){
-			return width + "";
-		}else if("clientHeight".equals(name)) {
-			return height + "";
+		if(TestElement.CLIENT_WIDTH.equals(name)){
+			return String.valueOf(width);
+		}else if(TestElement.CLIENT_HEIGTH.equals(name)) {
+			return String.valueOf(height);
 		}
 		return super.getAttribute(name);
 	}

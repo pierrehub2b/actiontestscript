@@ -44,26 +44,13 @@ public class TestElementImage extends TestElement {
 	@Override
 	public void over(ActionStatus status, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {
 		final FoundElement fe = getFoundElement();
-		/*JavascriptExecutor js = (JavascriptExecutor) ((RemoteWebElement) fe.getValue()).getWrappedDriver();
-		
-		int halfWidth = Utils.string2Int(js.executeScript("return window.innerWidth").toString())/2;
-		int halfHeight = Utils.string2Int(js.executeScript("return window.innerHeight").toString())/2;
-		
-		super.over(status, position, desktopDragDrop, fe.getBoundX().intValue() - halfWidth, fe.getBoundY().intValue()- halfHeight);*/
-		
-		int halfWidth = Utils.string2Int(fe.getValue().getAttribute(TestElement.CLIENT_WIDTH))/2;
-		int halfHeight = Utils.string2Int(fe.getValue().getAttribute(TestElement.CLIENT_HEIGTH))/2;
-		super.over(status, position, desktopDragDrop, fe.getBoundX().intValue() - halfWidth, fe.getBoundY().intValue() - halfHeight);
+		super.over(status, position, desktopDragDrop, fe.getMiddleX(), fe.getMiddleY());
 	}
 
 	@Override
 	protected void mouseClick(ActionStatus status, MouseDirection position, int offsetX, int offsetY) {
 		final FoundElement fe = getFoundElement();
-		
-		final int halfWidth = Utils.string2Int(fe.getValue().getAttribute(TestElement.CLIENT_WIDTH))/2;
-		final int halfHeight = Utils.string2Int(fe.getValue().getAttribute(TestElement.CLIENT_HEIGTH))/2;
-
-		super.mouseClick(status, position, fe.getBoundX().intValue() - halfWidth, fe.getBoundY().intValue() - halfHeight);
+		super.mouseClick(status, position, fe.getMiddleX(), fe.getMiddleY());
 	}
 
 	@Override

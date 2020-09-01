@@ -82,10 +82,10 @@ public class TestElementRoot extends TestElement {
 			return engine.getSource();
 		case RECTANGLE:
 			return channel.getBoundDimension();
-		case TestElement.CLIENT_WIDTH:
-			return channel.getSubDimension().getWidth().toString();
-		case TestElement.CLIENT_HEIGTH:
-			return channel.getSubDimension().getHeight().toString();
+		case CLIENT_WIDTH:
+			return channel.getDimension().getWidth().toString();
+		case CLIENT_HEIGTH:
+			return channel.getDimension().getHeight().toString();
 		case SCREEN_SHOT:
 			return Base64.getEncoder().encodeToString(channel.getScreenShot());
 		case VERSION:
