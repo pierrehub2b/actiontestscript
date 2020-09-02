@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
+
 import org.xml.sax.SAXException;
 import javax.xml.parsers.*;
 import javax.xml.transform.*;
@@ -39,9 +40,12 @@ public class CampaignReportGenerator {
 	public static void main(String[] args) throws ParserConfigurationException, SAXException, TransformerException, IOException {
 		String fopDir = System.getProperty("fop", null);
 		String xmlPath = System.getProperty("xml", null);
-		String xslPath = System.getProperty("xsl", null);
+		String xslPathHtml = System.getProperty("xslHtml", null);
+		String xslPathPdf = System.getProperty("xslPdf", null);
 		String pdfPath = System.getProperty("pdf", null);
 		String name = System.getProperty("name", null);
+		String actions = System.getProperty("actions", null);
+		String images =  System.getProperty("images", null);
 		
 		String basePath = new File(pdfPath).getParentFile().getAbsolutePath();
 		
@@ -56,10 +60,10 @@ public class CampaignReportGenerator {
 			}
 		}
 
-		if (xslPath == null || !(new File(xslPath).exists())) {
+		if (xslPathPdf == null || !(new File(xslPathPdf).exists())) {
 			try {
 				final String styleSheet = Resources.toString(ResourceContent.class.getResource("/reports/campaign_pdf_stylesheet.xml"), Charsets.UTF_8);
-				xslPath = createEmptyStylesheet(styleSheet,basePath);
+				xslPathPdf = createEmptyStylesheet(styleSheet,basePath);
 				copyImageToTempFolder("false",basePath);
 				copyImageToTempFolder("false",basePath);
 				copyImageToTempFolder("true",basePath);
@@ -70,25 +74,28 @@ public class CampaignReportGenerator {
 			}
 		}
 
-		if (fopDir == null || xmlPath == null || xslPath == null || pdfPath == null) { return; }
+		if (fopDir == null || xmlPath == null || xslPathPdf == null || pdfPath == null) { return; }
 		
-		String xmlUrl = generateReportXml(xmlPath, basePath);
+		String xmlUrl = generateReportXml(xmlPath, basePath, actions, images);
 		try {
 			String command = String.format("java -cp %s;%s org.apache.fop.cli.Main -xml %s -xsl %s -pdf %s",
-					fopDir + "\\build\\fop.jar", fopDir + "\\lib\\*", xmlUrl, xslPath, pdfPath);
+					fopDir + "\\build\\fop.jar", fopDir + "\\lib\\*", xmlUrl, xslPathPdf, pdfPath);
 			Runtime.getRuntime().exec("cmd /c " + command);
-			System.out.println(command);
 		} catch (IOException e1) {
 			return;
 		}
 		
 		//HTML reports
 		try {
-			String styleSheetHtmlDetail = Resources.toString(ResourceContent.class.getResource("/reports/campaign_html_stylesheet.xml"), Charsets.UTF_8);
-			String styleSheetHtml = createEmptyStylesheetHtml(styleSheetHtmlDetail,basePath);
+			Transformer transformer = null;
 			TransformerFactory tFactory = TransformerFactory.newInstance();
-		    Transformer transformer = tFactory.newTransformer(new StreamSource(styleSheetHtml));
-
+			if(xslPathHtml == null || !(new File(xslPathHtml).exists())) {
+				String styleSheetHtmlDetail = Resources.toString(ResourceContent.class.getResource("/reports/campaign_html_stylesheet.xml"), Charsets.UTF_8);
+				String styleSheetHtml = createEmptyStylesheetHtml(styleSheetHtmlDetail,basePath);
+				transformer = tFactory.newTransformer(new StreamSource(styleSheetHtml));
+			} else {
+				transformer = tFactory.newTransformer(new StreamSource(xslPathHtml));
+			}
 		    transformer.transform(new StreamSource(xmlUrl), new StreamResult(basePath + File.separator + name + ".html"));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -130,24 +137,27 @@ public class CampaignReportGenerator {
         return f.getAbsolutePath();
 	}
 	
-	public static String generateReportXml(String xmlPath, String basePath) throws IOException, ParserConfigurationException, SAXException{
+	public static String generateReportXml(String xmlPath, String basePath, String actions, String images) throws IOException, ParserConfigurationException, SAXException{
 		File f = new File(basePath + File.separator + "report.xml");
         f.setWritable(true);
         f.setReadable(true);
         FileWriter fw = new FileWriter(f);
-        fw.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><report>");
+        fw.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><report actions=\"" +  actions + "\" images=\"" + images + "\">");
         
         String[] paths = xmlPath.split(",");
+        String currentScript = "";
         String currentSuite = "";
         for (int j = 0; j<paths.length;j++) {
         	String[] scripts = paths[j].split(";");
         	for (int i = 0; i < scripts.length; i++) {
         		var currentFile = new File(scripts[i]);
             	String content = Files.asCharSource(currentFile, Charsets.UTF_8).read();
-				if(i == 0) {
+				if(i != 0) {
+					currentScript = currentFile.getParentFile().getName();
+				} else {
 					currentSuite = currentFile.getName().replace(".xml", "");
 				}
-    			fw.write(content.replaceAll(patternDOCTYPE, "").replaceAll(patternXML, "").replace("<script", "<script suiteName=\"" + currentSuite + "\""));
+    			fw.write(content.replaceAll(patternDOCTYPE, "").replaceAll(patternXML, "").replaceAll("<action ", "<action scriptName=\"" + currentScript + "\" suiteName=\"" + currentSuite + "\" ").replace("<script ", "<script suiteName=\"" + currentSuite + "\" "));
     			if(i == 0) { fw.write("<tests>"); }
     		}
         	fw.write("</tests>");
