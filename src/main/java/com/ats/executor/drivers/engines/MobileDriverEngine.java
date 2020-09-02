@@ -37,10 +37,7 @@ import com.ats.graphic.TemplateMatchingSimple;
 import com.ats.script.actions.ActionApi;
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 import okhttp3.OkHttpClient;
 import okhttp3.OkHttpClient.Builder;
 import okhttp3.Request;
@@ -75,10 +72,8 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	public final static String TAP = "tap";
 	public final static String PRESS = "press";
 	public final static String SWIPE = "swipe";
-	public final static String PINCH = "pinch";
-	public final static String ROTATE = "rotate";
 	public final static String SCRIPTING = "scripting";
-	public final static String SET_PROP = "sysprop-set";
+	public final static String SET_PROP = "set-property";
 	public final static String GET_PROP = "sysprop-get";
 	public final static String SYS_BUTTON = "sysbutton";
 
@@ -147,7 +142,10 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 				rootElement = new AndroidRootElement(this);
 				cachedElement = new AndroidRootElement(this);
 			}
-
+			
+			final JsonArray properties = response.getAsJsonArray("systemProperties");
+			channel.setSystemProperties(properties);
+			
 			final String driverVersion = response.get("driverVersion").getAsString();
 
 			final double deviceWidth = response.get("deviceWidth").getAsDouble();
@@ -189,7 +187,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			} else {
 				channel.setApplicationData(os + ":" + systemName, version, driverVersion, -1, icon, endPointData[0] + ":" + screenCapturePort);
 			}
-
+			
 			refreshElementMapLocation();
 		}
 	}

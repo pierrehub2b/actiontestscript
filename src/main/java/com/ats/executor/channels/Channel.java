@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gson.JsonArray;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebElement;
 
@@ -79,7 +80,17 @@ public class Channel {
 	private String applicationVersion = "";
 	private String driverVersion = "";
 	private String os = "";
-
+	
+	private ArrayList<String> systemProperties = new ArrayList<>();
+	public void setSystemProperties(JsonArray info) {
+		ArrayList<String> properties = new ArrayList<>();
+		for (int i = 0; i < info.size(); i++) {
+			properties.add(info.get(i).getAsString());
+		}
+		
+		this.systemProperties = properties;
+	}
+	
 	private byte[] icon;
 	private String screenServer;
 	private ArrayList<String> operations = new ArrayList<String>();
