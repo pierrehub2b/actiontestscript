@@ -12,7 +12,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:variable name="atsv_reports" select="//report/suite/parameter[@name='visual.report']/@value"/>
   <xsl:variable name="ats_loglevel" select="//report/suite/parameter[@name='ats.log.level']/@value"/>
   <xsl:variable name="actions" select="//report/@actions"/>
-  <xsl:variable name="images" select="//report/@images"/>
+  <xsl:variable name="details" select="//report/@details"/>
   <!-- ========================= -->
   <!-- Appel du template: ats -->
   <!-- ========================= -->
@@ -366,20 +366,15 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
             </xsl:when>
           </xsl:choose>
 	</THEAD>
+			<xsl:choose>
+		<xsl:when test="$details = 'true'">
 	<TBODY>
-	
-	<xsl:choose>
-		<xsl:when test="$images = 'true'">
 			<TR>
 	  <TD class="w-100 p-3" COLSPAN="2">
 	    <xsl:variable name="img" select="concat(@suiteName, '/', @scriptName ,'/',img/@src)"/>
 	    <IMG width="100%" SRC="{$img}"/>
 	  </TD>
-	</TR>
-		</xsl:when>
-    </xsl:choose>
-	
-	
+	</TR>	
 	<TR>
 	  <TD class="w-100 p-3" COLSPAN="2">
             Channel name :
@@ -411,6 +406,8 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 	  </TD>
 	</TR>
 	</TBODY>
+				</xsl:when>
+    </xsl:choose>
 	</TABLE>
   </xsl:template>
 </xsl:stylesheet>

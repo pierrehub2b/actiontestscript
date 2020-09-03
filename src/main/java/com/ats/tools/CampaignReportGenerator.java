@@ -45,7 +45,7 @@ public class CampaignReportGenerator {
 		String pdfPath = System.getProperty("pdf", null);
 		String name = System.getProperty("name", null);
 		String actions = System.getProperty("actions", null);
-		String images =  System.getProperty("images", null);
+		String details =  System.getProperty("details", null);
 		
 		String basePath = new File(pdfPath).getParentFile().getAbsolutePath();
 		
@@ -76,11 +76,12 @@ public class CampaignReportGenerator {
 
 		if (fopDir == null || xmlPath == null || xslPathPdf == null || pdfPath == null) { return; }
 		
-		String xmlUrl = generateReportXml(xmlPath, basePath, actions, images);
+		String xmlUrl = generateReportXml(xmlPath, basePath, actions, details);
 		try {
 			String command = String.format("java -cp %s;%s org.apache.fop.cli.Main -xml %s -xsl %s -pdf %s",
 					fopDir + "\\build\\fop.jar", fopDir + "\\lib\\*", xmlUrl, xslPathPdf, pdfPath);
 			Runtime.getRuntime().exec("cmd /c " + command);
+			System.out.println(command);
 		} catch (IOException e1) {
 			return;
 		}
@@ -137,12 +138,12 @@ public class CampaignReportGenerator {
         return f.getAbsolutePath();
 	}
 	
-	public static String generateReportXml(String xmlPath, String basePath, String actions, String images) throws IOException, ParserConfigurationException, SAXException{
+	public static String generateReportXml(String xmlPath, String basePath, String actions, String details) throws IOException, ParserConfigurationException, SAXException{
 		File f = new File(basePath + File.separator + "report.xml");
         f.setWritable(true);
         f.setReadable(true);
         FileWriter fw = new FileWriter(f);
-        fw.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><report actions=\"" +  actions + "\" images=\"" + images + "\">");
+        fw.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><report actions=\"" +  actions + "\" details=\"" + details + "\">");
         
         String[] paths = xmlPath.split(",");
         String currentScript = "";
