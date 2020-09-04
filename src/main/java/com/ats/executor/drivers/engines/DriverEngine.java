@@ -209,19 +209,19 @@ public abstract class DriverEngine {
 	
 	public List<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template) {
 
+		channel.setWindowToFront();
+		channel.refreshLocation();
+		
 		TestBound outterBound = null;
 		if(parent != null) {
 			outterBound = parent.getFoundElement().getTestScreenBound();
 		}else {
 			outterBound = channel.getDimension();
 		}
-		
-		channel.setWindowToFront();
-		
-		byte[] screenshot = new byte[0];
-		screenshot = getDesktopDriver().getScreenshotByte(outterBound.getX(), outterBound.getY(), outterBound.getWidth(), outterBound.getHeight());
 
-		return template.findOccurrences(screenshot).parallelStream().map(r -> new FoundElement(channel, parent, r)).collect(Collectors.toCollection(ArrayList::new));
+		return template.findOccurrences(
+				getDesktopDriver().getScreenshotByte(outterBound.getX(), outterBound.getY(), outterBound.getWidth(), outterBound.getHeight()))
+				.parallelStream().map(r -> new FoundElement(channel, parent, r)).collect(Collectors.toCollection(ArrayList::new));
 	}
 	
 	public byte[] getScreenshot(Double x, Double y, Double width, Double height) {
