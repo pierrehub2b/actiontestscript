@@ -383,13 +383,11 @@ public class FoundElement{
 	//----------------------------------------------------------------------------------------------------------------------
 
 	public int getMiddleX() {
-		final Double sc = getBoundX() + (getWidth()/2);
-		return sc.intValue() - (Utils.string2Int(getValue().getAttribute(TestElement.CLIENT_WIDTH)) /2);
+		return getBoundX().intValue() - (Utils.string2Int(getValue().getAttribute(TestElement.CLIENT_WIDTH)) /2);
 	}
 	
 	public int getMiddleY() {
-		final Double sc = getBoundY() + (getHeight()/2);
-		return sc.intValue() - (Utils.string2Int(getValue().getAttribute(TestElement.CLIENT_HEIGTH)) /2);
+		return getBoundY().intValue() - (Utils.string2Int(getValue().getAttribute(TestElement.CLIENT_HEIGTH)) /2);
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------
