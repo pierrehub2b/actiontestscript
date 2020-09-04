@@ -36,11 +36,11 @@ public class TestElementImage extends TestElement {
 		}
 		return engine.findElements(parent, template);
 	}
-
+	
 	//-------------------------------------------------------------------------------------------------------------------
-	// Mouse ...
+	// Mouse actions ...
 	//-------------------------------------------------------------------------------------------------------------------
-
+	
 	@Override
 	public void over(ActionStatus status, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {
 		final FoundElement fe = getFoundElement();
@@ -57,11 +57,11 @@ public class TestElementImage extends TestElement {
 	public void mouseWheel(int delta) {
 		// do nothing for the moment
 	}
-
+	
 	//-------------------------------------------------------------------------------------------------------------------
 	// Text ...
 	//-------------------------------------------------------------------------------------------------------------------
-
+	
 	@Override
 	public void clearText(ActionStatus status, MouseDirection md) {
 		engine.getDesktopDriver().clearText();

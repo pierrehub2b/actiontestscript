@@ -378,6 +378,10 @@ public class FoundElement{
 		return children;
 	}
 	
+	//----------------------------------------------------------------------------------------------------------------------
+	// Get image recognition screen position
+	//----------------------------------------------------------------------------------------------------------------------
+
 	public int getMiddleX() {
 		final Double sc = getScreenX() - getX() + (getWidth()/2);
 		return sc.intValue() - (Utils.string2Int(getValue().getAttribute(TestElement.CLIENT_WIDTH)) /2);
