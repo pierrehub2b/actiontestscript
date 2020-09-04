@@ -10,7 +10,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="ats-automated-testing" target="11" />
+      <module name="ats-automated-testing" target="10" />
     </bytecodeTargetLevel>
   </component>
 </project>
