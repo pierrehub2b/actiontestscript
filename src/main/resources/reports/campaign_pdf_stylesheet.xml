@@ -157,19 +157,19 @@
   <!-- ========================= -->
   <xsl:template match="parameter">
     <xsl:if test="@name = 'xml.report' and @value = 'true'">
-      <fo:block display-align="left" text-align="left" font-weight="normal">
+      <fo:block font-weight="normal">
         XML/PDF Report generation
       </fo:block>
     </xsl:if>
 
     <xsl:if test="@name = 'visual.report' and @value &gt; 0">
-      <fo:block display-align="left" text-align="left" font-weight="normal">
+      <fo:block font-weight="normal">
         ATSV Report level : <xsl:value-of select="@value"/>
       </fo:block>
     </xsl:if>
 
     <xsl:if test="@name = 'ats.log.level'">
-      <fo:block display-align="left" text-align="left" font-weight="normal">
+      <fo:block text-align="left" font-weight="normal">
         ATS log level : <xsl:value-of select="@value"/>
       </fo:block>
     </xsl:if>
@@ -399,14 +399,14 @@
       </fo:static-content>
       <fo:flow flow-name="xsl-region-body">
 	  
-	  <fo:block-container vertical-align="center"  text-align="left" padding-left="1cm" display-align="center" border-style="solid" border-width="1" border-color="black" height="2cm" left="0" top="0" position="absolute" page-break-before="always">
+	  <fo:block-container text-align="left" width="18cm" padding-left="1cm" display-align="center" border-style="solid" border-width="1" border-color="black" height="2cm" left="0" top="0" position="absolute" page-break-before="always">
 		<fo:block>
             Action type :
             <xsl:value-of select="@type"/>            
           </fo:block>
         </fo:block-container>
 		
-			  <fo:block-container vertical-align="center"  text-align="center" display-align="center" border-style="solid" border-width="1" border-color="black" height="2cm" left="18.5cm" top="0" position="absolute">
+			  <fo:block-container text-align="center" display-align="center" border-style="solid" border-width="1" border-color="black" height="2cm" left="18.5cm" top="0" position="absolute">
           <fo:block>
             <xsl:choose>
               <xsl:when test="passed = 'true'">
@@ -430,10 +430,10 @@
 	  
 	  <xsl:choose>
   <xsl:when test="$details = 'true'">
-        <fo:block-container border-style="solid" border-width="1" border-color="black" width="15cm" height="10.5cm" left="0" top="2.5cm" position="absolute" padding-left="0.1cm">
+        <fo:block-container width="15cm" height="10.5cm" left="0" top="2.5cm" position="absolute">
           <fo:block>
             <xsl:variable name="img" select="concat(@suiteName, '/', @scriptName, '/', img/@src)"/>
-            <fo:external-graphic src="{$img}" content-height="13.3cm" content-width="18cm"/>
+            <fo:external-graphic src="{$img}" content-height="11.3cm" content-width="16cm"/>
           </fo:block>
         </fo:block-container>
         <fo:block-container border-style="solid" border-width="1" border-color="black" width="7.2cm" height="10cm" left="18.5cm" top="2.5cm" position="absolute">
@@ -453,7 +453,7 @@
             <xsl:value-of select="timeline"/>            
           </fo:block>
         </fo:block-container>
-        <fo:block-container border-style="solid" border-width="1" border-color="black" width="25.7cm" height="2cm" left="0" top="16cm" position="absolute" padding-left="0.1cm">
+        <fo:block-container border-style="solid" border-width="1" border-color="black" width="25.7cm" height="2cm" left="0" top="15cm" position="absolute">
           <fo:block text-align="left" font-weight="bold">
             Technical information:
           </fo:block>

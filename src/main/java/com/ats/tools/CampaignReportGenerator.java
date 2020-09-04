@@ -37,7 +37,7 @@ public class CampaignReportGenerator {
     public static String patternDOCTYPE = "<!DOCTYPE[^<>]*(?:<![^<>]*>[^<>]*)*>";
     public static String patternXML = "\\<\\?xml[^<>]*(?:<![^<>]*>[^<>]*)*>";
 	
-	public static void main(String[] args) throws ParserConfigurationException, SAXException, TransformerException, IOException {
+	public static void main(String[] args) throws ParserConfigurationException, SAXException, TransformerException, IOException, InterruptedException {
 		String fopDir = System.getProperty("fop", null);
 		String xmlPath = System.getProperty("xml", null);
 		String xslPathHtml = System.getProperty("xslHtml", null);
@@ -77,14 +77,6 @@ public class CampaignReportGenerator {
 		if (fopDir == null || xmlPath == null || xslPathPdf == null || pdfPath == null) { return; }
 		
 		String xmlUrl = generateReportXml(xmlPath, basePath, actions, details);
-		try {
-			String command = String.format("java -cp %s;%s org.apache.fop.cli.Main -xml %s -xsl %s -pdf %s",
-					fopDir + "\\build\\fop.jar", fopDir + "\\lib\\*", xmlUrl, xslPathPdf, pdfPath);
-			Runtime.getRuntime().exec("cmd /c " + command);
-			System.out.println(command);
-		} catch (IOException e1) {
-			return;
-		}
 		
 		//HTML reports
 		try {
@@ -102,6 +94,18 @@ public class CampaignReportGenerator {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		try {
+			String command = String.format("java -cp %s;%s org.apache.fop.cli.Main -xml %s -xsl %s -pdf %s",
+					fopDir + "\\build\\fop.jar", fopDir + "\\lib\\*", xmlUrl, xslPathPdf, pdfPath);
+			Process p = Runtime.getRuntime().exec("cmd /c " + command);
+			/*System.out.println("Waiting for batch file for process " + name + "...");
+		    p.waitFor();
+		    System.out.println("Batch file done for " + name);*/
+		} catch (Throwable t)
+          {
+            t.printStackTrace();
+          }
 		
 	}
 	

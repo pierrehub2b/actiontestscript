@@ -38,7 +38,7 @@ import com.google.common.io.Resources;
 
 public class ScriptReportGenerator {
 
-	public static void main(String[] args) throws TransformerException {
+	public static void main(String[] args) throws TransformerException, InterruptedException {
 		String fopDir = System.getProperty("fop", null);
 		String xmlPath = System.getProperty("xml", null);
 		String xslPath = System.getProperty("xsl", null);
@@ -69,15 +69,7 @@ public class ScriptReportGenerator {
 			}
 		}
 
-		if (fopDir == null || xmlPath == null || xslPath == null) { return; }
-		String command = String.format("java -cp %s;%s org.apache.fop.cli.Main -xml %s -xsl %s -pdf %s",
-				fopDir + "\\build\\fop.jar", fopDir + "\\lib\\*", xmlPath, xslPath, f.getParentFile().getAbsolutePath() + File.separator + f.getParentFile().getName() + ".pdf");
-		try {
-			Runtime.getRuntime().exec("cmd /c " + command);
-		} catch (IOException e) {
-			System.out.println(e);
-		}
-		
+		if (fopDir == null || xmlPath == null || xslPath == null) { return; }		
 		//HTML reports
 		try {
 			String path = f.getParentFile().getAbsolutePath();
@@ -91,6 +83,18 @@ public class ScriptReportGenerator {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		String command = String.format("java -cp %s;%s org.apache.fop.cli.Main -xml %s -xsl %s -pdf %s",
+				fopDir + "\\build\\fop.jar", fopDir + "\\lib\\*", xmlPath, xslPath, f.getParentFile().getAbsolutePath() + File.separator + f.getParentFile().getName() + ".pdf");
+		try {
+			Process p = Runtime.getRuntime().exec("cmd /c " + command);
+			System.out.println("Waiting for batch file for process " + name + "...");
+		    p.waitFor();
+		    System.out.println("Batch file done for " + name);
+		} catch (Throwable t)
+          {
+            t.printStackTrace();
+          }
 	}
 	
 	public static String createEmptyStylesheetHtml(String xmlSource,String basePath) throws IOException {	
