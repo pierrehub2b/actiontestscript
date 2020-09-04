@@ -151,7 +151,7 @@ public class CampaignReportGenerator {
         for (int j = 0; j<paths.length;j++) {
         	String[] scripts = paths[j].split(";");
         	for (int i = 0; i < scripts.length; i++) {
-        		var currentFile = new File(scripts[i]);
+        		File currentFile = new File(scripts[i]);
             	String content = Files.asCharSource(currentFile, Charsets.UTF_8).read();
 				if(i != 0) {
 					currentScript = currentFile.getParentFile().getName();

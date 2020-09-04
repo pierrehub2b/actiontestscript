@@ -56,7 +56,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 	    </H3>
           </TD>
 	  <TD class="align-middle text-center">
-	    <xsl:text disable-output-escaping="yes">&lt;A href=&quot;</xsl:text>
+	    <xsl:text disable-output-escaping="yes">&lt;A target=&quot;_blank&quot; href=&quot;</xsl:text>
 	    <xsl:value-of select="concat(@testName,'_xml.pdf')"/>
 	    <xsl:text disable-output-escaping="yes">&quot; class=&quot;btn btn-secondary btn-sm &quot; role=&quot;button&quot; aria-pressed=&quot;true&quot;&gt;PDF report&lt;/a&gt;</xsl:text>
 	  </TD>
