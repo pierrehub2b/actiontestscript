@@ -243,13 +243,13 @@ public class Channel {
 	}
 
 	public void toFront(){
-		engine.toFront();
+		getDesktopDriver().setChannelToFront(getHandle(getDesktopDriver()), processId);
 	}
 
 	public void setWindowToFront(){
-		if(!(engine instanceof MobileDriverEngine) && !(engine instanceof ApiDriverEngine)) {
+		/*if(!(engine instanceof MobileDriverEngine) && !(engine instanceof ApiDriverEngine)) {
 			getDesktopDriver().setChannelToFront(getHandle(getDesktopDriver()), processId);
-		}
+		}*/
 		engine.setWindowToFront();
 	}
 

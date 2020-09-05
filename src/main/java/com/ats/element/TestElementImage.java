@@ -44,13 +44,13 @@ public class TestElementImage extends TestElement {
 	@Override
 	public void over(ActionStatus status, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {
 		final FoundElement fe = getFoundElement();
-		super.over(status, position, desktopDragDrop, fe.getMiddleX(), fe.getMiddleY());
+		super.over(status, position, desktopDragDrop, fe.getInnerX(), fe.getInnerY());
 	}
 
 	@Override
 	protected void mouseClick(ActionStatus status, MouseDirection position, int offsetX, int offsetY) {
 		final FoundElement fe = getFoundElement();
-		super.mouseClick(status, position, fe.getMiddleX(), fe.getMiddleY());
+		super.mouseClick(status, position, fe.getInnerX(), fe.getInnerY());
 	}
 
 	@Override

@@ -60,12 +60,6 @@ public class IEDriverEngine extends WebDriverEngine {
 		
 		executeToFront();
 	}
-
-	@Override
-	public void toFront() {
-		channel.setWindowToFront();
-		executeToFront();
-	}
 	
 	@Override
 	public void setWindowToFront() {
@@ -129,7 +123,8 @@ public class IEDriverEngine extends WebDriverEngine {
 		super.switchWindow(status, index, tries);
 		if(status.isPassed()) {
 			executeJavaScript(status, "setTimeout(function(){window.focus();},1000);", true);
-			toFront();
+			channel.setWindowToFront();
+			executeToFront();
 			channel.sleep(2000);
 			
 			getDesktopDriver().updateWindowHandle(channel);

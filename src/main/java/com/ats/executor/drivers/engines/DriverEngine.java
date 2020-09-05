@@ -205,7 +205,6 @@ public abstract class DriverEngine {
 
 	abstract protected void setPosition(Point pt);
 	abstract protected void setSize(Dimension dim);
-	public void toFront() {};
 	
 	public List<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template) {
 
