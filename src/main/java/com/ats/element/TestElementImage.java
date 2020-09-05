@@ -10,7 +10,7 @@ import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
-import com.ats.graphic.TemplateMatchingSimple;
+import com.ats.graphic.ImageTemplateMatchingSimple;
 import com.ats.tools.Utils;
 
 public class TestElementImage extends TestElement {
@@ -21,7 +21,7 @@ public class TestElementImage extends TestElement {
 
 	@Override
 	protected List<FoundElement> loadElements(SearchedElement searchedElement) {
-		final TemplateMatchingSimple template = new TemplateMatchingSimple(searchedElement.getImage());
+		final ImageTemplateMatchingSimple template = new ImageTemplateMatchingSimple(searchedElement.getImage());
 
 		for (CalculatedProperty property : searchedElement.getCriterias()){
 			if("error".equals(property.getName())){

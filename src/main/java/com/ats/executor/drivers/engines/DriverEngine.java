@@ -40,7 +40,7 @@ import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
-import com.ats.graphic.TemplateMatchingSimple;
+import com.ats.graphic.ImageTemplateMatchingSimple;
 
 public abstract class DriverEngine {
 	
@@ -206,7 +206,7 @@ public abstract class DriverEngine {
 	abstract protected void setPosition(Point pt);
 	abstract protected void setSize(Dimension dim);
 	
-	public List<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template) {
+	public List<FoundElement> findElements(TestElement parent, ImageTemplateMatchingSimple template) {
 
 		channel.setWindowToFront();
 		channel.refreshLocation();

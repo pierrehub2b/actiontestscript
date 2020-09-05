@@ -33,7 +33,7 @@ import com.ats.generator.ATS;
 import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
-import com.ats.graphic.TemplateMatchingSimple;
+import com.ats.graphic.ImageTemplateMatchingSimple;
 import com.ats.script.actions.ActionApi;
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
@@ -67,7 +67,6 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	private final static String SWITCH = "switch";
 	private final static String CAPTURE = "capture";
 	private final static String INPUT = "input";
-	private final static String BUTTON = "button";
 	public final static String ELEMENT = "element";
 	public final static String TAP = "tap";
 	public final static String PRESS = "press";
@@ -388,7 +387,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public List<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template) {
+	public List<FoundElement> findElements(TestElement parent, ImageTemplateMatchingSimple template) {
 		final byte[] screenshot = getDesktopDriver().getMobileScreenshotByte(getScreenshotPath());
 		return template.findOccurrences(screenshot).parallelStream().map(r -> new FoundElement(channel, parent, r)).collect(Collectors.toCollection(ArrayList::new));
 	}
@@ -409,7 +408,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void buttonClick(String type) {
-		executeRequest(BUTTON, type);
+		executeRequest(SYS_BUTTON, type);
 	}
 	
 	@Override
