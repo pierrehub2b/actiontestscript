@@ -231,11 +231,6 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 		}
 	}
 
-	@Override
-	public void toFront() {
-		channel.setWindowToFront();
-	}
-
 	//---------------------------------------------------------------------------------------------------------------------
 	// 
 	//---------------------------------------------------------------------------------------------------------------------
@@ -367,6 +362,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void setWindowToFront() {
+		channel.toFront();
 		getDesktopDriver().switchTo(channel.getProcessId(), windowIndex);
 	}
 

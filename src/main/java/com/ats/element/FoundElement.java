@@ -35,7 +35,6 @@ import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.desktop.DesktopElement;
 import com.ats.executor.drivers.desktop.DesktopWindow;
 import com.ats.executor.drivers.engines.WebDriverEngine;
-import com.ats.tools.Utils;
 
 public class FoundElement{
 
@@ -51,6 +50,9 @@ public class FoundElement{
 
 	private Double screenX = 0.0;
 	private Double screenY = 0.0;
+	
+	private Double innerX = 0.0;
+	private Double innerY = 0.0;
 
 	private Double boundX = 0.0;
 	private Double boundY = 0.0;
@@ -283,6 +285,9 @@ public class FoundElement{
 
 		this.screenX = this.x + channel.getDimension().getX() + cw;
 		this.screenY = this.y + channel.getDimension().getY() + ch;
+		
+		this.innerX = this.boundX - (channel.getSubDimension().getWidth()/2);
+		this.innerY = this.boundY - (channel.getSubDimension().getHeight()/2);
 	}
 
 	//------------------------------------------------------------------------------------------------------------------------------
@@ -382,14 +387,12 @@ public class FoundElement{
 	// Get image recognition screen position
 	//----------------------------------------------------------------------------------------------------------------------
 
-	public int getMiddleX() {
-		final Double sc = getScreenX() - getX() + (getWidth()/2);
-		return sc.intValue() - (Utils.string2Int(getValue().getAttribute(TestElement.CLIENT_WIDTH)) /2);
+	public int getInnerX() {
+		return innerX.intValue();
 	}
 	
-	public int getMiddleY() {
-		final Double sc = getScreenY() - getY() + (getHeight()/2);
-		return sc.intValue() - (Utils.string2Int(getValue().getAttribute(TestElement.CLIENT_HEIGTH)) /2);
+	public int getInnerY() {
+		return innerY.intValue();
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------

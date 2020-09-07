@@ -75,7 +75,7 @@ import com.ats.executor.drivers.engines.webservices.RestApiExecutor;
 import com.ats.executor.drivers.engines.webservices.SoapApiExecutor;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
-import com.ats.graphic.TemplateMatchingSimple;
+import com.ats.graphic.ImageTemplateMatchingSimple;
 import com.ats.script.ProjectData;
 import com.ats.script.actions.ActionApi;
 import com.ats.script.actions.ActionChannelStart;
@@ -176,7 +176,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	}
 
 	@Override
-	public List<FoundElement> findElements(TestElement parent, TemplateMatchingSimple template) {
+	public List<FoundElement> findElements(TestElement parent, ImageTemplateMatchingSimple template) {
 		return null;
 	}
 	
@@ -235,7 +235,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	}
 
 	//------------------------------------------------------------------------------------------------------------------------------------
-
+	
 	@Override
 	public void waitAfterAction(ActionStatus status) {}
 

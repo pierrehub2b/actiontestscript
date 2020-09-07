@@ -1,3 +1,22 @@
+/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
 package com.ats.element;
 
 import java.util.List;
@@ -10,7 +29,7 @@ import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
-import com.ats.graphic.TemplateMatchingSimple;
+import com.ats.graphic.ImageTemplateMatchingSimple;
 import com.ats.tools.Utils;
 
 public class TestElementImage extends TestElement {
@@ -21,7 +40,7 @@ public class TestElementImage extends TestElement {
 
 	@Override
 	protected List<FoundElement> loadElements(SearchedElement searchedElement) {
-		final TemplateMatchingSimple template = new TemplateMatchingSimple(searchedElement.getImage());
+		final ImageTemplateMatchingSimple template = new ImageTemplateMatchingSimple(searchedElement.getImage());
 
 		for (CalculatedProperty property : searchedElement.getCriterias()){
 			if("error".equals(property.getName())){
@@ -44,13 +63,13 @@ public class TestElementImage extends TestElement {
 	@Override
 	public void over(ActionStatus status, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {
 		final FoundElement fe = getFoundElement();
-		super.over(status, position, desktopDragDrop, fe.getMiddleX(), fe.getMiddleY());
+		super.over(status, position, desktopDragDrop, fe.getInnerX(), fe.getInnerY());
 	}
 
 	@Override
 	protected void mouseClick(ActionStatus status, MouseDirection position, int offsetX, int offsetY) {
 		final FoundElement fe = getFoundElement();
-		super.mouseClick(status, position, fe.getMiddleX(), fe.getMiddleY());
+		super.mouseClick(status, position, fe.getInnerX(), fe.getInnerY());
 	}
 
 	@Override

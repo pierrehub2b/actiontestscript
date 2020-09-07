@@ -634,7 +634,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	public FoundElement getTestElementParent(FoundElement element){
 		final ArrayList<ArrayList<Object>> listElements = (ArrayList<ArrayList<Object>>) runJavaScript(JS_ELEMENT_PARENTS, element.getValue());
-		if(listElements != null){
+		if(listElements != null && listElements.size() > 0){
 			return new FoundElement(
 					channel,
 					element.getIframes(),
@@ -865,6 +865,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void setWindowToFront() {
+		channel.toFront();
 		final String[] wins = getWindowsHandle(0, 0);
 		if(wins.length> currentWindow) {
 			driver.switchTo().window(wins[currentWindow]);
