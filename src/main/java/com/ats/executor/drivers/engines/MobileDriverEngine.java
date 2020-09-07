@@ -72,8 +72,8 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	public final static String PRESS = "press";
 	public final static String SWIPE = "swipe";
 	public final static String SCRIPTING = "scripting";
-	public final static String SET_PROP = "set-property";
-	public final static String GET_PROP = "sysprop-get";
+	public final static String SET_PROP = "property-set";
+	public final static String GET_PROP = "property";
 	public final static String SYS_BUTTON = "sysbutton";
 
 	private final static String SCREENSHOT_METHOD = "/screenshot";
@@ -656,12 +656,12 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	
 	@Override
 	public void setSysProperty(String propertyName, String propertyValue) {
-		executeRequest(SET_PROP, propertyName, propertyValue);
+		executeRequest(SET_PROP, "sys-" + propertyName, propertyValue);
 	}
 	
 	@Override
 	public String getSysProperty(ActionStatus status, String propertyName, FoundElement element) {
-		JsonObject result = executeRequest(GET_PROP, propertyName);
+		JsonObject result = executeRequest(GET_PROP, "sys-" + propertyName);
 		
 		int code = result.get("status").getAsInt();
 		String message = result.get("message").getAsString();

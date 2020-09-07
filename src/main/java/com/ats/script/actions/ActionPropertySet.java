@@ -24,7 +24,7 @@ import com.ats.script.Script;
 
 public class ActionPropertySet extends Action {
 	
-	public static final String SCRIPT_LABEL = "system-set";
+	public static final String SCRIPT_LABEL = "property-set";
 	
 	private String name;
 	private String value;
@@ -40,7 +40,7 @@ public class ActionPropertySet extends Action {
 	@Override
 	public StringBuilder getJavaCode() {
 		StringBuilder builder = super.getJavaCode();
-		builder.append("\"" + name + "\"").append(", ").append("\"" + value + "\"").append(")");
+		builder.append("\"").append(name).append("\"").append(", ").append("\"").append(value).append("\"").append(")");
 		return builder;
 	}
 	
