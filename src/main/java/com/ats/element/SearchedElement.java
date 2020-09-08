@@ -31,7 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.CalculatedProperty;
-import com.ats.script.ProjectData;
+import com.ats.script.Project;
 import com.ats.script.Script;
 import com.ats.tools.Utils;
 
@@ -143,7 +143,7 @@ public class SearchedElement {
 						imageUrl = new URL(imagePath);
 					} catch (MalformedURLException e) {}
 				}else {
-					final String relativePath = ProjectData.ASSETS_FOLDER + "/" + ProjectData.RESOURCES_FOLDER + "/" + ProjectData.IMAGES_FOLDER + "/" + imagePath;
+					final String relativePath = Project.ASSETS_FOLDER + "/" + Project.RESOURCES_FOLDER + "/" + Project.IMAGES_FOLDER + "/" + imagePath;
 					imageUrl = getClass().getClassLoader().getResource(relativePath);
 				}
 

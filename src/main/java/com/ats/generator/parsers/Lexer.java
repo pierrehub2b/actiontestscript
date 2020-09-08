@@ -36,7 +36,7 @@ import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.EnvironmentValue;
 import com.ats.generator.variables.ParameterValue;
 import com.ats.generator.variables.Variable;
-import com.ats.script.ProjectData;
+import com.ats.script.Project;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
 import com.ats.script.actions.neoload.ActionNeoloadContainer;
@@ -54,7 +54,7 @@ public class Lexer {
 
 	private GeneratorReport report; //TODO create report with list of failed ATS to java conversions steps
 
-	private ProjectData projectData;
+	private Project projectData;
 
 	private Charset charset = StandardCharsets.UTF_8;
 
@@ -71,7 +71,7 @@ public class Lexer {
 		this.report = report;
 	}
 
-	public Lexer(ProjectData projectData, GeneratorReport report, String charset) {
+	public Lexer(Project projectData, GeneratorReport report, String charset) {
 		this.projectData = projectData;
 		this.report = report;
 
@@ -80,7 +80,7 @@ public class Lexer {
 		} catch (IllegalArgumentException e) {}
 	}
 
-	public Lexer(ProjectData projectData, GeneratorReport report, Charset charset) {
+	public Lexer(Project projectData, GeneratorReport report, Charset charset) {
 		this.projectData = projectData;
 		this.report = report;
 		this.charset = charset;

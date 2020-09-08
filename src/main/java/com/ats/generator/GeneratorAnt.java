@@ -24,7 +24,7 @@ import java.io.File;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 
-import com.ats.script.ProjectData;
+import com.ats.script.Project;
 
 public class GeneratorAnt extends Task{
 
@@ -61,7 +61,7 @@ public class GeneratorAnt extends Task{
 				log(" - Source folder -> " + sourceFolder);
 				log(" - Destination folder -> " + destination);
 
-				ProjectData projectData = ProjectData.getProjectData(source, destination, report);
+				Project projectData = Project.getProjectData(source, destination, report);
 				if(projectData.isValidated()) {
 					Generator generator = new Generator(projectData);
 					GeneratorReport generatorReport = generator.launch();

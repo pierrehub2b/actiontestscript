@@ -67,7 +67,7 @@ import com.ats.generator.variables.transform.Transformer;
 import com.ats.recorder.IVisualRecorder;
 import com.ats.recorder.VisualRecorder;
 import com.ats.recorder.VisualRecorderNull;
-import com.ats.script.ProjectData;
+import com.ats.script.Project;
 import com.ats.script.Script;
 import com.ats.script.ScriptHeader;
 import com.ats.script.actions.Action;
@@ -92,7 +92,7 @@ public class ActionTestScript extends Script implements ITest{
 	private String[] returnValues;
 
 	private String testName;
-	private ProjectData projectData;
+	private Project projectData;
 	
 	protected ScriptHeader getHeader() {return new ScriptHeader();}
 
@@ -321,7 +321,7 @@ public class ActionTestScript extends Script implements ITest{
 	//----------------------------------------------------------------------------------------------------------
 	//----------------------------------------------------------------------------------------------------------
 
-	public void setProjectData(ProjectData value) {
+	public void setProjectData(Project value) {
 		projectData = value;
 		projectData.synchronize();
 		passwords = new Passwords(projectData.getAssetsFolderPath().toFile());

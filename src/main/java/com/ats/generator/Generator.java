@@ -32,7 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.ats.generator.events.ScriptProcessedEvent;
 import com.ats.generator.events.ScriptProcessedNotifier;
 import com.ats.generator.parsers.Lexer;
-import com.ats.script.ProjectData;
+import com.ats.script.Project;
 import com.ats.script.ScriptLoader;
 import com.ats.tools.Utils;
 
@@ -42,7 +42,7 @@ public class Generator implements ScriptProcessedEvent{
 	private Lexer lexer;
 	private ArrayList<File> filesList;
 
-	private ProjectData projectData;
+	private Project project;
 
 	private int remainingScripts = 0;
 
@@ -54,7 +54,7 @@ public class Generator implements ScriptProcessedEvent{
 		final ATS arguments = new ATS(args);
 		arguments.parse();
 
-		final ProjectData projectData = ProjectData.getProjectData(arguments.getProjectFolder(), arguments.getDestinationFolder(), arguments.getReportFolder());
+		final Project projectData = Project.getProjectData(arguments.getProjectFolder(), arguments.getDestinationFolder(), arguments.getReportFolder());
 
 		if(projectData.isValidated()) {
 
@@ -71,26 +71,26 @@ public class Generator implements ScriptProcessedEvent{
 
 				final String targetFolderPath = projectData.getTargetFolderPath().toFile().getAbsolutePath();
 
-				ATS.logInfo("Compile generated java files into folder -> " + targetFolderPath + "/" + ProjectData.TARGET_FOLDER_CLASSES);
+				ATS.logInfo("Compile generated java files into folder -> " + targetFolderPath + "/" + Project.TARGET_FOLDER_CLASSES);
 
 				StringBuilder xmlBuilder = new StringBuilder();
 				xmlBuilder.append("<project basedir=\"");
 				xmlBuilder.append(targetFolderPath);
 				xmlBuilder.append("\" default=\"compile\">");
 				xmlBuilder.append("<copy todir=\"");
-				xmlBuilder.append(ProjectData.TARGET_FOLDER_CLASSES);
+				xmlBuilder.append(Project.TARGET_FOLDER_CLASSES);
 				xmlBuilder.append("\"><fileset dir=\"../");
-				xmlBuilder.append(ProjectData.SRC_FOLDER);
+				xmlBuilder.append(Project.SRC_FOLDER);
 				xmlBuilder.append("\" includes=\"");
-				xmlBuilder.append(ProjectData.ASSETS_FOLDER);
+				xmlBuilder.append(Project.ASSETS_FOLDER);
 				xmlBuilder.append("/**\"/></copy>");
 				xmlBuilder.append("<property name=\"lib.dir\" value=\"lib\"/>");
 				xmlBuilder.append("<target name=\"compile\"><mkdir dir=\"");
-				xmlBuilder.append(ProjectData.TARGET_FOLDER_CLASSES);
+				xmlBuilder.append(Project.TARGET_FOLDER_CLASSES);
 				xmlBuilder.append("\"/><javac includeantruntime=\"true\" srcdir=\"");
-				xmlBuilder.append(ProjectData.TARGET_FOLDER_GENERATED);
+				xmlBuilder.append(Project.TARGET_FOLDER_GENERATED);
 				xmlBuilder.append("\" destdir=\"");
-				xmlBuilder.append(ProjectData.TARGET_FOLDER_CLASSES);
+				xmlBuilder.append(Project.TARGET_FOLDER_CLASSES);
 				xmlBuilder.append("\"/></target></project>");
 
 				try {
@@ -113,30 +113,30 @@ public class Generator implements ScriptProcessedEvent{
 	}
 
 	public Generator(File atsFile){
-		this(ProjectData.getProjectData(atsFile, null, null));
+		this(Project.getProjectData(atsFile, null, null));
 	}
 
-	public Generator(ProjectData project){
+	public Generator(Project project){
 
 		if(init(project) && remainingScripts > 0){
 
-			projectData.initFolders();
+			project.initFolders();
 			genReport.startGenerator(remainingScripts);
 
-			lexer = new Lexer(projectData, genReport, StandardCharsets.UTF_8);
+			lexer = new Lexer(project, genReport, StandardCharsets.UTF_8);
 
 		}else{
 			ATS.logInfo("Nothing to be done (no ATS files found !)");
 		}
 	}
 
-	private boolean init(ProjectData pdata) {
-		if(pdata.isValidated()) {
+	private boolean init(Project p) {
+		if(p.isValidated()) {
 
 			genReport = new GeneratorReport();
-			projectData = pdata;
+			project = p;
 
-			filesList = projectData.getAtsScripts();
+			filesList = project.getAtsScripts();
 			remainingScripts = filesList.size();
 
 			return true;
@@ -152,8 +152,8 @@ public class Generator implements ScriptProcessedEvent{
 
 	public GeneratorReport launch(){
 
-		if(projectData.getJavaSourceFolder().toFile().exists()){
-			Utils.copyDir(projectData.getJavaSourceFolder().toString(), projectData.getJavaDestinationFolder().toString(), true);
+		if(project.getJavaSourceFolder().toFile().exists()){
+			Utils.copyDir(project.getJavaSourceFolder().toString(), project.getJavaDestinationFolder().toString(), true);
 		}
 
 		final Stream<File> stream = filesList.parallelStream();
@@ -170,7 +170,7 @@ public class Generator implements ScriptProcessedEvent{
 
 	private void loadScript(File f){
 		final ScriptLoader sc = lexer.loadScript(f, new ScriptProcessedNotifier(this));
-		sc.generateJavaFile(projectData.getGav());
+		sc.generateJavaFile(project);
 	}
 
 	public ArrayList<String> findSubscriptRef(String calledScript){
@@ -184,7 +184,7 @@ public class Generator implements ScriptProcessedEvent{
 
 		final ArrayList<File> dataFiles = new ArrayList<File>();
 		try {
-			Files.find(projectData.getAssetsFolderPath(), 99999, (p, bfa) -> bfa.isRegularFile()).forEach(p -> addDataFile(dataFiles, p.toFile()));
+			Files.find(project.getAssetsFolderPath(), 99999, (p, bfa) -> bfa.isRegularFile()).forEach(p -> addDataFile(dataFiles, p.toFile()));
 
 			for(File f : dataFiles) {
 				Scanner scanner = new Scanner(f);

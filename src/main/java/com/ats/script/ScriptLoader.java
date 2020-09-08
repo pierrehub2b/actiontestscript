@@ -62,11 +62,11 @@ public class ScriptLoader extends Script {
 		this.parser.addScript();
 	}
 
-	public ScriptLoader(String type, Lexer lexer, File file, ProjectData projectData){
+	public ScriptLoader(String type, Lexer lexer, File file, Project projectData){
 		this(type, lexer, file, projectData, DEFAULT_CHARSET);
 	}
 
-	public ScriptLoader(String type, Lexer lexer, File file, ProjectData projectData, Charset charset){
+	public ScriptLoader(String type, Lexer lexer, File file, Project projectData, Charset charset){
 
 		final ScriptHeader header = new ScriptHeader(projectData, file);
 		
@@ -127,7 +127,7 @@ public class ScriptLoader extends Script {
 	// Java Code Generator
 	//---------------------------------------------------------------------------------------------------------------------------------
 
-	public String getJavaCode(String projectGav){
+	public String getJavaCode(Project project){
 
 		if(javaCode != null) {
 
@@ -135,7 +135,7 @@ public class ScriptLoader extends Script {
 
 		}else {
 
-			final StringBuilder code = new StringBuilder(header.getJavaCode(projectGav));
+			final StringBuilder code = new StringBuilder(header.getJavaCode(project));
 
 			//-------------------------------------------------------------------------------------------------
 			// variables 
@@ -189,7 +189,7 @@ public class ScriptLoader extends Script {
 		}
 	}
 
-	public void generateJavaFile(String projectGav){
+	public void generateJavaFile(Project project){
 		if(header.getJavaDestinationFolder() != null){
 
 			final File javaFile = header.getJavaFile();
@@ -197,7 +197,7 @@ public class ScriptLoader extends Script {
 				javaFile.getParentFile().mkdirs();
 
 				final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter( new FileOutputStream(javaFile, false), charset));
-				writer.write(getJavaCode(projectGav));
+				writer.write(getJavaCode(project));
 				writer.close();
 
 			} catch (IOException e) {

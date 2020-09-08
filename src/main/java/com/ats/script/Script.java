@@ -344,7 +344,7 @@ public class Script {
 		if(!relativePath.startsWith("/")) {
 			relativePath = "/" + relativePath;
 		}
-		relativePath = ProjectData.ASSETS_FOLDER + relativePath;
+		relativePath = Project.ASSETS_FOLDER + relativePath;
 
 		final URL url = getClass().getClassLoader().getResource(relativePath);
 		if(url != null) {

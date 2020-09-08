@@ -76,7 +76,7 @@ import com.ats.executor.drivers.engines.webservices.SoapApiExecutor;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.graphic.ImageTemplateMatchingSimple;
-import com.ats.script.ProjectData;
+import com.ats.script.Project;
 import com.ats.script.actions.ActionApi;
 import com.ats.script.actions.ActionChannelStart;
 import com.google.common.base.Charsets;
@@ -100,7 +100,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 
 		try {
 			
-			final File logsFolder = new File(ProjectData.TARGET_FOLDER + File.separator + ProjectData.LOGS_FOLDER);
+			final File logsFolder = new File(Project.TARGET_FOLDER + File.separator + Project.LOGS_FOLDER);
 			if(!logsFolder.exists()) {
 				logsFolder.mkdirs();
 			}
@@ -357,11 +357,11 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 
 	private static Builder createHttpBuilder(int timeout, PrintStream logStream, String packageName, ClassLoader classLoader){
 
-		final Path certsFolderPath = Paths.get("").toAbsolutePath().resolve(ProjectData.SRC_FOLDER).resolve(ProjectData.ASSETS_FOLDER).resolve(ProjectData.CERTS_FOLDER);
+		final Path certsFolderPath = Paths.get("").toAbsolutePath().resolve(Project.SRC_FOLDER).resolve(Project.ASSETS_FOLDER).resolve(Project.CERTS_FOLDER);
 		
 		File certsFolder = certsFolderPath.toFile();
 		if(!certsFolder.exists()) {
-			final URL certsFolderUrl = classLoader.getResource(ProjectData.ASSETS_FOLDER + "/" + ProjectData.CERTS_FOLDER);
+			final URL certsFolderUrl = classLoader.getResource(Project.ASSETS_FOLDER + "/" + Project.CERTS_FOLDER);
 			if(certsFolderUrl != null) {
 				certsFolder = new File(certsFolderUrl.getPath());
 			}

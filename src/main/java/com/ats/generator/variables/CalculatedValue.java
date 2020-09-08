@@ -31,7 +31,7 @@ import com.ats.executor.ActionTestScript;
 import com.ats.executor.SendKeyData;
 import com.ats.generator.variables.transform.DateTransformer;
 import com.ats.generator.variables.transform.TimeTransformer;
-import com.ats.script.ProjectData;
+import com.ats.script.Project;
 import com.ats.script.Script;
 import com.ats.tools.Utils;
 
@@ -160,12 +160,12 @@ public class CalculatedValue{
 
 		mv = IMAGE_PATTERN.matcher(dataValue);
 		while (mv.find()) {
-			rawJavaCode = rawJavaCode.replace(mv.group(0), ProjectData.getAssetsImageJavaCode(mv.group(1)));
+			rawJavaCode = rawJavaCode.replace(mv.group(0), Project.getAssetsImageJavaCode(mv.group(1)));
 		}
 
 		mv = ASSET_PATTERN.matcher(dataValue);
 		while (mv.find()) {
-			rawJavaCode = rawJavaCode.replace(mv.group(0), ProjectData.getAssetsJavaCode(mv.group(1)));
+			rawJavaCode = rawJavaCode.replace(mv.group(0), Project.getAssetsJavaCode(mv.group(1)));
 		}
 
 		mv = PASSWORD_DATA.matcher(dataValue);

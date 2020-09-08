@@ -6,7 +6,7 @@
 	<groupId>com.actiontestscript</groupId>
 	<artifactId>ats-automated-testing</artifactId>
 
-	<version>1.7.8</version>
+	<version>1.7.9</version>
 	<packaging>jar</packaging>
 
 	<name>ats-automated-testing</name>
@@ -64,14 +64,6 @@
 		<url>https://github.com/pierrehub2b/actiontestscript.git</url>
 	</scm>
 
-	<repositories>
-		<repository>
-			<id>atlassian-public</id>
-			<name>atlassian</name>
-			<url>https://packages.atlassian.com/mvn/maven-external/</url>
-		</repository>
-	</repositories>
-
 	<distributionManagement>
 		<snapshotRepository>
 			<id>OSSRH-37505</id>
@@ -88,7 +80,6 @@
 		<java.version>10</java.version>
 		<!-- libraries versions -->
 		<apache.felix.version>2.3.7</apache.felix.version>
-		<lib.amf.serializer.version>2.2.0</lib.amf.serializer.version>
 		<lib.slf4j.version>1.7.30</lib.slf4j.version>
 		<lib.mxparser.version>4.4.2</lib.mxparser.version>
 		<lib.selenium.version>3.141.59</lib.selenium.version>
@@ -137,11 +128,6 @@
 			<groupId>org.apache.ant</groupId>
 			<artifactId>ant</artifactId>
 			<version>${lib.apache.ant.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.exadel.flamingo.flex</groupId>
-			<artifactId>amf-serializer</artifactId>
-			<version>${lib.amf.serializer.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>

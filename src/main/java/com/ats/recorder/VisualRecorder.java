@@ -27,7 +27,7 @@ import com.ats.element.TestElement;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.desktop.DesktopResponse;
 import com.ats.generator.objects.MouseDirection;
-import com.ats.script.ProjectData;
+import com.ats.script.Project;
 import com.ats.script.Script;
 import com.ats.script.ScriptHeader;
 import com.ats.script.actions.Action;
@@ -60,7 +60,7 @@ public class VisualRecorder implements IVisualRecorder {
 	
 	private ExecutionLogger logger;
 
-	public VisualRecorder(ScriptHeader header, ProjectData project, boolean xml, int quality) {
+	public VisualRecorder(ScriptHeader header, Project project, boolean xml, int quality) {
 
 		this.logger = new ExecutionLogger();
 		

@@ -46,7 +46,7 @@ import com.ats.tools.Utils;
 
 public class ScriptHeader {
 
-	private ProjectData projectData;
+	private Project projectData;
 
 	private String path = "";
 	private String projectPath = "";
@@ -72,7 +72,7 @@ public class ScriptHeader {
 		this.groups = Arrays.asList(groups.split(","));
 	}
 
-	public ScriptHeader(ProjectData projectData, File file){
+	public ScriptHeader(Project projectData, File file){
 
 		this.projectData = projectData;
 
@@ -206,7 +206,7 @@ public class ScriptHeader {
 			, "\tpublic void " + ActionTestScript.MAIN_TEST_FUNCTION + "(){"
 			);
 
-	public String getJavaCode(String projectGav) {
+	public String getJavaCode(Project project) {
 
 		String code = javaCode.replace("#CLASS_NAME#", name)
 				.replace("#TEST_NAME#", getQualifiedName())
@@ -217,10 +217,11 @@ public class ScriptHeader {
 				.replace("#GROUP_DATA#", getGroupCode())
 				.replace("#ATS_VERSION#", ATS.VERSION)
 				.replace("#GROUP_DESCRIPTION#", getDataGroups())
-				.replace("#PROJECT_GAV#", StringEscapeUtils.escapeJava(projectGav));
+				.replace("#PROJECT_GAV#", StringEscapeUtils.escapeJava(project.getGav()));
 
-		if(packageName.length() > 0) {
-			code = "package " + packageName + ";\r\n" + code;
+		String pkg = packageName + project.getDomainPackage();
+		if(pkg.length() > 0) {
+			code = "package " + pkg + ";\r\n" + code;
 		}
 
 		return code;

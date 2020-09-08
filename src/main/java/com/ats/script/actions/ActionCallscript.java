@@ -43,7 +43,7 @@ import com.ats.generator.variables.Variable;
 import com.ats.generator.variables.parameter.Parameter;
 import com.ats.generator.variables.parameter.ParameterDataFile;
 import com.ats.generator.variables.parameter.ParameterList;
-import com.ats.script.ProjectData;
+import com.ats.script.Project;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
 import com.ats.tools.Utils;
@@ -276,7 +276,7 @@ public class ActionCallscript extends Action {
 
 					if(csvPath.startsWith(ASSETS_PROTOCOLE)) {
 
-						final String csvFilePath = csvPath.replace(ASSETS_PROTOCOLE, ProjectData.ASSETS_FOLDER + File.separator);
+						final String csvFilePath = csvPath.replace(ASSETS_PROTOCOLE, Project.ASSETS_FOLDER + File.separator);
 						csvUrl = getClass().getClassLoader().getResource(csvFilePath);
 						if(csvUrl == null) {
 							csvUrl = getClass().getClassLoader().getResource(csvFilePath + ".csv");
