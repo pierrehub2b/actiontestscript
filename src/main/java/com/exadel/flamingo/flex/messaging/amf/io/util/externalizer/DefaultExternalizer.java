@@ -20,7 +20,6 @@
 
 package com.exadel.flamingo.flex.messaging.amf.io.util.externalizer;
 
-
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
