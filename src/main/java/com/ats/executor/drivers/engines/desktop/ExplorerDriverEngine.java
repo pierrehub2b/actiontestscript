@@ -58,7 +58,7 @@ public class ExplorerDriverEngine extends DesktopDriverEngine {
 		int maxTry = 10;
 		while(maxTry > 0) {
 			
-			window = desktopDriver.getWindowByTitle(folderName);
+			window = desktopDriver.getWindowByTitle(folderName, "explorer");
 			
 			if(window != null) {
 				

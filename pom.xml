@@ -91,7 +91,7 @@
 		<lib.opencsv.version>5.2</lib.opencsv.version>
 		<lib.naturalness.version>1.1</lib.naturalness.version>
 		<lib.bcprov.version>1.66</lib.bcprov.version>
-		<lib.netty.version>4.1.51.Final</lib.netty.version>
+		<lib.netty.version>4.1.52.Final</lib.netty.version>
 		<lib.browserup.version>2.1.1</lib.browserup.version>
 		<lib.jackson.databind>2.11.2</lib.jackson.databind>
 		<jacoco.plugin.version>0.8.5</jacoco.plugin.version>

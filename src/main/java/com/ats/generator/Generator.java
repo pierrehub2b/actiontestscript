@@ -190,8 +190,9 @@ public class Generator implements ScriptProcessedEvent{
 				Scanner scanner = new Scanner(f);
 				while (scanner.hasNext()) {
 					final String line = scanner.next();
-					if(line.contains(calledScript)) {
+					if(line.equals(calledScript) || line.contains("\"" + calledScript + "\"") || line.contains(calledScript + ",") || line.contains("," + calledScript) || line.contains(calledScript + ";") || line.contains(";" + calledScript)) {
 						result.add(f.getCanonicalPath());
+						break;
 					}
 				}
 				scanner.close();

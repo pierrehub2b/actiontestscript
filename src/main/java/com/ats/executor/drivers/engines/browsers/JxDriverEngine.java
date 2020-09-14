@@ -143,7 +143,7 @@ public class JxDriverEngine extends WebDriverEngine {
 			
 			driver.get(atsStartPage);
 			
-			final DesktopWindow window = desktopDriver.getWindowByTitle(titleId);
+			final DesktopWindow window = desktopDriver.getWindowByTitle(titleId, "jx");
 			if(window != null && window.getPid() > 0) {
 				return window;
 			}else {

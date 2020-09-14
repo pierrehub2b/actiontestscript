@@ -124,6 +124,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	protected Double initElementY = 0.0;
 
 	protected DriverProcess driverProcess;
+	private String browserName = "";
 
 	protected Actions actions;
 
@@ -151,6 +152,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			ApplicationProperties props) {
 
 		this(channel, driverProcess, desktopDriver, props, DEFAULT_WAIT, DEFAULT_PROPERTY_WAIT);
+		this.browserName = browser;
 	}
 
 	public WebDriverEngine(Channel channel, DesktopDriver desktopDriver, String application, ApplicationProperties props, int defaultWait, int defaultCheck) {
@@ -250,7 +252,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 		int maxTry = 10;
 		while(maxTry > 0) {
-			final DesktopWindow window = desktopDriver.getWindowByTitle(titleUid);
+			final DesktopWindow window = desktopDriver.getWindowByTitle(titleUid, browserName);
 			if(window != null) {
 				desktopDriver.setEngine(new DesktopDriverEngine(channel, window));
 				channel.setApplicationData(

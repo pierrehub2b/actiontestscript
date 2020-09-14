@@ -593,8 +593,8 @@ public class DesktopDriver extends RemoteWebDriver {
 		return sendRequestCommand(CommandType.Window, WindowType.Handle, handle).getWindow();
 	}
 
-	public DesktopWindow getWindowByTitle(String title) {
-		return sendRequestCommand(CommandType.Window, WindowType.Title, title).getWindow();
+	public DesktopWindow getWindowByTitle(String title, String name) {
+		return sendRequestCommand(CommandType.Window, WindowType.Title, title, name).getWindow();
 	}
 
 	public void setChannelToFront(int handle, long pid) {
