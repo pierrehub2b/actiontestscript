@@ -62,7 +62,7 @@ public class CampaignReportGenerator {
 
 		if (xslPathPdf == null || !(new File(xslPathPdf).exists())) {
 			try {
-				final String styleSheet = Resources.toString(ResourceContent.class.getResource("/reports/campaign_pdf_stylesheet.xml"), Charsets.UTF_8);
+				final String styleSheet = Resources.toString(ResourceContent.class.getResource("/reports/campaign/campaign_pdf_stylesheet.xml"), Charsets.UTF_8);
 				xslPathPdf = createEmptyStylesheet(styleSheet,basePath);
 				copyImageToTempFolder("false",basePath);
 				copyImageToTempFolder("false",basePath);
@@ -83,7 +83,7 @@ public class CampaignReportGenerator {
 			Transformer transformer = null;
 			TransformerFactory tFactory = TransformerFactory.newInstance();
 			if(xslPathHtml == null || !(new File(xslPathHtml).exists())) {
-				String styleSheetHtmlDetail = Resources.toString(ResourceContent.class.getResource("/reports/campaign_html_stylesheet.xml"), Charsets.UTF_8);
+				String styleSheetHtmlDetail = Resources.toString(ResourceContent.class.getResource("/reports/campaign/campaign_html_stylesheet.xml"), Charsets.UTF_8);
 				String styleSheetHtml = createEmptyStylesheetHtml(styleSheetHtmlDetail,basePath);
 				transformer = tFactory.newTransformer(new StreamSource(styleSheetHtml));
 			} else {
@@ -110,7 +110,7 @@ public class CampaignReportGenerator {
 	}
 	
 	public static void copyImageToTempFolder(String name, String basePath) throws IOException {
-		byte[] aByteArray = Resources.toByteArray(ResourceContent.class.getResource("/reports/" + name + ".png"));
+		byte[] aByteArray = Resources.toByteArray(ResourceContent.class.getResource("/reports/images/" + name + ".png"));
 		final File file = new File(basePath + File.separator + name + ".png");
         final FileOutputStream fileOut = new FileOutputStream(file );
         fileOut.write(aByteArray);
