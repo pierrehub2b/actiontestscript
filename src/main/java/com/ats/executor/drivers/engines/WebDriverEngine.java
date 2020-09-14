@@ -1152,10 +1152,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void buttonClick(String id) {}
-	
-	@Override
-	public void buttonClick(ArrayList<String> ids) {}
-	
+
 	@Override
 	public void tap(int count, FoundElement element) {}
 	

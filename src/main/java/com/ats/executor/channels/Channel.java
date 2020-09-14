@@ -90,6 +90,16 @@ public class Channel {
 		
 		this.systemProperties = properties;
 	}
+
+	private ArrayList<String> systemButtons = new ArrayList<>();
+	public void setSystemButtons(JsonArray info) {
+		ArrayList<String> properties = new ArrayList<>();
+		for (int i = 0; i < info.size(); i++) {
+			properties.add(info.get(i).getAsString());
+		}
+
+		this.systemButtons = properties;
+	}
 	
 	private byte[] icon;
 	private String screenServer;
@@ -658,8 +668,8 @@ public class Channel {
 		actionTerminated(status);
 	}
 	
-	public void buttonClick(ArrayList<String> ids) {
-		engine.buttonClick(ids);
+	public void buttonClick(String buttonType) {
+		engine.buttonClick(buttonType);
 	}
 	
 	//----------------------------------------------------------------------------------------------------------

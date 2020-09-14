@@ -15,44 +15,55 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
- */
+*/
 
 package com.ats.script.actions;
 
 import com.ats.executor.ActionTestScript;
 import com.ats.script.Script;
 
-public class ActionPropertySet extends Action {
-	
-	public static final String SCRIPT_LABEL = "property-set";
-	
-	private String name;
-	private String value;
-	
-	public ActionPropertySet() { }
-	
-	public ActionPropertySet(Script script, String name, String value) {
+public class ActionSystemButton extends ActionSystem {
+
+	public static final String SCRIPT_LABEL = "button";
+
+	private String buttonType;
+
+	public ActionSystemButton() { }
+
+	public ActionSystemButton(Script script, String buttonType) {
 		super(script);
-		setName(name);
-		setValue(value);
+		setButtonType(buttonType);
 	}
-	
+
+	@Override
+	public void execute(ActionTestScript ts, String testName, int testLine) {
+		super.execute(ts, testName, testLine);
+
+		if (status.isPassed()) {
+			if (ts.getCurrentChannel() != null) {
+				ts.getCurrentChannel().buttonClick(getButtonType());
+			}
+
+			status.endDuration();
+		}
+	}
+
 	@Override
 	public StringBuilder getJavaCode() {
 		StringBuilder builder = super.getJavaCode();
-		builder.append("\"").append(name).append("\"").append(", ").append("\"").append(value).append("\"").append(")");
+		builder.append("\"").append(buttonType).append("\"");
 		return builder;
 	}
-	
-	@Override
-	public void execute(ActionTestScript ts, String testName, int line) {
-		super.execute(ts, testName, line);
-		ts.getCurrentChannel().setSysProperty(getName(), getValue());
+
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------
+
+	public String getButtonType() {
+		return buttonType;
 	}
-	
-	public String getName() { return name; }
-	public void setName(String name) { this.name = name; }
-	
-	public String getValue() { return value; }
-	public void setValue(String value) { this.value = value; }
+
+	public void setButtonType(String buttonType) {
+		this.buttonType = buttonType;
+	}
 }
