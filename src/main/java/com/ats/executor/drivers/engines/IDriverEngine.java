@@ -95,7 +95,6 @@ public interface IDriverEngine{
 	public void rightClick();
 	public void middleClick(ActionStatus status, MouseDirection position, TestElement element);
 	public void buttonClick(String id);
-	public void buttonClick(ArrayList<String> ids);
 	public void tap(int count, FoundElement element);
 	public void press(int duration, ArrayList<String> paths, FoundElement element);
 	

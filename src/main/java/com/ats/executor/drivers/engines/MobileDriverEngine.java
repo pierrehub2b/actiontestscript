@@ -144,7 +144,10 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			
 			final JsonArray properties = response.getAsJsonArray("systemProperties");
 			channel.setSystemProperties(properties);
-			
+
+			/* final JsonArray buttons = response.getAsJsonArray("systemButtons");
+			channel.setSystemButtons(buttons); */
+
 			final String driverVersion = response.get("driverVersion").getAsString();
 
 			final double deviceWidth = response.get("deviceWidth").getAsDouble();
@@ -410,12 +413,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	public void buttonClick(String type) {
 		executeRequest(SYS_BUTTON, type);
 	}
-	
-	@Override
-	public void buttonClick(ArrayList<String> ids) {
-		executeRequest(SYS_BUTTON, ids.toArray(new String[0]));
-	}
-	
+
 	@Override
 	public void tap(int count, FoundElement element) {
 		rootElement.tap(element, count);

@@ -23,7 +23,7 @@ import com.ats.executor.ActionTestScript;
 import com.ats.script.Script;
 import com.google.gson.JsonObject;
 
-public abstract class ActionChannel extends Action{
+public abstract class ActionChannel extends Action {
 
 	public static final String SCRIPT_LABEL = "channel-";
 

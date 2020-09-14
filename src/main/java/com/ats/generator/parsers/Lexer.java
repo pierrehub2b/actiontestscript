@@ -115,7 +115,7 @@ public class Lexer {
 
  		final ArrayList<String> dataArray = new ArrayList<String>(Arrays.asList(data.split(ScriptParser.ATS_SEPARATOR)));
 
-		if(dataArray.size() > 0){
+		if (dataArray.size() > 0) {
 
 			String actionType = dataArray.remove(0).trim();
 			String optionsFlat;
@@ -134,15 +134,7 @@ public class Lexer {
 				stopExec = true;
 			}
 			
-			if (ActionSysButton.SCRIPT_LABEL.equals(actionType)) {
-				
-				//-----------------------
-				// Sys button action
-				//-----------------------
-				
-				script.addAction(new ActionSysButton(script, dataArray), disabled);
-				
-			} else if (ActionGesturePress.SCRIPT_LABEL.equals(actionType)) {
+			if (ActionGesturePress.SCRIPT_LABEL.equals(actionType)) {
 				
 				//-----------------------
 				// gesture press action
@@ -231,11 +223,36 @@ public class Lexer {
 					script.addAction(new ActionNeoloadStop(script, optionsFlat, userData, userOptions), disabled);
 				}
 
-			}else if(dataArray.size() > 0){
+			} else if(dataArray.size() > 0) {
 
 				String dataOne = dataArray.remove(0).trim();
 
-				if (ActionGestureTap.SCRIPT_LABEL.equals(actionType)) {
+				if (ActionSystem.SCRIPT_LABEL.equals(actionType)) {
+
+					if (ActionSystemButton.SCRIPT_LABEL.equals(dataOne)) {
+
+						String buttonType = dataArray.remove(0).trim();
+						script.addAction(new ActionSystemButton(script, buttonType), disabled);
+
+					} else if (ActionSystemPropertySet.SCRIPT_LABEL.equals(dataOne)) {
+
+						String propertyName = dataArray.remove(0).trim();
+						String propertyValue = dataArray.remove(0).trim();
+						script.addAction(new ActionSystemPropertySet(script, propertyName, propertyValue), disabled);
+
+					} else if (ActionSystemPropertyGet.SCRIPT_LABEL.equals(dataOne)) {
+
+						final String[] propertyArray = dataOne.split(ScriptParser.ATS_ASSIGN_SEPARATOR);
+
+						if (propertyArray.length > 1) {
+							final String propertyName = propertyArray[0].trim();
+							final Variable variable = script.getVariable(propertyArray[1].trim(), true);
+							script.addAction(new ActionSystemPropertyGet(script, stopExec, options, propertyName, variable), disabled);
+						}
+					}
+				}
+
+				else if (ActionGestureTap.SCRIPT_LABEL.equals(actionType)) {
 					
 					//-----------------------
 					// Gesture tap action
@@ -342,15 +359,7 @@ public class Lexer {
 						script.addAction(new ActionProperty(script, stopExec, options, propertyName, variable, dataArray), disabled);
 					}
 
-				} else if (ActionPropertySet.SCRIPT_LABEL.equals(actionType)) {
-					
-					//-----------------------
-					// Set prop action
-					//-----------------------
-					String value = dataArray.remove(0).trim();
-					script.addAction(new ActionPropertySet(script, dataOne, value), disabled);
-					
-				}  else if(actionType.contains(ActionSelect.SCRIPT_LABEL_SELECT)){
+				} else if(actionType.contains(ActionSelect.SCRIPT_LABEL_SELECT)){
 
 					//-----------------------
 					// Select action
