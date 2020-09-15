@@ -20,7 +20,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 	<META name="description" content=""/>
 	<TITLE>Agilitest test reporting</TITLE>
 	<LINK rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous"/>
-	<LINK rel="stylesheet" href="../report.css"/>
+	<LINK rel="stylesheet" href="report.css"/>
       </HEAD>
       <BODY class="py-4">
 	<DIV class="container">

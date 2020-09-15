@@ -65,7 +65,7 @@ public class CampaignReportGenerator {
 				final String styleSheet = Resources.toString(ResourceContent.class.getResource("/reports/campaign/campaign_pdf_stylesheet.xml"), Charsets.UTF_8);
 				xslPathPdf = createEmptyStylesheet(styleSheet,basePath);
 				copyImageToTempFolder("false",basePath);
-				copyImageToTempFolder("false",basePath);
+				copyImageToTempFolder("warning",basePath);
 				copyImageToTempFolder("true",basePath);
 				copyImageToTempFolder("warning",basePath);
 				copyImageToTempFolder("agilitest",basePath);
@@ -100,10 +100,51 @@ public class CampaignReportGenerator {
 		try {
 			String command = String.format("java -cp %s;%s org.apache.fop.cli.Main -xml %s -xsl %s -pdf %s",
 					fopDir + "\\build\\fop.jar", fopDir + "\\lib\\*", xmlUrl, xslPathPdf, pdfPath);
-			Process p = Runtime.getRuntime().exec("cmd /c " + command);
-			/*System.out.println("Waiting for batch file for process " + name + "...");
-		    p.waitFor();
+			
+			System.out.println(command);
+			
+			//Process p = Runtime.getRuntime().exec("cmd /c " + command);
+			
+			/*Runtime rt = Runtime.getRuntime();
+			Process proc = rt.exec("cmd /c " + command);
+
+			BufferedReader stdInput = new BufferedReader(new 
+				     InputStreamReader(proc.getInputStream()));
+
+			BufferedReader stdError = new BufferedReader(new 
+			     InputStreamReader(proc.getErrorStream()));
+			
+			// Read the output from the command
+			System.out.println("Here is the standard output of the command:\n");
+			String s = null;
+			while ((s = stdInput.readLine()) != null) {
+			    System.out.println(s);
+			}
+
+			// Read any errors from the attempted command
+			System.out.println("Here is the standard error of the command (if any):\n");
+			while ((s = stdError.readLine()) != null) {
+			    System.out.println(s);
+			}	
 		    System.out.println("Batch file done for " + name);*/
+			
+			ProcessBuilder ps= new ProcessBuilder("java","-cp",fopDir + "\\build\\fop.jar;" + fopDir + "\\lib\\*","org.apache.fop.cli.Main","-xml",xmlUrl,"-xsl",xslPathPdf,"-pdf",pdfPath);
+			ps.redirectErrorStream(true);
+
+			Process pr = ps.start();  
+
+			BufferedReader in = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+			String line;
+			while ((line = in.readLine()) != null) {
+			    System.out.println(line);
+			}
+			pr.waitFor();
+			System.out.println("ok!");
+
+			in.close();
+			System.exit(0);
+			
+			
 		} catch (Throwable t)
           {
             t.printStackTrace();
