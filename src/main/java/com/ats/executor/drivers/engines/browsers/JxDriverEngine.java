@@ -41,7 +41,7 @@ public class JxDriverEngine extends WebDriverEngine {
 		super(channel, desktopDriver, props.getUri(), props, DEFAULT_WAIT, DEFAULT_PROPERTY_WAIT);
 
 		final ProcessBuilder builder = new ProcessBuilder(getApplicationPath());
-
+		
 		try {
 			builder.start();
 			status.setPassed(true);
@@ -100,7 +100,8 @@ public class JxDriverEngine extends WebDriverEngine {
 					atsStartPageUri = tempHtml.toURI().toString();
 				} catch (IOException e) {}
 
-				final DesktopWindow window = getJxBrowserWindow(atsStartPageUri, titleUid);
+				
+				final DesktopWindow window = getJxBrowserWindow(atsStartPageUri, props.getTitle());
 				if(window != null) {
 
 					int maxTry = 10;
@@ -136,14 +137,14 @@ public class JxDriverEngine extends WebDriverEngine {
 		}
 	}
 
-	private DesktopWindow getJxBrowserWindow(String atsStartPage, String titleId) {
+	private DesktopWindow getJxBrowserWindow(String atsStartPage, String title) {
 
 		int maxTry = 10;
 		while(maxTry > 0) {
 			
 			driver.get(atsStartPage);
 			
-			final DesktopWindow window = desktopDriver.getWindowByTitle(titleId, "jx");
+			final DesktopWindow window = desktopDriver.getWindowByTitle("jx", title);
 			if(window != null && window.getPid() > 0) {
 				return window;
 			}else {

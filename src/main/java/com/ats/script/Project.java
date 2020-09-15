@@ -157,16 +157,19 @@ public class Project {
 		javaDestinationFolderPath = p;
 		javaDestinationFolderPath.toFile().mkdirs();
 	}
-	
+
 	public String getDomainPath() {
 		if(useProjectDomain) {
 			return getDomainPackage().replace(".", "/");
 		}
 		return "";
 	}
-	
+
 	public String getDomainPackage() {
-		return domain + "." + name;
+		if(useProjectDomain) {
+			return domain + "." + name;
+		}
+		return name;
 	}
 
 	private void setReportDestinationFolderPath(Path p) {
@@ -216,7 +219,7 @@ public class Project {
 			if(xmlNode != null){
 				setVersion(xmlNode.getTextContent());
 			}
-			
+
 			xmlNode = doc.getElementsByTagName("useProjectDomain").item(0);
 			if(xmlNode != null){
 				setUseProjectDomain("true".equalsIgnoreCase(xmlNode.getTextContent()));
@@ -278,7 +281,7 @@ public class Project {
 	public ArrayList<File> getAtsScripts() {
 		return getAtsScripts(getAtsSourceFolder().toFile());
 	}
-	
+
 	public ArrayList<File> getAtsScripts(File startFolder) {
 
 		final FileFilter atsFilefilter = new FileFilter() {
@@ -296,7 +299,7 @@ public class Project {
 
 		return result;
 	}
-	
+
 	public List<ScriptInfo> loadScriptsHeader() {
 
 		final ArrayList<File> files = getAtsScriptsWithoutSubscripts();
@@ -308,7 +311,7 @@ public class Project {
 
 		return result;
 	}
-	
+
 	public List<ScriptInfo> loadScriptsHeader(File atsFolder) {
 
 		final ArrayList<File> files = getAtsScripts(atsFolder);
@@ -354,11 +357,11 @@ public class Project {
 			}
 		}
 	}
-	
+
 	private void sortedWalk(ArrayList<File> list, File dir, FileFilter filter) {
 		final File[] files = dir.listFiles(filter);
 		Arrays.sort(files, new DirectoryBeforeFileComparator());
-		
+
 		for (File f : files) {
 			if(f.isDirectory()) {
 				walk(list, f, filter);
@@ -367,20 +370,20 @@ public class Project {
 			}
 		}
 	}
-	
+
 	public final static class DirectoryBeforeFileComparator implements Comparator<File> {
-	    @Override
-	    public int compare(File o1, File o2) {
-	        if (o1.isDirectory() && !o2.isDirectory()) {
-	            return 1;
-	        }
-	        if (!o1.isDirectory() && o2.isDirectory()) {
-	            return -1;
-	        }
-	        return o1.compareTo(o2);
-	    }
+		@Override
+		public int compare(File o1, File o2) {
+			if (o1.isDirectory() && !o2.isDirectory()) {
+				return 1;
+			}
+			if (!o1.isDirectory() && o2.isDirectory()) {
+				return -1;
+			}
+			return o1.compareTo(o2);
+		}
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	//  getters and setters for serialization
 	//-------------------------------------------------------------------------------------------------
@@ -388,39 +391,39 @@ public class Project {
 	public String getDomain() {
 		return domain;
 	}
-	
+
 	public void setDomain(String value) {
 		this.domain = value;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
-	
+
 	public void setName(String value) {
 		this.name = value;
 	}
-	
+
 	public String getDescription() {
 		return description;
 	}
-	
+
 	public void setDescription(String value) {
 		this.description = value;
 	}
-	
+
 	public String getVersion() {
 		return version;
 	}
-	
+
 	public void setVersion(String value) {
 		this.version = value;
 	}
-	
+
 	public String getFolderPath() {
 		return folderPath;
 	}
-	
+
 	public void setFolderPath(String value) {
 		this.folderPath = value;
 	}
