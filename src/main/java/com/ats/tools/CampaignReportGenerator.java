@@ -69,6 +69,8 @@ public class CampaignReportGenerator {
 				copyImageToTempFolder("true",basePath);
 				copyImageToTempFolder("warning",basePath);
 				copyImageToTempFolder("agilitest",basePath);
+				copyFileToTempFolder("report.css",basePath);
+				copyFileToTempFolder("script.js",basePath);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -113,6 +115,15 @@ public class CampaignReportGenerator {
 		byte[] aByteArray = Resources.toByteArray(ResourceContent.class.getResource("/reports/images/" + name + ".png"));
 		final File file = new File(basePath + File.separator + name + ".png");
         final FileOutputStream fileOut = new FileOutputStream(file );
+        fileOut.write(aByteArray);
+        fileOut.flush();
+        fileOut.close();
+	}
+	
+	public static void copyFileToTempFolder(String name, String basePath) throws IOException {
+		byte[] aByteArray = Resources.toByteArray(ResourceContent.class.getResource("/reports/campaign/" + name));
+		final File file = new File(basePath + File.separator + name);
+        final FileOutputStream fileOut = new FileOutputStream(file);
         fileOut.write(aByteArray);
         fileOut.flush();
         fileOut.close();

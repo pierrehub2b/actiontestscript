@@ -24,7 +24,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 	<META name="description" content=""/>
 	<TITLE>Agilitest campaign reporting</TITLE>
 	<LINK rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous"/>
-	<LINK rel="stylesheet" href="../report.css"/>
+	<LINK rel="stylesheet" href="report.css"/>
       </HEAD>
       <BODY class="py-4">
 
@@ -47,6 +47,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 	  <xsl:apply-templates/>
 	</DIV>
       </BODY>
+      	<script src="script.js"></script>
     </HTML>
   </xsl:template>
   <!-- ========================= -->
@@ -342,11 +343,13 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <!-- child element: action     -->
   <!-- ========================= -->
   <xsl:template match="action">
+  <button class="collapsible"><xsl:value-of select="@type"/></button>
+            <div class="content">
   <TABLE class="results table table-bordered table-hover" style="background-color:#EBEBEB">
 	<THEAD>
 		  <TH class="w-75 p-3">
-            Action :
-            <xsl:value-of select="@type"/>            
+		  Action : 
+            <xsl:value-of select="@type"/>   
 	  </TH>
 	  <xsl:choose>
             <xsl:when test="passed = 'true'">
@@ -409,5 +412,6 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 				</xsl:when>
     </xsl:choose>
 	</TABLE>
+</div>
   </xsl:template>
 </xsl:stylesheet>
