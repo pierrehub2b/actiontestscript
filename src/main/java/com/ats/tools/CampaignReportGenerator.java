@@ -65,7 +65,6 @@ public class CampaignReportGenerator {
 				final String styleSheet = Resources.toString(ResourceContent.class.getResource("/reports/campaign/campaign_pdf_stylesheet.xml"), Charsets.UTF_8);
 				xslPathPdf = createEmptyStylesheet(styleSheet,basePath);
 				copyImageToTempFolder("false",basePath);
-				copyImageToTempFolder("warning",basePath);
 				copyImageToTempFolder("true",basePath);
 				copyImageToTempFolder("warning",basePath);
 				copyImageToTempFolder("agilitest",basePath);
