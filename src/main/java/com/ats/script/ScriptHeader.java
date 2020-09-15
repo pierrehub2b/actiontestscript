@@ -219,9 +219,8 @@ public class ScriptHeader {
 				.replace("#GROUP_DESCRIPTION#", getDataGroups())
 				.replace("#PROJECT_GAV#", StringEscapeUtils.escapeJava(project.getGav()));
 
-		String pkg = packageName + project.getDomainPackage();
-		if(pkg.length() > 0) {
-			code = "package " + pkg + ";\r\n" + code;
+		if(packageName.length() > 0) {
+			code = "package " + packageName + ";\r\n" + code;
 		}
 
 		return code;

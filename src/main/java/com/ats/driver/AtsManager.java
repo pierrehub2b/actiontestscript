@@ -444,6 +444,8 @@ public class AtsManager {
 									String userDataDir = null;
 									String check = null;
 									String lang = null;
+									
+									String title = "";
 
 									if (browsers.item(j) instanceof Element) {
 										final Element browser = (Element) browsers.item(j);
@@ -458,6 +460,9 @@ public class AtsManager {
 													break;
 												case "waitaction":
 													waitAction = getElementText(browserElement);
+													break;
+												case "title":
+													title = getElementText(browserElement);
 													break;
 												case "driver":
 													driver = getElementText(browserElement);
@@ -494,7 +499,7 @@ public class AtsManager {
 											}else {
 												userDataDir = null;
 											}
-											addApplicationProperties(ApplicationProperties.BROWSER_TYPE, name, driver, path, waitAction, check, lang, userDataDir);
+											addApplicationProperties(ApplicationProperties.BROWSER_TYPE, name, driver, path, waitAction, check, lang, userDataDir, title);
 										}
 									}
 								}
@@ -530,7 +535,7 @@ public class AtsManager {
 										}
 
 										if(name != null && path != null) {
-											addApplicationProperties(ApplicationProperties.DESKTOP_TYPE, name, path, waitAction, "", null, null);
+											addApplicationProperties(ApplicationProperties.DESKTOP_TYPE, name, path, waitAction, "", null, null, null);
 										}
 									}
 								}
@@ -571,7 +576,7 @@ public class AtsManager {
 										}
 
 										if(name != null && endpoint != null && packageName != null) {
-											addApplicationProperties(ApplicationProperties.MOBILE_TYPE, name, endpoint + "/" + packageName, waitAction, "", null, null);
+											addApplicationProperties(ApplicationProperties.MOBILE_TYPE, name, endpoint + "/" + packageName, waitAction, "", null, null, null);
 										}
 									}
 								}
@@ -607,7 +612,7 @@ public class AtsManager {
 										}
 
 										if(name != null && url != null) {
-											addApplicationProperties(ApplicationProperties.API_TYPE, name, url, waitAction, "", null, null);
+											addApplicationProperties(ApplicationProperties.API_TYPE, name, url, waitAction, "", null, null, null);
 										}
 									}
 								}
@@ -1022,12 +1027,12 @@ public class AtsManager {
 		return new Properties();
 	}
 
-	private void addApplicationProperties(int type, String name, String path, String wait, String check, String lang, String userDataDir) {
-		addApplicationProperties(type, name, null, path, wait, check, lang, userDataDir);
+	private void addApplicationProperties(int type, String name, String path, String wait, String check, String lang, String userDataDir, String title) {
+		addApplicationProperties(type, name, null, path, wait, check, lang, userDataDir, title);
 	}
 
-	private void addApplicationProperties(int type, String name, String driver, String path, String wait, String check, String lang, String userDataDir) {
-		applicationsList.add(new ApplicationProperties(type, name, driver, path, Utils.string2Int(wait, -1), Utils.string2Int(check, -1), lang, userDataDir));
+	private void addApplicationProperties(int type, String name, String driver, String path, String wait, String check, String lang, String userDataDir, String title) {
+		applicationsList.add(new ApplicationProperties(type, name, driver, path, Utils.string2Int(wait, -1), Utils.string2Int(check, -1), lang, userDataDir, title));
 	}
 
 	//------------------------------------------------------------------------------------------------------------------
