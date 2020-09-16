@@ -22,7 +22,7 @@ package com.ats.script.actions;
 import com.ats.executor.ActionTestScript;
 import com.ats.script.Script;
 
-public class ActionSystemButton extends ActionSystem {
+public class ActionSystemButton extends Action {
 
 	public static final String SCRIPT_LABEL = "button";
 
@@ -40,10 +40,7 @@ public class ActionSystemButton extends ActionSystem {
 		super.execute(ts, testName, testLine);
 
 		if (status.isPassed()) {
-			if (ts.getCurrentChannel() != null) {
-				ts.getCurrentChannel().buttonClick(getButtonType());
-			}
-
+			ts.getCurrentChannel().buttonClick(getButtonType());
 			status.endDuration();
 		}
 	}

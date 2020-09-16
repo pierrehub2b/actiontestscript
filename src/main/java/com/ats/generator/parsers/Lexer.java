@@ -49,7 +49,9 @@ import com.ats.script.actions.performance.octoperf.ActionOctoperfVirtualUser;
 import com.ats.tools.Utils;
 
 public class Lexer {
-
+	
+	private static final String SYSTEM_ACTION_LABEL = "system";
+	
 	private final Pattern ACTION_PATTERN = Pattern.compile("(.*)\\[(.*?)\\]", Pattern.CASE_INSENSITIVE);
 
 	private GeneratorReport report; //TODO create report with list of failed ATS to java conversions steps
@@ -227,7 +229,7 @@ public class Lexer {
 
 				String dataOne = dataArray.remove(0).trim();
 
-				if (ActionSystem.SCRIPT_LABEL.equals(actionType)) {
+				if (SYSTEM_ACTION_LABEL.equals(actionType)) {
 
 					if (ActionSystemButton.SCRIPT_LABEL.equals(dataOne)) {
 
@@ -247,7 +249,7 @@ public class Lexer {
 						if (propertyArray.length > 1) {
 							final String propertyName = propertyArray[0].trim();
 							final Variable variable = script.getVariable(propertyArray[1].trim(), true);
-							script.addAction(new ActionSystemPropertyGet(script, stopExec, options, propertyName, variable), disabled);
+							script.addAction(new ActionSystemPropertyGet(script, variable, propertyName), disabled);
 						}
 					}
 				}

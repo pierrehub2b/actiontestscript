@@ -5,40 +5,66 @@ import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.Variable;
 import com.ats.script.Script;
 
-import java.util.ArrayList;
-
-public class ActionSystemPropertyGet extends ActionProperty {
+public class ActionSystemPropertyGet extends ActionReturnVariableArray {
 
     public static final String SCRIPT_LABEL = "property-get";
-
+    
+    private String name;
+    
     public ActionSystemPropertyGet() { }
 
-    public ActionSystemPropertyGet(Script script, boolean stop, ArrayList<String> options, String name, Variable variable) {
-        super(script, stop, options, name, variable, null);
+    public ActionSystemPropertyGet(Script script, Variable variable, String name) {
+        super(script, variable);
+        setName(name);
     }
-
-    public ActionSystemPropertyGet(Script script, boolean stop, int maxTry, int delay, String name, Variable variable) {
-        super(script, stop, maxTry, delay, null, name, variable);
-    }
-
+    
     @Override
-    public void terminateExecution(ActionTestScript ts) {
-        super.terminateExecution(ts);
-
+    public void execute(ActionTestScript ts, String testName, int line) {
+        super.execute(ts, testName, line);
+    
         if (status.isPassed()) {
-
+        
             String name = getName();
             final String attributeValue = ts.getCurrentChannel().getSysProperty(status, name);
             status.endDuration();
-
+        
             if (attributeValue == null) {
                 status.setError(ActionStatus.ATTRIBUTE_NOT_SET, "attribute '" + name + "' not found", name);
                 ts.getRecorder().update(ActionStatus.ATTRIBUTE_NOT_SET, status.getDuration(), name);
             } else {
                 status.setMessage(attributeValue);
-                updateVariableValue(attributeValue);
+                
+                getVariable().setData(attributeValue);
+                
                 ts.getRecorder().update(0, status.getDuration(), name, attributeValue);
             }
+        }
+    }
+    
+    @Override
+    public StringBuilder getJavaCode() {
+        StringBuilder builder = super.getJavaCode();
+        builder.append(", \"")
+                .append(name)
+                .append("\", ")
+                .append(getVariable().getName())
+                .append(")");
+        return builder;
+    }
+    
+    public String getName() {
+        return name;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    private Variable getVariable() {
+        if (variables.size() > 0) {
+            return variables.get(0);
+        } else {
+            return null;
         }
     }
 }

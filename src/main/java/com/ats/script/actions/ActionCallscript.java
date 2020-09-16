@@ -51,7 +51,7 @@ import com.ats.tools.logger.MessageCode;
 import com.ats.tools.logger.levels.AtsFailError;
 import com.google.gson.JsonObject;
 
-public class ActionCallscript extends Action {
+public class ActionCallscript extends ActionReturnVariableArray {
 
 	public static final String SCRIPT_LABEL = "subscript";
 	private static final int RND_INDEX_VALUE = -1;
@@ -69,7 +69,6 @@ public class ActionCallscript extends Action {
 
 	private ArrayList<Variable> scriptVariables;
 
-	private ArrayList<Variable> variables;
 	private ParameterList parameters;
 
 	private int loop = 1;
