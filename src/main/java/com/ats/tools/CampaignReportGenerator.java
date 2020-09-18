@@ -64,16 +64,17 @@ public class CampaignReportGenerator {
 			try {
 				final String styleSheet = Resources.toString(ResourceContent.class.getResource("/reports/campaign/campaign_pdf_stylesheet.xml"), Charsets.UTF_8);
 				xslPathPdf = createEmptyStylesheet(styleSheet,basePath);
-				copyImageToTempFolder("false",basePath);
-				copyImageToTempFolder("true",basePath);
-				copyImageToTempFolder("warning",basePath);
-				copyImageToTempFolder("agilitest",basePath);
-				copyFileToTempFolder("report.css",basePath);
-				copyFileToTempFolder("script.js",basePath);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
+		
+		copyImageToTempFolder("false",basePath);
+		copyImageToTempFolder("true",basePath);
+		copyImageToTempFolder("warning",basePath);
+		copyImageToTempFolder("agilitest",basePath);
+		copyFileToTempFolder("report.css",basePath);
+		copyFileToTempFolder("script.js",basePath);
 
 		if (fopDir == null || xmlPath == null || xslPathPdf == null || pdfPath == null) { return; }
 		
