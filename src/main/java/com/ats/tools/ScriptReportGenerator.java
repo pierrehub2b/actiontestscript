@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
 
 public class ScriptReportGenerator {
 
-	public static void main(String[] args) throws TransformerException, InterruptedException {
+	public static void main(String[] args) throws TransformerException, InterruptedException, IOException {
 		String fopDir = System.getProperty("fop", null);
 		String xmlPath = System.getProperty("xml", null);
 		String xslPath = System.getProperty("xsl", null);
@@ -56,15 +56,16 @@ public class ScriptReportGenerator {
 			try {
 				final String styleSheet = Resources.toString(ResourceContent.class.getResource("/reports/script/test_pdf_stylesheet.xml"), Charsets.UTF_8);
 				xslPath = createEmptyStylesheet(styleSheet,xmlPath);
-				copyImageToTempFolder("false",xmlPath);
-				copyImageToTempFolder("true",xmlPath);
-				copyImageToTempFolder("warning",xmlPath);
-				copyImageToTempFolder("agilitest",xmlPath);
-				copyFileToTempFolder("report.css",xmlPath);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
+		
+		copyImageToTempFolder("false",xmlPath);
+		copyImageToTempFolder("true",xmlPath);
+		copyImageToTempFolder("warning",xmlPath);
+		copyImageToTempFolder("agilitest",xmlPath);
+		copyFileToTempFolder("report.css",xmlPath);
 
 		if (fopDir == null || xmlPath == null || xslPath == null) { return; }		
 		//HTML reports
