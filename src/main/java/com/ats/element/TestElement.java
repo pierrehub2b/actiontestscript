@@ -43,6 +43,8 @@ public class TestElement{
 	public final static String CLIENT_WIDTH = "clientWidth";
 	public final static String CLIENT_HEIGTH = "clientHeight";
 	
+	private final static String MAT_SELECT = "MAT-SELECT";
+	
 	protected Channel channel;
 	protected IDriverEngine engine;
 
@@ -140,6 +142,10 @@ public class TestElement{
 		while(foundElements.size() > 0) {
 			foundElements.remove(0).dispose();
 		}
+	}
+	
+	public boolean isAngularSelect() {
+		return MAT_SELECT.equals(searchedTag);
 	}
 
 	public boolean isSysComp() {

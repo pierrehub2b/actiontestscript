@@ -377,7 +377,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			return loadElement(new ArrayList<AtsElement>(), x, y, w, h, initElementX, initElementY);
 		}
 	}
-	
+
 	private FoundElement loadElement(ArrayList<AtsElement> iframes, Double x, Double y, Double w, Double h, Double offsetX, Double offsetY) {
 
 		final ArrayList<Object> objectData = (ArrayList<Object>)runJavaScript(JS_ELEMENT_FROM_RECT, x - offsetX, y - offsetY, w, h);
@@ -423,7 +423,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public WebElement getRootElement(Channel cnl) {
-		
+
 		int maxTry = 20;
 		WebElement body = getHtmlView();
 
@@ -448,7 +448,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	private RemoteWebElement getWebElement(FoundElement element) {
 		return element.getRemoteWebElement(driver);
 	}
-	
+
 	@Override
 	public String getAttribute(ActionStatus status, FoundElement element, String attributeName, int maxTry) {
 		int tryLoop = maxTry;
@@ -467,11 +467,23 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public List<String[]> loadSelectOptions(TestElement element) {
 		final ArrayList<String[]> result = new ArrayList<String[]>();
-		final List<FoundElement> options = findSelectOptions(null, element);
-
-		if(options != null && options.size() > 0) {
-			options.stream().forEachOrdered(e -> result.add(new String[]{e.getValue().getAttribute("value"), e.getValue().getAttribute("text")}));
+		
+		if(element.isAngularSelect()) {
+			element.getWebElement().sendKeys(Keys.TAB);
+			element.click(channel.newActionStatus(), new MouseDirection());
+			
+			final List<FoundElement> options = findMatSelectOptions(element);
+			if(options != null && options.size() > 0) {
+				options.stream().forEachOrdered(e -> result.add(new String[]{e.getValue().getText(), e.getValue().getText()}));
+			}
+			
+		}else {
+			final List<FoundElement> options = findSelectOptions(null, element);
+			if(options != null && options.size() > 0) {
+				options.stream().forEachOrdered(e -> result.add(new String[]{e.getValue().getAttribute("value"), e.getValue().getAttribute("text")}));
+			}
 		}
+
 		return result;
 	}
 
@@ -480,51 +492,91 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		switchToDefaultContent();
 		return findElements(false, element, "option", new String[0], new String[0], Objects::nonNull, element.getWebElement(), false);
 	}
+	
+	public List<FoundElement> findMatSelectOptions(TestElement element) {
+		switchToDefaultContent();
+		return findElements(false, element, "mat-option", new String[0], new String[0], Objects::nonNull, null, true);
+	}
 
 	@Override
 	public void selectOptionsItem(ActionStatus status, TestElement element, CalculatedProperty selectProperty) {
 
-		final List<FoundElement> items = findSelectOptions(null, element);
+		if(element.isAngularSelect()) {
 
-		if(items != null && items.size() > 0) {
-
+			element.getWebElement().sendKeys(Keys.TAB);
 			element.click(status, new MouseDirection());
-
-			if(ActionSelect.SELECT_INDEX.equals(selectProperty.getName())){
-
-				final int index = Utils.string2Int(selectProperty.getValue().getCalculated());
-				if(items.size() > index) {
-					try {
-						items.get(index).getValue().click();
-					}catch (Exception e) {
-						new Select(items.get(index).getValue()).selectByIndex(index);
+			
+			final List<FoundElement> items = findMatSelectOptions(element);
+			
+			if(items != null && items.size() > 0) {
+				if(ActionSelect.SELECT_INDEX.equals(selectProperty.getName())){
+					final int index = Utils.string2Int(selectProperty.getValue().getCalculated());
+					if(items.size() > index) {
+						try {
+							items.get(index).getValue().click();
+						}catch (Exception e) {
+							status.setError(ActionStatus.OBJECT_NOT_INTERACTABLE, e.getMessage());
+						}
+					}else {
+						status.setError(ActionStatus.OBJECT_NOT_INTERACTABLE, "index not found, max length options : " + items.size());
 					}
 				}else {
-					status.setError(ActionStatus.OBJECT_NOT_INTERACTABLE, "index not found, max length options : " + items.size());
+					final String searchedValue = selectProperty.getValue().getCalculated();
+					try {
+						if(selectProperty.isRegexp()) {
+							items.stream().filter(e -> e.getValue().getText().matches(searchedValue)).findFirst().get().getValue().click();
+						}else {
+							items.stream().filter(e -> e.getValue().getText().equals(searchedValue)).findFirst().get().getValue().click();
+						}
+					}catch (NoSuchElementException e) {
+						status.setError(ActionStatus.OBJECT_NOT_INTERACTABLE, "mat-option not found : " + searchedValue);
+					}
 				}
+			}
+			
+		}else {
+			final List<FoundElement> items = findSelectOptions(null, element);
 
-			}else{
+			if(items != null && items.size() > 0) {
 
-				final String attribute = selectProperty.getName();
-				final String searchedValue = selectProperty.getValue().getCalculated();
-				Optional<FoundElement> foundOption = null;
+				element.click(status, new MouseDirection());
 
-				if(selectProperty.isRegexp()) {
-					foundOption = items.stream().filter(e -> e.getValue().getAttribute(attribute).matches(searchedValue)).findFirst();
-				}else {
-					foundOption = items.stream().filter(e -> e.getValue().getAttribute(attribute).equals(searchedValue)).findFirst();
+				if(ActionSelect.SELECT_INDEX.equals(selectProperty.getName())){
+
+					final int index = Utils.string2Int(selectProperty.getValue().getCalculated());
+					if(items.size() > index) {
+						try {
+							items.get(index).getValue().click();
+						}catch (Exception e) {
+							new Select(items.get(index).getValue()).selectByIndex(index);
+						}
+					}else {
+						status.setError(ActionStatus.OBJECT_NOT_INTERACTABLE, "index not found, max length options : " + items.size());
+					}
+
+				}else{
+
+					final String attribute = selectProperty.getName();
+					final String searchedValue = selectProperty.getValue().getCalculated();
+					Optional<FoundElement> foundOption = null;
+
+					if(selectProperty.isRegexp()) {
+						foundOption = items.stream().filter(e -> e.getValue().getAttribute(attribute).matches(searchedValue)).findFirst();
+					}else {
+						foundOption = items.stream().filter(e -> e.getValue().getAttribute(attribute).equals(searchedValue)).findFirst();
+					}
+
+					try {
+						foundOption.get().getValue().click();
+					}catch (NoSuchElementException e) {
+						status.setError(ActionStatus.OBJECT_NOT_INTERACTABLE, "option not found : " + searchedValue);
+					}
 				}
 
 				try {
-					foundOption.get().getValue().click();
-				}catch (NoSuchElementException e) {
-					status.setError(ActionStatus.OBJECT_NOT_INTERACTABLE, "option not found : " + searchedValue);
-				}
+					driver.executeScript("arguments[0].blur();", element.getWebElement());
+				}catch(Exception e) {}
 			}
-
-			try {
-				driver.executeScript("arguments[0].blur();", element.getWebElement());
-			}catch(Exception e) {}
 		}
 	}
 
@@ -534,10 +586,10 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		final String current = getAttribute(status, element, attributeName);
 		return current != null && current.equals(verify);
 	}
-	
+
 	@Override
 	public void setSysProperty(String propertyName, String propertyValue) { }
-	
+
 	@Override
 	public String getSysProperty(ActionStatus status, String propertyName, FoundElement element) {
 		return getAttribute(status, element, propertyName);
@@ -593,7 +645,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	public CalculatedProperty[] getCssAttributes(FoundElement element){
 		return getCssAttributes(getWebElement(element));
 	}
-	
+
 	private CalculatedProperty[] getCssAttributes(RemoteWebElement element){
 		return getAttributesList(element, JS_ELEMENT_CSS);
 	}
@@ -986,7 +1038,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	public void goToUrl(ActionStatus status, String url) {
 
 		channel.waitBeforeGotoUrl(this);
-		
+
 		if(ActionGotoUrl.REFRESH.equals(url)) {
 			driver.navigate().refresh();
 		}else if(ActionGotoUrl.NEXT.equals(url)) {
@@ -1106,7 +1158,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {
 
 		channel.waitBeforeEnterText(this);
-		
+
 		final WebElement we = element.getWebElement();
 		executeScript(status, "result={size:window.getComputedStyle(arguments[0], null).getPropertyValue('font-size'), family:window.getComputedStyle(arguments[0], null).getPropertyValue('font-family'), weight:window.getComputedStyle(arguments[0], null).getPropertyValue('font-weight')};", we);
 
@@ -1133,10 +1185,10 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void tap(int count, FoundElement element) {}
-	
+
 	@Override
 	public void press(int duration, ArrayList<String> paths, FoundElement element) {}
-	
+
 	@Override
 	public void windowState(ActionStatus status, Channel channel, String state) {
 		if(ActionWindowState.MAXIMIZE.equals(state)) {
