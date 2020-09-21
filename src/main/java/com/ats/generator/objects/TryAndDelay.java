@@ -19,12 +19,11 @@ under the License.
 
 package com.ats.generator.objects;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-
+import com.ats.tools.Utils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.ats.tools.Utils;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class TryAndDelay {
 

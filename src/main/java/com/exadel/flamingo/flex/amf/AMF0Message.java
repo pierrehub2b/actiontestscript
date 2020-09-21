@@ -7,10 +7,10 @@
 
 package com.exadel.flamingo.flex.amf;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.io.Serializable;
 
 public class AMF0Message implements Serializable {
 

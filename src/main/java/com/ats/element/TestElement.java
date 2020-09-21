@@ -19,19 +19,6 @@ under the License.
 
 package com.ats.element;
 
-import java.awt.Rectangle;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Predicate;
-
-import org.openqa.selenium.ElementNotInteractableException;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.WebElement;
-
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.SendKeyData;
@@ -41,6 +28,15 @@ import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.recorder.IVisualRecorder;
+import org.openqa.selenium.ElementNotInteractableException;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebElement;
+
+import java.awt.*;
+import java.util.List;
+import java.util.*;
+import java.util.function.Predicate;
 
 public class TestElement{
 
@@ -375,8 +371,6 @@ public class TestElement{
 		final MouseDirection md = new MouseDirection();
 
 		over(status, md, false, 0, 0);
-		if(status.isPassed()) {
-
 			if(status.isPassed()) {
 
 				recorder.updateScreen(false);
@@ -392,7 +386,6 @@ public class TestElement{
 					return enteredText;
 				}
 			}
-		}
 		return "";
 	}
 

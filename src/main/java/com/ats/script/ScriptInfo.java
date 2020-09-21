@@ -1,13 +1,13 @@
 package com.ats.script;
 
+import com.ats.generator.parsers.Lexer;
+import com.ats.script.actions.Action;
+import com.ats.script.actions.ActionCallscript;
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-
-import com.ats.generator.parsers.Lexer;
-import com.ats.script.actions.Action;
-import com.ats.script.actions.ActionCallscript;
 
 public class ScriptInfo {
 	

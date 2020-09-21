@@ -19,12 +19,11 @@ under the License.
 
 package com.ats.generator;
 
-import java.io.File;
-
+import com.ats.script.Project;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 
-import com.ats.script.Project;
+import java.io.File;
 
 public class GeneratorAnt extends Task{
 

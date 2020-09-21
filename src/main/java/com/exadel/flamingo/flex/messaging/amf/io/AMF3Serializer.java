@@ -20,37 +20,19 @@
 
 package com.exadel.flamingo.flex.messaging.amf.io;
 
-import java.io.DataOutputStream;
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectOutput;
-import java.io.OutputStream;
-import java.lang.reflect.Array;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.Map;
-
+import com.exadel.flamingo.flex.amf.AMF3Constants;
+import com.exadel.flamingo.flex.messaging.amf.io.util.*;
+import com.exadel.flamingo.flex.messaging.amf.io.util.externalizer.Externalizer;
+import com.exadel.flamingo.flex.messaging.util.StringUtil;
+import com.exadel.flamingo.flex.messaging.util.XMLUtil;
+import flex.messaging.io.ArrayCollection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 
-import com.exadel.flamingo.flex.amf.AMF3Constants;
-import com.exadel.flamingo.flex.messaging.amf.io.util.ClassGetter;
-import com.exadel.flamingo.flex.messaging.amf.io.util.Converter;
-import com.exadel.flamingo.flex.messaging.amf.io.util.DefaultClassGetter;
-import com.exadel.flamingo.flex.messaging.amf.io.util.DefaultConverter;
-import com.exadel.flamingo.flex.messaging.amf.io.util.DefaultJavaClassDescriptor;
-import com.exadel.flamingo.flex.messaging.amf.io.util.IndexedJavaClassDescriptor;
-import com.exadel.flamingo.flex.messaging.amf.io.util.JavaClassDescriptor;
-import com.exadel.flamingo.flex.messaging.amf.io.util.LazyUtil;
-import com.exadel.flamingo.flex.messaging.amf.io.util.externalizer.Externalizer;
-import com.exadel.flamingo.flex.messaging.util.StringUtil;
-import com.exadel.flamingo.flex.messaging.util.XMLUtil;
-
-import flex.messaging.io.ArrayCollection;
+import java.io.*;
+import java.lang.reflect.Array;
+import java.util.*;
 
 /**
  * @author Franck WOLFF

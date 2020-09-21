@@ -19,15 +19,15 @@ under the License.
 
 package com.ats.tools.performance.proxy;
 
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import com.browserup.bup.BrowserUpProxyServer;
 import com.browserup.bup.filters.RequestFilter;
 import com.browserup.bup.filters.RequestFilterAdapter;
 import com.browserup.bup.filters.ResponseFilter;
 import com.browserup.bup.filters.ResponseFilterAdapter;
 import com.browserup.bup.proxy.CaptureType;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class AtsBrowserMobProxyServer extends BrowserUpProxyServer {
 

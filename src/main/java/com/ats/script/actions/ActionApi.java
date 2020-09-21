@@ -19,17 +19,17 @@ under the License.
 
 package com.ats.script.actions;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.StringJoiner;
-
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
 import com.ats.tools.Utils;
 import com.google.gson.JsonObject;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.StringJoiner;
 
 public class ActionApi extends Action {
 

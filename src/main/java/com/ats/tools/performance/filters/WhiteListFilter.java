@@ -19,9 +19,9 @@ under the License.
 
 package com.ats.tools.performance.filters;
 
-import java.util.List;
-
 import com.browserup.harreader.model.HarEntry;
+
+import java.util.List;
 
 public class WhiteListFilter extends UrlBaseFilter {
 

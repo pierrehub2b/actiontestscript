@@ -1,12 +1,12 @@
 package com.ats.tools;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.ArrayList;
+import com.ats.recorder.VisualAction;
+import com.ats.recorder.VisualImage;
+import com.ats.recorder.VisualReport;
+import com.ats.tools.logger.ExecutionLogger;
+import com.exadel.flamingo.flex.messaging.amf.io.AMF3Deserializer;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -17,15 +17,9 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import com.ats.recorder.VisualAction;
-import com.ats.recorder.VisualImage;
-import com.ats.recorder.VisualReport;
-import com.ats.tools.logger.ExecutionLogger;
-import com.exadel.flamingo.flex.messaging.amf.io.AMF3Deserializer;
+import java.io.*;
+import java.nio.file.Path;
+import java.util.ArrayList;
 
 public class XmlReport {
 

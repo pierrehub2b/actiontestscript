@@ -19,9 +19,9 @@ under the License.
 
 package com.ats.generator.variables;
 
-import java.util.regex.Matcher;
-
 import org.apache.commons.text.StringEscapeUtils;
+
+import java.util.regex.Matcher;
 
 public class BaseValue {
 

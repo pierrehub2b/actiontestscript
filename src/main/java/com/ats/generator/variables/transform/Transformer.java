@@ -19,9 +19,9 @@ under the License.
 
 package com.ats.generator.variables.transform;
 
-import java.util.regex.Pattern;
-
 import com.ats.tools.Utils;
+
+import java.util.regex.Pattern;
 
 public abstract class Transformer {
 

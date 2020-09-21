@@ -19,10 +19,10 @@ under the License.
 
 package com.ats.generator.variables;
 
-import java.util.regex.Pattern;
-
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.transform.Transformer;
+
+import java.util.regex.Pattern;
 
 public class Variable implements Comparable<Variable>{
 

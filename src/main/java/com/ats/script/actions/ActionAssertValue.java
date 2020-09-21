@@ -19,9 +19,6 @@ under the License.
 
 package com.ats.script.actions;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.CalculatedValue;
@@ -29,6 +26,9 @@ import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
 import com.ats.tools.Operators;
 import com.google.gson.JsonObject;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ActionAssertValue extends ActionExecute {
 

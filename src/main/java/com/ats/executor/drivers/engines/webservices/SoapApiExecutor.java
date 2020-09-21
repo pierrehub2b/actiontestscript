@@ -19,36 +19,23 @@ under the License.
 
 package com.ats.executor.drivers.engines.webservices;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
 import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
 import com.ats.script.actions.ActionApi;
 import com.google.common.base.Charsets;
-
 import okhttp3.OkHttpClient;
 import okhttp3.Request.Builder;
 import okhttp3.RequestBody;
+import org.w3c.dom.*;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class SoapApiExecutor extends ApiExecutor {
 
@@ -116,7 +103,7 @@ public class SoapApiExecutor extends ApiExecutor {
 		NodeList nodeListOfOperations = null;
 		String attr ="http://www.w3.org/2001/XMLSchema";
 
-		Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(wsdlFile);
+		final Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(wsdlFile);
 		NodeList allNodesOfDocumnet = document.getChildNodes();
 
 		for(int index = 0; index<allNodesOfDocumnet.getLength(); index++){
@@ -172,7 +159,8 @@ public class SoapApiExecutor extends ApiExecutor {
 				nodeListOfOperations = document.getElementsByTagName(str4);
 			}
 
-			for (int i = 0; i < nodeListOfOperations.getLength(); i++) {
+			final int nodeLength = nodeListOfOperations.getLength();
+			for (int i = 0; i < nodeLength; i++) {
 				final Node operation = nodeListOfOperations.item(i);
 				final String operationName = operation.getAttributes().getNamedItem("name").getNodeValue();
 				String operationAction = operationName;
@@ -196,16 +184,18 @@ public class SoapApiExecutor extends ApiExecutor {
 		if(location != null){ 
 			if(operations.isEmpty()){   
 
-				Document documentForOperation = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(wsdlFile);
-				NodeList nodesOfNewDoc = documentForOperation.getChildNodes();
-				for(int index = 0; index<nodesOfNewDoc.getLength(); index++){
+				final Document documentForOperation = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(wsdlFile);
+				int nodeLength = documentForOperation.getChildNodes().getLength();
+
+				for(int index = 0; index < nodeLength; index++){
 					if( documentForOperation.getFirstChild().getNodeName().equalsIgnoreCase("#comment")){
 						document.removeChild(document.getFirstChild());
 					}       
 				}
 
-				NodeList nodeList  = documentForOperation.getElementsByTagName(str4);
-				for (int i = 0; i < nodeList.getLength(); i++) {
+				final NodeList nodeList  = documentForOperation.getElementsByTagName(str4);
+				nodeLength = nodeList.getLength();
+				for (int i = 0; i < nodeLength; i++) {
 					final Node operation = nodeList.item(i);
 
 					final String operationName = operation.getAttributes().getNamedItem("name").getNodeValue();

@@ -19,6 +19,15 @@ under the License.
 
 package com.ats.generator.variables.parameter;
 
+import com.google.common.io.CharStreams;
+import com.google.common.io.Closeables;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
@@ -29,15 +38,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
-import com.google.common.io.CharStreams;
-import com.google.common.io.Closeables;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.opencsv.CSVReader;
-import com.opencsv.exceptions.CsvException;
 
 public class ParameterDataFile{
 

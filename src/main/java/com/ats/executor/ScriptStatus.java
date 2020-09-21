@@ -19,10 +19,10 @@ under the License.
 
 package com.ats.executor;
 
+import com.google.gson.JsonObject;
+
 import java.util.ArrayList;
 import java.util.stream.Collectors;
-
-import com.google.gson.JsonObject;
 
 public class ScriptStatus {
 

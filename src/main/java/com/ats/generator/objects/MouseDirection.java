@@ -19,14 +19,14 @@ under the License.
 
 package com.ats.generator.objects;
 
+import com.ats.executor.ActionTestScript;
+import com.ats.generator.variables.CalculatedValue;
+import com.ats.script.Script;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-
-import com.ats.executor.ActionTestScript;
-import com.ats.generator.variables.CalculatedValue;
-import com.ats.script.Script;
 
 public class MouseDirection {
 

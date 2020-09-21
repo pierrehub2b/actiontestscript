@@ -19,14 +19,6 @@ under the License.
 
 package com.ats.executor.channels;
 
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-
-import com.google.gson.JsonArray;
-import org.openqa.selenium.Proxy;
-import org.openqa.selenium.WebElement;
-
 import com.ats.driver.AtsManager;
 import com.ats.element.DialogBox;
 import com.ats.element.FoundElement;
@@ -38,11 +30,10 @@ import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.desktop.DesktopResponse;
 import com.ats.executor.drivers.desktop.DesktopWindow;
-import com.ats.executor.drivers.engines.ApiDriverEngine;
+import com.ats.executor.drivers.engines.DesktopDriverEngine;
 import com.ats.executor.drivers.engines.IDriverEngine;
 import com.ats.executor.drivers.engines.MobileDriverEngine;
 import com.ats.executor.drivers.engines.WebDriverEngine;
-import com.ats.executor.drivers.engines.DesktopDriverEngine;
 import com.ats.generator.ATS;
 import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.MouseDirection;
@@ -62,6 +53,13 @@ import com.ats.tools.logger.ExecutionLogger;
 import com.ats.tools.performance.proxy.AtsNoProxy;
 import com.ats.tools.performance.proxy.AtsProxy;
 import com.ats.tools.performance.proxy.IAtsProxy;
+import com.google.gson.JsonArray;
+import org.openqa.selenium.Proxy;
+import org.openqa.selenium.WebElement;
+
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Channel {
 

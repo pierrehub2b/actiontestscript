@@ -19,18 +19,18 @@ under the License.
 
 package com.ats.executor.drivers.desktop;
 
+import com.ats.element.AtsBaseElement;
+import com.ats.element.AtsElement;
+import com.ats.element.FoundElement;
+import com.ats.executor.TestBound;
+import com.ats.generator.variables.CalculatedProperty;
+
 import java.beans.Transient;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import com.ats.element.AtsBaseElement;
-import com.ats.element.AtsElement;
-import com.ats.element.FoundElement;
-import com.ats.executor.TestBound;
-import com.ats.generator.variables.CalculatedProperty;
 
 public class DesktopResponse {
 			

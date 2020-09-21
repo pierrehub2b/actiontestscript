@@ -19,14 +19,13 @@ under the License.
 
 package com.ats.element;
 
-import org.openqa.selenium.Keys;
-
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
+import org.openqa.selenium.Keys;
 
 public class TestElementSystemButton extends TestElement {
 

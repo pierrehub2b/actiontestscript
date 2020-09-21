@@ -19,17 +19,17 @@ under the License.
 
 package com.ats.generator.parsers;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.regex.Matcher;
-
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.Variable;
 import com.ats.generator.variables.transform.Transformer;
 import com.ats.script.ScriptHeader;
 import com.ats.script.ScriptLoader;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.regex.Matcher;
 
 public class ScriptParser {
 

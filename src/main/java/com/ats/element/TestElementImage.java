@@ -19,9 +19,6 @@ under the License.
 
 package com.ats.element;
 
-import java.util.List;
-import java.util.function.Predicate;
-
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.SendKeyData;
@@ -31,6 +28,9 @@ import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.graphic.ImageTemplateMatchingSimple;
 import com.ats.tools.Utils;
+
+import java.util.List;
+import java.util.function.Predicate;
 
 public class TestElementImage extends TestElement {
 
@@ -101,7 +101,6 @@ public class TestElementImage extends TestElement {
 		final MouseDirection md = new MouseDirection();
 
 		mouseClick(status, md, 0, 0);
-		if(status.isPassed()) {
 
 			if(status.isPassed()) {
 
@@ -118,7 +117,6 @@ public class TestElementImage extends TestElement {
 					return enteredText;
 				}
 			}
-		}
 		return "";
 	}
 

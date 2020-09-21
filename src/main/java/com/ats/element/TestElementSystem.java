@@ -19,11 +19,11 @@ under the License.
 
 package com.ats.element;
 
-import java.util.function.Predicate;
-
 import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.MouseDirection;
+
+import java.util.function.Predicate;
 
 public class TestElementSystem extends TestElement {
 

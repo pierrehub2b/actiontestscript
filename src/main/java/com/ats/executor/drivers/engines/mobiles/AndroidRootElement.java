@@ -1,8 +1,5 @@
 package com.ats.executor.drivers.engines.mobiles;
 
-import java.awt.Rectangle;
-import java.util.ArrayList;
-
 import com.ats.element.AtsMobileElement;
 import com.ats.element.FoundElement;
 import com.ats.element.MobileTestElement;
@@ -10,6 +7,9 @@ import com.ats.executor.ActionStatus;
 import com.ats.executor.drivers.engines.MobileDriverEngine;
 import com.ats.generator.objects.MouseDirection;
 import com.google.gson.JsonObject;
+
+import java.awt.*;
+import java.util.ArrayList;
 
 public class AndroidRootElement extends RootElement {
 

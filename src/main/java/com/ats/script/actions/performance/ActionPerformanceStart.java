@@ -19,19 +19,18 @@ under the License.
 
 package com.ats.script.actions.performance;
 
+import com.ats.executor.ActionTestScript;
+import com.ats.executor.channels.Channel;
+import com.ats.script.Script;
+import com.ats.tools.Utils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.StringEscapeUtils;
-
-import com.ats.executor.ActionTestScript;
-import com.ats.executor.channels.Channel;
-import com.ats.script.Script;
-import com.ats.tools.Utils;
 
 public class ActionPerformanceStart extends ActionPerformance {
 

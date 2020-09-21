@@ -19,10 +19,6 @@ under the License.
 
 package com.ats.script.actions;
 
-import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.ats.element.SearchedElement;
 import com.ats.executor.ActionTestScript;
 import com.ats.script.Script;
@@ -30,6 +26,10 @@ import com.ats.script.ScriptLoader;
 import com.ats.tools.Operators;
 import com.ats.tools.Utils;
 import com.google.gson.JsonObject;
+
+import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ActionAssertCount extends ActionExecuteElement {
 

@@ -19,19 +19,16 @@ under the License.
 
 package com.ats.recorder;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics2D;
+import com.ats.executor.TestBound;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
-
-import javax.imageio.ImageIO;
-
-import com.ats.executor.TestBound;
 
 public class VisualImage {
 

@@ -14,11 +14,9 @@ import com.exadel.flamingo.flex.amf.AMF3Object;
 import flex.messaging.io.ASObject;
 import flex.messaging.io.ASRecordSet;
 import org.apache.commons.beanutils.PropertyUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.*;
 
 import java.beans.PropertyDescriptor;
 import java.io.ByteArrayOutputStream;
@@ -27,16 +25,7 @@ import java.io.IOException;
 import java.io.ObjectOutput;
 import java.lang.reflect.Method;
 import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.*;
 
 public class AMF0Serializer {
 

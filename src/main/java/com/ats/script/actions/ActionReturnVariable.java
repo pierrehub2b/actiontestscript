@@ -19,11 +19,11 @@ under the License.
 
 package com.ats.script.actions;
 
-import java.util.ArrayList;
-
 import com.ats.element.SearchedElement;
 import com.ats.generator.variables.Variable;
 import com.ats.script.Script;
+
+import java.util.ArrayList;
 
 public class ActionReturnVariable extends ActionExecuteElement {
 	

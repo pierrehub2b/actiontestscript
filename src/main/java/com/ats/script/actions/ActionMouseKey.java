@@ -19,11 +19,6 @@ under the License.
 
 package com.ats.script.actions;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-
-import org.openqa.selenium.Keys;
-
 import com.ats.element.SearchedElement;
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.objects.mouse.Mouse;
@@ -31,6 +26,10 @@ import com.ats.generator.objects.mouse.MouseKey;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
 import com.google.gson.JsonObject;
+import org.openqa.selenium.Keys;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class ActionMouseKey extends ActionMouse {
 

@@ -19,7 +19,8 @@ under the License.
 
 package com.ats.graphic;
 
-import java.awt.Rectangle;
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -27,8 +28,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.IntStream;
-
-import javax.imageio.ImageIO;
 
 public class ImageTemplateMatchingSimple {
 

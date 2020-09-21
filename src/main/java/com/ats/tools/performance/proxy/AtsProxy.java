@@ -19,15 +19,6 @@ under the License.
 
 package com.ats.tools.performance.proxy;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.openqa.selenium.Proxy;
-
 import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.ATS;
@@ -43,6 +34,14 @@ import com.browserup.bup.proxy.CaptureType;
 import com.browserup.harreader.model.Har;
 import com.browserup.harreader.model.HarEntry;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.openqa.selenium.Proxy;
+
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AtsProxy implements IAtsProxy {
 

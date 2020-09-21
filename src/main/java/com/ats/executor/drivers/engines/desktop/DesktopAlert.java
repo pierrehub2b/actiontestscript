@@ -1,18 +1,17 @@
 package com.ats.executor.drivers.engines.desktop;
 
-import java.util.List;
-import java.util.StringJoiner;
-import java.util.stream.Collectors;
-
-import com.ats.executor.drivers.engines.DesktopDriverEngine;
-import org.openqa.selenium.NoAlertPresentException;
-
 import com.ats.element.DialogBox;
 import com.ats.element.FoundElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.TestBound;
+import com.ats.executor.drivers.engines.DesktopDriverEngine;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
+import org.openqa.selenium.NoAlertPresentException;
+
+import java.util.List;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 public class DesktopAlert extends DialogBox {
 

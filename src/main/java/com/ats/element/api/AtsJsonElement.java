@@ -19,9 +19,9 @@ under the License.
 
 package com.ats.element.api;
 
-import java.util.Map;
-
 import com.google.gson.JsonElement;
+
+import java.util.Map;
 
 public class AtsJsonElement extends AtsApiElement {
 

@@ -19,16 +19,16 @@ under the License.
 
 package com.ats.generator.variables;
 
-import java.util.function.Predicate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
-
 import com.ats.element.AtsBaseElement;
 import com.ats.executor.ActionTestScript;
 import com.ats.script.Script;
 import com.ats.tools.Operators;
 import com.ats.tools.Utils;
+
+import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public class CalculatedProperty implements Comparable<CalculatedProperty>{
 

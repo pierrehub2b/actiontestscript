@@ -1,9 +1,9 @@
 package com.ats.tools.logger.levels;
 
-import java.io.PrintStream;
-
 import com.ats.script.actions.Action;
 import com.google.gson.JsonObject;
+
+import java.io.PrintStream;
 
 public class FullLevelLogger extends WarningLevelLogger {
 

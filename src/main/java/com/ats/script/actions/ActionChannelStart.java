@@ -19,11 +19,6 @@ under the License.
 
 package com.ats.script.actions;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.StringJoiner;
-
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.variables.CalculatedValue;
@@ -31,6 +26,11 @@ import com.ats.script.Script;
 import com.ats.script.actions.neoload.ActionNeoload;
 import com.ats.script.actions.performance.ActionPerformance;
 import com.google.gson.JsonObject;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.StringJoiner;
 
 public class ActionChannelStart extends ActionChannel {
 

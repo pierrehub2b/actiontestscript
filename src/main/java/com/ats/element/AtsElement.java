@@ -19,14 +19,13 @@ under the License.
 
 package com.ats.element;
 
+import com.ats.executor.drivers.desktop.DesktopData;
+import org.openqa.selenium.remote.RemoteWebElement;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import org.openqa.selenium.remote.RemoteWebElement;
-
-import com.ats.executor.drivers.desktop.DesktopData;
 
 @SuppressWarnings("unchecked")
 public class AtsElement extends AtsBaseElement {

@@ -19,14 +19,14 @@ under the License.
 
 package com.ats.executor.channels;
 
-import java.util.ArrayList;
-import java.util.Optional;
-
 import com.ats.driver.AtsManager;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.drivers.DriverManager;
 import com.ats.script.actions.ActionChannelStart;
+
+import java.util.ArrayList;
+import java.util.Optional;
 
 public class ChannelManager {
 
