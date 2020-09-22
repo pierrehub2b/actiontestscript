@@ -19,14 +19,13 @@ under the License.
 
 package com.ats.tools.performance.proxy;
 
-import java.util.List;
-
-import org.openqa.selenium.Proxy;
-
 import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
 import com.ats.script.actions.Action;
 import com.ats.script.actions.performance.octoperf.ActionOctoperfVirtualUser;
+import org.openqa.selenium.Proxy;
+
+import java.util.List;
 
 public interface IAtsProxy {
 	Proxy startProxy();

@@ -19,12 +19,12 @@ under the License.
 
 package com.ats.tools.performance.filters;
 
+import com.ats.tools.performance.proxy.AtsProxy;
+import com.browserup.harreader.model.HarEntry;
+
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import com.ats.tools.performance.proxy.AtsProxy;
-import com.browserup.harreader.model.HarEntry;
 
 public class UrlBaseFilter {
 

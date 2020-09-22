@@ -19,15 +19,6 @@ under the License.
 
 package com.ats.executor.drivers.engines;
 
-import java.awt.Rectangle;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.Point;
-import org.openqa.selenium.remote.RemoteWebDriver;
-
 import com.ats.driver.ApplicationProperties;
 import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
@@ -41,6 +32,14 @@ import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.graphic.ImageTemplateMatchingSimple;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Point;
+import org.openqa.selenium.remote.RemoteWebDriver;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class DriverEngine {
 	

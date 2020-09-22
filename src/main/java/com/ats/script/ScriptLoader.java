@@ -19,19 +19,6 @@ under the License.
 
 package com.ats.script;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Stream;
-
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.GeneratorReport;
 import com.ats.generator.parsers.Lexer;
@@ -41,6 +28,15 @@ import com.ats.generator.variables.Variable;
 import com.ats.generator.variables.parameter.ParameterList;
 import com.ats.script.actions.Action;
 import com.ats.script.actions.ActionCallscript;
+
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
 
 public class ScriptLoader extends Script {
 

@@ -19,12 +19,10 @@ under the License.
 
 package com.ats.driver;
 
-import java.net.InetSocketAddress;
-
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.Proxy.ProxyType;
 
-import com.ats.tools.Utils;
+import java.net.InetSocketAddress;
 
 public class AtsProxy {
 
@@ -32,25 +30,30 @@ public class AtsProxy {
 	public final static String SYSTEM = "system";
 	public final static String DIRECT = "direct";
 	public final static String MANUAL = "manual";
+	public final static String PAC = "pac";
 
 	private String type;
 	private String host;
 	private int port;
+	private String pacUrl;
 
 	public AtsProxy(String type) {
 		this.type = type;
 	}
 	
-	public AtsProxy(String host, String port) {
-		this.type = MANUAL;
-		this.host = host;
-		this.port = Utils.string2Int(port, 8080);
+	public AtsProxy(String host, int port) {
+		this(MANUAL, host, port);
 	}
 
 	public AtsProxy(String type, String host, int port) {
 		this.type = type;
 		this.host = host;
 		this.port = port;
+	}
+	
+	public AtsProxy(String type, String url) {
+		this.type = type;
+		pacUrl = url;
 	}
 
 	public String getType() {
@@ -72,6 +75,8 @@ public class AtsProxy {
 
 		if(AUTO.equals(type)) {
 			proxy.setProxyType(ProxyType.AUTODETECT);
+		}else if(PAC.equals(type)) {
+			proxy.setProxyAutoconfigUrl(pacUrl);
 		}else if(DIRECT.equals(type)) {
 			proxy.setProxyType(ProxyType.DIRECT);
 		}else if(MANUAL.equals(type)) {
@@ -89,8 +94,11 @@ public class AtsProxy {
 	public java.net.Proxy getHttpProxy() {
 		if(MANUAL.equals(type)){
 			return new java.net.Proxy(java.net.Proxy.Type.HTTP, new InetSocketAddress(host, port));
+		}else if(PAC.equals(type)) {
+			//final Proxy proxy = new Proxy();
+			//proxy.setProxyAutoconfigUrl(pacUrl);
 		}
-		return null;
+		return java.net.Proxy.NO_PROXY;
 	}
 
 	/*public JsonObject getGeckoProxy() {

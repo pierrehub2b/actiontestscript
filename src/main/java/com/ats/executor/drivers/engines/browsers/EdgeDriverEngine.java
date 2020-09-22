@@ -19,14 +19,6 @@ under the License.
 
 package com.ats.executor.drivers.engines.browsers;
 
-import java.util.ArrayList;
-
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.Point;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.edge.EdgeOptions;
-import org.openqa.selenium.remote.CapabilityType;
-
 import com.ats.driver.ApplicationProperties;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
@@ -37,6 +29,13 @@ import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.WebDriverEngine;
 import com.ats.generator.objects.MouseDirection;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Point;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.edge.EdgeOptions;
+import org.openqa.selenium.remote.CapabilityType;
+
+import java.util.ArrayList;
 
 public class EdgeDriverEngine extends WebDriverEngine {
 

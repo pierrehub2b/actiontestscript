@@ -19,13 +19,6 @@ under the License.
 
 package com.ats.generator.variables;
 
-import java.util.ArrayList;
-import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.commons.text.StringEscapeUtils;
-
 import com.ats.crypto.Password;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.SendKeyData;
@@ -34,6 +27,12 @@ import com.ats.generator.variables.transform.TimeTransformer;
 import com.ats.script.Project;
 import com.ats.script.Script;
 import com.ats.tools.Utils;
+import org.apache.commons.text.StringEscapeUtils;
+
+import java.util.ArrayList;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CalculatedValue{
 

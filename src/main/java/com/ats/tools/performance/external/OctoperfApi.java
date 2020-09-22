@@ -19,40 +19,25 @@ under the License.
 
 package com.ats.tools.performance.external;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Instant;
-import java.util.zip.GZIPOutputStream;
-
 import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
 import com.ats.script.actions.performance.octoperf.ActionOctoperfVirtualUser;
 import com.ats.tools.logger.MessageCode;
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
-
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
+import com.google.gson.*;
+import okhttp3.*;
 import okhttp3.Request.Builder;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 import okhttp3.internal.Util;
 import okio.BufferedSink;
 import okio.Okio;
 import okio.Source;
+
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.zip.GZIPOutputStream;
 
 public class OctoperfApi {
 

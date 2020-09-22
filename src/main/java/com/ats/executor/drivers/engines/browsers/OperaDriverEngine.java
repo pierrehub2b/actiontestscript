@@ -19,10 +19,6 @@ under the License.
 
 package com.ats.executor.drivers.engines.browsers;
 
-import java.io.File;
-
-import org.openqa.selenium.opera.OperaOptions;
-
 import com.ats.driver.ApplicationProperties;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
@@ -33,6 +29,9 @@ import com.ats.executor.drivers.engines.WebDriverEngine;
 import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.MouseDirectionData;
 import com.ats.tools.Utils;
+import org.openqa.selenium.opera.OperaOptions;
+
+import java.io.File;
 
 public class OperaDriverEngine extends WebDriverEngine {
 	

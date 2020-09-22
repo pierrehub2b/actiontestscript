@@ -19,6 +19,14 @@ under the License.
 
 package com.ats.generator;
 
+import com.ats.generator.events.ScriptProcessedEvent;
+import com.ats.generator.events.ScriptProcessedNotifier;
+import com.ats.generator.parsers.Lexer;
+import com.ats.script.Project;
+import com.ats.script.ScriptLoader;
+import com.ats.tools.Utils;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -26,15 +34,6 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.stream.Stream;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.ats.generator.events.ScriptProcessedEvent;
-import com.ats.generator.events.ScriptProcessedNotifier;
-import com.ats.generator.parsers.Lexer;
-import com.ats.script.Project;
-import com.ats.script.ScriptLoader;
-import com.ats.tools.Utils;
 
 public class Generator implements ScriptProcessedEvent{
 

@@ -19,10 +19,10 @@ under the License.
 
 package com.ats.element.api;
 
-import java.util.Map;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
+import java.util.Map;
 
 public class AtsXmlElement extends AtsApiElement {
 

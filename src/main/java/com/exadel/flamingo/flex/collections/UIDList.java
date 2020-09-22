@@ -20,9 +20,9 @@
 
 package com.exadel.flamingo.flex.collections;
 
-import java.util.Collection;
-
 import flex.messaging.io.ArrayCollection;
+
+import java.util.Collection;
 
 /**
  * @author Franck WOLFF

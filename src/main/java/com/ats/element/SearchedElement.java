@@ -19,6 +19,13 @@ under the License.
 
 package com.ats.element;
 
+import com.ats.executor.ActionTestScript;
+import com.ats.generator.variables.CalculatedProperty;
+import com.ats.script.Project;
+import com.ats.script.Script;
+import com.ats.tools.Utils;
+import org.apache.commons.lang3.StringUtils;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -26,14 +33,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.StringJoiner;
 import java.util.regex.Matcher;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.ats.executor.ActionTestScript;
-import com.ats.generator.variables.CalculatedProperty;
-import com.ats.script.Project;
-import com.ats.script.Script;
-import com.ats.tools.Utils;
 
 public class SearchedElement {
 

@@ -1,16 +1,5 @@
 package com.ats.executor.drivers.engines.browsers;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.openqa.selenium.chrome.ChromeOptions;
-
 import com.ats.driver.ApplicationProperties;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
@@ -21,6 +10,16 @@ import com.ats.tools.Utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.openqa.selenium.chrome.ChromeOptions;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ChromiumBasedDriverEngine extends WebDriverEngine {
 

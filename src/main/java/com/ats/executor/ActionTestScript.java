@@ -19,28 +19,6 @@ under the License.
 
 package com.ats.executor;
 
-import static org.testng.Assert.fail;
-
-import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.logging.Level;
-
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.interactions.Actions;
-import org.testng.ITest;
-import org.testng.ITestContext;
-import org.testng.SkipException;
-import org.testng.TestRunner;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.Listeners;
-
 import com.ats.crypto.Passwords;
 import com.ats.element.SearchedElement;
 import com.ats.executor.channels.Channel;
@@ -52,18 +30,10 @@ import com.ats.generator.objects.mouse.Mouse;
 import com.ats.generator.objects.mouse.MouseKey;
 import com.ats.generator.objects.mouse.MouseScroll;
 import com.ats.generator.objects.mouse.MouseSwipe;
-import com.ats.generator.variables.CalculatedProperty;
-import com.ats.generator.variables.CalculatedValue;
-import com.ats.generator.variables.ConditionalValue;
-import com.ats.generator.variables.RandomStringValue;
-import com.ats.generator.variables.Variable;
+import com.ats.generator.variables.*;
 import com.ats.generator.variables.parameter.Parameter;
 import com.ats.generator.variables.parameter.ParameterList;
-import com.ats.generator.variables.transform.DateTransformer;
-import com.ats.generator.variables.transform.NumericTransformer;
-import com.ats.generator.variables.transform.RegexpTransformer;
-import com.ats.generator.variables.transform.TimeTransformer;
-import com.ats.generator.variables.transform.Transformer;
+import com.ats.generator.variables.transform.*;
 import com.ats.recorder.IVisualRecorder;
 import com.ats.recorder.VisualRecorder;
 import com.ats.recorder.VisualRecorderNull;
@@ -78,8 +48,23 @@ import com.ats.tools.logger.ExecutionLogger;
 import com.ats.tools.logger.levels.AtsFailError;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-
 import okhttp3.OkHttpClient;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.interactions.Actions;
+import org.testng.ITest;
+import org.testng.ITestContext;
+import org.testng.SkipException;
+import org.testng.TestRunner;
+import org.testng.annotations.*;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.logging.Level;
+
+import static org.testng.Assert.fail;
 
 @Listeners({TestListener.class})
 public class ActionTestScript extends Script implements ITest{

@@ -19,13 +19,12 @@ under the License.
 
 package com.ats.generator.variables.transform;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-
+import com.ats.executor.ActionTestScript;
 import org.apache.commons.lang3.StringUtils;
 import org.mariuszgromada.math.mxparser.Expression;
 
-import com.ats.executor.ActionTestScript;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 
 public class NumericTransformer extends Transformer {
 

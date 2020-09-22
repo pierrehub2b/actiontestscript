@@ -19,15 +19,14 @@ under the License.
 
 package com.ats.script.actions.performance.octoperf;
 
-import java.util.ArrayList;
-
-import org.apache.commons.text.StringEscapeUtils;
-
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
 import com.ats.script.actions.Action;
+import org.apache.commons.text.StringEscapeUtils;
+
+import java.util.ArrayList;
 
 public class ActionOctoperfVirtualUser extends Action {
 

@@ -19,14 +19,6 @@ under the License.
 
 package com.ats.executor.drivers.engines.browsers;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Set;
-
-import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.ie.InternetExplorerOptions;
-import org.testng.collections.Sets;
-
 import com.ats.driver.ApplicationProperties;
 import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
@@ -38,6 +30,13 @@ import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.WebDriverEngine;
 import com.ats.generator.objects.MouseDirection;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.ie.InternetExplorerOptions;
+import org.testng.collections.Sets;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Set;
 
 public class IEDriverEngine extends WebDriverEngine {
 	

@@ -19,12 +19,11 @@ under the License.
 
 package com.ats.generator.variables.transform;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.ats.executor.ActionTestScript;
 import org.apache.commons.text.StringEscapeUtils;
 
-import com.ats.executor.ActionTestScript;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class RegexpTransformer extends Transformer {
 

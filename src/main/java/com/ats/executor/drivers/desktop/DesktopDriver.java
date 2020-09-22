@@ -19,24 +19,6 @@ under the License.
 
 package com.ats.executor.drivers.desktop;
 
-import java.awt.Rectangle;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.Point;
-import org.openqa.selenium.remote.RemoteWebDriver;
-
 import com.ats.element.AtsBaseElement;
 import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
@@ -52,13 +34,25 @@ import com.ats.script.ScriptHeader;
 import com.ats.tools.logger.ExecutionLogger;
 import com.exadel.flamingo.flex.messaging.amf.io.AMF3Deserializer;
 import com.google.gson.Gson;
-
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
+import okhttp3.*;
 import okhttp3.OkHttpClient.Builder;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Point;
+import org.openqa.selenium.remote.RemoteWebDriver;
+
+import java.awt.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DesktopDriver extends RemoteWebDriver {
 

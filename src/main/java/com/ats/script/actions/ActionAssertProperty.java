@@ -19,8 +19,6 @@ under the License.
 
 package com.ats.script.actions;
 
-import java.util.ArrayList;
-
 import com.ats.element.SearchedElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
@@ -28,6 +26,8 @@ import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
 import com.google.gson.JsonObject;
+
+import java.util.ArrayList;
 
 public class ActionAssertProperty extends ActionExecuteElement {
 

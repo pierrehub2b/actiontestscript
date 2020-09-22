@@ -19,11 +19,11 @@ under the License.
 
 package com.ats.generator.variables;
 
+import com.ats.tools.Utils;
+
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.ats.tools.Utils;
 
 public class RandomStringValue extends BaseValue {
 

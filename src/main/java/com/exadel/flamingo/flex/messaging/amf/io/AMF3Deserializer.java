@@ -27,21 +27,12 @@ import com.exadel.flamingo.flex.messaging.amf.io.util.externalizer.Externalizer;
 import com.exadel.flamingo.flex.messaging.amf.io.util.instanciator.AbstractInstanciator;
 import com.exadel.flamingo.flex.messaging.util.StringUtil;
 import com.exadel.flamingo.flex.messaging.util.XMLUtil;
-import org.w3c.dom.Document;
-
-import java.io.DataInputStream;
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInput;
-import java.io.UTFDataFormatException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Document;
+
+import java.io.*;
+import java.util.*;
 
 /**
  * @author Franck WOLFF

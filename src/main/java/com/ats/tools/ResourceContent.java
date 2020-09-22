@@ -19,12 +19,12 @@ under the License.
 
 package com.ats.tools;
 
-import java.io.IOException;
-import java.util.Base64;
-
 import com.google.common.base.Charsets;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Resources;
+
+import java.io.IOException;
+import java.util.Base64;
 
 public class ResourceContent {
 

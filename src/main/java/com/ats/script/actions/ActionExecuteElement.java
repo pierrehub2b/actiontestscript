@@ -19,21 +19,8 @@ under the License.
 
 package com.ats.script.actions;
 
-import java.util.ArrayList;
-import java.util.function.Predicate;
-
-import org.openqa.selenium.JavascriptException;
-import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.WebDriverException;
-
 import com.ats.driver.AtsManager;
-import com.ats.element.SearchedElement;
-import com.ats.element.TestElement;
-import com.ats.element.TestElementDialog;
-import com.ats.element.TestElementImage;
-import com.ats.element.TestElementRoot;
-import com.ats.element.TestElementSystem;
-import com.ats.element.TestElementSystemButton;
+import com.ats.element.*;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
@@ -41,6 +28,12 @@ import com.ats.script.Script;
 import com.ats.tools.Operators;
 import com.ats.tools.logger.MessageCode;
 import com.google.gson.JsonObject;
+import org.openqa.selenium.JavascriptException;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebDriverException;
+
+import java.util.ArrayList;
+import java.util.function.Predicate;
 
 public class ActionExecuteElement extends ActionExecuteElementAbstract {
 

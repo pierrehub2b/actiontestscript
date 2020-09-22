@@ -19,10 +19,10 @@ under the License.
 
 package com.ats.script.actions;
 
-import java.util.ArrayList;
-
 import com.ats.generator.objects.TryAndDelay;
 import com.ats.script.Script;
+
+import java.util.ArrayList;
 
 public abstract class ActionExecuteElementAbstract extends ActionExecute {
 	

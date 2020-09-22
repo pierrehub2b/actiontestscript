@@ -19,10 +19,10 @@ under the License.
 
 package com.ats.tools.logger.levels;
 
-import java.io.PrintStream;
-
 import com.ats.script.actions.Action;
 import com.ats.tools.logger.NullPrintStream;
+
+import java.io.PrintStream;
 
 public class AtsLogger {
 

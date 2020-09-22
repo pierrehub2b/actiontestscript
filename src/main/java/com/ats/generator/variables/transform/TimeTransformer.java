@@ -19,14 +19,14 @@ under the License.
 
 package com.ats.generator.variables.transform;
 
+import com.ats.executor.ActionTestScript;
+
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.ats.executor.ActionTestScript;
 
 public class TimeTransformer extends Transformer {
 

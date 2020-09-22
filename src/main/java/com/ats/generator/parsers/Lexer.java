@@ -19,16 +19,6 @@ under the License.
 
 package com.ats.generator.parsers;
 
-import java.io.File;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import com.ats.script.actions.*;
-
 import com.ats.generator.GeneratorReport;
 import com.ats.generator.events.ScriptProcessedNotifier;
 import com.ats.generator.objects.mouse.Mouse;
@@ -39,6 +29,7 @@ import com.ats.generator.variables.Variable;
 import com.ats.script.Project;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
+import com.ats.script.actions.*;
 import com.ats.script.actions.neoload.ActionNeoloadContainer;
 import com.ats.script.actions.neoload.ActionNeoloadRecord;
 import com.ats.script.actions.neoload.ActionNeoloadStart;
@@ -47,6 +38,14 @@ import com.ats.script.actions.performance.ActionPerformanceRecord;
 import com.ats.script.actions.performance.ActionPerformanceStart;
 import com.ats.script.actions.performance.octoperf.ActionOctoperfVirtualUser;
 import com.ats.tools.Utils;
+
+import java.io.File;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Lexer {
 	

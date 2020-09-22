@@ -23,12 +23,7 @@ package com.exadel.flamingo.flex.messaging.util;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Franck WOLFF

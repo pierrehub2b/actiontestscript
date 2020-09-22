@@ -19,6 +19,18 @@ under the License.
 
 package com.ats.script;
 
+import com.ats.executor.ActionTestScript;
+import com.ats.generator.GeneratorReport;
+import com.ats.generator.parsers.Lexer;
+import com.ats.generator.parsers.ScriptParser;
+import com.ats.tools.Utils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
@@ -30,20 +42,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
-
-import com.ats.executor.ActionTestScript;
-import com.ats.generator.GeneratorReport;
-import com.ats.generator.parsers.Lexer;
-import com.ats.generator.parsers.ScriptParser;
-import com.ats.tools.Utils;
 
 public class Project {
 

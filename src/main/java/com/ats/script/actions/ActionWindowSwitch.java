@@ -19,12 +19,12 @@ under the License.
 
 package com.ats.script.actions;
 
-import java.util.ArrayList;
-
 import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.TryAndDelay;
 import com.ats.script.Script;
 import com.google.gson.JsonObject;
+
+import java.util.ArrayList;
 
 public class ActionWindowSwitch extends ActionWindow {
 

@@ -19,11 +19,11 @@ under the License.
 
 package com.ats.generator.variables.parameter;
 
+import com.ats.executor.ActionTestScript;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
-
-import com.ats.executor.ActionTestScript;
 
 public class ParameterList {
 

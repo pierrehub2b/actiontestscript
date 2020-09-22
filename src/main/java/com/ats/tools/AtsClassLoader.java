@@ -19,6 +19,11 @@ under the License.
 
 package com.ats.tools;
 
+import com.ats.executor.ActionTestScript;
+import com.ats.tools.wait.IWaitGuiReady;
+import com.ats.tools.wait.WaitGuiReady;
+import com.ats.tools.wait.WaitGuiReadyInfo;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -29,11 +34,6 @@ import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-
-import com.ats.executor.ActionTestScript;
-import com.ats.tools.wait.IWaitGuiReady;
-import com.ats.tools.wait.WaitGuiReady;
-import com.ats.tools.wait.WaitGuiReadyInfo;
 
 public class AtsClassLoader extends ClassLoader{
 

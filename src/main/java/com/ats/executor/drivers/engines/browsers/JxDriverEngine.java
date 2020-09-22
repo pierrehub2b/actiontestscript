@@ -1,5 +1,21 @@
 package com.ats.executor.drivers.engines.browsers;
 
+import com.ats.driver.ApplicationProperties;
+import com.ats.executor.ActionStatus;
+import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.DriverManager;
+import com.ats.executor.drivers.desktop.DesktopDriver;
+import com.ats.executor.drivers.desktop.DesktopWindow;
+import com.ats.executor.drivers.engines.DesktopDriverEngine;
+import com.ats.executor.drivers.engines.WebDriverEngine;
+import com.ats.tools.Utils;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Point;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -9,23 +25,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.Point;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.remote.RemoteWebDriver;
-
-import com.ats.driver.ApplicationProperties;
-import com.ats.executor.ActionStatus;
-import com.ats.executor.channels.Channel;
-import com.ats.executor.drivers.DriverManager;
-import com.ats.executor.drivers.desktop.DesktopDriver;
-import com.ats.executor.drivers.desktop.DesktopWindow;
-import com.ats.executor.drivers.engines.WebDriverEngine;
-import com.ats.executor.drivers.engines.DesktopDriverEngine;
-import com.ats.tools.Utils;
 
 public class JxDriverEngine extends WebDriverEngine {
 

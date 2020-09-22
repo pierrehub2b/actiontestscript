@@ -19,19 +19,6 @@ under the License.
 
 package com.ats.element;
 
-import java.awt.Rectangle;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Predicate;
-
-import org.openqa.selenium.ElementNotInteractableException;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.WebElement;
-
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.SendKeyData;
@@ -41,11 +28,22 @@ import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.recorder.IVisualRecorder;
+import org.openqa.selenium.ElementNotInteractableException;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebElement;
+
+import java.awt.*;
+import java.util.List;
+import java.util.*;
+import java.util.function.Predicate;
 
 public class TestElement{
 
 	public final static String CLIENT_WIDTH = "clientWidth";
 	public final static String CLIENT_HEIGTH = "clientHeight";
+	
+	private final static String MAT_SELECT = "MAT-SELECT";
 	
 	protected Channel channel;
 	protected IDriverEngine engine;
@@ -144,6 +142,10 @@ public class TestElement{
 		while(foundElements.size() > 0) {
 			foundElements.remove(0).dispose();
 		}
+	}
+	
+	public boolean isAngularSelect() {
+		return MAT_SELECT.equals(searchedTag);
 	}
 
 	public boolean isSysComp() {
@@ -375,8 +377,6 @@ public class TestElement{
 		final MouseDirection md = new MouseDirection();
 
 		over(status, md, false, 0, 0);
-		if(status.isPassed()) {
-
 			if(status.isPassed()) {
 
 				recorder.updateScreen(false);
@@ -392,7 +392,6 @@ public class TestElement{
 					return enteredText;
 				}
 			}
-		}
 		return "";
 	}
 

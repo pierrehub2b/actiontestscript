@@ -19,21 +19,6 @@ under the License.
 
 package com.ats.script.actions;
 
-import static org.testng.Assert.fail;
-
-import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.StringJoiner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
@@ -50,6 +35,21 @@ import com.ats.tools.Utils;
 import com.ats.tools.logger.MessageCode;
 import com.ats.tools.logger.levels.AtsFailError;
 import com.google.gson.JsonObject;
+
+import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.StringJoiner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.testng.Assert.fail;
 
 public class ActionCallscript extends ActionReturnVariableArray {
 

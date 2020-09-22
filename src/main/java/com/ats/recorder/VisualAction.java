@@ -19,14 +19,14 @@ under the License.
 
 package com.ats.recorder;
 
-import java.beans.Transient;
-import java.nio.file.Path;
-import java.util.ArrayList;
-
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
 import com.ats.script.actions.Action;
 import com.ats.script.actions.ActionComment;
+
+import java.beans.Transient;
+import java.nio.file.Path;
+import java.util.ArrayList;
 
 public class VisualAction {
 	

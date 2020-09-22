@@ -19,12 +19,12 @@ under the License.
 
 package com.ats.generator;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.apache.tools.ant.DefaultLogger;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
+
+import java.io.File;
+import java.io.IOException;
 
 public class AntCompiler {
 	public static void main(String[] args) throws IOException {

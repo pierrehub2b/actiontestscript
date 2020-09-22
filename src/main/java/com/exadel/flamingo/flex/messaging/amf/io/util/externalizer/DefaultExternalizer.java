@@ -20,29 +20,19 @@
 
 package com.exadel.flamingo.flex.messaging.amf.io.util.externalizer;
 
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
-
 import com.exadel.flamingo.flex.collections.BasicMap;
 import com.exadel.flamingo.flex.messaging.amf.io.util.Converter;
 import com.exadel.flamingo.flex.messaging.amf.io.util.DefaultConverter;
 import com.exadel.flamingo.flex.messaging.amf.io.util.instanciator.AbstractInstanciator;
 import com.exadel.flamingo.flex.messaging.util.ClassUtil;
+
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.lang.reflect.*;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Franck WOLFF

@@ -1,10 +1,5 @@
 package com.ats.executor.drivers.engines.browsers;
 
-import java.util.Collections;
-
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.remote.CapabilityType;
-
 import com.ats.driver.ApplicationProperties;
 import com.ats.element.SearchedElement;
 import com.ats.element.TestElementSystem;
@@ -14,6 +9,10 @@ import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.generator.variables.CalculatedProperty;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.CapabilityType;
+
+import java.util.Collections;
 
 public class MsEdgeDriverEngine extends ChromiumBasedDriverEngine {
 

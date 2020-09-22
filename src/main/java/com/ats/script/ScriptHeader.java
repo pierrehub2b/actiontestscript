@@ -19,18 +19,6 @@ under the License.
 
 package com.ats.script;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.text.DateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.StringJoiner;
-import java.util.stream.Collectors;
-
-import org.apache.commons.text.StringEscapeUtils;
-import org.testng.annotations.Test;
-
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.ATS;
 import com.ats.generator.objects.Cartesian;
@@ -43,6 +31,17 @@ import com.ats.script.actions.performance.ActionPerformance;
 import com.ats.script.actions.performance.octoperf.ActionOctoperfVirtualUser;
 import com.ats.tools.Operators;
 import com.ats.tools.Utils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.testng.annotations.Test;
+
+import java.io.File;
+import java.nio.file.Path;
+import java.text.DateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 public class ScriptHeader {
 

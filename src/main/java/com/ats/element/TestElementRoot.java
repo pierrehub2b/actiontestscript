@@ -19,14 +19,14 @@ under the License.
 
 package com.ats.element;
 
-import java.util.Base64;
-
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
+
+import java.util.Base64;
 
 public class TestElementRoot extends TestElement {
 

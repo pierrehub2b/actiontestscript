@@ -19,9 +19,8 @@ under the License.
 
 package com.ats.generator.objects.mouse;
 
-import org.openqa.selenium.Keys;
-
 import com.ats.generator.objects.MouseDirectionData;
+import org.openqa.selenium.Keys;
 
 public class MouseKey extends Mouse {
 	

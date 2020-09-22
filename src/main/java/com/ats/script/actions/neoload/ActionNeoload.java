@@ -19,9 +19,6 @@ under the License.
 
 package com.ats.script.actions.neoload;
 
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
-
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
@@ -29,11 +26,13 @@ import com.ats.generator.ATS;
 import com.ats.script.Script;
 import com.ats.script.actions.Action;
 import com.google.gson.Gson;
-
 import okhttp3.OkHttpClient;
 import okhttp3.Request.Builder;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 public class ActionNeoload extends Action {
 

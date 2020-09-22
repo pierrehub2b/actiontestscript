@@ -20,9 +20,9 @@
 
 package com.exadel.flamingo.flex.amf;
 
-import java.io.Serializable;
-
 import flex.messaging.messages.Message;
+
+import java.io.Serializable;
 
 /**
  * @author Franck WOLFF

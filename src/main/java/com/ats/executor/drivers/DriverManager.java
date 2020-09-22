@@ -19,26 +19,19 @@ under the License.
 
 package com.ats.executor.drivers;
 
-import java.util.ArrayList;
-
 import com.ats.driver.ApplicationProperties;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.channels.ChannelManager;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.ApiDriverEngine;
+import com.ats.executor.drivers.engines.DesktopDriverEngine;
 import com.ats.executor.drivers.engines.IDriverEngine;
 import com.ats.executor.drivers.engines.MobileDriverEngine;
-import com.ats.executor.drivers.engines.browsers.ChromeDriverEngine;
-import com.ats.executor.drivers.engines.browsers.ChromiumDriverEngine;
-import com.ats.executor.drivers.engines.browsers.EdgeDriverEngine;
-import com.ats.executor.drivers.engines.browsers.FirefoxDriverEngine;
-import com.ats.executor.drivers.engines.browsers.IEDriverEngine;
-import com.ats.executor.drivers.engines.browsers.JxDriverEngine;
-import com.ats.executor.drivers.engines.browsers.MsEdgeDriverEngine;
-import com.ats.executor.drivers.engines.browsers.OperaDriverEngine;
-import com.ats.executor.drivers.engines.DesktopDriverEngine;
+import com.ats.executor.drivers.engines.browsers.*;
 import com.ats.executor.drivers.engines.desktop.ExplorerDriverEngine;
+
+import java.util.ArrayList;
 
 public class DriverManager {
 

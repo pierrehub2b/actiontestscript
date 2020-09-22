@@ -19,14 +19,14 @@ under the License.
 
 package com.ats.element;
 
-import java.awt.Rectangle;
+import com.ats.generator.variables.CalculatedProperty;
+
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import com.ats.generator.variables.CalculatedProperty;
 
 public class AtsMobileElement extends AtsBaseElement {
 	

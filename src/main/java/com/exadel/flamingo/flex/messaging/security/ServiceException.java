@@ -20,8 +20,8 @@
 
 package com.exadel.flamingo.flex.messaging.security;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Franck WOLFF
