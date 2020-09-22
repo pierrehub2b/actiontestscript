@@ -228,9 +228,9 @@ public class ActionCallscript extends ActionReturnVariableArray {
 			if(loop > 1) {
 				codeBuilder.append(", ")
 				.append(loop);
-			}else if(variables != null){
+			}else if(getVariables() != null){
 				final StringJoiner joiner = new StringJoiner(", ");
-				for (Variable variable : variables){
+				for (Variable variable : getVariables()){
 					joiner.add(variable.getName());
 				}
 				codeBuilder.append(", ")
@@ -332,7 +332,7 @@ public class ActionCallscript extends ActionReturnVariableArray {
 					final Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
 
 					for (int iteration=0; iteration<loop; iteration++) {
-						ats.initCalledScript(ts, testName, line, parameters, variables, iteration, loop, scriptName, SCRIPT_LOOP, null);
+						ats.initCalledScript(ts, testName, line, parameters, getVariables(), iteration, loop, scriptName, SCRIPT_LOOP, null);
 						testMain.invoke(ats);
 					}
 
@@ -381,14 +381,10 @@ public class ActionCallscript extends ActionReturnVariableArray {
 	public void setName(CalculatedValue name) {
 		this.name = name;
 	}
-
-	public ArrayList<Variable> getVariables() {
-		return variables;
-	}
-
+	
 	public void setVariables(ArrayList<Variable> value) {
 		if(value != null && value.size() > 0) {
-			this.variables = value;
+			setVariables(value);
 			this.parameterFilePath = null;
 			this.loop = 1;
 		}
@@ -426,7 +422,7 @@ public class ActionCallscript extends ActionReturnVariableArray {
 
 		if(loop > 1) {
 			this.parameterFilePath = null;
-			this.variables = null;
+			setVariables(null);
 		}
 		this.loop = loop;
 	}
@@ -447,7 +443,7 @@ public class ActionCallscript extends ActionReturnVariableArray {
 		this.parameterFilePath = value;
 		if(value != null) {
 			this.parameters = null;
-			this.variables = null;
+			setVariables(null);
 			this.loop = 1;
 		}
 	}	

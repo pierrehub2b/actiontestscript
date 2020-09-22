@@ -145,8 +145,8 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			final JsonArray properties = response.getAsJsonArray("systemProperties");
 			channel.setSystemProperties(properties);
 
-			/* final JsonArray buttons = response.getAsJsonArray("systemButtons");
-			channel.setSystemButtons(buttons); */
+			final JsonArray buttons = response.getAsJsonArray("systemButtons");
+			channel.setSystemButtons(buttons);
 
 			final String driverVersion = response.get("driverVersion").getAsString();
 

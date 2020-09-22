@@ -9,10 +9,9 @@ import java.util.Collections;
 
 public abstract class ActionReturnVariableArray extends Action {
 	
-	protected ArrayList<Variable> variables;
+	private ArrayList<Variable> variables;
 	
 	public ActionReturnVariableArray() { }
-	
 	
 	public ActionReturnVariableArray(Script script) {
 		super(script);

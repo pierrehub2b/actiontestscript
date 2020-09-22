@@ -61,8 +61,8 @@ public class ActionSystemPropertyGet extends ActionReturnVariableArray {
     }
     
     private Variable getVariable() {
-        if (variables.size() > 0) {
-            return variables.get(0);
+        if (getVariables().size() > 0) {
+            return getVariables().get(0);
         } else {
             return null;
         }
