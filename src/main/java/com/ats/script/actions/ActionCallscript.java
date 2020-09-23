@@ -383,8 +383,8 @@ public class ActionCallscript extends ActionReturnVariableArray {
 	}
 	
 	public void setVariables(ArrayList<Variable> value) {
-		if(value != null && value.size() > 0) {
-			setVariables(value);
+		if (value != null && value.size() > 0) {
+			super.setVariables(value);
 			this.parameterFilePath = null;
 			this.loop = 1;
 		}
