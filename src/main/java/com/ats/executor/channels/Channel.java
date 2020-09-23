@@ -429,11 +429,16 @@ public class Channel {
 	//----------------------------------------------------------------------------------------------------------------------
 	// Getter and setter for serialization
 	//----------------------------------------------------------------------------------------------------------------------
-
+	
+	public ArrayList<String> getSystemProperties() { return systemProperties; }
+	public void setSystemProperties(ArrayList<String> systemProperties) { this.systemProperties = systemProperties; }
+	
+	public ArrayList<String> getSystemButtons() { return systemButtons; }
+	public void setSystemButtons(ArrayList<String> systemButtons) { this.systemButtons = systemButtons; }
+	
 	public ArrayList<String> getOperations() {
 		return operations;
 	}
-
 	public void setOperations(ArrayList<String> operations) {
 		this.operations = operations;
 	}
@@ -441,7 +446,6 @@ public class Channel {
 	public String getApplication() {
 		return application;
 	}
-
 	public void setApplication(String value) {
 		this.application = value;
 	}
@@ -666,8 +670,8 @@ public class Channel {
 		actionTerminated(status);
 	}
 	
-	public void buttonClick(String buttonType) {
-		engine.buttonClick(buttonType);
+	public void buttonClick(ActionStatus status, String buttonType) {
+		engine.buttonClick(status, buttonType);
 	}
 	
 	//----------------------------------------------------------------------------------------------------------

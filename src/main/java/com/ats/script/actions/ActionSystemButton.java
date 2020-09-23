@@ -40,7 +40,7 @@ public class ActionSystemButton extends Action {
 		super.execute(ts, testName, testLine);
 
 		if (status.isPassed()) {
-			ts.getCurrentChannel().buttonClick(getButtonType());
+			ts.getCurrentChannel().buttonClick(status, getButtonType());
 			status.endDuration();
 		}
 	}

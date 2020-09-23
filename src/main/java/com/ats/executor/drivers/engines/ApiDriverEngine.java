@@ -301,7 +301,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	public void switchToFrameId(String id) {}
 
 	@Override
-	public void buttonClick(String id) {}
+	public void buttonClick(ActionStatus status, String id) {}
 
 	@Override
 	public void tap(int count, FoundElement element) {}

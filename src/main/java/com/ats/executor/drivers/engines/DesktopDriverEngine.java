@@ -515,7 +515,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	public void api(ActionStatus status, ActionApi api) {}
 
 	@Override
-	public void buttonClick(String id) {}
+	public void buttonClick(ActionStatus status, String id) {}
 
 	@Override
 	public void tap(int count, FoundElement element) {}

@@ -51,6 +51,8 @@ public class ActionStatus {
 	
 	public static final int NEOLOAD_POST_ERROR = -50;
 	
+	public static final int SYS_BUTTON_ERROR = -60;
+	
 	private static final String ATS_TECHNICAL_ERROR = "AtsTechnicalError";
 	private static final String ATS_FUNCTIONAL_ERROR = "AtsFunctionalError";
 

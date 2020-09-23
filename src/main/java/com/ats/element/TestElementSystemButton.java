@@ -42,7 +42,7 @@ public class TestElementSystemButton extends TestElement {
 	
 	@Override
 	public void click(ActionStatus status, MouseDirection position) {
-		getChannel().getDriverEngine().buttonClick(id);
+		getChannel().getDriverEngine().buttonClick(status, id);
 	}
 
 	@Override
