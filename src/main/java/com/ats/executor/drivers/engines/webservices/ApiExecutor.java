@@ -268,17 +268,17 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 		if(testObject.getParent() == null){
 			refresh(channel);
 		}else {
-			Optional<AtsApiElement> parentElement = atsElements.stream().filter(e -> e.getId().equals(testObject.getParent().getFoundElement().getId())).findFirst();
+			final Optional<AtsApiElement> parentElement = atsElements.stream().filter(e -> e.getId().equals(testObject.getParent().getFoundElement().getId())).findFirst();
 			if(parentElement.isPresent()) {
 				if(!parentElement.get().isResponse()) {
 					if(type == XML_TYPE) {
-						Element elem = ((AtsXmlElement)parentElement.get()).getElement();
+						final Element elem = ((AtsXmlElement)parentElement.get()).getElement();
 						if(elem != null) {
 							initAtsElements();
 							loadElementsList(elem.getElementsByTagName("*"));
 						}
 					}else if(type == JSON_TYPE) {
-						AtsJsonElement elem = (AtsJsonElement)parentElement.get();
+						final AtsJsonElement elem = (AtsJsonElement)parentElement.get();
 						if(elem != null) {
 							initAtsElements();
 							loadElementsList(elem.getElement(), elem.getAttribute("name"));
@@ -304,7 +304,7 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 
 	private void loadElementsList(JsonElement json, String name) {
 
-		HashMap<String, String> attributes = new HashMap<String, String>(Map.of("name", name));
+		final HashMap<String, String> attributes = new HashMap<String, String>(Map.of("name", name));
 
 		if(json.isJsonArray()) {
 
@@ -360,15 +360,15 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 			final Node node = nodeList.item(i);
 			final String nodeName = node.getNodeName();
 
-			Map<String, String> foundAttributes = new HashMap<String, String>();
-			NamedNodeMap nodeAttributes = node.getAttributes();
+			final Map<String, String> foundAttributes = new HashMap<String, String>();
+			final NamedNodeMap nodeAttributes = node.getAttributes();
 
 			if(nodeName != null) {
 				foundAttributes.put("name", xmlPropertyPattern.matcher(nodeName).replaceFirst(""));
 			}
 
 			for(int j=0; j<nodeAttributes.getLength(); j++) {
-				Node attribute = nodeAttributes.item(j);
+				final Node attribute = nodeAttributes.item(j);
 				addAttribute(foundAttributes, xmlPropertyPattern.matcher(attribute.getNodeName()).replaceFirst(""), attribute.getNodeValue());
 			}
 
@@ -397,7 +397,7 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 			if(hasChild) {//Node
 				atsElements.add(new AtsXmlElement(node, NODE, foundAttributes));
 			}else{//Element
-				NodeList properties = node.getChildNodes();
+				final NodeList properties = node.getChildNodes();
 				for(int j=0; j<properties.getLength(); j++) {
 					Node property = properties.item(j);
 					String propertyValue = property.getNodeValue();
@@ -426,7 +426,7 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 	}
 
 	public String getElementAttribute(String id, String attributeName, int maxTry) {
-		Optional<AtsApiElement> elem = atsElements.stream().filter(e -> e.getId().equals(id)).findFirst();
+		final Optional<AtsApiElement> elem = atsElements.stream().filter(e -> e.getId().equals(id)).findFirst();
 		if(elem.isPresent()) {
 			return elem.get().getAttribute(attributeName);
 		}
@@ -434,7 +434,7 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 	}
 
 	public CalculatedProperty[] getElementAttributes(String id) {
-		Optional<AtsApiElement> elem = atsElements.stream().filter(e -> e.getId().equals(id)).findFirst();
+		final Optional<AtsApiElement> elem = atsElements.stream().filter(e -> e.getId().equals(id)).findFirst();
 		if(elem.isPresent()) {
 			return elem.get().getAttributesMap().entrySet().stream().parallel().map(e -> new CalculatedProperty(e.getKey(), e.getValue())).toArray(c -> new CalculatedProperty[c]);
 		}

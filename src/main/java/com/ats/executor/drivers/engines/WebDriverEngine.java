@@ -68,6 +68,9 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	private final static int DEFAULT_WAIT = 150;
 	private final static int DEFAULT_PROPERTY_WAIT = 200;
+	
+	private final static String OPTION = "option";
+	private final static String ANGULAR_OPTION = "mat-option";
 
 	//-----------------------------------------------------------------------------------------------------------------------------
 	// Javascript static code
@@ -483,19 +486,18 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 				options.stream().forEachOrdered(e -> result.add(new String[]{e.getValue().getAttribute("value"), e.getValue().getAttribute("text")}));
 			}
 		}
-
 		return result;
 	}
 
 	@Override
 	public List<FoundElement> findSelectOptions(TestBound dimension, TestElement element) {
 		switchToDefaultContent();
-		return findElements(false, element, "option", new String[0], new String[0], Objects::nonNull, element.getWebElement(), false);
+		return findElements(false, element, OPTION, new String[0], new String[0], Objects::nonNull, element.getWebElement(), false);
 	}
 	
 	public List<FoundElement> findMatSelectOptions(TestElement element) {
 		switchToDefaultContent();
-		return findElements(false, element, "mat-option", new String[0], new String[0], Objects::nonNull, null, true);
+		return findElements(false, element, ANGULAR_OPTION, new String[0], new String[0], Objects::nonNull, null, true);
 	}
 
 	@Override
@@ -741,7 +743,8 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	private void scrollAndMove(FoundElement element, MouseDirection position, int offsetX, int offsetY) {
 		scroll(element);
-
+		channel.sleep(100);
+		
 		final Rectangle rect = element.getRectangle();
 		move(element, getOffsetX(rect, position) + offsetX, getOffsetY(rect, position) + offsetY);
 	}
