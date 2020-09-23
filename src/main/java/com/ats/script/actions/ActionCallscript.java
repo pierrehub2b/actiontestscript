@@ -342,12 +342,12 @@ public class ActionCallscript extends ActionReturnVariableArray {
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | NoSuchMethodException | SecurityException e) {
 				fail(e.getMessage());
 			} catch (InvocationTargetException e) {
-				if(e.getTargetException() instanceof AtsFailError) {
+				if (e.getTargetException() instanceof AtsFailError) {
 					final AtsFailError target = (AtsFailError) e.getTargetException();
 					ts.getTopScript().addErrorStack(target.getInfo());
 					ts.getTopScript().addErrorStack(testName + ":" + line);
 					fail(target.getFullMessage());
-				}else{
+				} else {
 					ts.getTopScript().addErrorStack(testName + ":" + line);
 					fail(e.getTargetException().getMessage());
 				}
