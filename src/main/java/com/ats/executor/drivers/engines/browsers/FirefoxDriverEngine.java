@@ -113,13 +113,6 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	}
 
 	@Override
-	public void sendTextData(ActionStatus status, TestElement element, ArrayList<SendKeyData> textActionList) {
-		for(SendKeyData sequence : textActionList) {
-			element.getWebElement().sendKeys(sequence.getSequenceChar());
-		}
-	}
-
-	@Override
 	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {
 		middleClickSimulation(status, position, element);
 	}

@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.*;
@@ -220,12 +221,20 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 		final String titleUid = UUID.randomUUID().toString();
 		try {
-			final File tempHtml = File.createTempFile("ats_", ".html");
-			tempHtml.deleteOnExit();
+			final File startAtsPage = new File(System.getProperty("user.home") + File.separator + "ats_start_page.html");
 
-			Files.write(tempHtml.toPath(), Utils.getAtsBrowserContent(titleUid, channel.getApplication(), applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait(), getPropertyWait(), maxTrySearch, maxTryProperty, scriptTimeout, pageLoadTimeout, watchdog, getDesktopDriver(), profilePath));
-			driver.get(tempHtml.toURI().toString());
-		} catch (IOException e) {}
+			Files.write(
+					startAtsPage.toPath(),
+					Utils.getAtsBrowserContent(titleUid, channel.getApplication(), applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait(), getPropertyWait(), maxTrySearch, maxTryProperty, scriptTimeout, pageLoadTimeout, watchdog, getDesktopDriver(), profilePath),
+					StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+			
+			driver.get(startAtsPage.toURI().toString());
+			
+		} catch (IOException e) {
+			status.setTechnicalError(ActionStatus.CHANNEL_START_ERROR, e.getMessage());
+			driverProcess.close(false);
+			return;
+		}
 
 		final String osVersion = getDesktopDriver().getOsName() + " (" + getDesktopDriver().getOsVersion() +")";
 
