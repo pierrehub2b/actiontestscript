@@ -122,4 +122,9 @@ public class TestElementRoot extends TestElement {
 		reloadFoundElements();
 		return super.getCssAttributes();
 	}
+	
+	@Override
+	public FoundElement getFoundElement() {
+		return new FoundElement(channel); 
+	}
 }
