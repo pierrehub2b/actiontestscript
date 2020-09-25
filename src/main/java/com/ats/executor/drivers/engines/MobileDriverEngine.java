@@ -664,16 +664,6 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 	
 	@Override
-	public String getSysProperty(ActionStatus status, String propertyName, FoundElement element) {
-		JsonObject result = executeRequest(GET_PROP, "sys-" + propertyName);
-		
-		int code = result.get("status").getAsInt();
-		String message = result.get("message").getAsString();
-		
-		return code != 0 ? null : message;
-	}
-	
-	@Override
 	public Object executeJavaScript(ActionStatus status, String script, TestElement element) {
 		final JsonObject result = (JsonObject)rootElement.scripting(script, element.getFoundElement());
 		return handleResult(status, result);

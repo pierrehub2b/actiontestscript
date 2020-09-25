@@ -240,16 +240,6 @@ public class Lexer {
 						String propertyName = dataArray.remove(0).trim();
 						String propertyValue = dataArray.remove(0).trim();
 						script.addAction(new ActionSystemPropertySet(script, propertyName, propertyValue), disabled);
-
-					} else if (ActionSystemPropertyGet.SCRIPT_LABEL.equals(dataOne)) {
-
-						final String[] propertyArray = dataOne.split(ScriptParser.ATS_ASSIGN_SEPARATOR);
-
-						if (propertyArray.length > 1) {
-							final String propertyName = propertyArray[0].trim();
-							final Variable variable = script.getVariable(propertyArray[1].trim(), true);
-							script.addAction(new ActionSystemPropertyGet(script, variable, propertyName), disabled);
-						}
 					}
 				}
 

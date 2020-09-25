@@ -257,11 +257,6 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	
 	}
 	
-	@Override
-	public String getSysProperty(ActionStatus status, String propertyName, FoundElement element) {
-		return getDesktopDriver().getElementAttribute(element.getId(), propertyName);
-	}
-	
 	public CalculatedProperty[] getAttributes(String elementId){
 		return getDesktopDriver().getElementAttributes(elementId);
 	}

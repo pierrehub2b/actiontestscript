@@ -99,7 +99,7 @@ public class TestElementRoot extends TestElement {
 			return String.valueOf(engine.getNumWindows());
 		default :
 			reloadFoundElements();
-			return engine.getSysProperty(status, name, getFoundElement());
+			return engine.getAttribute(status, getFoundElement(), name, 5);
 		}
 	}
 

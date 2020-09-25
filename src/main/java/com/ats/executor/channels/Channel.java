@@ -409,10 +409,6 @@ public class Channel {
 	public void setSysProperty(String attributeName, String attributeValue) {
 		engine.setSysProperty(attributeName, attributeValue);
 	}
-	
-	public String getSysProperty(ActionStatus status, String propertyName) {
-		return engine.getSysProperty(status, propertyName, null);
-	}
 
 	//----------------------------------------------------------------------------------------------------------------------
 	// logs

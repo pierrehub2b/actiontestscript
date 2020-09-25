@@ -601,11 +601,6 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public void setSysProperty(String propertyName, String propertyValue) { }
 
-	@Override
-	public String getSysProperty(ActionStatus status, String propertyName, FoundElement element) {
-		return getAttribute(status, element, propertyName);
-	}
-
 	private String getAttribute(ActionStatus status, FoundElement element, String attributeName) {
 
 		final RemoteWebElement elem = getWebElement(element);
