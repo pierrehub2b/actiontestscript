@@ -47,12 +47,6 @@ public class DriverProcess {
 		this.name = name;
 		this.manager = manager;
 
-		if(DriverManager.CHROME_BROWSER.equals(name) || DriverManager.OPERA_BROWSER.equals(name)) {
-			Utils.clearDriverFolder(name);
-		}
-
-		//port = getPortUsedByDriver(driverName);
-
 		final File driverFile = driverFolderPath.resolve(driverName).toFile();
 
 		if(driverFile.exists()){

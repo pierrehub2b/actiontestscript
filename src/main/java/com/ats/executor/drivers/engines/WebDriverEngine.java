@@ -19,9 +19,53 @@ under the License.
 
 package com.ats.executor.drivers.engines;
 
+import java.awt.Rectangle;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.ElementNotVisibleException;
+import org.openqa.selenium.JavascriptException;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.MutableCapabilities;
+import org.openqa.selenium.NoSuchWindowException;
+import org.openqa.selenium.PageLoadStrategy;
+import org.openqa.selenium.Point;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.interactions.MoveTargetOutOfBoundsException;
+import org.openqa.selenium.remote.CapabilityType;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.RemoteWebElement;
+import org.openqa.selenium.support.ui.Select;
+
 import com.ats.driver.ApplicationProperties;
 import com.ats.driver.AtsManager;
-import com.ats.element.*;
+import com.ats.element.AtsBaseElement;
+import com.ats.element.AtsElement;
+import com.ats.element.DialogBox;
+import com.ats.element.FoundElement;
+import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
 import com.ats.executor.TestBound;
@@ -34,33 +78,13 @@ import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
-import com.ats.script.actions.*;
+import com.ats.script.actions.ActionApi;
+import com.ats.script.actions.ActionChannelStart;
+import com.ats.script.actions.ActionGotoUrl;
+import com.ats.script.actions.ActionSelect;
+import com.ats.script.actions.ActionWindowState;
 import com.ats.tools.ResourceContent;
 import com.ats.tools.Utils;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.Point;
-import org.openqa.selenium.*;
-import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.interactions.MoveTargetOutOfBoundsException;
-import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.remote.RemoteWebElement;
-import org.openqa.selenium.support.ui.Select;
-
-import java.awt.Rectangle;
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @SuppressWarnings("unchecked")
 public class WebDriverEngine extends DriverEngine implements IDriverEngine {
@@ -69,7 +93,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	private final static int DEFAULT_WAIT = 150;
 	private final static int DEFAULT_PROPERTY_WAIT = 200;
-	
+
 	private final static String OPTION = "option";
 	private final static String ANGULAR_OPTION = "mat-option";
 
@@ -221,15 +245,31 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 		final String titleUid = UUID.randomUUID().toString();
 		try {
+
 			final File startAtsPage = new File(System.getProperty("user.home") + File.separator + "ats_start_page.html");
 
 			Files.write(
 					startAtsPage.toPath(),
-					Utils.getAtsBrowserContent(titleUid, channel.getApplication(), applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait(), getPropertyWait(), maxTrySearch, maxTryProperty, scriptTimeout, pageLoadTimeout, watchdog, getDesktopDriver(), profilePath),
+					Utils.getAtsBrowserContent(
+							titleUid, 
+							channel.getApplication(), 
+							applicationPath, 
+							applicationVersion, 
+							driverVersion, 
+							channel.getDimension(), 
+							getActionWait(), 
+							getPropertyWait(), 
+							maxTrySearch, 
+							maxTryProperty, 
+							scriptTimeout, 
+							pageLoadTimeout, 
+							watchdog,
+							getDesktopDriver(), 
+							profilePath),
 					StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-			
+
 			driver.get(startAtsPage.toURI().toString());
-			
+
 		} catch (IOException e) {
 			status.setTechnicalError(ActionStatus.CHANNEL_START_ERROR, e.getMessage());
 			driverProcess.close(false);
@@ -479,16 +519,16 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public List<String[]> loadSelectOptions(TestElement element) {
 		final ArrayList<String[]> result = new ArrayList<String[]>();
-		
+
 		if(element.isAngularSelect()) {
 			element.getWebElement().sendKeys(Keys.TAB);
 			element.click(channel.newActionStatus(), new MouseDirection());
-			
+
 			final List<FoundElement> options = findMatSelectOptions(element);
 			if(options != null && options.size() > 0) {
 				options.stream().forEachOrdered(e -> result.add(new String[]{e.getValue().getText(), e.getValue().getText()}));
 			}
-			
+
 		}else {
 			final List<FoundElement> options = findSelectOptions(null, element);
 			if(options != null && options.size() > 0) {
@@ -503,7 +543,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		switchToDefaultContent();
 		return findElements(false, element, OPTION, new String[0], new String[0], Objects::nonNull, element.getWebElement(), false);
 	}
-	
+
 	public List<FoundElement> findMatSelectOptions(TestElement element) {
 		switchToDefaultContent();
 		return findElements(false, element, ANGULAR_OPTION, new String[0], new String[0], Objects::nonNull, null, true);
@@ -516,9 +556,9 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 			element.getWebElement().sendKeys(Keys.TAB);
 			element.click(status, new MouseDirection());
-			
+
 			final List<FoundElement> items = findMatSelectOptions(element);
-			
+
 			if(items != null && items.size() > 0) {
 				if(ActionSelect.SELECT_INDEX.equals(selectProperty.getName())){
 					final int index = Utils.string2Int(selectProperty.getValue().getCalculated());
@@ -544,7 +584,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 					}
 				}
 			}
-			
+
 		}else {
 			final List<FoundElement> items = findSelectOptions(null, element);
 
@@ -753,7 +793,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	private void scrollAndMove(FoundElement element, MouseDirection position, int offsetX, int offsetY) {
 		scroll(element);
 		channel.sleep(100);
-		
+
 		final Rectangle rect = element.getRectangle();
 		move(element, getOffsetX(rect, position) + offsetX, getOffsetY(rect, position) + offsetY);
 	}

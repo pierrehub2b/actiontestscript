@@ -1,17 +1,5 @@
 package com.ats.executor.drivers.engines.browsers;
 
-import com.ats.driver.ApplicationProperties;
-import com.ats.executor.ActionStatus;
-import com.ats.executor.channels.Channel;
-import com.ats.executor.drivers.DriverProcess;
-import com.ats.executor.drivers.desktop.DesktopDriver;
-import com.ats.executor.drivers.engines.WebDriverEngine;
-import com.ats.tools.Utils;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import org.openqa.selenium.chrome.ChromeOptions;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.nio.file.Files;
@@ -20,6 +8,19 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.openqa.selenium.chrome.ChromeOptions;
+
+import com.ats.driver.ApplicationProperties;
+import com.ats.executor.ActionStatus;
+import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.DriverProcess;
+import com.ats.executor.drivers.desktop.DesktopDriver;
+import com.ats.executor.drivers.engines.WebDriverEngine;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class ChromiumBasedDriverEngine extends WebDriverEngine {
 
@@ -49,7 +50,11 @@ public class ChromiumBasedDriverEngine extends WebDriverEngine {
 		
 		options.addArguments("--ignore-certificate-errors");
 
-		checkProfileFolder(options, props, browserName);
+		profileFolder = props.getUserDataDir();
+		if(profileFolder != null) {
+			removeMetricsData();
+			options.addArguments("--user-data-dir=" + profileFolder);
+		}
 
 		if(lang != null) {
 			options.addArguments("--lang=" + lang);
@@ -73,72 +78,63 @@ public class ChromiumBasedDriverEngine extends WebDriverEngine {
 		return options;
 	}
 
-	private void checkProfileFolder(ChromeOptions options, ApplicationProperties props, String browser) {
-		final String atsProfileFolder = props.getUserDataDir();
-		if(atsProfileFolder != null) {
-			if("default".equals(atsProfileFolder) || "disabled".equals(atsProfileFolder) || "no".equals(atsProfileFolder)) {
-				return;
-			}
-			
-			profileFolder = new File(atsProfileFolder).getAbsolutePath();
+	private void removeMetricsData() {
 
-			final Path atsProfilePath = Paths.get(profileFolder);
-			if(atsProfilePath.toFile().exists()) {
-				final Path localStatePath = atsProfilePath.resolve("Local State");
-				if(localStatePath.toFile().exists()) {
-					try {
-						final JsonObject localStateObject = JsonParser.parseString(new String(Files.readAllBytes(localStatePath))).getAsJsonObject();
+		final Path atsProfilePath = Paths.get(profileFolder);
+		if(atsProfilePath.toFile().exists()) {
+			final Path localStatePath = atsProfilePath.resolve("Local State");
+			if(localStatePath.toFile().exists()) {
+				try {
+					final JsonObject localStateObject = JsonParser.parseString(new String(Files.readAllBytes(localStatePath))).getAsJsonObject();
+					final JsonObject metrics = localStateObject.get("user_experience_metrics").getAsJsonObject();
+					if(metrics != null) {
+						final JsonObject stability = metrics.get("stability").getAsJsonObject();
+						if(stability != null) {
+							if(!stability.get("exited_cleanly").getAsBoolean()) {
+								stability.remove("exited_cleanly");
+								stability.addProperty("exited_cleanly", true);
 
-						final JsonObject metrics = localStateObject.get("user_experience_metrics").getAsJsonObject();
-						if(metrics != null) {
-							final JsonObject stability = metrics.get("stability").getAsJsonObject();
-							if(stability != null) {
-								if(!stability.get("exited_cleanly").getAsBoolean()) {
-									stability.remove("exited_cleanly");
-									stability.addProperty("exited_cleanly", true);
+								metrics.remove("stability");
+								metrics.add("stability", stability);
 
-									metrics.remove("stability");
-									metrics.add("stability", stability);
+								localStateObject.remove("user_experience_metrics");
+								localStateObject.add("user_experience_metrics", metrics);
 
-									localStateObject.remove("user_experience_metrics");
-									localStateObject.add("user_experience_metrics", metrics);
-
-									final FileWriter fileWriter = new FileWriter(localStatePath.toFile());
-									new Gson().toJson(localStateObject, fileWriter);
-									fileWriter.close();
-								}
-							}
-						}
-					} catch (Exception e) {	}
-				}
-
-				final Path preferencesPath = atsProfilePath.resolve("Default").resolve("Preferences");
-				if(preferencesPath.toFile().exists()) {
-					try {
-						final JsonObject PreferencesObject = JsonParser.parseString(new String(Files.readAllBytes(preferencesPath))).getAsJsonObject();
-
-						final JsonObject profile = PreferencesObject.get("profile").getAsJsonObject();
-						if(profile != null) {
-							
-							if(!"Normal".equals(profile.get("exit_type").getAsString())) {
-
-								profile.remove("exit_type");
-								profile.addProperty("exit_type", "Normal");
-
-								PreferencesObject.remove("profile");
-								PreferencesObject.add("profile", profile);
-
-								final FileWriter fileWriter = new FileWriter(preferencesPath.toFile());
-								new Gson().toJson(PreferencesObject, fileWriter);
+								final FileWriter fileWriter = new FileWriter(localStatePath.toFile());
+								new Gson().toJson(localStateObject, fileWriter);
 								fileWriter.close();
 							}
 						}
-					} catch (Exception e) {	}
-				}
+					}
+				} catch (Exception e) {	}
 			}
-		}else {
-			profileFolder = Utils.createDriverFolder(browser).getAbsolutePath();
+
+			final Path preferencesPath = atsProfilePath.resolve("Default").resolve("Preferences");
+			if(preferencesPath.toFile().exists()) {
+				try {
+					final JsonObject PreferencesObject = JsonParser.parseString(new String(Files.readAllBytes(preferencesPath))).getAsJsonObject();
+
+					final JsonObject profile = PreferencesObject.get("profile").getAsJsonObject();
+					if(profile != null) {
+
+						final JsonElement exitType = profile.get("exit_type");
+						
+						if(exitType != null) {
+							profile.remove("exit_type");
+						}
+						
+						profile.addProperty("exit_type", "Normal");
+
+						PreferencesObject.remove("profile");
+						PreferencesObject.add("profile", profile);
+
+						final FileWriter fileWriter = new FileWriter(preferencesPath.toFile());
+						new Gson().toJson(PreferencesObject, fileWriter);
+						fileWriter.close();
+						
+					}
+				} catch (Exception e) {	}
+			}
 		}
-		options.addArguments("--user-data-dir=" + profileFolder);
 	}
 }

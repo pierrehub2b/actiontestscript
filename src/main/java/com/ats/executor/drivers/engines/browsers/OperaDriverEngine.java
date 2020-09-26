@@ -19,6 +19,8 @@ under the License.
 
 package com.ats.executor.drivers.engines.browsers;
 
+import org.openqa.selenium.opera.OperaOptions;
+
 import com.ats.driver.ApplicationProperties;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
@@ -28,10 +30,6 @@ import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.WebDriverEngine;
 import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.MouseDirectionData;
-import com.ats.tools.Utils;
-import org.openqa.selenium.opera.OperaOptions;
-
-import java.io.File;
 
 public class OperaDriverEngine extends WebDriverEngine {
 	
@@ -49,19 +47,10 @@ public class OperaDriverEngine extends WebDriverEngine {
 		options.addArguments("--allow-file-access-from-files");
 		options.addArguments("--disable-web-security");
 		options.addArguments("--allow-running-insecure-content");
-				
-		File profileFolder = null;
+			
 		if(props.getUserDataDir() != null) {
-			profileFolder = new File(props.getUserDataDir());
-			if(!profileFolder.exists()) {
-				profileFolder = null;
-			}
+			options.addArguments("--user-data-dir=" + props.getUserDataDir());
 		}
-		
-		if(profileFolder == null) {
-			profileFolder = Utils.createDriverFolder(DriverManager.OPERA_BROWSER);
-		}
-		options.addArguments("--user-data-dir=" + profileFolder.getAbsolutePath());
 								
 		if(lang != null) {
 			options.addArguments("--lang=" + lang);
@@ -71,9 +60,9 @@ public class OperaDriverEngine extends WebDriverEngine {
 			options.setBinary(applicationPath);
 		}
 		
-		launchDriver(status, options, profileFolder.getAbsolutePath());
+		launchDriver(status, options, props.getUserDataDir());
 	}
-	
+
 	@Override
 	protected int getCartesianOffset(int value, MouseDirectionData direction, Cartesian cart1, Cartesian cart2,	Cartesian cart3) {
 		return super.getCartesianOffset(value, direction, cart1, cart2, cart3) + value/2;
