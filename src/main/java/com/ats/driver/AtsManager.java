@@ -477,7 +477,10 @@ public class AtsManager {
 												case "userdatadir":
 													dataDir = getElementText(browserElement);
 													break;
-												case "waitProperty":
+												case "profiledir":
+													dataDir = getElementText(browserElement);
+													break;
+												case "waitproperty":
 													check = getElementText(browserElement);
 													break;
 												case "lang":

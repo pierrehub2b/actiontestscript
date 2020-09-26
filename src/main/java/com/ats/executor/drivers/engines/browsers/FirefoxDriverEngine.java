@@ -19,12 +19,15 @@ under the License.
 
 package com.ats.executor.drivers.engines.browsers;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.ats.driver.ApplicationProperties;
 import com.ats.element.FoundElement;
@@ -48,30 +51,31 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 
 	private final static int DEFAULT_WAIT = 250;
 	private final static int DEFAULT_PROPERTY_WAIT = 250;
-	
+
 	private OkHttpClient client;
+
+	private static final String BINARY = "firefox_binary";
 
 	public FirefoxDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
 		super(channel, driverProcess, windowsDriver, props, DEFAULT_WAIT, DEFAULT_PROPERTY_WAIT);
-		
-		FirefoxOptions options = new FirefoxOptions();
-		options.setCapability("acceptSslCerts ", true);
-		options.setCapability("acceptInsecureCerts ", true);
-		options.setCapability("security.fileuri.strict_origin_policy", false);
-		options.setCapability("app.update.disabledForTesting", true);
+
+		final DesiredCapabilities capabilities = DesiredCapabilities.firefox();
+		capabilities.setCapability("acceptSslCerts ", true);
+		capabilities.setCapability("acceptInsecureCerts ", true);
+		capabilities.setCapability("security.fileuri.strict_origin_policy", false);
+		capabilities.setCapability("app.update.disabledForTesting", true);
 		//options.setCapability("marionnette ", true);
 		//options.setCapability("nativeEvents", false);
-		
+
 		if(applicationPath != null) {
-			options.setBinary(applicationPath);
+			capabilities.setCapability(BINARY, applicationPath);
 		}
-		
-		//FirefoxProfile atsProfile = new FirefoxProfile (Utils.createDriverFolder(DriverManager.FIREFOX_BROWSER));  
-		//ProfilesIni profile = new ProfilesIni();
-		//FirefoxProfile atsProfile = profile.getProfile("atsProfile");
-		//atsProfile.setPreference("intl.accept_languages", "fr");
-		//options.setProfile(atsProfile);
-				
+
+		if(props.getUserDataDir() != null) {
+			final FirefoxProfile profile = new FirefoxProfile(new File(props.getUserDataDir()));
+			capabilities.setCapability(FirefoxDriver.PROFILE, profile);
+		}
+
 		final Builder builder = new Builder()
 				.connectTimeout(20, TimeUnit.SECONDS)
 				.writeTimeout(20, TimeUnit.SECONDS)
@@ -79,10 +83,10 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 				.cache(null);
 
 		client = builder.build();
-			
-		launchDriver(status, options, null);
+
+		launchDriver(status, capabilities, props.getUserDataDir());
 	}
-	
+
 	@Override
 	public void close(boolean keepRunning) {
 		if(!keepRunning) {
@@ -91,12 +95,12 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		getDriverProcess().close(keepRunning);
 		/*if(driver != null){
 			driver.quit();
-			
+
 		}*/
-		
+
 		//super.close();
 	}
-	
+
 	@Override
 	protected boolean switchToWindowHandle(String handle) {
 		if(super.switchToWindowHandle(handle)) {
@@ -119,37 +123,37 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 
 	@Override
 	protected void move(FoundElement element, int offsetX, int offsetY) {
-		
+
 		//-----------------------------------------------------------------------------------------------------
 		// I don't know why, but we have to do that to make click action reliable with Firefox and geckodriver
 		//-----------------------------------------------------------------------------------------------------
-		
+
 		element.getValue().getTagName();
 		element.getValue().getRect();
-		
+
 		//--------------------------------------------------------------------------------------------
-		
+
 		final JsonArray actionList = new JsonArray();
-		
+
 		actionList.add(getMoveAction(getElementOrigin(element.getId()), offsetX, offsetY));
 		executeRequestActions(getElementAction(actionList));
 	}
-	
+
 	@Override
 	protected void click(FoundElement element, int offsetX, int offsetY) {
-				
+
 		move(element, offsetX, offsetY);
 		channel.sleep(30);
-				
+
 		final JsonObject origin = getElementOrigin(element.getId());
-		
+
 		final JsonArray actionList = new JsonArray();
 		actionList.add(getMouseClickAction(origin, "pointerDown"));
 		actionList.add(getMouseClickAction(origin, "pointerUp"));
-				
+
 		executeRequestActions(getElementAction(actionList));
 	}
-	
+
 	@Override
 	public void doubleClick() {
 		final JsonArray actionList = new JsonArray();
@@ -164,7 +168,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	protected void loadUrl(String url) {
 		final JsonObject parameters = new JsonObject();
 		parameters.addProperty("url", url);
-		
+
 		executeRequest(parameters, "url");
 	}
 
@@ -176,7 +180,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		action.add("origin", origin);
 		return action;
 	}
-	
+
 	private JsonObject getMouseClickAction(String type) {
 		final JsonObject action = new JsonObject();
 		action.addProperty("duration", 20);
@@ -223,19 +227,19 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 
 		return postData;
 	}
-	
+
 	private void executeRequestActions(JsonObject action) {
 		executeRequest(action, "actions");
 	}
-	
+
 	private void executeRequest(JsonObject action, String type) {
-		
+
 		final Request request = new Request.Builder()
 				.url(driverSession + "/" + type)
 				.addHeader("Content-Type", "application/json")
 				.post(RequestBody.create(null, action.toString()))
 				.build();
-		
+
 		try {
 			final Response response = client.newCall(request).execute();
 			response.close();
