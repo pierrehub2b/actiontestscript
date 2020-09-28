@@ -191,10 +191,10 @@ public class DriverManager {
 				status.setError(ActionStatus.CHANNEL_START_ERROR, "missing Chromium properties ('path' and 'driver') in .atsProperties file");
 				return null;
 			}
-		}else if(JX_BROWSER.equals(appName)) {
+		}else if(JX_BROWSER.equals(appName) || (JX_BROWSER + "browser").equals(appName)) {
 			if(driverName != null && props.getUri() != null) {
 
-				final JxDriverEngine jxEngine = new JxDriverEngine(this, appName, ChannelManager.ATS.getDriversFolderPath(), driverName, channel, status, desktopDriver, props);
+				final JxDriverEngine jxEngine = new JxDriverEngine(this, ChannelManager.ATS.getDriversFolderPath(), driverName, channel, status, desktopDriver, props);
 				if(status.isPassed()) {
 					return jxEngine;
 				}

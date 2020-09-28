@@ -36,7 +36,7 @@ public class JxDriverEngine extends WebDriverEngine {
 	private ProcessHandle jxProcess;
 
 	@SuppressWarnings("unchecked")
-	public JxDriverEngine(DriverManager driverManager, String appName, Path driversPath, String driverName, Channel channel, ActionStatus status, DesktopDriver desktopDriver, ApplicationProperties props) {
+	public JxDriverEngine(DriverManager driverManager, Path driversPath, String driverName, Channel channel, ActionStatus status, DesktopDriver desktopDriver, ApplicationProperties props) {
 		super(channel, desktopDriver, props.getUri(), props, DEFAULT_WAIT, DEFAULT_PROPERTY_WAIT);
 
 		final ProcessBuilder builder = new ProcessBuilder(getApplicationPath());
@@ -48,7 +48,7 @@ public class JxDriverEngine extends WebDriverEngine {
 			status.setException(ActionStatus.CHANNEL_START_ERROR, e1);
 		}
 
-		this.setDriverProcess(driverManager.getDriverProcess(status, appName, driverName, null));
+		this.setDriverProcess(driverManager.getDriverProcess(status, DriverManager.JX_BROWSER, driverName, null));
 
 		if(status.isPassed()) {
 			try {
