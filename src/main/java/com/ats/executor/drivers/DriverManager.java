@@ -49,7 +49,6 @@ public class DriverManager {
 	public static final String CHROME_DRIVER_FILE_NAME = "chromedriver";
 	public static final String CHROMIUM_DRIVER_FILE_NAME = "chromiumdriver";
 	public static final String IE_DRIVER_FILE_NAME = "IEDriverServer";
-	public static final String EDGE_DRIVER_FILE_NAME = "MicrosoftWebDriver";
 	public static final String MSEDGE_DRIVER_FILE_NAME = "msedgedriver";
 	public static final String OPERA_DRIVER_FILE_NAME = "operadriver";
 	public static final String FIREFOX_DRIVER_FILE_NAME = "geckodriver";
@@ -117,18 +116,6 @@ public class DriverManager {
 			driverProcess = getDriverProcess(status, appName, driverName, CHROME_DRIVER_FILE_NAME);
 			if(status.isPassed()) {
 				return new ChromeDriverEngine(
-						channel, 
-						status, 
-						driverProcess, 
-						desktopDriver, 
-						props);	
-			}else {
-				return null;
-			}
-		}else if(EDGE_BROWSER.equals(appName)) {
-			driverProcess = getDriverProcess(status, appName, driverName, EDGE_DRIVER_FILE_NAME + "-" + desktopDriver.getOsBuildVersion());
-			if(status.isPassed()) {
-				return new EdgeDriverEngine(
 						channel, 
 						status, 
 						driverProcess, 

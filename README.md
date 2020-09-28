@@ -255,6 +255,13 @@ You can find all chromium driver versions here : https://sites.google.com/a/chro
 	<driver>chromedriver_73</driver>
 </browser>
 ```
+* You can change user profile default path with Chromium based browsers (Chrome, MsEdge, Chromium), if the folder does not exists it will be created before to launch the browser :
+```
+<browser>
+	<name>chrome</name>
+	<profileDir>C:/atsProfiles/chrome/automatic_joe</profileDir>
+</browser>
+```
 * You can define a Neoload configuration to record and design load testing project with Neoload. ATS Neoload actions will enable Neoload UserPath recording and send commands to execute some design actions in a Neoload project. In order to enable Neoload recording you have to define Neoload proxy and service parameters :
 ```
 <neoload>

@@ -19,6 +19,27 @@ under the License.
 
 package com.ats.tools;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageOutputStream;
+import javax.net.ssl.HttpsURLConnection;
+import javax.swing.Icon;
+
 import com.ats.executor.ActionStatus;
 import com.ats.executor.TestBound;
 import com.ats.executor.drivers.desktop.DesktopDriver;
@@ -26,22 +47,6 @@ import com.ats.generator.ATS;
 import com.ats.generator.variables.parameter.ParameterDataFile;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonPrimitive;
-
-import javax.imageio.ImageIO;
-import javax.imageio.stream.ImageOutputStream;
-import javax.net.ssl.HttpsURLConnection;
-import javax.swing.*;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.*;
-import java.util.Arrays;
-import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class Utils {
 
@@ -96,52 +101,6 @@ public class Utils {
 	//-------------------------------------------------------------------------------------------------------------------------------------------
 	//  Files utils
 	//-------------------------------------------------------------------------------------------------------------------------------------------
-
-	private static final ExecutorService DELETE_SERVICE = Executors.newSingleThreadExecutor();
-	private static final String ATS_DRIVER_FOLDER = ".AtsDrivers";
-
-	public static File createDriverFolder(String name) {
-
-		final File worksDirectory = new File(
-				(new StringBuilder(System.getProperty("user.home")).
-						append(File.separator).
-						append(ATS_DRIVER_FOLDER).
-						append(File.separator).
-						append(name).
-						append(File.separator).
-						append(UUID.randomUUID().toString())).toString());
-
-		worksDirectory.mkdirs();
-
-		return worksDirectory;
-	}
-
-	public static void clearDriverFolder(String name) {
-
-		final File driverProfileDir = new File(
-				new StringBuilder(System.getProperty("user.home")).
-				append(File.separator).
-				append(ATS_DRIVER_FOLDER).
-				append(File.separator).
-				append(name).toString());
-
-		if(driverProfileDir.exists()) {
-			Arrays.stream(driverProfileDir.listFiles(File::isDirectory)).parallel().forEach(f -> deleteFile(f));
-		}
-	}
-
-	private static void deleteFile(final File file) {
-		if (file != null) {
-			DELETE_SERVICE.submit(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						deleteRecursive(file);
-					} catch (FileNotFoundException e) {}
-				}
-			});
-		}
-	}
 
 	public static boolean deleteRecursive(File path) throws FileNotFoundException{
 		if (!path.exists()) throw new FileNotFoundException(path.getAbsolutePath());

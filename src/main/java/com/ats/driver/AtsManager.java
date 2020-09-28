@@ -445,7 +445,7 @@ public class AtsManager {
 									String waitAction = null;
 									String path = null;
 									String driver = null;
-									String userDataDir = null;
+									String dataDir = null;
 									String check = null;
 									String lang = null;
 									
@@ -475,9 +475,12 @@ public class AtsManager {
 													path = getElementText(browserElement);
 													break;
 												case "userdatadir":
-													userDataDir = getElementText(browserElement);
+													dataDir = getElementText(browserElement);
 													break;
-												case "waitProperty":
+												case "profiledir":
+													dataDir = getElementText(browserElement);
+													break;
+												case "waitproperty":
 													check = getElementText(browserElement);
 													break;
 												case "lang":
@@ -488,20 +491,21 @@ public class AtsManager {
 										}
 
 										if(name != null) {
-											if(userDataDir != null && userDataDir.length() > 0) {
-												File userProfileDir = new File(userDataDir);
-												if(!userProfileDir.exists()) {
-													final Path userDataPath = Paths.get(userDataDir);
-													if(userDataPath.isAbsolute()) {
-														userProfileDir = userDataPath.toFile();
+											String userDataDir = null;
+											if(dataDir != null && dataDir.length() > 0) {
+												final Path userDataPath = Paths.get(dataDir);
+												if(userDataPath.isAbsolute()) {
+													final File f = userDataPath.toFile();
+													userDataDir = f.getAbsolutePath();
+													
+													if(f.exists()) {
+														if(!f.isDirectory()) {
+															userDataDir = null;
+														}
 													}else {
-														userProfileDir = Paths.get(System.getProperty("user.home"), ".AtsDrivers", "user_profile", userDataDir).toFile();	
+														f.mkdirs();
 													}
-													userProfileDir.mkdirs();
 												}
-												userDataDir = userProfileDir.getAbsolutePath();
-											}else {
-												userDataDir = null;
 											}
 											addApplicationProperties(ApplicationProperties.BROWSER_TYPE, name, driver, path, waitAction, check, lang, userDataDir, title);
 										}
