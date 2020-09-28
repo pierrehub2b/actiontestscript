@@ -236,9 +236,10 @@ public class Lexer {
 						script.addAction(new ActionSystemButton(script, buttonType), disabled);
 
 					} else if (ActionSystemPropertySet.SCRIPT_LABEL.equals(dataOne)) {
-
+						
 						String propertyName = dataArray.remove(0).trim();
-						String propertyValue = dataArray.remove(0).trim();
+						String propertyValue = dataArray.size() > 0 ? dataArray.remove(0).trim() : "";
+
 						script.addAction(new ActionSystemPropertySet(script, propertyName, propertyValue), disabled);
 					}
 				}
@@ -316,7 +317,7 @@ public class Lexer {
 						script.addAction(new ActionWindowState(script, ActionWindowState.CLOSE), disabled);
 					}
 
-				}else if(actionType.equals(ActionScripting.SCRIPT_LABEL) || actionType.equals(ActionScripting.JAVASCRIPT_LABEL)){
+				} else if (actionType.equals(ActionScripting.SCRIPT_LABEL) || actionType.equals(ActionScripting.JAVASCRIPT_LABEL)) {
 
 					//-----------------------
 					// Javascript action
@@ -324,7 +325,7 @@ public class Lexer {
 
 					final String[] jsDataArray = dataOne.split(ScriptParser.ATS_ASSIGN_SEPARATOR);
 
-					if(jsDataArray.length > 0) {
+					if (jsDataArray.length > 0) {
 
 						Variable variable = null;
 						final String jsCode = jsDataArray[0].trim();
