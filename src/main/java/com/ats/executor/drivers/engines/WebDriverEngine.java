@@ -1210,8 +1210,12 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		executeScript(status, "result={size:window.getComputedStyle(arguments[0], null).getPropertyValue('font-size'), family:window.getComputedStyle(arguments[0], null).getPropertyValue('font-family'), weight:window.getComputedStyle(arguments[0], null).getPropertyValue('font-weight')};", we);
 
 		for(SendKeyData sequence : textActionList) {
-			we.sendKeys(sequence.getSequenceWithDigit());
+			we.sendKeys(getSequenceData(sequence));
 		}
+	}
+	
+	protected CharSequence getSequenceData(SendKeyData seq) {
+		return seq.getSequenceWeb(true);
 	}
 
 	@Override

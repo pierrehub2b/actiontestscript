@@ -33,6 +33,7 @@ import com.ats.driver.ApplicationProperties;
 import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
+import com.ats.executor.SendKeyData;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
@@ -89,6 +90,11 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 		client = builder.build();
 
 		launchDriver(status, capabilities, props.getUserDataDir());
+	}
+	
+	@Override
+	protected CharSequence getSequenceData(SendKeyData seq) {
+		return seq.getSequenceWeb(false);
 	}
 
 	@Override

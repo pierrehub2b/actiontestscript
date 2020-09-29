@@ -109,7 +109,7 @@ public class IEDriverEngine extends WebDriverEngine {
 		}else {
 			try {
 				for(SendKeyData sequence : textActionList) {
-					element.getWebElement().sendKeys(sequence.getSequenceWithDigit());
+					element.getWebElement().sendKeys(sequence.getSequenceWeb(true));
 				}
 			}catch(Exception e) {
 				status.setError(ActionStatus.ENTER_TEXT_FAIL, e.getMessage());

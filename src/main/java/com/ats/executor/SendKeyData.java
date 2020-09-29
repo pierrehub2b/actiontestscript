@@ -143,8 +143,8 @@ public class SendKeyData {
 	// get sequence by driver type
 	//---------------------------------------------------------------------------
 
-	public CharSequence getSequenceWithDigit() {
-
+	public CharSequence getSequenceWeb(boolean withDigit) {
+		
 		if(specialKeys != null) {
 			return specialKeys;
 		}
@@ -152,27 +152,12 @@ public class SendKeyData {
 		final StringBuffer sequence = new StringBuffer();
 
 		for (int i = 0, n = data.length(); i < n; i++) {
-			char c = data.charAt(i);
-			if(Character.isDigit(c)) {
+			final char c = data.charAt(i);
+			if(withDigit && Character.isDigit(c)) {
 				sequence.append(getNumpad(c));
 			}else {
 				sequence.append(c);
 			}
-		}
-		return sequence;
-	}	
-
-	public CharSequence getSequenceChar() {
-
-		final StringBuffer sequence = new StringBuffer();
-
-		if(data.isEmpty() && !specialKeyString.isEmpty()) {
-			return specialKeys;
-		}
-
-		for (int i = 0, n = data.length(); i < n; i++) {
-			char c = data.charAt(i);
-			sequence.append(c);
 		}
 		return sequence;
 	}	
