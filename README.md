@@ -166,8 +166,8 @@ Here is an example of global ATS configuration file (*.atsProperties* file in AT
 		<browser>
 			<name>chrome</name>
 			<options>
-				<option>--disable-infobars</option>
 				<option>--disable-web-security</option>
+				<option>--incognito</option>
 			</options>
 		</browser>
 		<browser>

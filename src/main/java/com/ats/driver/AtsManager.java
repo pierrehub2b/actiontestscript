@@ -26,6 +26,7 @@ import com.ats.tools.AtsClassLoader;
 import com.ats.tools.Utils;
 import com.ats.tools.performance.external.OctoperfApi;
 import com.ats.tools.wait.IWaitGuiReady;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -209,7 +210,7 @@ public class AtsManager {
 
 							final Element type = (Element) executeChildren.item(i);
 							String url = null;
-							
+
 							switch (type.getNodeName().toLowerCase()) {
 
 							case "performance":
@@ -334,7 +335,7 @@ public class AtsManager {
 								String proxyType = null;
 								String host = null;
 								int port = 0;
-								
+
 								for (int j = 0; j < proxyChildren.getLength(); j++) {
 									if (proxyChildren.item(j) instanceof Element) {
 										final Element proxyElement = (Element) proxyChildren.item(j);
@@ -448,7 +449,9 @@ public class AtsManager {
 									String dataDir = null;
 									String check = null;
 									String lang = null;
-									
+
+									String[] options = null;
+
 									String title = "";
 
 									if (browsers.item(j) instanceof Element) {
@@ -486,6 +489,16 @@ public class AtsManager {
 												case "lang":
 													lang = getElementText(browserElement);
 													break;
+												case "options":
+													final NodeList optionsList = browserElement.getElementsByTagName("option");
+													final int optionsLen = optionsList.getLength();
+													if(optionsLen > 0) {
+														options = new String[optionsLen];
+														for( int l = 0; l < optionsLen; l++ ){
+															options[l] = optionsList.item(l).getTextContent();
+													    }
+													}
+													break;
 												}
 											}
 										}
@@ -497,7 +510,7 @@ public class AtsManager {
 												if(userDataPath.isAbsolute()) {
 													final File f = userDataPath.toFile();
 													userDataDir = f.getAbsolutePath();
-													
+
 													if(f.exists()) {
 														if(!f.isDirectory()) {
 															userDataDir = null;
@@ -507,7 +520,7 @@ public class AtsManager {
 													}
 												}
 											}
-											addApplicationProperties(ApplicationProperties.BROWSER_TYPE, name, driver, path, waitAction, check, lang, userDataDir, title);
+											addApplicationProperties(ApplicationProperties.BROWSER_TYPE, name, driver, path, waitAction, check, lang, userDataDir, title, options);
 										}
 									}
 								}
@@ -643,11 +656,11 @@ public class AtsManager {
 	}
 
 	private void addApplicationProperties(int type, String name, String path, String wait, String check, String lang, String userDataDir, String title) {
-		addApplicationProperties(type, name, null, path, wait, check, lang, userDataDir, title);
+		addApplicationProperties(type, name, null, path, wait, check, lang, userDataDir, title, null);
 	}
 
-	private void addApplicationProperties(int type, String name, String driver, String path, String wait, String check, String lang, String userDataDir, String title) {
-		applicationsList.add(new ApplicationProperties(type, name, driver, path, Utils.string2Int(wait, -1), Utils.string2Int(check, -1), lang, userDataDir, title));
+	private void addApplicationProperties(int type, String name, String driver, String path, String wait, String check, String lang, String userDataDir, String title, String[] options) {
+		applicationsList.add(new ApplicationProperties(type, name, driver, path, Utils.string2Int(wait, -1), Utils.string2Int(check, -1), lang, userDataDir, title, options));
 	}
 
 	//------------------------------------------------------------------------------------------------------------------

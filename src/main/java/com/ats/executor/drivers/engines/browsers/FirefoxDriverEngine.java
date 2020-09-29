@@ -75,6 +75,10 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 			final FirefoxProfile profile = new FirefoxProfile(new File(props.getUserDataDir()));
 			capabilities.setCapability(FirefoxDriver.PROFILE, profile);
 		}
+		
+		if(props.getOptions() != null) {
+			//TODO
+		}
 
 		final Builder builder = new Builder()
 				.connectTimeout(20, TimeUnit.SECONDS)

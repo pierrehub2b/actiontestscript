@@ -38,12 +38,13 @@ public class ApplicationProperties {
 	private String lang;
 	private String userDataDir;
 	private String title;
+	private String[] options;
 
 	public ApplicationProperties(String name) {
 		this.name = name;
 	}
 	
-	public ApplicationProperties(int type, String name, String driver, String uri, int wait, int check, String lang, String userDataDir, String title) {
+	public ApplicationProperties(int type, String name, String driver, String uri, int wait, int check, String lang, String userDataDir, String title, String[] options) {
 		this.type = type;
 		this.name = name;
 		this.driver = driver;
@@ -53,6 +54,7 @@ public class ApplicationProperties {
 		this.lang = lang;
 		this.userDataDir = userDataDir;
 		this.title = title;
+		this.options = options;
 	}
 	
 	public boolean isWeb() {
@@ -101,5 +103,9 @@ public class ApplicationProperties {
 	
 	public String getTitle() {
 		return title;
+	}
+	
+	public String[] getOptions() {
+		return options;
 	}
 }

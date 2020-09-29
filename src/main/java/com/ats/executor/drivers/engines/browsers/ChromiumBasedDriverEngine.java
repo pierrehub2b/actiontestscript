@@ -49,6 +49,14 @@ public class ChromiumBasedDriverEngine extends WebDriverEngine {
 		options.addArguments("--disable-popup-blocking");
 		
 		options.addArguments("--ignore-certificate-errors");
+		
+		if(props.getOptions() != null) {
+			for (String s: props.getOptions()) {
+				if(s.length() > 0) {
+					options.addArguments(s);
+				}
+			}
+		}
 
 		profileFolder = props.getUserDataDir();
 		if(profileFolder != null) {
