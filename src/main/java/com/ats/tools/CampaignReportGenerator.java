@@ -62,15 +62,6 @@ public class CampaignReportGenerator {
 				}
 			}
 		}
-
-		if (xslPathPdf == null || !(new File(xslPathPdf).exists())) {
-			try {
-				final String styleSheet = Resources.toString(ResourceContent.class.getResource("/reports/campaign/campaign_pdf_stylesheet.xml"), Charsets.UTF_8);
-				xslPathPdf = createEmptyStylesheet(styleSheet,basePath);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
 		
 		copyImageToTempFolder("false",basePath);
 		copyImageToTempFolder("true",basePath);
@@ -79,57 +70,21 @@ public class CampaignReportGenerator {
 		copyFileToTempFolder("report.css",basePath);
 		copyFileToTempFolder("script.js",basePath);
 
-		if (fopDir == null || xmlPath == null || xslPathPdf == null || pdfPath == null) { return; }
+		if (fopDir == null || xmlPath == null || xslPathPdf == null || pdfPath == null || xslPathHtml == null) { return; }
 		
 		String xmlUrl = generateReportXml(xmlPath, basePath, actions, details);
 		
 		//HTML reports
-		try {
-			Transformer transformer = null;
-			TransformerFactory tFactory = TransformerFactory.newInstance();
-			if(xslPathHtml == null || !(new File(xslPathHtml).exists())) {
-				String styleSheetHtmlDetail = Resources.toString(ResourceContent.class.getResource("/reports/campaign/campaign_html_stylesheet.xml"), Charsets.UTF_8);
-				String styleSheetHtml = createEmptyStylesheetHtml(styleSheetHtmlDetail,basePath);
-				transformer = tFactory.newTransformer(new StreamSource(styleSheetHtml));
-			} else {
-				transformer = tFactory.newTransformer(new StreamSource(xslPathHtml));
-			}
-		    transformer.transform(new StreamSource(xmlUrl), new StreamResult(basePath + File.separator + name + ".html"));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		Transformer transformer = null;
+		TransformerFactory tFactory = TransformerFactory.newInstance();
+		transformer = tFactory.newTransformer(new StreamSource(xslPathHtml));
+	    transformer.transform(new StreamSource(xmlUrl), new StreamResult(basePath + File.separator + name + ".html"));
 		
 		try {
 			String command = String.format("java -cp %s;%s org.apache.fop.cli.Main -xml %s -xsl %s -pdf %s",
 					fopDir + "\\build\\fop.jar", fopDir + "\\lib\\*", xmlUrl, xslPathPdf, pdfPath);
 			
 			System.out.println(command);
-			
-			//Process p = Runtime.getRuntime().exec("cmd /c " + command);
-			
-			/*Runtime rt = Runtime.getRuntime();
-			Process proc = rt.exec("cmd /c " + command);
-
-			BufferedReader stdInput = new BufferedReader(new 
-				     InputStreamReader(proc.getInputStream()));
-
-			BufferedReader stdError = new BufferedReader(new 
-			     InputStreamReader(proc.getErrorStream()));
-			
-			// Read the output from the command
-			System.out.println("Here is the standard output of the command:\n");
-			String s = null;
-			while ((s = stdInput.readLine()) != null) {
-			    System.out.println(s);
-			}
-
-			// Read any errors from the attempted command
-			System.out.println("Here is the standard error of the command (if any):\n");
-			while ((s = stdError.readLine()) != null) {
-			    System.out.println(s);
-			}	
-		    System.out.println("Batch file done for " + name);*/
 			
 			ProcessBuilder ps= new ProcessBuilder("java","-cp",fopDir + "\\build\\fop.jar;" + fopDir + "\\lib\\*","org.apache.fop.cli.Main","-xml",xmlUrl,"-xsl",xslPathPdf,"-pdf",pdfPath);
 			ps.redirectErrorStream(true);
@@ -171,30 +126,6 @@ public class CampaignReportGenerator {
         fileOut.write(aByteArray);
         fileOut.flush();
         fileOut.close();
-	}
-	
-	public static String createEmptyStylesheet(String xmlSource,String basePath) throws IOException {	
-		String path = basePath + File.separator + "campaign_pdf_stylesheet.xml";
-		File f = new File(path);
-        f.setWritable(true);
-        f.setReadable(true);
-        FileWriter fw = new FileWriter(f);
-        fw.write(xmlSource);
-	    fw.close();
-
-        return f.getAbsolutePath();
-	}
-	
-	public static String createEmptyStylesheetHtml(String xmlSource,String basePath) throws IOException {	
-		String path = basePath + File.separator + "campaign_html_stylesheet.xml";
-		File f = new File(path);
-        f.setWritable(true);
-        f.setReadable(true);
-        FileWriter fw = new FileWriter(f);
-        fw.write(xmlSource);
-	    fw.close();
-
-        return f.getAbsolutePath();
 	}
 	
 	public static String generateReportXml(String xmlPath, String basePath, String actions, String details) throws IOException, ParserConfigurationException, SAXException{

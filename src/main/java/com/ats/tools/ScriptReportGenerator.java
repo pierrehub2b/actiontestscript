@@ -19,7 +19,6 @@ under the License.
 
 package com.ats.tools;
 
-import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 
 import javax.xml.transform.Transformer;
@@ -37,8 +36,8 @@ public class ScriptReportGenerator {
 	public static void main(String[] args) throws TransformerException, InterruptedException, IOException {
 		String fopDir = System.getProperty("fop", null);
 		String xmlPath = System.getProperty("xml", null);
-		String xslPath = System.getProperty("xsl", null);
-		String name = System.getProperty("name", null);
+		String xslPath = System.getProperty("xslPdf", null);
+		String xslHtmlPath = System.getProperty("xslHtml", null);
 		File f = new File(xmlPath);
 		
 		if (fopDir == null || !(new File(fopDir).exists())) {
@@ -51,15 +50,6 @@ public class ScriptReportGenerator {
 				}
 			}
 		}
-
-		if (xslPath == null || !(new File(xslPath).exists())) {
-			try {
-				final String styleSheet = Resources.toString(ResourceContent.class.getResource("/reports/script/test_pdf_stylesheet.xml"), Charsets.UTF_8);
-				xslPath = createEmptyStylesheet(styleSheet,xmlPath);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
 		
 		copyImageToTempFolder("false",xmlPath);
 		copyImageToTempFolder("true",xmlPath);
@@ -67,31 +57,17 @@ public class ScriptReportGenerator {
 		copyImageToTempFolder("agilitest",xmlPath);
 		copyFileToTempFolder("report.css",xmlPath);
 
-		if (fopDir == null || xmlPath == null || xslPath == null) { return; }		
-		//HTML reports
-		try {
-			String path = f.getParentFile().getAbsolutePath();
-			String styleSheetHtmlDetail = Resources.toString(ResourceContent.class.getResource("/reports/script/test_html_stylesheet.xml"), Charsets.UTF_8);
-			String styleSheetHtml = createEmptyStylesheetHtml(styleSheetHtmlDetail,path);
-			TransformerFactory tFactory = TransformerFactory.newInstance();
-		    Transformer transformer = tFactory.newTransformer(new StreamSource(styleSheetHtml));
-
-		    transformer.transform(new StreamSource(xmlPath), new StreamResult(path + File.separator + f.getParentFile().getName() + ".html"));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		if (fopDir == null || xmlPath == null || xslPath == null || xslHtmlPath == null) { return; }		
 		
-		/*String command = String.format("java -cp %s;%s org.apache.fop.cli.Main -xml %s -xsl %s -pdf %s",
-				fopDir + "\\build\\fop.jar", fopDir + "\\lib\\*", xmlPath, xslPath, f.getParentFile().getAbsolutePath() + File.separator + f.getParentFile().getName() + ".pdf");*/
+		//HTML reports
+		String path = f.getParentFile().getAbsolutePath();
+		Transformer transformer = null;
+		TransformerFactory tFactory = TransformerFactory.newInstance();
+		transformer = tFactory.newTransformer(new StreamSource(xslHtmlPath));
+	    transformer.transform(new StreamSource(xmlPath), new StreamResult(path + File.separator + f.getParentFile().getName() + ".html"));
+		
 		try {
-			/*Process p = Runtime.getRuntime().exec("cmd /c " + command);
-			System.out.println("Waiting for batch file for process " + name + "...");
-		    p.waitFor();
-		    System.out.println("Batch file done for " + name);*/
-			
-			
-			 ProcessBuilder ps= new ProcessBuilder("java","-cp",fopDir + "\\build\\fop.jar;" + fopDir + "\\lib\\*","org.apache.fop.cli.Main","-xml",xmlPath,"-xsl",xslPath,"-pdf",f.getParentFile().getAbsolutePath() + File.separator + f.getParentFile().getName() + ".pdf");
+			ProcessBuilder ps= new ProcessBuilder("java","-cp",fopDir + "\\build\\fop.jar;" + fopDir + "\\lib\\*","org.apache.fop.cli.Main","-xml",xmlPath,"-xsl",xslPath,"-pdf",f.getParentFile().getAbsolutePath() + File.separator + f.getParentFile().getName() + ".pdf");
 			ps.redirectErrorStream(true);
 
 			Process pr = ps.start();  
@@ -110,18 +86,6 @@ public class ScriptReportGenerator {
           {
             t.printStackTrace();
           }
-	}
-	
-	public static String createEmptyStylesheetHtml(String xmlSource,String basePath) throws IOException {	
-		String path = basePath + File.separator + "test_html_stylesheet.xml";
-		File f = new File(path);
-        f.setWritable(true);
-        f.setReadable(true);
-        FileWriter fw = new FileWriter(f);
-        fw.write(xmlSource);
-	    fw.close();
-
-        return f.getAbsolutePath();
 	}
 	
 	public static void copyImageToTempFolder(String name, String xmlPath) throws IOException {
@@ -145,17 +109,4 @@ public class ScriptReportGenerator {
         fileOut.flush();
         fileOut.close();
 	}
-	
-	public static String createEmptyStylesheet(String xmlSource,String xmlPath) throws IOException {
-		File f = new File(xmlPath);		
-		String path = f.getParentFile().getAbsolutePath() + File.separator + "test_pdf_stylesheet.xml";
-		File file = new File(path);
-        file.setWritable(true);
-        file.setReadable(true);
-        FileWriter fw = new FileWriter(file);
-        fw.write(xmlSource);
-	    fw.close();
-
-        return file.getAbsolutePath();
-	}	
 }
