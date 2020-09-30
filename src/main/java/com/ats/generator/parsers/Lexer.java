@@ -22,10 +22,7 @@ package com.ats.generator.parsers;
 import com.ats.generator.GeneratorReport;
 import com.ats.generator.events.ScriptProcessedNotifier;
 import com.ats.generator.objects.mouse.Mouse;
-import com.ats.generator.variables.CalculatedValue;
-import com.ats.generator.variables.EnvironmentValue;
-import com.ats.generator.variables.ParameterValue;
-import com.ats.generator.variables.Variable;
+import com.ats.generator.variables.*;
 import com.ats.script.Project;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
@@ -166,9 +163,21 @@ public class Lexer {
 				//-----------------------
 				// Mouse button action
 				//-----------------------
-
-				script.addAction(new ActionMouseKey(script, actionType, stopExec, options, dataArray), disabled);
-
+				
+				// Legacy
+				String dataOne = dataArray.get(0);
+				if (dataOne.trim().startsWith("sysbutton")) {
+					final Matcher objectMatcher = Script.OBJECT_PATTERN.matcher(dataOne);
+					if (objectMatcher.find()) {
+						if (objectMatcher.groupCount() == 2) {
+							CalculatedProperty property = new CalculatedProperty(script, objectMatcher.group(2));
+							script.addAction(new ActionSystemButton(script, property.getValue().getData()), disabled);
+						}
+					}
+				} else {
+					script.addAction(new ActionMouseKey(script, actionType, stopExec, options, dataArray), disabled);
+				}
+				
 			}else if(ActionChannelClose.SCRIPT_CLOSE_LABEL.equals(actionType)){
 
 				//-----------------------
@@ -232,7 +241,7 @@ public class Lexer {
 
 					if (ActionSystemButton.SCRIPT_LABEL.equals(dataOne)) {
 
-						String buttonType = dataArray.remove(0).trim();
+						String buttonType = dataArray.size() > 0 ? dataArray.remove(0).trim() : "";
 						script.addAction(new ActionSystemButton(script, buttonType), disabled);
 
 					} else if (ActionSystemPropertySet.SCRIPT_LABEL.equals(dataOne)) {
