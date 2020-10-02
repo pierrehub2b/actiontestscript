@@ -40,7 +40,6 @@ public class SearchedElement {
 
 	private static final String DIALOG = "DIALOG";
 	private static final String SYSCOMP = "SYSCOMP";
-	private static final String SYSBUTTON = "SYSBUTTON";
 	public static final String IMAGE_TAG = "@IMAGE";
 	
 	public static final String INDEX_PROPERTY = "@index";
@@ -165,11 +164,7 @@ public class SearchedElement {
 	public boolean isDialog() {
 		return DIALOG.equals(tag.toUpperCase());
 	}
-
-	public boolean isSysButton() {
-		return SYSBUTTON.equals(tag.toUpperCase());
-	}
-
+	
 	public boolean isSysComp() {
 		if(parent != null) {
 			return parent.isSysComp();

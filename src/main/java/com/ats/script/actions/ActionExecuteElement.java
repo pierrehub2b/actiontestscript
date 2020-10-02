@@ -141,25 +141,22 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 								channel.progressiveWait(trySearch);
 							}
 						}
+					} else {
 
-					}else if(searchElement.isSysButton()) {	
-						setTestElement(new TestElementSystemButton(channel, searchElement));
-					}else {
-
-						if(searchElement.isSysComp()){
+						if (searchElement.isSysComp()) {
 							while (trySearch < actionMaxTry) {
 
 								setTestElement(new TestElementSystem(channel, actionMaxTry, predicate, searchElement));
 
-								if(testElement.isValidated()) {
+								if (testElement.isValidated()) {
 									trySearch = actionMaxTry;
-								}else {
+								} else {
 									trySearch++;
 									channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "Searching element", actionMaxTry - trySearch);
 									channel.progressiveWait(trySearch);
 								}
 							}
-						}else {
+						} else {
 							while (trySearch < actionMaxTry) {
 
 								if(searchElement.isImageSearch()) {
