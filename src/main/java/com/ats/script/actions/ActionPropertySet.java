@@ -19,6 +19,12 @@ public class ActionPropertySet extends Action {
         setName(name);
         setValue(new CalculatedValue(script, value));
     }
+    
+    public ActionPropertySet(Script script, String name, CalculatedValue value) {
+        super(script);
+        setName(name);
+        setValue(value);
+    }
 
     //---------------------------------------------------------------------------------------------------------------------------------
     //---------------------------------------------------------------------------------------------------------------------------------
@@ -54,9 +60,7 @@ public class ActionPropertySet extends Action {
                 .append(name)
                 .append("\"")
                 .append(", ")
-                .append("\"")
-                .append(value)
-                .append("\"")
+                .append(value.getJavaCode())
                 .append(")");
         return builder;
     }

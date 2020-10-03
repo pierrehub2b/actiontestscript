@@ -233,7 +233,10 @@ public class Lexer {
 
 				if (ActionPropertySet.SCRIPT_LABEL.equals(actionType)) {
 
-					final String propertyValue = dataArray.size() > 0 ? dataArray.remove(0).trim() : "";
+					String propertyValue = "";
+					if(dataArray.size() > 0) {
+						propertyValue = dataArray.remove(0).trim();
+					}
 					script.addAction(new ActionPropertySet(script, dataOne, propertyValue), disabled);
 
 				}else if(ActionButton.SCRIPT_LABEL.equals(actionType)) {
