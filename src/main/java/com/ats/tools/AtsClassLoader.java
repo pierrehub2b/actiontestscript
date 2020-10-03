@@ -49,7 +49,6 @@ public class AtsClassLoader extends ClassLoader{
 		}
 		
 		return testScriptClass;
-		
 	}
 	
 	@Override

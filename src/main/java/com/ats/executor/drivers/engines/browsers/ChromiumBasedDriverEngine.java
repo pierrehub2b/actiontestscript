@@ -76,7 +76,6 @@ public class ChromiumBasedDriverEngine extends WebDriverEngine {
 		}
 
 		options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
-		options.setExperimentalOption("useAutomationExtension", false);
 
 		final Map<String, Object> prefs = new HashMap<String, Object>();
 		prefs.put("credentials_enable_service", false);

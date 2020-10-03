@@ -50,6 +50,10 @@ public class ChannelManager {
 		if(ATS.getError() != null) {
 			script.sendInfoLog("ActionTestScript properties file found, but an error occured !", ATS.getError());
 		}
+		
+		if(ATS.getWaitGuiReady() != null) {
+			script.sendInfoLog("Custom WaitGuiReady class found !", "");
+		}
 	}
 
 	public int getMaxTry() {

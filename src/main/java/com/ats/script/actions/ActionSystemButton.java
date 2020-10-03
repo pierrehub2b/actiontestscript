@@ -57,9 +57,7 @@ public class ActionSystemButton extends Action {
 
 	@Override
 	public StringBuilder getJavaCode() {
-		StringBuilder builder = super.getJavaCode();
-		builder.append("\"").append(buttonType).append("\"");
-		return builder;
+		return super.getJavaCode().append("\"").append(buttonType).append("\")");
 	}
 
 	//--------------------------------------------------------
