@@ -2,21 +2,22 @@ package com.ats.script.actions;
 
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
+import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
 
-public class ActionSystemPropertySet extends Action {
+public class ActionPropertySet extends Action {
 
     public static final String SCRIPT_LABEL = "property-set";
 
     private String name;
-    private String value;
+    private CalculatedValue value;
 
-    public ActionSystemPropertySet() { }
+    public ActionPropertySet() { }
 
-    public ActionSystemPropertySet(Script script, String name, String value) {
+    public ActionPropertySet(Script script, String name, String value) {
         super(script);
         setName(name);
-        setValue(value);
+        setValue(new CalculatedValue(script, value));
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------
@@ -28,7 +29,7 @@ public class ActionSystemPropertySet extends Action {
 
         Channel currentChannel = ts.getCurrentChannel();
         if (currentChannel != null) {
-            currentChannel.setSysProperty(getName(), getValue());
+            currentChannel.setSysProperty(getName(), getValue().getCalculated());
         }
     }
 
@@ -39,8 +40,8 @@ public class ActionSystemPropertySet extends Action {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
-    public String getValue() { return value; }
-    public void setValue(String value) { this.value = value; }
+    public CalculatedValue getValue() { return value; }
+    public void setValue(CalculatedValue value) { this.value = value; }
 
     //---------------------------------------------------------------------------------------------------------------------------------
     // Code Generator

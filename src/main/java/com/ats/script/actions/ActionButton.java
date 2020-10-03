@@ -25,20 +25,20 @@ import com.ats.executor.ActionTestScript;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
 
-public class ActionSystemButton extends Action {
+public class ActionButton extends Action {
 
 	public static final String SCRIPT_LABEL = "button";
 
 	private String buttonType = "home";
 
-	public ActionSystemButton() { }
+	public ActionButton() { }
 
-	public ActionSystemButton(Script script, String buttonType) {
+	public ActionButton(Script script, String buttonType) {
 		super(script);
 		setButtonType(buttonType);
 	}
 
-	public ActionSystemButton(ScriptLoader script, ArrayList<String> dataArray) {
+	public ActionButton(ScriptLoader script, ArrayList<String> dataArray) {
 		String[] data = dataArray.get(0).split("=");
 		if(data.length == 2) {
 			setButtonType(data[1].replace("]", "").trim());
