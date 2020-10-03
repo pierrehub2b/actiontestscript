@@ -98,14 +98,12 @@ public class ATS {
 			final boolean force = cmd.hasOption("f");
 			compile = cmd.hasOption("comp");
 
-			File file;
-
 			String prjFolder = ".";
 			if (cmd.hasOption("prj")) {
 				prjFolder = cmd.getOptionValue("prj");
 			}
 
-			file = new File(prjFolder);
+			File file = new File(prjFolder);
 
 			if(file.exists()) {
 				projectFolder = new File(file.getAbsolutePath());

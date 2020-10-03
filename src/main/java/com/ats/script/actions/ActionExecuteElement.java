@@ -24,6 +24,7 @@ import com.ats.element.*;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.engines.MobileDriverEngine;
 import com.ats.script.Script;
 import com.ats.tools.Operators;
 import com.ats.tools.logger.MessageCode;
@@ -47,7 +48,7 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 
 	public ActionExecuteElement(Script script, boolean stop, ArrayList<String> options, ArrayList<String> element) {
 		super(script, stop, options);
-		if(element != null && element.size() > 0){
+		if(element != null && element.size() > 0 && !element.get(0).contains(MobileDriverEngine.SYS_BUTTON)){
 			setSearchElement(new SearchedElement(script, element));
 		}
 	}

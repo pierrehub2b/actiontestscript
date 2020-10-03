@@ -411,9 +411,10 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void buttonClick(ActionStatus status, String type) {
-		JsonObject result = executeRequest(SYS_BUTTON, type);
-		int code = result.get("status").getAsInt();
-		String message = result.get("message").getAsString();
+		final JsonObject result = executeRequest(SYS_BUTTON, type);
+		
+		final int code = result.get("status").getAsInt();
+		final String message = result.get("message").getAsString();
 		
 		status.setCode(code);
 		status.setMessage(message);

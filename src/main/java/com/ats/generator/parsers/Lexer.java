@@ -19,6 +19,7 @@ under the License.
 
 package com.ats.generator.parsers;
 
+import com.ats.executor.drivers.engines.MobileDriverEngine;
 import com.ats.generator.GeneratorReport;
 import com.ats.generator.events.ScriptProcessedNotifier;
 import com.ats.generator.objects.mouse.Mouse;
@@ -41,13 +42,13 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Lexer {
 	
 	private static final String SYSTEM_ACTION_LABEL = "system";
-	public static final String SYSBUTTON = "sysbutton";
 	
 	private final Pattern ACTION_PATTERN = Pattern.compile("(.*)\\[(.*?)\\]", Pattern.CASE_INSENSITIVE);
 	
@@ -117,36 +118,22 @@ public class Lexer {
 		if (dataArray.size() > 0) {
 			
 			String actionType = dataArray.remove(0).trim();
-			String optionsFlat;
-			ArrayList<String> options;
-			boolean stopExec;
+			String optionsFlat = "";
+			ArrayList<String> options = new ArrayList<String>();
+			boolean stopExec = true;;
 			
 			Matcher matcher = ACTION_PATTERN.matcher(actionType);
 			if (matcher.find()) {
 				actionType = matcher.group(1).trim().toLowerCase();
 				optionsFlat = matcher.group(2).trim();
-				options = new ArrayList<>(Arrays.asList(optionsFlat.split(",")));
+				Collections.addAll(options, optionsFlat.split(","));
+				
 				stopExec = !options.removeIf(s -> s.equalsIgnoreCase(ActionExecute.NO_FAIL_LABEL));
-			} else {
-				optionsFlat = "";
-				options = new ArrayList<String>();
-				stopExec = true;
 			}
-			
-			// Legacy sysbutton
-			if (dataArray.size() > 0) {
-				final String lastParam = dataArray.get(dataArray.size() - 1);
-				final Matcher objectMatcher = Script.OBJECT_PATTERN.matcher(lastParam.trim());
-				if (objectMatcher.find() && objectMatcher.groupCount() == 2 && objectMatcher.group(1).trim().equals(SYSBUTTON)) {
-					if (actionType.startsWith(Mouse.CLICK)) {
-						CalculatedProperty property = new CalculatedProperty(script, objectMatcher.group(2));
-						script.addAction(new ActionSystemButton(script, property.getValue().getData()), disabled);
-						return;
-					} else {
-						dataArray.remove(lastParam);
-					}
-				}
-			}
+
+			//-------------------------------------------------------------------------------------------
+			// Start decision tree ...
+			//-------------------------------------------------------------------------------------------
 			
 			if (ActionGesturePress.SCRIPT_LABEL.equals(actionType)) {
 				
@@ -180,8 +167,13 @@ public class Lexer {
 				// Mouse button action
 				//-----------------------
 				
-				script.addAction(new ActionMouseKey(script, actionType, stopExec, options, dataArray), disabled);
-				
+				//TODO remove sysbutton legacy in 01/01/2021 !!!
+				if(dataArray.size() > 0 && dataArray.get(0).contains(MobileDriverEngine.SYS_BUTTON)) {
+					script.addAction(new ActionSystemButton(script, dataArray), disabled);
+				}else {
+					script.addAction(new ActionMouseKey(script, actionType, stopExec, options, dataArray), disabled);
+				}
+
 			} else if (ActionChannelClose.SCRIPT_CLOSE_LABEL.equals(actionType)) {
 				
 				//-----------------------
@@ -255,9 +247,8 @@ public class Lexer {
 						
 						script.addAction(new ActionSystemPropertySet(script, propertyName, propertyValue), disabled);
 					}
-				}
-				
-				else if (ActionGestureTap.SCRIPT_LABEL.equals(actionType)) {
+					
+				}else if (ActionGestureTap.SCRIPT_LABEL.equals(actionType)) {
 					
 					//-----------------------
 					// Gesture tap action

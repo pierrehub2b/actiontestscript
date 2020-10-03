@@ -19,20 +19,30 @@ under the License.
 
 package com.ats.script.actions;
 
+import java.util.ArrayList;
+
 import com.ats.executor.ActionTestScript;
 import com.ats.script.Script;
+import com.ats.script.ScriptLoader;
 
 public class ActionSystemButton extends Action {
 
 	public static final String SCRIPT_LABEL = "button";
 
-	private String buttonType;
+	private String buttonType = "home";
 
 	public ActionSystemButton() { }
 
 	public ActionSystemButton(Script script, String buttonType) {
 		super(script);
 		setButtonType(buttonType);
+	}
+
+	public ActionSystemButton(ScriptLoader script, ArrayList<String> dataArray) {
+		String[] data = dataArray.get(0).split("=");
+		if(data.length == 2) {
+			setButtonType(data[1].replace("]", "").trim());
+		}
 	}
 
 	@Override
@@ -60,7 +70,7 @@ public class ActionSystemButton extends Action {
 		return buttonType;
 	}
 
-	public void setButtonType(String buttonType) {
-		this.buttonType = buttonType;
+	public void setButtonType(String value) {
+		this.buttonType = value;
 	}
 }
