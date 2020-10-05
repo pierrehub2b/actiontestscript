@@ -336,10 +336,10 @@ public class Lexer {
 						script.addAction(new ActionScripting(script, stopExec, options, jsCode, variable, dataArray), disabled);
 					}
 
-				} else if(ActionProperty.SCRIPT_LABEL.equals(actionType)){
+				} else if(actionType.startsWith(ActionProperty.SCRIPT_LABEL)){
 
 					//-----------------------
-					// Property action
+					// Get property action
 					//-----------------------
 
 					final String[] propertyArray = dataOne.split(ScriptParser.ATS_ASSIGN_SEPARATOR);
