@@ -19,6 +19,7 @@ under the License.
 
 package com.ats.tools;
 
+import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 
 import javax.xml.transform.Transformer;
@@ -50,6 +51,26 @@ public class ScriptReportGenerator {
 				}
 			}
 		}
+		
+		if (xslPath == null || (!new File(xslPath).exists())) {
+			try {
+				final String styleSheet = Resources.toString(ResourceContent.class.getResource("/reports/script/script_pdf_stylesheet.xml"), Charsets.UTF_8);
+				xslPath = createEmptyStylesheet(styleSheet,f.getParent());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		
+		if (xslHtmlPath == null || (!new File(xslHtmlPath).exists())) {
+			try {
+				final String styleSheet = Resources.toString(ResourceContent.class.getResource("/reports/script/script_html_stylesheet.xml"), Charsets.UTF_8);
+				xslHtmlPath = createEmptyStylesheetHtml(styleSheet, f.getParent());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
 		
 		copyImageToTempFolder("false",xmlPath);
 		copyImageToTempFolder("true",xmlPath);
@@ -97,6 +118,31 @@ public class ScriptReportGenerator {
         fileOut.write(aByteArray);
         fileOut.flush();
         fileOut.close();
+	}
+	
+	public static String createEmptyStylesheet(String xmlSource,String xmlPath) throws IOException {
+		File f = new File(xmlPath);		
+		String path = f.getParentFile().getAbsolutePath() + File.separator + "script_pdf_stylesheet.xml";
+		File file = new File(path);
+        file.setWritable(true);
+        file.setReadable(true);
+        FileWriter fw = new FileWriter(file);
+        fw.write(xmlSource);
+	    fw.close();
+
+        return file.getAbsolutePath();
+	}	
+	
+	public static String createEmptyStylesheetHtml(String xmlSource,String basePath) throws IOException {	
+		String path = basePath + File.separator + "script_html_stylesheet.xml";
+		File f = new File(path);
+        f.setWritable(true);
+        f.setReadable(true);
+        FileWriter fw = new FileWriter(f);
+        fw.write(xmlSource);
+	    fw.close();
+
+        return f.getAbsolutePath();
 	}
 	
 	public static void copyFileToTempFolder(String name, String basePath) throws IOException {
