@@ -54,7 +54,7 @@ public class ScriptReportGenerator {
 		
 		if (xslPath == null || !(new File(xslPath).exists())) {
 			try {
-				final String styleSheet = Resources.toString(ResourceContent.class.getResource("/reports/script/test_pdf_stylesheet.xml"), Charsets.UTF_8);
+				final String styleSheet = Resources.toString(ResourceContent.class.getResource("/reports/script/script_pdf_stylesheet.xml"), Charsets.UTF_8);
 				xslPath = createEmptyStylesheet(styleSheet,xmlPath);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -64,7 +64,7 @@ public class ScriptReportGenerator {
 		
 		if (xslHtmlPath == null || !(new File(xslHtmlPath).exists())) {
 			try {
-				final String styleSheet = Resources.toString(ResourceContent.class.getResource("/reports/script/test_html_stylesheet.xml"), Charsets.UTF_8);
+				final String styleSheet = Resources.toString(ResourceContent.class.getResource("/reports/script/script_html_stylesheet.xml"), Charsets.UTF_8);
 				xslPath = createEmptyStylesheetHtml(styleSheet, xmlPath);
 			} catch (IOException e) {
 				e.printStackTrace();
