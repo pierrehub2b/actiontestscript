@@ -63,7 +63,7 @@ public class CampaignReportGenerator {
 			}
 		}
 		
-		if (xslPathPdf == null || !(new File(xslPathPdf).exists())) {
+		if (xslPathPdf == null || (!new File(xslPathPdf).exists())) {
 			try {
 				final String styleSheet = Resources.toString(ResourceContent.class.getResource("/reports/campaign/campaign_pdf_stylesheet.xml"), Charsets.UTF_8);
 				xslPathPdf = createEmptyStylesheet(styleSheet,basePath);
@@ -73,7 +73,7 @@ public class CampaignReportGenerator {
 		}
 		
 		
-		if (xslPathHtml == null || !(new File(xslPathHtml).exists())) {
+		if (xslPathHtml == null || (!new File(xslPathHtml).exists())) {
 			try {
 				final String styleSheet = Resources.toString(ResourceContent.class.getResource("/reports/campaign/campaign_html_stylesheet.xml"), Charsets.UTF_8);
 				xslPathHtml = createEmptyStylesheetHtml(styleSheet, basePath);

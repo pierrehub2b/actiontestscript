@@ -52,20 +52,20 @@ public class ScriptReportGenerator {
 			}
 		}
 		
-		if (xslPath == null || !(new File(xslPath).exists())) {
+		if (xslPath == null || (!new File(xslPath).exists())) {
 			try {
 				final String styleSheet = Resources.toString(ResourceContent.class.getResource("/reports/script/script_pdf_stylesheet.xml"), Charsets.UTF_8);
-				xslPath = createEmptyStylesheet(styleSheet,xmlPath);
+				xslPath = createEmptyStylesheet(styleSheet,f.getParent());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 		
 		
-		if (xslHtmlPath == null || !(new File(xslHtmlPath).exists())) {
+		if (xslHtmlPath == null || (!new File(xslHtmlPath).exists())) {
 			try {
 				final String styleSheet = Resources.toString(ResourceContent.class.getResource("/reports/script/script_html_stylesheet.xml"), Charsets.UTF_8);
-				xslPath = createEmptyStylesheetHtml(styleSheet, xmlPath);
+				xslHtmlPath = createEmptyStylesheetHtml(styleSheet, f.getParent());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
