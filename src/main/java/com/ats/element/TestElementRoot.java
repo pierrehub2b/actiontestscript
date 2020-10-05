@@ -19,14 +19,16 @@ under the License.
 
 package com.ats.element;
 
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Map;
+
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
-
-import java.util.Base64;
 
 public class TestElementRoot extends TestElement {
 
@@ -38,12 +40,16 @@ public class TestElementRoot extends TestElement {
 	private final static String SCREEN_SHOT = "screenshot";
 	private final static String WINDOWS = "windows";
 	
+	private Map<String, String> properties;
+	
 	public TestElementRoot() {}
 
 	public TestElementRoot(Channel channel) {
 		super(channel, 1, 0);
 		setCriterias("root");
-	}	
+
+		properties = channel.getCapabilities();
+	}
 
 	@Override
 	protected void startSearch(boolean sysComp, SearchedElement searchedElement) {
@@ -78,6 +84,13 @@ public class TestElementRoot extends TestElement {
 
 	@Override
 	public String getAttribute(ActionStatus status, String name) {
+		
+		final String value = properties.get(name);
+		
+		if(value != null) {
+			return value;
+		}
+		
 		switch (name.toLowerCase()) {
 		case SOURCE:
 			return engine.getSource();
@@ -106,15 +119,17 @@ public class TestElementRoot extends TestElement {
 	@Override
 	public CalculatedProperty[] getAttributes(boolean reload) {
 		
-		final CalculatedProperty[] props = new CalculatedProperty[6];
-		props[0] = new CalculatedProperty(SOURCE, "[...]");
-		props[1] = new CalculatedProperty(VERSION, channel.getApplicationVersion());
-		props[2] = new CalculatedProperty(RECTANGLE, channel.getBoundDimension());
-		props[3] = new CalculatedProperty(PROCESS_ID, String.valueOf(channel.getProcessId()));
-		props[4] = new CalculatedProperty(TITLE, engine.getTitle());
-		props[5] = new CalculatedProperty(WINDOWS, String.valueOf(engine.getNumWindows()));
-		
-		return props;
+		final ArrayList<CalculatedProperty> attributes = new ArrayList<CalculatedProperty>();
+
+		properties.entrySet().forEach(e -> attributes.add(new CalculatedProperty(e.getKey(), e.getValue())));
+		attributes.add(new CalculatedProperty(SOURCE, "[...]"));
+		attributes.add(new CalculatedProperty(VERSION, channel.getApplicationVersion()));
+		attributes.add(new CalculatedProperty(RECTANGLE, channel.getBoundDimension()));
+		attributes.add(new CalculatedProperty(PROCESS_ID, String.valueOf(channel.getProcessId())));
+		attributes.add(new CalculatedProperty(TITLE, engine.getTitle()));
+		attributes.add(new CalculatedProperty(WINDOWS, String.valueOf(engine.getNumWindows())));
+				
+		return attributes.toArray(new CalculatedProperty[attributes.size()]);
 	}
 
 	@Override

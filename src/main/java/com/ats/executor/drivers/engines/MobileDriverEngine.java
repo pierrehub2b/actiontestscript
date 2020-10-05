@@ -77,7 +77,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	public final static String SYS_BUTTON = "sysbutton";
 
 	private final static String SCREENSHOT_METHOD = "/screenshot";
-	
+
 	private JsonObject source;
 	private MobileTestElement testElement;
 	private OkHttpClient client;
@@ -85,7 +85,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	protected RootElement rootElement;
 	protected RootElement cachedElement;
 	protected long cachedElementTime = 0L;
-	
+
 	private String userAgent;
 	private String token;
 	private String endPoint;
@@ -130,7 +130,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			}
 
 			this.token = response.get("token").getAsString();
-			
+
 			final String systemName = response.get("systemName").getAsString();
 			final String os = response.get("os").getAsString();
 
@@ -141,12 +141,9 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 				rootElement = new AndroidRootElement(this);
 				cachedElement = new AndroidRootElement(this);
 			}
-			
-			final JsonArray properties = response.getAsJsonArray("systemProperties");
-			channel.setSystemProperties(properties);
 
-			final JsonArray buttons = response.getAsJsonArray("systemButtons");
-			channel.setSystemButtons(buttons);
+			channel.addSystemProperties(response.getAsJsonArray("systemProperties"));
+			channel.addSystemButtons(response.getAsJsonArray("systemButtons"));
 
 			final String driverVersion = response.get("driverVersion").getAsString();
 
@@ -189,9 +186,23 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			} else {
 				channel.setApplicationData(os + ":" + systemName, version, driverVersion, -1, icon, endPointData[0] + ":" + screenCapturePort);
 			}
-			
+
 			refreshElementMapLocation();
 		}
+	}
+
+
+	@Override
+	public HashMap<String, String> getCapabilities() {
+		final HashMap<String, String> result = new HashMap<String, String>();
+
+		result.put("system-name", "mobileosname");
+		result.put("system-version", "mobileversion");
+		result.put("system-build", "mobileosbuild");
+		result.put("system-country", "mobileoscountry");
+		result.put("system-machine-name", "mobilemachinename");
+
+		return result;
 	}
 
 	@Override
@@ -250,21 +261,21 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 		AtsMobileElement element = cachedElement.getValue();
 
 		listElements.sort(Comparator.comparing(AtsMobileElement::getPositionInDom));
-		
+
 		for (AtsMobileElement child : listElements) {
 			int coordinateX = child.getX().intValue();
 			int coordinateY = child.getY().intValue();
 			int coordinateW = child.getWidth().intValue();
 			int coordinateH = child.getHeight().intValue();
-			
+
 			if (child.getRect().contains(new Point(mouseX, mouseY)) &&
 					(
 							element.getRect().contains(new Point(coordinateX, coordinateY)) ||
-									element.getRect().contains(new Point(coordinateX + coordinateW, coordinateY)) ||
-									element.getRect().contains(new Point(coordinateX + coordinateW, coordinateY + coordinateH)) ||
-									element.getRect().contains(new Point(coordinateX, coordinateY + coordinateH))
-					)
-			) {
+							element.getRect().contains(new Point(coordinateX + coordinateW, coordinateY)) ||
+							element.getRect().contains(new Point(coordinateX + coordinateW, coordinateY + coordinateH)) ||
+							element.getRect().contains(new Point(coordinateX, coordinateY + coordinateH))
+							)
+					) {
 				element = child;
 			}
 		}
@@ -287,7 +298,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 		AtsMobileElement element = cachedElement.getValue();
 
 		listElements.sort(Comparator.comparing(AtsMobileElement::getPositionInDom));
-		
+
 		for (AtsMobileElement child : listElements) {
 			if (child.getRect().contains(new Point(mouseX, mouseY)) && child.getRect().getWidth() <= w && child.getRect().getHeight() <= h && element.getRect().contains(child.getRect())) {
 				element = child;
@@ -296,7 +307,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 		return element.getFoundElement();
 	}
-	
+
 	public String getToken() {
 		return token;
 	}
@@ -354,7 +365,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 		}
 		return new CalculatedProperty[0];
 	}
-	
+
 	private AtsMobileElement getCapturedElementById(String id, boolean reload) {
 		if (reload) {
 			return getElementById(rootElement.getValue(), id);
@@ -412,10 +423,10 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public void buttonClick(ActionStatus status, String type) {
 		final JsonObject result = executeRequest(SYS_BUTTON, type);
-		
+
 		final int code = result.get("status").getAsInt();
 		final String message = result.get("message").getAsString();
-		
+
 		status.setCode(code);
 		status.setMessage(message);
 		status.setPassed(true);
@@ -425,12 +436,12 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	public void tap(int count, FoundElement element) {
 		rootElement.tap(element, count);
 	}
-	
+
 	@Override
 	public void press(int duration, ArrayList<String> paths, FoundElement element) {
 		rootElement.press(element, paths, duration);
 	}
-	
+
 	@Override
 	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {
 		cachedElementTime = 0L;
@@ -522,7 +533,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------------------------------
-	
+
 	@Override
 	public void api(ActionStatus status, ActionApi api) {}
 
@@ -658,12 +669,12 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void windowState(ActionStatus status, Channel channel, String state) { }
-	
+
 	@Override
 	public void setSysProperty(String propertyName, String propertyValue) {
 		executeRequest(SET_PROP, "sys-" + propertyName, propertyValue);
 	}
-	
+
 	@Override
 	public Object executeJavaScript(ActionStatus status, String script, TestElement element) {
 		final JsonObject result = (JsonObject)rootElement.scripting(script, element.getFoundElement());
@@ -675,26 +686,26 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 		final JsonObject result = (JsonObject)rootElement.scripting(script);
 		return handleResult(status, result);
 	}
-	
+
 	private Object handleResult(ActionStatus status, JsonObject result) {
 		int code = result.get("status").getAsInt();
 		String message = result.get("message").getAsString();
-		
+
 		if (code == 0) {
 			status.setNoError(message);
 		} else {
 			status.setError(ActionStatus.JAVASCRIPT_ERROR, message);
 		}
-		
+
 		return result;
 	}
-	
+
 	@Override
 	protected void setPosition(org.openqa.selenium.Point pt) { }
 
 	@Override
 	protected void setSize(Dimension dim) { }
-	
+
 	@Override
 	public int getNumWindows() {
 		return 1;

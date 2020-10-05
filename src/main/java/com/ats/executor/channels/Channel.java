@@ -19,6 +19,14 @@ under the License.
 
 package com.ats.executor.channels;
 
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import org.openqa.selenium.Proxy;
+import org.openqa.selenium.WebElement;
+
 import com.ats.driver.AtsManager;
 import com.ats.element.DialogBox;
 import com.ats.element.FoundElement;
@@ -54,12 +62,6 @@ import com.ats.tools.performance.proxy.AtsNoProxy;
 import com.ats.tools.performance.proxy.AtsProxy;
 import com.ats.tools.performance.proxy.IAtsProxy;
 import com.google.gson.JsonArray;
-import org.openqa.selenium.Proxy;
-import org.openqa.selenium.WebElement;
-
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Channel {
 
@@ -78,27 +80,25 @@ public class Channel {
 	private String applicationVersion = "";
 	private String driverVersion = "";
 	private String os = "";
-	
+
 	private ArrayList<String> systemProperties = new ArrayList<>();
-	public void setSystemProperties(JsonArray info) {
-		ArrayList<String> properties = new ArrayList<>();
-		for (int i = 0; i < info.size(); i++) {
-			properties.add(info.get(i).getAsString());
+	public void addSystemProperties(JsonArray info) {
+		if(info != null) {
+			for (int i = 0; i < info.size(); i++) {
+				systemProperties.add(info.get(i).getAsString());
+			}
 		}
-		
-		this.systemProperties = properties;
 	}
 
 	private ArrayList<String> systemButtons = new ArrayList<>();
-	public void setSystemButtons(JsonArray info) {
-		ArrayList<String> properties = new ArrayList<>();
-		for (int i = 0; i < info.size(); i++) {
-			properties.add(info.get(i).getAsString());
+	public void addSystemButtons(JsonArray info) {
+		if(info != null) {
+			for (int i = 0; i < info.size(); i++) {
+				systemButtons.add(info.get(i).getAsString());
+			}
 		}
-
-		this.systemButtons = properties;
 	}
-	
+
 	private byte[] icon;
 	private String screenServer;
 	private ArrayList<String> operations = new ArrayList<String>();
@@ -115,7 +115,7 @@ public class Channel {
 	//----------------------------------------------------------------------------------------------------------------------
 
 	public Channel() {}
-	
+
 	public Channel(AtsManager atsManager) {
 		this.atsManager = atsManager;
 	}
@@ -161,7 +161,7 @@ public class Channel {
 	public void waitBeforeSearchElement(WebDriverEngine webDriverEngine) {
 		atsManager.getWaitGuiReady().waitBeforeSearchElement(this, webDriverEngine);
 	}
-	
+
 	public void waitBeforeEnterText(WebDriverEngine webDriverEngine) {
 		atsManager.getWaitGuiReady().waitBeforeEnterText(this, webDriverEngine);
 	}
@@ -173,7 +173,18 @@ public class Channel {
 	public Class<ActionTestScript> loadTestScriptClass(String name){
 		return atsManager.loadTestScriptClass(name);
 	}
+	
+	public HashMap<String, String> getCapabilities(){
+		
+		final HashMap<String, String> result = engine.getCapabilities();
 
+		result.put("system-app", getApplication());
+		result.put("system-app-version", getApplicationVersion());
+		result.put("system-authentication", getAuthentication());
+		
+		return result;
+	}
+	
 	//----------------------------------------------------------------------------------------------------------------------
 	//----------------------------------------------------------------------------------------------------------------------
 
@@ -269,7 +280,7 @@ public class Channel {
 	public String getSource(){
 		return engine.getSource();
 	}
-	
+
 	public void checkStatus(ActionExecute actionExecute, String testName, int testLine) {
 	}
 
@@ -405,7 +416,7 @@ public class Channel {
 	public String getAttribute(ActionStatus status, FoundElement element, String attributeName, int maxTry){
 		return engine.getAttribute(status, element, attributeName, maxTry + ChannelManager.ATS.getMaxTryProperty());
 	}
-	
+
 	public void setSysProperty(String attributeName, String attributeValue) {
 		engine.setSysProperty(attributeName, attributeValue);
 	}
@@ -425,13 +436,13 @@ public class Channel {
 	//----------------------------------------------------------------------------------------------------------------------
 	// Getter and setter for serialization
 	//----------------------------------------------------------------------------------------------------------------------
-	
+
 	public ArrayList<String> getSystemProperties() { return systemProperties; }
 	public void setSystemProperties(ArrayList<String> systemProperties) { this.systemProperties = systemProperties; }
-	
+
 	public ArrayList<String> getSystemButtons() { return systemButtons; }
 	public void setSystemButtons(ArrayList<String> systemButtons) { this.systemButtons = systemButtons; }
-	
+
 	public ArrayList<String> getOperations() {
 		return operations;
 	}
@@ -537,7 +548,7 @@ public class Channel {
 	public void setDimension(TestBound dimension) {
 		this.dimension = dimension;
 	}
-	
+
 	public String getBoundDimension() {
 		return dimension.getX().intValue() + "," + dimension.getY().intValue() + "," + dimension.getWidth().intValue() + "," + dimension.getHeight().intValue();
 	}
@@ -665,11 +676,11 @@ public class Channel {
 		engine.mouseMoveToElement(status, foundElement, position, false, 0, 0);
 		actionTerminated(status);
 	}
-	
+
 	public void buttonClick(ActionStatus status, String buttonType) {
 		engine.buttonClick(status, buttonType);
 	}
-	
+
 	//----------------------------------------------------------------------------------------------------------
 	// Performance
 	//----------------------------------------------------------------------------------------------------------
@@ -722,7 +733,7 @@ public class Channel {
 	public void endHarAction() {
 		atsProxy.endAction();
 	}
-	
+
 	public void sendToOctoperfServer(ActionOctoperfVirtualUser action) {
 		atsProxy.sendToOctoperfServer(this, action);
 	}
@@ -751,7 +762,7 @@ public class Channel {
 	public void createVisualAction(String actionName, int scriptLine, long timeline, boolean sync) {
 		this.engine.createVisualAction(this, actionName, scriptLine, timeline, sync);
 	}
-	
+
 	public void updateVisualAction(boolean isRef) {
 		this.engine.updateScreenshot(this.dimension, isRef);
 	}
