@@ -63,6 +63,25 @@ public class CampaignReportGenerator {
 			}
 		}
 		
+		if (xslPathPdf == null || !(new File(xslPathPdf).exists())) {
+			try {
+				final String styleSheet = Resources.toString(ResourceContent.class.getResource("/reports/script/test_pdf_stylesheet.xml"), Charsets.UTF_8);
+				xslPathPdf = createEmptyStylesheet(styleSheet,xmlPath);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		
+		if (xslPathHtml == null || !(new File(xslPathHtml).exists())) {
+			try {
+				final String styleSheet = Resources.toString(ResourceContent.class.getResource("/reports/script/test_html_stylesheet.xml"), Charsets.UTF_8);
+				xslPathHtml = createEmptyStylesheetHtml(styleSheet, xmlPath);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
 		copyImageToTempFolder("false",basePath);
 		copyImageToTempFolder("true",basePath);
 		copyImageToTempFolder("warning",basePath);
@@ -155,6 +174,30 @@ public class CampaignReportGenerator {
         } 
         fw.write("</report>");
 	    fw.close();
+        return f.getAbsolutePath();
+	}
+	
+	public static String createEmptyStylesheet(String xmlSource,String basePath) throws IOException {	
+		String path = basePath + File.separator + "campaign_pdf_stylesheet.xml";
+		File f = new File(path);
+        f.setWritable(true);
+        f.setReadable(true);
+        FileWriter fw = new FileWriter(f);
+        fw.write(xmlSource);
+	    fw.close();
+
+        return f.getAbsolutePath();
+	}
+	
+	public static String createEmptyStylesheetHtml(String xmlSource,String basePath) throws IOException {	
+		String path = basePath + File.separator + "campaign_html_stylesheet.xml";
+		File f = new File(path);
+        f.setWritable(true);
+        f.setReadable(true);
+        FileWriter fw = new FileWriter(f);
+        fw.write(xmlSource);
+	    fw.close();
+
         return f.getAbsolutePath();
 	}
 }
