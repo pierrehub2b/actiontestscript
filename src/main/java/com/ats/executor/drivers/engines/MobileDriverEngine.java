@@ -661,7 +661,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	
 	@Override
 	public void setSysProperty(String propertyName, String propertyValue) {
-		executeRequest(SET_PROP, "sys-" + propertyName, propertyValue);
+		executeRequest(SET_PROP, propertyName, propertyValue);
 	}
 	
 	@Override
