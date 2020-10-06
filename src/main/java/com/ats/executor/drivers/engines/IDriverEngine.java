@@ -37,6 +37,7 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -113,4 +114,5 @@ public interface IDriverEngine{
 	public void windowState(ActionStatus status, Channel channel, String state);
 	public String getTitle();
 	public int getNumWindows();
+	public HashMap<String, String> getCapabilities();
 }

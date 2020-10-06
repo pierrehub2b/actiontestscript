@@ -38,6 +38,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -85,6 +86,20 @@ public abstract class DriverEngine {
 		if(propertyWait == -1) {
 			propertyWait = defaultCheck;
 		}
+	}
+	
+	public HashMap<String, String> getCapabilities(){
+		
+		final HashMap<String, String> result = new HashMap<String, String>();
+		
+		result.put("system-name", getDesktopDriver().getOsName());
+		result.put("system-version", getDesktopDriver().getOsVersion());
+		result.put("system-build", getDesktopDriver().getOsBuildVersion());
+		result.put("system-country", getDesktopDriver().getCountryCode());
+		result.put("system-machine-name", getDesktopDriver().getMachineName());
+		result.put("system-dotnet-version", getDesktopDriver().getDotNetVersion());
+		
+		return result;
 	}
 	
 	public void started(ActionStatus status) {
