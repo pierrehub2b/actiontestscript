@@ -66,11 +66,12 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
               <xsl:value-of select="@name"/>
 	    </H3>
           </TD>
-	  <!--<TD class="align-middle text-center">
-	    <xsl:text disable-output-escaping="yes">&lt;A target=&quot;_blank&quot; href=&quot;</xsl:text>
-	    <xsl:value-of select="concat('../',@name,'/report_',@name,'.pdf')"/>
-	    <xsl:text disable-output-escaping="yes">&quot; class=&quot;btn btn-secondary btn-sm &quot; role=&quot;button&quot; aria-pressed=&quot;true&quot;&gt;PDF report&lt;/a&gt;</xsl:text>
-	  </TD>-->
+          
+		  <TD class="align-middle text-center">
+		    <xsl:text disable-output-escaping="yes">&lt;A target=&quot;_blank&quot; href=&quot;</xsl:text>
+		    <xsl:value-of select="concat('campaign_report.pdf')"/>
+		    <xsl:text disable-output-escaping="yes">&quot; class=&quot;btn btn-secondary btn-sm &quot; role=&quot;button&quot; aria-pressed=&quot;true&quot;&gt;PDF report&lt;/a&gt;</xsl:text>
+		  </TD>
 
         </TR>
 	<TR>
