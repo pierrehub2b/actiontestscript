@@ -20,6 +20,7 @@ under the License.
 package com.ats.script;
 
 import com.ats.executor.ActionTestScript;
+import com.ats.executor.channels.ChannelManager;
 import com.ats.generator.ATS;
 import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.mouse.Mouse;
@@ -321,6 +322,6 @@ public class ScriptHeader {
 	public void setSystemProperties(String value) {}
 	
 	public String getSystemProperties() {
-		return project.getSystemProperties();
+		return ChannelManager.SYSTEM_VALUES;
 	}
 }

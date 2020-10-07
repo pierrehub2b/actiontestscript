@@ -31,7 +31,19 @@ import java.util.Optional;
 public class ChannelManager {
 
 	public static AtsManager ATS = new AtsManager();
-	
+
+	public static final String SYS_OS_NAME = "os-name";
+	public static final String SYS_OS_VERSION = "os-version";
+	public static final String SYS_OS_BUILD = "os-build";
+	public static final String SYS_COUNTRY = "country";
+	public static final String SYS_MACHINE_NAME = "machine-name";
+	public static final String SYS_DOT_NET = "dot-net";
+	public static final String SYS_APP_NAME = "app-name";
+	public static final String SYS_APP_VERSION = "app-version";
+	public static final String SYS_USER_NAME = "user-name";
+
+	public static String SYSTEM_VALUES = SYS_OS_NAME + "," + SYS_OS_VERSION + "," + SYS_OS_BUILD + "," + SYS_COUNTRY + "," + SYS_MACHINE_NAME + "," + SYS_DOT_NET + "," + SYS_APP_NAME + "," + SYS_APP_VERSION + "," + SYS_USER_NAME;
+
 	private Channel currentChannel;
 	private ArrayList<Channel> channelsList;
 
@@ -50,7 +62,7 @@ public class ChannelManager {
 		if(ATS.getError() != null) {
 			script.sendInfoLog("ActionTestScript properties file found, but an error occured !", ATS.getError());
 		}
-		
+
 		if(ATS.getWaitGuiReady() != null) {
 			script.sendInfoLog("Custom WaitGuiReady class found !", "");
 		}
@@ -101,7 +113,7 @@ public class ChannelManager {
 		final String appName = action.getApplication().getCalculated();
 
 		if(getChannel(name) instanceof EmptyChannel){
-			
+
 			final Channel newChannel = new Channel(ATS, status, mainScript, driverManager, action);
 
 			if(status.isPassed()) {
@@ -121,7 +133,7 @@ public class ChannelManager {
 
 			status.setData(getChannelsList());
 		}
-		
+
 		return appName;
 	}
 

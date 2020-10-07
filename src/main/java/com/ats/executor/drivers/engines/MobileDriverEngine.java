@@ -181,8 +181,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			final String[] endPointData = endPoint.split(":");
 			final String version = response.get("version").getAsString();
 			final String userName = "mobileUser";
-			
-			
+						
 			String udpInfo = endPointData[0] + ":" + screenCapturePort;
 			
 			if(udpEndPoint != null) {
@@ -192,20 +191,6 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 			refreshElementMapLocation();
 		}
-	}
-
-
-	@Override
-	public HashMap<String, String> getCapabilities() {
-		final HashMap<String, String> result = new HashMap<String, String>();
-
-		result.put("system-name", "mobileosname");
-		result.put("system-version", "mobileversion");
-		result.put("system-build", "mobileosbuild");
-		result.put("system-country", "mobileoscountry");
-		result.put("system-machine-name", "mobilemachinename");
-
-		return result;
 	}
 
 	@Override

@@ -64,16 +64,6 @@ public class Project {
 	private static final String SRC_FOLDER_ATS = "ats";
 	private static final String SRC_FOLDER_SUBSCRIPTS = "subscripts";
 	private static final String SRC_FOLDER_JAVA = "java";
-	
-	public static final String SYS_OS_NAME = "os-name";
-	public static final String SYS_OS_VERSION = "os-version";
-	public static final String SYS_OS_BUILD = "os-build";
-	public static final String SYS_COUNTRY = "country";
-	public static final String SYS_MACHINE_NAME = "machine-name";
-	public static final String SYS_DOT_NET = "dot-net";
-	public static final String SYS_APP_NAME = "app-name";
-	public static final String SYS_APP_VERSION = "app-version";
-	public static final String SYS_USER_NAME = "user-name";
 
 	private String name = "";
 	private String domain = "";
@@ -94,10 +84,6 @@ public class Project {
 		}else {
 			return new Project(sourceFolder);
 		}
-	}
-		
-	public String getSystemProperties() {
-		return SYS_OS_NAME + "," + SYS_OS_VERSION + "," + SYS_OS_BUILD + "," + SYS_COUNTRY + "," + SYS_MACHINE_NAME + "," + SYS_DOT_NET + "," + SYS_APP_NAME + "," + SYS_APP_VERSION + "," + SYS_USER_NAME;
 	}
 
 	public static String getAssetsJavaCode(String path) {

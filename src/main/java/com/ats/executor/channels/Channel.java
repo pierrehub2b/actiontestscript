@@ -47,7 +47,6 @@ import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
-import com.ats.script.Project;
 import com.ats.script.ScriptHeader;
 import com.ats.script.actions.Action;
 import com.ats.script.actions.ActionApi;
@@ -80,6 +79,9 @@ public class Channel {
 	private String applicationVersion = "";
 	private String driverVersion = "";
 	private String os = "";
+	private String osName = "";
+	private String osVersion = "";
+	private String osBuild = "";
 	private String userName = System.getProperty("user.name");
 
 	private ArrayList<String> systemProperties = new ArrayList<>();
@@ -143,12 +145,18 @@ public class Channel {
 			this.engine = driverManager.getDriverEngine(this, status, desktopDriver);
 
 			if(status.isPassed()) {
-				this.refreshLocation();
-				this.engine.started(status);
+				refreshLocation();
+				loadSystemValues();
+				engine.started(status);
 			}else {
 				status.setChannel(null);
 			}
 		}
+	}
+	
+	private void loadSystemValues() {
+		// TODO Auto-generated method stub
+		
 	}
 
 	public void waitBeforeMouseMoveToElement(WebDriverEngine webDriverEngine) {
@@ -173,30 +181,6 @@ public class Channel {
 
 	public Class<ActionTestScript> loadTestScriptClass(String name){
 		return atsManager.loadTestScriptClass(name);
-	}
-	
-	public String getSystemValue(String name){
-		switch (name) {
-		case Project.SYS_OS_NAME :
-			return engine.getDesktopDriver().getOsName();
-		case Project.SYS_OS_VERSION :
-			return engine.getDesktopDriver().getOsVersion();
-		case Project.SYS_OS_BUILD :
-			return engine.getDesktopDriver().getOsBuildVersion();
-		case Project.SYS_COUNTRY :
-			return engine.getDesktopDriver().getCountryCode();
-		case Project.SYS_MACHINE_NAME :
-			return engine.getDesktopDriver().getMachineName();
-		case Project.SYS_DOT_NET :
-			return engine.getDesktopDriver().getDotNetVersion();
-		case Project.SYS_APP_NAME :
-			return getApplication();
-		case Project.SYS_APP_VERSION :
-			return getApplicationVersion();
-		case Project.SYS_USER_NAME :
-			return getUserName();
-		}
-		return "";
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------
@@ -531,10 +515,6 @@ public class Channel {
 
 	public String getApplicationVersion() {
 		return applicationVersion;
-	}
-		
-	private String getUserName() {
-		return userName;
 	}
 
 	public void setApplicationVersion(String applicationVersion) {

@@ -19,6 +19,15 @@ under the License.
 
 package com.ats.executor.drivers.engines;
 
+import java.awt.Rectangle;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Point;
+import org.openqa.selenium.remote.RemoteWebDriver;
+
 import com.ats.driver.ApplicationProperties;
 import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
@@ -32,15 +41,6 @@ import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.graphic.ImageTemplateMatchingSimple;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.Point;
-import org.openqa.selenium.remote.RemoteWebDriver;
-
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public abstract class DriverEngine {
 	
@@ -86,20 +86,6 @@ public abstract class DriverEngine {
 		if(propertyWait == -1) {
 			propertyWait = defaultCheck;
 		}
-	}
-	
-	public HashMap<String, String> getCapabilities(){
-		
-		final HashMap<String, String> result = new HashMap<String, String>();
-		
-		result.put("os-name", getDesktopDriver().getOsName());
-		result.put("os-version", getDesktopDriver().getOsVersion());
-		result.put("os-build", getDesktopDriver().getOsBuildVersion());
-		result.put("country", getDesktopDriver().getCountryCode());
-		result.put("machine-name", getDesktopDriver().getMachineName());
-		result.put("dotnet", getDesktopDriver().getDotNetVersion());
-		
-		return result;
 	}
 	
 	public void started(ActionStatus status) {

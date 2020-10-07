@@ -19,8 +19,21 @@ under the License.
 
 package com.ats.script;
 
+import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.regex.Pattern;
+
 import com.ats.crypto.Passwords;
-import com.ats.executor.channels.Channel;
 import com.ats.executor.channels.ChannelManager;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.ScriptValue;
@@ -32,15 +45,6 @@ import com.ats.generator.variables.transform.Transformer;
 import com.ats.script.actions.Action;
 import com.ats.tools.logger.ExecutionLogger;
 import com.ats.tools.logger.levels.AtsLogger;
-
-import java.io.File;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.regex.Pattern;
 
 public class Script {
 
@@ -289,12 +293,12 @@ public class Script {
 	//-------------------------------------------------------------------------------------------------
 
 	public String getSystemValue(String name){
-		if(channelManager != null) {
+		/*if(channelManager != null) {
 			final Channel cnl = channelManager.getCurrentChannel();
 			if(cnl != null) {
 				return cnl.getSystemValue(name);
 			}
-		}
+		}*/
 		return "";
 	}
 

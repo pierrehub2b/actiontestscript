@@ -208,8 +208,8 @@ public class DriverManager {
 			}
 
 		} else if (props.isMobile() || application.startsWith(MOBILE + "://")) {
-			String token = getChannelToken(application);
-			MobileDriverEngine mobileDriverEngine = new MobileDriverEngine(channel, status, application, desktopDriver, props, token);
+			final String token = getChannelToken(application);
+			final MobileDriverEngine mobileDriverEngine = new MobileDriverEngine(channel, status, application, desktopDriver, props, token);
 			mobileDrivers.add(mobileDriverEngine);
 			return mobileDriverEngine;			
 		} else if (props.isApi() || application.startsWith(HTTP + "://") || application.startsWith(HTTPS + "://")) {
