@@ -112,7 +112,7 @@ public class CalculatedValue{
 			final String replace = mv.group(0);
 			final String value = StringEscapeUtils.escapeJava(mv.group(1).trim());
 			dataValue = dataValue.replace(replace, script.getSystemValue(value));
-			rawJavaCode = rawJavaCode.replace(replace, "\"," + ActionTestScript.JAVA_SYSTEM_FUNCTION_NAME + "(\"" + value + "\"),\"");
+			rawJavaCode = rawJavaCode.replace(replace, "\"," + ActionTestScript.JAVA_SYSTEM_FUNCTION_NAME + "(\"" + value + "\"), \"");
 		}
 
 		mv = ParameterValue.PARAMETER_PATTERN.matcher(dataValue);
