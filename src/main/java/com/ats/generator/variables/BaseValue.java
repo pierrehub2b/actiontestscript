@@ -55,7 +55,7 @@ public class BaseValue {
 	}
 
 	public String getCode() {
-		StringBuilder codeBuilder = new StringBuilder("(");
+		final StringBuilder codeBuilder = new StringBuilder("(");
 		codeBuilder.append(codeValue);
 						
 		if(defaultValue.length() > 0) {

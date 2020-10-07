@@ -180,12 +180,15 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 			final String[] endPointData = endPoint.split(":");
 			final String version = response.get("version").getAsString();
-
+			final String userName = "mobileUser";
+			
+			
+			String udpInfo = endPointData[0] + ":" + screenCapturePort;
+			
 			if(udpEndPoint != null) {
-				channel.setApplicationData(os + ":" + systemName, version, driverVersion, -1, icon, udpEndPoint.getAsString() + ":" + screenCapturePort);
-			} else {
-				channel.setApplicationData(os + ":" + systemName, version, driverVersion, -1, icon, endPointData[0] + ":" + screenCapturePort);
+				udpInfo = udpEndPoint.getAsString() + ":" + screenCapturePort;
 			}
+			channel.setApplicationData(os, systemName, userName, version, driverVersion, icon, udpInfo);
 
 			refreshElementMapLocation();
 		}

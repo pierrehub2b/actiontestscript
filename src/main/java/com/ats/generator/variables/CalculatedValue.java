@@ -48,7 +48,9 @@ public class CalculatedValue{
 	public static final Pattern IMAGE_PATTERN = Pattern.compile("\\$image\\s*?\\(([^\\)]*)\\)", Pattern.CASE_INSENSITIVE);
 
 	private static final Pattern PASSWORD_DATA = Pattern.compile("\\$pass\\s*?\\(([^\\)]*)\\)", Pattern.CASE_INSENSITIVE);
-
+	
+	private static final Pattern SYS_PATTERN = Pattern.compile("\\$sys\\s*?\\(([^\\)]*)\\)", Pattern.CASE_INSENSITIVE);
+	
 	//-----------------------------------------------------------------------------------------------------
 	// variable and parameter management
 	//-----------------------------------------------------------------------------------------------------
@@ -103,6 +105,14 @@ public class CalculatedValue{
 			final String variableName = mv.group(1);
 			dataValue = dataValue.replace(replace, script.getVariableValue(variableName));
 			rawJavaCode = rawJavaCode.replace(replace, "\", " + variableName + ", \"");
+		}
+
+		mv = SYS_PATTERN.matcher(dataValue);
+		while (mv.find()) {
+			final String replace = mv.group(0);
+			final String value = StringEscapeUtils.escapeJava(mv.group(1).trim());
+			dataValue = dataValue.replace(replace, script.getSystemValue(value));
+			rawJavaCode = rawJavaCode.replace(replace, "\"," + ActionTestScript.JAVA_SYSTEM_FUNCTION_NAME + "(\"" + value + "\"),\"");
 		}
 
 		mv = ParameterValue.PARAMETER_PATTERN.matcher(dataValue);

@@ -72,7 +72,6 @@ public class ActionTestScript extends Script implements ITest{
 	public static final String MAIN_TEST_FUNCTION = "testMain";
 
 	protected ActionTestScript topScript;
-	private ChannelManager channelManager;
 
 	private String[] returnValues;
 
@@ -445,6 +444,13 @@ public class ActionTestScript extends Script implements ITest{
 
 	public String env(String name, String defaultValue) {
 		return getEnvironmentValue(name, defaultValue);
+	}
+	
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_SYSTEM_FUNCTION_NAME = "sys";
+	public String sys(String name){
+		return getSystemValue(name);
 	}
 
 	//---------------------------------------------------------------------------------------------

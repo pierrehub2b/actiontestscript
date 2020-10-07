@@ -39,16 +39,12 @@ public class TestElementRoot extends TestElement {
 	private final static String PROCESS_ID = "process-id";
 	private final static String SCREEN_SHOT = "screenshot";
 	private final static String WINDOWS = "windows";
-	
-	private Map<String, String> properties;
-	
+		
 	public TestElementRoot() {}
 
 	public TestElementRoot(Channel channel) {
 		super(channel, 1, 0);
 		setCriterias("root");
-
-		properties = channel.getCapabilities();
 	}
 
 	@Override
@@ -85,12 +81,6 @@ public class TestElementRoot extends TestElement {
 	@Override
 	public String getAttribute(ActionStatus status, String name) {
 		
-		final String value = properties.get(name);
-		
-		if(value != null) {
-			return value;
-		}
-		
 		switch (name.toLowerCase()) {
 		case SOURCE:
 			return engine.getSource();
@@ -121,7 +111,6 @@ public class TestElementRoot extends TestElement {
 		
 		final ArrayList<CalculatedProperty> attributes = new ArrayList<CalculatedProperty>();
 
-		properties.entrySet().forEach(e -> attributes.add(new CalculatedProperty(e.getKey(), e.getValue())));
 		attributes.add(new CalculatedProperty(SOURCE, "[...]"));
 		attributes.add(new CalculatedProperty(VERSION, channel.getApplicationVersion()));
 		attributes.add(new CalculatedProperty(RECTANGLE, channel.getBoundDimension()));

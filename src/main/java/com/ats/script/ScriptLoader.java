@@ -62,13 +62,13 @@ public class ScriptLoader extends Script {
 		this(type, lexer, file, projectData, DEFAULT_CHARSET);
 	}
 
-	public ScriptLoader(String type, Lexer lexer, File file, Project projectData, Charset charset){
+	public ScriptLoader(String type, Lexer lexer, File file, Project prj, Charset charset){
 
-		final ScriptHeader header = new ScriptHeader(projectData, file);
+		final ScriptHeader header = new ScriptHeader(prj, file);
 		
 		this.setHeader(header);
 		this.setCharset(charset);
-		this.projectGav = projectData.getGav();
+		this.projectGav = prj.getGav();
 
 		if(ATS_EXTENSION.equals(type)){
 

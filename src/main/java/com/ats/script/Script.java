@@ -20,6 +20,8 @@ under the License.
 package com.ats.script;
 
 import com.ats.crypto.Passwords;
+import com.ats.executor.channels.Channel;
+import com.ats.executor.channels.ChannelManager;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.ScriptValue;
 import com.ats.generator.variables.Variable;
@@ -61,6 +63,8 @@ public class Script {
 
 	protected File csvFile;
 	protected int iteration = 0;
+
+	protected ChannelManager channelManager;
 
 	private Map<String, String> testExecutionVariables;
 	private ExecutionLogger logger = new ExecutionLogger();
@@ -284,11 +288,22 @@ public class Script {
 	//-------------------------------------------------------------------------------------------------
 	//-------------------------------------------------------------------------------------------------
 
+	public String getSystemValue(String name){
+		if(channelManager != null) {
+			final Channel cnl = channelManager.getCurrentChannel();
+			if(cnl != null) {
+				return cnl.getSystemValue(name);
+			}
+		}
+		return "";
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
+
 	public String getEnvironmentValue(String name, String defaultValue) {
 
-		String value = null;
-
-		value = System.getProperty(name);
+		String value = System.getProperty(name);
 		if(value != null) {
 			return value;
 		}

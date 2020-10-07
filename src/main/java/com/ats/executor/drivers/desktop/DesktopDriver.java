@@ -103,7 +103,7 @@ public class DesktopDriver extends RemoteWebDriver {
 		final DriverProcess desktopDriverProcess = driverManager.getDesktopDriver(status);
 
 		if(status.isPassed()) {
-
+			
 			this.driverHost = desktopDriverProcess.getDriverServerUrl().getHost();
 			this.driverPort = desktopDriverProcess.getDriverServerUrl().getPort();
 			this.driverUrl = "http://" + getDriverHost() + ":" + getDriverPort();

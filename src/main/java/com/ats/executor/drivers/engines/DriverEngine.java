@@ -92,12 +92,12 @@ public abstract class DriverEngine {
 		
 		final HashMap<String, String> result = new HashMap<String, String>();
 		
-		result.put("system-name", getDesktopDriver().getOsName());
-		result.put("system-version", getDesktopDriver().getOsVersion());
-		result.put("system-build", getDesktopDriver().getOsBuildVersion());
-		result.put("system-country", getDesktopDriver().getCountryCode());
-		result.put("system-machine-name", getDesktopDriver().getMachineName());
-		result.put("system-dotnet-version", getDesktopDriver().getDotNetVersion());
+		result.put("os-name", getDesktopDriver().getOsName());
+		result.put("os-version", getDesktopDriver().getOsVersion());
+		result.put("os-build", getDesktopDriver().getOsBuildVersion());
+		result.put("country", getDesktopDriver().getCountryCode());
+		result.put("machine-name", getDesktopDriver().getMachineName());
+		result.put("dotnet", getDesktopDriver().getDotNetVersion());
 		
 		return result;
 	}

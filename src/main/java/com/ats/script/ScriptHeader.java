@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 
 public class ScriptHeader {
 
-	private Project projectData;
+	private Project project;
 
 	private String path = "";
 	private String projectPath = "";
@@ -71,34 +71,34 @@ public class ScriptHeader {
 		this.groups = Arrays.asList(groups.split(","));
 	}
 
-	public ScriptHeader(Project projectData, File file){
+	public ScriptHeader(Project prj, File file){
 
-		this.projectData = projectData;
+		this.project = prj;
 
-		this.setProjectPath(projectData.getFolderPath());
+		this.setProjectPath(project.getFolderPath());
 		this.setPath(file.getAbsolutePath());
 		this.setName(Utils.removeExtension(file.getName()));
 
 		try {
-			final Path relative = projectData.getAtsSourceFolder().relativize(file.getParentFile().toPath());
+			final Path relative = project.getAtsSourceFolder().relativize(file.getParentFile().toPath());
 			this.setPackageName(relative.toString().replace(File.separator, "."));
 		}catch (IllegalArgumentException e) {}
 	}
 
 	public File getTestReportFolder(Path path) {
-		return projectData.getReportFolder().toFile();
+		return project.getReportFolder().toFile();
 	}
 
 	public File getReportFolder() {
-		return projectData.getReportFolder().toFile();
+		return project.getReportFolder().toFile();
 	}
 
 	public File getJavaDestinationFolder() {
-		return projectData.getJavaDestinationFolder().toFile();
+		return project.getJavaDestinationFolder().toFile();
 	}
 
 	public File getJavaFile() {
-		return projectData.getJavaFile(getPackagePath() + name + ".java");
+		return project.getJavaFile(getPackagePath() + name + ".java");
 	}
 
 	public String getPackagePath() {
@@ -316,5 +316,11 @@ public class ScriptHeader {
 
 	public void setCreatedAt(Date createdAt) {
 		this.createdAt = createdAt;
+	}
+	
+	public void setSystemProperties(String value) {}
+	
+	public String getSystemProperties() {
+		return project.getSystemProperties();
 	}
 }

@@ -21,7 +21,6 @@ package com.ats.executor.channels;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import org.openqa.selenium.Proxy;
@@ -48,6 +47,7 @@ import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
+import com.ats.script.Project;
 import com.ats.script.ScriptHeader;
 import com.ats.script.actions.Action;
 import com.ats.script.actions.ActionApi;
@@ -64,7 +64,7 @@ import com.ats.tools.performance.proxy.IAtsProxy;
 import com.google.gson.JsonArray;
 
 public class Channel {
-
+		
 	private IDriverEngine engine;
 
 	private ActionChannelStart actionStart;
@@ -80,6 +80,7 @@ public class Channel {
 	private String applicationVersion = "";
 	private String driverVersion = "";
 	private String os = "";
+	private String userName = System.getProperty("user.name");
 
 	private ArrayList<String> systemProperties = new ArrayList<>();
 	public void addSystemProperties(JsonArray info) {
@@ -174,17 +175,30 @@ public class Channel {
 		return atsManager.loadTestScriptClass(name);
 	}
 	
-	public HashMap<String, String> getCapabilities(){
-		
-		final HashMap<String, String> result = engine.getCapabilities();
-
-		result.put("system-app", getApplication());
-		result.put("system-app-version", getApplicationVersion());
-		result.put("system-authentication", getAuthentication());
-		
-		return result;
+	public String getSystemValue(String name){
+		switch (name) {
+		case Project.SYS_OS_NAME :
+			return engine.getDesktopDriver().getOsName();
+		case Project.SYS_OS_VERSION :
+			return engine.getDesktopDriver().getOsVersion();
+		case Project.SYS_OS_BUILD :
+			return engine.getDesktopDriver().getOsBuildVersion();
+		case Project.SYS_COUNTRY :
+			return engine.getDesktopDriver().getCountryCode();
+		case Project.SYS_MACHINE_NAME :
+			return engine.getDesktopDriver().getMachineName();
+		case Project.SYS_DOT_NET :
+			return engine.getDesktopDriver().getDotNetVersion();
+		case Project.SYS_APP_NAME :
+			return getApplication();
+		case Project.SYS_APP_VERSION :
+			return getApplicationVersion();
+		case Project.SYS_USER_NAME :
+			return getUserName();
+		}
+		return "";
 	}
-	
+
 	//----------------------------------------------------------------------------------------------------------------------
 	//----------------------------------------------------------------------------------------------------------------------
 
@@ -266,9 +280,6 @@ public class Channel {
 	}
 
 	public void setWindowToFront(){
-		/*if(!(engine instanceof MobileDriverEngine) && !(engine instanceof ApiDriverEngine)) {
-			getDesktopDriver().setChannelToFront(getHandle(getDesktopDriver()), processId);
-		}*/
 		engine.setWindowToFront();
 	}
 
@@ -332,7 +343,16 @@ public class Channel {
 	public void setNeoloadDesignApi(String value) {
 		this.neoloadDesignApi = value;
 	}
+	
+	//--------------------------------------------------------------------------------------------------
+	// Mobile channel init
+	//--------------------------------------------------------------------------------------------------
 
+	public void setApplicationData(String os, String system, String user, String version, String dVersion, byte[] icon, String udp) {
+		this.userName = user;
+		setApplicationData(os + ":" + system, version, dVersion, -1, icon, udp);
+	}
+	
 	//--------------------------------------------------------------------------------------------------
 	// Api webservices init
 	//--------------------------------------------------------------------------------------------------
@@ -352,7 +372,7 @@ public class Channel {
 
 	//--------------------------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------------------------
-
+	
 	public void setApplicationData(String os, String version, String dVersion, long pid, byte[] icon, String screenServer) {
 		this.os = os;
 		this.applicationVersion = version;
@@ -511,6 +531,10 @@ public class Channel {
 
 	public String getApplicationVersion() {
 		return applicationVersion;
+	}
+		
+	private String getUserName() {
+		return userName;
 	}
 
 	public void setApplicationVersion(String applicationVersion) {

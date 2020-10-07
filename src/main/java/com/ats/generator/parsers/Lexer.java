@@ -89,7 +89,7 @@ public class Lexer {
 	}
 
 	public ScriptLoader loadScript(File f, ScriptProcessedNotifier notifier){
-		ScriptLoader script = getScript(f);
+		final ScriptLoader script = getScript(f);
 		notifier.scriptProcessed();
 		return script;
 	}
