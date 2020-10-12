@@ -5,6 +5,7 @@ import com.ats.element.SearchedElement;
 import com.ats.element.TestElementSystem;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.channels.Channel;
+import com.ats.executor.channels.SystemValues;
 import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
@@ -28,10 +29,11 @@ public class MsEdgeDriverEngine extends ChromiumBasedDriverEngine {
 	}
 	
 	@Override
-	public void started(ActionStatus status) {
+	public SystemValues started(ActionStatus status) {
 		final TestElementSystem closInfobarButton = new TestElementSystem(channel, 1, p -> p == 1, new SearchedElement(new SearchedElement(new SearchedElement(0, "syscomp", new CalculatedProperty[] {}), 0, "Group", new CalculatedProperty[] {new CalculatedProperty("ClassName", "InfoBarContainerView")}), 0, "Button", new CalculatedProperty[] {}));
 		if(closInfobarButton.getCount() == 1) {
 			closInfobarButton.executeScript(status, "Invoke()", false);
 		}
+		return super.started(status);
 	}
 }

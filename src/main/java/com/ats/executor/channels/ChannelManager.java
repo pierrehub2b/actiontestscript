@@ -30,25 +30,9 @@ import java.util.Optional;
 
 public class ChannelManager {
 
-	public static AtsManager ATS = new AtsManager();
-
-	public static final String SYS_OS_NAME = "os-name";
-	public static final String SYS_OS_VERSION = "os-version";
-	public static final String SYS_OS_BUILD = "os-build";
-	public static final String SYS_COUNTRY = "country";
-	public static final String SYS_MACHINE_NAME = "machine-name";
-	public static final String SYS_DOT_NET = "dot-net";
-	public static final String SYS_APP_NAME = "app-name";
-	public static final String SYS_APP_VERSION = "app-version";
-	public static final String SYS_USER_NAME = "user-name";
-
-	public static String SYSTEM_VALUES = SYS_OS_NAME + "," + SYS_OS_VERSION + "," + SYS_OS_BUILD + "," + SYS_COUNTRY + "," + SYS_MACHINE_NAME + "," + SYS_DOT_NET + "," + SYS_APP_NAME + "," + SYS_APP_VERSION + "," + SYS_USER_NAME;
-
 	private Channel currentChannel;
 	private ArrayList<Channel> channelsList;
-
 	private ActionTestScript mainScript;
-
 	private DriverManager driverManager;
 
 	public ChannelManager(ActionTestScript script) {
@@ -56,20 +40,20 @@ public class ChannelManager {
 		this.mainScript = script;
 		this.channelsList = new ArrayList<Channel>();
 		this.driverManager = new DriverManager();
-		this.currentChannel = new EmptyChannel(ATS);
+		this.currentChannel = new EmptyChannel();
 
-		script.sendInfoLog("ATS drivers folder", ATS.getDriversFolderPath().toFile().getAbsolutePath());
-		if(ATS.getError() != null) {
-			script.sendInfoLog("ActionTestScript properties file found, but an error occured !", ATS.getError());
+		script.sendInfoLog("ATS drivers folder", AtsManager.getInstance().getDriversFolderPath().toFile().getAbsolutePath());
+		if(AtsManager.getInstance().getError() != null) {
+			script.sendInfoLog("ActionTestScript properties file found, but an error occured !", AtsManager.getInstance().getError());
 		}
 
-		if(ATS.getWaitGuiReady() != null) {
+		if(AtsManager.getInstance().getWaitGuiReady() != null) {
 			script.sendInfoLog("Custom WaitGuiReady class found !", "");
 		}
 	}
 
 	public int getMaxTry() {
-		return ATS.getMaxTrySearch();
+		return AtsManager.getInstance().getMaxTrySearch();
 	}
 
 	public Channel getCurrentChannel(){
@@ -104,7 +88,7 @@ public class ChannelManager {
 				return cnl;
 			}
 		}
-		return new EmptyChannel(ATS);// Channel with name : does not exists or has been closed
+		return new EmptyChannel();// Channel with name : does not exists or has been closed
 	}
 
 	public String startChannel(ActionStatus status, ActionChannelStart action){
@@ -114,7 +98,7 @@ public class ChannelManager {
 
 		if(getChannel(name) instanceof EmptyChannel){
 
-			final Channel newChannel = new Channel(ATS, status, mainScript, driverManager, action);
+			final Channel newChannel = new Channel(status, mainScript, driverManager, action);
 
 			if(status.isPassed()) {
 
@@ -180,7 +164,7 @@ public class ChannelManager {
 					status.setChannel(current);
 				}
 			}else{
-				currentChannel = new EmptyChannel(ATS);
+				currentChannel = new EmptyChannel();
 			}
 
 			status.setNoError();

@@ -34,6 +34,7 @@ import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
+import com.ats.executor.channels.SystemValues;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.Cartesian;
@@ -88,8 +89,8 @@ public abstract class DriverEngine {
 		}
 	}
 	
-	public void started(ActionStatus status) {
-		//nothing to do by default
+	public SystemValues started(ActionStatus status) {
+		return new SystemValues();
 	}
 	
 	public void updateScreenshot(TestBound dimension, boolean isRef) {

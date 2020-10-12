@@ -19,6 +19,13 @@ under the License.
 
 package com.ats.executor.drivers.engines;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Predicate;
+
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebElement;
+
 import com.ats.element.AtsBaseElement;
 import com.ats.element.DialogBox;
 import com.ats.element.FoundElement;
@@ -27,23 +34,17 @@ import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
+import com.ats.executor.channels.SystemValues;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.generator.objects.BoundData;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.graphic.ImageTemplateMatchingSimple;
 import com.ats.script.actions.ActionApi;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebElement;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.function.Predicate;
 
 public interface IDriverEngine{
 	
-	public void started(ActionStatus status);
+	public SystemValues started(ActionStatus status);
 	public DesktopDriver getDesktopDriver();
 	public WebElement getRootElement(Channel cnl);
 	public void close(boolean keepRunning);

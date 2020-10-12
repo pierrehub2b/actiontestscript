@@ -73,16 +73,12 @@ public class Channel {
 	private ActionTestScript mainScript;
 
 	private int scrollUnit = AtsManager.getScrollUnit();
-	private TestBound dimension = ChannelManager.ATS.getApplicationBound();
+	private TestBound dimension = AtsManager.getInstance().getApplicationBound();
 	private TestBound subDimension = new TestBound();
 
 	private String applicationVersion = "";
 	private String driverVersion = "";
 	private String os = "";
-	private String osName = "";
-	private String osVersion = "";
-	private String osBuild = "";
-	private String userName = System.getProperty("user.name");
 
 	private ArrayList<String> systemProperties = new ArrayList<>();
 	public void addSystemProperties(JsonArray info) {
@@ -111,7 +107,7 @@ public class Channel {
 
 	private String neoloadDesignApi;
 
-	private AtsManager atsManager;
+	private AtsManager atsManager = AtsManager.getInstance();
 
 	//----------------------------------------------------------------------------------------------------------------------
 	// Constructor
@@ -119,18 +115,11 @@ public class Channel {
 
 	public Channel() {}
 
-	public Channel(AtsManager atsManager) {
-		this.atsManager = atsManager;
-	}
-
 	public Channel(
-			AtsManager atsManager,
 			ActionStatus status,
 			ActionTestScript script,
 			DriverManager driverManager, 
 			ActionChannelStart action) {
-
-		this(atsManager);
 
 		final DesktopDriver desktopDriver = new DesktopDriver(status, driverManager);
 
@@ -332,8 +321,7 @@ public class Channel {
 	// Mobile channel init
 	//--------------------------------------------------------------------------------------------------
 
-	public void setApplicationData(String os, String system, String user, String version, String dVersion, byte[] icon, String udp) {
-		this.userName = user;
+	public void setApplicationData(String os, String system, String version, String dVersion, byte[] icon, String udp) {
 		setApplicationData(os + ":" + system, version, dVersion, -1, icon, udp);
 	}
 	
@@ -377,6 +365,9 @@ public class Channel {
 		this.driverVersion = "";
 		this.winHandle = handle;
 	}
+	
+	//--------------------------------------------------------------------------------------------------
+	//--------------------------------------------------------------------------------------------------
 
 	public void switchToFrame(String id) {
 		engine.switchToFrameId(id);
@@ -418,7 +409,7 @@ public class Channel {
 	}
 
 	public String getAttribute(ActionStatus status, FoundElement element, String attributeName, int maxTry){
-		return engine.getAttribute(status, element, attributeName, maxTry + ChannelManager.ATS.getMaxTryProperty());
+		return engine.getAttribute(status, element, attributeName, maxTry + AtsManager.getInstance().getMaxTryProperty());
 	}
 
 	public void setSysProperty(String attributeName, String attributeValue) {

@@ -25,6 +25,7 @@ import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
+import com.ats.executor.channels.SystemValues;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.mobiles.AndroidRootElement;
 import com.ats.executor.drivers.engines.mobiles.IosRootElement;
@@ -187,10 +188,16 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			if(udpEndPoint != null) {
 				udpInfo = udpEndPoint.getAsString() + ":" + screenCapturePort;
 			}
-			channel.setApplicationData(os, systemName, userName, version, driverVersion, icon, udpInfo);
+			channel.setApplicationData(os, systemName, version, driverVersion, icon, udpInfo);
 
 			refreshElementMapLocation();
 		}
+	}
+	
+	@Override
+	public SystemValues started(ActionStatus status) {
+		
+		return null;
 	}
 
 	@Override

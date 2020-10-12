@@ -148,12 +148,36 @@ public class AtsManager {
 	}
 
 	//-----------------------------------------------------------------------------------------------
+	// Singleton management
+	//-----------------------------------------------------------------------------------------------
+
+	private static volatile AtsManager singleInstance;
+
+	public static AtsManager getInstance() {
+		if (singleInstance == null) {
+			synchronized (AtsManager.class) {
+				if (singleInstance == null) {
+					singleInstance = new AtsManager();
+					singleInstance.init();
+				}
+			}
+		}
+		return singleInstance;
+	}
+	
+	private AtsManager(){
+        if (singleInstance != null){
+            throw new RuntimeException("Use getInstance() method to get the single instance of this class.");
+        }
+    }
+
+	//-----------------------------------------------------------------------------------------------
 	// Instance management
 	//-----------------------------------------------------------------------------------------------
 
 	private AtsClassLoader atsClassLoader;
 
-	public AtsManager() {
+	public void init() {
 
 		String atsHome = System.getProperty("ats.home");
 		if(atsHome == null || atsHome.length() == 0) {
@@ -170,7 +194,6 @@ public class AtsManager {
 		}else {
 			driversFolderPath = Paths.get("");
 			ATS.logWarn("ATS driver folder not found -> " + atsHome);
-			//System.exit(0);
 		}
 
 		if(proxy == null) {
@@ -496,7 +519,7 @@ public class AtsManager {
 														options = new String[optionsLen];
 														for( int l = 0; l < optionsLen; l++ ){
 															options[l] = optionsList.item(l).getTextContent();
-													    }
+														}
 													}
 													break;
 												}

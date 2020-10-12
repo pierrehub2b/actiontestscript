@@ -70,7 +70,6 @@ import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
-import com.ats.executor.channels.ChannelManager;
 import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.desktop.DesktopWindow;
@@ -173,22 +172,21 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	protected void launchDriver(ActionStatus status, MutableCapabilities cap, String profilePath) {
 
-		final AtsManager ats = ChannelManager.ATS;
-		final int maxTrySearch = ats.getMaxTrySearch();
-		final int maxTryProperty = ats.getMaxTryProperty();
+		final int maxTrySearch = AtsManager.getInstance().getMaxTrySearch();
+		final int maxTryProperty = AtsManager.getInstance().getMaxTryProperty();
 
-		final int scriptTimeout = ats.getScriptTimeOut();
-		final int pageLoadTimeout = ats.getPageloadTimeOut();
-		final int watchdog = ats.getWatchDogTimeOut();		
+		final int scriptTimeout = AtsManager.getInstance().getScriptTimeOut();
+		final int pageLoadTimeout = AtsManager.getInstance().getPageloadTimeOut();
+		final int watchdog = AtsManager.getInstance().getWatchDogTimeOut();		
 
 		if(channel.getPerformance() == ActionChannelStart.PERF) {
-			cap.setCapability(CapabilityType.PROXY, channel.startAtsProxy(ats));
+			cap.setCapability(CapabilityType.PROXY, channel.startAtsProxy(AtsManager.getInstance()));
 		}else {
 			if(channel.getPerformance() == ActionChannelStart.NEOLOAD) {
-				channel.setNeoloadDesignApi(ats.getNeoloadDesignApi());
-				cap.setCapability(CapabilityType.PROXY, ats.getNeoloadProxy().getValue());
+				channel.setNeoloadDesignApi(AtsManager.getInstance().getNeoloadDesignApi());
+				cap.setCapability(CapabilityType.PROXY, AtsManager.getInstance().getNeoloadProxy().getValue());
 			}else {
-				cap.setCapability(CapabilityType.PROXY, ats.getProxy().getValue());
+				cap.setCapability(CapabilityType.PROXY, AtsManager.getInstance().getProxy().getValue());
 			}
 		}
 

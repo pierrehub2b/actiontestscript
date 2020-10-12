@@ -322,6 +322,6 @@ public class ScriptHeader {
 	public void setSystemProperties(String value) {}
 	
 	public String getSystemProperties() {
-		return ChannelManager.SYSTEM_VALUES;
+		return String.join(",", Script.SYSTEM_VALUES);
 	}
 }
