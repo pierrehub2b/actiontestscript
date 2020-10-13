@@ -214,7 +214,7 @@ public class XmlReport {
 							data.setTextContent(vsum.getData());
 							summary.appendChild(data);
 
-							atsRoot.appendChild(summary);
+							script.appendChild(summary);
 						}
 					}
 
