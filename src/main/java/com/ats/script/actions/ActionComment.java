@@ -93,15 +93,13 @@ public class ActionComment extends Action {
 			super.execute(ts, testName, testLine);
 			status.endDuration();
 			ts.getRecorder().update(type, comment.getCalculated());
-		}else if(SUMMARY_TYPE.equals(type)) {
-			super.execute(ts, testName, testLine);
-			status.endDuration();
-			ts.getRecorder().updateSummary(testName, testLine, comment.getCalculated());
 		} else {
 			status = ts.getCurrentChannel().newActionStatus(testName, testLine);
 			status.endDuration();
 			if(LOG_TYPE.equals(type)) {
 				ts.getTopScript().sendCommentLog(comment.getCalculated());
+			}else if(SUMMARY_TYPE.equals(type)) {
+				ts.getRecorder().updateSummary(testName, testLine, comment.getCalculated());
 			}
 		}
 	}
