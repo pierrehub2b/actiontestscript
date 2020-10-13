@@ -32,6 +32,7 @@ import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
+import com.ats.executor.ScriptStatus;
 import com.ats.executor.TestBound;
 import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.desktop.DesktopDriver;
@@ -760,7 +761,11 @@ public class Channel {
 		return getDesktopDriver().startVisualRecord(this, script, quality, started);
 	}
 
-	public void stopVisualRecord() {
+	public void stopVisualRecord(ScriptStatus status, String summary) {
+		if(summary == null || summary.isEmpty()) {
+			summary = "[empty]";
+		}
+		getDesktopDriver().saveSummary(status, summary);
 		getDesktopDriver().stopVisualRecord();
 	}
 

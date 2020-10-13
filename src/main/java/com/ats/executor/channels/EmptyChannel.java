@@ -23,6 +23,7 @@ import java.nio.file.Path;
 
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
+import com.ats.executor.ScriptStatus;
 import com.ats.executor.drivers.desktop.DesktopResponse;
 import com.ats.generator.objects.MouseDirectionData;
 import com.ats.script.ScriptHeader;
@@ -94,7 +95,7 @@ public class EmptyChannel extends Channel {
 	}
 
 	@Override
-	public void stopVisualRecord() {
+	public void stopVisualRecord(ScriptStatus status, String summary) {
 	}
 
 	@Override

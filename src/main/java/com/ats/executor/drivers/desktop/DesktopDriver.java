@@ -19,28 +19,7 @@ under the License.
 
 package com.ats.executor.drivers.desktop;
 
-import com.ats.element.AtsBaseElement;
-import com.ats.element.FoundElement;
-import com.ats.element.TestElement;
-import com.ats.executor.ActionStatus;
-import com.ats.executor.TestBound;
-import com.ats.executor.channels.Channel;
-import com.ats.executor.drivers.DriverManager;
-import com.ats.executor.drivers.DriverProcess;
-import com.ats.executor.drivers.engines.DesktopDriverEngine;
-import com.ats.generator.objects.MouseDirectionData;
-import com.ats.generator.variables.CalculatedProperty;
-import com.ats.script.ScriptHeader;
-import com.ats.tools.logger.ExecutionLogger;
-import com.exadel.flamingo.flex.messaging.amf.io.AMF3Deserializer;
-import com.google.gson.Gson;
-import okhttp3.*;
-import okhttp3.OkHttpClient.Builder;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.Point;
-import org.openqa.selenium.remote.RemoteWebDriver;
-
-import java.awt.*;
+import java.awt.Rectangle;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
@@ -53,6 +32,34 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Point;
+import org.openqa.selenium.remote.RemoteWebDriver;
+
+import com.ats.element.AtsBaseElement;
+import com.ats.element.FoundElement;
+import com.ats.element.TestElement;
+import com.ats.executor.ActionStatus;
+import com.ats.executor.ScriptStatus;
+import com.ats.executor.TestBound;
+import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.DriverManager;
+import com.ats.executor.drivers.DriverProcess;
+import com.ats.executor.drivers.engines.DesktopDriverEngine;
+import com.ats.generator.objects.MouseDirectionData;
+import com.ats.generator.variables.CalculatedProperty;
+import com.ats.script.ScriptHeader;
+import com.ats.tools.logger.ExecutionLogger;
+import com.exadel.flamingo.flex.messaging.amf.io.AMF3Deserializer;
+import com.google.gson.Gson;
+
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.OkHttpClient.Builder;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class DesktopDriver extends RemoteWebDriver {
 
@@ -399,7 +406,8 @@ public class DesktopDriver extends RemoteWebDriver {
 		Download(10),
 		ImageMobile(11),
 		CreateMobile(12),
-		ScreenshotMobile(13);
+		ScreenshotMobile(13),
+		Summary(14);
 
 		private final int type;
 		RecordType(int value){
@@ -718,6 +726,10 @@ public class DesktopDriver extends RemoteWebDriver {
 	//visual actions
 	//---------------------------------------------------------------------------------------
 
+	public void saveSummary(ScriptStatus status, String summary) {
+		sendRequestCommand(CommandType.Record, RecordType.Summary, status.isPassed(), status.getActions(), status.getSuiteName(), status.getTestName(), summary);
+	}
+		
 	public void stopVisualRecord() {
 		sendRequestCommand(CommandType.Record, RecordType.Stop);
 	}

@@ -20,6 +20,7 @@ under the License.
 package com.ats.recorder;
 
 import com.ats.element.TestElement;
+import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.desktop.DesktopResponse;
 import com.ats.generator.objects.MouseDirection;
@@ -45,10 +46,14 @@ public class VisualRecorder implements IVisualRecorder {
 	
 	private long started;
 	
+	private StringBuilder summary = new StringBuilder("");
+	private ActionTestScript topScript;
+	
 	private ExecutionLogger logger;
 
-	public VisualRecorder(ScriptHeader header, Project project, boolean xml, int quality) {
+	public VisualRecorder(ActionTestScript topScript, ScriptHeader header, Project project, boolean xml, int quality) {
 
+		this.topScript = topScript;
 		this.logger = new ExecutionLogger();
 		
 		final Path output = project.getReportFolder().resolve(header.getPackagePath());
@@ -57,8 +62,9 @@ public class VisualRecorder implements IVisualRecorder {
 		initAndStart(output, header, xml, quality);
 	}
 
-	public VisualRecorder(File outputFolder, ScriptHeader header, boolean xml, int quality, ExecutionLogger logger) {
+	public VisualRecorder(ActionTestScript topScript, File outputFolder, ScriptHeader header, boolean xml, int quality, ExecutionLogger logger) {
 		
+		this.topScript = topScript;
 		this.logger = logger;
 		
 		final Path output = outputFolder.toPath();
@@ -80,6 +86,11 @@ public class VisualRecorder implements IVisualRecorder {
 		this.started = System.currentTimeMillis();
 	}
 	
+	@Override
+	public void updateSummary(String testName, int testLine, String data) {
+		summary.append(data).append('\n');
+	}
+	
 	//--------------------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------------------
 	
@@ -89,7 +100,7 @@ public class VisualRecorder implements IVisualRecorder {
 			final Path path = Paths.get(outputPath);
 			
 			logger.sendInfo("Stop visual recording", scriptHeader.getQualifiedName());
-			channel.stopVisualRecord();
+			channel.stopVisualRecord(topScript.getStatus(), summary.toString());
 			channel.saveVisualReportFile(path, scriptHeader.getQualifiedName() + Script.ATS_VISUAL_FILE_EXTENSION, logger);
 			
 			if(xml) {

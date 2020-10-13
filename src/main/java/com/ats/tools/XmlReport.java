@@ -3,6 +3,7 @@ package com.ats.tools;
 import com.ats.recorder.VisualAction;
 import com.ats.recorder.VisualImage;
 import com.ats.recorder.VisualReport;
+import com.ats.recorder.VisualSummary;
 import com.ats.tools.logger.ExecutionLogger;
 import com.exadel.flamingo.flex.messaging.amf.io.AMF3Deserializer;
 import org.w3c.dom.Document;
@@ -24,13 +25,13 @@ import java.util.ArrayList;
 public class XmlReport {
 
 	public static String REPORT_FILE = "actions.xml";
-	
+
 	public static void createReport(Path output, String qualifiedName, ExecutionLogger logger) {
 
 		final File atsvFile = output.resolve(qualifiedName + ".atsv").toFile();
 
 		if(atsvFile.exists()) {
-			
+
 			final File xmlFolder = output.resolve(qualifiedName + "_xml").toFile();
 			logger.sendInfo("Create XML report", xmlFolder.getAbsolutePath());
 
@@ -71,7 +72,7 @@ public class XmlReport {
 
 					script.setAttribute("testId", report.getId());					
 					script.setAttribute("testName", report.getName());
-					
+
 					script.setAttribute("cpuSpeed", report.getCpuSpeed() + "");
 					script.setAttribute("cpuCount", report.getCpuCount() + "");
 					script.setAttribute("totalMemory", report.getTotalMemory() + "");		
@@ -109,90 +110,112 @@ public class XmlReport {
 
 					while(amf3.available() > 0) {
 
-						final VisualAction va = (VisualAction) amf3.readObject();
+						final Object obj = amf3.readObject();
 
-						final Element action = document.createElement("action");
-						action.setAttribute("index", va.getIndex() + "");
-						action.setAttribute("type", va.getType());
-						
-						action.appendChild(document.createElement("line")).setTextContent(va.getLine() + "");
-						action.appendChild(document.createElement("timeLine")).setTextContent(va.getTimeLine() + "");
-						action.appendChild(document.createElement("error")).setTextContent(va.getError() + "");
-						action.appendChild(document.createElement("duration")).setTextContent(va.getDuration() + "");
-						action.appendChild(document.createElement("passed")).setTextContent((va.getError() == 0) + "");
-						action.appendChild(document.createElement("value")).setTextContent(va.getValue());
-						action.appendChild(document.createElement("data")).setTextContent(va.getData());
+						if(obj instanceof VisualAction) {
 
-						Element elem = document.createElement("img");
-						elem.setAttribute("src", va.getImageFileName());
-						elem.setAttribute("width", va.getChannelBound().getWidth().intValue() + "");
-						elem.setAttribute("height", va.getChannelBound().getHeight().intValue() + "");
-						action.appendChild(elem);
+							final VisualAction va = (VisualAction) obj;
 
-						Element channel = document.createElement("channel");
-						channel.setAttribute("name", va.getChannelName());
+							final Element action = document.createElement("action");
+							action.setAttribute("index", va.getIndex() + "");
+							action.setAttribute("type", va.getType());
 
-						Element channelBound = document.createElement("bound");
-						Element channelX = document.createElement("x");
-						channelX.setTextContent(va.getChannelBound().getX().intValue() + "");
-						channelBound.appendChild(channelX);
+							action.appendChild(document.createElement("line")).setTextContent(va.getLine() + "");
+							action.appendChild(document.createElement("timeLine")).setTextContent(va.getTimeLine() + "");
+							action.appendChild(document.createElement("error")).setTextContent(va.getError() + "");
+							action.appendChild(document.createElement("duration")).setTextContent(va.getDuration() + "");
+							action.appendChild(document.createElement("passed")).setTextContent((va.getError() == 0) + "");
+							action.appendChild(document.createElement("value")).setTextContent(va.getValue());
+							action.appendChild(document.createElement("data")).setTextContent(va.getData());
 
-						Element channelY = document.createElement("y");
-						channelY.setTextContent(va.getChannelBound().getY().intValue() + "");
-						channelBound.appendChild(channelY);
+							Element elem = document.createElement("img");
+							elem.setAttribute("src", va.getImageFileName());
+							elem.setAttribute("width", va.getChannelBound().getWidth().intValue() + "");
+							elem.setAttribute("height", va.getChannelBound().getHeight().intValue() + "");
+							action.appendChild(elem);
 
-						Element channelWidth = document.createElement("width");
-						channelWidth.setTextContent(va.getChannelBound().getWidth().intValue() + "");
-						channelBound.appendChild(channelWidth);
+							Element channel = document.createElement("channel");
+							channel.setAttribute("name", va.getChannelName());
 
-						Element channelHeight = document.createElement("height");
-						channelHeight.setTextContent(va.getChannelBound().getHeight().intValue() + "");
-						channelBound.appendChild(channelHeight);
+							Element channelBound = document.createElement("bound");
+							Element channelX = document.createElement("x");
+							channelX.setTextContent(va.getChannelBound().getX().intValue() + "");
+							channelBound.appendChild(channelX);
 
-						channel.appendChild(channelBound);
-						action.appendChild(channel);
+							Element channelY = document.createElement("y");
+							channelY.setTextContent(va.getChannelBound().getY().intValue() + "");
+							channelBound.appendChild(channelY);
 
-						if(va.getElement() != null) {
+							Element channelWidth = document.createElement("width");
+							channelWidth.setTextContent(va.getChannelBound().getWidth().intValue() + "");
+							channelBound.appendChild(channelWidth);
 
-							Element element = document.createElement("element");
-							element.setAttribute("tag", va.getElement().getTag());
+							Element channelHeight = document.createElement("height");
+							channelHeight.setTextContent(va.getChannelBound().getHeight().intValue() + "");
+							channelBound.appendChild(channelHeight);
 
-							Element criterias = document.createElement("criterias");
-							criterias.setTextContent(va.getElement().getCriterias());
-							element.appendChild(criterias);
+							channel.appendChild(channelBound);
+							action.appendChild(channel);
 
-							Element foundElements = document.createElement("foundElements");
-							foundElements.setTextContent(va.getElement().getFoundElements() + "");
-							element.appendChild(foundElements);
+							if(va.getElement() != null) {
 
-							Element searchDuration = document.createElement("searchDuration");
-							searchDuration.setTextContent(va.getElement().getSearchDuration() + "");
-							element.appendChild(searchDuration);
+								Element element = document.createElement("element");
+								element.setAttribute("tag", va.getElement().getTag());
 
-							Element elementBound = document.createElement("bound");
-							Element elementX = document.createElement("x");
-							elementX.setTextContent(va.getElement().getBound().getX().intValue() + "");
-							elementBound.appendChild(elementX);
+								Element criterias = document.createElement("criterias");
+								criterias.setTextContent(va.getElement().getCriterias());
+								element.appendChild(criterias);
 
-							Element elementY = document.createElement("y");
-							elementY.setTextContent(va.getElement().getBound().getY().intValue() + "");
-							elementBound.appendChild(elementY);
+								Element foundElements = document.createElement("foundElements");
+								foundElements.setTextContent(va.getElement().getFoundElements() + "");
+								element.appendChild(foundElements);
 
-							Element elementWidth = document.createElement("width");
-							elementWidth.setTextContent(va.getElement().getBound().getWidth().intValue() + "");
-							elementBound.appendChild(elementWidth);
+								Element searchDuration = document.createElement("searchDuration");
+								searchDuration.setTextContent(va.getElement().getSearchDuration() + "");
+								element.appendChild(searchDuration);
 
-							Element elementHeight = document.createElement("height");
-							elementHeight.setTextContent(va.getElement().getBound().getHeight().intValue() + "");
-							elementBound.appendChild(elementHeight);
+								Element elementBound = document.createElement("bound");
+								Element elementX = document.createElement("x");
+								elementX.setTextContent(va.getElement().getBound().getX().intValue() + "");
+								elementBound.appendChild(elementX);
 
-							element.appendChild(elementBound);
-							action.appendChild(element);
+								Element elementY = document.createElement("y");
+								elementY.setTextContent(va.getElement().getBound().getY().intValue() + "");
+								elementBound.appendChild(elementY);
+
+								Element elementWidth = document.createElement("width");
+								elementWidth.setTextContent(va.getElement().getBound().getWidth().intValue() + "");
+								elementBound.appendChild(elementWidth);
+
+								Element elementHeight = document.createElement("height");
+								elementHeight.setTextContent(va.getElement().getBound().getHeight().intValue() + "");
+								elementBound.appendChild(elementHeight);
+
+								element.appendChild(elementBound);
+								action.appendChild(element);
+							}
+
+							actions.appendChild(action);
+
+							va.addImage(xmlFolerPath, imagesList);
+
+						} else if(obj instanceof VisualSummary){
+							
+							final VisualSummary vsum = (VisualSummary)obj;
+							
+							final Element summary = document.createElement("summary");
+							
+							summary.setAttribute("actions", String.valueOf(vsum.getActions()));
+							summary.setAttribute("suiteName", vsum.getSuiteName());
+							summary.setAttribute("testName", vsum.getTestName());
+							summary.setAttribute("passed", String.valueOf(vsum.isPassed()));
+							
+							Element data = document.createElement("data");
+							data.setTextContent(vsum.getData());
+							summary.appendChild(data);
+
+							atsRoot.appendChild(summary);
 						}
-						
-						actions.appendChild(action);
-
-						va.addImage(xmlFolerPath, imagesList);
 					}
 
 				} catch (FileNotFoundException e0) {
@@ -229,7 +252,7 @@ public class XmlReport {
 			} catch (ParserConfigurationException e4) {
 				logger.sendError("XML report parser error ->", e4.getMessage());
 			}
-			
+
 			logger.sendInfo("XML report generated -> ", xmlFolder.getAbsolutePath());
 		}
 	}

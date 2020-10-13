@@ -134,6 +134,10 @@ public class ActionTestScript extends Script implements ITest{
 	public void addErrorStack(String value) {
 		status.addErrorStack(value);
 	}
+	
+	public ScriptStatus getStatus() {
+		return status;
+	}
 
 	//----------------------------------------------------------------------------------------------------------
 	// TestNG management
@@ -185,7 +189,7 @@ public class ActionTestScript extends Script implements ITest{
 					output.mkdirs();
 				}
 
-				setRecorder(new VisualRecorder(output, header, xml, visualQuality, mainLogger));
+				setRecorder(new VisualRecorder(this, output, header, xml, visualQuality, mainLogger));
 			}
 
 			final JsonObject logs = new JsonObject();
@@ -716,7 +720,7 @@ public class ActionTestScript extends Script implements ITest{
 	}
 
 	public void startRecorder(ScriptHeader info, int quality, boolean xml) {
-		topScript.setRecorder(new VisualRecorder(info, projectData, xml, quality));
+		topScript.setRecorder(new VisualRecorder(topScript, info, projectData, xml, quality));
 	}
 
 	public void stopRecorder() {

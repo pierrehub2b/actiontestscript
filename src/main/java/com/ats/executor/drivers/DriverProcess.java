@@ -19,10 +19,6 @@ under the License.
 
 package com.ats.executor.drivers;
 
-import com.ats.executor.ActionStatus;
-import com.ats.executor.StreamGobbler;
-import com.ats.tools.Utils;
-
 import java.io.File;
 import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
@@ -31,6 +27,9 @@ import java.net.ServerSocket;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.stream.Stream;
+
+import com.ats.executor.ActionStatus;
+import com.ats.executor.StreamGobbler;
 
 public class DriverProcess {
 

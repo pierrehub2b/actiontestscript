@@ -38,6 +38,10 @@ public class VisualReport extends VisualAction{
 		super();
 	}
 	
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------
+	
 	public String getId() {
 		return id;
 	}

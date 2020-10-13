@@ -34,6 +34,7 @@ public class ActionComment extends Action {
 	private static final String STEP_TYPE = "step";
 	private static final String LOG_TYPE = "log";
 	private static final String SCRIPT_TYPE = "script";
+	private static final String SUMMARY_TYPE = "summary";
 
 	private CalculatedValue comment;
 	private String type = STEP_TYPE;
@@ -42,7 +43,7 @@ public class ActionComment extends Action {
 
 	public ActionComment(ScriptLoader script, String type, ArrayList<String> dataArray) {
 		super(script);
-		if(type.equals(LOG_TYPE) || type.equals(SCRIPT_TYPE)){
+		if(LOG_TYPE.equals(type) || SCRIPT_TYPE.equals(type) || SUMMARY_TYPE.equals(type)){
 			setType(type);
 		}
 
@@ -92,6 +93,10 @@ public class ActionComment extends Action {
 			super.execute(ts, testName, testLine);
 			status.endDuration();
 			ts.getRecorder().update(type, comment.getCalculated());
+		}else if(SUMMARY_TYPE.equals(type)) {
+			super.execute(ts, testName, testLine);
+			status.endDuration();
+			ts.getRecorder().updateSummary(testName, testLine, comment.getCalculated());
 		} else {
 			status = ts.getCurrentChannel().newActionStatus(testName, testLine);
 			status.endDuration();

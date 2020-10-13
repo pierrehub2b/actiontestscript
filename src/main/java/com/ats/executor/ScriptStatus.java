@@ -58,6 +58,22 @@ public class ScriptStatus {
 	public void failed() {
 		passed = false;
 	}
+	
+	public boolean isPassed() {
+		return passed;
+	}
+	
+	public String getTestName() {
+		return testName;
+	}
+	
+	public String getSuiteName() {
+		return suiteName;
+	}
+	
+	public int getActions() {
+		return actions;
+	}
 
 	public String endLogs() {
 		final JsonObject logs = new JsonObject();
