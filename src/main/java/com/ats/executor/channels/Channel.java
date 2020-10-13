@@ -63,11 +63,10 @@ import com.ats.tools.performance.proxy.IAtsProxy;
 import com.google.gson.JsonArray;
 
 public class Channel {
-		
+
 	private IDriverEngine engine;
 
 	private ActionChannelStart actionStart;
-	private String application = "";
 	private boolean current = false;
 
 	private ActionTestScript mainScript;
@@ -76,9 +75,18 @@ public class Channel {
 	private TestBound dimension = AtsManager.getInstance().getApplicationBound();
 	private TestBound subDimension = new TestBound();
 
-	private String applicationVersion = "";
 	private String driverVersion = "";
-	private String os = "";
+
+	private SystemValues systemValues = new SystemValues();
+
+	private byte[] icon;
+	private String screenServer;
+	private ArrayList<String> operations = new ArrayList<String>();
+
+	private int winHandle = -1;
+	private long processId = 0;	
+
+	private String neoloadDesignApi;
 
 	private ArrayList<String> systemProperties = new ArrayList<>();
 	public void addSystemProperties(JsonArray info) {
@@ -98,17 +106,6 @@ public class Channel {
 		}
 	}
 
-	private byte[] icon;
-	private String screenServer;
-	private ArrayList<String> operations = new ArrayList<String>();
-
-	private int winHandle = -1;
-	private long processId = 0;
-
-	private String neoloadDesignApi;
-
-	private AtsManager atsManager = AtsManager.getInstance();
-
 	//----------------------------------------------------------------------------------------------------------------------
 	// Constructor
 	//----------------------------------------------------------------------------------------------------------------------
@@ -127,49 +124,49 @@ public class Channel {
 
 			status.setChannel(this);
 
+			systemValues.setOsName(desktopDriver.getOsName());
+			systemValues.setApplicationName(action.getApplication().getCalculated());
+			systemValues.setCountry(desktopDriver.getCountryCode());
+			systemValues.setMachineName(desktopDriver.getMachineName());
+			systemValues.setOsVersion(desktopDriver.getOsVersion());
+			systemValues.setOsBuild(desktopDriver.getOsBuildVersion());
+
 			this.mainScript = script;
 			this.current = true;
 			this.actionStart = action;
-			this.application = action.getApplication().getCalculated();
 			this.engine = driverManager.getDriverEngine(this, status, desktopDriver);
 
 			if(status.isPassed()) {
 				refreshLocation();
-				loadSystemValues();
 				engine.started(status);
 			}else {
 				status.setChannel(null);
 			}
 		}
 	}
-	
-	private void loadSystemValues() {
-		// TODO Auto-generated method stub
-		
-	}
 
 	public void waitBeforeMouseMoveToElement(WebDriverEngine webDriverEngine) {
-		atsManager.getWaitGuiReady().waitBeforeMouseMoveToElement(this, webDriverEngine);
+		AtsManager.getInstance().getWaitGuiReady().waitBeforeMouseMoveToElement(this, webDriverEngine);
 	}
 
 	public void waitBeforeSwitchWindow(WebDriverEngine webDriverEngine) {
-		atsManager.getWaitGuiReady().waitBeforeSwitchWindow(this, webDriverEngine);
+		AtsManager.getInstance().getWaitGuiReady().waitBeforeSwitchWindow(this, webDriverEngine);
 	}
 
 	public void waitBeforeSearchElement(WebDriverEngine webDriverEngine) {
-		atsManager.getWaitGuiReady().waitBeforeSearchElement(this, webDriverEngine);
+		AtsManager.getInstance().getWaitGuiReady().waitBeforeSearchElement(this, webDriverEngine);
 	}
 
 	public void waitBeforeEnterText(WebDriverEngine webDriverEngine) {
-		atsManager.getWaitGuiReady().waitBeforeEnterText(this, webDriverEngine);
+		AtsManager.getInstance().getWaitGuiReady().waitBeforeEnterText(this, webDriverEngine);
 	}
 
 	public void waitBeforeGotoUrl(WebDriverEngine webDriverEngine) {
-		atsManager.getWaitGuiReady().waitBeforeGotoUrl(this, webDriverEngine);
+		AtsManager.getInstance().getWaitGuiReady().waitBeforeGotoUrl(this, webDriverEngine);
 	}
 
 	public Class<ActionTestScript> loadTestScriptClass(String name){
-		return atsManager.loadTestScriptClass(name);
+		return AtsManager.getInstance().loadTestScriptClass(name);
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------
@@ -266,6 +263,7 @@ public class Channel {
 	}
 
 	public void checkStatus(ActionExecute actionExecute, String testName, int testLine) {
+		//do nothing in non empty channel
 	}
 
 	//---------------------------------------------------------------------------
@@ -291,20 +289,6 @@ public class Channel {
 	//---------------------------------------------------------------------------
 	//---------------------------------------------------------------------------
 
-	public void setApplicationData(String os, String version, String dVersion, long pid) {
-		setApplicationData(os, version, dVersion, pid, new byte[0], "");
-	}
-
-	public void setApplicationData(String os, String name, String version, String dVersion, long pid) {
-		setApplication(name);
-		setApplicationData(os, version, dVersion, pid, new byte[0], "");
-	}
-
-	public void setApplicationData(String os, String version, String dVersion, long pid, long handle) {
-		setApplicationData(os, version, dVersion, pid, new byte[0], "");
-		this.winHandle = (int) handle;
-	}
-
 	public String getAuthenticationValue() {
 		return actionStart.getAuthenticationValue();
 	}
@@ -316,56 +300,83 @@ public class Channel {
 	public void setNeoloadDesignApi(String value) {
 		this.neoloadDesignApi = value;
 	}
-	
+
 	//--------------------------------------------------------------------------------------------------
 	// Mobile channel init
 	//--------------------------------------------------------------------------------------------------
 
-	public void setApplicationData(String os, String system, String version, String dVersion, byte[] icon, String udp) {
+	public void setApplicationData(String os, String system, String version, String dVersion, byte[] icon, String udp, String appName, String userName, String machineName, String osBuild, String country) {
 		setApplicationData(os + ":" + system, version, dVersion, -1, icon, udp);
+		systemValues.setApplicationName(appName);
+		systemValues.setUserName(userName);
+		systemValues.setMachineName(machineName);
+		systemValues.setOsVersion(system);
+		systemValues.setOsBuild(osBuild);
+		systemValues.setCountry(country);
 	}
-	
+
 	//--------------------------------------------------------------------------------------------------
 	// Api webservices init
 	//--------------------------------------------------------------------------------------------------
 
 	public void setApplicationData(String os) {
-		this.os = os;
-		this.icon = ResourceContent.getAtsByteLogo();
-		this.driverVersion = ATS.VERSION;
-		this.dimension = new TestBound(0D, 0D, 1D, 1D);
+		icon = ResourceContent.getAtsByteLogo();
+		driverVersion = ATS.VERSION;
+		dimension = new TestBound(0D, 0D, 1D, 1D);
+		systemValues.setOsName(os);
 	}
 
-	public void setApplicationData(String os, String type, ArrayList<String> operations) {
-		this.os = os;
-		this.application = type;
-		this.operations = operations;
+	public void setApplicationData(String os, String type, ArrayList<String> op) {
+		operations = op;
+		systemValues.setOsName(os);
+		systemValues.setApplicationName(type);
 	}
 
 	//--------------------------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------------------------
-	
-	public void setApplicationData(String os, String version, String dVersion, long pid, byte[] icon, String screenServer) {
-		this.os = os;
-		this.applicationVersion = version;
-		this.driverVersion = dVersion;
-		this.processId = pid;
-		this.icon = icon;
-		this.screenServer = screenServer;
+
+	public void setApplicationData(String os, String version, String dv, long pid, byte[] ic, String screen) {
+		driverVersion = dv;
+		processId = pid;
+		icon = ic;
+		screenServer = screen;
+
+		systemValues.setOsName(os);
+		systemValues.setApplicationVersion(version);
 	}
 
 	public void setApplicationData(String os, String serviceType) {
-		this.os = os;
-		this.application = serviceType;
+		systemValues.setOsName(os);
+		systemValues.setApplicationName(serviceType);
 	}
 
 	public void setApplicationData(String os, int handle) {
-		this.os = os;
-		this.applicationVersion = "";
-		this.driverVersion = "";
-		this.winHandle = handle;
+		driverVersion = "";
+		winHandle = handle;
+		systemValues.setOsName(os);
 	}
-	
+
+	public void setApplicationData(String os, String version, String dVersion, long pid) {
+		setApplicationData(os, version, dVersion, pid, new byte[0], "");
+	}
+
+	public void setApplicationData(String os, String name, String version, String dVersion, long pid) {
+		setApplicationData(os, version, dVersion, pid, new byte[0], "");
+		systemValues.setApplicationName(name);
+	}
+
+	public void setApplicationData(String os, String version, String dVersion, long pid, long handle) {
+		setApplicationData(os, version, dVersion, pid, new byte[0], "");
+		winHandle = (int) handle;
+	}
+
+	public String getSystemValue(String name) {
+		if(name != null) {
+			return systemValues.get(name);
+		}
+		return "";
+	}
+
 	//--------------------------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------------------------
 
@@ -415,6 +426,20 @@ public class Channel {
 	public void setSysProperty(String attributeName, String attributeValue) {
 		engine.setSysProperty(attributeName, attributeValue);
 	}
+	
+	//----------------------------------------------------------------------------------------------------------------------
+
+	public String getOs() {
+		return systemValues.getOsName();
+	}
+	
+	public String getApplication() {
+		return systemValues.getApplicationName();
+	}
+	
+	public String getApplicationVersion() {
+		return systemValues.getApplicationVersion();
+	}
 
 	//----------------------------------------------------------------------------------------------------------------------
 	// logs
@@ -432,26 +457,34 @@ public class Channel {
 	// Getter and setter for serialization
 	//----------------------------------------------------------------------------------------------------------------------
 
-	public ArrayList<String> getSystemProperties() { return systemProperties; }
-	public void setSystemProperties(ArrayList<String> systemProperties) { this.systemProperties = systemProperties; }
+	public ArrayList<String> getSystemProperties() {
+		return systemProperties; 
+	}
+	public void setSystemProperties(ArrayList<String> props) { 
+		systemProperties = props; 
+	}
 
-	public ArrayList<String> getSystemButtons() { return systemButtons; }
-	public void setSystemButtons(ArrayList<String> systemButtons) { this.systemButtons = systemButtons; }
+	public ArrayList<String> getSystemButtons() { 
+		return systemButtons; 
+	}
+	public void setSystemButtons(ArrayList<String> buttons) { 
+		systemButtons = buttons;
+	}
 
 	public ArrayList<String> getOperations() {
 		return operations;
 	}
+
 	public void setOperations(ArrayList<String> operations) {
 		this.operations = operations;
 	}
 
-	public String getApplication() {
-		return application;
+	public SystemValues getSystemValues(){
+		return systemValues;
 	}
-	public void setApplication(String value) {
-		this.application = value;
-	}
-
+	
+	public void setSystemValues(SystemValues value) {} //read only
+	
 	public String getApplicationPath() {
 		return engine.getApplicationPath();
 	}
@@ -470,7 +503,6 @@ public class Channel {
 	public boolean isMobile() {
 		return engine instanceof MobileDriverEngine;
 	}
-
 	public void setMobile(boolean value) {} // read only
 
 	public String getName() {
@@ -504,22 +536,6 @@ public class Channel {
 		}
 	}
 
-	public String getApplicationVersion() {
-		return applicationVersion;
-	}
-
-	public void setApplicationVersion(String applicationVersion) {
-		this.applicationVersion = applicationVersion;
-	}
-
-	public String getOs() {
-		return os;
-	}
-
-	public void setOs(String os) {
-		this.os = os;
-	}
-
 	public byte[] getIcon() {
 		return icon;
 	}
@@ -548,12 +564,10 @@ public class Channel {
 		return dimension.getX().intValue() + "," + dimension.getY().intValue() + "," + dimension.getWidth().intValue() + "," + dimension.getHeight().intValue();
 	}
 
-	public void setProcessId(Long value) {
-	}
-
 	public Long getProcessId() {
 		return processId;
 	}
+	public void setProcessId(Long value) {} //read only
 
 	public TestBound getSubDimension(){
 		return subDimension;

@@ -21,7 +21,6 @@ package com.ats.element;
 
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Map;
 
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;

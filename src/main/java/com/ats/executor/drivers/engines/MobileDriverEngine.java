@@ -19,13 +19,42 @@ under the License.
 
 package com.ats.executor.drivers.engines;
 
+import java.awt.Graphics;
+import java.awt.Point;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.imageio.ImageIO;
+
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebElement;
+
 import com.ats.driver.ApplicationProperties;
-import com.ats.element.*;
+import com.ats.element.AtsBaseElement;
+import com.ats.element.AtsMobileElement;
+import com.ats.element.DialogBox;
+import com.ats.element.FoundElement;
+import com.ats.element.MobileRootElement;
+import com.ats.element.MobileTestElement;
+import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
-import com.ats.executor.channels.SystemValues;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.mobiles.AndroidRootElement;
 import com.ats.executor.drivers.engines.mobiles.IosRootElement;
@@ -38,26 +67,16 @@ import com.ats.graphic.ImageTemplateMatchingSimple;
 import com.ats.script.actions.ActionApi;
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
-import com.google.gson.*;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+
 import okhttp3.OkHttpClient;
 import okhttp3.OkHttpClient.Builder;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebElement;
-
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.util.List;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
@@ -111,8 +130,6 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			final String application = appData[1];
 
 			this.applicationPath = "http://" + endPoint;
-			channel.setApplication(application);
-
 			this.client = new Builder().cache(null).connectTimeout(30, TimeUnit.SECONDS).writeTimeout(30, TimeUnit.SECONDS).readTimeout(40, TimeUnit.SECONDS).build();
 
 			this.userAgent = "AtsMobileDriver/" + ATS.VERSION + "," + System.getProperty("user.name") + ",";
@@ -182,22 +199,19 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			final String[] endPointData = endPoint.split(":");
 			final String version = response.get("version").getAsString();
 			final String userName = "mobileUser";
+			final String machineName = "mobileName";
+			final String osBuild = "osBuild";
+			final String country = "country";
 						
 			String udpInfo = endPointData[0] + ":" + screenCapturePort;
 			
 			if(udpEndPoint != null) {
 				udpInfo = udpEndPoint.getAsString() + ":" + screenCapturePort;
 			}
-			channel.setApplicationData(os, systemName, version, driverVersion, icon, udpInfo);
+			channel.setApplicationData(os, systemName, version, driverVersion, icon, udpInfo, application, userName, machineName, osBuild, country);
 
 			refreshElementMapLocation();
 		}
-	}
-	
-	@Override
-	public SystemValues started(ActionStatus status) {
-		
-		return null;
 	}
 
 	@Override

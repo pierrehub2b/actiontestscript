@@ -34,6 +34,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 import com.ats.crypto.Passwords;
+import com.ats.executor.channels.Channel;
 import com.ats.executor.channels.ChannelManager;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.generator.variables.ScriptValue;
@@ -61,18 +62,6 @@ public class Script {
 	public final static String SCRIPT_LOG = "SCRIPT";
 	public final static String COMMENT_LOG = "COMMENT";
 	
-	public static final String SYS_OS_NAME = "os-name";
-	public static final String SYS_OS_VERSION = "os-version";
-	public static final String SYS_OS_BUILD = "os-build";
-	public static final String SYS_COUNTRY = "country";
-	public static final String SYS_MACHINE_NAME = "machine-name";
-	public static final String SYS_DOT_NET = "dot-net";
-	public static final String SYS_APP_NAME = "app-name";
-	public static final String SYS_APP_VERSION = "app-version";
-	public static final String SYS_USER_NAME = "user-name";
-
-	public final static String[] SYSTEM_VALUES = new String[]{SYS_OS_NAME, SYS_OS_VERSION, SYS_OS_BUILD, SYS_COUNTRY, SYS_MACHINE_NAME, SYS_DOT_NET, SYS_APP_NAME, SYS_APP_VERSION, SYS_USER_NAME};
-
 	//-------------------------------------------------------------------------------------
 	// instances
 	//-------------------------------------------------------------------------------------
@@ -309,12 +298,12 @@ public class Script {
 	//-------------------------------------------------------------------------------------------------
 
 	public String getSystemValue(String name){
-		/*if(channelManager != null) {
+		if(channelManager != null) {
 			final Channel cnl = channelManager.getCurrentChannel();
 			if(cnl != null) {
 				return cnl.getSystemValue(name);
 			}
-		}*/
+		}
 		return "";
 	}
 
