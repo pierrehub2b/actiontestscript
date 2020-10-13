@@ -41,11 +41,6 @@ public class EmptyChannel extends Channel {
 	}
 
 	@Override
-	public String getApplicationPath() {
-		return "";
-	}
-
-	@Override
 	public boolean isDesktop() {
 		return false;
 	}

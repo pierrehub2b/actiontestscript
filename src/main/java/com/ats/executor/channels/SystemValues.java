@@ -28,6 +28,7 @@ public class SystemValues {
 	public static final String SYS_MACHINE_NAME = "machine-name";
 	public static final String SYS_APP_NAME = "app-name";
 	public static final String SYS_APP_VERSION = "app-version";
+	public static final String SYS_APP_PATH = "app-path";
 	public static final String SYS_USER_NAME = "user-name";
 
 	public final static String[] VALUES_NAME = new String[]{SYS_OS_NAME, SYS_OS_VERSION, SYS_OS_BUILD, SYS_COUNTRY, SYS_MACHINE_NAME, SYS_APP_NAME, SYS_APP_VERSION, SYS_USER_NAME};
@@ -42,6 +43,7 @@ public class SystemValues {
 	private String country = "";
 	private String machineName = "";
 	private String applicationName = "";
+	private String applicationPath = "";
 	private String applicationVersion = "";
 	private String userName = System.getProperty("user.name");
 
@@ -106,6 +108,12 @@ public class SystemValues {
 	}
 	public void setApplicationName(String applicationName) {
 		this.applicationName = applicationName;
+	}
+	public String getApplicationPath() {
+		return applicationPath;
+	}
+	public void setApplicationPath(String applicationPath) {
+		this.applicationPath = applicationPath;
 	}
 	public String getApplicationVersion() {
 		return applicationVersion;

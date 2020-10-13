@@ -124,22 +124,26 @@ public class Channel {
 		if(status.isPassed()) {
 
 			status.setChannel(this);
-
+			
 			systemValues.setOsName(desktopDriver.getOsName());
 			systemValues.setApplicationName(action.getApplication().getCalculated());
 			systemValues.setCountry(desktopDriver.getCountryCode());
 			systemValues.setMachineName(desktopDriver.getMachineName());
 			systemValues.setOsVersion(desktopDriver.getOsVersion());
 			systemValues.setOsBuild(desktopDriver.getOsBuildVersion());
-
+			
 			this.mainScript = script;
 			this.current = true;
 			this.actionStart = action;
 			this.engine = driverManager.getDriverEngine(this, status, desktopDriver);
 
 			if(status.isPassed()) {
+				
+				systemValues.setApplicationPath(engine.getApplicationPath());
+				
 				refreshLocation();
 				engine.started(status);
+				
 			}else {
 				status.setChannel(null);
 			}
@@ -483,14 +487,8 @@ public class Channel {
 	public SystemValues getSystemValues(){
 		return systemValues;
 	}
-	
 	public void setSystemValues(SystemValues value) {} //read only
 	
-	public String getApplicationPath() {
-		return engine.getApplicationPath();
-	}
-	public void setApplicationPath(String url) {} // read only	
-
 	public String getDriverVersion() {
 		return driverVersion;
 	}
