@@ -193,12 +193,12 @@ public class ScriptReportGenerator {
 	public static void copyDefaultImagesToFolder(File targetFile) throws IOException {
 		HashMap<String, BufferedImage> map = new HashMap<String, BufferedImage>();
 		
-		BufferedImage atsImg = ImageIO.read(ResourceContent.class.getResource("/reports/images/ats.png"));
+		BufferedImage logoImg = ImageIO.read(ResourceContent.class.getResource("/reports/images/logo.png"));
 		BufferedImage trueImg = ImageIO.read(ResourceContent.class.getResource("/reports/images/true.png"));
 		BufferedImage falseImg = ImageIO.read(ResourceContent.class.getResource("/reports/images/false.png"));
 		BufferedImage warningImg = ImageIO.read(ResourceContent.class.getResource("/reports/images/warning.png"));
 		
-		map.put("ats.png", atsImg);
+		map.put("logo.png", logoImg);
 		map.put("true.png", trueImg);
 		map.put("false.png", falseImg);
 		map.put("warning.png", warningImg);
