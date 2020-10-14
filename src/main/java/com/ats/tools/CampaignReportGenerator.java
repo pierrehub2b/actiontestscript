@@ -243,11 +243,11 @@ public class CampaignReportGenerator {
         FileWriter fw = new FileWriter(f);
         fw.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><report actions=\"" +  (det > 1) + "\" details=\"" + (det > 2) + "\">");
         
-        String[] paths = xmlPath.split(";");
+        final String[] paths = xmlPath.split(";");
         String currentScript = "";
         String currentSuite = "";
         for (int j = 0; j<paths.length;j++) {
-        	String[] scripts = paths[j].split(",");
+        	final String[] scripts = paths[j].split(",");
         	for (int i = 0; i < scripts.length; i++) {
         		File currentFile = null;
         		if(i == 0) {
@@ -261,7 +261,7 @@ public class CampaignReportGenerator {
         			System.out.println("currentScript: " + currentScript);
         		}
 
-            	String content = Files.readString(currentFile.toPath(), StandardCharsets.UTF_8);
+        		final String content = new String(Files.readAllBytes(currentFile.toPath()), StandardCharsets.UTF_8);
     			fw.write(content.replaceAll(patternDOCTYPE, "").replaceAll(patternXML, "").replaceAll("<action ", "<action scriptName=\"" + currentScript + "\" suiteName=\"" + currentSuite + "\" ").replace("<script ", "<script suiteName=\"" + currentSuite + "\" "));
     			if(i == 0) { fw.write("<tests>"); }
     		}
