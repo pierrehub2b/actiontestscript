@@ -152,7 +152,7 @@ public class CampaignReportGenerator {
 		if (pdf == null || (!new File(pdf).exists())) {
 			try {
 				pdf = targetFile.getParent() +"/campaign_pdf_stylesheet.xml";
-				copyResource(ResourceContent.class.getResourceAsStream("/reports/campaign/campaign_pdf_stylesheet.xml"),html);
+				copyResource(ResourceContent.class.getResourceAsStream("/reports/campaign/campaign_pdf_stylesheet.xml"),pdf);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

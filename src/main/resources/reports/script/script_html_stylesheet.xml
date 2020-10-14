@@ -110,6 +110,14 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
             <xsl:apply-templates select="groups"/>
           </TD>
         </TR>
+       <TR>
+	  <TD class="w-25 p-3">
+            Summary :
+          </TD>
+	  <TD COLSPAN="2">
+            <xsl:apply-templates select="summary"/>
+          </TD>
+        </TR>
 	<xsl:apply-templates select="test"/>
       </TBODY>
     </TABLE>
@@ -163,6 +171,16 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 	<xsl:value-of select="."/>
       </xsl:for-each>
       <BR/>
+  </xsl:template> 
+  
+  
+  <!-- ========================= -->
+  <!-- child element: summary     -->
+  <!-- ========================= -->
+  <xsl:template match="summary">
+    <b>Actions: </b><xsl:value-of select="@actions"/><br />
+    <b>Passed: </b><xsl:value-of select="@passed"/><br />
+    <b>Data: </b><xsl:value-of select="data"/>
   </xsl:template> 
 
   <!-- ========================= -->

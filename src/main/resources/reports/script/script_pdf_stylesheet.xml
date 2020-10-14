@@ -144,6 +144,9 @@
                     </fo:block>
                   </fo:table-cell>
                 </fo:table-row>
+                <fo:table-row>
+                <xsl:apply-templates select="summary"/>
+                </fo:table-row>
               </fo:table-body>
             </fo:table>
         </fo:block>
@@ -219,6 +222,31 @@
       <xsl:if test="position() != 1"> - </xsl:if>
       <xsl:value-of select="."/>
     </xsl:for-each>
+  </xsl:template>
+  
+   <!-- ========================= -->
+  <!-- child element: summary     -->
+  <!-- ========================= -->
+  <xsl:template match="summary">
+    <fo:table-cell>
+      <fo:block text-align="left" font-weight="bold">
+        Summary :
+      </fo:block>
+    </fo:table-cell>
+    <fo:table-cell>
+      <fo:block>
+            Actions :
+            <xsl:value-of select="@actions"/>            
+          </fo:block>
+          <fo:block>
+            Passed :
+            <xsl:value-of select="@passed"/>            
+          </fo:block>
+          <fo:block>
+            Data :
+            <xsl:value-of select="data"/>            
+          </fo:block>
+    </fo:table-cell>
   </xsl:template>
 
   <!-- ========================= -->
