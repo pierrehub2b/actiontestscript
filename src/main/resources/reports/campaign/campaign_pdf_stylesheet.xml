@@ -279,7 +279,7 @@
   <!-- child element: ats     -->
   <!-- ========================= -->
   <xsl:template match="ats">
-	    <fo:page-sequence master-reference="landscapeA4-body">
+	  <fo:page-sequence master-reference="landscapeA4-body">
       <fo:static-content flow-name="xsl-region-after">
         <fo:block text-align="center" vertical-align="bottom">
           Page <fo:page-number/>

@@ -176,7 +176,9 @@ public class ActionTestScript extends Script implements ITest{
 			//-----------------------------------------------------------
 
 			final int visualQuality = Utils.string2Int(getEnvironmentValue("visual.report", "0"));
-			final boolean xml = "true".equalsIgnoreCase(getEnvironmentValue("xml.report", ""));
+			
+			String reportVar = getEnvironmentValue("xml.report", "");
+			final boolean xml = reportVar.equalsIgnoreCase("true") || Integer.parseInt(reportVar) > 0;
 
 			if(visualQuality > 0 || xml) {
 

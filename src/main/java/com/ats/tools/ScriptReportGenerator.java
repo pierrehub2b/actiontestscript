@@ -19,76 +19,146 @@ under the License.
 
 package com.ats.tools;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
-
+import javax.imageio.ImageIO;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
+
+import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ScriptReportGenerator {
-
+public class ScriptReportGenerator {	
+	
 	public static void main(String[] args) throws TransformerException, InterruptedException, IOException {
-		String fopDir = System.getProperty("fop", null);
-		String xmlPath = System.getProperty("xml", null);
-		String xslPath = System.getProperty("xslPdf", null);
-		String xslHtmlPath = System.getProperty("xslHtml", null);
-		File f = new File(xmlPath);
 		
-		if (fopDir == null || !(new File(fopDir).exists())) {
+		String target = null;
+		String fop = null;
+		String html = null;
+		String pdf = null;
+		
+		for (int i = 0; i < args.length; i++) {
+			String string = args[i];
+			if(string.startsWith("--") && i+1 < args.length) {
+				switch (string.substring(2)) {
+					case "target":
+						target = args[i+1];
+						break;
+					case "fop":
+						fop = args[i+1];
+						break;
+				}
+			}
+		}
+			
+		if(target == null) return;
+		File targetFile = new File(target);
+		
+		File projectFolder = null;
+		File currentFolder = targetFile;
+		
+		while(projectFolder == null) {
+			currentFolder = currentFolder.getParentFile();
+			File[] tmpFiles = currentFolder.listFiles();
+			for (File f : tmpFiles) {
+				if(f.getName().equalsIgnoreCase("src")) {
+					projectFolder = currentFolder;
+				}
+			}
+		}
+		File xsltFolder = new File(projectFolder.getAbsolutePath() + "/src/assets/resources/xslt");
+		
+		for (File xslt : xsltFolder.listFiles()) {
+			if(xslt.getName().equalsIgnoreCase("script")) {
+				for (File stylesheets : xslt.listFiles()) {
+					if(stylesheets.getName().contains("_pdf_")) {
+						pdf = stylesheets.getAbsolutePath();
+					}
+					if(stylesheets.getName().contains("_html_")) {
+						html = stylesheets.getAbsolutePath();
+					}
+					if(stylesheets.getName().contains(".css") || stylesheets.getName().contains(".js")) {
+						InputStream initialStream = new FileInputStream(stylesheets);
+					    byte[] buffer = new byte[initialStream.available()];
+					    initialStream.read(buffer);
+					 
+					    File styleFile = new File(targetFile.getParentFile().getAbsolutePath() + File.separator + stylesheets.getName());
+					    OutputStream outStream = new FileOutputStream(styleFile);
+					    outStream.write(buffer);
+					    outStream.close();
+					    initialStream.close();
+					}
+				}
+			}
+			
+			if(xslt.getName().equalsIgnoreCase("images")) {
+				if(xslt.listFiles().length > 0) {
+					for (File images : xslt.listFiles()) {
+						InputStream initialStream = new FileInputStream(images);
+					    byte[] buffer = new byte[initialStream.available()];
+					    initialStream.read(buffer);
+					 
+					    File styleFile = new File(targetFile.getParentFile().getAbsolutePath() + File.separator + images.getName());
+					    OutputStream outStream = new FileOutputStream(styleFile);
+					    outStream.write(buffer);
+					    outStream.close();
+					    initialStream.close();
+					}
+				} else {
+					///TODO copy default files
+					copyDefaultImagesToFolder(targetFile);
+				}
+			}
+		}
+
+		if (fop == null) {
 			Map<String, String> map = System.getenv();
 			for (Map.Entry<String, String> entry : map.entrySet()) {
 				Pattern pattern = Pattern.compile("fop-[\\d].[\\d]");
 				Matcher matcher = pattern.matcher(entry.getValue().toLowerCase());
 				if (entry.getKey().toLowerCase().contains("fop") && matcher.find()) {
-					fopDir = entry.getValue();
+					fop = entry.getValue() + "\\build\\fop.jar;" + entry.getValue() + "\\lib\\*";
 				}
 			}
 		}
 		
-		if (xslPath == null || (!new File(xslPath).exists())) {
+		if (pdf == null || (!new File(pdf).exists())) {
 			try {
-				final String styleSheet = Resources.toString(ResourceContent.class.getResource("/reports/script/script_pdf_stylesheet.xml"), Charsets.UTF_8);
-				xslPath = createEmptyStylesheet(styleSheet,f.getParent());
+				pdf = targetFile.getParent() +"/script_pdf_stylesheet.xml";
+				copyResource(ResourceContent.class.getResourceAsStream("/reports/script/script_pdf_stylesheet.xml"),html);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 		
-		
-		if (xslHtmlPath == null || (!new File(xslHtmlPath).exists())) {
+		if (html == null || (!new File(html).exists())) {
 			try {
-				final String styleSheet = Resources.toString(ResourceContent.class.getResource("/reports/script/script_html_stylesheet.xml"), Charsets.UTF_8);
-				xslHtmlPath = createEmptyStylesheetHtml(styleSheet, f.getParent());
+				html = targetFile.getParent() +"/script_html_stylesheet.xml";
+				copyResource(ResourceContent.class.getResourceAsStream("/reports/script/script_html_stylesheet.xml"),html);
+				
+				//copy css
+				copyResource(ResourceContent.class.getResourceAsStream("/reports/script/report.css"),targetFile.getParent() +"/report.css");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-		
-		
-		copyImageToTempFolder("false",xmlPath);
-		copyImageToTempFolder("true",xmlPath);
-		copyImageToTempFolder("warning",xmlPath);
-		copyImageToTempFolder("agilitest",xmlPath);
-		copyFileToTempFolder("report.css",xmlPath);
 
-		if (fopDir == null || xmlPath == null || xslPath == null || xslHtmlPath == null) { return; }		
+		if (fop == null || target == null || pdf == null || html == null) { return; }		
 		
 		//HTML reports
-		String path = f.getParentFile().getAbsolutePath();
+		String path = targetFile.getParentFile().getAbsolutePath();
 		Transformer transformer = null;
 		TransformerFactory tFactory = TransformerFactory.newInstance();
-		transformer = tFactory.newTransformer(new StreamSource(xslHtmlPath));
-	    transformer.transform(new StreamSource(xmlPath), new StreamResult(path + File.separator + f.getParentFile().getName() + ".html"));
+		transformer = tFactory.newTransformer(new StreamSource(html));
+	    transformer.transform(new StreamSource(target), new StreamResult(path + File.separator + targetFile.getParentFile().getName() + ".html"));
 		
 		try {
-			ProcessBuilder ps= new ProcessBuilder("java","-cp",fopDir + "\\build\\fop.jar;" + fopDir + "\\lib\\*","org.apache.fop.cli.Main","-xml",xmlPath,"-xsl",xslPath,"-pdf",f.getParentFile().getAbsolutePath() + File.separator + f.getParentFile().getName() + ".pdf");
+			ProcessBuilder ps= new ProcessBuilder("java","-cp",fop,"org.apache.fop.cli.Main","-xml",target,"-xsl",pdf,"-pdf",targetFile.getParentFile().getAbsolutePath() + File.separator + targetFile.getParentFile().getName() + ".pdf");
 			ps.redirectErrorStream(true);
 
 			Process pr = ps.start();  
@@ -108,51 +178,38 @@ public class ScriptReportGenerator {
             t.printStackTrace();
           }
 	}
-	
-	public static void copyImageToTempFolder(String name, String xmlPath) throws IOException {
-		File f = new File(xmlPath);
-		String path = f.getParentFile().getAbsolutePath();
-		byte[] aByteArray = Resources.toByteArray(ResourceContent.class.getResource("/reports/images/" + name + ".png"));
-		final File file = new File(path + File.separator + name + ".png");
-        final FileOutputStream fileOut = new FileOutputStream(file);
-        fileOut.write(aByteArray);
-        fileOut.flush();
-        fileOut.close();
+		
+
+	public static void copyResource(InputStream res, String dest) throws IOException {
+	    byte[] buffer = new byte[res.available()];
+	    res.read(buffer);
+	 
+	    File targetFile = new File(dest);
+	    OutputStream outStream = new FileOutputStream(targetFile);
+	    outStream.write(buffer);
+	    outStream.close();
 	}
 	
-	public static String createEmptyStylesheet(String xmlSource,String xmlPath) throws IOException {
-		File f = new File(xmlPath);		
-		String path = f.getParentFile().getAbsolutePath() + File.separator + "script_pdf_stylesheet.xml";
-		File file = new File(path);
-        file.setWritable(true);
-        file.setReadable(true);
-        FileWriter fw = new FileWriter(file);
-        fw.write(xmlSource);
-	    fw.close();
+	public static void copyDefaultImagesToFolder(File targetFile) throws IOException {
+		HashMap<String, BufferedImage> map = new HashMap<String, BufferedImage>();
+		
+		BufferedImage agilitestImg = ImageIO.read(ResourceContent.class.getResource("/reports/images/agilitest.png"));
+		BufferedImage trueImg = ImageIO.read(ResourceContent.class.getResource("/reports/images/true.png"));
+		BufferedImage falseImg = ImageIO.read(ResourceContent.class.getResource("/reports/images/false.png"));
+		BufferedImage warningImg = ImageIO.read(ResourceContent.class.getResource("/reports/images/warning.png"));
+		
+		map.put("agilitest.png", agilitestImg);
+		map.put("true.png", trueImg);
+		map.put("false.png", falseImg);
+		map.put("warning.png", warningImg);
+		
+		for(Map.Entry<String, BufferedImage> entry : map.entrySet()) {
+		    String key = entry.getKey();
+		    BufferedImage value = entry.getValue();
 
-        return file.getAbsolutePath();
+		    String path = targetFile.getParentFile().getAbsolutePath() + File.separator + key;
+			File tmpFile = new File(path);
+			ImageIO.write(value, "png", tmpFile);
+		}
 	}	
-	
-	public static String createEmptyStylesheetHtml(String xmlSource,String basePath) throws IOException {	
-		String path = basePath + File.separator + "script_html_stylesheet.xml";
-		File f = new File(path);
-        f.setWritable(true);
-        f.setReadable(true);
-        FileWriter fw = new FileWriter(f);
-        fw.write(xmlSource);
-	    fw.close();
-
-        return f.getAbsolutePath();
-	}
-	
-	public static void copyFileToTempFolder(String name, String basePath) throws IOException {
-		File f = new File(basePath);
-		String path = f.getParentFile().getAbsolutePath();
-		byte[] aByteArray = Resources.toByteArray(ResourceContent.class.getResource("/reports/script/" + name));
-		final File file = new File(path + File.separator + name);
-        final FileOutputStream fileOut = new FileOutputStream(file);
-        fileOut.write(aByteArray);
-        fileOut.flush();
-        fileOut.close();
-	}
 }
