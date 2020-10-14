@@ -31,7 +31,7 @@ public class BlackListFilter extends UrlBaseFilter {
 
 	@Override
 	protected void process(HarEntry entry, List<HarEntry> savedEntries) {
-		if(listUrls.stream().filter(isMatching(entry.getRequest().getUrl())).findFirst().isEmpty()) {
+		if(!listUrls.stream().filter(isMatching(entry.getRequest().getUrl())).findFirst().isPresent()) {
 			saveEntry(savedEntries, entry);
 		}
 	}
