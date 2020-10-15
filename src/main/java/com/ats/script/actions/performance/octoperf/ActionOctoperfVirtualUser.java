@@ -85,11 +85,12 @@ public class ActionOctoperfVirtualUser extends Action {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void execute(ActionTestScript ts, String testName, int testLine) {
+	public boolean execute(ActionTestScript ts, String testName, int testLine) {
 		final Channel channel = ts.getCurrentChannel();
 		setStatus(channel.newActionStatus(testName, testLine));
 		channel.sendToOctoperfServer(this);
 		status.endDuration();
+		return true;
 	}
 	
 	//--------------------------------------------------------

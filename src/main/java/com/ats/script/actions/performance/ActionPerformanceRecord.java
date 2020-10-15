@@ -53,7 +53,7 @@ public class ActionPerformanceRecord extends ActionPerformance {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void execute(ActionTestScript ts, String testName, int testLine) {
+	public boolean execute(ActionTestScript ts, String testName, int testLine) {
 		final Channel channel = ts.getCurrentChannel();
 		setStatus(channel.newActionStatus(testName, testLine));
 		
@@ -64,6 +64,7 @@ public class ActionPerformanceRecord extends ActionPerformance {
 		}
 		
 		status.endDuration();
+		return true;
 	}
 
 	//--------------------------------------------------------

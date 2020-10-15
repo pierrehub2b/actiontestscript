@@ -56,7 +56,7 @@ public class ActionGotoUrl extends ActionExecute {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void execute(ActionTestScript ts, String testName, int testLine) {
+	public boolean execute(ActionTestScript ts, String testName, int testLine) {
 
 		super.execute(ts, testName, testLine);
 		
@@ -71,6 +71,8 @@ public class ActionGotoUrl extends ActionExecute {
 			
 			ts.getRecorder().updateScreen(0, status.getDuration(), urlString);
 		}
+		
+		return true;
 	}
 
 	@Override

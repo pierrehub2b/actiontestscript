@@ -42,6 +42,7 @@ import com.ats.script.Script;
 import com.ats.script.ScriptHeader;
 import com.ats.script.actions.Action;
 import com.ats.script.actions.ActionCallscript;
+import com.ats.script.actions.ActionComment;
 import com.ats.script.actions.ActionExecute;
 import com.ats.tools.Utils;
 import com.ats.tools.logger.ExecutionLogger;
@@ -627,6 +628,12 @@ public class ActionTestScript extends Script implements ITest{
 		action.execute(this, getTestName(), line);
 		getTopScript().actionFinished(getTestName(), line, action, true);
 	}
+	
+	public void exec(int line, ActionComment action){
+		if(action.execute(this, getTestName(), line)) {
+			getTopScript().actionFinished(getTestName(), line, action, true);
+		}
+	}
 
 	public void exec(int line, ActionCallscript action){
 		action.execute(this, getTestName(), line);
@@ -662,6 +669,7 @@ public class ActionTestScript extends Script implements ITest{
 		sendErrorLog(errorScript, errorInfo);
 
 		if(status.isSuiteExecution()) {
+			getRecorder().updateSummaryFail(script, line, app, errorMessage);
 			throw new AtsFailError(errorScript, errorInfo);
 		}
 	}

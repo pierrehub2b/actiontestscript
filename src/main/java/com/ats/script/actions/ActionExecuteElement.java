@@ -77,13 +77,13 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 	//---------------------------------------------------------------------------------------------------------------------------------
 	
 	@Override
-	public void execute(ActionTestScript ts, String testName, int testLine) {
+	public boolean execute(ActionTestScript ts, String testName, int testLine) {
 		
 		int maxTry = AtsManager.getMaxStaleOrJavaScriptError();
 		while(maxTry > 0) {
 			try {
 				execute(ts, testName, testLine, Operators.GREATER, 0);
-				return;
+				return true;
 			} catch(JavascriptException e) {
 				ts.getTopScript().sendWarningLog("Javascript error", "try again : " + maxTry);
 				status.setException(ActionStatus.JAVASCRIPT_ERROR, e);

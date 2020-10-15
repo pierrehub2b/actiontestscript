@@ -93,7 +93,7 @@ public class ActionAssertValue extends ActionExecute {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void execute(ActionTestScript ts, String testName, int testLine) {
+	public boolean execute(ActionTestScript ts, String testName, int testLine) {
 		
 		super.execute(ts, testName, testLine);
 		
@@ -118,6 +118,8 @@ public class ActionAssertValue extends ActionExecute {
 		
 		status.endDuration();
 		ts.getRecorder().update(error, status.getDuration(), value1Calculated, regexpLabel + value2Calculated);
+		
+		return true;
 	}
 
 	//--------------------------------------------------------

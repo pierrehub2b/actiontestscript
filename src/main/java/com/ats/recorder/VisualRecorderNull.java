@@ -101,4 +101,8 @@ public class VisualRecorderNull implements IVisualRecorder {
 	@Override
 	public void updateSummary(String testName, int testLine, String data) {
 	}
+
+	@Override
+	public void updateSummaryFail(String testName, int testLine, String app, String errorMessage) {
+	}
 }

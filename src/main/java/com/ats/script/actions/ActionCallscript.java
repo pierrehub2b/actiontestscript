@@ -251,7 +251,7 @@ public class ActionCallscript extends ActionReturnVariableArray {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void execute(ActionTestScript ts, String testName, int line) {
+	public boolean execute(ActionTestScript ts, String testName, int line) {
 
 		final Channel currentChannel = ts.getCurrentChannel();
 		setStatus(currentChannel.newActionStatus(testName, line));
@@ -289,7 +289,7 @@ public class ActionCallscript extends ActionReturnVariableArray {
 
 					if(csvUrl == null) {
 						status.setError(ActionStatus.FILE_NOT_FOUND, "CSV file not found : " + csvPath);
-						return;
+						return true;
 					}
 
 					final ParameterDataFile data = Utils.loadData(csvUrl);
@@ -356,6 +356,8 @@ public class ActionCallscript extends ActionReturnVariableArray {
 
 		condition = null;
 		status.endDuration();
+		
+		return true;
 	}
 	
 	private void callScriptWithParametersFile(Method testMain, ActionTestScript ats, ActionTestScript ts, String testName, int line, ParameterList row, int iteration, int iterationMax, String scriptName, File csvFile) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {

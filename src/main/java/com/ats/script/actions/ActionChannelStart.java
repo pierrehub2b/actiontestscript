@@ -89,9 +89,10 @@ public class ActionChannelStart extends ActionChannel {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void execute(ActionTestScript ts, String testName, int testLine) {
+	public boolean execute(ActionTestScript ts, String testName, int testLine) {
 		setStatus(ts.getCurrentChannel().newActionStatus(testName, testLine));
 		ts.getChannelManager().startChannel(status, this);
+		return true;
 	}
 
 	@Override

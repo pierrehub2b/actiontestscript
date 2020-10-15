@@ -46,7 +46,7 @@ public class VisualRecorder implements IVisualRecorder {
 	
 	private long started;
 	
-	private StringBuilder summary = new StringBuilder("");
+	private ReportSummary summary = new ReportSummary();
 	private ActionTestScript topScript;
 	
 	private ExecutionLogger logger;
@@ -88,7 +88,12 @@ public class VisualRecorder implements IVisualRecorder {
 	
 	@Override
 	public void updateSummary(String testName, int testLine, String data) {
-		summary.append(data).append('\n');
+		summary.appendData(data);
+	}
+	
+	@Override
+	public void updateSummaryFail(String testName, int testLine, String app, String errorMessage) {
+		summary.setFailData(testName, testLine, errorMessage);
 	}
 	
 	//--------------------------------------------------------------------------------------------
@@ -100,7 +105,7 @@ public class VisualRecorder implements IVisualRecorder {
 			final Path path = Paths.get(outputPath);
 			
 			logger.sendInfo("Stop visual recording", scriptHeader.getQualifiedName());
-			channel.stopVisualRecord(topScript.getStatus(), summary.toString());
+			channel.stopVisualRecord(topScript.getStatus(), summary);
 			channel.saveVisualReportFile(path, scriptHeader.getQualifiedName() + Script.ATS_VISUAL_FILE_EXTENSION, logger);
 			
 			if(xml) {

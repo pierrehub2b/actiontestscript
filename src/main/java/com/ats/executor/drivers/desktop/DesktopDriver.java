@@ -49,6 +49,7 @@ import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.engines.DesktopDriverEngine;
 import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
+import com.ats.recorder.ReportSummary;
 import com.ats.script.ScriptHeader;
 import com.ats.tools.logger.ExecutionLogger;
 import com.exadel.flamingo.flex.messaging.amf.io.AMF3Deserializer;
@@ -725,9 +726,9 @@ public class DesktopDriver extends RemoteWebDriver {
 	//---------------------------------------------------------------------------------------
 	//visual actions
 	//---------------------------------------------------------------------------------------
-
-	public void saveSummary(ScriptStatus status, String summary) {
-		sendRequestCommand(CommandType.Record, RecordType.Summary, status.isPassed(), status.getActions(), status.getSuiteName(), status.getTestName(), summary);
+	
+	public void saveSummary(ScriptStatus status, ReportSummary summary) {
+		sendRequestCommand(CommandType.Record, RecordType.Summary, summary.toData(status));
 	}
 		
 	public void stopVisualRecord() {

@@ -140,10 +140,11 @@ public class ActionApi extends Action {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void execute(ActionTestScript ts, String testName, int testLine) {
+	public boolean execute(ActionTestScript ts, String testName, int testLine) {
 		super.execute(ts, testName, testLine);
 		getCurrentChannel().api(status, this);
 		status.endDuration();
+		return true;
 	}
 	
 	@Override

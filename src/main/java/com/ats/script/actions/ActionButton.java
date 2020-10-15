@@ -46,13 +46,15 @@ public class ActionButton extends Action {
 	}
 
 	@Override
-	public void execute(ActionTestScript ts, String testName, int testLine) {
+	public boolean execute(ActionTestScript ts, String testName, int testLine) {
 		super.execute(ts, testName, testLine);
 
 		if (status.isPassed()) {
 			ts.getCurrentChannel().buttonClick(status, getButtonType());
 			status.endDuration();
 		}
+		
+		return true;
 	}
 
 	@Override

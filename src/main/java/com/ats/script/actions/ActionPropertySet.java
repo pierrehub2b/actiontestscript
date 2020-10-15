@@ -30,13 +30,15 @@ public class ActionPropertySet extends Action {
     //---------------------------------------------------------------------------------------------------------------------------------
 
     @Override
-    public void execute(ActionTestScript ts, String testName, int line) {
+    public boolean execute(ActionTestScript ts, String testName, int line) {
         super.execute(ts, testName, line);
 
         Channel currentChannel = ts.getCurrentChannel();
         if (currentChannel != null) {
             currentChannel.setSysProperty(getName(), getValue().getCalculated());
         }
+        
+		return true;
     }
 
     //--------------------------------------------------------

@@ -37,9 +37,10 @@ public abstract class ActionExecute extends Action {
 	}
 
 	@Override
-	public void execute(ActionTestScript ts, String testName, int testLine){
+	public boolean execute(ActionTestScript ts, String testName, int testLine){
 		super.execute(ts, testName, testLine);
 		getCurrentChannel().checkStatus(this, testName, testLine);
+		return true;
 	}
 	
 	@Override

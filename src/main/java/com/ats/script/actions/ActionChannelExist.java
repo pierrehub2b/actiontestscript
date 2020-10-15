@@ -36,7 +36,7 @@ public class ActionChannelExist extends ActionChannel{
 	protected boolean channelEmpty = true;
 
 	@Override
-	public void execute(ActionTestScript ts, String testName, int testLine) {
+	public boolean execute(ActionTestScript ts, String testName, int testLine) {
 		final Channel channel = ts.getChannelManager().getChannel(getName());
 		
 		channelEmpty = (channel instanceof EmptyChannel);
@@ -46,6 +46,8 @@ public class ActionChannelExist extends ActionChannel{
 			super.execute(ts, testName, testLine);
 			ts.getRecorder().update(getName());
 		}
+		
+		return true;
 	}
 		
 	@Override

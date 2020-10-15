@@ -103,11 +103,12 @@ public class ActionPerformanceStart extends ActionPerformance {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void execute(ActionTestScript ts, String testName, int testLine) {
+	public boolean execute(ActionTestScript ts, String testName, int testLine) {
 		final Channel channel = ts.getCurrentChannel();
 		setStatus(channel.newActionStatus(testName, testLine));
 		channel.startHarServer(status, whiteList, trafficIdle, latency, sendBandWidth, receiveBandWidth);
 		status.endDuration();
+		return true;
 	}
 
 	//--------------------------------------------------------

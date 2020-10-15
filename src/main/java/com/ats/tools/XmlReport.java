@@ -3,7 +3,7 @@ package com.ats.tools;
 import com.ats.recorder.VisualAction;
 import com.ats.recorder.VisualImage;
 import com.ats.recorder.VisualReport;
-import com.ats.recorder.VisualSummary;
+import com.ats.recorder.ReportSummary;
 import com.ats.tools.logger.ExecutionLogger;
 import com.exadel.flamingo.flex.messaging.amf.io.AMF3Deserializer;
 import org.w3c.dom.Document;
@@ -199,20 +199,28 @@ public class XmlReport {
 
 							va.addImage(xmlFolerPath, imagesList);
 
-						} else if(obj instanceof VisualSummary){
+						} else if(obj instanceof ReportSummary){
 							
-							final VisualSummary vsum = (VisualSummary)obj;
+							final ReportSummary reportSummary = (ReportSummary)obj;
 							
 							final Element summary = document.createElement("summary");
 							
-							summary.setAttribute("actions", String.valueOf(vsum.getActions()));
-							summary.setAttribute("suiteName", vsum.getSuiteName());
-							summary.setAttribute("testName", vsum.getTestName());
-							summary.setAttribute("passed", String.valueOf(vsum.isPassed()));
+							summary.setAttribute("actions", String.valueOf(reportSummary.getActions()));
+							summary.setAttribute("suiteName", reportSummary.getSuiteName());
+							summary.setAttribute("testName", reportSummary.getTestName());
+							summary.setAttribute("status", String.valueOf(reportSummary.getStatus()));
 							
-							Element data = document.createElement("data");
-							data.setTextContent(vsum.getData());
+							final Element data = document.createElement("data");
+							data.setTextContent(reportSummary.getData());
 							summary.appendChild(data);
+							
+							if(reportSummary.getStatus() == 0 && reportSummary.getError() != null) {
+								final Element error = document.createElement("error");
+								error.setAttribute("script", reportSummary.getError().getScriptName());
+								error.setAttribute("line", String.valueOf(reportSummary.getError().getLine()));
+								error.setTextContent(reportSummary.getError().getMessage());
+								summary.appendChild(error);
+							}							
 
 							script.appendChild(summary);
 						}

@@ -26,6 +26,7 @@ import com.ats.executor.ActionStatus;
 import com.ats.executor.ScriptStatus;
 import com.ats.executor.drivers.desktop.DesktopResponse;
 import com.ats.generator.objects.MouseDirectionData;
+import com.ats.recorder.ReportSummary;
 import com.ats.script.ScriptHeader;
 import com.ats.script.actions.ActionExecute;
 import com.ats.tools.logger.ExecutionLogger;
@@ -90,7 +91,7 @@ public class EmptyChannel extends Channel {
 	}
 
 	@Override
-	public void stopVisualRecord(ScriptStatus status, String summary) {
+	public void stopVisualRecord(ScriptStatus status, ReportSummary summary) {
 	}
 
 	@Override

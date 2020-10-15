@@ -34,7 +34,7 @@ public abstract class ActionWindow extends Action {
 	}
 	
 	@Override
-	public void execute(ActionTestScript ts, String testName, int testLine) {
+	public boolean execute(ActionTestScript ts, String testName, int testLine) {
 		super.execute(ts, testName, testLine);
 		final Channel channel = ts.getCurrentChannel();
 		
@@ -47,6 +47,8 @@ public abstract class ActionWindow extends Action {
 		
 		status.endDuration();
 		ts.getRecorder().updateScreen(0, status.getDuration(), execResult);
+		
+		return true;
 	}
 	
 	protected String exec(Channel channel) {

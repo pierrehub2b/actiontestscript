@@ -36,13 +36,14 @@ public class ActionChannelSwitch extends ActionChannelExist {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void execute(ActionTestScript ts, String testName, int testLine) {
+	public boolean execute(ActionTestScript ts, String testName, int testLine) {
 		super.execute(ts, testName, testLine);
 		if(channelEmpty) {
 			ts.getTopScript().sendWarningLog("ActionChannelSwitch (" + testName + ":" + testLine + ")", "Cannot switch to Channel '" + getName() + "', this channel is not running !");
 		}else {
 			ts.getChannelManager().switchChannel(status, getName());
 		}
+		return true;
 	}
 	
 	//---------------------------------------------------------------------------------------------------------------------------------

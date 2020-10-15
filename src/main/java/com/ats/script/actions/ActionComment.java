@@ -88,11 +88,12 @@ public class ActionComment extends Action {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void execute(ActionTestScript ts, String testName, int testLine) {
+	public boolean execute(ActionTestScript ts, String testName, int testLine) {
 		if (STEP_TYPE.equals(type)) {
 			super.execute(ts, testName, testLine);
 			status.endDuration();
 			ts.getRecorder().update(type, comment.getCalculated());
+			return true;
 		} else {
 			status = ts.getCurrentChannel().newActionStatus(testName, testLine);
 			status.endDuration();
@@ -101,6 +102,7 @@ public class ActionComment extends Action {
 			}else if(SUMMARY_TYPE.equals(type)) {
 				ts.getRecorder().updateSummary(testName, testLine, comment.getCalculated());
 			}
+			return false;
 		}
 	}
 

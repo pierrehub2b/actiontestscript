@@ -41,13 +41,14 @@ public class ActionChannelClose extends ActionChannelExist {
 	//---------------------------------------------------------------------------------------------------------------------------------
 	
 	@Override
-	public void execute(ActionTestScript ts, String testName, int testLine) {
+	public boolean execute(ActionTestScript ts, String testName, int testLine) {
 		super.execute(ts, testName, testLine);
 		if(channelEmpty) {
 			ts.getTopScript().sendWarningLog("ActionChannelClose (" + testName + ":" + testLine + ")", "Cannot close Channel '" + getName() + "', this channel is not running !");
 		}else {
 			ts.getChannelManager().closeChannel(status, getName(), keepRunning);
 		}
+		return true;
 	}
 
 	//--------------------------------------------------------

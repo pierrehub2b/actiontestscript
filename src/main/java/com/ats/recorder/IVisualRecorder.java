@@ -44,5 +44,6 @@ public interface IVisualRecorder {
 	public void update(int error, long duration, String value, String data, TestElement element);
 	public void update(int error, long duration, TestElement element);
 	public void updateSummary(String testName, int testLine, String data);
+	public void updateSummaryFail(String testName, int testLine, String app, String errorMessage);
 
 }

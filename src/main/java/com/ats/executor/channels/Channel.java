@@ -48,6 +48,7 @@ import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
+import com.ats.recorder.ReportSummary;
 import com.ats.script.ScriptHeader;
 import com.ats.script.actions.Action;
 import com.ats.script.actions.ActionApi;
@@ -759,10 +760,7 @@ public class Channel {
 		return getDesktopDriver().startVisualRecord(this, script, quality, started);
 	}
 
-	public void stopVisualRecord(ScriptStatus status, String summary) {
-		if(summary == null || summary.isEmpty()) {
-			summary = "[empty]";
-		}
+	public void stopVisualRecord(ScriptStatus status, ReportSummary summary) {
 		getDesktopDriver().saveSummary(status, summary);
 		getDesktopDriver().stopVisualRecord();
 	}

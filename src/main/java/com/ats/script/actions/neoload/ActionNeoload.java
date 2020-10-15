@@ -63,8 +63,9 @@ public class ActionNeoload extends Action {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void execute(ActionTestScript ts, String testName, int testLine) {
+	public boolean execute(ActionTestScript ts, String testName, int testLine) {
 		ts.getCurrentChannel().neoloadAction(this, testName, testLine);
+		return true;
 	}
 
 	public void executeRequest(Channel channel, String designApiUrl) {
