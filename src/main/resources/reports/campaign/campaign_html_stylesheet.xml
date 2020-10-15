@@ -345,7 +345,7 @@
 						<xsl:when test="script/summary/error != ''">
 				<TR>
 					<TD colspan="8">
-						<xsl:text disable-output-escaping="yes"><xsl:value-of select="script/summary/error" disable-output-escaping="yes"/></xsl:text>
+						<xsl:text disable-output-escaping="yes">&lt;b&gt;Error in script &lt;/b&gt;<xsl:value-of select="concat('&lt;i&gt;(', script/summary/error/@script, ')&lt;/i&gt;&#160;:&#160;')" disable-output-escaping="yes"/><xsl:value-of select="script/summary/error" disable-output-escaping="yes"/></xsl:text>
 					</TD>
 				</TR>
 				</xsl:when>
