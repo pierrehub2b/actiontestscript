@@ -47,7 +47,7 @@
               <fo:table-row>
                 <fo:table-cell>
                   <fo:block text-align="left" font-weight="bold">
-                    <fo:external-graphic src="agilitest.png"/>
+                    <fo:external-graphic src="logo.png"/>
                   </fo:block>
                 </fo:table-cell>
                 <fo:table-cell padding-before="30pt" padding-after="30pt" >

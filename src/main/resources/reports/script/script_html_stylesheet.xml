@@ -18,7 +18,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 	<META charset="utf-8"/>
 	<META name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
 	<META name="description" content=""/>
-	<TITLE>Agilitest test reporting</TITLE>
+	<TITLE>Ats test reporting</TITLE>
 	<LINK rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous"/>
 	<LINK rel="stylesheet" href="report.css"/>
       </HEAD>
@@ -37,7 +37,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
       <TBODY> 
 	<TR>
 	  <TH class="align-middle text-center">
-            <IMG src="agilitest.png"/>
+            <IMG src="logo.png"/>
 	  </TH>
 	  <TH class="align-middle text-center">
             <H1>
