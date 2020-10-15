@@ -23,8 +23,8 @@ public class IosRootElement extends RootElement {
 	private Double ratioWidth = 1.0;
 	private Double ratioHeight = 1.0;
 
-	public IosRootElement(MobileDriverEngine drv) {
-		super(drv);
+	public IosRootElement(MobileDriverEngine driver) {
+		super(driver);
 	}
 
 	@Override

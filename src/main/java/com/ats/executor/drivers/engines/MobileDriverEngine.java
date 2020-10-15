@@ -67,7 +67,6 @@ import com.ats.graphic.ImageTemplateMatchingSimple;
 import com.ats.script.actions.ActionApi;
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
@@ -111,20 +110,19 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	private String endPoint;
 
 	public MobileDriverEngine(Channel channel, ActionStatus status, String app, DesktopDriver desktopDriver, ApplicationProperties props, String token) {
-
 		super(channel, desktopDriver, props, 0, 60);
 
-		if(applicationPath == null) {
+		if (applicationPath == null) {
 			applicationPath = app;
 		}
 
 		final int start = applicationPath.indexOf("://");
-		if(start > -1) {
+		if (start > -1) {
 			applicationPath = applicationPath.substring(start + 3);
 		}
 
 		final String[] appData = applicationPath.split("/");
-		if(appData.length > 1) {
+		if (appData.length > 1) {
 
 			endPoint = appData[0];
 			final String application = appData[1];
@@ -149,9 +147,17 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 			this.token = response.get("token").getAsString();
 
+			channel.addSystemProperties(response.getAsJsonArray("systemProperties"));
+			channel.addSystemButtons(response.getAsJsonArray("systemButtons"));
+			
 			final String systemName = response.get("systemName").getAsString();
+			final String driverVersion = response.get("driverVersion").getAsString();
+			final String userName = response.get("mobileUser").getAsString();
+			final String machineName = response.get("mobileName").getAsString();
+			final String osBuild = response.get("osBuild").getAsString();
+			final String country = response.get("country").getAsString();
 			final String os = response.get("os").getAsString();
-
+			
 			if (os.equals("ios")) {
 				rootElement = new IosRootElement(this);
 				cachedElement = new IosRootElement(this);
@@ -159,23 +165,16 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 				rootElement = new AndroidRootElement(this);
 				cachedElement = new AndroidRootElement(this);
 			}
-
-			channel.addSystemProperties(response.getAsJsonArray("systemProperties"));
-			channel.addSystemButtons(response.getAsJsonArray("systemButtons"));
-
-			final String driverVersion = response.get("driverVersion").getAsString();
-
+			
 			final double deviceWidth = response.get("deviceWidth").getAsDouble();
 			final double deviceHeight = response.get("deviceHeight").getAsDouble();
 			final double channelWidth = response.get("channelWidth").getAsDouble();
 			final double channelHeight = response.get("channelHeight").getAsDouble();
-
-			final int screenCapturePort = response.get("screenCapturePort").getAsInt();
-
-			final JsonElement udpEndPoint = response.get("udpEndPoint");
-
+			
 			channel.setDimensions(new TestBound(0D, 0D, deviceWidth, deviceHeight), new TestBound(0D, 0D, channelWidth, channelHeight));
-
+			
+			final int screenCapturePort = response.get("screenCapturePort").getAsInt();
+			
 			response = executeRequest(APP, START, application);
 			if (response == null) {
 				status.setError(ActionStatus.CHANNEL_START_ERROR, "unable to connect to : " + application);
@@ -193,21 +192,14 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			if (base64.length() > 0) {
 				try {
 					icon = Base64.getDecoder().decode(base64);
-				}catch(Exception ignored) {}
+				} catch (Exception ignored) {}
 			}
 
 			final String[] endPointData = endPoint.split(":");
 			final String version = response.get("version").getAsString();
-			final String userName = "mobileUser";
-			final String machineName = "mobileName";
-			final String osBuild = "osBuild";
-			final String country = "country";
-						
+			
 			String udpInfo = endPointData[0] + ":" + screenCapturePort;
 			
-			if(udpEndPoint != null) {
-				udpInfo = udpEndPoint.getAsString() + ":" + screenCapturePort;
-			}
 			channel.setApplicationData(os, systemName, version, driverVersion, icon, udpInfo, application, userName, machineName, osBuild, country);
 
 			refreshElementMapLocation();
