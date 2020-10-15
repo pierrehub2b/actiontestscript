@@ -68,7 +68,7 @@
 
 					<TD class="align-middle text-center">
 						<xsl:text disable-output-escaping="yes">&lt;A target=&quot;_blank&quot; href=&quot;</xsl:text>
-						<xsl:value-of select="concat('report.pdf')" />
+						<xsl:value-of select="concat('ats-report.pdf')" />
 						<xsl:text disable-output-escaping="yes">&quot; class=&quot;btn btn-secondary btn-sm &quot; role=&quot;button&quot; aria-pressed=&quot;true&quot;&gt;PDF report&lt;/a&gt;</xsl:text>
 					</TD>
 
@@ -100,7 +100,7 @@
 			</TBODY>
 		</TABLE>
 		<TABLE class="result table table-bordered table-hover" style="background-color:#EBEBEB">
-			<THEAD>
+			<TBODY>
 				<TR>
 					<xsl:choose>
 						<xsl:when test="$nbkos &gt; 0">
@@ -114,10 +114,6 @@
 							</TD>
 						</xsl:when>
 					</xsl:choose>
-				</TR>
-			</THEAD>
-			<TBODY>
-				<TR>
 					<TD>
 						Nb tests :
 						<xsl:value-of select="$nbtests" />
@@ -152,7 +148,7 @@
 		<xsl:value-of select="@actions" />
 		<br />
 		<b>Passed: </b>
-		<xsl:value-of select="@passed" />
+		<xsl:value-of select="@status" />
 		<br />
 		<b>Data: </b>
 		<xsl:value-of select="data" />
@@ -323,12 +319,12 @@
 					
 
 					<xsl:choose>
-						<xsl:when test="script/summary/@passed = 'false'">
+						<xsl:when test="script/summary/@status = '0'">
 							<TD class="test-failed">
 								<IMG src="false.png" />
 							</TD>
 						</xsl:when>
-						<xsl:when test="script/summary/@passed = 'true'">
+						<xsl:when test="script/summary/@status = '1'">
 							<TD class="test-passed">
 								<IMG src="true.png" />
 							</TD>
@@ -336,22 +332,24 @@
 					</xsl:choose>
 
 				</TR>
-			</TBODY>
-		</TABLE>
-		
-		<TABLE class="results table table-bordered table-hover" style="background-color:#C4C4C4">
-			<THEAD>
+				<xsl:choose>
+						<xsl:when test="script/summary/data != '[empty]'">
 				<TR>
-				<TD><b>Summary:</b></TD>
-				</TR>
-			</THEAD>
-			
-			<TBODY>
-				<TR>
-					<TD>
+					<TD colspan="8">
 						<xsl:text disable-output-escaping="yes"><xsl:value-of select="script/summary/data" disable-output-escaping="yes"/></xsl:text>
 					</TD>
 				</TR>
+				</xsl:when>
+					</xsl:choose>
+					<xsl:choose>
+						<xsl:when test="script/summary/error != ''">
+				<TR>
+					<TD colspan="8">
+						<xsl:text disable-output-escaping="yes"><xsl:value-of select="script/summary/error" disable-output-escaping="yes"/></xsl:text>
+					</TD>
+				</TR>
+				</xsl:when>
+					</xsl:choose>
 			</TBODY>
 		</TABLE>
 		

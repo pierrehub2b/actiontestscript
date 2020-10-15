@@ -5,7 +5,7 @@
   <!-- Calculations    -->
   <!-- ========================= -->
   <xsl:variable name="nbtests" select="count(//report/tests/ats)"/>
-  <xsl:variable name="nbkos" select="count(//report/tests/ats/actions/action[passed = 'false'])"/>
+  <xsl:variable name="nbkos" select="count(//report/tests/ats/script/summary[@status='0'])"/>
   <xsl:variable name="nbpassed" select="$nbtests - $nbkos"/>
   <xsl:variable name="actions" select="//report/@actions"/>
   <xsl:variable name="details" select="//report/@details"/>
@@ -52,7 +52,7 @@
                 </fo:table-cell>
                 <fo:table-cell padding-before="30pt" padding-after="30pt" >
                   <fo:block display-align="center" text-align="left" font-weight="bold">
-                    ActionTestScript - Campaign Result
+                    ActionTestScript - Suites Result
                   </fo:block>
                 </fo:table-cell>
               </fo:table-row>
@@ -91,7 +91,7 @@
                   </fo:block>
                 </fo:table-cell>
               </fo:table-row>
-              <xsl:apply-templates select="test"/>
+              <!--<xsl:apply-templates select="test"/>-->
             </fo:table-body>
           </fo:table>
         </fo:block>
@@ -161,6 +161,12 @@
         XML/PDF Report generation
       </fo:block>
     </xsl:if>
+    
+    <xsl:if test="@name = 'xml.report' and @value &gt; 0">
+      <fo:block font-weight="normal">
+        ATSV details level : <xsl:value-of select="@value"/>
+      </fo:block>
+    </xsl:if>
 
     <xsl:if test="@name = 'visual.report' and @value &gt; 0">
       <fo:block font-weight="normal">
@@ -179,37 +185,9 @@
   <!-- ========================= -->
   <xsl:template match="test">
     <fo:table-row>
-      <xsl:apply-templates select="groups"/>
-      <xsl:apply-templates select="packages"/>
-      <xsl:apply-templates select="classes"/>
+	     <xsl:apply-templates select="groups"/>
+	     <xsl:apply-templates select="packages"/>
     </fo:table-row>
-    <fo:table-row>
-    <xsl:apply-templates select="summary"/>
-    </fo:table-row>
-  </xsl:template>
-  <!-- ========================= -->
-  <!-- child element: summary     -->
-  <!-- ========================= -->
-  <xsl:template match="summary">
-    <fo:table-cell>
-      <fo:block text-align="left" font-weight="bold">
-        Summary :
-      </fo:block>
-    </fo:table-cell>
-    <fo:table-cell>
-      <fo:block>
-            Actions :
-            <xsl:value-of select="@actions"/>            
-          </fo:block>
-          <fo:block>
-            Passed :
-            <xsl:value-of select="@passed"/>            
-          </fo:block>
-          <fo:block>
-            Data :
-            <xsl:value-of select="data"/>            
-          </fo:block>
-    </fo:table-cell>
   </xsl:template>
   <!-- ========================= -->
   <!-- child element: groups     -->
@@ -316,11 +294,10 @@
         <fo:block-container width="25.5cm" height="17cm" left="0" top="0" position="absolute" padding-left="0.1cm">
           <fo:block page-break-before="always">
 			<fo:table table-layout="fixed" width="100%">
-              <fo:table-column column-width="5cm"/>
-              <fo:table-column column-width="5.5cm"/>
-              <fo:table-column column-width="5.5cm"/>
-              <fo:table-column column-width="5cm"/>
-              <fo:table-column column-width="5cm"/>
+              <fo:table-column column-width="6cm"/>
+              <fo:table-column column-width="6cm"/>
+              <fo:table-column column-width="6cm"/>
+              <fo:table-column column-width="6cm"/>
               <fo:table-body>
                 <fo:table-row>
                   <fo:table-cell border-width="2px" border-style="solid">
@@ -331,11 +308,6 @@
                   <fo:table-cell border-width="2px" border-style="solid">
                     <fo:block display-align="center" text-align="center" font-weight="bold">
                       OS
-                    </fo:block>
-                  </fo:table-cell>
-                  <fo:table-cell border-width="2px" border-style="solid">
-                    <fo:block display-align="center" text-align="center" font-weight="bold">
-                      Version Context
                     </fo:block>
                   </fo:table-cell>
                   <fo:table-cell border-width="2px" border-style="solid">
@@ -376,6 +348,29 @@
 					</fo:table-row>
               </fo:table-body>
             </fo:table>
+            
+            <fo:table table-layout="fixed" width="100%">
+              <fo:table-column column-width="24cm"/>
+              <fo:table-body>
+                    <fo:table-row border-width="2px" border-style="solid">
+					  <fo:table-cell border-width="2px" border-style="solid">
+						<fo:block display-align="center" text-align="left">
+						  <xsl:value-of select="script/summary/data" disable-output-escaping="yes" />
+						</fo:block>
+					  </fo:table-cell>
+					</fo:table-row>
+					<fo:table-row border-width="2px" border-style="solid">
+					  <fo:table-cell border-width="2px" border-style="solid">
+						<fo:block display-align="center" text-align="left">
+						  <xsl:value-of select="script/summary/error" disable-output-escaping="yes" />
+						</fo:block>
+					  </fo:table-cell>
+					</fo:table-row>
+              </fo:table-body>
+            </fo:table>
+            
+            
+            
           </fo:block>
         </fo:block-container>
       </fo:flow>

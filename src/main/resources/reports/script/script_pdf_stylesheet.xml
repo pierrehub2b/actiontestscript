@@ -4,10 +4,10 @@
   <!-- ========================= -->
   <!-- Calculations    -->
   <!-- ========================= -->
-  <xsl:variable name="nbactions" select="count(//ats/actions/action)"/>
+  <xsl:variable name="nbactions" select="//ats/script/summary/@actions"/>
   <xsl:variable name="nbpassed" select="count(//ats/actions/action[passed = 'true'])"/>
   <xsl:variable name="nbwarning" select="count(//ats/actions/action[passed = 'warning'])"/>
-  <xsl:variable name="nbko" select="count(//ats/actions/action[passed = 'false'])"/>  
+  <xsl:variable name="nbko" select="count(//ats/script/summary[@status='0'])"/>  
   <!-- ========================= -->
   <!-- Appel du template: ats -->
   <!-- ========================= -->
@@ -234,17 +234,8 @@
       </fo:block>
     </fo:table-cell>
     <fo:table-cell>
-      <fo:block>
-            Actions :
-            <xsl:value-of select="@actions"/>            
-          </fo:block>
-          <fo:block>
-            Passed :
-            <xsl:value-of select="@passed"/>            
-          </fo:block>
-          <fo:block>
-            Data :
-            <xsl:value-of select="data"/>            
+          <fo:block text-align="left">
+            <xsl:value-of select="data" disable-output-escaping="yes" />      
           </fo:block>
     </fo:table-cell>
   </xsl:template>

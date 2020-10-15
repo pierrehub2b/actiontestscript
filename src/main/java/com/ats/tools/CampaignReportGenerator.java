@@ -178,10 +178,10 @@ public class CampaignReportGenerator {
 		Transformer transformer = null;
 		TransformerFactory tFactory = TransformerFactory.newInstance();
 		transformer = tFactory.newTransformer(new StreamSource(html));
-	    transformer.transform(new StreamSource(target), new StreamResult(path + File.separator + targetFile.getName().replace(".xml", "") + ".html"));
+	    transformer.transform(new StreamSource(target), new StreamResult(path + File.separator + "ats-" + targetFile.getName().replace(".xml", "") + ".html"));
 		
 		try {
-			ProcessBuilder ps= new ProcessBuilder("java","-cp",fop,"org.apache.fop.cli.Main","-xml",target,"-xsl",pdf,"-pdf",targetFile.getParentFile().getAbsolutePath() + File.separator + targetFile.getName().replace(".xml", "") + ".pdf");
+			ProcessBuilder ps= new ProcessBuilder("java","-cp",fop,"org.apache.fop.cli.Main","-xml",target,"-xsl",pdf,"-pdf",targetFile.getParentFile().getAbsolutePath() + File.separator + "ats-" + targetFile.getName().replace(".xml", "") + ".pdf");
 			ps.redirectErrorStream(true);
 
 			Process pr = ps.start();  
