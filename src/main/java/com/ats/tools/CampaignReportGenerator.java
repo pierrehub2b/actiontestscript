@@ -90,20 +90,29 @@ public class CampaignReportGenerator {
 		if(target == null) return;
 		File targetFile = new File(target);
 		
-		
-		System.out.println(projectFolder.getAbsolutePath());
 		File xsltFolder = new File(projectFolder.getAbsolutePath() + "/src/assets/resources/xslt");
-		System.out.println(xsltFolder.getAbsolutePath());
 
-		if (fop == null) {
+		if (fop == null || !(new File(fop).exists())) {
 			Map<String, String> map = System.getenv();
 			for (Map.Entry<String, String> entry : map.entrySet()) {
 				Pattern pattern = Pattern.compile("fop-[\\d].[\\d]");
 				Matcher matcher = pattern.matcher(entry.getValue().toLowerCase());
 				if (entry.getKey().toLowerCase().contains("fop") && matcher.find()) {
-					fop = entry.getValue() + "\\build\\fop.jar;" + entry.getValue() + "\\lib\\*";
+					fop = entry.getValue();
 				}
 			}
+		}
+		
+		if(fop != null) {
+			String fopLibsString = "";
+			File[] fopLibs = new File(fop + "/lib").listFiles();
+			for (File libs : fopLibs) {
+				if(libs.getName().contains(".jar")) {
+					fopLibsString += ";" + libs.getAbsolutePath();
+				}
+			}
+			
+			fop = fop + "\\build\\fop.jar;" + fopLibsString;
 		}
 		
 		for (File xslt : xsltFolder.listFiles()) {
@@ -254,11 +263,9 @@ public class CampaignReportGenerator {
         			
         			currentSuite = scripts[i];
         			currentFile = new File(projectFolder.getAbsolutePath() + "/src/exec/" + scripts[i] + ".xml");
-        			System.out.println("currentSuite: " + currentSuite);
         		} else {
         			currentScript = scripts[i];
         			currentFile = new File(outputFolder + "/" + currentSuite + "/" + scripts[i] + "/actions.xml");
-        			System.out.println("currentScript: " + currentScript);
         		}
 
         		final String content = new String(Files.readAllBytes(currentFile.toPath()), StandardCharsets.UTF_8);

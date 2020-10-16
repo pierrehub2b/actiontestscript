@@ -116,15 +116,27 @@ public class ScriptReportGenerator {
 			}
 		}
 
-		if (fop == null) {
+		if (fop == null || !(new File(fop).exists())) {
 			Map<String, String> map = System.getenv();
 			for (Map.Entry<String, String> entry : map.entrySet()) {
 				Pattern pattern = Pattern.compile("fop-[\\d].[\\d]");
 				Matcher matcher = pattern.matcher(entry.getValue().toLowerCase());
 				if (entry.getKey().toLowerCase().contains("fop") && matcher.find()) {
-					fop = entry.getValue() + "\\build\\fop.jar;" + entry.getValue() + "\\lib\\*";
+					fop = entry.getValue();
 				}
 			}
+		}
+		
+		if(fop != null) {
+			String fopLibsString = "";
+			File[] fopLibs = new File(fop + "/lib").listFiles();
+			for (File libs : fopLibs) {
+				if(libs.getName().contains(".jar")) {
+					fopLibsString += ";" + libs.getAbsolutePath();
+				}
+			}
+			
+			fop = fop + "\\build\\fop.jar;" + fopLibsString;
 		}
 		
 		if (pdf == null || (!new File(pdf).exists())) {
