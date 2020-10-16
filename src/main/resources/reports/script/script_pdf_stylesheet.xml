@@ -144,9 +144,11 @@
                     </fo:block>
                   </fo:table-cell>
                 </fo:table-row>
-                <fo:table-row>
-                <xsl:apply-templates select="summary"/>
-                </fo:table-row>
+                <xsl:choose>
+                	<xsl:when test="summary/data != '[empty]' or summary/error != ''">
+                		<xsl:apply-templates select="summary"/>
+                 	</xsl:when>
+                </xsl:choose>
               </fo:table-body>
             </fo:table>
         </fo:block>
@@ -228,16 +230,27 @@
   <!-- child element: summary     -->
   <!-- ========================= -->
   <xsl:template match="summary">
-    <fo:table-cell>
-      <fo:block text-align="left" font-weight="bold">
-        Summary :
-      </fo:block>
-    </fo:table-cell>
-    <fo:table-cell>
-          <fo:block text-align="left">
-            <xsl:value-of select="data" disable-output-escaping="yes" />      
-          </fo:block>
-    </fo:table-cell>
+  <fo:table-row>
+  	<xsl:choose>
+    	<xsl:when test="summary/data != '[empty]'">
+    		<fo:table-cell>
+      			<fo:block text-align="left" font-weight="bold">
+        			Summary :
+      			</fo:block>
+    		</fo:table-cell>
+    	</xsl:when>
+    </xsl:choose>
+    
+    <xsl:choose>
+    	<xsl:when test="summary/error != ''">
+    		<fo:table-cell>
+          		<fo:block text-align="left">
+            		<xsl:value-of select="data" disable-output-escaping="yes" />      
+          		</fo:block>
+          	</fo:table-cell>
+         </xsl:when>
+     </xsl:choose>
+    </fo:table-row>
   </xsl:template>
 
   <!-- ========================= -->

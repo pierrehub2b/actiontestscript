@@ -349,9 +349,13 @@
               </fo:table-body>
             </fo:table>
             
+            <xsl:choose>
+                	<xsl:when test="script/summary/data != '[empty]' or script/summary/error != ''">
             <fo:table table-layout="fixed" width="100%">
               <fo:table-column column-width="24cm"/>
               <fo:table-body>
+               <xsl:choose>
+                	<xsl:when test="script/summary/data != '[empty]'">
                     <fo:table-row border-width="2px" border-style="solid">
 					  <fo:table-cell border-width="2px" border-style="solid">
 						<fo:block display-align="center" text-align="left">
@@ -359,15 +363,24 @@
 						</fo:block>
 					  </fo:table-cell>
 					</fo:table-row>
-					<fo:table-row border-width="2px" border-style="solid">
-					  <fo:table-cell border-width="2px" border-style="solid">
-						<fo:block display-align="center" text-align="left">
-						  <xsl:value-of select="script/summary/error" disable-output-escaping="yes" />
-						</fo:block>
-					  </fo:table-cell>
-					</fo:table-row>
+					</xsl:when>
+            </xsl:choose>
+            
+            <xsl:choose>
+                	<xsl:when test="script/summary/error != ''">
+						<fo:table-row border-width="2px" border-style="solid">
+						  <fo:table-cell border-width="2px" border-style="solid">
+							<fo:block display-align="center" text-align="left">
+							  <xsl:value-of select="script/summary/error" disable-output-escaping="yes" />
+							</fo:block>
+						  </fo:table-cell>
+						</fo:table-row>
+					</xsl:when>
+	            </xsl:choose>
               </fo:table-body>
             </fo:table>
+            	</xsl:when>
+            </xsl:choose>
             
             
             
