@@ -278,7 +278,7 @@
           </fo:block>
           <fo:block>
             Timeline :
-            <xsl:value-of select="timeline"/>            
+            <xsl:value-of select="timeLine"/>            
           </fo:block>
         </fo:block-container>
         <fo:block-container vertical-align="middle"  text-align="center" display-align="center" border-style="solid" border-width="1" border-color="black" width="7.2cm" height="3cm" left="18.5cm" top="10.5cm" position="absolute">

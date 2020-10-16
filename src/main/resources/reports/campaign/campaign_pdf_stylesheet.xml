@@ -472,7 +472,7 @@
           </fo:block>
           <fo:block>
             Timeline :
-            <xsl:value-of select="timeline"/>            
+            <xsl:value-of select="timeLine"/>            
           </fo:block>
         </fo:block-container>
         <fo:block-container border-style="solid" border-width="1" border-color="black" width="25.7cm" height="2cm" left="0" top="15cm" position="absolute">

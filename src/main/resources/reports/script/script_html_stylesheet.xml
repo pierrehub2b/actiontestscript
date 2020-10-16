@@ -118,7 +118,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
             			Summary :
           			</TD>
 	  				<TD COLSPAN="2">
-            			<xsl:text disable-output-escaping="yes"><xsl:value-of select="summary/data" disable-output-escaping="yes"/></xsl:text>
+            			<xsl:text><xsl:value-of select="summary/data" disable-output-escaping="yes"/></xsl:text>
           			</TD>
           		</TR>
 			</xsl:when>
@@ -141,18 +141,6 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     <TABLE class="result table table-bordered table-hover">
       <TBODY>
 	<TR>
-	 <xsl:choose>
-            <xsl:when test="$nbko &gt; 0">
-	      <TD class="test-failed" COLSPAN="4" STYLE="text-align: center;">
-                <IMG src="false.png"/>
-	      </TD>
-            </xsl:when>
-            <xsl:when test="$nbko = 0">
-	      <TD class="test-passed" COLSPAN="4" STYLE="text-align: center;">
-                <IMG src="true.png"/>
-	      </TD>
-	    </xsl:when>
-          </xsl:choose>
 	  <TD>
             Nb actions :
             <xsl:value-of select="$nbactions"/>                  
@@ -169,6 +157,18 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
             Nb KOs :
             <xsl:value-of select="$nbko"/>
           </TD>
+          	 <xsl:choose>
+            <xsl:when test="$nbko &gt; 0">
+	      <TD class="test-failed" COLSPAN="4" STYLE="text-align: center;">
+                <IMG src="false.png"/>
+	      </TD>
+            </xsl:when>
+            <xsl:when test="$nbko = 0">
+	      <TD class="test-passed" COLSPAN="4" STYLE="text-align: center;">
+                <IMG src="true.png"/>
+	      </TD>
+	    </xsl:when>
+          </xsl:choose>
         </TR>
       </TBODY>
     </TABLE>
@@ -250,24 +250,37 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 	    <xsl:value-of select="timeLine"/>            
 	  </TD>
 	</TR>
-	<TR>
-	  <TD class="w-100 p-3" COLSPAN="2">
-            Element tag :
-            <xsl:value-of select="element/@tag"/>            
-	  </TD>
-	</TR>
-	<TR>
-	  <TD class="w-100 p-3" COLSPAN="2">
-            Criterias :
-            <xsl:value-of select="element/criterias"/>            
-	  </TD>
-	</TR>
+	<xsl:choose>
+								<xsl:when test="element/@tag != ''">
+									<TR>
+										<TD class="w-100 p-3" COLSPAN="2">
+											Element tag :
+											<xsl:value-of select="element/@tag" />
+										</TD>
+									</TR>
+								</xsl:when>
+							</xsl:choose>
+							<xsl:choose>
+								<xsl:when test="element/criterias != ''">
+									<TR>
+										<TD class="w-100 p-3" COLSPAN="2">
+											Criterias :
+											<xsl:value-of select="element/criterias" />
+										</TD>
+									</TR>
+								</xsl:when>
+							</xsl:choose>
+							
+							<xsl:choose>
+								<xsl:when test="data != ''">
 	<TR>
 	  <TD class="w-100 p-3" COLSPAN="2">
             Data :
             <xsl:value-of select="data"/>            
 	  </TD>
 	</TR>
+	</xsl:when>
+							</xsl:choose>
       </THEAD>
     </TABLE>
   </xsl:template>
