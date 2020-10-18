@@ -98,15 +98,10 @@
 				</script>
 				<style>
 					HTML * {font-family: Arial}
-					TABLE, TD
-					{border:0px;margin-bottom:0.1rem;border-top:1px;border-collapse:collapse;border-spacing:0;}
-					TABLE TD {border-top: thin
-					solid;border-bottom:thin;border-right:thin
-					solid;border-color:#ffffff}
-					TD.titleClass
-					{border-top:none;border-bottom:none;border-right:none;border-color:#000000}
-					HR {height: 2px; color: #565656; background-color: #565656; width:
-					100%; border: none;margin-bottom:20px}
+					TABLE, TD {border:0px;margin-bottom:0.1rem;border-top:1px;border-collapse:collapse;border-spacing:0;}
+					TABLE TD {border-top:thin solid;border-bottom:thin solid;border-right:thin solid;border-color:#ffffff}
+					TD.titleClass {border-top:none;border-bottom:none;border-right:none;border-color:#000000}
+					HR {height:2px;color:#696969;background-color:#696969; width:100%;border:none;margin-bottom:20px}
 				</style>
 			</HEAD>
 			<BODY onload="loopCollapsible()">
@@ -192,14 +187,13 @@
 							</i>
 						</TD>
 
-						<TD width="50"
-							style="border-style:solid;border-width: 0px 0px 0px 0px;">
+						<TD style="border-style:solid;border-width: 0px 0px 0px 0px;padding: 2px 5px 2px 0px;">
 							<xsl:choose>
 								<xsl:when test="$failedTests = 0">
-									<IMG src="true.png" />
+									<IMG src="true.png" width="34" height="34" align="right"/>
 								</xsl:when>
 								<xsl:otherwise>
-									<IMG src="false.png" />
+									<IMG src="false.png" width="34" height="34" align="right"/>
 								</xsl:otherwise>
 							</xsl:choose>
 						</TD>
@@ -274,7 +268,7 @@
 	<!-- ========================= -->
 	<xsl:template match="tests">
 		<xsl:param name="suiteName"/>
-		<div style="padding-left:5%">
+		<div style="padding-left:6%">
 			<xsl:apply-templates select="ats">
 				<xsl:with-param name="suiteName" select="$suiteName"/>
 			</xsl:apply-templates>
@@ -285,15 +279,8 @@
 	<!-- ========================= -->
 	<xsl:template match="ats">
 		<xsl:param name="suiteName"/>
-		<xsl:variable name="testName"
-			select="concat(script[1]/@suiteName, '/', script[1]/@testName)" />
+		<xsl:variable name="testName" select="concat($suiteName, '/', script[1]/@testName)" />
 		
-		<xsl:variable name="test_result"
-			select="count(actions/action[passed = 'false'])" />
-		<xsl:variable name="test_file"
-			select="concat(script[1]/@suiteName, '/', script[1]/@testName, '_xml/', script[1]/@testName, '_xml')" />
-		<xsl:variable name="atsv_test_file"
-			select="concat(script[1]/@suiteName, '/', script[1]/@testName)" />
 		<div style="color: #565656; text-shadow: 2px 2px 8px #b9b9b9">
 			<FONT SIZE="4">
 				<B>
@@ -334,7 +321,6 @@
 			</THEAD>
 			<TBODY>
 				<TR>
-
 					<TD style="text-align:center">
 						<xsl:value-of select="script/summary/@actions" />
 					</TD>
@@ -347,45 +333,40 @@
 					<TD>
 						<xsl:value-of select="script/author" />
 					</TD>
-
-					<TD class="align-middle text-center linkButtons">
-						<xsl:text disable-output-escaping="yes">&lt;A target=&quot;_blank&quot; href=&quot;</xsl:text>
-						<xsl:value-of select="concat($test_file,'.html')" />
-						<xsl:text disable-output-escaping="yes">&quot; class=&quot;btn btn-secondary btn-sm &quot; role=&quot;button&quot; aria-pressed=&quot;true&quot;&gt;HTML report&lt;/a&gt;</xsl:text>
-						<xsl:choose>
-							<xsl:when
-								test="$xml_reports = 'true' or $xml_reports &gt; 0">
-								<xsl:text disable-output-escaping="yes">&lt;A target=&quot;_blank&quot; href=&quot;</xsl:text>
-								<xsl:value-of select="concat($test_file,'.pdf')" />
-								<xsl:text disable-output-escaping="yes">&quot; class=&quot;btn btn-secondary btn-sm &quot; role=&quot;button&quot; aria-pressed=&quot;true&quot;&gt;PDF report&lt;/a&gt;</xsl:text>
-							</xsl:when>
-						</xsl:choose>
-						<xsl:choose>
-							<xsl:when test="$atsv_reports &gt; 0">
-								<xsl:text disable-output-escaping="yes">&lt;A target=&quot;_blank&quot; href=&quot;</xsl:text>
-								<xsl:value-of
-									select="concat($atsv_test_file,'.atsv')" />
-								<xsl:text disable-output-escaping="yes">&quot; class=&quot;btn btn-secondary btn-sm &quot; role=&quot;button&quot; aria-pressed=&quot;true&quot;&gt;ATSV report&lt;/a&gt;</xsl:text>
-
-							</xsl:when>
-						</xsl:choose>
+					<TD class="linkButtons">
+						<a>
+							<xsl:attribute name="href">
+							<xsl:value-of select="concat($testName,'.html')"/>
+							</xsl:attribute>
+							HTML report
+						</a>
+						<a>
+							<xsl:attribute name="href">
+							<xsl:value-of select="concat($testName,'.pdf')"/>
+							</xsl:attribute>
+							PDF report
+						</a>
+						<a>
+							<xsl:attribute name="href">
+							<xsl:value-of select="concat($testName,'.atsv')"/>
+							</xsl:attribute>
+							ATSV report
+						</a>
 					</TD>
-
 					<xsl:choose>
 						<xsl:when test="script/summary/@status = '0'">
 							<TD class="test-failed" style="horizontal-align:right"
 								width="50">
-								<IMG src="false.png" />
+								<IMG src="false.png" align="right"/>
 							</TD>
 						</xsl:when>
 						<xsl:when test="script/summary/@status = '1'">
 							<TD class="test-passed" style="horizontal-align:right"
 								width="50">
-								<IMG src="true.png" />
+								<IMG src="true.png" align="right"/>
 							</TD>
 						</xsl:when>
 					</xsl:choose>
-
 				</TR>
 				<xsl:choose>
 					<xsl:when test="script/summary/data != '[empty]'">
@@ -427,7 +408,6 @@
 						</TR>
 					</xsl:when>
 				</xsl:choose>
-
 				<xsl:choose>
 					<xsl:when test="$actions = 'true'">
 						<xsl:choose>
@@ -469,11 +449,10 @@
 				</xsl:choose>
 			</TBODY>
 		</TABLE>
-
 		<xsl:choose>
 			<xsl:when test="$actions = 'true'">
 				<xsl:apply-templates select="actions">
-					<xsl:with-param name="fullTestName" select="concat($suiteName, '/', script[1]/@testName)"/>
+					<xsl:with-param name="fullTestName" select="$testName"/>
 				</xsl:apply-templates>
 			</xsl:when>
 		</xsl:choose>
