@@ -17,6 +17,7 @@
 		select="//report/suite/parameter[@name='ats.log.level']/@value" />
 	<xsl:variable name="actions" select="//report/@actions" />
 	<xsl:variable name="details" select="//report/@details" />
+	<xsl:variable name="currentSuite" select="''"/>
 
 	<xsl:template name="substring-after-last">
 		<xsl:param name="string" />
@@ -165,7 +166,8 @@
 	<!-- child element: suite -->
 	<!-- ========================= -->
 	<xsl:template match="suite">
-
+		<xsl:variable name="suiteName" select="@name" />
+		
 		<xsl:variable name="countTests" select="count(tests/ats)" />
 		<xsl:variable name="failedTests"
 			select="count(tests/ats/script/summary[@status = '0'])" />
@@ -261,7 +263,9 @@
 
 		<hr />
 
-		<xsl:apply-templates select="tests" />
+		<xsl:apply-templates select="tests">
+			<xsl:with-param name="suiteName" select="$suiteName"/>
+		</xsl:apply-templates>
 
 	</xsl:template>
 
@@ -269,21 +273,27 @@
 	<!-- child element: tests -->
 	<!-- ========================= -->
 	<xsl:template match="tests">
+		<xsl:param name="suiteName"/>
 		<div style="padding-left:5%">
-			<xsl:apply-templates select="ats" />
+			<xsl:apply-templates select="ats">
+				<xsl:with-param name="suiteName" select="$suiteName"/>
+			</xsl:apply-templates>
 		</div>
 	</xsl:template>
 	<!-- ========================= -->
 	<!-- child element: ats -->
 	<!-- ========================= -->
 	<xsl:template match="ats">
+		<xsl:param name="suiteName"/>
+		<xsl:variable name="testName"
+			select="concat(script[1]/@suiteName, '/', script[1]/@testName)" />
+		
 		<xsl:variable name="test_result"
 			select="count(actions/action[passed = 'false'])" />
 		<xsl:variable name="test_file"
 			select="concat(script[1]/@suiteName, '/', script[1]/@testName, '_xml/', script[1]/@testName, '_xml')" />
 		<xsl:variable name="atsv_test_file"
 			select="concat(script[1]/@suiteName, '/', script[1]/@testName)" />
-
 		<div style="color: #565656; text-shadow: 2px 2px 8px #b9b9b9">
 			<FONT SIZE="4">
 				<B>
@@ -462,26 +472,30 @@
 
 		<xsl:choose>
 			<xsl:when test="$actions = 'true'">
-				<xsl:apply-templates select="actions" />
+				<xsl:apply-templates select="actions">
+					<xsl:with-param name="fullTestName" select="concat($suiteName, '/', script[1]/@testName)"/>
+				</xsl:apply-templates>
 			</xsl:when>
 		</xsl:choose>
 
-
-		<hr />
+		<hr/>
 	</xsl:template>
 
 	<!-- ========================= -->
 	<!-- child element: actions -->
 	<!-- ========================= -->
 	<xsl:template match="actions">
-		<xsl:apply-templates select="action" />
+		<xsl:param name="fullTestName"/>
+		<xsl:apply-templates select="action" >
+			<xsl:with-param name="fullTestName" select="$fullTestName"/>
+		</xsl:apply-templates>
 	</xsl:template>
 
 	<!-- ========================= -->
 	<!-- child element: action -->
 	<!-- ========================= -->
 	<xsl:template match="action">
-
+		<xsl:param name="fullTestName"/>
 		<xsl:choose>
 			<xsl:when test="$details = 'true'">
 				<table width="100%" class="actionDetails"
@@ -561,13 +575,11 @@
 						</td>
 					</tr>
 				</table>
-
 			</xsl:otherwise>
 		</xsl:choose>
 
 		<xsl:choose>
 			<xsl:when test="$details = 'true'">
-
 				<div class="content">
 					<TABLE class="results table table-bordered"
 						style="background-color:#EBEBEB">
@@ -581,7 +593,7 @@
 							<TR>
 								<TD class="w-100 p-3" COLSPAN="2">
 									<xsl:variable name="img"
-										select="concat(@suiteName, '/', @scriptName ,'/',img/@src)" />
+										select="concat($fullTestName ,'_xml/',img/@src)" />
 									<IMG width="100%" SRC="{$img}" />
 								</TD>
 							</TR>
