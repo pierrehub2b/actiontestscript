@@ -42,6 +42,8 @@ public class CampaignReportGenerator {
 	
     public static String patternDOCTYPE = "<!DOCTYPE[^<>]*(?:<![^<>]*>[^<>]*)*>";
     public static String patternXML = "\\<\\?xml[^<>]*(?:<![^<>]*>[^<>]*)*>";
+    
+    public static final String ATS_REPORT = "ats-report";
 	
 	public static void main(String[] args) throws ParserConfigurationException, SAXException, TransformerException, IOException, InterruptedException {
 		String targetFiles = null;
@@ -171,15 +173,12 @@ public class CampaignReportGenerator {
 			try {
 				html = targetFile.getParent() +"/campaign_html_stylesheet.xml";
 				copyResource(ResourceContent.class.getResourceAsStream("/reports/campaign/campaign_html_stylesheet.xml"),html);
-				
-				//copy css & js
 				copyResource(ResourceContent.class.getResourceAsStream("/reports/campaign/report.css"),targetFile.getParent() +"/report.css");
-				copyResource(ResourceContent.class.getResourceAsStream("/reports/campaign/script.js"),targetFile.getParent() +"/script.js");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-
+		
 		if (fop == null || target == null || pdf == null || html == null) { return; }		
 		
 		//HTML reports
@@ -187,10 +186,10 @@ public class CampaignReportGenerator {
 		Transformer transformer = null;
 		TransformerFactory tFactory = TransformerFactory.newInstance();
 		transformer = tFactory.newTransformer(new StreamSource(html));
-	    transformer.transform(new StreamSource(target), new StreamResult(path + File.separator + "ats-" + targetFile.getName().replace(".xml", "") + ".html"));
+	    transformer.transform(new StreamSource(target), new StreamResult(path + File.separator + ATS_REPORT + ".html"));
 		
 		try {
-			ProcessBuilder ps= new ProcessBuilder("java","-cp",fop,"org.apache.fop.cli.Main","-xml",target,"-xsl",pdf,"-pdf",targetFile.getParentFile().getAbsolutePath() + File.separator + "ats-" + targetFile.getName().replace(".xml", "") + ".pdf");
+			ProcessBuilder ps= new ProcessBuilder("java","-cp",fop,"org.apache.fop.cli.Main","-xml",target,"-xsl",pdf,"-pdf",targetFile.getParentFile().getAbsolutePath() + File.separator + ATS_REPORT + ".pdf");
 			ps.redirectErrorStream(true);
 
 			Process pr = ps.start();  
@@ -245,37 +244,47 @@ public class CampaignReportGenerator {
 	}	
 	
 	public static String generateReportXml(String xmlPath, String outputFolder, File projectFolder, String details) throws IOException, ParserConfigurationException, SAXException{
-		File f = new File(outputFolder + File.separator + "report.xml");
+		
+		final File f = new File(outputFolder + File.separator + ATS_REPORT + ".xml");
+		
 		int det = Integer.parseInt(details);
         f.setWritable(true);
         f.setReadable(true);
-        FileWriter fw = new FileWriter(f);
+        
+        final FileWriter fw = new FileWriter(f);
         fw.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><report actions=\"" +  (det > 1) + "\" details=\"" + (det > 2) + "\">");
         
         final String[] paths = xmlPath.split(";");
-        String currentScript = "";
         String currentSuite = "";
+        
         for (int j = 0; j<paths.length;j++) {
         	final String[] scripts = paths[j].split(",");
         	for (int i = 0; i < scripts.length; i++) {
         		File currentFile = null;
         		if(i == 0) {
-        			
         			currentSuite = scripts[i];
         			currentFile = new File(projectFolder.getAbsolutePath() + "/src/exec/" + scripts[i] + ".xml");
+        			
+        			final String content = new String(Files.readAllBytes(currentFile.toPath()), StandardCharsets.UTF_8);
+        			fw.write(content.replaceAll(patternDOCTYPE, "").replace("</suite>", ""));
+        			
         		} else {
-        			currentScript = scripts[i];
         			currentFile = new File(outputFolder + "/" + currentSuite + "/" + scripts[i] + "/actions.xml");
+        			final String content = new String(Files.readAllBytes(currentFile.toPath()), StandardCharsets.UTF_8);
+        			final StringBuilder builder = new StringBuilder("<tests>");
+        			
+        			builder.append(content.replaceAll(patternXML, ""));
+        			builder.append("</tests>");
+        			
+        			fw.write(builder.toString());
         		}
-
-        		final String content = new String(Files.readAllBytes(currentFile.toPath()), StandardCharsets.UTF_8);
-    			fw.write(content.replaceAll(patternDOCTYPE, "").replaceAll(patternXML, "").replaceAll("<action ", "<action scriptName=\"" + currentScript + "\" suiteName=\"" + currentSuite + "\" ").replace("<script ", "<script suiteName=\"" + currentSuite + "\" "));
-    			if(i == 0) { fw.write("<tests>"); }
     		}
-        	fw.write("</tests>");
+        	fw.write("</suite>");
         } 
+        
         fw.write("</report>");
 	    fw.close();
+	    
         return f.getAbsolutePath();
 	}
 }
