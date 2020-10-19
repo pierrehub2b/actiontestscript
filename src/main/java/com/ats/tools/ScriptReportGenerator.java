@@ -152,6 +152,9 @@ public class ScriptReportGenerator {
 			try {
 				html = targetFile.getParent() +"/script_html_stylesheet.xml";
 				copyResource(ResourceContent.class.getResourceAsStream("/reports/script/script_html_stylesheet.xml"),html);
+				
+				//copy css
+				copyResource(ResourceContent.class.getResourceAsStream("/reports/script/report.css"),targetFile.getParent() +"/report.css");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
