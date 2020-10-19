@@ -4,9 +4,6 @@
   <!-- ========================= -->
   <!-- Calculations    -->
   <!-- ========================= -->
-  <xsl:variable name="nbtests" select="count(//report/tests/ats)"/>
-  <xsl:variable name="nbkos" select="count(//report/tests/ats/script/summary[@status='0'])"/>
-  <xsl:variable name="nbpassed" select="$nbtests - $nbkos"/>
   <xsl:variable name="actions" select="//report/@actions"/>
   <xsl:variable name="details" select="//report/@details"/>
   
@@ -38,6 +35,11 @@
   <!-- child element: suite     -->
   <!-- ========================= -->
   <xsl:template match="suite">
+  	<xsl:variable name="nbtests" select="count(tests/ats)"/>
+  	<xsl:variable name="nbkos" select="count(tests/ats/script/summary[@status='0'])"/>
+  	<xsl:variable name="nbpassed" select="$nbtests - $nbkos"/>
+  
+  
     <fo:page-sequence master-reference="landscapeA4-head">
       <fo:static-content flow-name="xsl-region-after">
         <fo:block text-align="center" vertical-align="bottom">
@@ -169,6 +171,7 @@
         </fo:block>
       </fo:flow>
     </fo:page-sequence>
+    <xsl:apply-templates select="tests"/>
   </xsl:template>
   <!-- ========================= -->
   <!-- child element: parameter     -->
