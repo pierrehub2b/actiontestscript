@@ -9,6 +9,12 @@
   <xsl:variable name="nbpassed" select="$nbtests - $nbkos"/>
   <xsl:variable name="actions" select="//report/@actions"/>
   <xsl:variable name="details" select="//report/@details"/>
+  
+  <xsl:variable name="picTrue" select="//report/pics/pic[@name='true']"/>
+  <xsl:variable name="picFalse" select="//report/pics/pic[@name='false']"/>
+  <xsl:variable name="picWarning" select="//report/pics/pic[@name='warning']"/>
+  <xsl:variable name="picLogo" select="//report/pics/pic[@name='logo']"/>
+  
   <!-- ========================= -->
   <!-- Appel du template: ats -->
   <!-- ========================= -->
@@ -47,7 +53,11 @@
               <fo:table-row>
                 <fo:table-cell>
                   <fo:block text-align="left" font-weight="bold">
-                    <fo:external-graphic src="logo.png"/>
+                    <fo:external-graphic>
+                    	<xsl:attribute name="src">
+                        	<xsl:value-of select="$picLogo"/>
+                    	</xsl:attribute>
+                    </fo:external-graphic>
                   </fo:block>
                 </fo:table-cell>
                 <fo:table-cell padding-before="30pt" padding-after="30pt" >
@@ -107,12 +117,20 @@
                     <xsl:choose>
                       <xsl:when test="$nbkos &gt; 0">
                         <fo:block>
-                          <fo:external-graphic src="false.png"/>
+                          <fo:external-graphic>
+                    	<xsl:attribute name="src">
+                        	<xsl:value-of select="$picFalse"/>
+                    	</xsl:attribute>
+                    </fo:external-graphic>
                         </fo:block>
                       </xsl:when>
                       <xsl:when test="$nbkos = 0">
                         <fo:block>
-                          <fo:external-graphic src="true.png"/>
+                          <fo:external-graphic>
+                    	<xsl:attribute name="src">
+                        	<xsl:value-of select="$picTrue"/>
+                    	</xsl:attribute>
+                    </fo:external-graphic>
                         </fo:block>
                       </xsl:when>
                     </xsl:choose>
@@ -334,12 +352,20 @@
 						  <xsl:choose>
 							<xsl:when test="$test_result &gt; 0">
 							  <fo:block>
-								<fo:external-graphic src="false.png"/>
+								<fo:external-graphic>
+                    	<xsl:attribute name="src">
+                        	<xsl:value-of select="$picFalse"/>
+                    	</xsl:attribute>
+                    </fo:external-graphic>
 							  </fo:block>
 							</xsl:when>
 							<xsl:when test="$test_result = 0">
 							  <fo:block>
-								<fo:external-graphic src="true.png"/>
+								<fo:external-graphic>
+                    	<xsl:attribute name="src">
+                        	<xsl:value-of select="$picTrue"/>
+                    	</xsl:attribute>
+                    </fo:external-graphic>
 							  </fo:block>
 							</xsl:when>
 						  </xsl:choose>
@@ -446,17 +472,29 @@
             <xsl:choose>
               <xsl:when test="passed = 'true'">
                 <fo:block>
-                  <fo:external-graphic src="true.png"/>
+                  <fo:external-graphic>
+                    	<xsl:attribute name="src">
+                        	<xsl:value-of select="$picTrue"/>
+                    	</xsl:attribute>
+                    </fo:external-graphic>
                 </fo:block>
               </xsl:when>
               <xsl:when test="passed = 'warning'">
                 <fo:block>
-                  <fo:external-graphic src="warning.png"/>
+                  <fo:external-graphic>
+                    	<xsl:attribute name="src">
+                        	<xsl:value-of select="$picWarning"/>
+                    	</xsl:attribute>
+                    </fo:external-graphic>
                 </fo:block>
               </xsl:when>
               <xsl:when test="passed = 'false'">
                 <fo:block>
-                  <fo:external-graphic src="false.png"/>
+                  <fo:external-graphic>
+                    	<xsl:attribute name="src">
+                        	<xsl:value-of select="$picFalse"/>
+                    	</xsl:attribute>
+                    </fo:external-graphic>
                 </fo:block>
               </xsl:when>
             </xsl:choose>
