@@ -9,6 +9,9 @@
 	<!-- Calculations -->
 	<!-- ========================= -->
 
+	<xsl:variable name="picFail" select="//report/pics/pic[@name='fail']" />
+	<xsl:variable name="picPass" select="//report/pics/pic[@name='pass']" />
+		
 	<xsl:variable name="xml_reports"
 		select="//report/suite/parameter[@name='xml.report']/@value" />
 	<xsl:variable name="atsv_reports"
@@ -155,9 +158,14 @@
 			</BODY>
 		</HTML>
 	</xsl:template>
+	
+	<xsl:template match="pic">
+	</xsl:template>
+		
 	<!-- ========================= -->
 	<!-- child element: suite -->
 	<!-- ========================= -->
+			
 	<xsl:template match="suite">
 	
 		<xsl:variable name="suiteName" select="@name" />
@@ -343,13 +351,21 @@
 						<xsl:when test="script/summary/@status = '0'">
 							<TD class="test-failed" style="horizontal-align:right"
 								width="50">
-								<IMG src="false.png" align="right"/>
+								<img align="right" alt="Test failed">
+									<xsl:attribute name="src">
+										<xsl:value-of select="$picFail"/>
+									</xsl:attribute>
+								</img>	
 							</TD>
 						</xsl:when>
 						<xsl:when test="script/summary/@status = '1'">
 							<TD class="test-passed" style="horizontal-align:right"
 								width="50">
-								<IMG src="true.png" align="right"/>
+								<img align="right" alt="Test passed">
+									<xsl:attribute name="src">
+										<xsl:value-of select="$picPass"/>
+									</xsl:attribute>
+								</img>		
 							</TD>
 						</xsl:when>
 					</xsl:choose>
@@ -387,7 +403,6 @@
 										disable-output-escaping="yes" />
 									)
 								</i>
-
 								<xsl:value-of select="script/summary/error"
 									disable-output-escaping="yes" />
 							</TD>
@@ -493,8 +508,11 @@
 										height="30px" width="30px" style="vertical-align:middle" />
 								</xsl:when>
 								<xsl:when test="passed = 'false'">
-									<IMG src="false.png" class='actionStatusImg' height="30px"
-										width="30px" style="vertical-align:middle" />
+								<img align="right" alt="Test failed" height="30px" width="30px" style="vertical-align:middle">
+									<xsl:attribute name="src">
+										<xsl:value-of select="$picFail"/>
+									</xsl:attribute>
+								</img>	
 								</xsl:when>
 							</xsl:choose>
 						</td>
