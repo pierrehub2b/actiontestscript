@@ -93,6 +93,7 @@
 		<lib.bcprov.version>1.66</lib.bcprov.version>
 		<lib.netty.version>4.1.52.Final</lib.netty.version>
 		<lib.browserup.version>2.1.1</lib.browserup.version>
+		<lib.browserup.mitm.version>2.1.1</lib.browserup.mitm.version>
 		<lib.jackson.databind>2.11.2</lib.jackson.databind>
 		<jacoco.plugin.version>0.8.5</jacoco.plugin.version>
 	</properties>
@@ -183,6 +184,11 @@
 			<groupId>com.browserup</groupId>
 			<artifactId>browserup-proxy-core</artifactId>
 			<version>${lib.browserup.version}</version>
+		</dependency>
+		<dependency>
+		   <groupId>com.browserup</groupId>
+		   <artifactId>browserup-proxy-mitm</artifactId>
+		   <version>${lib.browserup.mitm.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>

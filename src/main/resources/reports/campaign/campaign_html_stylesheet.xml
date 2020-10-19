@@ -77,7 +77,6 @@
 				<META charset="utf-8" />
 				<META name="description" content="" />
 				<TITLE>Ats suites reporting</TITLE>
-				<LINK rel="stylesheet" href="report.css" />
 
 				<script type="text/javascript">
 					function loopCollapsible(){
@@ -99,11 +98,17 @@
 					}
 				</script>
 				<style>
-					HTML * {font-family: Arial}
+					html{background:#f0f0f0;padding:20px;font-family: Arial;}	
 					TABLE, TD {border:0px;margin-bottom:0.1rem;border-top:1px;border-collapse:collapse;border-spacing:0;}
 					TABLE TD {border-top:thin solid;border-bottom:thin solid;border-right:thin solid;border-color:#ffffff}
 					TD.titleClass {border-top:none;border-bottom:none;border-right:none;border-color:#000000}
-					HR {height:2px;color:#696969;background-color:#696969; width:100%;border:none;margin-bottom:20px}
+					HR {height:2px;color:#696969;background-color:#696969; width:100%;border:none;margin-bottom:20px}				
+					body {margin: 100px;padding: 20px;font-size: 100%;line-height: 1.5;}					
+					.themed-grid-col {padding-top: 15px;padding-bottom: 15px;background-color: rgba(86, 61, 124, .15);border: 1px solid rgba(86, 61, 124, .2);}					
+					.themed-container {padding: 15px;margin-bottom: 30px;background-color: rgba(0, 123, 255, .15);border: 1px solid rgba(0, 123, 255, .2);}					
+					.execution {margin-bottom:20px;}					
+					.content {padding: 0 18px;max-height: 0;overflow: hidden;transition: max-height 0.2s ease-out;background-color: #f1f1f1;}
+					.linkButtons a {margin:0px 10px;}
 				</style>
 			</HEAD>
 			<BODY onload="loopCollapsible()">

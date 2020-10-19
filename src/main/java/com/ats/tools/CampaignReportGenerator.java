@@ -173,7 +173,6 @@ public class CampaignReportGenerator {
 			try {
 				html = targetFile.getParent() +"/campaign_html_stylesheet.xml";
 				copyResource(ResourceContent.class.getResourceAsStream("/reports/campaign/campaign_html_stylesheet.xml"),html);
-				copyResource(ResourceContent.class.getResourceAsStream("/reports/campaign/report.css"),targetFile.getParent() +"/report.css");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
