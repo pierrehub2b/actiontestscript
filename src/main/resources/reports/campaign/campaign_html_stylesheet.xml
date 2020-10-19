@@ -17,7 +17,6 @@
 		select="//report/suite/parameter[@name='ats.log.level']/@value" />
 	<xsl:variable name="actions" select="//report/@actions" />
 	<xsl:variable name="details" select="//report/@details" />
-	<xsl:variable name="currentSuite" select="''"/>
 
 	<xsl:template name="substring-after-last">
 		<xsl:param name="string" />
@@ -111,7 +110,6 @@
 							<TD class="titleClass">
 								<IMG src="logo.png" />
 							</TD>
-
 							<TD class="titleClass">
 								<span
 									style="color: #565656; text-shadow: 2px 2px 8px #a5a5a5">
@@ -127,10 +125,10 @@
 												<xsl:when test="$actions = 'true'">
 													<xsl:choose>
 														<xsl:when test="$details = 'true'">
-															Full detailed report,
+															Full detailed report
 														</xsl:when>
 														<xsl:otherwise>
-															Detailed report,
+															Detailed report
 														</xsl:otherwise>
 													</xsl:choose>
 												</xsl:when>
@@ -138,19 +136,19 @@
 													Simplified report
 												</xsl:otherwise>
 											</xsl:choose>
-											(created at
+											 - 
+											<xsl:value-of select="count(suite)"/>
+											suite(s) launched (created at
 											<xsl:value-of
 												select="java:format(java:java.text.SimpleDateFormat.new('yyyy.MM.dd-HH:mm'), java:java.util.Date.new())" />
 											)
 										</I>
 									</FONT>
 								</span>
-
 							</TD>
 						</TR>
 					</TBODY>
 				</TABLE>
-
 				<DIV>
 					<xsl:apply-templates />
 				</DIV>
@@ -161,13 +159,11 @@
 	<!-- child element: suite -->
 	<!-- ========================= -->
 	<xsl:template match="suite">
+	
 		<xsl:variable name="suiteName" select="@name" />
-		
 		<xsl:variable name="countTests" select="count(tests/ats)" />
-		<xsl:variable name="failedTests"
-			select="count(tests/ats/script/summary[@status = '0'])" />
-		<xsl:variable name="passedTests"
-			select="count(tests/ats/script/summary[@status = '1'])" />
+		<xsl:variable name="failedTests" select="count(tests/ats/script/summary[@status = '0'])" />
+		<xsl:variable name="passedTests" select="count(tests/ats/script/summary[@status = '1'])" />
 
 		<TABLE style="background-color:#cbcbcb" width="100%">
 			<TBODY>
@@ -183,10 +179,9 @@
 							<i>
 								-
 								<xsl:value-of select="$countTests" />
-								test(s) have been executed
+								test(s) executed
 							</i>
 						</TD>
-
 						<TD style="border-style:solid;border-width: 0px 0px 0px 0px;padding: 2px 5px 2px 0px;">
 							<xsl:choose>
 								<xsl:when test="$failedTests = 0">
@@ -197,11 +192,9 @@
 								</xsl:otherwise>
 							</xsl:choose>
 						</TD>
-
 					</TR>
 				</THEAD>
 				<TR height="25">
-
 					<TD COLSPAN="1" style="padding: 2px 0px 0px 15px;" width="80">
 						<font size="2" color="#5d5d5d">
 							<i>
@@ -218,7 +211,6 @@
 						<xsl:text disable-output-escaping="yes">&quot; class=&quot;btn btn-secondary btn-sm &quot; role=&quot;button&quot; aria-pressed=&quot;true&quot;&gt;PDF report&lt;/a&gt;</xsl:text>
 					</TD>
 				</TR>
-
 				<TR height="25">
 					<TD colspan="1" style="padding: 0px 0px 0px 15px;" width="80">
 						<font size="2" color="#5d5d5d">
@@ -228,7 +220,6 @@
 						</font>
 					</TD>
 					<TD style="padding: 0px 0px 0px 15px;">
-
 						<xsl:choose>
 							<xsl:when test="$countTests = $passedTests">
 								all tests passed !
@@ -247,25 +238,21 @@
 								</xsl:choose>
 							</xsl:otherwise>
 						</xsl:choose>
-
 					</TD>
 				</TR>
-
 				<xsl:apply-templates select="test" />
 			</TBODY>
 		</TABLE>
-
-		<hr />
-
+		<HR/>
 		<xsl:apply-templates select="tests">
 			<xsl:with-param name="suiteName" select="$suiteName"/>
 		</xsl:apply-templates>
-
 	</xsl:template>
 
 	<!-- ========================= -->
 	<!-- child element: tests -->
 	<!-- ========================= -->
+	
 	<xsl:template match="tests">
 		<xsl:param name="suiteName"/>
 		<div style="padding-left:6%">
@@ -274,13 +261,14 @@
 			</xsl:apply-templates>
 		</div>
 	</xsl:template>
+	
 	<!-- ========================= -->
 	<!-- child element: ats -->
 	<!-- ========================= -->
+	
 	<xsl:template match="ats">
 		<xsl:param name="suiteName"/>
 		<xsl:variable name="testName" select="concat($suiteName, '/', script[1]/@testName)" />
-		
 		<div style="color: #565656; text-shadow: 2px 2px 8px #b9b9b9">
 			<FONT SIZE="4">
 				<B>
@@ -295,10 +283,8 @@
 				</I>
 			</FONT>
 		</div>
-
 		<TABLE border="1" bordercolor="#ffffff" cellpadding="10"
 			width="100%" style="background-color:#C4C4C4">
-
 			<THEAD>
 				<TR style="background-color:#575757;color:white">
 					<TH>
@@ -419,7 +405,6 @@
 												<b>Prerequisite</b>
 											</i>
 										</font>
-
 									</TD>
 									<TD colspan="7">
 										<xsl:value-of select="script/prerequisite"
@@ -456,13 +441,13 @@
 				</xsl:apply-templates>
 			</xsl:when>
 		</xsl:choose>
-
-		<hr/>
+		<HR/>
 	</xsl:template>
 
 	<!-- ========================= -->
 	<!-- child element: actions -->
 	<!-- ========================= -->
+	
 	<xsl:template match="actions">
 		<xsl:param name="fullTestName"/>
 		<xsl:apply-templates select="action" >
@@ -556,7 +541,6 @@
 				</table>
 			</xsl:otherwise>
 		</xsl:choose>
-
 		<xsl:choose>
 			<xsl:when test="$details = 'true'">
 				<div class="content">
