@@ -21,7 +21,6 @@ package com.ats.tools;
 
 import org.xml.sax.SAXException;
 
-import javax.imageio.ImageIO;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -29,11 +28,12 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.*;
 import java.nio.file.Files;
-import java.util.HashMap;
+import java.util.Base64;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -86,7 +86,6 @@ public class CampaignReportGenerator {
 			}
 		}
 		
-		//TODO construct the output report
 		String target = generateReportXml(targetFiles, outputFolder, projectFolder, details);
 		
 		if(target == null) return;
@@ -126,17 +125,6 @@ public class CampaignReportGenerator {
 					if(stylesheets.getName().contains("_html_")) {
 						html = stylesheets.getAbsolutePath();
 					}
-					if(stylesheets.getName().contains(".css") || stylesheets.getName().contains(".js")) {
-						InputStream initialStream = new FileInputStream(stylesheets);
-					    byte[] buffer = new byte[initialStream.available()];
-					    initialStream.read(buffer);
-					 
-					    File styleFile = new File(targetFile.getParentFile().getAbsolutePath() + File.separator + stylesheets.getName());
-					    OutputStream outStream = new FileOutputStream(styleFile);
-					    outStream.write(buffer);
-					    outStream.close();
-					    initialStream.close();
-					}
 				}
 			}
 			
@@ -154,8 +142,7 @@ public class CampaignReportGenerator {
 					    initialStream.close();
 					}
 				} else {
-					///TODO copy default files
-					copyDefaultImagesToFolder(targetFile);
+					//copyDefaultImagesToFolder(targetFile);
 				}
 			}
 		}
@@ -173,7 +160,6 @@ public class CampaignReportGenerator {
 			try {
 				html = targetFile.getParent() +"/campaign_html_stylesheet.xml";
 				copyResource(ResourceContent.class.getResourceAsStream("/reports/campaign/campaign_html_stylesheet.xml"),html);
-				copyResource(ResourceContent.class.getResourceAsStream("/reports/campaign/report.css"),targetFile.getParent() +"/report.css");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -220,27 +206,8 @@ public class CampaignReportGenerator {
 	    outStream.close();
 	}
 	
-	public static void copyDefaultImagesToFolder(File targetFile) throws IOException {
-		HashMap<String, BufferedImage> map = new HashMap<String, BufferedImage>();
-		
-		BufferedImage logoImg = ImageIO.read(ResourceContent.class.getResource("/reports/images/logo.png"));
-		BufferedImage trueImg = ImageIO.read(ResourceContent.class.getResource("/reports/images/true.png"));
-		BufferedImage falseImg = ImageIO.read(ResourceContent.class.getResource("/reports/images/false.png"));
-		BufferedImage warningImg = ImageIO.read(ResourceContent.class.getResource("/reports/images/warning.png"));
-		
-		map.put("logo.png", logoImg);
-		map.put("true.png", trueImg);
-		map.put("false.png", falseImg);
-		map.put("warning.png", warningImg);
-		
-		for(Map.Entry<String, BufferedImage> entry : map.entrySet()) {
-		    String key = entry.getKey();
-		    BufferedImage value = entry.getValue();
-
-		    String path = targetFile.getParentFile().getAbsolutePath() + File.separator + key;
-			File tmpFile = new File(path);
-			ImageIO.write(value, "png", tmpFile);
-		}
+	public static String getBase64DefaultImages(byte[] b) throws IOException {
+		return Base64.getEncoder().encodeToString(b);
 	}	
 	
 	public static String generateReportXml(String xmlPath, String outputFolder, File projectFolder, String details) throws IOException, ParserConfigurationException, SAXException{
@@ -253,6 +220,13 @@ public class CampaignReportGenerator {
         
         final FileWriter fw = new FileWriter(f);
         fw.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><report actions=\"" +  (det > 1) + "\" details=\"" + (det > 2) + "\">");
+        
+        fw.write("<pics>");  
+        String[] defaultImages = {"logo.png","true.png","false.png","warning.png"};
+        for (String img : defaultImages) {
+			fw.write("<pic name='"+ img.replace(".png",  "")  +"'>data:image/png;base64," +  getBase64DefaultImages(ResourceContent.class.getResourceAsStream("/reports/images/" + img).readAllBytes())  + "</pic>");
+		}
+        fw.write("</pics>");
         
         final String[] paths = xmlPath.split(";");
         String currentSuite = "";

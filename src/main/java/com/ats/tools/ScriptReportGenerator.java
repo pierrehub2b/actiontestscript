@@ -110,8 +110,7 @@ public class ScriptReportGenerator {
 					    initialStream.close();
 					}
 				} else {
-					///TODO copy default files
-					copyDefaultImagesToFolder(targetFile);
+					//copyDefaultImagesToFolder(targetFile);
 				}
 			}
 		}
@@ -141,7 +140,7 @@ public class ScriptReportGenerator {
 		
 		if (pdf == null || (!new File(pdf).exists())) {
 			try {
-				pdf = targetFile.getParent() +"/script_pdf_stylesheet.xml";
+				pdf = targetFile.getParentFile().getParent() +"\\script_pdf_stylesheet.xml";
 				copyResource(ResourceContent.class.getResourceAsStream("/reports/script/script_pdf_stylesheet.xml"),pdf);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -150,11 +149,8 @@ public class ScriptReportGenerator {
 		
 		if (html == null || (!new File(html).exists())) {
 			try {
-				html = targetFile.getParent() +"/script_html_stylesheet.xml";
+				html = targetFile.getParentFile().getParent() +"\\script_html_stylesheet.xml";
 				copyResource(ResourceContent.class.getResourceAsStream("/reports/script/script_html_stylesheet.xml"),html);
-				
-				//copy css
-				copyResource(ResourceContent.class.getResourceAsStream("/reports/script/report.css"),targetFile.getParent() +"/report.css");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -163,14 +159,14 @@ public class ScriptReportGenerator {
 		if (fop == null || target == null || pdf == null || html == null) { return; }		
 		
 		//HTML reports
-		String path = targetFile.getParentFile().getAbsolutePath();
+		String path = targetFile.getParentFile().getParentFile().getAbsolutePath();
 		Transformer transformer = null;
 		TransformerFactory tFactory = TransformerFactory.newInstance();
 		transformer = tFactory.newTransformer(new StreamSource(html));
-	    transformer.transform(new StreamSource(target), new StreamResult(path + File.separator + targetFile.getParentFile().getName() + ".html"));
+	    transformer.transform(new StreamSource(target), new StreamResult(path + File.separator + targetFile.getParentFile().getName().replace("_xml", "") + ".html"));
 		
 		try {
-			ProcessBuilder ps= new ProcessBuilder("java","-cp",fop,"org.apache.fop.cli.Main","-xml",target,"-xsl",pdf,"-pdf",targetFile.getParentFile().getAbsolutePath() + File.separator + targetFile.getParentFile().getName() + ".pdf");
+			ProcessBuilder ps= new ProcessBuilder("java","-cp",fop,"org.apache.fop.cli.Main","-xml",target,"-xsl",pdf,"-pdf",targetFile.getParentFile().getParentFile().getAbsolutePath() + File.separator + targetFile.getParentFile().getName().replace("_xml", "") + ".pdf");
 			ps.redirectErrorStream(true);
 
 			Process pr = ps.start();  

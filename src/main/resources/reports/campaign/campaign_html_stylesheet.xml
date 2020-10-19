@@ -9,8 +9,10 @@
 	<!-- Calculations -->
 	<!-- ========================= -->
 
-	<xsl:variable name="picFail" select="//report/pics/pic[@name='fail']" />
-	<xsl:variable name="picPass" select="//report/pics/pic[@name='pass']" />
+	<xsl:variable name="picFalse" select="//report/pics/pic[@name='false']" />
+	<xsl:variable name="picTrue" select="//report/pics/pic[@name='true']" />
+	<xsl:variable name="picWarning" select="//report/pics/pic[@name='logo']" />
+	<xsl:variable name="picLogo" select="//report/pics/pic[@name='logo']" />
 		
 	<xsl:variable name="xml_reports"
 		select="//report/suite/parameter[@name='xml.report']/@value" />
@@ -77,7 +79,6 @@
 				<META charset="utf-8" />
 				<META name="description" content="" />
 				<TITLE>Ats suites reporting</TITLE>
-				<LINK rel="stylesheet" href="report.css" />
 
 				<script type="text/javascript">
 					function loopCollapsible(){
@@ -99,11 +100,17 @@
 					}
 				</script>
 				<style>
-					HTML * {font-family: Arial}
+					html{background:#f0f0f0;padding:20px;font-family: Arial;}	
 					TABLE, TD {border:0px;margin-bottom:0.1rem;border-top:1px;border-collapse:collapse;border-spacing:0;}
 					TABLE TD {border-top:thin solid;border-bottom:thin solid;border-right:thin solid;border-color:#ffffff}
 					TD.titleClass {border-top:none;border-bottom:none;border-right:none;border-color:#000000}
-					HR {height:2px;color:#696969;background-color:#696969; width:100%;border:none;margin-bottom:20px}
+					HR {height:2px;color:#696969;background-color:#696969; width:100%;border:none;margin-bottom:20px}				
+					body {margin: 100px;padding: 20px;font-size: 100%;line-height: 1.5;}					
+					.themed-grid-col {padding-top: 15px;padding-bottom: 15px;background-color: rgba(86, 61, 124, .15);border: 1px solid rgba(86, 61, 124, .2);}					
+					.themed-container {padding: 15px;margin-bottom: 30px;background-color: rgba(0, 123, 255, .15);border: 1px solid rgba(0, 123, 255, .2);}					
+					.execution {margin-bottom:20px;}					
+					.content {padding: 0 18px;max-height: 0;overflow: hidden;transition: max-height 0.2s ease-out;background-color: #f1f1f1;}
+					.linkButtons a {margin:0px 10px;}
 				</style>
 			</HEAD>
 			<BODY onload="loopCollapsible()">
@@ -111,7 +118,11 @@
 					<TBODY>
 						<TR>
 							<TD class="titleClass">
-								<IMG src="logo.png" />
+								<img align="right" alt="ATS logo">
+									<xsl:attribute name="src">
+										<xsl:value-of select="$picLogo"/>
+									</xsl:attribute>
+								</img>
 							</TD>
 							<TD class="titleClass">
 								<span
@@ -193,10 +204,18 @@
 						<TD style="border-style:solid;border-width: 0px 0px 0px 0px;padding: 2px 5px 2px 0px;">
 							<xsl:choose>
 								<xsl:when test="$failedTests = 0">
-									<IMG src="true.png" width="34" height="34" align="right"/>
+									<img width="34" height="34" align="right" alt="Test passed">
+										<xsl:attribute name="src">
+											<xsl:value-of select="$picTrue"/>
+										</xsl:attribute>
+									</img>
 								</xsl:when>
 								<xsl:otherwise>
-									<IMG src="false.png" width="34" height="34" align="right"/>
+									<img width="34" height="34" align="right" alt="Test failed">
+										<xsl:attribute name="src">
+											<xsl:value-of select="$picFalse"/>
+										</xsl:attribute>
+									</img>
 								</xsl:otherwise>
 							</xsl:choose>
 						</TD>
@@ -353,7 +372,7 @@
 								width="50">
 								<img align="right" alt="Test failed">
 									<xsl:attribute name="src">
-										<xsl:value-of select="$picFail"/>
+										<xsl:value-of select="$picFalse"/>
 									</xsl:attribute>
 								</img>	
 							</TD>
@@ -363,7 +382,7 @@
 								width="50">
 								<img align="right" alt="Test passed">
 									<xsl:attribute name="src">
-										<xsl:value-of select="$picPass"/>
+										<xsl:value-of select="$picTrue"/>
 									</xsl:attribute>
 								</img>		
 							</TD>
@@ -500,19 +519,25 @@
 						<td style="padding-right: 4px;border :0">
 							<xsl:choose>
 								<xsl:when test="passed = 'true'">
-									<IMG src="true.png" class='actionStatusImg' height="30px"
-										width="30px" style="vertical-align:middle" />
+									<img height="30px" width="30px" style="vertical-align:middle" alt="Test passed">
+										<xsl:attribute name="src">
+											<xsl:value-of select="$picTrue"/>
+										</xsl:attribute>
+									</img>
 								</xsl:when>
 								<xsl:when test="passed = 'warning'">
-									<IMG src="warning.png" class='actionStatusImg'
-										height="30px" width="30px" style="vertical-align:middle" />
+									<img height="30px" width="30px" style="vertical-align:middle" alt="Test unstable">
+										<xsl:attribute name="src">
+											<xsl:value-of select="$picWarning"/>
+										</xsl:attribute>
+									</img>
 								</xsl:when>
 								<xsl:when test="passed = 'false'">
-								<img align="right" alt="Test failed" height="30px" width="30px" style="vertical-align:middle">
-									<xsl:attribute name="src">
-										<xsl:value-of select="$picFail"/>
-									</xsl:attribute>
-								</img>	
+								<img height="30px" width="30px" style="vertical-align:middle" alt="Test failed">
+										<xsl:attribute name="src">
+											<xsl:value-of select="$picFalse"/>
+										</xsl:attribute>
+									</img>
 								</xsl:when>
 							</xsl:choose>
 						</td>
@@ -542,16 +567,25 @@
 						<td style="padding-right: 4px;border :0">
 							<xsl:choose>
 								<xsl:when test="passed = 'true'">
-									<IMG src="true.png" class='actionStatusImg' height="30px"
-										width="30px" style="vertical-align:middle" />
+									<img height="30px" width="30px" style="vertical-align:middle" alt="Test passed">
+										<xsl:attribute name="src">
+											<xsl:value-of select="$picTrue"/>
+										</xsl:attribute>
+									</img>
 								</xsl:when>
 								<xsl:when test="passed = 'warning'">
-									<IMG src="warning.png" class='actionStatusImg'
-										height="30px" width="30px" style="vertical-align:middle" />
+									<img height="30px" width="30px" style="vertical-align:middle" alt="Test unstable">
+										<xsl:attribute name="src">
+											<xsl:value-of select="$picWarning"/>
+										</xsl:attribute>
+									</img>
 								</xsl:when>
 								<xsl:when test="passed = 'false'">
-									<IMG src="false.png" class='actionStatusImg' height="30px"
-										width="30px" style="vertical-align:middle" />
+									<img height="30px" width="30px" style="vertical-align:middle" alt="Test failed">
+										<xsl:attribute name="src">
+											<xsl:value-of select="$picFalse"/>
+										</xsl:attribute>
+									</img>
 								</xsl:when>
 							</xsl:choose>
 						</td>
