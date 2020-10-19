@@ -175,10 +175,13 @@ public class CampaignReportGenerator {
 		
 		//HTML reports
 		String path = targetFile.getParentFile().getAbsolutePath();
-		Transformer transformer = null;
-		TransformerFactory tFactory = TransformerFactory.newInstance();
-		transformer = tFactory.newTransformer(new StreamSource(html));
-	    transformer.transform(new StreamSource(target), new StreamResult(path + File.separator + ATS_REPORT + ".html"));
+
+		final Transformer transformer = TransformerFactory.newInstance().newTransformer(new StreamSource(html));
+
+		final FilteredWriter filteredWriter = new FilteredWriter(new FileWriter(path + File.separator + ATS_REPORT + ".html"));
+		transformer.transform(new StreamSource(target), new StreamResult(filteredWriter));
+				
+		filteredWriter.close();
 		
 		try {
 			ProcessBuilder ps= new ProcessBuilder("java","-cp",fop,"org.apache.fop.cli.Main","-xml",target,"-xsl",pdf,"-pdf",targetFile.getParentFile().getAbsolutePath() + File.separator + ATS_REPORT + ".pdf");

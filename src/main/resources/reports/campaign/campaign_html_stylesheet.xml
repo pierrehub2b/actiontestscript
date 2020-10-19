@@ -3,8 +3,10 @@
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:java="http://xml.apache.org/xslt/java"
 	exclude-result-prefixes="java">
-	<xsl:output method="html" version="5.0" encoding="UTF-8"
-		indent="yes" />
+	
+	<xsl:output method="html" version="5.0" encoding="UTF-8" indent="no" />
+	<xsl:strip-space elements="*"/>
+		
 	<!-- ========================= -->
 	<!-- Calculations -->
 	<!-- ========================= -->
