@@ -262,11 +262,11 @@ public class ActionCallscript extends ActionReturnVariableArray {
 		if(clazz == null) {
 			status.setError(MessageCode.SCRIPT_NOT_FOUND, "ATS script not found : '" + scriptName + "' (maybe a letter case issue ?)\n");
 		}else {
-
+			
 			try {
 
 				final ActionTestScript ats = clazz.getDeclaredConstructor().newInstance();
-				ats.setTopScript(ts.getTopScript());
+				ats.setTopScript(ts.getTopScript(), scriptName);
 
 				if(parameterFilePath != null) {
 

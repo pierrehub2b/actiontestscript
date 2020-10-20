@@ -383,13 +383,13 @@ public class Lexer {
 							dataOne = matcher.group(1).trim();
 							String parametersData = matcher.group(2);
 
-							Matcher mv = ParameterValue.PARAMETER_PATTERN.matcher(parametersData);
+							Matcher mv = CalculatedValue.PARAMETER_PATTERN.matcher(parametersData);
 							while (mv.find()) {
 								ParameterValue sp = new ParameterValue(mv);
 								parametersData = parametersData.replace(sp.getReplace(), sp.getNoComma());
 							}
 
-							mv = EnvironmentValue.ENV_PATTERN.matcher(parametersData);
+							mv = CalculatedValue.ENV_PATTERN.matcher(parametersData);
 							while (mv.find()) {
 								final EnvironmentValue sp = new EnvironmentValue(mv);
 								parametersData = parametersData.replace(sp.getReplace(), sp.getNoComma());

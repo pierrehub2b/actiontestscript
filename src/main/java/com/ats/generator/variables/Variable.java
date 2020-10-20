@@ -22,13 +22,10 @@ package com.ats.generator.variables;
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.transform.Transformer;
 
-import java.util.regex.Pattern;
-
 public class Variable implements Comparable<Variable>{
 
 	public static final String SCRIPT_LABEL = "var";
 	public static final int SCRIPT_LABEL_LENGTH = SCRIPT_LABEL.length();
-	public static final Pattern SCRIPT_PATTERN = Pattern.compile("\\$var\\s*?\\((\\w+)\\)", Pattern.CASE_INSENSITIVE);
 
 	private boolean calculation = true;
 	private String name = "";
@@ -40,18 +37,27 @@ public class Variable implements Comparable<Variable>{
 	public Variable() {}
 
 	public Variable(String name, CalculatedValue value) {
-		this.setName(formatVariableName(name));
+		this.setName(name);
 		this.setValue(value);
 	}
+	
+	public Variable(ActionTestScript script, String variablePath) {
+		this.setName(name);
+		this.setValue(new CalculatedValue(script, ""));
+
+	}
+	
+	/*if(value.contains(".")) {
+	globalVariablePath = value;
+	value = GLOBAL_VARIABLE_PREFIX + value.replaceAll("\\.", "_");
+	
+			this.globalVariable = script.getScriptTreeVariable(variablePath);
+}*/
 
 	public Variable(String name, CalculatedValue value, Transformer transformer) {
-		this.setName(formatVariableName(name));
+		this.setName(name);
 		this.setValue(value);
 		this.setTransformation(transformer);
-	}
-
-	public static final String formatVariableName(String value){
-		return value.replaceAll("[^A-Za-z0-9_]", "");
 	}
 	
 	@Override
@@ -60,7 +66,6 @@ public class Variable implements Comparable<Variable>{
 	}
 
 	public String getCalculatedValue() {
-
 		String result = data; 
 		if(result == null) {
 			result = value.getCalculated();
@@ -91,16 +96,17 @@ public class Variable implements Comparable<Variable>{
 	//---------------------------------------------------------------------------------------------------------------------------------
 	// Code Generator
 	//---------------------------------------------------------------------------------------------------------------------------------
-
+	
 	public String getJavaCode(){
 
-		StringBuilder codeBuilder = new StringBuilder(this.getClass().getSimpleName());
+		final String varName = getName();
+		final StringBuilder codeBuilder = new StringBuilder(this.getClass().getSimpleName());
 		codeBuilder.append(" ");
-		codeBuilder.append(getName());
+		codeBuilder.append(varName);
 		codeBuilder.append(" = ");
 		codeBuilder.append(ActionTestScript.JAVA_VAR_FUNCTION_NAME);
 		codeBuilder.append("(\"");
-		codeBuilder.append(getName());
+		codeBuilder.append(varName);
 		codeBuilder.append("\"");
 
 		if(isCalculation()) {

@@ -134,13 +134,13 @@ public class CalculatedValueTest {
 	@Test
 	public void envGroupExtract() throws IOException {
 		
-		Matcher mv = EnvironmentValue.ENV_PATTERN.matcher("$env(br.alpha, ok)");
+		Matcher mv = CalculatedValue.ENV_PATTERN.matcher("$env(br.alpha, ok)");
 		mv.find();
 		EnvironmentValue sp = new EnvironmentValue(mv);
 		
 		assertEquals(sp.getCode(), "(\"br.alpha\", \"ok\")");
 		
-		mv = EnvironmentValue.ENV_PATTERN.matcher("$env(br, ok)");
+		mv = CalculatedValue.ENV_PATTERN.matcher("$env(br, ok)");
 		mv.find();
 		sp = new EnvironmentValue(mv);
 		

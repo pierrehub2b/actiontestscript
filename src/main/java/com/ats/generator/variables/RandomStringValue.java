@@ -19,15 +19,12 @@ under the License.
 
 package com.ats.generator.variables;
 
-import com.ats.tools.Utils;
-
 import java.util.Random;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import com.ats.tools.Utils;
 
 public class RandomStringValue extends BaseValue {
-
-	public static final Pattern RND_PATTERN = Pattern.compile("\\$rnd(?:string)?\\s*?\\((\\d+),?(\\w{0,3}?[^\\)]*)?\\)", Pattern.CASE_INSENSITIVE);
 	
 	private static final String UPP_KEY = "upp";
 	private static final String LOW_KEY = "low";

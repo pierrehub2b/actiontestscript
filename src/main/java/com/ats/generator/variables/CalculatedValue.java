@@ -50,6 +50,12 @@ public class CalculatedValue{
 	private static final Pattern PASSWORD_DATA = Pattern.compile("\\$pass\\s*?\\(([^\\)]*)\\)", Pattern.CASE_INSENSITIVE);
 	
 	private static final Pattern SYS_PATTERN = Pattern.compile("\\$sys\\s*?\\(([^\\)]*)\\)", Pattern.CASE_INSENSITIVE);
+	public static final Pattern PARAMETER_PATTERN = Pattern.compile("\\$param\\s*?\\((\\w+),?(\\s*?[^\\)]*)?\\)", Pattern.CASE_INSENSITIVE);
+	public static final Pattern ENV_PATTERN = Pattern.compile("\\$env\\s*?\\(([\\w.]+),?(\\s*?[^\\)]*)?\\)", Pattern.CASE_INSENSITIVE);
+	private static final Pattern RND_PATTERN = Pattern.compile("\\$rnd(?:string)?\\s*?\\((\\d+),?(\\w{0,3}?[^\\)]*)?\\)", Pattern.CASE_INSENSITIVE);
+
+	private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\$var\\s*?\\(([^\\)\\.]*)\\)", Pattern.CASE_INSENSITIVE);
+	private static final Pattern GLOBAL_VARIABLE_PATTERN = Pattern.compile("\\$var\\s*?\\(([^\\)]*)\\)", Pattern.CASE_INSENSITIVE);
 	
 	//-----------------------------------------------------------------------------------------------------
 	// variable and parameter management
@@ -99,12 +105,24 @@ public class CalculatedValue{
 
 		rawJavaCode = StringEscapeUtils.escapeJava(dataValue);
 
-		Matcher mv = Variable.SCRIPT_PATTERN.matcher(dataValue);
+		Matcher mv = VARIABLE_PATTERN.matcher(dataValue);
 		while (mv.find()) {
+			
 			final String replace = mv.group(0);
 			final String variableName = mv.group(1);
+			
 			dataValue = dataValue.replace(replace, script.getVariableValue(variableName));
 			rawJavaCode = rawJavaCode.replace(replace, "\", " + variableName + ", \"");
+		}
+		
+		mv = GLOBAL_VARIABLE_PATTERN.matcher(dataValue);
+		while (mv.find()) {
+			
+			final String replace = mv.group(0);
+			final String variableName = mv.group(1);
+			
+			dataValue = script.getGlobalVariableValue(variableName);
+			rawJavaCode = rawJavaCode.replace(replace, "\", " + ActionTestScript.JAVA_GLOBAL_VAR_FUNCTION_NAME + "(\"" + variableName + "\"), \"");
 		}
 
 		mv = SYS_PATTERN.matcher(dataValue);
@@ -115,14 +133,14 @@ public class CalculatedValue{
 			rawJavaCode = rawJavaCode.replace(replace, "\"," + ActionTestScript.JAVA_SYSTEM_FUNCTION_NAME + "(\"" + value + "\"), \"");
 		}
 
-		mv = ParameterValue.PARAMETER_PATTERN.matcher(dataValue);
+		mv = PARAMETER_PATTERN.matcher(dataValue);
 		while (mv.find()) {
 			final ParameterValue sp = new ParameterValue(mv);
 			dataValue = dataValue.replace(sp.getReplace(), script.getParameterValue(sp.getValue(), sp.getDefaultValue()));
 			rawJavaCode = rawJavaCode.replace(sp.getReplace(), "\", " + ActionTestScript.JAVA_PARAM_FUNCTION_NAME + sp.getCode() + ", \"");
 		}
 
-		mv = EnvironmentValue.ENV_PATTERN.matcher(dataValue);
+		mv = ENV_PATTERN.matcher(dataValue);
 		while (mv.find()) {
 			final EnvironmentValue sp = new EnvironmentValue(mv);
 			dataValue = dataValue.replace(sp.getReplace(), script.getEnvironmentValue(sp.getValue(), sp.getDefaultValue()));
@@ -150,7 +168,7 @@ public class CalculatedValue{
 			rawJavaCode = rawJavaCode.replace(replace, "\", " + ActionTestScript.JAVA_UUID_FUNCTION_NAME + "(), \"");
 		}
 
-		mv = RandomStringValue.RND_PATTERN.matcher(dataValue);
+		mv = RND_PATTERN.matcher(dataValue);
 		while (mv.find()) {
 			final RandomStringValue rds = new RandomStringValue(mv);
 			dataValue = dataValue.replace(rds.getReplace(), rds.exec());

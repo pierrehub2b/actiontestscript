@@ -34,6 +34,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 import com.ats.crypto.Passwords;
+import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.channels.ChannelManager;
 import com.ats.generator.variables.CalculatedValue;
@@ -61,14 +62,16 @@ public class Script {
 
 	public final static String SCRIPT_LOG = "SCRIPT";
 	public final static String COMMENT_LOG = "COMMENT";
-	
+
 	//-------------------------------------------------------------------------------------
 	// instances
 	//-------------------------------------------------------------------------------------
-	
+
 	private ParameterList parameterList;
 	private List<Variable> variables = new ArrayList<Variable>();
 	private ArrayList<CalculatedValue> returns;
+
+	protected List<ActionTestScript> scriptCallTree;
 
 	protected File csvFile;
 	protected int iteration = 0;
@@ -190,6 +193,30 @@ public class Script {
 	// variables
 	//-------------------------------------------------------------------------------------------------
 
+	protected void addToScriptCallTree(ActionTestScript sc, String name) {
+		if(!scriptCallTree.stream().filter(a -> a.getTestName().equals(name)).findFirst().isPresent()) {
+			scriptCallTree.add(sc);
+		}
+	}
+
+	public String getGlobalVariableValue(String varPath) {
+		if(scriptCallTree != null) {
+			final int lastDot = varPath.lastIndexOf(".");
+			if(lastDot > -1) {
+				final String scriptPath = varPath.substring(0, lastDot);
+				final Optional<ActionTestScript> sc = scriptCallTree.stream().filter(a -> a.getTestName().equals(scriptPath)).findFirst();
+				if(sc.isPresent()) {
+					final Variable scVar = sc.get().getVariable(varPath.substring(lastDot+1));
+					if(scVar != null) {
+						return scVar.getCalculatedValue();
+					}
+				}
+			}
+			sendWarningLog("Unable to find global variable", varPath);
+		}
+		return "";
+	}
+
 	public boolean checkVariableExists(String name){
 		for(Variable variable : getVariables()){
 			if(variable.getName().equals(name)){
@@ -215,14 +242,12 @@ public class Script {
 		return foundVar;
 	}
 
-	private Variable getVariable(String name) {
-		Variable found = null;
-
-		Optional<Variable> opt = (variables.stream().filter(p -> p.getName().equals(name))).findFirst();
+	public Variable getVariable(String name) {
+		final Optional<Variable> opt = (variables.stream().filter(p -> p.getName().equals(name))).findFirst();
 		if(opt != null && opt.isPresent()){
-			found = opt.get();
+			return opt.get();
 		}
-		return found;
+		return null;
 	}
 
 	public Variable addVariable(String name, CalculatedValue value, Transformer transformer){
@@ -237,7 +262,7 @@ public class Script {
 	}
 
 	public Variable createVariable(String name, CalculatedValue value, Transformer transformer){
-		Variable newVar = new Variable(name, value, transformer);
+		final Variable newVar = new Variable(name, value, transformer);
 		variables.add(newVar);
 		return newVar;
 	}
