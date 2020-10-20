@@ -23,32 +23,31 @@ import java.io.FilterWriter;
 import java.io.IOException;
 import java.io.Writer;
 
-public class FilteredWriter extends FilterWriter
+public class MinifyWriter extends FilterWriter
 {
-    protected char[] filter = "\t".toCharArray();
+	protected MinifyWriter(Writer out) {
+		super(out);
+	}
 
-    protected FilteredWriter(Writer out) {
-        super(out);
-    }
+	public void write(String str, int off, int len) throws IOException
+	{
+		write(str.toCharArray(), off, len);
+	}
 
-    public void write(String str, int off, int len) throws IOException
-    {
-        write(str.toCharArray(), off, len);
-    }
+	public void write(char[] cbuf, int off, int len) throws IOException
+	{
+		for (int i = off; i < off + len; i++)
+			write(cbuf[i]);
+	}
 
-    public void write(char[] cbuf, int off, int len) throws IOException
-    {
-        for (int i = off; i < off + len; i++)
-            write(cbuf[i]);
-    }
-
-    public void write(int c) throws IOException
-    {
-        for (char f : filter)
-        {
-            if (f == (char)c)
-                return;
-        }
-        out.write(c);
-    }
+	public void write(int c) throws IOException
+	{
+		if ('\t' != c && '\r' != c) {
+			if(c == '\n') {
+				out.write(' ');
+			}else {
+				out.write(c);
+			}
+		}
+	}
 }

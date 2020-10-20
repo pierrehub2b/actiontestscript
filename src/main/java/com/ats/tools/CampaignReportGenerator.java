@@ -174,11 +174,11 @@ public class CampaignReportGenerator {
 		if (fop == null || target == null || pdf == null || html == null) { return; }		
 		
 		//HTML reports
-		String path = targetFile.getParentFile().getAbsolutePath();
-
+		
+		final MinifyWriter filteredWriter = new MinifyWriter(
+				new FileWriter(targetFile.getParentFile().getAbsolutePath() + File.separator + ATS_REPORT + ".html"));
+		
 		final Transformer transformer = TransformerFactory.newInstance().newTransformer(new StreamSource(html));
-
-		final FilteredWriter filteredWriter = new FilteredWriter(new FileWriter(path + File.separator + ATS_REPORT + ".html"));
 		transformer.transform(new StreamSource(target), new StreamResult(filteredWriter));
 				
 		filteredWriter.close();
