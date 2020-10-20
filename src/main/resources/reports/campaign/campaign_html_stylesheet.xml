@@ -80,13 +80,16 @@
 				<TITLE>Ats suites reporting</TITLE>
 
 				<script type="text/javascript">
-				
-					var picTrue="<xsl:value-of select="//report/pics/pic[@name='true']"/>";
-					var picFalse="<xsl:value-of select="//report/pics/pic[@name='false']"/>";
-					var picWarning="<xsl:value-of select="//report/pics/pic[@name='warning']"/>";
+					
+					function init(){
+						loopCollapsible();
+						loopIcons('iconTrue',"<xsl:value-of select="//report/pics/pic[@name='true']"/>");
+						loopIcons('iconFalse',"<xsl:value-of select="//report/pics/pic[@name='false']"/>");
+						loopIcons('iconWarning',"<xsl:value-of select="//report/pics/pic[@name='warning']"/>")
+					}
 					
 					function loopIcons(cl, data){
-						let icons = document.getElementsByClassName(cl);
+						let icons=document.getElementsByClassName(cl);
 						for (var i=0,item; item = icons[i]; i++) {
 							icons[i].src = data;
 						}
@@ -124,7 +127,7 @@
 					.linkButtons a {margin:0px 10px;}
 				</style>
 			</HEAD>
-			<BODY onload="loopCollapsible();loopIcons('iconTrue', picTrue);loopIcons('iconFalse', picFalse);loopIcons('iconWarning', picWarning);">
+			<BODY onload="init()">
 				<TABLE>
 					<TBODY>
 						<TR>
@@ -314,7 +317,7 @@
 		<TABLE border="1" bordercolor="#ffffff" cellpadding="10"
 			width="100%" style="background-color:#C4C4C4">
 			<THEAD>
-				<TR style="background-color:#575757;color:white">
+				<TR style="background-color:#575757;color:white;font-size:80%">
 					<TH>
 						Actions
 					</TH>
