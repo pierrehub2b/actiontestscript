@@ -79,8 +79,8 @@ public class CampaignReportGenerator {
 			}
 		}
 		
-		File projectFolder = null;
-		File currentFolder = new File(outputFolder);
+		File projectFolder = new File(outputFolder).getParentFile().getParentFile();
+		/*File currentFolder = new File(outputFolder);
 		
 		while(projectFolder == null) {
 			currentFolder = currentFolder.getParentFile();
@@ -90,7 +90,7 @@ public class CampaignReportGenerator {
 					projectFolder = currentFolder;
 				}
 			}
-		}
+		}*/
 		
 		String target = generateReportXml(targetFiles, outputFolder, projectFolder, details);
 		
@@ -190,12 +190,7 @@ public class CampaignReportGenerator {
 			Process pr = ps.start();  
 
 			BufferedReader in = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-			String line;
-			while ((line = in.readLine()) != null) {
-			    System.out.println(line);
-			}
 			pr.waitFor();
-			System.out.println("ok!");
 
 			in.close();
 			System.exit(0);

@@ -59,8 +59,8 @@ public class ScriptReportGenerator {
 		if(target == null) return;
 		File targetFile = new File(target);
 		
-		File projectFolder = null;
-		File currentFolder = targetFile;
+		File projectFolder = targetFile.getParentFile().getParentFile().getParentFile().getParentFile().getParentFile();
+		/*File currentFolder = targetFile;
 		
 		while(projectFolder == null) {
 			currentFolder = currentFolder.getParentFile();
@@ -70,7 +70,7 @@ public class ScriptReportGenerator {
 					projectFolder = currentFolder;
 				}
 			}
-		}
+		}*/
 		File xsltFolder = new File(projectFolder.getAbsolutePath() + "/src/assets/resources/xslt");
 		
 		for (File xslt : xsltFolder.listFiles()) {
@@ -172,12 +172,7 @@ public class ScriptReportGenerator {
 			Process pr = ps.start();  
 
 			BufferedReader in = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-			String line;
-			while ((line = in.readLine()) != null) {
-			    System.out.println(line);
-			}
 			pr.waitFor();
-			System.out.println("ok!");
 
 			in.close();
 			System.exit(0);
