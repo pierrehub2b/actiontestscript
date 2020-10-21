@@ -195,7 +195,7 @@ public class ActionTestScript extends Script implements ITest{
 
 			final ExecutionLogger mainLogger = new ExecutionLogger(System.out, getEnvironmentValue("ats.log.level", ""));
 			setLogger(mainLogger);
-
+			
 			//-----------------------------------------------------------
 			// check report output specified
 			//-----------------------------------------------------------
@@ -209,8 +209,9 @@ public class ActionTestScript extends Script implements ITest{
 			
 			final String generateReport = System.getProperty("report");
 			if("true".equalsIgnoreCase(generateReport)) {
-				xml = true;
 				visualQuality = 3;
+				xml = true;
+				sendScriptInfo("Ats force report detected");
 			}
 			
 			if(visualQuality > 0 || xml) {
