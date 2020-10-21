@@ -201,11 +201,7 @@ public class ActionTestScript extends Script implements ITest{
 			//-----------------------------------------------------------
 			
 			int visualQuality = Utils.string2Int(getEnvironmentValue("visual.report", "0"));
-			int intReportValue = Utils.string2Int(getEnvironmentValue("xml.report", "0"));
-			
-			String reportVar = getEnvironmentValue("xml.report", "");
-			
-			boolean xml = reportVar.equalsIgnoreCase("true") || intReportValue > 0;
+			boolean xml = getEnvironmentValue("xml.report", "").equalsIgnoreCase("true");
 			
 			final String generateReport = System.getProperty("report");
 			if("true".equalsIgnoreCase(generateReport)) {
