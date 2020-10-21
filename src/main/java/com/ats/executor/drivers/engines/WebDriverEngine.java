@@ -243,8 +243,9 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 		final String titleUid = UUID.randomUUID().toString();
 		try {
-
+			
 			final File startAtsPage = new File(System.getProperty("user.home") + File.separator + "ats_start_page.html");
+			startAtsPage.deleteOnExit();
 
 			Files.write(
 					startAtsPage.toPath(),
@@ -733,10 +734,11 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public void close(boolean keepRunning) {
+	public synchronized void close(boolean keepRunning) {
 		if(driver != null){
 			Arrays.asList(getWindowsHandle(0, 0)).stream().sorted(Collections.reverseOrder()).forEach(s -> closeWindowHandler(s));
 			driver.quit();
+			driver = null;
 			channel.sleep(1000);
 		}
 		getDriverProcess().close(keepRunning);

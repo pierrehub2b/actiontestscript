@@ -33,7 +33,6 @@ public class ChromiumBasedDriverEngine extends WebDriverEngine {
 	protected ChromeOptions initOptions(ApplicationProperties props, String browserName) {
 
 		final ChromeOptions options = new ChromeOptions();
-		options.addArguments("--no-sandbox");
 		options.addArguments("--no-default-browser-check");
 		options.addArguments("--test-type");
 		options.addArguments("--allow-file-access-from-files");
