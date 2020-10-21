@@ -79,8 +79,8 @@ public class CampaignReportGenerator {
 			}
 		}
 		
-		File projectFolder = new File(outputFolder).getParentFile().getParentFile();
-		/*File currentFolder = new File(outputFolder);
+		File projectFolder = null;
+		File currentFolder = new File(outputFolder);
 		
 		while(projectFolder == null) {
 			currentFolder = currentFolder.getParentFile();
@@ -90,7 +90,7 @@ public class CampaignReportGenerator {
 					projectFolder = currentFolder;
 				}
 			}
-		}*/
+		}
 		
 		String target = generateReportXml(targetFiles, outputFolder, projectFolder, details);
 		
