@@ -29,8 +29,6 @@ public abstract class RootElement {
 	abstract public void tap(ActionStatus status, FoundElement element, MouseDirection position);
 	abstract public void tap(FoundElement element, int count);
 	abstract public void press(FoundElement element, ArrayList<String> paths, int duration);
-	// abstract public void pinch(FoundElement element, int percent, int duration);
-	// abstract public void rotate(FoundElement element, int percent, int duration);
 	abstract public void swipe(MobileTestElement testElement, int hDirection, int vDirection);
 	abstract public Object scripting(String script, FoundElement element);
 	abstract public Object scripting(String script);

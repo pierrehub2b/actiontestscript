@@ -50,7 +50,9 @@ public class IosRootElement extends RootElement {
 	
 	@Override
 	public void tap(FoundElement element, int count) {
-		driver.executeRequest(MobileDriverEngine.ELEMENT, element.getId(), MobileDriverEngine.TAP, String.valueOf(count));
+		if (element.getParent() != null) {
+			driver.executeRequest(MobileDriverEngine.ELEMENT, element.getId(), MobileDriverEngine.TAP, String.valueOf(count));
+		}
 	}
 	
 	@Override
@@ -172,7 +174,7 @@ public class IosRootElement extends RootElement {
 		}
 
 		final AtsMobileElement[] firstChilds = domStructure.getChildren();
-		if (firstChilds != null) {
+		if (firstChilds != null && firstChilds.length > 0) {
 			final AtsMobileElement[] frontElements = firstChilds[0].getChildren();
 			if (frontElements != null && frontElements.length > 1) {
 
