@@ -43,17 +43,17 @@ import java.util.stream.Collectors;
 public class Passwords implements Serializable {
 
 	private static final long serialVersionUID = -2364261599407176796L;
-	
+
 	private static final String FILE_NAME = "passwords.crypto";
 
 	private transient static BufferedBlockCipher cipher = new PaddedBufferedBlockCipher(new CBCBlockCipher(new AESEngine()));
-	
+
 	private transient File file;
 
 	private int keyLen = 16;
 	private byte[] masterKey;
 	private HashMap<String, byte[]> data = new HashMap<String, byte[]>();
-	
+
 	public Passwords(Path assetsPath) {
 
 		file = assetsPath.resolve("secret").resolve(FILE_NAME).toFile();
@@ -63,12 +63,16 @@ public class Passwords implements Serializable {
 			save();
 		}
 	}
-	
+
 	public Passwords(File assetsFolder) {
-		file = assetsFolder.toPath().resolve("secret").resolve(FILE_NAME).toFile();
-		if(file.exists()) {
-			load();
-		}else {
+		try {
+			file = assetsFolder.toPath().resolve("secret").resolve(FILE_NAME).toFile();
+			if(file.exists()) {
+				load();
+			}else {
+				file = null;
+			}
+		}catch(Exception e) {
 			file = null;
 		}
 	}
@@ -85,9 +89,9 @@ public class Passwords implements Serializable {
 		}
 		return "";
 	}
-	
+
 	public PasswordData[] getDataList() {
-		
+
 		final List<String> keySet = data.keySet().stream().collect(Collectors.toList());
 		Collections.sort(keySet, (o1, o2) -> o1.compareTo(o2));
 
@@ -99,7 +103,7 @@ public class Passwords implements Serializable {
 		}
 		return result;
 	}
-	
+
 	public void clear() {
 		data.clear();
 	}
@@ -110,7 +114,7 @@ public class Passwords implements Serializable {
 
 	private void load() {
 		try {
-			
+
 			byte[] fileContent = Base64.getDecoder().decode(Files.readAllBytes(file.toPath()));
 
 			ByteArrayInputStream bis = new ByteArrayInputStream(fileContent);
@@ -128,22 +132,22 @@ public class Passwords implements Serializable {
 			this.masterKey = pass.masterKey;
 
 		} catch (IOException | ClassNotFoundException e) {}
-		
+
 		data.replaceAll((k, v) -> decrypt(masterKey, v));
 	}
-	
+
 	private void save() {
 		try {
-			
+
 			file.getParentFile().mkdirs();			
-			
+
 			final byte[] randomKey = new byte[keyLen];
 			masterKey = new byte[keyLen];
 
 			final SecureRandom random = SecureRandom.getInstanceStrong();
 			random.nextBytes(randomKey);
 			random.nextBytes(masterKey);
-			
+
 			data.replaceAll((k, v) -> encrypt(masterKey, v));
 
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -163,7 +167,7 @@ public class Passwords implements Serializable {
 			outfile.close();
 
 		} catch (NoSuchAlgorithmException | IOException e) {
-			
+
 			System.out.println(e.getMessage());
 		} 
 	}
