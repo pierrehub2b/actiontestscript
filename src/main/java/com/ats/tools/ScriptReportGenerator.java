@@ -17,6 +17,7 @@ specific language governing permissions and limitations
 under the License.
  */
 
+package com.ats.tools;
 
 import javax.imageio.ImageIO;
 import javax.xml.transform.Transformer;
@@ -24,8 +25,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-
-import com.ats.tools.ResourceContent;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
