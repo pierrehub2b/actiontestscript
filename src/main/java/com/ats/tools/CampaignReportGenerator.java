@@ -30,11 +30,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -42,6 +43,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import org.xml.sax.SAXException;
 
 public class CampaignReportGenerator {
@@ -64,13 +66,13 @@ public class CampaignReportGenerator {
 			if(string.startsWith("--") && i+1 < args.length) {
 				switch (string.substring(2)) {
 					case "outputFolder":
-						outputFolder = args[i+1];
+						outputFolder = args[i+1].replaceAll("\"", "");
 						break;
 					case "targetFiles":
 						targetFiles = args[i+1];
 						break;
 					case "fop":
-						fop = args[i+1];
+						fop = args[i+1].replaceAll("\"", "");
 						break;
 					case "details":
 						details = args[i+1];
@@ -92,7 +94,8 @@ public class CampaignReportGenerator {
 			}
 		}
 		
-		String target = generateReportXml(targetFiles, outputFolder, projectFolder, details);
+		
+		String target = generateReportXml(targetFiles, outputFolder, projectFolder, details, fop);
 		
 		if(target == null) return;
 		File targetFile = new File(target);
@@ -214,7 +217,7 @@ public class CampaignReportGenerator {
 		return Base64.getEncoder().encodeToString(b);
 	}	
 	
-	public static String generateReportXml(String xmlPath, String outputFolder, File projectFolder, String details) throws IOException, ParserConfigurationException, SAXException{
+	public static String generateReportXml(String xmlPath, String outputFolder, File projectFolder, String details, String fop) throws IOException, ParserConfigurationException, SAXException {
 		
 		final File f = new File(outputFolder + File.separator + ATS_REPORT + ".xml");
 		
@@ -255,6 +258,10 @@ public class CampaignReportGenerator {
         			builder.append("</tests>");
         			
         			fw.write(builder.toString());
+        			
+        			
+        			ScriptGeneratorThread t = new ScriptGeneratorThread(currentFile.getAbsolutePath(), fop);
+        			t.start();
         		}
     		}
         	fw.write("</suite>");

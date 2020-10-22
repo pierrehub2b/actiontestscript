@@ -17,7 +17,6 @@ specific language governing permissions and limitations
 under the License.
  */
 
-package com.ats.tools;
 
 import javax.imageio.ImageIO;
 import javax.xml.transform.Transformer;
@@ -25,6 +24,8 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
+
+import com.ats.tools.ResourceContent;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -47,10 +48,10 @@ public class ScriptReportGenerator {
 			if(string.startsWith("--") && i+1 < args.length) {
 				switch (string.substring(2)) {
 					case "target":
-						target = args[i+1];
+						target = args[i+1].replaceAll("\"", "");;
 						break;
 					case "fop":
-						fop = args[i+1];
+						fop = args[i+1].replaceAll("\"", "");;
 						break;
 				}
 			}
