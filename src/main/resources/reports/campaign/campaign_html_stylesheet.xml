@@ -412,21 +412,27 @@
 				<xsl:choose>
 					<xsl:when test="script/summary/error != ''">
 						<TR>
-							<TD colspan="8">
-								<font color="#b32e42">
-									<b>
-										Error in script
-									</b>
+							<TD colspan="1" width="100">
+								<font color="#b32e42" size="2">
+									<i><b>
+										Execution error 
+									</b></i>
 								</font>
-								<i>
-									(
+								</TD>
+								<TD colspan="7">
+								<b>
 									<xsl:value-of
-										select="script/summary/error/@script"
-										disable-output-escaping="yes" />
-									)
-								</i>
+										select="substring-before(script/summary/error/@script, ':')"
+										disable-output-escaping="yes"/>
+									</b><i> (line 
+									<xsl:value-of
+										select="script/summary/error/@line"
+										disable-output-escaping="yes"/>
+									) : </i>
+								<i>
 								<xsl:value-of select="script/summary/error"
 									disable-output-escaping="yes" />
+									</i>
 							</TD>
 						</TR>
 					</xsl:when>

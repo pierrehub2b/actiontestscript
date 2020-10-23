@@ -275,7 +275,6 @@ public class XmlReport {
 			} catch (FileNotFoundException e) {}
 
 			xmlFolder.mkdirs();
-			final Path xmlFolerPath = xmlFolder.toPath();
 			
 			try {
 
@@ -315,7 +314,7 @@ public class XmlReport {
 					script.appendChild(prerequisite);
 
 					Element started = document.createElement("started");
-					started.setTextContent(new Date().getTime().toString());
+					started.setTextContent(String.valueOf(new Date().getTime()));
 					script.appendChild(started);
 
 					Element groups = document.createElement("groups");
