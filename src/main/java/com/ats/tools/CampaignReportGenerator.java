@@ -251,17 +251,19 @@ public class CampaignReportGenerator {
         			
         		} else {
         			currentFile = new File(outputFolder + "/" + currentSuite + "/" + scripts[i] + "/actions.xml");
-        			final String content = new String(Files.readAllBytes(currentFile.toPath()), StandardCharsets.UTF_8);
-        			final StringBuilder builder = new StringBuilder("<tests>");
-        			
-        			builder.append(content.replaceAll(patternXML, ""));
-        			builder.append("</tests>");
-        			
-        			fw.write(builder.toString());
-        			
-        			
-        			ScriptGeneratorThread t = new ScriptGeneratorThread(currentFile.getAbsolutePath(), fop);
-        			t.start();
+        			if(currentFile.exists()) {
+        				final String content = new String(Files.readAllBytes(currentFile.toPath()), StandardCharsets.UTF_8);
+            			final StringBuilder builder = new StringBuilder("<tests>");
+            			
+            			builder.append(content.replaceAll(patternXML, ""));
+            			builder.append("</tests>");
+            			
+            			fw.write(builder.toString());
+            			
+            			
+            			ScriptGeneratorThread t = new ScriptGeneratorThread(currentFile.getAbsolutePath(), fop);
+            			t.start();
+        			}
         		}
     		}
         	fw.write("</suite>");
