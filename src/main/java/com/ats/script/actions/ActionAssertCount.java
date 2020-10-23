@@ -35,7 +35,7 @@ public class ActionAssertCount extends ActionExecuteElement {
 
 	public static final String SCRIPT_LABEL = "check-count";
 
-	private final Pattern COUNT_PATTERN = Pattern.compile("(\\d+) ?(\\-?\\+?=?)");
+	private final Pattern COUNT_PATTERN = Pattern.compile("(\\d+) ?(\\-?\\+?=?!?)");
 
 	private int value = 1;
 	private String operator = Operators.EQUAL;
@@ -44,7 +44,7 @@ public class ActionAssertCount extends ActionExecuteElement {
 
 	public ActionAssertCount(ScriptLoader script, boolean stop, ArrayList<String> options, String data, ArrayList<String> objectArray) {
 		super(script, stop, options, objectArray);
-
+		
 		final Matcher m = COUNT_PATTERN.matcher(data);
 		if(m.matches()) {
 			
