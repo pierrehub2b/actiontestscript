@@ -300,6 +300,7 @@
 	<xsl:template match="ats">
 		<xsl:param name="suiteName"/>
 		<xsl:variable name="testName" select="concat($suiteName, '/', script[1]/@testName)" />
+		<xsl:variable name="actionsCount" select="script/summary/@actions" />
 		<div style="color: #565656; text-shadow: 2px 2px 8px #b9b9b9">
 			<FONT SIZE="4">
 				<B>
@@ -338,7 +339,14 @@
 			<TBODY>
 				<TR>
 					<TD style="text-align:center">
-						<xsl:value-of select="script/summary/@actions" />
+						<xsl:choose>
+							<xsl:when test="$actionsCount != ''">
+								<xsl:value-of select="$actionsCount" />
+							</xsl:when>
+							<xsl:otherwise>
+								0
+							</xsl:otherwise>
+						</xsl:choose>
 					</TD>
 					<TD>
 						<xsl:call-template name="millisecs-to-ISO">

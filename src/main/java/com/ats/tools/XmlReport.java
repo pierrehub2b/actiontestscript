@@ -21,6 +21,7 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class XmlReport {
 
@@ -262,6 +263,98 @@ public class XmlReport {
 			}
 
 			logger.sendInfo("XML report generated -> ", xmlFolder.getAbsolutePath());
+		} else {
+			///TODO Create empty xml
+			final File xmlFolder = output.resolve(qualifiedName + "_xml").toFile();
+			logger.sendInfo("Create empty XML report because no ATSV file founded", xmlFolder.getAbsolutePath());
+			
+			final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			
+			try {
+				Utils.deleteRecursive(xmlFolder);
+			} catch (FileNotFoundException e) {}
+
+			xmlFolder.mkdirs();
+			final Path xmlFolerPath = xmlFolder.toPath();
+			
+			try {
+
+				final DocumentBuilder builder = factory.newDocumentBuilder();
+				final Document document= builder.newDocument();
+
+				try {
+
+					final Element atsRoot = document.createElement("ats");
+					document.appendChild(atsRoot);
+
+					//------------------------------------------------------------------------------------------------------
+					// script header
+					//------------------------------------------------------------------------------------------------------
+					final Element script = document.createElement("script");
+
+					atsRoot.appendChild(script);
+
+					script.setAttribute("testId", "");					
+					script.setAttribute("testName", qualifiedName);
+
+					script.setAttribute("cpuSpeed", "");
+					script.setAttribute("cpuCount", "");
+					script.setAttribute("totalMemory", "");		
+					script.setAttribute("osInfo", "");	
+
+					Element description = document.createElement("description");
+					description.setTextContent("This script is empty");
+					script.appendChild(description);
+
+					Element author = document.createElement("author");
+					author.setTextContent("");
+					script.appendChild(author);
+
+					Element prerequisite = document.createElement("prerequisite");
+					prerequisite.setTextContent("");
+					script.appendChild(prerequisite);
+
+					Element started = document.createElement("started");
+					started.setTextContent(new Date().getTime().toString());
+					script.appendChild(started);
+
+					Element groups = document.createElement("groups");
+					groups.setTextContent("");
+					script.appendChild(groups);
+
+					Element quality = document.createElement("quality");
+					quality.setTextContent("");
+					script.appendChild(quality);
+
+					//------------------------------------------------------------------------------------------------------
+					//------------------------------------------------------------------------------------------------------
+
+					Element actions = document.createElement("actions");
+					atsRoot.appendChild(actions);
+				} catch (Exception e2) {
+					logger.sendError("XML report exception ->", e2.getMessage());
+				}finally {
+				}
+
+				try {
+
+					final Transformer transformer = TransformerFactory.newInstance().newTransformer();
+					transformer.transform(new DOMSource(document), new StreamResult(new FileOutputStream(xmlFolder.toPath().resolve(REPORT_FILE).toFile())));
+
+				} catch (TransformerConfigurationException e2) {
+					logger.sendError("XML report config error ->", e2.getMessage());
+				} catch (TransformerException e3) {
+					logger.sendError("XML report transform error ->", e3.getMessage());
+				} catch (FileNotFoundException e4) {
+					logger.sendError("XML report write file error ->", e4.getMessage());
+				}
+
+			} catch (ParserConfigurationException e4) {
+				logger.sendError("XML report parser error ->", e4.getMessage());
+			}
+
+			logger.sendInfo("XML report generated -> ", xmlFolder.getAbsolutePath());
+			
 		}
 	}
 }
