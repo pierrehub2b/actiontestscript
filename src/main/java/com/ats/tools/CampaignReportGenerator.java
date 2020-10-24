@@ -19,22 +19,26 @@ under the License.
 
 package com.ats.tools;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.Map;
+import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -42,6 +46,10 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 public class CampaignReportGenerator {
@@ -52,22 +60,25 @@ public class CampaignReportGenerator {
 	public static final String ATS_REPORT = "ats-report";
 
 	public static void main(String[] args) throws ParserConfigurationException, SAXException, TransformerException, IOException, InterruptedException {
-		String targetFiles = null;
-		String outputFolder = null;
+
+		String output = null;
 		String details = null;
 		String fop = null;
 		String html = null;
 		String pdf = null;
+		String suitesFile = null;
 
 		for (int i = 0; i < args.length; i++) {
 			String string = args[i];
 			if(string.startsWith("--") && i+1 < args.length) {
 				switch (string.substring(2)) {
 				case "outputFolder":
-					outputFolder = args[i+1].replaceAll("\"", "");
+				case "output":
+				case "reportFolder":
+					output = args[i+1].replaceAll("\"", "");
 					break;
-				case "targetFiles":
-					targetFiles = args[i+1];
+				case "suites":
+					suitesFile = args[i+1].replaceAll("\"", "");
 					break;
 				case "fop":
 					fop = args[i+1].replaceAll("\"", "");
@@ -79,125 +90,221 @@ public class CampaignReportGenerator {
 			}
 		}
 
-		File projectFolder = null;
-		File currentFolder = new File(outputFolder);
-
-		while(projectFolder == null) {
-			currentFolder = currentFolder.getParentFile();
-			File[] tmpFiles = currentFolder.listFiles();
-			for (File f : tmpFiles) {
-				if(f.getName().equalsIgnoreCase("src")) {
-					projectFolder = currentFolder;
-				}
-			}
+		if(output == null) {
+			System.out.println("Error, output folder not defined !");
+			return;
 		}
 
-
-		String target = generateReportXml(targetFiles, outputFolder, projectFolder, details, fop);
-
-		if(target == null) return;
-		File targetFile = new File(target);
-
-		File xsltFolder = new File(projectFolder.getAbsolutePath() + "/src/assets/resources/xslt");
-
-		if (fop == null || !(new File(fop).exists())) {
-			Map<String, String> map = System.getenv();
-			for (Map.Entry<String, String> entry : map.entrySet()) {
-				Pattern pattern = Pattern.compile("fop-[\\d].[\\d]");
-				Matcher matcher = pattern.matcher(entry.getValue().toLowerCase());
-				if (entry.getKey().toLowerCase().contains("fop") && matcher.find()) {
-					fop = entry.getValue();
-				}
-			}
+		final Path outputFolderPath = Paths.get(output).toAbsolutePath();
+		if(!outputFolderPath.toFile().exists()) {
+			System.out.println("Error, output folder path not found : " + output);
+			return;
 		}
 
-		if(fop != null) {
-			String fopLibsString = "";
-			File[] fopLibs = new File(fop + "/lib").listFiles();
-			for (File libs : fopLibs) {
-				if(libs.getName().contains(".jar")) {
-					fopLibsString += ";" + libs.getAbsolutePath();
-				}
-			}
-
-			fop = fop + "\\build\\fop.jar;" + fopLibsString;
+		if(suitesFile == null) {
+			System.out.println("No suites file defined !");
+			return;
 		}
 
-		for (File xslt : xsltFolder.listFiles()) {
-			if(xslt.getName().equalsIgnoreCase("campaign")) {
-				for (File stylesheets : xslt.listFiles()) {
-					if(stylesheets.getName().contains("_pdf_")) {
-						pdf = stylesheets.getAbsolutePath();
+		final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+
+		final Path suiteFilesPath = Paths.get(suitesFile);
+		if(suiteFilesPath.toFile().exists()) {
+
+			final int detailsValue = Utils.string2Int(details, 1);
+
+			final File xmlReport = outputFolderPath.resolve(ATS_REPORT + ".xml").toFile();
+			final FileWriter fw = new FileWriter(xmlReport);
+			fw.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><report actions=\"" +  (detailsValue > 1) + "\" details=\"" + (detailsValue > 2) + "\">");
+
+			fw.write("<pics>");  
+			final String[] defaultImages = {"logo.png","true.png","false.png","warning.png"};
+			for (String img : defaultImages) {
+				fw.write("<pic name='"+ img.replace(".png",  "")  +"'>data:image/png;base64," +  getBase64DefaultImages(ResourceContent.class.getResourceAsStream("/reports/images/" + img).readAllBytes())  + "</pic>");
+			}
+			fw.write("</pics>");
+
+			final Document doc = builder.parse(
+					new InputSource(
+							new StringReader(
+									new String(
+											Files.readAllBytes(
+													suiteFilesPath
+													), StandardCharsets.UTF_8))));
+
+			final NodeList suiteList = doc.getElementsByTagName("suite-file");
+
+			for (int i=0; i<suiteList.getLength(); i++) {
+
+				final String actionsFilePath = ((Element)suiteList.item(i)).getAttribute("path");
+				final Path sp = Paths.get(actionsFilePath);
+				final File spFile = sp.toFile();
+
+				if(spFile.exists()) {
+
+					final String suiteName = spFile.getName().replace(".xml", "");
+					fw.write("<suite name=\"" + suiteName + "\">");
+
+					final Document suiteDoc = builder.parse(
+							new InputSource(
+									new StringReader(
+											new String(Files.readAllBytes(sp), StandardCharsets.UTF_8))));
+
+					final NodeList classesList = suiteDoc.getElementsByTagName("class");
+					final NodeList parametersList = suiteDoc.getElementsByTagName("parameter");
+
+					for (int j=0; j<parametersList.getLength(); j++) {
+						final String parameterName = ((Element)parametersList.item(j)).getAttribute("name");
+						final String parameterValue = ((Element)parametersList.item(j)).getAttribute("value");
+						//TODO
 					}
-					if(stylesheets.getName().contains("_html_")) {
-						html = stylesheets.getAbsolutePath();
+
+					fw.write("<tests>");
+
+					for (int j=0; j<classesList.getLength(); j++) {
+						final String className = ((Element)classesList.item(j)).getAttribute("name");
+
+						final Path xmlDataPath = outputFolderPath.resolve(suiteName).resolve(className + "_xml").resolve("actions.xml");
+						final File xmlDataFile = xmlDataPath.toFile();
+
+						if(xmlDataFile.exists()) {
+							fw.write(new String(Files.readAllBytes(xmlDataPath), StandardCharsets.UTF_8).replaceAll(patternXML, ""));
+						}
+					}
+
+					fw.write("</tests></suite>");
+				}
+			}
+
+			fw.write("</report>");
+			fw.close();
+
+			if (fop == null || !(new File(fop).exists())) {
+				Map<String, String> map = System.getenv();
+				for (Map.Entry<String, String> entry : map.entrySet()) {
+					Pattern pattern = Pattern.compile("fop-[\\d].[\\d]");
+					Matcher matcher = pattern.matcher(entry.getValue().toLowerCase());
+					if (entry.getKey().toLowerCase().contains("fop") && matcher.find()) {
+						fop = entry.getValue();
 					}
 				}
 			}
 
-			if(xslt.getName().equalsIgnoreCase("images")) {
-				if(xslt.listFiles().length > 0) {
-					for (File images : xslt.listFiles()) {
-						InputStream initialStream = new FileInputStream(images);
-						byte[] buffer = new byte[initialStream.available()];
-						initialStream.read(buffer);
-
-						File styleFile = new File(targetFile.getParentFile().getAbsolutePath() + File.separator + images.getName());
-						OutputStream outStream = new FileOutputStream(styleFile);
-						outStream.write(buffer);
-						outStream.close();
-						initialStream.close();
+			if(fop != null) {
+				final Path fopPath = Paths.get(fop);
+				final File fopFile = fopPath.toFile();
+				
+				if(fopFile.exists()) {
+					final StringJoiner fopLibsJoin = new StringJoiner(File.pathSeparator);
+					fopLibsJoin.add(fopPath.resolve("build").resolve("fop.jar").toFile().getAbsolutePath());
+					
+					final File[] fopLibs = fopPath.resolve("lib").toFile().listFiles();
+					
+					for (File libs : fopLibs) {
+						if(libs.getName().contains(".jar")) {
+							fopLibsJoin.add(libs.getAbsolutePath());
+						}
 					}
-				} else {
-					//copyDefaultImagesToFolder(targetFile);
+					
+					fop = fopLibsJoin.toString();
 				}
 			}
-		}
 
-		if (pdf == null || (!new File(pdf).exists())) {
+			final File xsltFolder = Paths.get("").resolve("src/assets/resources/xslt").toFile();
+			if(xsltFolder != null && xsltFolder.exists()) {
+				for (File xslt : xsltFolder.listFiles()) {
+					if(xslt.getName().equalsIgnoreCase("campaign")) {
+						for (File stylesheets : xslt.listFiles()) {
+							if(stylesheets.getName().contains("_pdf_")) {
+								pdf = stylesheets.getAbsolutePath();
+							}
+							if(stylesheets.getName().contains("_html_")) {
+								html = stylesheets.getAbsolutePath();
+							}
+						}
+					}
+
+					if(xslt.getName().equalsIgnoreCase("images")) {
+						if(xslt.listFiles().length > 0) {
+							for (File images : xslt.listFiles()) {
+								InputStream initialStream = new FileInputStream(images);
+								byte[] buffer = new byte[initialStream.available()];
+								initialStream.read(buffer);
+
+								OutputStream outStream = new FileOutputStream(outputFolderPath.resolve(images.getName()).toFile());
+								outStream.write(buffer);
+								outStream.close();
+								initialStream.close();
+							}
+						} else {
+							//copyDefaultImagesToFolder(targetFile);
+						}
+					}
+				}
+			}
+
+			if (pdf == null || (!new File(pdf).exists())) {
+				try {
+					pdf = outputFolderPath.resolve("campaign_pdf_stylesheet.xml").toFile().getAbsolutePath();
+					copyResource(ResourceContent.class.getResourceAsStream("/reports/campaign/campaign_pdf_stylesheet.xml"),pdf);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+
+			if (html == null || (!new File(html).exists())) {
+				try {
+					html = outputFolderPath.resolve("campaign_html_stylesheet.xml").toFile().getAbsolutePath();
+					copyResource(ResourceContent.class.getResourceAsStream("/reports/campaign/campaign_html_stylesheet.xml"),html);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+
+			if (fop == null || pdf == null || html == null) { return; }		
+
+			//HTML reports
+
+			final MinifyWriter filteredWriter = new MinifyWriter(
+					new FileWriter(outputFolderPath.resolve(ATS_REPORT + ".html").toFile()));
+
+			final Transformer htmlTransformer = TransformerFactory.newInstance().newTransformer(new StreamSource(html));
+			htmlTransformer.transform(new StreamSource(xmlReport), new StreamResult(filteredWriter));
+
+			filteredWriter.close();
+
 			try {
-				pdf = targetFile.getParent() +"/campaign_pdf_stylesheet.xml";
-				copyResource(ResourceContent.class.getResourceAsStream("/reports/campaign/campaign_pdf_stylesheet.xml"),pdf);
-			} catch (IOException e) {
-				e.printStackTrace();
+				Runtime.getRuntime().exec("java -cp \"" + fop + "\" org.apache.fop.cli.Main -xml \"" + xmlReport.getAbsolutePath() + "\" -xsl " + pdf + " \"" + outputFolderPath.resolve(ATS_REPORT + ".pdf").toFile().getAbsolutePath() +"\"");
+			} catch (Throwable t)
+			{
+				t.printStackTrace();
 			}
-		}
 
-		if (html == null || (!new File(html).exists())) {
-			try {
-				html = targetFile.getParent() +"/campaign_html_stylesheet.xml";
-				copyResource(ResourceContent.class.getResourceAsStream("/reports/campaign/campaign_html_stylesheet.xml"),html);
-			} catch (IOException e) {
-				e.printStackTrace();
+		}else {
+			System.out.println("Suite files not found : " + suitesFile);
+		}
+	}
+
+	public static void appendSuiteData(DocumentBuilder builder, StringJoiner suitesJoiner, File suiteFile) throws SAXException, IOException {
+
+		if(suiteFile.exists()) {
+			final StringJoiner joiner = new StringJoiner(",");
+			joiner.add(suiteFile.getName().replace(".xml", ""));
+			final Document doc = builder.parse(
+					new InputSource(
+							new StringReader(
+									new String(
+											Files.readAllBytes(
+													suiteFile.toPath()
+													), StandardCharsets.UTF_8))));
+
+			final NodeList classList = doc.getElementsByTagName("class");
+
+			for (int i=0; i<classList.getLength(); i++) {
+				joiner.add(((Element)classList.item(i)).getAttribute("name"));
 			}
-		}
 
-		if (fop == null || target == null || pdf == null || html == null) { return; }		
-
-		//HTML reports
-
-		final MinifyWriter filteredWriter = new MinifyWriter(
-				new FileWriter(targetFile.getParentFile().getAbsolutePath() + File.separator + ATS_REPORT + ".html"));
-
-		final Transformer transformer = TransformerFactory.newInstance().newTransformer(new StreamSource(html));
-		transformer.transform(new StreamSource(target), new StreamResult(filteredWriter));
-
-		filteredWriter.close();
-
-		try {
-			ProcessBuilder ps= new ProcessBuilder("java","-cp",fop,"org.apache.fop.cli.Main","-xml",target,"-xsl",pdf,"-pdf",targetFile.getParentFile().getAbsolutePath() + File.separator + ATS_REPORT + ".pdf");
-			ps.redirectErrorStream(true);
-
-			Process pr = ps.start();  
-
-			BufferedReader in = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-			pr.waitFor();
-
-			in.close();
-			System.exit(0);
-		} catch (Throwable t)
-		{
-			t.printStackTrace();
+			suitesJoiner.add(joiner.toString());
 		}
 	}
 
@@ -215,23 +322,14 @@ public class CampaignReportGenerator {
 		return Base64.getEncoder().encodeToString(b);
 	}	
 
-	public static String generateReportXml(String xmlPath, String outputFolder, File projectFolder, String details, String fop) throws IOException, ParserConfigurationException, SAXException {
+	/*public static String generateReportXml(String xmlPath, String outputFolder, File projectFolder, String details, String fop) throws IOException, ParserConfigurationException, SAXException {
 
-		final File f = new File(outputFolder + File.separator + ATS_REPORT + ".xml");
+
 
 		int det = Integer.parseInt(details);
 		f.setWritable(true);
 		f.setReadable(true);
 
-		final FileWriter fw = new FileWriter(f);
-		fw.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><report actions=\"" +  (det > 1) + "\" details=\"" + (det > 2) + "\">");
-
-		fw.write("<pics>");  
-		final String[] defaultImages = {"logo.png","true.png","false.png","warning.png"};
-		for (String img : defaultImages) {
-			fw.write("<pic name='"+ img.replace(".png",  "")  +"'>data:image/png;base64," +  getBase64DefaultImages(ResourceContent.class.getResourceAsStream("/reports/images/" + img).readAllBytes())  + "</pic>");
-		}
-		fw.write("</pics>");
 
 		final String[] paths = xmlPath.split(";");
 		String currentSuite = "";
@@ -270,5 +368,5 @@ public class CampaignReportGenerator {
 		fw.close();
 
 		return f.getAbsolutePath();
-	}
+	}*/
 }

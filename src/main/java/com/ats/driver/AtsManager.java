@@ -171,6 +171,17 @@ public class AtsManager {
         }
     }
 
+	public static String getAtsHomeFolder() {
+		String atsHome = System.getProperty("ats.home");
+		if(atsHome == null || atsHome.length() == 0) {
+			atsHome = System.getenv("ATS_HOME");
+			if(atsHome == null || atsHome.length() == 0) {
+				atsHome = System.getProperty("user.home") + File.separator + ATS_FOLDER;
+			}
+		}
+		return atsHome;
+	}
+	
 	//-----------------------------------------------------------------------------------------------
 	// Instance management
 	//-----------------------------------------------------------------------------------------------
@@ -179,13 +190,7 @@ public class AtsManager {
 
 	public void init() {
 
-		String atsHome = System.getProperty("ats.home");
-		if(atsHome == null || atsHome.length() == 0) {
-			atsHome = System.getenv("ATS_HOME");
-			if(atsHome == null || atsHome.length() == 0) {
-				atsHome = System.getProperty("user.home") + File.separator + ATS_FOLDER;
-			}
-		}
+		final String atsHome = getAtsHomeFolder();
 
 		final Path atsFolderPath = Paths.get(atsHome);
 		if(atsFolderPath.toFile().exists()) {
