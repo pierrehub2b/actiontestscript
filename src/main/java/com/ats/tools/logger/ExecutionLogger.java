@@ -43,6 +43,10 @@ public class ExecutionLogger {
 	public ExecutionLogger() {
 		levelLogger = new AtsLogger();
 	}
+	
+	public ExecutionLogger(PrintStream sysout) {
+		this(sysout, INFO_LEVEL);
+	}
 
 	public ExecutionLogger(PrintStream sysout, String verbose) {
 

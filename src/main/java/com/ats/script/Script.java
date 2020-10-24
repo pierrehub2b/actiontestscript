@@ -79,7 +79,7 @@ public class Script {
 	protected ChannelManager channelManager;
 
 	private Map<String, String> testExecutionVariables;
-	private ExecutionLogger logger = new ExecutionLogger();
+	protected ExecutionLogger logger = new ExecutionLogger();
 	protected Passwords passwords;
 
 	public Script() {}

@@ -22,12 +22,18 @@ package com.ats.executor;
 import static org.testng.Assert.fail;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
+import java.util.stream.Stream;
 
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.interactions.Actions;
@@ -37,6 +43,7 @@ import org.testng.SkipException;
 import org.testng.TestRunner;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.AfterSuite;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeSuite;
@@ -46,7 +53,6 @@ import com.ats.crypto.Passwords;
 import com.ats.element.SearchedElement;
 import com.ats.executor.channels.Channel;
 import com.ats.executor.channels.ChannelManager;
-import com.ats.generator.ATS;
 import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.MouseDirectionData;
 import com.ats.generator.objects.mouse.Mouse;
@@ -75,15 +81,19 @@ import com.ats.script.actions.Action;
 import com.ats.script.actions.ActionCallscript;
 import com.ats.script.actions.ActionComment;
 import com.ats.script.actions.ActionExecute;
+import com.ats.tools.CampaignReportGenerator;
+import com.ats.tools.SuiteReportInfo;
 import com.ats.tools.Utils;
 import com.ats.tools.logger.ExecutionLogger;
 import com.ats.tools.logger.levels.AtsFailError;
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonReader;
 
 import okhttp3.OkHttpClient;
 
-@Listeners({TestListener.class})
+@Listeners({ExecutionListener.class, TestListener.class})
 public class ActionTestScript extends Script implements ITest{
 
 	public static final String MAIN_TEST_FUNCTION = "testMain";
@@ -94,7 +104,7 @@ public class ActionTestScript extends Script implements ITest{
 
 	private String testName;
 	private Project projectData;
-	
+
 	protected ScriptHeader getHeader() {return new ScriptHeader();}
 
 	private ScriptStatus status = new ScriptStatus();
@@ -103,49 +113,53 @@ public class ActionTestScript extends Script implements ITest{
 		super(null);
 		init(new Passwords(getAssetsFile("")));
 	}
-	
+
 	public ActionTestScript(File assetsFolder) {
 		super(null);
 		init(new Passwords(assetsFolder.toPath()));
 	}
-	
+
 	public ActionTestScript(ExecutionLogger logger) {
 		super(logger);
 		init(null);
 	}
-	
+
 	public ActionTestScript(ActionTestScript topScript) {
 		setTopScript(topScript);
 	}
-	
+
 	public void setTopScript(ActionTestScript topScript, String scriptName) {
 		setTopScript(topScript);
 		this.testName = scriptName;
 		topScript.addToScriptCallTree(this, scriptName);
 	}
-	
+
 	public void setTopScript(ActionTestScript topScript) {
 		init(topScript, topScript.getChannelManager(), topScript.getPasswords());
 	}
-	
+
 	private void init(Passwords passwords) {
 		init(this, new ChannelManager(this), passwords);
 	}
-	
+
 	private void init(ActionTestScript topScript, ChannelManager channelManager, Passwords passwords) {
 		this.topScript = topScript;
 		this.channelManager = channelManager;
 		this.passwords = passwords;
+
+		java.util.logging.Logger.getLogger("org.openqa.selenium").setLevel(Level.OFF);
+		java.util.logging.Logger.getLogger(Actions.class.getName()).setLevel(Level.OFF);
+		java.util.logging.Logger.getLogger(OkHttpClient.class.getName()).setLevel(Level.FINE);
 	}
 
 	public String[] getReturnValues() {
 		return returnValues;
 	}
-		
+
 	public Passwords getPasswords() {
 		return passwords;
 	}
-	
+
 	public void updateTestName(String name) {
 		this.testName = name;
 	}
@@ -157,7 +171,7 @@ public class ActionTestScript extends Script implements ITest{
 	public void addErrorStack(String value) {
 		status.addErrorStack(value);
 	}
-	
+
 	public ScriptStatus getStatus() {
 		return status;
 	}
@@ -167,19 +181,58 @@ public class ActionTestScript extends Script implements ITest{
 	//----------------------------------------------------------------------------------------------------------
 
 	@BeforeSuite(alwaysRun=true)
-	public void beforeSuite() {
-		System.out.println("-------------------------[ ATS " + ATS.VERSION + " execution start ]-------------------------\n");
+	public void beforeSuite(ITestContext ctx) {
+
+		setLogger(new ExecutionLogger(System.out));
+		sendScriptInfo("Start suite -> " + ctx.getSuite().getName());
+		
+		final SuiteReportInfo currentSuite = new SuiteReportInfo((TestRunner) ctx);
+		
+		final Path outputPath = Paths.get(ctx.getOutputDirectory()).getParent();
+		outputPath.toFile().mkdirs();
+		
+		final File jsonSuiteFile = outputPath.resolve(CampaignReportGenerator.ATS_JSON_SUITES).toFile();
+		
+		final Gson gson = new Gson();
+		SuiteReportInfo[] suitesList = null;
+
+		try{
+			if(jsonSuiteFile.exists()) {
+				final JsonReader reader = new JsonReader(new FileReader(jsonSuiteFile));
+				suitesList = gson.fromJson(reader, SuiteReportInfo[].class);
+				reader.close();
+			}else {
+				suitesList = new SuiteReportInfo[0];
+			}
+			
+			if(suitesList == null) {
+				suitesList = new SuiteReportInfo[] {currentSuite};
+			}else {
+				suitesList = Stream.concat(Arrays.stream(suitesList), Arrays.stream(new SuiteReportInfo[] {currentSuite})).toArray(SuiteReportInfo[]::new);
+			}
+			
+			final FileWriter writer = new FileWriter(jsonSuiteFile);
+			gson.toJson(
+					suitesList, 
+					writer);
+
+			writer.close();
+			
+		}catch (IOException e) {
+			System.out.println(e.getMessage());
+		}
+	}
+
+	@AfterSuite(alwaysRun=true)
+	public void afterSuite(ITestContext ctx) {
+		sendScriptInfo("Suite terminated -> " + ctx.getSuite().getName());
 	}
 
 	@BeforeClass(alwaysRun=true)
-	public void beforeAtsTest(ITestContext ctx) {
+	public void beforeClass(ITestContext ctx) {
 
-		java.util.logging.Logger.getLogger("org.openqa.selenium").setLevel(Level.OFF);
-		java.util.logging.Logger.getLogger(Actions.class.getName()).setLevel(Level.OFF);
-		java.util.logging.Logger.getLogger(OkHttpClient.class.getName()).setLevel(Level.FINE);
-		
 		final TestRunner runner = (TestRunner) ctx;
-		
+
 		testName = this.getClass().getName();
 		scriptCallTree = new ArrayList<ActionTestScript>(Arrays.asList(this));
 
@@ -192,23 +245,22 @@ public class ActionTestScript extends Script implements ITest{
 
 			final Map<String, String> params = runner.getTest().getAllParameters();
 			setTestExecutionVariables(params);
-
-			final ExecutionLogger mainLogger = new ExecutionLogger(System.out, getEnvironmentValue("ats.log.level", ""));
-			setLogger(mainLogger);
 			
+			setLogger(new ExecutionLogger(System.out, getEnvironmentValue("ats.log.level", "")));
+
 			//-----------------------------------------------------------
 			// check report output specified
 			//-----------------------------------------------------------
-			
+
 			int visualQuality = Utils.string2Int(getEnvironmentValue("visual.report", "0"));
 			boolean xml = getEnvironmentValue("xml.report", "").equalsIgnoreCase("true");
-			
+
 			if("true".equalsIgnoreCase(System.getProperty("report"))) {
 				visualQuality = 3;
 				xml = true;
 				sendScriptInfo("Force generate report");
 			}
-			
+
 			if(visualQuality > 0 || xml) {
 
 				final ScriptHeader header = getHeader();
@@ -220,7 +272,7 @@ public class ActionTestScript extends Script implements ITest{
 					output.mkdirs();
 				}
 
-				setRecorder(new VisualRecorder(this, output, header, xml, visualQuality, mainLogger));
+				setRecorder(new VisualRecorder(this, output, header, xml, visualQuality, logger));
 			}
 
 			final JsonObject logs = new JsonObject();
@@ -258,9 +310,8 @@ public class ActionTestScript extends Script implements ITest{
 	}
 
 	@AfterTest(alwaysRun=true)
-	public void testFinished() {
-		stopRecorder();
-		tearDown();
+	public void testFinished(ITestContext ctx) {
+
 	}
 
 	@AfterMethod(alwaysRun=true)
@@ -328,7 +379,7 @@ public class ActionTestScript extends Script implements ITest{
 			setVariables(variables);
 		}
 		setTestExecutionVariables(topScript.getTestExecutionVariables());
-		
+
 		topScript.sendScriptInfo(ActionCallscript.getScriptLog(testName, line, log));
 	}
 
@@ -370,7 +421,7 @@ public class ActionTestScript extends Script implements ITest{
 	public Variable var(String name, CalculatedValue value, Transformer transformer){
 		return createVariable(name, value, transformer);
 	}
-	
+
 	public static final String JAVA_GLOBAL_VAR_FUNCTION_NAME = "globalVariable";
 	public String globalVariable(String varPath){
 		return topScript.getGlobalVariableValue(varPath);
@@ -386,7 +437,7 @@ public class ActionTestScript extends Script implements ITest{
 	//---------------------------------------------------------------------------------------------
 
 	public static final String JAVA_PARAM_FUNCTION_NAME = "prm";
-	
+
 	public String prm(String name) {
 		return getParameterValue(name);
 	}
@@ -394,7 +445,7 @@ public class ActionTestScript extends Script implements ITest{
 	public String prm(String name, String defaultValue) {
 		return getParameterValue(name, defaultValue);
 	}
-	
+
 	public String prm(int index) {
 		return getParameterValue(index);
 	}
@@ -457,7 +508,7 @@ public class ActionTestScript extends Script implements ITest{
 		returnValues = values;
 		updateVariables();
 	}
-	
+
 	public void returnValues(Object... values) {
 		returnValues = Arrays.stream(values).map(Object::toString).toArray(String[]::new);
 		updateVariables();
@@ -484,7 +535,7 @@ public class ActionTestScript extends Script implements ITest{
 	public String env(String name, String defaultValue) {
 		return getEnvironmentValue(name, defaultValue);
 	}
-	
+
 	//---------------------------------------------------------------------------------------------
 
 	public static final String JAVA_SYSTEM_FUNCTION_NAME = "sys";
@@ -506,7 +557,7 @@ public class ActionTestScript extends Script implements ITest{
 	public String uid() {
 		return getUuidValue();
 	}
-	
+
 	//---------------------------------------------------------------------------------------------
 
 	public static final String JAVA_TODAY_FUNCTION_NAME = "td";
@@ -660,7 +711,7 @@ public class ActionTestScript extends Script implements ITest{
 		action.execute(this, getTestName(), line);
 		getTopScript().actionFinished(getTestName(), line, action, true);
 	}
-	
+
 	public void exec(int line, ActionComment action){
 		if(action.execute(this, getTestName(), line)) {
 			getTopScript().actionFinished(getTestName(), line, action, true);

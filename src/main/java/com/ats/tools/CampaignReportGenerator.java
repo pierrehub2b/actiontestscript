@@ -22,6 +22,7 @@ package com.ats.tools;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,7 +39,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -52,7 +52,12 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
+
 public class CampaignReportGenerator {
+
+	public static String ATS_JSON_SUITES = "ats-suites.json";
 
 	public static String patternDOCTYPE = "<!DOCTYPE[^<>]*(?:<![^<>]*>[^<>]*)*>";
 	public static String patternXML = "\\<\\?xml[^<>]*(?:<![^<>]*>[^<>]*)*>";
@@ -66,7 +71,6 @@ public class CampaignReportGenerator {
 		String fop = null;
 		String html = null;
 		String pdf = null;
-		String suitesFile = null;
 
 		for (int i = 0; i < args.length; i++) {
 			String string = args[i];
@@ -76,9 +80,6 @@ public class CampaignReportGenerator {
 				case "output":
 				case "reportFolder":
 					output = args[i+1].replaceAll("\"", "");
-					break;
-				case "suites":
-					suitesFile = args[i+1].replaceAll("\"", "");
 					break;
 				case "fop":
 					fop = args[i+1].replaceAll("\"", "");
@@ -101,15 +102,24 @@ public class CampaignReportGenerator {
 			return;
 		}
 
-		if(suitesFile == null) {
-			System.out.println("No suites file defined !");
-			return;
-		}
+		final File jsonSuiteFilesFile = outputFolderPath.resolve(ATS_JSON_SUITES).toFile();
+		if(jsonSuiteFilesFile.exists()) {
 
-		final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+			final Gson gson = new Gson();
+			SuiteReportInfo[] suitesList = null;
 
-		final Path suiteFilesPath = Paths.get(suitesFile);
-		if(suiteFilesPath.toFile().exists()) {
+			try{
+
+				final JsonReader reader = new JsonReader(new FileReader(jsonSuiteFilesFile));
+				suitesList = gson.fromJson(reader, SuiteReportInfo[].class);
+				reader.close();
+
+			}catch (IOException e) {}
+
+			if(suitesList == null) {
+				System.out.println("No suites found, nothing to do !");
+				return;
+			}
 
 			final int detailsValue = Utils.string2Int(details, 1);
 
@@ -124,56 +134,34 @@ public class CampaignReportGenerator {
 			}
 			fw.write("</pics>");
 
-			final Document doc = builder.parse(
-					new InputSource(
-							new StringReader(
-									new String(
-											Files.readAllBytes(
-													suiteFilesPath
-													), StandardCharsets.UTF_8))));
+			for (int i=0; i<suitesList.length; i++) {
 
-			final NodeList suiteList = doc.getElementsByTagName("suite-file");
+				final String suiteName = suitesList[i].name;
 
-			for (int i=0; i<suiteList.getLength(); i++) {
+				fw.write("<suite name=\"" + suiteName + "\">");
 
-				final String actionsFilePath = ((Element)suiteList.item(i)).getAttribute("path");
-				final Path sp = Paths.get(actionsFilePath);
-				final File spFile = sp.toFile();
+				final String[] tests = suitesList[i].tests;
+				final Map<String, String> parameters = suitesList[i].parameters;
 
-				if(spFile.exists()) {
-
-					final String suiteName = spFile.getName().replace(".xml", "");
-					fw.write("<suite name=\"" + suiteName + "\">");
-
-					final Document suiteDoc = builder.parse(
-							new InputSource(
-									new StringReader(
-											new String(Files.readAllBytes(sp), StandardCharsets.UTF_8))));
-
-					final NodeList classesList = suiteDoc.getElementsByTagName("class");
-					final NodeList parametersList = suiteDoc.getElementsByTagName("parameter");
-
-					for (int j=0; j<parametersList.getLength(); j++) {
-						final String parameterName = ((Element)parametersList.item(j)).getAttribute("name");
-						final String parameterValue = ((Element)parametersList.item(j)).getAttribute("value");
-						//TODO
-					}
-
-					fw.write("<tests>");
-
-					for (int j=0; j<classesList.getLength(); j++) {
-						final String className = ((Element)classesList.item(j)).getAttribute("name");
-
-						final Path xmlDataPath = outputFolderPath.resolve(suiteName).resolve(className + "_xml").resolve("actions.xml");
-						final File xmlDataFile = xmlDataPath.toFile();
-
-						if(xmlDataFile.exists()) {
-							fw.write(new String(Files.readAllBytes(xmlDataPath), StandardCharsets.UTF_8).replaceAll(patternXML, ""));
-						}
-					}
-
-					fw.write("</tests></suite>");
+				for (int j=0; j<parameters.size(); j++) { //TODO this is a job for GG
+					//final String parameterName = ;
+					//final String parameterValue = ;
 				}
+
+				fw.write("<tests>");
+
+				for (int j=0; j<tests.length; j++) {
+					final String className = tests[j];
+					final Path xmlDataPath = outputFolderPath.resolve(suiteName).resolve(className + "_xml").resolve("actions.xml");
+					final File xmlDataFile = xmlDataPath.toFile();
+
+					if(xmlDataFile.exists()) {
+						fw.write(new String(Files.readAllBytes(xmlDataPath), StandardCharsets.UTF_8).replaceAll(patternXML, ""));
+					}
+				}
+
+				fw.write("</tests></suite>");
+
 			}
 
 			fw.write("</report>");
@@ -193,19 +181,19 @@ public class CampaignReportGenerator {
 			if(fop != null) {
 				final Path fopPath = Paths.get(fop);
 				final File fopFile = fopPath.toFile();
-				
+
 				if(fopFile.exists()) {
 					final StringJoiner fopLibsJoin = new StringJoiner(File.pathSeparator);
 					fopLibsJoin.add(fopPath.resolve("build").resolve("fop.jar").toFile().getAbsolutePath());
-					
+
 					final File[] fopLibs = fopPath.resolve("lib").toFile().listFiles();
-					
+
 					for (File libs : fopLibs) {
 						if(libs.getName().contains(".jar")) {
 							fopLibsJoin.add(libs.getAbsolutePath());
 						}
 					}
-					
+
 					fop = fopLibsJoin.toString();
 				}
 			}
@@ -281,7 +269,7 @@ public class CampaignReportGenerator {
 			}
 
 		}else {
-			System.out.println("Suite files not found : " + suitesFile);
+			System.out.println("Suite files not found : " + ATS_JSON_SUITES);
 		}
 	}
 
