@@ -30,8 +30,8 @@ public class ScriptStatus {
 	private int actions;
 	private boolean passed;
 
-	private String testName;
-	private String suiteName;
+	private String testName = "";
+	private String suiteName = "";
 	
 	private ArrayList<String> errorStack = new ArrayList<String>();
 	

@@ -111,7 +111,7 @@ public class DesktopDriver extends RemoteWebDriver {
 		final DriverProcess desktopDriverProcess = driverManager.getDesktopDriver(status);
 
 		if(status.isPassed()) {
-			
+
 			this.driverHost = desktopDriverProcess.getDriverServerUrl().getHost();
 			this.driverPort = desktopDriverProcess.getDriverServerUrl().getPort();
 			this.driverUrl = "http://" + getDriverHost() + ":" + getDriverPort();
@@ -178,21 +178,21 @@ public class DesktopDriver extends RemoteWebDriver {
 			}
 		}
 	}
-	
+
 	public Double getScreenWidth() {
 		try {
 			return Double.parseDouble(screenWidth);
 		}catch(NumberFormatException e) {}
 		return 0D;
 	}
-	
+
 	public Double getScreenHeight() {
 		try {
 			return Double.parseDouble(screenHeight);
 		}catch(NumberFormatException e) {}
 		return 0D;
 	}
-	
+
 	public TestBound getScreenBound() {
 		return new TestBound(0D, 0D, getScreenWidth(), getScreenHeight());
 	}
@@ -505,7 +505,7 @@ public class DesktopDriver extends RemoteWebDriver {
 	public List<FoundElement> getWebElementsListByHandle(TestBound channelDimension, int handle) {
 		return sendRequestCommand(CommandType.Element, ElementType.LoadTree, handle).getFoundElements(channelDimension);
 	}
-	
+
 	public void defineRoot(TestBound channelDimension, String id) {
 		setElementMapLocation(sendRequestCommand(CommandType.Element, ElementType.Root, id).getFoundElements(channelDimension));
 	}
@@ -568,7 +568,7 @@ public class DesktopDriver extends RemoteWebDriver {
 		}
 		return hoverElement;
 	}
-	
+
 	public FoundElement getRootElement(Channel channel) {
 		return getRootElement(channel.getHandle(this));
 	}
@@ -683,7 +683,7 @@ public class DesktopDriver extends RemoteWebDriver {
 
 		return response.getFoundElements(predicate, channel.getDimension());
 	}
-	
+
 	public List<FoundElement> getListItems(TestBound dimension, String comboId){
 		return sendRequestCommand(CommandType.Element, ElementType.ListItems, new Object[] {comboId}).getFoundElements(dimension);
 	}
@@ -700,12 +700,12 @@ public class DesktopDriver extends RemoteWebDriver {
 		final DesktopResponse resp = sendRequestCommand(CommandType.Element, ElementType.Attributes, elementId, attribute);
 		return resp.getFirstAttribute();
 	}
-	
+
 	public List<FoundElement> getDialogBox(TestBound dimension) {
 		final DesktopResponse resp = sendRequestCommand(CommandType.Element, ElementType.DialogBox);
 		return resp.getFoundElements(dimension);
 	}
-	
+
 	private static class LoadMapElement	implements Runnable {
 		final TestBound channelDimension;
 		final int handle;
@@ -726,11 +726,11 @@ public class DesktopDriver extends RemoteWebDriver {
 	//---------------------------------------------------------------------------------------
 	//visual actions
 	//---------------------------------------------------------------------------------------
-	
+
 	public void saveSummary(ScriptStatus status, ReportSummary summary) {
 		sendRequestCommand(CommandType.Record, RecordType.Summary, summary.toData(status));
 	}
-		
+
 	public void stopVisualRecord() {
 		sendRequestCommand(CommandType.Record, RecordType.Stop);
 	}
@@ -744,7 +744,7 @@ public class DesktopDriver extends RemoteWebDriver {
 		sendRequestCommand(CommandType.Record, RecordType.CreateMobile, actionType, scriptLine, timeline,
 				channelName, subDimension.getX().intValue(), subDimension.getY().intValue(), subDimension.getWidth().intValue(), subDimension.getHeight().intValue(), screenshotPath, sync);
 	}
-	
+
 	public void createVisualAction(Channel channel, String actionType, int scriptLine, long timeline, boolean sync) {
 		sendRequestCommand(CommandType.Record, RecordType.Create, actionType, scriptLine, timeline,
 				channel.getName(), channel.getDimension().getX().intValue(), channel.getDimension().getY().intValue(), channel.getDimension().getWidth().intValue(), channel.getDimension().getHeight().intValue(), sync);

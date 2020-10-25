@@ -39,7 +39,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -64,13 +63,11 @@ public class CampaignReportGenerator {
 
 	public static final String ATS_REPORT = "ats-report";
 
-	public static void main(String[] args) throws ParserConfigurationException, SAXException, TransformerException, IOException, InterruptedException {
+	public static void main(String[] args) {
 
 		String output = null;
 		String details = null;
 		String fop = null;
-		String html = null;
-		String pdf = null;
 
 		for (int i = 0; i < args.length; i++) {
 			String string = args[i];
@@ -104,172 +101,181 @@ public class CampaignReportGenerator {
 
 		final File jsonSuiteFilesFile = outputFolderPath.resolve(ATS_JSON_SUITES).toFile();
 		if(jsonSuiteFilesFile.exists()) {
+			
+			try {
+				new CampaignReportGenerator(outputFolderPath, jsonSuiteFilesFile, details, fop);
+			} catch (IOException | TransformerException e) {
+				e.printStackTrace();
+			}
+			
+		}else {
+			System.out.println("Suites file not found : " + ATS_JSON_SUITES);
+		}
+	}
+	
+	public CampaignReportGenerator(Path outputFolderPath, File jsonSuiteFilesFile, String details, String fop) throws IOException, TransformerException {
+		
+		final int detailsValue = Utils.string2Int(details, 1);
+		
+		final Gson gson = new Gson();
+		SuiteReportInfo[] suitesList = null;
 
-			final Gson gson = new Gson();
-			SuiteReportInfo[] suitesList = null;
+		try{
 
-			try{
+			final JsonReader reader = new JsonReader(new FileReader(jsonSuiteFilesFile));
+			suitesList = gson.fromJson(reader, SuiteReportInfo[].class);
+			reader.close();
 
-				final JsonReader reader = new JsonReader(new FileReader(jsonSuiteFilesFile));
-				suitesList = gson.fromJson(reader, SuiteReportInfo[].class);
-				reader.close();
+		}catch (IOException e) {}
 
-			}catch (IOException e) {}
+		if(suitesList == null) {
+			System.out.println("No suites found, nothing to do !");
+			return;
+		}
 
-			if(suitesList == null) {
-				System.out.println("No suites found, nothing to do !");
-				return;
+		final File xmlReport = outputFolderPath.resolve(ATS_REPORT + ".xml").toFile();
+		final FileWriter fw = new FileWriter(xmlReport);
+		fw.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><report actions=\"" +  (detailsValue > 1) + "\" details=\"" + (detailsValue > 2) + "\">");
+
+		fw.write("<pics>");  
+		final String[] defaultImages = {"logo.png","true.png","false.png","warning.png"};
+		for (String img : defaultImages) {
+			fw.write("<pic name='"+ img.replace(".png",  "")  +"'>data:image/png;base64," +  getBase64DefaultImages(ResourceContent.class.getResourceAsStream("/reports/images/" + img).readAllBytes())  + "</pic>");
+		}
+		fw.write("</pics>");
+
+		for (int i=0; i<suitesList.length; i++) {
+
+			final String suiteName = suitesList[i].name;
+
+			fw.write("<suite name=\"" + suiteName + "\"><parameters>");
+
+			for (Map.Entry<String, String> entry : suitesList[i].parameters.entrySet()) {
+				fw.write("<parameter name=\"" + entry.getKey() + "\" value=\"" + entry.getValue() + "\"/>");
 			}
 
-			final int detailsValue = Utils.string2Int(details, 1);
+			fw.write("</parameters><tests>");
 
-			final File xmlReport = outputFolderPath.resolve(ATS_REPORT + ".xml").toFile();
-			final FileWriter fw = new FileWriter(xmlReport);
-			fw.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><report actions=\"" +  (detailsValue > 1) + "\" details=\"" + (detailsValue > 2) + "\">");
+			final String[] tests = suitesList[i].tests;
+			for (int j=0; j<tests.length; j++) {
+				final String className = tests[j];
+				final Path xmlDataPath = outputFolderPath.resolve(suiteName).resolve(className + "_xml").resolve("actions.xml");
+				final File xmlDataFile = xmlDataPath.toFile();
 
-			fw.write("<pics>");  
-			final String[] defaultImages = {"logo.png","true.png","false.png","warning.png"};
-			for (String img : defaultImages) {
-				fw.write("<pic name='"+ img.replace(".png",  "")  +"'>data:image/png;base64," +  getBase64DefaultImages(ResourceContent.class.getResourceAsStream("/reports/images/" + img).readAllBytes())  + "</pic>");
-			}
-			fw.write("</pics>");
-
-			for (int i=0; i<suitesList.length; i++) {
-
-				final String suiteName = suitesList[i].name;
-
-				fw.write("<suite name=\"" + suiteName + "\">");
-
-				final String[] tests = suitesList[i].tests;
-				final Map<String, String> parameters = suitesList[i].parameters;
-
-				for (int j=0; j<parameters.size(); j++) { //TODO this is a job for GG
-					//final String parameterName = ;
-					//final String parameterValue = ;
+				if(xmlDataFile.exists()) {
+					fw.write(new String(Files.readAllBytes(xmlDataPath), StandardCharsets.UTF_8).replaceAll(patternXML, ""));
 				}
+			}
 
-				fw.write("<tests>");
+			fw.write("</tests></suite>");
+		}
 
-				for (int j=0; j<tests.length; j++) {
-					final String className = tests[j];
-					final Path xmlDataPath = outputFolderPath.resolve(suiteName).resolve(className + "_xml").resolve("actions.xml");
-					final File xmlDataFile = xmlDataPath.toFile();
+		fw.write("</report>");
+		fw.close();
 
-					if(xmlDataFile.exists()) {
-						fw.write(new String(Files.readAllBytes(xmlDataPath), StandardCharsets.UTF_8).replaceAll(patternXML, ""));
+		if (fop == null || !(new File(fop).exists())) {
+			Map<String, String> map = System.getenv();
+			for (Map.Entry<String, String> entry : map.entrySet()) {
+				Pattern pattern = Pattern.compile("fop-[\\d].[\\d]");
+				Matcher matcher = pattern.matcher(entry.getValue().toLowerCase());
+				if (entry.getKey().toLowerCase().contains("fop") && matcher.find()) {
+					fop = entry.getValue();
+				}
+			}
+		}
+
+		if(fop != null) {
+			final Path fopPath = Paths.get(fop);
+			final File fopFile = fopPath.toFile();
+
+			if(fopFile.exists()) {
+				final StringJoiner fopLibsJoin = new StringJoiner(File.pathSeparator);
+				fopLibsJoin.add(fopPath.resolve("build").resolve("fop.jar").toFile().getAbsolutePath());
+
+				final File[] fopLibs = fopPath.resolve("lib").toFile().listFiles();
+
+				for (File libs : fopLibs) {
+					if(libs.getName().contains(".jar")) {
+						fopLibsJoin.add(libs.getAbsolutePath());
 					}
 				}
 
-				fw.write("</tests></suite>");
-
+				fop = fopLibsJoin.toString();
 			}
+		}
 
-			fw.write("</report>");
-			fw.close();
-
-			if (fop == null || !(new File(fop).exists())) {
-				Map<String, String> map = System.getenv();
-				for (Map.Entry<String, String> entry : map.entrySet()) {
-					Pattern pattern = Pattern.compile("fop-[\\d].[\\d]");
-					Matcher matcher = pattern.matcher(entry.getValue().toLowerCase());
-					if (entry.getKey().toLowerCase().contains("fop") && matcher.find()) {
-						fop = entry.getValue();
-					}
-				}
-			}
-
-			if(fop != null) {
-				final Path fopPath = Paths.get(fop);
-				final File fopFile = fopPath.toFile();
-
-				if(fopFile.exists()) {
-					final StringJoiner fopLibsJoin = new StringJoiner(File.pathSeparator);
-					fopLibsJoin.add(fopPath.resolve("build").resolve("fop.jar").toFile().getAbsolutePath());
-
-					final File[] fopLibs = fopPath.resolve("lib").toFile().listFiles();
-
-					for (File libs : fopLibs) {
-						if(libs.getName().contains(".jar")) {
-							fopLibsJoin.add(libs.getAbsolutePath());
+		String html = null;
+		String pdf = null;
+		
+		final File xsltFolder = Paths.get("").resolve("src/assets/resources/xslt").toFile();
+		if(xsltFolder != null && xsltFolder.exists()) {
+			for (File xslt : xsltFolder.listFiles()) {
+				if(xslt.getName().equalsIgnoreCase("campaign")) {
+					for (File stylesheets : xslt.listFiles()) {
+						if(stylesheets.getName().contains("_pdf_")) {
+							pdf = stylesheets.getAbsolutePath();
 						}
-					}
-
-					fop = fopLibsJoin.toString();
-				}
-			}
-
-			final File xsltFolder = Paths.get("").resolve("src/assets/resources/xslt").toFile();
-			if(xsltFolder != null && xsltFolder.exists()) {
-				for (File xslt : xsltFolder.listFiles()) {
-					if(xslt.getName().equalsIgnoreCase("campaign")) {
-						for (File stylesheets : xslt.listFiles()) {
-							if(stylesheets.getName().contains("_pdf_")) {
-								pdf = stylesheets.getAbsolutePath();
-							}
-							if(stylesheets.getName().contains("_html_")) {
-								html = stylesheets.getAbsolutePath();
-							}
-						}
-					}
-
-					if(xslt.getName().equalsIgnoreCase("images")) {
-						if(xslt.listFiles().length > 0) {
-							for (File images : xslt.listFiles()) {
-								InputStream initialStream = new FileInputStream(images);
-								byte[] buffer = new byte[initialStream.available()];
-								initialStream.read(buffer);
-
-								OutputStream outStream = new FileOutputStream(outputFolderPath.resolve(images.getName()).toFile());
-								outStream.write(buffer);
-								outStream.close();
-								initialStream.close();
-							}
-						} else {
-							//copyDefaultImagesToFolder(targetFile);
+						if(stylesheets.getName().contains("_html_")) {
+							html = stylesheets.getAbsolutePath();
 						}
 					}
 				}
-			}
 
-			if (pdf == null || (!new File(pdf).exists())) {
-				try {
-					pdf = outputFolderPath.resolve("campaign_pdf_stylesheet.xml").toFile().getAbsolutePath();
-					copyResource(ResourceContent.class.getResourceAsStream("/reports/campaign/campaign_pdf_stylesheet.xml"),pdf);
-				} catch (IOException e) {
-					e.printStackTrace();
+				if(xslt.getName().equalsIgnoreCase("images")) {
+					if(xslt.listFiles().length > 0) {
+						for (File images : xslt.listFiles()) {
+							InputStream initialStream = new FileInputStream(images);
+							byte[] buffer = new byte[initialStream.available()];
+							initialStream.read(buffer);
+
+							OutputStream outStream = new FileOutputStream(outputFolderPath.resolve(images.getName()).toFile());
+							outStream.write(buffer);
+							outStream.close();
+							initialStream.close();
+						}
+					} else {
+						//copyDefaultImagesToFolder(targetFile);
+					}
 				}
 			}
+		}
 
-			if (html == null || (!new File(html).exists())) {
-				try {
-					html = outputFolderPath.resolve("campaign_html_stylesheet.xml").toFile().getAbsolutePath();
-					copyResource(ResourceContent.class.getResourceAsStream("/reports/campaign/campaign_html_stylesheet.xml"),html);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+		if (pdf == null || (!new File(pdf).exists())) {
+			try {
+				pdf = outputFolderPath.resolve("campaign_pdf_stylesheet.xml").toFile().getAbsolutePath();
+				copyResource(ResourceContent.class.getResourceAsStream("/reports/campaign/campaign_pdf_stylesheet.xml"),pdf);
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
+		}
 
-			if (fop == null || pdf == null || html == null) { return; }		
+		if (html == null || (!new File(html).exists())) {
+			try {
+				html = outputFolderPath.resolve("campaign_html_stylesheet.xml").toFile().getAbsolutePath();
+				copyResource(ResourceContent.class.getResourceAsStream("/reports/campaign/campaign_html_stylesheet.xml"),html);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 
-			//HTML reports
+		if (pdf == null || html == null) { return; }		
 
-			final MinifyWriter filteredWriter = new MinifyWriter(
-					new FileWriter(outputFolderPath.resolve(ATS_REPORT + ".html").toFile()));
+		//HTML reports
 
-			final Transformer htmlTransformer = TransformerFactory.newInstance().newTransformer(new StreamSource(html));
-			htmlTransformer.transform(new StreamSource(xmlReport), new StreamResult(filteredWriter));
+		final MinifyWriter filteredWriter = new MinifyWriter(
+				new FileWriter(outputFolderPath.resolve(ATS_REPORT + ".html").toFile()));
 
-			filteredWriter.close();
+		final Transformer htmlTransformer = TransformerFactory.newInstance().newTransformer(new StreamSource(html));
+		htmlTransformer.transform(new StreamSource(xmlReport), new StreamResult(filteredWriter));
+		filteredWriter.close();
 
+		if(fop != null) {
 			try {
 				Runtime.getRuntime().exec("java -cp \"" + fop + "\" org.apache.fop.cli.Main -xml \"" + xmlReport.getAbsolutePath() + "\" -xsl " + pdf + " \"" + outputFolderPath.resolve(ATS_REPORT + ".pdf").toFile().getAbsolutePath() +"\"");
 			} catch (Throwable t)
 			{
 				t.printStackTrace();
 			}
-
-		}else {
-			System.out.println("Suite files not found : " + ATS_JSON_SUITES);
 		}
 	}
 

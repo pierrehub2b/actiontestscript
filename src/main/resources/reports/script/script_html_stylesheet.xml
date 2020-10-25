@@ -70,8 +70,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 	    <xsl:value-of select="concat(@testName,'_xml.pdf')"/>
 	    <xsl:text disable-output-escaping="yes">&quot; class=&quot;btn btn-secondary btn-sm &quot; role=&quot;button&quot; aria-pressed=&quot;true&quot;&gt;PDF report&lt;/a&gt;</xsl:text>
 	  </TD>
-
-        </TR>
+    </TR>
 	<TR>
 	  <TD class="w-25 p-3">
             Id : 

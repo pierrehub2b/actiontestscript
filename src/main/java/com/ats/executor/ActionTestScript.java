@@ -188,7 +188,13 @@ public class ActionTestScript extends Script implements ITest{
 		
 		final SuiteReportInfo currentSuite = new SuiteReportInfo((TestRunner) ctx);
 		
-		final Path outputPath = Paths.get(ctx.getOutputDirectory()).getParent();
+		Path outputPath = null;
+		final String outputFolder = System.getProperty("output-folder");
+		if(outputFolder != null) {
+			outputPath = Paths.get(outputFolder);
+		}else {
+			outputPath = Paths.get(ctx.getOutputDirectory()).getParent();
+		}
 		outputPath.toFile().mkdirs();
 		
 		final File jsonSuiteFile = outputPath.resolve(CampaignReportGenerator.ATS_JSON_SUITES).toFile();
@@ -232,11 +238,16 @@ public class ActionTestScript extends Script implements ITest{
 	public void beforeClass(ITestContext ctx) {
 
 		final TestRunner runner = (TestRunner) ctx;
-
+		final String suiteName = ctx.getSuite().getName();
+		
+		final String outputFolder = System.getProperty("output-folder");
+		if(outputFolder != null) {
+			runner.setOutputDirectory(outputFolder + File.separator + suiteName);
+		}
+		
 		testName = this.getClass().getName();
 		scriptCallTree = new ArrayList<ActionTestScript>(Arrays.asList(this));
 
-		final String suiteName = ctx.getSuite().getName();
 		status = new ScriptStatus(testName, suiteName);
 
 		if("true".equalsIgnoreCase(runner.getTest().getParameter("check.mode"))) {
@@ -255,10 +266,10 @@ public class ActionTestScript extends Script implements ITest{
 			int visualQuality = Utils.string2Int(getEnvironmentValue("visual.report", "0"));
 			boolean xml = getEnvironmentValue("xml.report", "").equalsIgnoreCase("true");
 
-			if("true".equalsIgnoreCase(System.getProperty("report"))) {
+			final String atsReport = System.getProperty("ats-report");
+			if(atsReport != null) {
 				visualQuality = 3;
 				xml = true;
-				sendScriptInfo("Force generate report");
 			}
 
 			if(visualQuality > 0 || xml) {

@@ -221,15 +221,24 @@
 					</TR>
 				</THEAD>
 				<TR height="25">
-					<TD COLSPAN="1" style="padding: 2px 0px 0px 15px;" width="80">
+					<TD COLSPAN="1" style="padding: 0px 0px 0px 15px;" width="80">
 						<font size="2" color="#5d5d5d">
 							<i>
-								<b>Logs level</b>
+								<b>Parameters</b>
 							</i>
 						</font>
 					</TD>
-					<TD COLSPAN="1" style="padding: 2px 0px 0px 15px;">
-						<xsl:value-of select="$ats_loglevel" />
+					<TD COLSPAN="1" style="padding: 0px 10px 0px 0px;">
+						
+						<font size="2" color="#5d5d5d">
+						<xsl:for-each select="parameters/parameter">
+							<span style="padding: 0px 0px 0px 20px;">
+							<b>
+							<xsl:value-of select="@name"/></b> = 
+							<xsl:value-of select="@value" />
+							</span>
+						</xsl:for-each>
+						</font>
 					</TD>
 					<TD COLSPAN="2" style="text-align:right;padding: 0px 5px 0px 0px;" ROWSPAN="2">
 						<xsl:choose>
