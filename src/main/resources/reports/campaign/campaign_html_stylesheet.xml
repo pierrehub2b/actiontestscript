@@ -140,14 +140,14 @@
 							</TD>
 							<TD class="titleClass">
 								<span
-									style="color: #565656; text-shadow: 2px 2px 8px #a5a5a5;">
+									style="color: #4d545d; text-shadow: 2px 2px 8px #a5a5a5;">
 									<FONT SIZE="6">
 										<B>
-											ActionTestScript - Suites report
+											ActionTestScript - Suites Execution Report
 										</B>
 									</FONT>
 									<br />
-									<FONT SIZE="3" COLOR="#565656">
+									<FONT SIZE="4" COLOR="#4d545d">
 										<I>
 											<xsl:choose>
 												<xsl:when test="$actions = 'true'">
@@ -167,7 +167,7 @@
 											 - 
 											<xsl:value-of select="count(suite)"/>
 											suite(s) launched 
-											<FONT SIZE="2" COLOR="#565656">
+											<FONT SIZE="3" COLOR="#4d545d">
 											(created at
 											<xsl:value-of
 												select="java:format(java:java.text.SimpleDateFormat.new('yyyy.MM.dd-HH:mm'), java:java.util.Date.new())" />
@@ -204,9 +204,9 @@
 		<TABLE style="background-color:#cbcbcb" width="100%">
 			<TBODY>
 				<THEAD>
-					<TR style="background-color:#787779;color:#ffffff" height="34">
+					<TR style="background-color:#4d545d;color:#ffffff" height="34">
 						<TD colspan="4"
-							style="padding: 0px 0px 0px 15px;border-style:solid;border-width: 0px 0px 0px 0px;">
+							style="padding: 0px 0px 0px 10px;border-style:solid;border-width: 0px 0px 0px 0px;">
 							<FONT SIZE="5">
 								<B>
 									<xsl:value-of select="@name" />
@@ -221,8 +221,8 @@
 					</TR>
 				</THEAD>
 				<TR height="25">
-					<TD COLSPAN="1" style="padding: 0px 0px 0px 15px;" width="80">
-						<font size="2" color="#5d5d5d">
+					<TD COLSPAN="1" style="padding: 0px 10px 0px 10px;" width="80">
+						<font size="2" color="#4d545d">
 							<i>
 								<b>Parameters</b>
 							</i>
@@ -252,8 +252,8 @@
 					</TD>
 				</TR>
 				<TR height="25">
-					<TD colspan="1" style="padding: 0px 0px 0px 15px;" width="80">
-						<font size="2" color="#5d5d5d">
+					<TD colspan="1" style="padding: 0px 10px 0px 10px;" width="80">
+						<font size="2" color="#4d545d">
 							<i>
 								<b>Result</b>
 							</i>

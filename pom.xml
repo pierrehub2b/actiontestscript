@@ -6,7 +6,7 @@
 	<groupId>com.actiontestscript</groupId>
 	<artifactId>ats-automated-testing</artifactId>
 
-	<version>1.8.4</version>
+	<version>1.8.5</version>
 	<packaging>jar</packaging>
 
 	<name>ats-automated-testing</name>
@@ -179,9 +179,9 @@
 			<version>${lib.browserup.version}</version>
 		</dependency>
 		<dependency>
-		   <groupId>com.browserup</groupId>
-		   <artifactId>browserup-proxy-mitm</artifactId>
-		   <version>${lib.browserup.mitm.version}</version>
+			<groupId>com.browserup</groupId>
+			<artifactId>browserup-proxy-mitm</artifactId>
+			<version>${lib.browserup.mitm.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -211,7 +211,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.22.0</version>
+				<version>3.0.0-M5</version>
 				<configuration>
 					<includes>
 						<include>**/PasswordsTest.java</include>
@@ -256,7 +256,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>2.22.0</version>
+				<version>3.0.0-M5</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -327,7 +327,7 @@
 			<plugin>
 				<groupId>org.sonatype.plugins</groupId>
 				<artifactId>nexus-staging-maven-plugin</artifactId>
-				<version>1.6.7</version>
+				<version>1.6.8</version>
 				<extensions>true</extensions>
 				<configuration>
 					<serverId>OSSRH-37505</serverId>
@@ -379,7 +379,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore/>
+										<ignore />
 									</action>
 								</pluginExecution>
 							</pluginExecutions>

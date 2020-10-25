@@ -48,18 +48,18 @@ public class ExecutionListener implements IExecutionListener {
 		} catch (FileNotFoundException e) {
 		}
 
-		System.out.println("[INFO] -------------------------------");
-		System.out.println("[INFO]    ATS " + ATS.VERSION + " execution start");
-		System.out.println("[INFO] -------------------------------");
+		System.out.println("[INFO] ------------------------------------");
+		System.out.println("[INFO]   ATS " + ATS.VERSION + " execution start");
+		System.out.println("[INFO] ------------------------------------");
 	}
 
 	@Override
 	public void onExecutionFinish() {
 		IExecutionListener.super.onExecutionFinish();
 
-		System.out.println("[INFO] -------------------------------");
-		System.out.println("[INFO]    ATS execution complete");
-		System.out.println("[INFO] -------------------------------");
+		System.out.println("[INFO] ------------------------------------");
+		System.out.println("[INFO]   ATS execution complete");
+		System.out.println("[INFO] ------------------------------------");
 
 		final String atsReport = System.getProperty("ats-report");
 		if(atsReport != null) {
