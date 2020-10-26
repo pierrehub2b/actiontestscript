@@ -23,6 +23,7 @@ import com.ats.element.TestElement;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.script.actions.Action;
 import com.ats.script.actions.ActionChannelStart;
+import com.ats.script.actions.ActionExecute;
 
 public class VisualRecorderNull implements IVisualRecorder {
 	
@@ -104,5 +105,9 @@ public class VisualRecorderNull implements IVisualRecorder {
 
 	@Override
 	public void updateSummaryFail(String testName, int testLine, String app, String errorMessage) {
+	}
+
+	@Override
+	public void createVisualAction(ActionExecute action) {
 	}
 }

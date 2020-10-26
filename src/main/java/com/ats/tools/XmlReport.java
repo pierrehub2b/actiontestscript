@@ -77,9 +77,9 @@ public class XmlReport {
 					script.setAttribute("testId", report.getId());					
 					script.setAttribute("testName", report.getName());
 
-					script.setAttribute("cpuSpeed", report.getCpuSpeed() + "");
-					script.setAttribute("cpuCount", report.getCpuCount() + "");
-					script.setAttribute("totalMemory", report.getTotalMemory() + "");		
+					script.setAttribute("cpuSpeed", String.valueOf(report.getCpuSpeed()));
+					script.setAttribute("cpuCount", String.valueOf(report.getCpuCount()));
+					script.setAttribute("totalMemory", String.valueOf(report.getTotalMemory()));		
 					script.setAttribute("osInfo", report.getOsInfo());	
 
 					Element description = document.createElement("description");
@@ -103,7 +103,7 @@ public class XmlReport {
 					script.appendChild(groups);
 
 					Element quality = document.createElement("quality");
-					quality.setTextContent(report.getQuality() + "");
+					quality.setTextContent(String.valueOf(report.getQuality()));
 					script.appendChild(quality);
 
 					//------------------------------------------------------------------------------------------------------
@@ -121,21 +121,22 @@ public class XmlReport {
 							final VisualAction va = (VisualAction) obj;
 
 							final Element action = document.createElement("action");
-							action.setAttribute("index", va.getIndex() + "");
+							action.setAttribute("index", String.valueOf(va.getIndex()));
 							action.setAttribute("type", va.getType());
 
-							action.appendChild(document.createElement("line")).setTextContent(va.getLine() + "");
-							action.appendChild(document.createElement("timeLine")).setTextContent(va.getTimeLine() + "");
-							action.appendChild(document.createElement("error")).setTextContent(va.getError() + "");
-							action.appendChild(document.createElement("duration")).setTextContent(va.getDuration() + "");
-							action.appendChild(document.createElement("passed")).setTextContent((va.getError() == 0) + "");
+							action.appendChild(document.createElement("line")).setTextContent(String.valueOf(va.getLine()));
+							action.appendChild(document.createElement("timeLine")).setTextContent(String.valueOf(va.getTimeLine()));
+							action.appendChild(document.createElement("error")).setTextContent(String.valueOf(va.getError()));
+							action.appendChild(document.createElement("stop")).setTextContent(String.valueOf(va.isStop()));
+							action.appendChild(document.createElement("duration")).setTextContent(String.valueOf(va.getDuration()));
+							action.appendChild(document.createElement("passed")).setTextContent((String.valueOf(va.getError() == 0)));
 							action.appendChild(document.createElement("value")).setTextContent(va.getValue());
 							action.appendChild(document.createElement("data")).setTextContent(va.getData());
 
 							Element elem = document.createElement("img");
 							elem.setAttribute("src", va.getImageFileName());
-							elem.setAttribute("width", va.getChannelBound().getWidth().intValue() + "");
-							elem.setAttribute("height", va.getChannelBound().getHeight().intValue() + "");
+							elem.setAttribute("width", String.valueOf(va.getChannelBound().getWidth().intValue()));
+							elem.setAttribute("height", String.valueOf(va.getChannelBound().getHeight().intValue()));
 							action.appendChild(elem);
 
 							Element channel = document.createElement("channel");
@@ -143,19 +144,19 @@ public class XmlReport {
 
 							Element channelBound = document.createElement("bound");
 							Element channelX = document.createElement("x");
-							channelX.setTextContent(va.getChannelBound().getX().intValue() + "");
+							channelX.setTextContent(String.valueOf(va.getChannelBound().getX().intValue()));
 							channelBound.appendChild(channelX);
 
 							Element channelY = document.createElement("y");
-							channelY.setTextContent(va.getChannelBound().getY().intValue() + "");
+							channelY.setTextContent(String.valueOf(va.getChannelBound().getY().intValue()));
 							channelBound.appendChild(channelY);
 
 							Element channelWidth = document.createElement("width");
-							channelWidth.setTextContent(va.getChannelBound().getWidth().intValue() + "");
+							channelWidth.setTextContent(String.valueOf(va.getChannelBound().getWidth().intValue()));
 							channelBound.appendChild(channelWidth);
 
 							Element channelHeight = document.createElement("height");
-							channelHeight.setTextContent(va.getChannelBound().getHeight().intValue() + "");
+							channelHeight.setTextContent(String.valueOf(va.getChannelBound().getHeight().intValue()));
 							channelBound.appendChild(channelHeight);
 
 							channel.appendChild(channelBound);
@@ -171,28 +172,28 @@ public class XmlReport {
 								element.appendChild(criterias);
 
 								Element foundElements = document.createElement("foundElements");
-								foundElements.setTextContent(va.getElement().getFoundElements() + "");
+								foundElements.setTextContent(String.valueOf(va.getElement().getFoundElements()));
 								element.appendChild(foundElements);
 
 								Element searchDuration = document.createElement("searchDuration");
-								searchDuration.setTextContent(va.getElement().getSearchDuration() + "");
+								searchDuration.setTextContent(String.valueOf(va.getElement().getSearchDuration()));
 								element.appendChild(searchDuration);
 
 								Element elementBound = document.createElement("bound");
 								Element elementX = document.createElement("x");
-								elementX.setTextContent(va.getElement().getBound().getX().intValue() + "");
+								elementX.setTextContent(String.valueOf(va.getElement().getBound().getX().intValue()));
 								elementBound.appendChild(elementX);
 
 								Element elementY = document.createElement("y");
-								elementY.setTextContent(va.getElement().getBound().getY().intValue() + "");
+								elementY.setTextContent(String.valueOf(va.getElement().getBound().getY().intValue()));
 								elementBound.appendChild(elementY);
 
 								Element elementWidth = document.createElement("width");
-								elementWidth.setTextContent(va.getElement().getBound().getWidth().intValue() + "");
+								elementWidth.setTextContent(String.valueOf(va.getElement().getBound().getWidth().intValue()));
 								elementBound.appendChild(elementWidth);
 
 								Element elementHeight = document.createElement("height");
-								elementHeight.setTextContent(va.getElement().getBound().getHeight().intValue() + "");
+								elementHeight.setTextContent(String.valueOf(va.getElement().getBound().getHeight().intValue()));
 								elementBound.appendChild(elementHeight);
 
 								element.appendChild(elementBound);

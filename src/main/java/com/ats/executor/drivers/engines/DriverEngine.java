@@ -96,8 +96,8 @@ public abstract class DriverEngine {
 		getDesktopDriver().updateVisualImage(dimension, isRef);
 	}
 	
-	public void createVisualAction(Channel channel, String actionType, int scriptLine, long timeline, boolean sync) {
-		getDesktopDriver().createVisualAction(channel, actionType, scriptLine, timeline, sync);
+	public void createVisualAction(Channel channel, String actionType, int scriptLine, long timeline, boolean sync, boolean stop) {
+		getDesktopDriver().createVisualAction(channel, actionType, scriptLine, timeline, sync, stop);
 	}
 
 	public TestElement getTestElementRoot() {

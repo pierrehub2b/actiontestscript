@@ -740,14 +740,14 @@ public class DesktopDriver extends RemoteWebDriver {
 		return resp.image;
 	}
 
-	public void createMobileRecord(String actionType, int scriptLine, long timeline, String channelName, TestBound subDimension, String screenshotPath, boolean sync){
+	public void createMobileRecord(String actionType, int scriptLine, long timeline, String channelName, TestBound subDimension, String screenshotPath, boolean sync, boolean stop){
 		sendRequestCommand(CommandType.Record, RecordType.CreateMobile, actionType, scriptLine, timeline,
-				channelName, subDimension.getX().intValue(), subDimension.getY().intValue(), subDimension.getWidth().intValue(), subDimension.getHeight().intValue(), screenshotPath, sync);
+				channelName, subDimension.getX().intValue(), subDimension.getY().intValue(), subDimension.getWidth().intValue(), subDimension.getHeight().intValue(), screenshotPath, sync, stop);
 	}
 
-	public void createVisualAction(Channel channel, String actionType, int scriptLine, long timeline, boolean sync) {
+	public void createVisualAction(Channel channel, String actionType, int scriptLine, long timeline, boolean sync, boolean stop) {
 		sendRequestCommand(CommandType.Record, RecordType.Create, actionType, scriptLine, timeline,
-				channel.getName(), channel.getDimension().getX().intValue(), channel.getDimension().getY().intValue(), channel.getDimension().getWidth().intValue(), channel.getDimension().getHeight().intValue(), sync);
+				channel.getName(), channel.getDimension().getX().intValue(), channel.getDimension().getY().intValue(), channel.getDimension().getWidth().intValue(), channel.getDimension().getHeight().intValue(), sync, stop);
 	}
 
 	public byte[] getMobileScreenshotByte(String url){

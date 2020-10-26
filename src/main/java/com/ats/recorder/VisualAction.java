@@ -48,6 +48,8 @@ public class VisualAction {
 	private int line;
 	private String value = "";
 	private String data = "";
+	
+	private boolean stop = true;
 
 	private VisualElement element;
 
@@ -69,6 +71,14 @@ public class VisualAction {
 	// getters and setters for serialization
 	//--------------------------------------------------------
 
+	public boolean isStop() {
+		return stop;
+	}
+
+	public void setStop(boolean stop) {
+		this.stop = stop;
+	}
+	
 	public String getChannelName() {
 		return channelName;
 	}

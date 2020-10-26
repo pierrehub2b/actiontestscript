@@ -23,10 +23,12 @@ import com.ats.element.TestElement;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.script.actions.Action;
 import com.ats.script.actions.ActionChannelStart;
+import com.ats.script.actions.ActionExecute;
 
 public interface IVisualRecorder {
 	public void terminate();
 	public void createVisualAction(Action action);
+	public void createVisualAction(ActionExecute action);
 	public void createVisualStartChannelAction(ActionChannelStart action, long duration);
 	public void updateScreen(boolean ref);
 	public void updateScreen(int error, long duration);
