@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,9 +49,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -63,10 +59,6 @@ import com.google.gson.stream.JsonReader;
 public class CampaignReportGenerator {
 
 	public static String ATS_JSON_SUITES = "ats-suites.json";
-
-	public static String patternDOCTYPE = "<!DOCTYPE[^<>]*(?:<![^<>]*>[^<>]*)*>";
-	public static String patternXML = "\\<\\?xml[^<>]*(?:<![^<>]*>[^<>]*)*>";
-
 	public static final String ATS_REPORT = "ats-report";
 
 	public static void main(String[] args) {
@@ -124,7 +116,6 @@ public class CampaignReportGenerator {
 		final int detailsValue = Utils.string2Int(details, 1);
 
 		SuiteReportInfo[] suitesList = null;
-
 		try{
 
 			final JsonReader reader = new JsonReader(new FileReader(jsonSuiteFilesFile));
@@ -146,7 +137,7 @@ public class CampaignReportGenerator {
 
 		writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><report actions=\"" +  (detailsValue > 1) + "\" details=\"" + (detailsValue > 2) + "\"><pics>");
 
-		final String[] defaultImages = {"logo.png","true.png","false.png","warning.png"};
+		final String[] defaultImages = new String[]{"logo.png","true.png","false.png","warning.png"};
 		for (String img : defaultImages) {
 			writer.write("<pic name='"+ img.replace(".png",  "")  +"'>data:image/png;base64," +  getBase64DefaultImages(ResourceContent.class.getResourceAsStream("/reports/images/" + img).readAllBytes())  + "</pic>");
 		}
@@ -302,30 +293,7 @@ public class CampaignReportGenerator {
 		}
 	}
 
-	public static void appendSuiteData(DocumentBuilder builder, StringJoiner suitesJoiner, File suiteFile) throws SAXException, IOException {
-
-		if(suiteFile.exists()) {
-			final StringJoiner joiner = new StringJoiner(",");
-			joiner.add(suiteFile.getName().replace(".xml", ""));
-			final Document doc = builder.parse(
-					new InputSource(
-							new StringReader(
-									new String(
-											Files.readAllBytes(
-													suiteFile.toPath()
-													), StandardCharsets.UTF_8))));
-
-			final NodeList classList = doc.getElementsByTagName("class");
-
-			for (int i=0; i<classList.getLength(); i++) {
-				joiner.add(((Element)classList.item(i)).getAttribute("name"));
-			}
-
-			suitesJoiner.add(joiner.toString());
-		}
-	}
-
-	public static void copyResource(InputStream res, String dest) throws IOException {
+	private static void copyResource(InputStream res, String dest) throws IOException {
 		byte[] buffer = new byte[res.available()];
 		res.read(buffer);
 
@@ -335,55 +303,7 @@ public class CampaignReportGenerator {
 		outStream.close();
 	}
 
-	public static String getBase64DefaultImages(byte[] b) throws IOException {
+	private static String getBase64DefaultImages(byte[] b) throws IOException {
 		return Base64.getEncoder().encodeToString(b);
 	}	
-
-	/*public static String generateReportXml(String xmlPath, String outputFolder, File projectFolder, String details, String fop) throws IOException, ParserConfigurationException, SAXException {
-
-
-
-		int det = Integer.parseInt(details);
-		f.setWritable(true);
-		f.setReadable(true);
-
-
-		final String[] paths = xmlPath.split(";");
-		String currentSuite = "";
-
-		for (int j = 0; j<paths.length;j++) {
-			final String[] scripts = paths[j].split(",");
-			for (int i = 0; i < scripts.length; i++) {
-				File currentFile = null;
-				if(i == 0) {
-					currentSuite = scripts[i];
-					currentFile = new File(projectFolder.getAbsolutePath() + "/src/exec/" + scripts[i] + ".xml");
-
-					final String content = new String(Files.readAllBytes(currentFile.toPath()), StandardCharsets.UTF_8);
-					fw.write(content.replaceAll(patternDOCTYPE, "").replace("</suite>", ""));
-
-				} else {
-					currentFile = new File(outputFolder + "/" + currentSuite + "/" + scripts[i] + "/actions.xml");
-					if(currentFile.exists()) {
-						final String content = new String(Files.readAllBytes(currentFile.toPath()), StandardCharsets.UTF_8);
-						final StringBuilder builder = new StringBuilder("<tests>");
-
-						builder.append(content.replaceAll(patternXML, ""));
-						builder.append("</tests>");
-
-						fw.write(builder.toString());
-
-						ScriptGeneratorThread t = new ScriptGeneratorThread(currentFile.getAbsolutePath(), fop);
-						t.start();
-					}
-				}
-			}
-			fw.write("</suite>");
-		} 
-
-		fw.write("</report>");
-		fw.close();
-
-		return f.getAbsolutePath();
-	}*/
 }
