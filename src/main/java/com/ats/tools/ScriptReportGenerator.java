@@ -165,7 +165,7 @@ public class ScriptReportGenerator {
 			}
 		}
 
-		if (fop == null || target == null || pdf == null || html == null) {
+		if (target == null || pdf == null || html == null) {
 			return;
 		}
 
@@ -177,22 +177,25 @@ public class ScriptReportGenerator {
 		transformer.transform(new StreamSource(target), new StreamResult(
 				path + File.separator + targetFile.getParentFile().getName().replace("_xml", "") + ".html"));
 
-		try {
-			ProcessBuilder ps = new ProcessBuilder("java", "-cp", fop, "org.apache.fop.cli.Main", "-xml", target,
-					"-xsl", pdf, "-pdf", targetFile.getParentFile().getParentFile().getAbsolutePath() + File.separator
-							+ targetFile.getParentFile().getName().replace("_xml", "") + ".pdf");
-			ps.redirectErrorStream(true);
+		if(fop != null) {
+			try {
+				ProcessBuilder ps = new ProcessBuilder("java", "-cp", fop, "org.apache.fop.cli.Main", "-xml", target,
+						"-xsl", pdf, "-pdf", targetFile.getParentFile().getParentFile().getAbsolutePath() + File.separator
+								+ targetFile.getParentFile().getName().replace("_xml", "") + ".pdf");
+				ps.redirectErrorStream(true);
 
-			Process pr = ps.start();
+				Process pr = ps.start();
 
-			BufferedReader in = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-			pr.waitFor();
+				BufferedReader in = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+				pr.waitFor();
 
-			in.close();
-			System.exit(0);
-		} catch (Throwable t) {
-			t.printStackTrace();
+				in.close();
+				System.exit(0);
+			} catch (Throwable t) {
+				t.printStackTrace();
+			}
 		}
+		
 	}
 
 	public static void copyResource(InputStream res, String dest) throws IOException {
