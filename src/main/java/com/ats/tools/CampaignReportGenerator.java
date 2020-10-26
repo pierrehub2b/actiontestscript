@@ -137,7 +137,7 @@ public class CampaignReportGenerator {
 
 		writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><report actions=\"" +  (detailsValue > 1) + "\" details=\"" + (detailsValue > 2) + "\"><pics>");
 
-		final String[] defaultImages = new String[]{"logo.png","true.png","false.png","warning.png"};
+		final String[] defaultImages = new String[]{"logo.png", "true.png", "false.png", "warning.png", "noStop.png"};
 		for (String img : defaultImages) {
 			writer.write("<pic name='"+ img.replace(".png",  "")  +"'>data:image/png;base64," +  getBase64DefaultImages(ResourceContent.class.getResourceAsStream("/reports/images/" + img).readAllBytes())  + "</pic>");
 		}

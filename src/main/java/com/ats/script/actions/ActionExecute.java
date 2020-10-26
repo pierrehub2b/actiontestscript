@@ -38,8 +38,11 @@ public abstract class ActionExecute extends Action {
 
 	@Override
 	public boolean execute(ActionTestScript ts, String testName, int testLine){
-		super.execute(ts, testName, testLine);
+		updateCurrentChannel(ts.getCurrentChannel(), testName, line);
+		ts.getRecorder().createVisualAction(this, stop);
+		
 		getCurrentChannel().checkStatus(this, testName, testLine);
+		
 		return true;
 	}
 	

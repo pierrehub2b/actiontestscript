@@ -85,6 +85,7 @@
 						loopCollapsible();
 						loopIcons('iconTrue',"<xsl:value-of select="//report/pics/pic[@name='true']"/>");
 						loopIcons('iconFalse',"<xsl:value-of select="//report/pics/pic[@name='false']"/>");
+						loopIcons('iconNoStop',"<xsl:value-of select="//report/pics/pic[@name='noStop']"/>");
 						loopIcons('iconWarning',"<xsl:value-of select="//report/pics/pic[@name='warning']"/>")
 					}
 					
@@ -556,13 +557,21 @@
 						<td style="padding-right: 4px;border :0">
 							<xsl:choose>
 								<xsl:when test="passed = 'true'">
-									<img height="30px" width="30px" style="vertical-align:middle" alt="Test passed" class="iconTrue"/>
+									<img height="30px" width="30px" style="vertical-align:middle" alt="Action passed" class="iconTrue"/>
 								</xsl:when>
 								<xsl:when test="passed = 'warning'">
-									<img height="30px" width="30px" style="vertical-align:middle" alt="Test unstable" class="iconWarning"/>
+									<img height="30px" width="30px" style="vertical-align:middle" alt="Action unstable" class="iconWarning"/>
 								</xsl:when>
 								<xsl:when test="passed = 'false'">
-								<img height="30px" width="30px" style="vertical-align:middle" alt="Test failed" class="iconFalse"/>
+								<xsl:choose>
+									<xsl:when test="stop = 'true'">
+										<img height="30px" width="30px" style="vertical-align:middle" alt="Action failed" class="iconFalse"/>
+									</xsl:when>
+									<xsl:otherwise>
+										<img height="30px" width="38px" style="vertical-align:middle" alt="Non blocking action" class="iconNoStop"/>
+									</xsl:otherwise>
+								</xsl:choose>
+								
 								</xsl:when>
 							</xsl:choose>
 						</td>
@@ -592,13 +601,21 @@
 						<td style="padding-right: 4px;border :0">
 							<xsl:choose>
 								<xsl:when test="passed = 'true'">
-									<img height="30px" width="30px" style="vertical-align:middle" alt="Test passed" class="iconTrue"/>
+									<img height="30px" width="30px" style="vertical-align:middle" alt="Action passed" class="iconTrue"/>
 								</xsl:when>
 								<xsl:when test="passed = 'warning'">
-									<img height="30px" width="30px" style="vertical-align:middle" alt="Test unstable" class="iconWarning"/>
+									<img height="30px" width="30px" style="vertical-align:middle" alt="Action unstable" class="iconWarning"/>
 								</xsl:when>
 								<xsl:when test="passed = 'false'">
-									<img height="30px" width="30px" style="vertical-align:middle" alt="Test failed" class="iconFalse"/>
+								<xsl:choose>
+									<xsl:when test="stop = 'true'">
+										<img height="30px" width="30px" style="vertical-align:middle" alt="Action failed" class="iconFalse"/>
+									</xsl:when>
+									<xsl:otherwise>
+										<img height="30px" width="38px" style="vertical-align:middle" alt="Non blocking action" class="iconNoStop"/>
+									</xsl:otherwise>
+								</xsl:choose>
+								
 								</xsl:when>
 							</xsl:choose>
 						</td>

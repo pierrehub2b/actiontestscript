@@ -143,15 +143,9 @@ public class VisualRecorder implements IVisualRecorder {
 	}
 	
 	@Override
-	public void createVisualAction(Action action) {
+	public void createVisualAction(Action action, boolean stop) {
 		setChannel(action.getStatus().getChannel());
-		channel.createVisualAction(action.getClass().getName(), action.getLine(), System.currentTimeMillis() - started, isSyncAction(action.getClass().getName()), true);
-	}
-	
-	@Override
-	public void createVisualAction(ActionExecute action) {
-		setChannel(action.getStatus().getChannel());
-		channel.createVisualAction(action.getClass().getName(), action.getLine(), System.currentTimeMillis() - started, isSyncAction(action.getClass().getName()), action.isStop());
+		channel.createVisualAction(action.getClass().getName(), action.getLine(), System.currentTimeMillis() - started, isSyncAction(action.getClass().getName()), stop);
 	}
 	
 	@Override

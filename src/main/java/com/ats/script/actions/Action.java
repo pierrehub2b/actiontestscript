@@ -68,12 +68,16 @@ public abstract class Action {
 	//---------------------------------------------------------------------------------------------------------------------------------
 	
 	public boolean execute(ActionTestScript ts, String testName, int line){
-		currentChannel = ts.getCurrentChannel();
-		status = currentChannel.newActionStatus(testName, line);
+		updateCurrentChannel(ts.getCurrentChannel(), testName, line);
+		ts.getRecorder().createVisualAction(this, true);
 		
-		ts.getRecorder().createVisualAction(this);
-		currentChannel.startHarAction(this, status.getTestLine());
 		return true;
+	}
+	
+	protected void updateCurrentChannel(Channel cnl, String testName, int line) {
+		currentChannel = cnl;
+		status = currentChannel.newActionStatus(testName, line);
+		currentChannel.startHarAction(this, status.getTestLine());
 	}
 	
 	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
