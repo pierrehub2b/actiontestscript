@@ -8,10 +8,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
 import org.testng.IExecutionListener;
 import org.testng.TestNG;
+import org.xml.sax.SAXException;
 
 import com.ats.generator.ATS;
 import com.ats.tools.CampaignReportGenerator;
@@ -74,7 +76,7 @@ public class ExecutionListener implements IExecutionListener {
 
 				try {
 					new CampaignReportGenerator(getOutputFolderPath(), jsonSuiteFile, atsReport, fop);
-				} catch (IOException | TransformerException e) {
+				} catch (IOException | TransformerException | ParserConfigurationException | SAXException e) {
 					e.printStackTrace();
 				}
 			}

@@ -19,13 +19,14 @@ under the License.
 
 package com.ats.tools;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
@@ -39,9 +40,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
@@ -53,6 +58,7 @@ import org.xml.sax.SAXException;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
+
 
 public class CampaignReportGenerator {
 
@@ -101,29 +107,28 @@ public class CampaignReportGenerator {
 
 		final File jsonSuiteFilesFile = outputFolderPath.resolve(ATS_JSON_SUITES).toFile();
 		if(jsonSuiteFilesFile.exists()) {
-			
+
 			try {
 				new CampaignReportGenerator(outputFolderPath, jsonSuiteFilesFile, details, fop);
-			} catch (IOException | TransformerException e) {
+			} catch (IOException | TransformerException | ParserConfigurationException | SAXException e) {
 				e.printStackTrace();
 			}
-			
+
 		}else {
 			System.out.println("Suites file not found : " + ATS_JSON_SUITES);
 		}
 	}
-	
-	public CampaignReportGenerator(Path outputFolderPath, File jsonSuiteFilesFile, String details, String fop) throws IOException, TransformerException {
-		
+
+	public CampaignReportGenerator(Path outputFolderPath, File jsonSuiteFilesFile, String details, String fop) throws IOException, TransformerException, ParserConfigurationException, SAXException {
+
 		final int detailsValue = Utils.string2Int(details, 1);
-		
-		final Gson gson = new Gson();
+
 		SuiteReportInfo[] suitesList = null;
 
 		try{
 
 			final JsonReader reader = new JsonReader(new FileReader(jsonSuiteFilesFile));
-			suitesList = gson.fromJson(reader, SuiteReportInfo[].class);
+			suitesList = new Gson().fromJson(reader, SuiteReportInfo[].class);
 			reader.close();
 
 		}catch (IOException e) {}
@@ -133,45 +138,54 @@ public class CampaignReportGenerator {
 			return;
 		}
 
-		final File xmlReport = outputFolderPath.resolve(ATS_REPORT + ".xml").toFile();
-		final FileWriter fw = new FileWriter(xmlReport);
-		fw.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><report actions=\"" +  (detailsValue > 1) + "\" details=\"" + (detailsValue > 2) + "\">");
+		final Transformer xmlSerializer = TransformerFactory.newInstance().newTransformer();
+		xmlSerializer.setOutputProperty("omit-xml-declaration", "yes");
 
-		fw.write("<pics>");  
+		final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		final BufferedWriter writer = Files.newBufferedWriter(outputFolderPath.resolve(ATS_REPORT + ".xml"), StandardCharsets.UTF_8);
+
+		writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><report actions=\"" +  (detailsValue > 1) + "\" details=\"" + (detailsValue > 2) + "\"><pics>");
+
 		final String[] defaultImages = {"logo.png","true.png","false.png","warning.png"};
 		for (String img : defaultImages) {
-			fw.write("<pic name='"+ img.replace(".png",  "")  +"'>data:image/png;base64," +  getBase64DefaultImages(ResourceContent.class.getResourceAsStream("/reports/images/" + img).readAllBytes())  + "</pic>");
+			writer.write("<pic name='"+ img.replace(".png",  "")  +"'>data:image/png;base64," +  getBase64DefaultImages(ResourceContent.class.getResourceAsStream("/reports/images/" + img).readAllBytes())  + "</pic>");
 		}
-		fw.write("</pics>");
+		
+		writer.write("</pics>");
 
 		for (int i=0; i<suitesList.length; i++) {
 
 			final String suiteName = suitesList[i].name;
 
-			fw.write("<suite name=\"" + suiteName + "\"><parameters>");
+			writer.write("<suite name=\"" + suiteName + "\"><parameters>");
 
 			for (Map.Entry<String, String> entry : suitesList[i].parameters.entrySet()) {
-				fw.write("<parameter name=\"" + entry.getKey() + "\" value=\"" + entry.getValue() + "\"/>");
+				writer.write("<parameter name=\"" + entry.getKey() + "\" value=\"" + entry.getValue() + "\"/>");
 			}
 
-			fw.write("</parameters><tests>");
+			writer.write("</parameters><tests>");
 
 			final String[] tests = suitesList[i].tests;
 			for (int j=0; j<tests.length; j++) {
 				final String className = tests[j];
-				final Path xmlDataPath = outputFolderPath.resolve(suiteName).resolve(className + "_xml").resolve("actions.xml");
-				final File xmlDataFile = xmlDataPath.toFile();
+				final Path xmlDataPath = outputFolderPath.resolve(suiteName).resolve(className + "_xml").resolve(XmlReport.REPORT_FILE);
 
-				if(xmlDataFile.exists()) {
-					fw.write(new String(Files.readAllBytes(xmlDataPath), StandardCharsets.UTF_8).replaceAll(patternXML, ""));
+				if(xmlDataPath.toFile().exists()) {
+					xmlSerializer.transform(
+							new DOMSource(
+									builder.parse(
+											new InputSource(
+													new InputStreamReader(
+															new FileInputStream(xmlDataPath.toAbsolutePath().toString()), 
+															StandardCharsets.UTF_8)))), new StreamResult(writer));
 				}
 			}
 
-			fw.write("</tests></suite>");
+			writer.write("</tests></suite>");
 		}
 
-		fw.write("</report>");
-		fw.close();
+		writer.write("</report>");
+		writer.close();
 
 		if (fop == null || !(new File(fop).exists())) {
 			Map<String, String> map = System.getenv();
@@ -206,7 +220,7 @@ public class CampaignReportGenerator {
 
 		String html = null;
 		String pdf = null;
-		
+
 		final File xsltFolder = Paths.get("").resolve("src/assets/resources/xslt").toFile();
 		if(xsltFolder != null && xsltFolder.exists()) {
 			for (File xslt : xsltFolder.listFiles()) {
@@ -262,16 +276,24 @@ public class CampaignReportGenerator {
 
 		//HTML reports
 
-		final MinifyWriter filteredWriter = new MinifyWriter(
-				new FileWriter(outputFolderPath.resolve(ATS_REPORT + ".html").toFile()));
-
+		final Path atsXmlDataPath = outputFolderPath.resolve(ATS_REPORT + ".xml");
+		
+		final MinifyWriter filteredWriter = new MinifyWriter(Files.newBufferedWriter(outputFolderPath.resolve(ATS_REPORT + ".html"), StandardCharsets.UTF_8));
 		final Transformer htmlTransformer = TransformerFactory.newInstance().newTransformer(new StreamSource(html));
-		htmlTransformer.transform(new StreamSource(xmlReport), new StreamResult(filteredWriter));
+		
+		htmlTransformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+		htmlTransformer.transform(
+				new DOMSource(
+						builder.parse(
+								new InputSource(
+										new InputStreamReader(
+												Files.newInputStream(atsXmlDataPath), StandardCharsets.UTF_8)))), new StreamResult(filteredWriter));
+		
 		filteredWriter.close();
 
 		if(fop != null) {
 			try {
-				Runtime.getRuntime().exec("java -cp \"" + fop + "\" org.apache.fop.cli.Main -xml \"" + xmlReport.getAbsolutePath() + "\" -xsl " + pdf + " \"" + outputFolderPath.resolve(ATS_REPORT + ".pdf").toFile().getAbsolutePath() +"\"");
+				Runtime.getRuntime().exec("java -cp \"" + fop + "\" org.apache.fop.cli.Main -xml \"" + atsXmlDataPath.toFile().getAbsolutePath() + "\" -xsl " + pdf + " \"" + outputFolderPath.resolve(ATS_REPORT + ".pdf").toFile().getAbsolutePath() +"\"");
 			} catch (Throwable t)
 			{
 				t.printStackTrace();

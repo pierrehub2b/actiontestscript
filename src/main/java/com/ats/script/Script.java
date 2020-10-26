@@ -194,7 +194,7 @@ public class Script {
 	//-------------------------------------------------------------------------------------------------
 
 	protected void addToScriptCallTree(ActionTestScript sc, String name) {
-		if(!scriptCallTree.stream().filter(a -> a.getTestName().equals(name)).findFirst().isPresent()) {
+		if(scriptCallTree != null && !scriptCallTree.stream().filter(a -> a.getTestName().equals(name)).findFirst().isPresent()) {
 			scriptCallTree.add(sc);
 		}
 	}

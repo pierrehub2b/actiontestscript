@@ -12,6 +12,7 @@ import org.w3c.dom.Element;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -19,6 +20,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
@@ -247,8 +250,11 @@ public class XmlReport {
 
 				try {
 
+					final BufferedWriter writer = Files.newBufferedWriter(xmlFolder.toPath().resolve(REPORT_FILE), StandardCharsets.UTF_8);
 					final Transformer transformer = TransformerFactory.newInstance().newTransformer();
-					transformer.transform(new DOMSource(document), new StreamResult(new FileOutputStream(xmlFolder.toPath().resolve(REPORT_FILE).toFile())));
+					transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+					
+					transformer.transform(new DOMSource(document), new StreamResult(writer));
 
 				} catch (TransformerConfigurationException e2) {
 					logger.sendError("XML report config error ->", e2.getMessage());
@@ -256,6 +262,8 @@ public class XmlReport {
 					logger.sendError("XML report transform error ->", e3.getMessage());
 				} catch (FileNotFoundException e4) {
 					logger.sendError("XML report write file error ->", e4.getMessage());
+				} catch (IOException e5) {
+					logger.sendError("XML report IO write file error ->", e5.getMessage());
 				}
 
 			} catch (ParserConfigurationException e4) {
@@ -338,7 +346,10 @@ public class XmlReport {
 				try {
 
 					final Transformer transformer = TransformerFactory.newInstance().newTransformer();
-					transformer.transform(new DOMSource(document), new StreamResult(new FileOutputStream(xmlFolder.toPath().resolve(REPORT_FILE).toFile())));
+					transformer.transform(
+							new DOMSource(document), 
+							new StreamResult(
+									new FileOutputStream(xmlFolder.toPath().resolve(REPORT_FILE).toFile())));
 
 				} catch (TransformerConfigurationException e2) {
 					logger.sendError("XML report config error ->", e2.getMessage());
