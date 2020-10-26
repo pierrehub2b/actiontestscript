@@ -228,19 +228,19 @@
 							</i>
 						</font>
 					</TD>
-					<TD COLSPAN="1" style="padding: 0px 10px 0px 0px;">
+					<TD COLSPAN="2" style="padding: 0px 10px 0px 0px;">
 						
-						<font size="2" color="#5d5d5d">
+						<font size="2">
 						<xsl:for-each select="parameters/parameter">
 							<span style="padding: 0px 0px 0px 20px;">
 							<b>
 							<xsl:value-of select="@name"/></b> = 
-							<xsl:value-of select="@value" />
+							<i><xsl:value-of select="@value" /></i>
 							</span>
 						</xsl:for-each>
 						</font>
 					</TD>
-					<TD COLSPAN="2" style="text-align:right;padding: 0px 5px 0px 0px;" ROWSPAN="2">
+					<TD COLSPAN="1" width="44" style="text-align:right;padding: 0px 5px 0px 0px;" ROWSPAN="2">
 						<xsl:choose>
 							<xsl:when test="$failedTests = 0">
 								<img width="34" height="34" align="right" alt="Test passed" class="iconTrue"/>
@@ -259,25 +259,35 @@
 							</i>
 						</font>
 					</TD>
-					<TD style="padding: 0px 0px 0px 15px;">
+					<TD colspan="2" style="padding: 0px 0px 0px 15px;">
+					<font size="2">
 						<xsl:choose>
 							<xsl:when test="$countTests = $passedTests">
-								all tests passed !
+							<span style="padding: 0px 0px 0px 4px;color:#246a16">
+								<b>all tests passed !</b>
+								</span>
 							</xsl:when>
 							<xsl:otherwise>
 								<xsl:choose>
 									<xsl:when test="$countTests = $failedTests">
-										all tests failed !
+									<span style="padding: 0px 0px 0px 4px;">
+										<b>all tests failed !</b>
+										</span>
 									</xsl:when>
 									<xsl:otherwise>
+									<b><span style="padding: 0px 0px 0px 4px;color:#246a16">
 										<xsl:value-of select="$passedTests" />
 										test(s) passed,
+										</span>
+										<span style="padding: 0px 0px 0px 10px;color:#a91b22">
 										<xsl:value-of select="$failedTests" />
-										test(s) failed.
+										test(s) failed
+										</span></b>
 									</xsl:otherwise>
 								</xsl:choose>
 							</xsl:otherwise>
 						</xsl:choose>
+						</font>
 					</TD>
 				</TR>
 				<xsl:apply-templates select="test" />
@@ -433,11 +443,11 @@
 									<xsl:value-of
 										select="substring-before(script/summary/error/@script, ':')"
 										disable-output-escaping="yes"/>
-									</b><i> (line 
+									</b><i> ( line 
 									<xsl:value-of
 										select="script/summary/error/@line"
 										disable-output-escaping="yes"/>
-									) : </i>
+									 ) : </i>
 								<i>
 								<xsl:value-of select="script/summary/error"
 									disable-output-escaping="yes" />
