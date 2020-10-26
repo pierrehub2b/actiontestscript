@@ -293,7 +293,8 @@ public class CampaignReportGenerator {
 
 		if(fop != null) {
 			try {
-				Runtime.getRuntime().exec("java -cp \"" + fop + "\" org.apache.fop.cli.Main -xml \"" + atsXmlDataPath.toFile().getAbsolutePath() + "\" -xsl " + pdf + " \"" + outputFolderPath.resolve(ATS_REPORT + ".pdf").toFile().getAbsolutePath() +"\"");
+				final String cmd = "java -cp \"" + fop + "\" org.apache.fop.cli.Main -xml \"" + atsXmlDataPath.toFile().getAbsolutePath() + "\" -xsl " + pdf + " \"" + outputFolderPath.resolve(ATS_REPORT + ".pdf").toFile().getAbsolutePath() + "\"";
+				Runtime.getRuntime().exec(cmd);
 			} catch (Throwable t)
 			{
 				t.printStackTrace();

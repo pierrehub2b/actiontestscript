@@ -205,7 +205,7 @@
 			<TBODY>
 				<THEAD>
 					<TR style="background-color:#4d545d;color:#ffffff" height="34">
-						<TD colspan="4"
+						<TD colspan="2"
 							style="padding: 0px 0px 0px 10px;border-style:solid;border-width: 0px 0px 0px 0px;">
 							<FONT SIZE="5">
 								<B>
@@ -218,6 +218,10 @@
 								test(s) executed
 							</i>
 						</TD>
+						<TD colspan="1" style="padding: 0px 0px 0px 10px;border-style:solid;border-width: 0px 0px 0px 0px;">
+							Links
+						</TD>
+						<TD colspan="1" style="padding: 0px 0px 0px 10px;border-style:none;"></TD>
 					</TR>
 				</THEAD>
 				<TR height="25">
@@ -228,7 +232,7 @@
 							</i>
 						</font>
 					</TD>
-					<TD COLSPAN="2" style="padding: 0px 10px 0px 0px;">
+					<TD COLSPAN="1" style="padding: 0px 10px 0px 0px;">
 						
 						<font size="2">
 						<xsl:for-each select="parameters/parameter">
@@ -239,6 +243,11 @@
 							</span>
 						</xsl:for-each>
 						</font>
+					</TD>
+					<TD COLSPAN="1" RAWSPAN="2" style="text-align:center;">
+						<a target='_blank' href='ats-report.pdf'>
+							PDF report
+						</a>
 					</TD>
 					<TD COLSPAN="1" width="44" style="text-align:right;padding: 0px 5px 0px 0px;" ROWSPAN="2">
 						<xsl:choose>
@@ -347,7 +356,7 @@
 					<TH>
 						Author
 					</TH>
-					<TH>
+					<TH style="display:none">
 						Links
 					</TH>
 					<TH>
@@ -376,7 +385,7 @@
 					<TD>
 						<xsl:value-of select="script/author" />
 					</TD>
-					<TD class="linkButtons">
+					<TD class="linkButtons" style="display:none">
 						<a>
 							<xsl:attribute name="href">
 							<xsl:value-of select="concat($testName,'.html')"/>
