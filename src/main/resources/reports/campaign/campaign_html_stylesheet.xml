@@ -357,7 +357,7 @@
 					<TH>
 						Author
 					</TH>
-					<TH style="display:none">
+					<TH>
 						Links
 					</TH>
 					<TH>
@@ -386,14 +386,14 @@
 					<TD>
 						<xsl:value-of select="script/author" />
 					</TD>
-					<TD class="linkButtons" style="display:none">
-						<a>
+					<TD class="linkButtons">
+						<a style="display:none">
 							<xsl:attribute name="href">
 							<xsl:value-of select="concat($testName,'.html')"/>
 							</xsl:attribute>
 							HTML report
 						</a>
-						<a>
+						<a style="display:none">
 							<xsl:attribute name="href">
 							<xsl:value-of select="concat($testName,'.pdf')"/>
 							</xsl:attribute>
