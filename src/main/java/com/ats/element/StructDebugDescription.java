@@ -3,14 +3,15 @@ package com.ats.element;
 import java.util.UUID;
 
 public class StructDebugDescription {
+	
 	protected Integer level;
 	protected UUID uuid;
 	protected String content;
 	
-	public StructDebugDescription(Integer l, String c) {
-		this.level = l;
+	public StructDebugDescription(Integer level, String content) {
 		this.uuid = UUID.randomUUID();
-		this.content = c;
+		this.level = level;
+		this.content = content;
 	}
 	
 	public Integer getLevel() {

@@ -9,6 +9,7 @@ import com.ats.executor.drivers.engines.MobileDriverEngine;
 import com.ats.generator.objects.MouseDirection;
 import com.google.gson.JsonObject;
 
+import javax.annotation.Nonnull;
 import java.awt.*;
 import java.util.*;
 
@@ -77,12 +78,7 @@ public class IosRootElement extends RootElement {
 	}
 
 	@Override
-	public void refresh(JsonObject jsonObject) {
-
-		if (jsonObject == null || jsonObject.get("root") == null) {
-			return;
-		}
-
+	public void refresh(@Nonnull JsonObject jsonObject) {
 		this.deviceHeight = jsonObject.get("deviceHeight").getAsDouble();
 		this.deviceWidth = jsonObject.get("deviceWidth").getAsDouble();
 
@@ -92,8 +88,7 @@ public class IosRootElement extends RootElement {
 		Double width = 0.0;
 		Double height = 0.0;
 
-		final ArrayList<StructDebugDescription> structDebug = new ArrayList<>();
-		
+		final ArrayList<StructDebugDescription> elementInfoArray = new ArrayList<>();
 		for (String item : debugDescriptionArray) {
 			int level = countSpaces(item);
 			if (level >= 4 && !item.contains("Application, pid:")) {
@@ -104,7 +99,7 @@ public class IosRootElement extends RootElement {
 					width = Double.parseDouble(arraySize[arraySize.length - 2]);
 					height = Double.parseDouble(arraySize[arraySize.length - 1]);
 				}
-				structDebug.add(new StructDebugDescription((level / 2) - 1, trimmedLine));
+				elementInfoArray.add(new StructDebugDescription((level / 2) - 1, trimmedLine));
 			}
 		}
 
@@ -116,17 +111,24 @@ public class IosRootElement extends RootElement {
 			height = height * ratioHeight;
 		}
 
-		final AtsMobileElement domStructure = new AtsMobileElement(UUID.randomUUID().toString(), "root", width, height,
-				0.0, 0.0, false, new HashMap<>());
-
-		int currentIndex = 0;
-		for (StructDebugDescription structDebugDescription : structDebug) {
-
-			final String tag = structDebugDescription.getContent().split(regexBraces)[0].replaceAll(regexSpaces, "");
-			final String[] arraySize = structDebugDescription.getContent().split(regexBraces);
+		final AtsMobileElement rootElement = new AtsMobileElement(
+				UUID.randomUUID().toString(),
+				"root",
+				width,
+				height,
+				0.0,
+				0.0,
+				false,
+				new HashMap<>()
+		);
+		
+		int currentElementIndex = 0;
+		for (StructDebugDescription elementInfo : elementInfoArray) {
+			System.out.println("Current element index : " + currentElementIndex);
+			final String[] arraySize = elementInfo.getContent().split(regexBraces);
+			final String tag = arraySize[0].replaceAll(regexSpaces, "");
 
 			final ArrayList<String> stringArray = new ArrayList<>();
-			
 			for (String s : arraySize) {
 				if (!s.replaceAll(regexSpaces, "").equals("")) {
 					stringArray.add(s);
@@ -134,7 +136,7 @@ public class IosRootElement extends RootElement {
 			}
 
 			int firstSizeIndex = 2;
-			if (structDebugDescription.getContent().contains("pid:")) {
+			if (elementInfo.getContent().contains("pid:")) {
 				firstSizeIndex++;
 			}
 
@@ -143,54 +145,62 @@ public class IosRootElement extends RootElement {
 			final double currentWidth = Double.parseDouble(stringArray.get(firstSizeIndex + 2)) * ratioWidth;
 			final double currentHeight = Double.parseDouble(stringArray.get(firstSizeIndex + 3)) * ratioHeight;
 
-			if (currentX < 0.0 || currentX > height) {
+			/* if (currentX < 0.0 || currentX > height) {
 				continue;
-			}
+			} */
 
-			final AtsMobileElement currentAtsMobileElement = new AtsMobileElement(
-					structDebugDescription.getUuid().toString(), tag, currentWidth, currentHeight, currentX, currentY,
-					true, getAttributes(structDebugDescription.getContent()));
-
-			if (structDebugDescription.getLevel() == 1) {
-				domStructure.addChildren(currentAtsMobileElement);
+			final AtsMobileElement element = new AtsMobileElement(
+					elementInfo.getUuid().toString(),
+					tag,
+					currentWidth,
+					currentHeight,
+					currentX,
+					currentY,
+					true,
+					getAttributes(elementInfo.getContent())
+			);
+			
+			if (elementInfo.getLevel() == 1) {
+				rootElement.addChildren(element);
 			} else {
+				
 				// get parentLevel
-				int i = currentIndex;
+				int i = currentElementIndex;
 				UUID uuidParent = null;
 				while ((i - 1) > -1) {
-					if (structDebug.get(i - 1).getLevel() + 1 == structDebugDescription.getLevel()) {
-						uuidParent = structDebug.get(i - 1).getUuid();
+					if (elementInfoArray.get(i - 1).getLevel() + 1 == elementInfo.getLevel()) {
+						uuidParent = elementInfoArray.get(i - 1).getUuid();
 						break;
 					}
 					i--;
 				}
 
 				if (uuidParent != null) {
-					searchAndAdd(uuidParent.toString(), domStructure, currentAtsMobileElement);
+					searchAndAdd(uuidParent.toString(), rootElement, element);
 				}
 
 			}
-			currentIndex++;
+			currentElementIndex++;
 		}
 
-		final AtsMobileElement[] firstChilds = domStructure.getChildren();
-		if (firstChilds != null && firstChilds.length > 0) {
-			final AtsMobileElement[] frontElements = firstChilds[0].getChildren();
+		// Many Windows
+		final AtsMobileElement[] rootElementChildren = rootElement.getChildren();
+		if (rootElementChildren != null && rootElementChildren.length > 0) {
+			// Window children
+			final AtsMobileElement[] frontElements = rootElementChildren[0].getChildren();
 			if (frontElements != null && frontElements.length > 1) {
-
-				final AtsMobileElement child = frontElements[frontElements.length - 1];
-				final boolean containsElements = checkConsistency(child.getChildren(), false);
+				final AtsMobileElement lastElement = frontElements[frontElements.length - 1];
+				final boolean containsElements = checkConsistency(lastElement.getChildren(), false);
 
 				if (containsElements) {
-					domStructure.getChildren()[0].setChildren(child.getChildren());
+					rootElement.getChildren()[0].setChildren(lastElement.getChildren());
 				} else {
-					domStructure.getChildren()[0].setChildren(frontElements[0].getChildren());
+					rootElement.getChildren()[0].setChildren(frontElements[0].getChildren());
 				}
-
 			}
 		}
 		// domStructure.getChildren()[0].setChildren(fixErrorsInDOM(domStructure.getChildren()[0]));
-		this.value = domStructure;
+		this.value = rootElement;
 	}
 
 	public boolean checkConsistency(AtsMobileElement[] child, boolean val) {
