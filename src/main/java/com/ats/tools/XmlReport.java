@@ -52,7 +52,7 @@ public class XmlReport {
 			try {
 
 				final DocumentBuilder builder = factory.newDocumentBuilder();
-				final Document document= builder.newDocument();
+				final Document document = builder.newDocument();
 
 				FileInputStream fis = null;
 				AMF3Deserializer amf3 = null;
@@ -350,7 +350,10 @@ public class XmlReport {
 					transformer.transform(
 							new DOMSource(document), 
 							new StreamResult(
-									new FileOutputStream(xmlFolder.toPath().resolve(REPORT_FILE).toFile())));
+									new OutputStreamWriter(
+											new FileOutputStream(
+													xmlFolder.toPath().resolve(REPORT_FILE).toFile()), 
+											StandardCharsets.UTF_8)));
 
 				} catch (TransformerConfigurationException e2) {
 					logger.sendError("XML report config error ->", e2.getMessage());

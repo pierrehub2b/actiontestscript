@@ -19,7 +19,6 @@ under the License.
 
 package com.ats.tools;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -28,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -49,12 +49,13 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
-
 
 public class CampaignReportGenerator {
 
@@ -129,55 +130,67 @@ public class CampaignReportGenerator {
 			return;
 		}
 
-		final Transformer xmlSerializer = TransformerFactory.newInstance().newTransformer();
-		xmlSerializer.setOutputProperty("omit-xml-declaration", "yes");
-
 		final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-		final BufferedWriter writer = Files.newBufferedWriter(outputFolderPath.resolve(ATS_REPORT + ".xml"), StandardCharsets.UTF_8);
 
-		writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><report actions=\"" +  (detailsValue > 1) + "\" details=\"" + (detailsValue > 2) + "\"><pics>");
+		final Document writeXmlDocument = builder.newDocument();
+		
+		final Element report = writeXmlDocument.createElement("report");
+		report.setAttribute("actions", String.valueOf(detailsValue > 1));
+		report.setAttribute("details", String.valueOf(detailsValue > 2));
+		writeXmlDocument.appendChild(report);
+
+		final Element picsList = writeXmlDocument.createElement("pics");
 
 		final String[] defaultImages = new String[]{"logo.png", "true.png", "false.png", "warning.png", "noStop.png"};
 		for (String img : defaultImages) {
-			writer.write("<pic name='"+ img.replace(".png",  "")  +"'>data:image/png;base64," +  getBase64DefaultImages(ResourceContent.class.getResourceAsStream("/reports/images/" + img).readAllBytes())  + "</pic>");
+			final Element pic = writeXmlDocument.createElement("pic");
+			pic.setAttribute("name", img.replace(".png",  ""));
+			pic.setTextContent("data:image/png;base64," +  getBase64DefaultImages(ResourceContent.class.getResourceAsStream("/reports/images/" + img).readAllBytes()));
+			picsList.appendChild(pic);
 		}
-		
-		writer.write("</pics>");
+		report.appendChild(picsList);
 
-		for (int i=0; i<suitesList.length; i++) {
+		for (SuiteReportInfo info : suitesList) {
 
-			final String suiteName = suitesList[i].name;
+			final Element suite = writeXmlDocument.createElement("suite");
+			report.appendChild(suite);
 
-			writer.write("<suite name=\"" + suiteName + "\"><parameters>");
+			suite.setAttribute("name", info.name);
 
-			for (Map.Entry<String, String> entry : suitesList[i].parameters.entrySet()) {
-				writer.write("<parameter name=\"" + entry.getKey() + "\" value=\"" + entry.getValue() + "\"/>");
+			final Element parameters = writeXmlDocument.createElement("parameters");
+			suite.appendChild(parameters);
+
+			for (Map.Entry<String, String> entry : info.parameters.entrySet()) {
+				final Element parameter = writeXmlDocument.createElement("parameter");
+				parameter.setAttribute("name", entry.getKey());
+				parameter.setAttribute("value", entry.getValue());
+				
+				parameters.appendChild(parameter);
 			}
 
-			writer.write("</parameters><tests>");
+			final Element tests = writeXmlDocument.createElement("tests");
+			suite.appendChild(tests);
 
-			final String[] tests = suitesList[i].tests;
-			for (int j=0; j<tests.length; j++) {
-				final String className = tests[j];
-				final Path xmlDataPath = outputFolderPath.resolve(suiteName).resolve(className + "_xml").resolve(XmlReport.REPORT_FILE);
-
-				if(xmlDataPath.toFile().exists()) {
-					xmlSerializer.transform(
-							new DOMSource(
-									builder.parse(
-											new InputSource(
-													new InputStreamReader(
-															new FileInputStream(xmlDataPath.toAbsolutePath().toString()), 
-															StandardCharsets.UTF_8)))), new StreamResult(writer));
+			for (String className : info.tests) {
+				final File xmlDataFile = outputFolderPath.resolve(info.name).resolve(className + "_xml").resolve(XmlReport.REPORT_FILE).toFile();
+				if(xmlDataFile.exists()) {
+					tests.appendChild(
+							writeXmlDocument.importNode(
+									builder.parse(xmlDataFile).getDocumentElement(), true));
 				}
 			}
-
-			writer.write("</tests></suite>");
 		}
 
-		writer.write("</report>");
-		writer.close();
+		final Transformer transformer = TransformerFactory.newInstance().newTransformer();
+		transformer.transform(
+				new DOMSource(writeXmlDocument), 
+				new StreamResult(
+						new OutputStreamWriter(
+								new FileOutputStream(
+										outputFolderPath.resolve(ATS_REPORT + ".xml").toFile()), 
+								StandardCharsets.UTF_8)));
 
+		
 		if (fop == null || !(new File(fop).exists())) {
 			Map<String, String> map = System.getenv();
 			for (Map.Entry<String, String> entry : map.entrySet()) {
@@ -268,10 +281,10 @@ public class CampaignReportGenerator {
 		//HTML reports
 
 		final Path atsXmlDataPath = outputFolderPath.resolve(ATS_REPORT + ".xml");
-		
+
 		final MinifyWriter filteredWriter = new MinifyWriter(Files.newBufferedWriter(outputFolderPath.resolve(ATS_REPORT + ".html"), StandardCharsets.UTF_8));
 		final Transformer htmlTransformer = TransformerFactory.newInstance().newTransformer(new StreamSource(html));
-		
+
 		htmlTransformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
 		htmlTransformer.transform(
 				new DOMSource(
@@ -279,7 +292,7 @@ public class CampaignReportGenerator {
 								new InputSource(
 										new InputStreamReader(
 												Files.newInputStream(atsXmlDataPath), StandardCharsets.UTF_8)))), new StreamResult(filteredWriter));
-		
+
 		filteredWriter.close();
 
 		if(fop != null) {
