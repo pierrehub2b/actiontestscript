@@ -88,6 +88,7 @@
 				<script type="text/javascript">
 
 					function init(){
+										
 					loopCollapsible();
 					loopIcons('iconTrue',"
 					<xsl:value-of
@@ -115,6 +116,19 @@
 					icons[i].src = data;
 					}
 					}
+					
+function downloadJsonInfo(data){
+	var ar = data.split(",");
+	var exportObj = {projectId:ar[0],scriptName:ar[1],scriptLine:ar[2]};
+    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+    var downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("mimetype", "application/ats.action-test-script.action-report");
+    downloadAnchorNode.setAttribute("download", "ats-report.atsx");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+}
 
 					function loopCollapsible(){
 					var coll = document.getElementsByClassName("ats-script-line");
@@ -136,6 +150,9 @@
 					});
 					}
 					}
+					
+
+					
 				</script>
 				<style>
 					html{background:#f0f0f0;padding:20px;font-family:
@@ -169,15 +186,13 @@
 					.ats-script {color: #565656; text-shadow: 2px 2px
 					8px
 					#b9b9b9}
-					.ats-script-drag {border-radius: 5px;cursor:pointer}
-					.ats-script-drag a{text-decoration: none;color:#565656;}
-					.ats-script-line-drag {border-radius:
-					5px;background:#fff;padding-bottom:2px;padding-left:8px;padding-right:8px;cursor:pointer}
-					.ats-script-line-drag a{text-decoration:
-					none;color:grey;background-color:light-grey}
 					.ats-script-line
 					{color:#333;background-color:#f0f0f0;border-bottom:1px solid
 					#9ba7af;font-size:0.875rem;line-height:1.5;width:100%}
+					
+					.ats-script-drag a{text-decoration: none;color:#565656;}
+					.ats-script-info {border-radius:5px;background:#fff;padding-bottom:2px;padding-left:8px;padding-right:8px;cursor:pointer}
+					.ats-script-line-drag a{text-decoration:none;color:grey;background-color:light-grey}
 
 				</style>
 			</HEAD>
@@ -630,19 +645,17 @@
 						</div>
 					</td>
 					<td width="100%" style="padding-left: 8px; border: 0">
-						<i>
-							<span class="ats-script-line-drag" draggable="true">
-								<a>
-									<xsl:attribute name="href">
-							<xsl:value-of
-										select="concat('ats://', $projectId, '/', script, ':', line)" />
-							</xsl:attribute>
-									<xsl:value-of select="script" />
+						<i><font size="2">
+							<span class="ats-script-info">
+								<xsl:attribute name="onclick">
+								<xsl:value-of select="concat('downloadJsonInfo(&quot;', $projectId, ',', script, ',', line, '&quot;)')" />
+								</xsl:attribute>
+								<xsl:value-of select="script" />
 									( line
 									<xsl:value-of select="line" />
 									)
-								</a>
 							</span>
+							</font>
 						</i>
 					</td>
 					<td width="300" style="padding-right: 26px; border: 0">
