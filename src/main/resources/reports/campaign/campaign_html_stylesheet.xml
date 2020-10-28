@@ -687,7 +687,7 @@
 				</tr>
 			</tbody>
 
-			<xsl:choose>
+<!-- 			<xsl:choose>
 				<xsl:when test="$details = 'true'">
 					<tbody>
 						<TR>
@@ -699,7 +699,7 @@
 						</TR>
 					</tbody>
 				</xsl:when>
-			</xsl:choose>
+			</xsl:choose> -->
 		</table>
 	</xsl:template>
 </xsl:stylesheet>
