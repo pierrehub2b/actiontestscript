@@ -207,20 +207,18 @@ public class CampaignReportGenerator {
 
 		if(fop != null) {
 			final Path fopPath = Paths.get(fop);
-			final File fopFile = fopPath.toFile();
+			final File fopJarFile = fopPath.resolve("build").resolve("fop.jar").toFile();
+			final File fopLibFile = fopPath.resolve("lib").toFile();
 
-			if(fopFile.exists()) {
+			if(fopJarFile.exists() && fopLibFile.exists()) {
 				final StringJoiner fopLibsJoin = new StringJoiner(File.pathSeparator);
-				fopLibsJoin.add(fopPath.resolve("build").resolve("fop.jar").toFile().getAbsolutePath());
+				fopLibsJoin.add(fopJarFile.getAbsolutePath());
 
-				final File[] fopLibs = fopPath.resolve("lib").toFile().listFiles();
-
-				for (File libs : fopLibs) {
+				for (File libs : fopLibFile.listFiles()) {
 					if(libs.getName().contains(".jar")) {
 						fopLibsJoin.add(libs.getAbsolutePath());
 					}
 				}
-
 				fop = fopLibsJoin.toString();
 			}
 		}
