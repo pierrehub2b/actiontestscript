@@ -16,8 +16,8 @@ import org.testng.TestNG;
 import org.xml.sax.SAXException;
 
 import com.ats.generator.ATS;
-import com.ats.tools.CampaignReportGenerator;
 import com.ats.tools.Utils;
+import com.ats.tools.report.CampaignReportGenerator;
 
 public class ExecutionListener implements IExecutionListener {
 

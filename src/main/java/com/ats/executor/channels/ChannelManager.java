@@ -112,7 +112,7 @@ public class ChannelManager {
 				status.setChannel(newChannel);
 				status.endDuration();
 
-				mainScript.getRecorder().createVisualStartChannelAction(action, status.getDuration());
+				mainScript.getRecorder().createVisualStartChannelAction(action, status.getDuration(), mainScript.getTestName(), action.getLine());
 			}
 
 			status.setData(getChannelsList());

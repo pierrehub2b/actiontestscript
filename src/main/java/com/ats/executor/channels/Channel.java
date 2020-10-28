@@ -769,8 +769,8 @@ public class Channel {
 		getDesktopDriver().saveVisualReportFile(path.resolve(fileName), logger);
 	}
 
-	public void createVisualAction(String actionName, int scriptLine, long timeline, boolean sync, boolean stop) {
-		this.engine.createVisualAction(this, actionName, scriptLine, timeline, sync, stop);
+	public void createVisualAction(boolean stop, String actionName, int scriptLine, String scriptName, long timeline, boolean sync) {
+		this.engine.createVisualAction(this, stop, actionName, scriptLine, scriptName, timeline, sync);
 	}
 
 	public void updateVisualAction(boolean isRef) {

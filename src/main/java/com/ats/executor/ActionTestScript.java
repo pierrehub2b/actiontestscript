@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
-import java.util.stream.Stream;
 
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.interactions.Actions;
@@ -81,11 +80,12 @@ import com.ats.script.actions.Action;
 import com.ats.script.actions.ActionCallscript;
 import com.ats.script.actions.ActionComment;
 import com.ats.script.actions.ActionExecute;
-import com.ats.tools.CampaignReportGenerator;
-import com.ats.tools.SuiteReportInfo;
 import com.ats.tools.Utils;
 import com.ats.tools.logger.ExecutionLogger;
 import com.ats.tools.logger.levels.AtsFailError;
+import com.ats.tools.report.CampaignReportGenerator;
+import com.ats.tools.report.SuitesReport;
+import com.ats.tools.report.SuitesReportItem;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -182,11 +182,12 @@ public class ActionTestScript extends Script implements ITest{
 
 	@BeforeSuite(alwaysRun=true)
 	public void beforeSuite(ITestContext ctx) {
-
-		setLogger(new ExecutionLogger(System.out));
-		sendScriptInfo("Start suite -> " + ctx.getSuite().getName());
 		
-		final SuiteReportInfo currentSuite = new SuiteReportInfo((TestRunner) ctx);
+		final SuitesReportItem currentSuite = new SuitesReportItem((TestRunner) ctx);
+		
+		setLogger(new ExecutionLogger(System.out, currentSuite.logLevel));
+		
+		sendScriptInfo("Start suite -> " + ctx.getSuite().getName());
 		
 		Path outputPath = null;
 		final String outputFolder = System.getProperty("output-folder");
@@ -200,26 +201,23 @@ public class ActionTestScript extends Script implements ITest{
 		final File jsonSuiteFile = outputPath.resolve(CampaignReportGenerator.ATS_JSON_SUITES).toFile();
 		
 		final Gson gson = new Gson();
-		SuiteReportInfo[] suitesList = null;
-
+		SuitesReport suiteReport = null;
+		
 		try{
 			if(jsonSuiteFile.exists()) {
 				final JsonReader reader = new JsonReader(new FileReader(jsonSuiteFile));
-				suitesList = gson.fromJson(reader, SuiteReportInfo[].class);
+				suiteReport = gson.fromJson(reader, SuitesReport.class);
 				reader.close();
+				
+				suiteReport.add(currentSuite);	
+				
 			}else {
-				suitesList = new SuiteReportInfo[0];
-			}
-			
-			if(suitesList == null) {
-				suitesList = new SuiteReportInfo[] {currentSuite};
-			}else {
-				suitesList = Stream.concat(Arrays.stream(suitesList), Arrays.stream(new SuiteReportInfo[] {currentSuite})).toArray(SuiteReportInfo[]::new);
+				suiteReport = new SuitesReport(gav(), currentSuite);
 			}
 			
 			final FileWriter writer = new FileWriter(jsonSuiteFile);
 			gson.toJson(
-					suitesList, 
+					suiteReport, 
 					writer);
 
 			writer.close();
@@ -256,8 +254,6 @@ public class ActionTestScript extends Script implements ITest{
 
 			final Map<String, String> params = runner.getTest().getAllParameters();
 			setTestExecutionVariables(params);
-			
-			setLogger(new ExecutionLogger(System.out, getEnvironmentValue("ats.log.level", "")));
 
 			//-----------------------------------------------------------
 			// check report output specified

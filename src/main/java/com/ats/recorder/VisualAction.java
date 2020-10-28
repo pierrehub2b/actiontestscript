@@ -46,6 +46,8 @@ public class VisualAction {
 
 	private String type;
 	private int line;
+	private String script;
+	
 	private String value = "";
 	private String data = "";
 	
@@ -71,6 +73,14 @@ public class VisualAction {
 	// getters and setters for serialization
 	//--------------------------------------------------------
 
+	public String getScript() {
+		return script;
+	}
+
+	public void setScript(String script) {
+		this.script = script;
+	}
+	
 	public boolean isStop() {
 		return stop;
 	}

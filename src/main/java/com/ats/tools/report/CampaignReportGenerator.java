@@ -17,7 +17,7 @@ specific language governing permissions and limitations
 under the License.
  */
 
-package com.ats.tools;
+package com.ats.tools.report;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -54,6 +54,8 @@ import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.ats.tools.ResourceContent;
+import com.ats.tools.Utils;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 
@@ -116,16 +118,16 @@ public class CampaignReportGenerator {
 
 		final int detailsValue = Utils.string2Int(details, 1);
 
-		SuiteReportInfo[] suitesList = null;
+		SuitesReport sr = null;
 		try{
 
 			final JsonReader reader = new JsonReader(new FileReader(jsonSuiteFilesFile));
-			suitesList = new Gson().fromJson(reader, SuiteReportInfo[].class);
+			sr = new Gson().fromJson(reader, SuitesReport.class);
 			reader.close();
 
 		}catch (IOException e) {}
 
-		if(suitesList == null) {
+		if(sr == null) {
 			System.out.println("No suites found, nothing to do !");
 			return;
 		}
@@ -134,9 +136,10 @@ public class CampaignReportGenerator {
 
 		final Document writeXmlDocument = builder.newDocument();
 		
-		final Element report = writeXmlDocument.createElement("report");
+		final Element report = writeXmlDocument.createElement("ats-report");
 		report.setAttribute("actions", String.valueOf(detailsValue > 1));
 		report.setAttribute("details", String.valueOf(detailsValue > 2));
+		report.setAttribute("projectId", sr.projectId);
 		writeXmlDocument.appendChild(report);
 
 		final Element picsList = writeXmlDocument.createElement("pics");
@@ -150,7 +153,7 @@ public class CampaignReportGenerator {
 		}
 		report.appendChild(picsList);
 
-		for (SuiteReportInfo info : suitesList) {
+		for (SuitesReportItem info : sr.suites) {
 
 			final Element suite = writeXmlDocument.createElement("suite");
 			report.appendChild(suite);

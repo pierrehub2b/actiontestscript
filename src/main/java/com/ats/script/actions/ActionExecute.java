@@ -19,7 +19,6 @@ under the License.
 
 package com.ats.script.actions;
 
-import com.ats.executor.ActionTestScript;
 import com.ats.script.Script;
 import com.google.gson.JsonObject;
 
@@ -34,16 +33,6 @@ public abstract class ActionExecute extends Action {
 	public ActionExecute(Script script, boolean stop) {
 		super(script);
 		setStop(stop);
-	}
-
-	@Override
-	public boolean execute(ActionTestScript ts, String testName, int testLine){
-		updateCurrentChannel(ts.getCurrentChannel(), testName, line);
-		ts.getRecorder().createVisualAction(this, stop);
-		
-		getCurrentChannel().checkStatus(this, testName, testLine);
-		
-		return true;
 	}
 	
 	@Override

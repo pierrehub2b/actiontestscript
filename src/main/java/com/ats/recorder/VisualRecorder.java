@@ -28,8 +28,8 @@ import com.ats.script.Project;
 import com.ats.script.Script;
 import com.ats.script.ScriptHeader;
 import com.ats.script.actions.*;
-import com.ats.tools.XmlReport;
 import com.ats.tools.logger.ExecutionLogger;
+import com.ats.tools.report.XmlReport;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -135,17 +135,32 @@ public class VisualRecorder implements IVisualRecorder {
 	}
 	
 	@Override
-	public void createVisualStartChannelAction(ActionChannelStart action, long duration) {
+	public void createVisualStartChannelAction(ActionChannelStart action, long duration, String scriptName, int scriptLine) {
 		setChannel(action.getStatus().getChannel());
-		channel.createVisualAction(action.getClass().getName(), action.getLine(), System.currentTimeMillis() - started - duration, isSyncAction(action.getClass().getName()), true);
+		
+		channel.createVisualAction(
+				true,
+				action.getClass().getName(), 
+				scriptLine, 
+				scriptName, 
+				System.currentTimeMillis() - started - duration,
+				isSyncAction(action.getClass().getName()));
+		
 		channel.sleep(100);
 		update(0, duration, action.getName(), action.getActionLogsData().toString());
 	}
 	
 	@Override
-	public void createVisualAction(Action action, boolean stop) {
+	public void createVisualAction(Action action, String scriptName, int scriptLine) {
 		setChannel(action.getStatus().getChannel());
-		channel.createVisualAction(action.getClass().getName(), action.getLine(), System.currentTimeMillis() - started, isSyncAction(action.getClass().getName()), stop);
+		
+		channel.createVisualAction(
+				(action instanceof  ActionExecute) && ((ActionExecute)action).isStop(), 
+				action.getClass().getName(), 
+				scriptLine, 
+				scriptName, 
+				System.currentTimeMillis() - started, 
+				isSyncAction(action.getClass().getName()));
 	}
 	
 	@Override

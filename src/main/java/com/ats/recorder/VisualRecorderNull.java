@@ -31,7 +31,7 @@ public class VisualRecorderNull implements IVisualRecorder {
 	}
 	
 	@Override
-	public void createVisualAction(Action action, boolean stop) {
+	public void createVisualAction(Action action, String scriptName, int scriptLine) {
 	}
 	
 	@Override
@@ -67,7 +67,7 @@ public class VisualRecorderNull implements IVisualRecorder {
 	}
 
 	@Override
-	public void createVisualStartChannelAction(ActionChannelStart action, long duration) {
+	public void createVisualStartChannelAction(ActionChannelStart action, long duration, String scriptName, int scriptLine) {
 	}
 
 	@Override

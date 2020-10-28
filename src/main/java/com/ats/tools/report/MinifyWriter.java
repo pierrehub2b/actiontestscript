@@ -17,7 +17,7 @@ specific language governing permissions and limitations
 under the License.
  */
 
-package com.ats.tools;
+package com.ats.tools.report;
 
 import java.io.FilterWriter;
 import java.io.IOException;

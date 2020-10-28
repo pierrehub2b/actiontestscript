@@ -1,5 +1,7 @@
 package com.ats.tools;
 
+import com.ats.tools.report.ScriptReportGenerator;
+
 public class ScriptGeneratorThread extends Thread {
 	public String path;
 	public String fop;

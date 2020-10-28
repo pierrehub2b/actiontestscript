@@ -1,4 +1,4 @@
-package com.ats.tools;
+package com.ats.tools.report;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -21,6 +21,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.ats.driver.AtsManager;
+import com.ats.tools.Utils;
 
 public class PrepareProjectExecution {
 

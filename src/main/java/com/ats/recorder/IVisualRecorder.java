@@ -26,8 +26,8 @@ import com.ats.script.actions.ActionChannelStart;
 
 public interface IVisualRecorder {
 	public void terminate();
-	public void createVisualAction(Action action, boolean stop);
-	public void createVisualStartChannelAction(ActionChannelStart action, long duration);
+	public void createVisualAction(Action action, String scriptName, int scriptLine);
+	public void createVisualStartChannelAction(ActionChannelStart action, long duration, String scriptName, int scriptLine);
 	public void updateScreen(boolean ref);
 	public void updateScreen(int error, long duration);
 	public void updateScreen(int error, long duration, String value);
