@@ -45,6 +45,18 @@
 		</xsl:choose>
 	</xsl:template>
 
+	<xsl:template name="seconds-to-time">
+		<xsl:param name="seconds" />
+		<xsl:variable name="h" select="floor($seconds div 3600)" />
+		<xsl:variable name="m"
+			select="floor($seconds div 60) mod 60" />
+		<xsl:variable name="s" select="$seconds mod 60" />
+
+		<xsl:value-of select="format-number($h, '00')" />
+		<xsl:value-of select="format-number($m, ':00')" />
+		<xsl:value-of select="format-number($s, ':00')" />
+	</xsl:template>
+
 	<xsl:template name="millisecs-to-ISO">
 		<xsl:param name="millisecs" />
 
@@ -88,7 +100,7 @@
 				<script type="text/javascript">
 
 					function init(){
-										
+
 					loopCollapsible();
 					loopIcons('iconTrue',"
 					<xsl:value-of
@@ -137,7 +149,7 @@
 					});
 					}
 					}
-										
+
 				</script>
 				<style>
 					html{background:#f0f0f0;padding:20px;font-family:
@@ -174,13 +186,17 @@
 					.ats-script-line
 					{color:#333;background-color:#f0f0f0;border-bottom:1px solid
 					#9ba7af;font-size:0.875rem;line-height:1.5;width:100%}
-					
+
 					.ats-script-drag a{text-decoration: none;color:#565656;}
-					.ats-script-drag a:hover {color: #244491;text-decoration: underline;}
-										
-					.ats-script-action {border-radius:5px;background:#fff;padding-bottom:2px;padding-left:8px;padding-right:8px;cursor:pointer}
-					.ats-script-action a{text-decoration:none;color:grey;background-color:light-grey}
-					.ats-script-action a:hover {color: #244491;text-decoration: underline;}
+					.ats-script-drag a:hover {color: #244491;text-decoration:
+					underline;}
+
+					.ats-script-action
+					{border-radius:5px;background:#fff;padding-bottom:2px;padding-left:8px;padding-right:8px;cursor:pointer}
+					.ats-script-action
+					a{text-decoration:none;color:grey;background-color:light-grey}
+					.ats-script-action a:hover {color: #244491;text-decoration:
+					underline;}
 
 				</style>
 			</HEAD>
@@ -222,7 +238,14 @@
 												</xsl:otherwise>
 											</xsl:choose>
 											-
-											<xsl:value-of select="$projectId" />
+											<span class="ats-script-drag">
+												<a>
+												<xsl:attribute name="href">
+													<xsl:value-of select="concat('ats://', $projectId)" />
+												</xsl:attribute>
+												<xsl:value-of select="$projectId" />
+												</a>
+											</span>
 											-
 											<xsl:value-of select="count(suite)" />
 											suite(s) launched
@@ -420,8 +443,11 @@
 			<FONT SIZE="2" COLOR="#565656">
 				<I>
 					(executed in
-					<xsl:value-of select="sum(actions/action/duration)" />
-					ms)
+					<xsl:call-template name="seconds-to-time">
+						<xsl:with-param name="seconds"
+							select="sum(actions/action/duration) div 1000" />
+					</xsl:call-template>
+					)
 				</I>
 			</FONT>
 		</div>
@@ -533,9 +559,15 @@
 							</TD>
 							<TD colspan="7">
 								<b>
-									<xsl:value-of
-										select="substring-before(script/summary/error/@script, ':')"
-										disable-output-escaping="yes" />
+									<span class="ats-script-drag">
+										<a>
+											<xsl:attribute name="href">
+											<xsl:value-of
+												select="concat('ats://', $projectId, '/', script/summary/error/@script)" />
+											</xsl:attribute>
+											<xsl:value-of select="substring-before(script/summary/error/@script, ':')" />
+										</a>
+									</span>
 								</b>
 								<i>
 									( line
@@ -633,19 +665,21 @@
 						</div>
 					</td>
 					<td width="100%" style="padding-left: 8px; border: 0">
-						<i><font size="2">
-							<span class="ats-script-action">
-								<a>
-									<xsl:attribute name="href">
-									<xsl:value-of select="concat('ats://', $projectId, '/', script, ':', line)" />
+						<i>
+							<font size="2">
+								<span class="ats-script-action">
+									<a>
+										<xsl:attribute name="href">
+									<xsl:value-of
+											select="concat('ats://', $projectId, '/', script, ':', line)" />
 									</xsl:attribute>
-									<xsl:value-of select="script/@testName" />
-									<xsl:value-of select="script" />
-									( line
-									<xsl:value-of select="line" />
-									)
-								</a>
-							</span>
+										<xsl:value-of select="script/@testName" />
+										<xsl:value-of select="script" />
+										( line
+										<xsl:value-of select="line" />
+										)
+									</a>
+								</span>
 							</font>
 						</i>
 					</td>
@@ -691,19 +725,10 @@
 				</tr>
 			</tbody>
 
-<!-- 			<xsl:choose>
-				<xsl:when test="$details = 'true'">
-					<tbody>
-						<TR>
-							<TD class="w-100 p-3" COLSPAN="2">
-								<xsl:variable name="img"
-									select="concat($fullTestName ,'_xml/',img/@src)" />
-								<IMG width="100%" SRC="{$img}" />
-							</TD>
-						</TR>
-					</tbody>
-				</xsl:when>
-			</xsl:choose> -->
+			<!-- <xsl:choose> <xsl:when test="$details = 'true'"> <tbody> <TR> <TD 
+				class="w-100 p-3" COLSPAN="2"> <xsl:variable name="img" select="concat($fullTestName 
+				,'_xml/',img/@src)" /> <IMG width="100%" SRC="{$img}" /> </TD> </TR> </tbody> 
+				</xsl:when> </xsl:choose> -->
 		</table>
 	</xsl:template>
 </xsl:stylesheet>
