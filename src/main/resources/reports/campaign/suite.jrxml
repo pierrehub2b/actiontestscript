@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.15.0.final using JasperReports Library version 6.15.0-dd49bfb94918336b8321d5507193f0169ead4e95  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reportNewForm_subreportElectronicDistributionList" language="groovy" pageWidth="555" pageHeight="802" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="b9a625d5-6c7d-4713-b6c4-4bd250a184cd">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="net.sf.jasperreports.chart.pie.ignore.duplicated.key" value="true"/>
+	<style name="Default" forecolor="#4D545D" fontName="Roboto" fontSize="12"/>
+	<style name="Label" forecolor="#4D545D" fontName="Roboto" fontSize="10"/>
+	<style name="PieChartLabel" forecolor="#4D545D" fontName="Roboto" fontSize="7"/>
+	<parameter name="iconTrue" class="java.lang.String"/>
+	<parameter name="iconFalse" class="java.lang.String"/>
+	<queryString language="XPath">
+		<![CDATA[/]]>
+	</queryString>
+	<field name="suiteName" class="java.lang.String">
+		<fieldDescription><![CDATA[@name]]></fieldDescription>
+	</field>
+	<field name="passed" class="java.lang.Boolean">
+		<fieldDescription><![CDATA[@passed]]></fieldDescription>
+	</field>
+	<field name="duration" class="java.lang.Integer">
+		<fieldDescription><![CDATA[@duration]]></fieldDescription>
+	</field>
+	<field name="testsCount" class="java.lang.Integer">
+		<fieldDescription><![CDATA[@testsCount]]></fieldDescription>
+	</field>
+	<field name="testsPassed" class="java.lang.Integer">
+		<fieldDescription><![CDATA[@testsPassed]]></fieldDescription>
+	</field>
+	<field name="actions" class="java.lang.Integer">
+		<fieldDescription><![CDATA[@actions]]></fieldDescription>
+	</field>
+	<detail>
+		<band height="200" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<textField>
+				<reportElement style="Default" mode="Opaque" x="30" y="0" width="525" height="26" backcolor="#EDEDED" uuid="47ebff0e-6c48-4b30-8800-04c7a35bec97">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box leftPadding="8">
+					<pen lineWidth="0.05" lineColor="#6F7885"/>
+					<topPen lineWidth="0.1" lineStyle="Solid" lineColor="#6E6E6E"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.1" lineStyle="Solid" lineColor="#6E6E6E"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{suiteName}]]></textFieldExpression>
+			</textField>
+			<image scaleImage="FillFrame">
+				<reportElement x="530" y="3" width="20" height="20" backcolor="#F6F6F6" uuid="ce34891e-76a9-4af5-b843-68d6de40676f">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<imageExpression><![CDATA[$F{passed} ?	javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(Base64.getDecoder().decode($P{iconTrue}))) : javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(Base64.getDecoder().decode($P{iconFalse})))]]></imageExpression>
+			</image>
+			<rectangle>
+				<reportElement x="275" y="36" width="130" height="64" backcolor="#E6E6E6" uuid="8fe39fab-dad5-4457-a420-0ac9151c4908">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="0.0" lineStyle="Solid"/>
+				</graphicElement>
+			</rectangle>
+			<staticText>
+				<reportElement style="Label" mode="Opaque" x="275" y="35" width="130" height="16" forecolor="#575757" backcolor="#DEDEDE" uuid="f1fcc548-e608-4ea4-be7c-12a288954cef">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box topPadding="4" leftPadding="4">
+					<pen lineColor="#F6F6F6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#F6F6F6"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#F6F6F6"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement>
+					<font size="10" isBold="false" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[Executed tests]]></text>
+			</staticText>
+			<pieChart>
+				<chart isShowLegend="false" customizerClass="ats.reports.charts.CustomPieChart">
+					<reportElement style="PieChartLabel" isPrintRepeatedValues="false" x="426" y="34" width="100" height="70" uuid="5d7712c9-644e-4d00-9679-7445af42b9d9">
+						<property name="com.jaspersoft.studio.element.name" value="Tests"/>
+						<property name="com.jaspersoft.studio.unit.width" value="px"/>
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					</reportElement>
+					<box>
+						<pen lineWidth="0.0" lineStyle="Dotted" lineColor="#FFFFFF"/>
+					</box>
+					<chartTitle>
+						<font size="6"/>
+					</chartTitle>
+					<chartSubtitle>
+						<font size="6"/>
+					</chartSubtitle>
+					<chartLegend>
+						<font size="6"/>
+					</chartLegend>
+				</chart>
+				<pieDataset maxCount="3">
+					<dataset resetType="Report"/>
+					<pieSeries>
+						<keyExpression><![CDATA["fail"]]></keyExpression>
+						<valueExpression><![CDATA[$F{testsCount}-$F{testsPassed}]]></valueExpression>
+					</pieSeries>
+					<pieSeries>
+						<keyExpression><![CDATA["pass"]]></keyExpression>
+						<valueExpression><![CDATA[$F{testsPassed}]]></valueExpression>
+					</pieSeries>
+					<otherKeyExpression><![CDATA[]]></otherKeyExpression>
+					<otherLabelExpression><![CDATA[]]></otherLabelExpression>
+				</pieDataset>
+				<piePlot>
+					<plot backgroundAlpha="0.0" foregroundAlpha="0.93">
+						<seriesColor seriesOrder="0" color="#6C6378"/>
+						<seriesColor seriesOrder="1" color="#E3E3E3"/>
+					</plot>
+					<itemLabel/>
+				</piePlot>
+			</pieChart>
+			<textField>
+				<reportElement style="Label" x="345" y="35" width="60" height="16" forecolor="#808080" uuid="64dc3fe2-e342-45bc-ab72-d03aef1b1875">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box topPadding="4" leftPadding="0" rightPadding="6">
+					<pen lineStyle="Solid" lineColor="#F6F6F6"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="10" isBold="false" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{testsCount}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="Label" mode="Opaque" x="275" y="52" width="130" height="16" forecolor="#575757" backcolor="#F5F2F2" uuid="539522ef-eb28-45cc-9631-f4d155e8e9b6">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box topPadding="4" leftPadding="4">
+					<pen lineColor="#F6F6F6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#F6F6F6"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#F6F6F6"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Justified">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Passed]]></text>
+			</staticText>
+			<textField>
+				<reportElement style="Label" x="345" y="52" width="60" height="16" forecolor="#808080" uuid="9e726f5a-7cf7-4e75-9fde-41437b95eb87">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box topPadding="4" leftPadding="0" rightPadding="6">
+					<pen lineStyle="Solid" lineColor="#F6F6F6"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Justified">
+					<font size="9" isBold="false" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{testsPassed}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="Label" mode="Opaque" x="275" y="68" width="130" height="16" forecolor="#575757" backcolor="#DEDEDE" uuid="fce3f18a-81ea-4620-8733-7ed4f40ef9fc">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box topPadding="4" leftPadding="4">
+					<pen lineColor="#F6F6F6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#F6F6F6"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#F6F6F6"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Justified">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Failed]]></text>
+			</staticText>
+			<textField>
+				<reportElement style="Label" x="345" y="68" width="60" height="16" forecolor="#808080" uuid="86323c1c-fccf-4831-9b2f-3e72ac5e7ed1">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box topPadding="4" leftPadding="0" rightPadding="6">
+					<pen lineStyle="Solid" lineColor="#F6F6F6"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Justified">
+					<font size="9" isBold="false" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{testsCount}-$F{testsPassed}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="Label" mode="Opaque" x="275" y="84" width="130" height="16" forecolor="#575757" backcolor="#F5F2F2" uuid="fb7763b3-b4f4-4f47-ad84-888b736e2f55">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box topPadding="4" leftPadding="4">
+					<pen lineColor="#F6F6F6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#F6F6F6"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#F6F6F6"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Justified">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Executed actions]]></text>
+			</staticText>
+			<textField>
+				<reportElement style="Label" x="345" y="83" width="60" height="16" forecolor="#808080" uuid="eacc6892-bd4d-4871-bac5-ec5de8d25b45">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box topPadding="4" leftPadding="0" rightPadding="6">
+					<pen lineStyle="Solid" lineColor="#F6F6F6"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Justified">
+					<font size="9" isBold="false" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{actions}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="275" y="101" width="260" height="1" forecolor="#60607F" uuid="a114e2a2-b0a3-4f8b-9440-c34078d4db5d">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="0.3" lineColor="#636370"/>
+				</graphicElement>
+			</line>
+			<subreport>
+				<reportElement x="30" y="110" width="505" height="70" isRemoveLineWhenBlank="true" uuid="5cc4557c-71bc-4dfe-854a-a17118820a16">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<subreportParameter name="iconTrue">
+					<subreportParameterExpression><![CDATA[$P{iconTrue}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="iconFalse">
+					<subreportParameterExpression><![CDATA[$P{iconFalse}]]></subreportParameterExpression>
+				</subreportParameter>
+				<dataSourceExpression><![CDATA[(net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}.subDataSource("//ats")]]></dataSourceExpression>
+				<subreportExpression><![CDATA["test.jasper"]]></subreportExpression>
+			</subreport>
+			<line>
+				<reportElement x="275" y="35" width="260" height="1" forecolor="#60607F" uuid="e6e4f847-5bf8-413d-a3d6-f913190c88fd">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="0.3" lineColor="#636370"/>
+				</graphicElement>
+			</line>
+			<textField>
+				<reportElement style="Label" x="329" y="9" width="180" height="14" uuid="3374235f-84ab-4386-92e5-72542d186df9"/>
+				<textElement textAlignment="Right" verticalAlignment="Justified">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["executed in " + RIGHT("0" + ((int)(($F{duration}/1000)/3600)),2) + ":" + RIGHT("0" + ((int)(($F{duration}/1000)/60))%60,2) + ":" + RIGHT("0" + ((int)($F{duration}/1000))%60,2)]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

@@ -35,8 +35,6 @@ import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.Map;
 import java.util.StringJoiner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -51,6 +49,8 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -68,7 +68,7 @@ public class CampaignReportGenerator {
 
 		String output = null;
 		String details = null;
-		String fop = null;
+		String jasper = null;
 
 		for (int i = 0; i < args.length; i++) {
 			String string = args[i];
@@ -79,8 +79,8 @@ public class CampaignReportGenerator {
 				case "reportFolder":
 					output = args[i+1].replaceAll("\"", "");
 					break;
-				case "fop":
-					fop = args[i+1].replaceAll("\"", "");
+				case "jasper":
+					jasper = args[i+1].replaceAll("\"", "");
 					break;
 				case "details":
 					details = args[i+1];
@@ -104,7 +104,7 @@ public class CampaignReportGenerator {
 		if(jsonSuiteFilesFile.exists()) {
 
 			try {
-				new CampaignReportGenerator(outputFolderPath, jsonSuiteFilesFile, details, fop);
+				new CampaignReportGenerator(outputFolderPath, jsonSuiteFilesFile, details, jasper);
 			} catch (IOException | TransformerException | ParserConfigurationException | SAXException e) {
 				e.printStackTrace();
 			}
@@ -114,7 +114,7 @@ public class CampaignReportGenerator {
 		}
 	}
 
-	public CampaignReportGenerator(Path outputFolderPath, File jsonSuiteFilesFile, String details, String fop) throws IOException, TransformerException, ParserConfigurationException, SAXException {
+	public CampaignReportGenerator(Path outputFolderPath, File jsonSuiteFilesFile, String details, String jasper) throws IOException, TransformerException, ParserConfigurationException, SAXException {
 
 		final int detailsValue = Utils.string2Int(details, 1);
 
@@ -135,16 +135,15 @@ public class CampaignReportGenerator {
 		final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 
 		final Document writeXmlDocument = builder.newDocument();
-		
+
 		final Element report = writeXmlDocument.createElement("ats-report");
-		report.setAttribute("actions", String.valueOf(detailsValue > 1));
-		report.setAttribute("details", String.valueOf(detailsValue > 2));
+		report.setAttribute("details", String.valueOf(detailsValue));
 		report.setAttribute("projectId", sr.projectId);
 		writeXmlDocument.appendChild(report);
 
 		final Element picsList = writeXmlDocument.createElement("pics");
 
-		final String[] defaultImages = new String[]{"logo.png", "true.png", "false.png", "warning.png", "noStop.png"};
+		final String[] defaultImages = new String[]{"logo.png", "true.png", "false.png", "warning.png", "noStop.png", "pdf.png"};
 		for (String img : defaultImages) {
 			final Element pic = writeXmlDocument.createElement("pic");
 			pic.setAttribute("name", img.replace(".png",  ""));
@@ -153,10 +152,17 @@ public class CampaignReportGenerator {
 		}
 		report.appendChild(picsList);
 
+		report.setAttribute("suitesCount", String.valueOf(sr.suites.length));
+		int totalTests = 0;
+		int totalTestsPassed = 0;
+		int totalSuitesPassed = 0;
+		int totalActions = 0;
+		int totalDuration = 0;
+
 		for (SuitesReportItem info : sr.suites) {
 
+			boolean suitePassed = true;
 			final Element suite = writeXmlDocument.createElement("suite");
-			report.appendChild(suite);
 
 			suite.setAttribute("name", info.name);
 
@@ -167,22 +173,81 @@ public class CampaignReportGenerator {
 				final Element parameter = writeXmlDocument.createElement("parameter");
 				parameter.setAttribute("name", entry.getKey());
 				parameter.setAttribute("value", entry.getValue());
-				
+
 				parameters.appendChild(parameter);
 			}
 
 			final Element tests = writeXmlDocument.createElement("tests");
 			suite.appendChild(tests);
 
+			int testsPassed = 0;
+			int actionsExecuted = 0;
+			int suiteDuration = 0;
+
+			suite.setAttribute("testsCount", String.valueOf(info.tests.length));
+
 			for (String className : info.tests) {
+
 				final File xmlDataFile = outputFolderPath.resolve(info.name).resolve(className + "_xml").resolve(XmlReport.REPORT_FILE).toFile();
 				if(xmlDataFile.exists()) {
+
+					totalTests++;
+					int testDuration = 0;
+
+					final Element atsTest = builder.parse(xmlDataFile).getDocumentElement();
+					final NodeList summary = atsTest.getElementsByTagName("summary");
+
+					if(summary.getLength() > 0) {
+						if("1".equals(summary.item(0).getAttributes().getNamedItem("status").getNodeValue())) {
+							testsPassed++;
+							totalTestsPassed++;
+						}else {
+							suitePassed = false;
+						}
+					}
+
+					final NodeList actionsList = atsTest.getElementsByTagName("action");
+					actionsExecuted += actionsList.getLength();
+					totalActions += actionsExecuted;
+
+					for(int i = 0; i<actionsList.getLength(); i++) {
+						final Node action = actionsList.item(i);
+
+						for(int j = 0; j<action.getChildNodes().getLength(); j++) {
+							final Node actionNode = action.getChildNodes().item(j);
+							if("duration".equals(actionNode.getNodeName())){
+								testDuration += Utils.string2Int(actionNode.getTextContent());
+								break;
+							}
+						}
+					}
+
+					atsTest.setAttribute("duration", String.valueOf(testDuration));
+
+					suiteDuration += testDuration;
+					totalDuration += suiteDuration;
+
 					tests.appendChild(
 							writeXmlDocument.importNode(
-									builder.parse(xmlDataFile).getDocumentElement(), true));
+									atsTest, true));
 				}
 			}
+
+			if(suitePassed) {
+				totalSuitesPassed++;
+			}
+			suite.setAttribute("passed", String.valueOf(suitePassed));
+			suite.setAttribute("duration", String.valueOf(suiteDuration));
+			suite.setAttribute("actions", String.valueOf(actionsExecuted));
+			suite.setAttribute("testsPassed", String.valueOf(testsPassed));
+			report.appendChild(suite);
 		}
+
+		report.setAttribute("duration", String.valueOf(totalDuration));
+		report.setAttribute("tests", String.valueOf(totalTests));
+		report.setAttribute("testsPassed", String.valueOf(totalTestsPassed));
+		report.setAttribute("suitesPassed", String.valueOf(totalSuitesPassed));
+		report.setAttribute("actions", String.valueOf(totalActions));
 
 		final Transformer transformer = TransformerFactory.newInstance().newTransformer();
 		transformer.transform(
@@ -192,36 +257,6 @@ public class CampaignReportGenerator {
 								new FileOutputStream(
 										outputFolderPath.resolve(ATS_REPORT + ".xml").toFile()), 
 								StandardCharsets.UTF_8)));
-
-		
-		if (fop == null || !(new File(fop).exists())) {
-			Map<String, String> map = System.getenv();
-			for (Map.Entry<String, String> entry : map.entrySet()) {
-				Pattern pattern = Pattern.compile("fop-[\\d].[\\d]");
-				Matcher matcher = pattern.matcher(entry.getValue().toLowerCase());
-				if (entry.getKey().toLowerCase().contains("fop") && matcher.find()) {
-					fop = entry.getValue();
-				}
-			}
-		}
-
-		if(fop != null) {
-			final Path fopPath = Paths.get(fop);
-			final File fopJarFile = fopPath.resolve("build").resolve("fop.jar").toFile();
-			final File fopLibFile = fopPath.resolve("lib").toFile();
-
-			if(fopJarFile.exists() && fopLibFile.exists()) {
-				final StringJoiner fopLibsJoin = new StringJoiner(File.pathSeparator);
-				fopLibsJoin.add(fopJarFile.getAbsolutePath());
-
-				for (File libs : fopLibFile.listFiles()) {
-					if(libs.getName().contains(".jar")) {
-						fopLibsJoin.add(libs.getAbsolutePath());
-					}
-				}
-				fop = fopLibsJoin.toString();
-			}
-		}
 
 		String html = null;
 		String pdf = null;
@@ -296,15 +331,44 @@ public class CampaignReportGenerator {
 
 		filteredWriter.close();
 
-		if(fop != null) {
-			try {
-				final String cmd = "java -cp \"" + fop + "\" org.apache.fop.cli.Main -xml \"" + atsXmlDataPath.toFile().getAbsolutePath() + "\" -xsl \"" + pdf + "\" -pdf \"" + outputFolderPath.resolve(ATS_REPORT + ".pdf").toFile().getAbsolutePath() + "\"";
-				Runtime.getRuntime().exec(cmd);
-			} catch (Throwable t)
-			{
-				t.printStackTrace();
+		if(jasper != null) {
+
+			final File jasperFolder = new File(jasper);
+			if(jasperFolder.exists()) {
+				copyResource("campaign.jrxml", outputFolderPath);
+				copyResource("suite.jrxml", outputFolderPath);
+				copyResource("test.jrxml", outputFolderPath);
+								
+				final StringJoiner jasperLibsJoin = new StringJoiner(File.pathSeparator);
+				for (File libs : jasperFolder.listFiles()) {
+					if(libs.getName().endsWith(".jar")) {
+						jasperLibsJoin.add(libs.getAbsolutePath());
+					}
+				}
+				
+				final String cp = jasperLibsJoin.toString();
+				
+				try {
+					final String cmd = "java -cp \"" + cp + "\" ats.reports.CampaignReport \"" + outputFolderPath.toAbsolutePath().toFile().getAbsolutePath();
+					Runtime.getRuntime().exec(cmd);
+				} catch (Throwable t)
+				{
+					t.printStackTrace();
+				}
 			}
 		}
+	}
+
+	private static void copyResource(String resName, Path dest) throws IOException {
+		InputStream is = ResourceContent.class.getResourceAsStream("/reports/campaign/" + resName);
+
+		byte[] buffer = new byte[is.available()];
+		is.read(buffer);
+
+		File targetFile = dest.resolve(resName).toFile();
+		OutputStream outStream = new FileOutputStream(targetFile);
+		outStream.write(buffer);
+		outStream.close();	
 	}
 
 	private static void copyResource(InputStream res, String dest) throws IOException {

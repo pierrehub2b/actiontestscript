@@ -70,12 +70,20 @@ public class ExecutionListener implements IExecutionListener {
 
 			final File jsonSuiteFile = getJsonSuitesFile();
 			if(jsonSuiteFile != null && jsonSuiteFile.exists()) {
-
-				String fop = System.getProperty("fop");
-				//fop = System.getenv("APACHE_FOP_HOME");
-
+				
+				String jasperHome = System.getenv("JASPER_HOME");
+				if(jasperHome == null) {
+					jasperHome = System.getProperty("jasper");
+				}
+				
+				if(jasperHome != null) {
+					System.out.println("[INFO] Jasper folder detected -> " + jasperHome);
+				}else {
+					System.out.println("[INFO] No Jasper folder detected !");
+				}
+				
 				try {
-					new CampaignReportGenerator(getOutputFolderPath(), jsonSuiteFile, atsReport, fop);
+					new CampaignReportGenerator(getOutputFolderPath(), jsonSuiteFile, atsReport, jasperHome);
 				} catch (IOException | TransformerException | ParserConfigurationException | SAXException e) {
 					e.printStackTrace();
 				}
