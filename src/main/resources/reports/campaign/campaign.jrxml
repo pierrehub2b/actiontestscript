@@ -55,7 +55,7 @@
 		<band height="842" splitType="Stretch">
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<staticText>
-				<reportElement positionType="FixRelativeToBottom" stretchType="ContainerHeight" mode="Opaque" x="-20" y="-20" width="595" height="862" backcolor="#F6F6F6" uuid="dfe1f579-eefb-46ed-92c2-09dc4d7c908e">
+				<reportElement positionType="FixRelativeToBottom" mode="Opaque" x="-20" y="-20" width="595" height="862" backcolor="#F6F6F6" uuid="dfe1f579-eefb-46ed-92c2-09dc4d7c908e">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>

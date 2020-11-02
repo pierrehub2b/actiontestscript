@@ -22,6 +22,8 @@ import com.ats.tools.report.CampaignReportGenerator;
 public class ExecutionListener implements IExecutionListener {
 
 	private static final String TESTNG_FILE_NAME = "testng-results.xml";
+	private static final String[] JASPER_PROPERTY_NAME = {"jasper", "jasper.home"};
+	private static final String JASPER_HOME_ENVIRONMENT = "JASPER_HOME";
 
 	@SuppressWarnings("deprecation")
 	private Path getOutputFolderPath() {
@@ -71,16 +73,18 @@ public class ExecutionListener implements IExecutionListener {
 			final File jsonSuiteFile = getJsonSuitesFile();
 			if(jsonSuiteFile != null && jsonSuiteFile.exists()) {
 				
-				String jasperHome = System.getenv("JASPER_HOME");
-				if(jasperHome == null) {
-					jasperHome = System.getProperty("jasper");
+				String jasperHome = null;
+				for (String s : JASPER_PROPERTY_NAME) {
+					jasperHome = System.getProperty(s);
+					if(jasperHome != null) {
+						break;
+					}
 				}
 				
-				if(jasperHome != null) {
-					System.out.println("[INFO] Jasper folder detected -> " + jasperHome);
-				}else {
-					System.out.println("[INFO] No Jasper folder detected !");
+				if(jasperHome == null) {
+					jasperHome = System.getenv(JASPER_HOME_ENVIRONMENT);
 				}
+				System.out.println("[INFO] Jasper folder -> " + jasperHome != null ? jasperHome:"no folder found");
 				
 				try {
 					new CampaignReportGenerator(getOutputFolderPath(), jsonSuiteFile, atsReport, jasperHome);

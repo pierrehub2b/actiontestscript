@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.15.0.final using JasperReports Library version 6.15.0-dd49bfb94918336b8321d5507193f0169ead4e95  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reportNewForm_subreportElectronicDistributionList" language="groovy" pageWidth="555" pageHeight="802" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="b9a625d5-6c7d-4713-b6c4-4bd250a184cd">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
@@ -107,7 +106,6 @@
 					</chartLegend>
 				</chart>
 				<pieDataset maxCount="3">
-					<dataset resetType="Report"/>
 					<pieSeries>
 						<keyExpression><![CDATA["fail"]]></keyExpression>
 						<valueExpression><![CDATA[$F{testsCount}-$F{testsPassed}]]></valueExpression>
@@ -156,7 +154,7 @@
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#F6F6F6"/>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement verticalAlignment="Justified">
+				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
 				<text><![CDATA[Passed]]></text>
@@ -171,7 +169,7 @@
 				<box topPadding="4" leftPadding="0" rightPadding="6">
 					<pen lineStyle="Solid" lineColor="#F6F6F6"/>
 				</box>
-				<textElement textAlignment="Right" verticalAlignment="Justified">
+				<textElement textAlignment="Right">
 					<font size="9" isBold="false" isItalic="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{testsPassed}]]></textFieldExpression>
@@ -190,7 +188,7 @@
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#F6F6F6"/>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement verticalAlignment="Justified">
+				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
 				<text><![CDATA[Failed]]></text>
@@ -205,7 +203,7 @@
 				<box topPadding="4" leftPadding="0" rightPadding="6">
 					<pen lineStyle="Solid" lineColor="#F6F6F6"/>
 				</box>
-				<textElement textAlignment="Right" verticalAlignment="Justified">
+				<textElement textAlignment="Right">
 					<font size="9" isBold="false" isItalic="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{testsCount}-$F{testsPassed}]]></textFieldExpression>
@@ -224,7 +222,7 @@
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#F6F6F6"/>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement verticalAlignment="Justified">
+				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
 				<text><![CDATA[Executed actions]]></text>
@@ -239,7 +237,7 @@
 				<box topPadding="4" leftPadding="0" rightPadding="6">
 					<pen lineStyle="Solid" lineColor="#F6F6F6"/>
 				</box>
-				<textElement textAlignment="Right" verticalAlignment="Justified">
+				<textElement textAlignment="Right">
 					<font size="9" isBold="false" isItalic="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{actions}]]></textFieldExpression>
@@ -279,7 +277,7 @@
 			</line>
 			<textField>
 				<reportElement style="Label" x="329" y="9" width="180" height="14" uuid="3374235f-84ab-4386-92e5-72542d186df9"/>
-				<textElement textAlignment="Right" verticalAlignment="Justified">
+				<textElement textAlignment="Right">
 					<font size="8" isItalic="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["executed in " + RIGHT("0" + ((int)(($F{duration}/1000)/3600)),2) + ":" + RIGHT("0" + ((int)(($F{duration}/1000)/60))%60,2) + ":" + RIGHT("0" + ((int)($F{duration}/1000))%60,2)]]></textFieldExpression>
