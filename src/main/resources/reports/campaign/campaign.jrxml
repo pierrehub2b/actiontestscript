@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.15.0.final using JasperReports Library version 6.15.0-dd49bfb94918336b8321d5507193f0169ead4e95  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="XMLDSReport" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="0" uuid="95bc676b-3069-4658-9b34-ad153d7f2bb8">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
@@ -134,7 +133,6 @@
 					<chartLegend/>
 				</chart>
 				<pieDataset maxCount="3">
-					<dataset resetType="Report"/>
 					<pieSeries>
 						<keyExpression><![CDATA["fail"]]></keyExpression>
 						<valueExpression><![CDATA[$F{suites}-$F{suitesPassed}]]></valueExpression>
@@ -312,7 +310,6 @@
 					<chartLegend/>
 				</chart>
 				<pieDataset maxCount="3">
-					<dataset resetType="Report"/>
 					<pieSeries>
 						<keyExpression><![CDATA["fail"]]></keyExpression>
 						<valueExpression><![CDATA[$F{tests}-$F{testsPassed}]]></valueExpression>
@@ -494,7 +491,7 @@
 				<textElement>
 					<font size="8" isBold="false" isItalic="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Generated at " + NOW( )]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Generated at " +DATEFORMAT(NOW( ),"H:mm:ss , yyyy-MM-dd")]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>

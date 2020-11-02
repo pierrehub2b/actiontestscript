@@ -101,6 +101,28 @@
 
 				<script type="text/javascript">
 
+					function scrollToNextAts(elem){
+						var sibling = elem.nextElementSibling;
+						while (sibling) {
+							if (sibling.className == "ats-script"){
+								sibling.scrollIntoView();
+								return;
+							};
+							sibling = sibling.nextElementSibling
+						}
+					};
+					
+					function scrollToPrevAts(elem){
+						var sibling = elem.previousElementSibling;
+						while (sibling) {
+							if (sibling.className == "ats-script"){
+								sibling.scrollIntoView();
+								return;
+							};
+							sibling = sibling.previousElementSibling
+						}
+					};
+
 					function init(){
 
 					loopCollapsible();
@@ -412,7 +434,7 @@
 			select="concat($suiteName, '/', script[1]/@testName)" />
 		<xsl:variable name="actionsCount"
 			select="script/summary/@actions" />
-		<div class="ats-script">
+		<div class="ats-script" width="100%">
 			<FONT SIZE="4">
 				<B>
 					<span class="ats-script-drag">
@@ -436,7 +458,17 @@
 					)
 				</I>
 			</FONT>
+			<span style="float:right">
+				<span style="cursor: pointer" onclick="scrollToPrevAts(parentNode.parentNode)">
+				prev
+				</span>
+				 - 
+				<span style="cursor: pointer" onclick="scrollToNextAts(parentNode.parentNode)">
+				next
+				</span>
+			</span>
 		</div>
+
 		<TABLE border="1" bordercolor="#ffffff" cellpadding="10"
 			width="100%" style="background-color:#C4C4C4">
 			<THEAD>

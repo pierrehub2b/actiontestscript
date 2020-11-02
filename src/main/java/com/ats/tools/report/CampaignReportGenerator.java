@@ -19,6 +19,7 @@ under the License.
 
 package com.ats.tools.report;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -337,9 +338,18 @@ public class CampaignReportGenerator {
 				final String cp = jasperLibsJoin.toString();
 
 				try {
-					final String cmd = "java -cp \"" + cp + "\" ats.reports.CampaignReport \""
-							+ outputFolderPath.toAbsolutePath().toFile().getAbsolutePath();
-					Runtime.getRuntime().exec(cmd);
+
+					final String cmd = "java -cp \"" + cp + "\" ats.reports.CampaignReport \"" + outputFolderPath.toAbsolutePath().toFile().getAbsolutePath();
+					Process proc = Runtime.getRuntime().exec(cmd);
+
+					BufferedReader stdError = new BufferedReader(new 
+							InputStreamReader(proc.getErrorStream()));
+
+					String s = null;
+					while ((s = stdError.readLine()) != null) {
+						System.out.println(s);
+					}
+										
 				} catch (Throwable t) {
 					t.printStackTrace();
 				}
