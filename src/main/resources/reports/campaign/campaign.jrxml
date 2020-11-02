@@ -491,7 +491,7 @@
 				<textElement>
 					<font size="8" isBold="false" isItalic="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Generated at " +DATEFORMAT(NOW( ),"H:mm:ss , yyyy-MM-dd")]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Created on " + DATEFORMAT(NOW( ),"yyyy-MM-dd ' at ' H:mm:ss")]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>

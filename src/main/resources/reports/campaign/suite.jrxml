@@ -7,6 +7,7 @@
 	<style name="Default" forecolor="#4D545D" fontName="Roboto" fontSize="12"/>
 	<style name="Label" forecolor="#4D545D" fontName="Roboto" fontSize="10"/>
 	<style name="PieChartLabel" forecolor="#4D545D" fontName="Roboto" fontSize="7"/>
+	<subDataset name="dataset1" uuid="af4c6df6-b73f-413c-8db5-02467c80853c"/>
 	<parameter name="iconTrue" class="java.lang.String"/>
 	<parameter name="iconFalse" class="java.lang.String"/>
 	<queryString language="XPath">
@@ -29,6 +30,9 @@
 	</field>
 	<field name="actions" class="java.lang.Integer">
 		<fieldDescription><![CDATA[@actions]]></fieldDescription>
+	</field>
+	<field name="parameters" class="java.util.List">
+		<fieldDescription><![CDATA[parameters]]></fieldDescription>
 	</field>
 	<detail>
 		<band height="200" splitType="Stretch">
