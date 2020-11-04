@@ -169,7 +169,7 @@
 				<textFieldExpression><![CDATA[$F{suites}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement style="Label" mode="Opaque" x="0" y="122" width="130" height="20" forecolor="#575757" backcolor="#EBEBEB" uuid="5be62bdc-a1dd-44bb-9a30-4b1fefc85dbb">
+				<reportElement style="Label" mode="Opaque" x="0" y="122" width="130" height="20" forecolor="#336600" backcolor="#EBEBEB" uuid="5be62bdc-a1dd-44bb-9a30-4b1fefc85dbb">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -188,7 +188,7 @@
 				<text><![CDATA[Passed]]></text>
 			</staticText>
 			<textField>
-				<reportElement style="Label" x="70" y="122" width="60" height="20" forecolor="#808080" uuid="e118ef10-b2d4-4f12-8fbf-b876c8276fd0">
+				<reportElement style="Label" x="70" y="122" width="60" height="20" forecolor="#336600" uuid="e118ef10-b2d4-4f12-8fbf-b876c8276fd0">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -202,7 +202,7 @@
 				<textFieldExpression><![CDATA[$F{suitesPassed}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement style="Label" mode="Opaque" x="0" y="142" width="130" height="20" forecolor="#575757" backcolor="#C9C9C9" uuid="5dda423c-9a7c-4c47-98f3-42d25897f1ee">
+				<reportElement style="Label" mode="Opaque" x="0" y="142" width="130" height="20" forecolor="#663300" backcolor="#C9C9C9" uuid="5dda423c-9a7c-4c47-98f3-42d25897f1ee">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -221,7 +221,7 @@
 				<text><![CDATA[Failed]]></text>
 			</staticText>
 			<textField>
-				<reportElement style="Label" x="70" y="142" width="60" height="20" forecolor="#808080" uuid="fc6aab14-91e3-4efe-a83d-ddcadfbac266">
+				<reportElement style="Label" x="70" y="142" width="60" height="20" forecolor="#663300" uuid="fc6aab14-91e3-4efe-a83d-ddcadfbac266">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -346,7 +346,7 @@
 				<textFieldExpression><![CDATA[$F{tests}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement style="Label" mode="Opaque" x="284" y="123" width="130" height="20" forecolor="#575757" backcolor="#EBEBEB" uuid="35addaa3-6a85-432a-89b2-bc33a998478f">
+				<reportElement style="Label" mode="Opaque" x="284" y="123" width="130" height="20" forecolor="#336600" backcolor="#EBEBEB" uuid="35addaa3-6a85-432a-89b2-bc33a998478f">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -365,7 +365,7 @@
 				<text><![CDATA[Passed]]></text>
 			</staticText>
 			<textField>
-				<reportElement style="Label" x="354" y="123" width="60" height="20" forecolor="#808080" uuid="6acc918c-f21d-4344-9dc9-c2f57bc808a4">
+				<reportElement style="Label" x="354" y="123" width="60" height="20" forecolor="#336600" uuid="6acc918c-f21d-4344-9dc9-c2f57bc808a4">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -379,7 +379,7 @@
 				<textFieldExpression><![CDATA[$F{testsPassed}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement style="Label" mode="Opaque" x="284" y="143" width="130" height="20" forecolor="#575757" backcolor="#C9C9C9" uuid="0aa7f9ce-709b-41c9-ab50-68d3843bfdd8">
+				<reportElement style="Label" mode="Opaque" x="284" y="143" width="130" height="20" forecolor="#663300" backcolor="#C9C9C9" uuid="0aa7f9ce-709b-41c9-ab50-68d3843bfdd8">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -398,7 +398,7 @@
 				<text><![CDATA[Failed]]></text>
 			</staticText>
 			<textField>
-				<reportElement style="Label" x="354" y="143" width="60" height="20" forecolor="#808080" uuid="df850cd2-c530-47ee-87a0-83fccd1f7e0a">
+				<reportElement style="Label" x="354" y="143" width="60" height="20" forecolor="#663300" uuid="df850cd2-c530-47ee-87a0-83fccd1f7e0a">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -523,11 +523,13 @@
 		<band height="36" splitType="Stretch">
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<textField>
-				<reportElement style="Label" x="274" y="6" width="280" height="14" uuid="b2db9bb2-8e8b-4fb1-a2a6-f4490b4e85f9"/>
-				<textElement textAlignment="Right">
-					<font isItalic="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA["page " + $V{PAGE_NUMBER} + " on " + $V{PAGE_COUNT}]]></textFieldExpression>
+				<reportElement style="Label" positionType="FixRelativeToBottom" x="433" y="16" width="80" height="20" uuid="2927edfb-7fe2-4274-bce1-1deacb0c6310"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement style="Label" x="515" y="16" width="40" height="20" uuid="d8aac3d7-ccc1-416d-9780-12575abf0cab"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 		</band>
 	</summary>

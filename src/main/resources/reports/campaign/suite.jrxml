@@ -31,9 +31,6 @@
 	<field name="actions" class="java.lang.Integer">
 		<fieldDescription><![CDATA[@actions]]></fieldDescription>
 	</field>
-	<field name="parameters" class="java.util.List">
-		<fieldDescription><![CDATA[parameters]]></fieldDescription>
-	</field>
 	<detail>
 		<band height="200" splitType="Stretch">
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -145,7 +142,7 @@
 				<textFieldExpression><![CDATA[$F{testsCount}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement style="Label" mode="Opaque" x="275" y="52" width="130" height="16" forecolor="#575757" backcolor="#F5F2F2" uuid="539522ef-eb28-45cc-9631-f4d155e8e9b6">
+				<reportElement style="Label" mode="Opaque" x="275" y="52" width="130" height="16" forecolor="#336600" backcolor="#F5F2F2" uuid="539522ef-eb28-45cc-9631-f4d155e8e9b6">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -164,7 +161,7 @@
 				<text><![CDATA[Passed]]></text>
 			</staticText>
 			<textField>
-				<reportElement style="Label" x="345" y="52" width="60" height="16" forecolor="#808080" uuid="9e726f5a-7cf7-4e75-9fde-41437b95eb87">
+				<reportElement style="Label" x="345" y="52" width="60" height="16" forecolor="#336600" uuid="9e726f5a-7cf7-4e75-9fde-41437b95eb87">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -179,7 +176,7 @@
 				<textFieldExpression><![CDATA[$F{testsPassed}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement style="Label" mode="Opaque" x="275" y="68" width="130" height="16" forecolor="#575757" backcolor="#DEDEDE" uuid="fce3f18a-81ea-4620-8733-7ed4f40ef9fc">
+				<reportElement style="Label" mode="Opaque" x="275" y="68" width="130" height="16" forecolor="#663300" backcolor="#DEDEDE" uuid="fce3f18a-81ea-4620-8733-7ed4f40ef9fc">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -198,7 +195,7 @@
 				<text><![CDATA[Failed]]></text>
 			</staticText>
 			<textField>
-				<reportElement style="Label" x="345" y="68" width="60" height="16" forecolor="#808080" uuid="86323c1c-fccf-4831-9b2f-3e72ac5e7ed1">
+				<reportElement style="Label" x="345" y="68" width="60" height="16" forecolor="#663300" uuid="86323c1c-fccf-4831-9b2f-3e72ac5e7ed1">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
