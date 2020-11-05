@@ -52,23 +52,24 @@ public class ExecutionListener implements IExecutionListener {
 		} catch (FileNotFoundException e) {
 		}
 
-		System.out.println("[INFO] ------------------------------------");
-		System.out.println("[INFO]   ATS " + ATS.VERSION + " execution start");
-		System.out.println("[INFO] ------------------------------------");
+		System.out.println("[ATS-SCRIPT] ------------------------------------");
+		System.out.println("[ATS-SCRIPT]   ATS " + ATS.VERSION + " execution start");
+		System.out.println("[ATS-SCRIPT] ------------------------------------");
 	}
 
 	@Override
 	public void onExecutionFinish() {
 		IExecutionListener.super.onExecutionFinish();
 
-		System.out.println("[INFO] ------------------------------------");
-		System.out.println("[INFO]   ATS execution complete");
-		System.out.println("[INFO] ------------------------------------");
+		System.out.println("[ATS-SCRIPT] ------------------------------------");
+		System.out.println("[ATS-SCRIPT]   ATS execution complete");
+		System.out.println("[ATS-SCRIPT] ------------------------------------");
 
 		final String atsReport = System.getProperty("ats-report");
 		if(atsReport != null) {
 
-			System.out.println("[INFO] Generate ATS report");
+			final String outputPath = getOutputFolderPath().toAbsolutePath().toFile().getAbsolutePath();
+			System.out.println("[ATS-SCRIPT] Generate ATS report -> " + outputPath);
 
 			final File jsonSuiteFile = getJsonSuitesFile();
 			if(jsonSuiteFile != null && jsonSuiteFile.exists()) {
@@ -84,8 +85,7 @@ public class ExecutionListener implements IExecutionListener {
 				if(jasperHome == null) {
 					jasperHome = System.getenv(JASPER_HOME_ENVIRONMENT);
 				}
-				System.out.println("[INFO] Jasper folder -> " + jasperHome != null ? jasperHome:"no folder found");
-				
+								
 				try {
 					new CampaignReportGenerator(getOutputFolderPath(), jsonSuiteFile, atsReport, jasperHome);
 				} catch (IOException | TransformerException | ParserConfigurationException | SAXException e) {

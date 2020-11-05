@@ -147,7 +147,7 @@ public class ChannelManager {
 	}
 
 	public void closeChannel(ActionStatus status, String channelName, boolean keepRunning){
-		Optional<Channel> cn = channelsList.stream().filter(c -> c.getName().equals(channelName)).findFirst();
+		final Optional<Channel> cn = channelsList.stream().filter(c -> c.getName().equals(channelName)).findFirst();
 		if(cn.isPresent()) {
 			cn.get().close(status, keepRunning);
 		}

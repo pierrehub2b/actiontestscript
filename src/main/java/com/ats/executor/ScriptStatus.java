@@ -87,7 +87,7 @@ public class ScriptStatus {
 	}
 
 	public boolean isSuiteExecution() {
-		return testName != null && suiteName != null;
+		return testName != null && suiteName != null && testName.length() != 0 && suiteName.length() != 0;
 	}
 
 	public void addErrorStack(String value) {

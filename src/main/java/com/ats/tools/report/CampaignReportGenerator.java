@@ -324,6 +324,9 @@ public class CampaignReportGenerator {
 
 			final File jasperFolder = new File(jasper);
 			if (jasperFolder.exists()) {
+				
+				System.out.println("[ATS-SCRIPT] Jasper folder -> " + jasperFolder.getAbsolutePath());
+				
 				copyResource("campaign.jrxml", outputFolderPath);
 				copyResource("suite.jrxml", outputFolderPath);
 				copyResource("test.jrxml", outputFolderPath);

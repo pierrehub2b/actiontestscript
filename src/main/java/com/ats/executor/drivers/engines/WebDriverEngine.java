@@ -739,7 +739,6 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			Arrays.asList(getWindowsHandle(0, 0)).stream().sorted(Collections.reverseOrder()).forEach(s -> closeWindowHandler(s));
 			driver.quit();
 			driver = null;
-			channel.sleep(1000);
 		}
 		getDriverProcess().close(keepRunning);
 	}
