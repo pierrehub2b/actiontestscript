@@ -97,7 +97,7 @@
 			<HEAD>
 				<META charset="utf-8" />
 				<META name="description" content="" />
-				<TITLE>Ats suites reporting</TITLE>
+				<TITLE>ATS Suites Reporting</TITLE>
 
 				<script type="text/javascript">
 
@@ -122,57 +122,6 @@
 							sibling = sibling.previousElementSibling
 						}
 					};
-
-					function init(){
-
-					loopCollapsible();
-					loopIcons('iconTrue',"
-					<xsl:value-of
-						select="//ats-report/pics/pic[@name='true']" />
-					");
-					loopIcons('iconFalse',"
-					<xsl:value-of
-						select="//ats-report/pics/pic[@name='false']" />
-					");
-					loopIcons('iconNoStop',"
-					<xsl:value-of
-						select="//ats-report/pics/pic[@name='noStop']" />
-					");
-					loopIcons('iconWarning',"
-					<xsl:value-of
-						select="//ats-report/pics/pic[@name='warning']" />
-					")
-					}
-
-					function loopIcons(cl, data){
-					let
-					icons=document.getElementsByClassName(cl);
-					for (var i=0,item; item =
-					icons[i]; i++) {
-					icons[i].src = data;
-					}
-					}
-
-					function loopCollapsible(){
-					var coll = document.getElementsByClassName("ats-script-line");
-
-					for
-					(var i=0, item; item = coll[i]; i++) {
-					coll[i].addEventListener("click", function() {
-					var content =
-					this.nextElementSibling;
-					content.style.display = null;
-					content.style.maxHeight = content.scrollHeight + "px";
-
-					if(!content.style.maxHeight){
-					content.style.maxHeight =
-					content.scrollHeight + "px";
-					} else {
-					content.style.maxHeight = null;
-					}
-					});
-					}
-					}
 
 				</script>
 				<style>
@@ -222,9 +171,40 @@
 					.ats-script-action a:hover {color: #244491;text-decoration:
 					underline;}
 
+					.ats-icon-true {
+					  background:
+					    url(<xsl:value-of select="//ats-report/pics/pic[@name='true']" />)
+					    no-repeat
+					    center;
+					  padding: 5px 0 5px 36px;
+					}
+					
+					.ats-icon-false {
+					  background:
+					    url(<xsl:value-of select="//ats-report/pics/pic[@name='false']" />)
+					    no-repeat
+					    center;
+					  padding: 5px 0 5px 36px;
+					}
+					
+					.ats-icon-no-stop {
+					  background:
+					    url(<xsl:value-of select="//ats-report/pics/pic[@name='noStop']" />)
+					    no-repeat
+					    center;
+					  padding: 5px 0 5px 36px;
+					}
+					
+					.ats-icon-warning {
+					  background:
+					    url(<xsl:value-of select="//ats-report/pics/pic[@name='warning']" />)
+					    no-repeat
+					    center;
+					  padding: 5px 0 5px 36px;
+					}
 				</style>
 			</HEAD>
-			<BODY onload="init()">
+			<BODY>
 				<TABLE width="100%">
 					<TBODY>
 						<TR>
@@ -271,8 +251,7 @@
 							</TD>
 							<TD COLSPAN="1" class="titleClass" width="120">
 								<a target='_blank' href='ats-report.pdf'>
-								PDF report
-									<img align="right" alt="Download PDF report">
+								Summary<img align="right" alt="Download PDF report">
 									<xsl:attribute name="src">
 										<xsl:value-of select="$picPdf" />
 									</xsl:attribute>
@@ -351,12 +330,10 @@
 						style="text-align:right;padding: 0px 5px 0px 0px;">
 						<xsl:choose>
 							<xsl:when test="$failedTests = 0">
-								<img width="32" height="32" align="right" alt="Test passed"
-									class="iconTrue" />
+									<span class="ats-icon-true" width="32" height="32"/>
 							</xsl:when>
 							<xsl:otherwise>
-								<img width="32" height="32" align="right" alt="Test failed"
-									class="iconFalse" />
+								<span class="ats-icon-false" width="32" height="32"/>
 							</xsl:otherwise>
 						</xsl:choose>
 					</TD>
@@ -512,18 +489,6 @@
 						<xsl:value-of select="script/author" />
 					</TD>
 					<TD class="linkButtons">
-						<a style="display:none">
-							<xsl:attribute name="href">
-							<xsl:value-of select="concat($testName,'.html')" />
-							</xsl:attribute>
-							HTML report
-						</a>
-						<a style="display:none">
-							<xsl:attribute name="href">
-							<xsl:value-of select="concat($testName,'.pdf')" />
-							</xsl:attribute>
-							PDF report
-						</a>
 						<a>
 							<xsl:attribute name="href">
 							<xsl:value-of select="concat($testName,'.atsv')" />
@@ -531,20 +496,18 @@
 							ATSV report
 						</a>
 					</TD>
+					
+					<TD align="center">
 					<xsl:choose>
 						<xsl:when test="script/summary/@status = '0'">
-							<TD class="test-failed" style="horizontal-align:right"
-								width="32">
-								<img align="right" alt="Test failed" class="iconFalse" />
-							</TD>
+							<span class="ats-icon-false" width="28" height="28" style="background-size: 28px 28px;"/>
 						</xsl:when>
 						<xsl:when test="script/summary/@status = '1'">
-							<TD class="test-passed" style="horizontal-align:right"
-								width="32">
-								<img align="right" alt="Test passed" class="iconTrue" />
-							</TD>
+							<span class="ats-icon-true" width="28" height="28" style="background-size: 28px 28px;"/>
 						</xsl:when>
 					</xsl:choose>
+					</TD>
+					
 				</TR>
 				<xsl:choose>
 					<xsl:when test="script/summary/data != '[empty]'">
@@ -706,26 +669,18 @@
 					<td style="padding-right: 4px;border :0">
 						<xsl:choose>
 							<xsl:when test="passed = 'true'">
-								<img height="24px" width="24px"
-									style="vertical-align:middle" alt="Action passed"
-									class="iconTrue" />
+								<span class="ats-icon-true" width="24" height="24" style="background-size: 24px 24px;"/>
 							</xsl:when>
 							<xsl:when test="passed = 'warning'">
-								<img height="24px" width="24px"
-									style="vertical-align:middle" alt="Action unstable"
-									class="iconWarning" />
+								<span class="ats-icon-warning" width="24" height="24" style="background-size: 24px 24px;"/>
 							</xsl:when>
 							<xsl:when test="passed = 'false'">
 								<xsl:choose>
 									<xsl:when test="stop = 'true'">
-										<img height="24px" width="24px"
-											style="vertical-align:middle" alt="Action failed"
-											class="iconFalse" />
+										<span class="ats-icon-false" width="24" height="24" style="background-size: 24px 24px;"/>
 									</xsl:when>
 									<xsl:otherwise>
-										<img height="24px" width="30px"
-											style="vertical-align:middle" alt="Non blocking action"
-											class="iconNoStop" />
+										<span class="ats-icon-no-stop" width="30" height="24" style="background-size: 30px 24px;"/>
 									</xsl:otherwise>
 								</xsl:choose>
 
