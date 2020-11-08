@@ -1,7 +1,6 @@
 package com.ats.executor;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,13 +15,12 @@ import org.testng.TestNG;
 import org.xml.sax.SAXException;
 
 import com.ats.generator.ATS;
-import com.ats.tools.Utils;
 import com.ats.tools.report.CampaignReportGenerator;
 
 public class ExecutionListener implements IExecutionListener {
 
 	private static final String TESTNG_FILE_NAME = "testng-results.xml";
-	private static final String[] JASPER_PROPERTY_NAME = {"jasper", "jasper.home"};
+	private static final String[] JASPER_PROPERTY_NAME = {"jasper", "jasper.home", "jasper-home"};
 	private static final String JASPER_HOME_ENVIRONMENT = "JASPER_HOME";
 
 	@SuppressWarnings("deprecation")
@@ -46,10 +44,9 @@ public class ExecutionListener implements IExecutionListener {
 	public void onExecutionStart() {
 		IExecutionListener.super.onExecutionStart();
 
-		final Path output = getOutputFolderPath();
 		try {
-			Utils.deleteRecursive(output.toFile());
-		} catch (FileNotFoundException e) {
+			getJsonSuitesFile().delete();
+		} catch (Exception e) {
 		}
 
 		System.out.println("[ATS-SCRIPT] ------------------------------------");
@@ -65,7 +62,7 @@ public class ExecutionListener implements IExecutionListener {
 		System.out.println("[ATS-SCRIPT]   ATS execution complete");
 		System.out.println("[ATS-SCRIPT] ------------------------------------");
 
-		final String atsReport = System.getProperty("ats-report");
+		final String atsReport = System.getProperty(CampaignReportGenerator.ATS_REPORT);
 		if(atsReport != null) {
 
 			final String outputPath = getOutputFolderPath().toAbsolutePath().toFile().getAbsolutePath();

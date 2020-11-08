@@ -48,8 +48,8 @@ public class PrepareProjectExecution {
 				if(targetFile.exists()) {
 					try {
 						Utils.deleteRecursiveFiles(targetFile);
-						targetFile.mkdir();
-					}catch(FileNotFoundException e) {}
+					}catch(Exception e) {}
+					targetFile.mkdir();
 				}
 
 				final File suiteFile = targetPath.resolve("suites.xml").toFile();
