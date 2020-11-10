@@ -19,6 +19,8 @@ under the License.
 
 package com.ats.graphic;
 
+import com.ats.driver.AtsManager;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -31,7 +33,6 @@ import java.util.stream.IntStream;
 
 public class ImageTemplateMatchingSimple {
 
-	//private final static double[] GRAYSCALE = new double[] {0.299, 0.587, 0.114};
 	private final static double[] GRAYSCALE = new double[] {0.2126, 0.7152, 0.0722};
 	private final static double PERCENT_DEFAULT = 0.3;
 	private final static int MAX_PIXELS_DIFF = 10;
@@ -120,13 +121,15 @@ public class ImageTemplateMatchingSimple {
 		final int[][] mainVector = getVector(mainImage);
 		final int[][] burnedPixels = new int[mainImage.getWidth()][ mainImage.getHeight()];
 
+		final int maxTryImageRecognition = AtsManager.getInstance().getMaxTryImageRecognition();
+
 		if(mainVector != null && subVector != null) {
 
 			final int xOffsetMax = mainImage.getWidth() - subWidth;
 			final int yOffsetMax = mainImage.getHeight() - subHeight;
 
 			Rectangle found = findSubImage(mainVector, burnedPixels, xOffsetMax, yOffsetMax, subVector, subWidth, subHeight, maxError, maxDiff);
-			while(found != null) {
+			while(found != null && result.size() < maxTryImageRecognition) {
 				result.add(found);
 				found = findSubImage(mainVector, burnedPixels, xOffsetMax, yOffsetMax, subVector, subWidth, subHeight, maxError, maxDiff);
 			}
