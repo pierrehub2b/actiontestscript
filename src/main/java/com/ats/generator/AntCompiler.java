@@ -28,6 +28,8 @@ import com.ats.driver.AtsManager;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class AntCompiler {
 	
@@ -61,15 +63,18 @@ public class AntCompiler {
 			if(args.length > 1 && args[1].startsWith(XML_SUITE_FILES)) {
 				
 				final String[] suites = args[1].replace(XML_SUITE_FILES, "").split(",");
-				
-				final FileWriter fw = new FileWriter(buildFile.getParentFile().toPath().resolve("suites.xml").toFile());
+				final Path projectFolderPath = buildFile.getParentFile().toPath();
+				final FileWriter fw = new FileWriter(projectFolderPath.resolve("suites.xml").toFile());
 
 				fw.write("<!DOCTYPE suite SYSTEM \"https://testng.org/testng-1.0.dtd\">");
 				fw.write("<suite name=\"allSuites\">");
 				fw.write("<suite-files>");
 
 				for (int i = 0; i < suites.length; i++) {
-					fw.write("<suite-file path=\"" + suites[i] + "\"/>");
+					final String suitePath = findSuiteFile(suites[i]);
+					if(suitePath != null) {
+						fw.write("<suite-file path=\"" + suitePath + "\"/>");
+					}
 				}
 
 				fw.write("</suite-files>");
@@ -82,6 +87,18 @@ public class AntCompiler {
 			
 			new AntCompiler(buildFile);
 		}
+	}
+	
+	private static String findSuiteFile(String s) {
+		if(Paths.get(s).toFile().exists()) {
+			return s;
+		}else {
+			s = "src/exec/" + s;
+			if(Paths.get(s).toFile().exists()) {
+				return s;
+			}
+		}
+		return null;
 	}
 
 	public AntCompiler(File buildFile) {
