@@ -23,16 +23,57 @@ import org.apache.tools.ant.DefaultLogger;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
 
+import com.ats.driver.AtsManager;
+
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
 public class AntCompiler {
 	public static void main(String[] args) throws IOException {
 		if(args.length > 0) {
 			final File buildFile = new File(args[0]);
-			if(buildFile.exists()) {
-				new AntCompiler(buildFile);
+			if(!buildFile.exists()) {
+			
+				buildFile.getParentFile().mkdirs();
+				
+				final FileWriter fw = new FileWriter(buildFile);
+				fw.write("<project basedir=\".\" default=\"compile\">");
+				fw.write("<copy todir=\"classes\"> ");
+				fw.write("<fileset dir=\"..\\src\" includes='assets/**'/>");
+				fw.write("</copy>");
+				fw.write("<property name=\"lib.dir\" value=\"lib\"/>");
+				fw.write("<path id=\"classpath\">");
+				fw.write("<fileset dir=\"" + AtsManager.getAtsHomeFolder() + "\\libs\" includes=\"**/*.jar\"/>");
+				fw.write("</path>");
+				fw.write("<target name=\"compile\">");
+				fw.write("<mkdir dir=\"classes\"/>");
+				fw.write("<javac srcdir=\"generated\" destdir=\"classes\" classpathref=\"classpath\"/>");
+				fw.write("</target>");
+				fw.write("</project>");
+
+				fw.close();
 			}
+			
+			if(args.length > 1) {
+				
+				final FileWriter fw = new FileWriter(buildFile.getParentFile().toPath().resolve("suites.xml").toFile());
+
+				fw.write("<!DOCTYPE suite SYSTEM \"https://testng.org/testng-1.0.dtd\">");
+				fw.write("<suite name=\"allSuites\">");
+				fw.write("<suite-files>");
+
+				for (int i = 1; i < args.length; i++) {
+					fw.write("<suite-file path=\"" + args[i] + "\"/>");
+				}
+
+				fw.write("</suite-files>");
+				fw.write("</suite>");
+
+				fw.close();
+			}
+			
+			new AntCompiler(buildFile);
 		}
 	}
 
