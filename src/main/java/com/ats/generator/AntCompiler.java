@@ -65,7 +65,7 @@ public class AntCompiler {
 				fw.write("<suite name=\"allSuites\">");
 				fw.write("<suite-files>");
 
-				for (int i = 1; i < suites.length; i++) {
+				for (int i = 0; i < suites.length; i++) {
 					fw.write("<suite-file path=\"" + suites[i] + "\"/>");
 				}
 
