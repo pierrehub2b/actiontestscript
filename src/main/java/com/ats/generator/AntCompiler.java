@@ -55,7 +55,9 @@ public class AntCompiler {
 				fw.close();
 			}
 			
-			if(args.length > 1) {
+			if(args.length > 2 && "-suiteXmlFiles".equals(args[1])) {
+				
+				final String[] suites = args[2].split(",");
 				
 				final FileWriter fw = new FileWriter(buildFile.getParentFile().toPath().resolve("suites.xml").toFile());
 
@@ -63,8 +65,8 @@ public class AntCompiler {
 				fw.write("<suite name=\"allSuites\">");
 				fw.write("<suite-files>");
 
-				for (int i = 1; i < args.length; i++) {
-					fw.write("<suite-file path=\"" + args[i] + "\"/>");
+				for (int i = 1; i < suites.length; i++) {
+					fw.write("<suite-file path=\"" + suites[i] + "\"/>");
 				}
 
 				fw.write("</suite-files>");
