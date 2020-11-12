@@ -30,6 +30,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class AntCompiler {
+	
+	private static final String XML_SUITE_FILES = "-suiteXmlFiles=";
+	
 	public static void main(String[] args) throws IOException {
 		if(args.length > 0) {
 			final File buildFile = new File(args[0]);
@@ -55,9 +58,9 @@ public class AntCompiler {
 				fw.close();
 			}
 			
-			if(args.length > 2 && "-suiteXmlFiles".equals(args[1])) {
+			if(args.length > 1 && args[1].startsWith(XML_SUITE_FILES)) {
 				
-				final String[] suites = args[2].split(",");
+				final String[] suites = args[1].replace(XML_SUITE_FILES, "").split(",");
 				
 				final FileWriter fw = new FileWriter(buildFile.getParentFile().toPath().resolve("suites.xml").toFile());
 
@@ -73,6 +76,8 @@ public class AntCompiler {
 				fw.write("</suite>");
 
 				fw.close();
+				
+				System.out.println("[ATS] " + suites.length + " suite(s) added to job execution");
 			}
 			
 			new AntCompiler(buildFile);
