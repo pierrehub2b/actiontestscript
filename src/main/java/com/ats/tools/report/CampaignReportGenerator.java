@@ -330,7 +330,7 @@ public class CampaignReportGenerator {
 				copyResource("suite.jrxml", outputFolderPath);
 				copyResource("test.jrxml", outputFolderPath);
 
-				final StringJoiner jasperLibsJoin = new StringJoiner(File.pathSeparator);
+				/*final StringJoiner jasperLibsJoin = new StringJoiner(File.pathSeparator);
 				for (File libs : jasperFolder.listFiles()) {
 					if (libs.getName().endsWith(".jar")) {
 						jasperLibsJoin.add(libs.getAbsolutePath());
@@ -346,7 +346,7 @@ public class CampaignReportGenerator {
 										
 				} catch (Throwable t) {
 					t.printStackTrace();
-				}
+				}*/
 			}
 		}
 	}

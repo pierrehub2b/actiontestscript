@@ -19,6 +19,8 @@ under the License.
 
 package com.ats.element;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 
 public class AtsBaseElement {
@@ -84,7 +86,13 @@ public class AtsBaseElement {
 	//----------------------------------------------------------------------------------------
 
 	public String getAttribute(String key) {
-		return attributes.get(key);
+		
+		final Object attr = attributes.get(key);
+		if(attr instanceof ArrayList<?>) {
+			return Arrays.toString(((ArrayList<String>) attr).toArray());
+		}else {
+			return attr.toString();
+		}
 	}
 	
 	public Map<String, String> getAttributesMap() {

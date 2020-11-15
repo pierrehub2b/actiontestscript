@@ -243,7 +243,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 		final String titleUid = UUID.randomUUID().toString();
 		try {
-			
+
 			final File startAtsPage = new File(System.getProperty("user.home") + File.separator + "ats_start_page.html");
 			startAtsPage.deleteOnExit();
 
@@ -1154,7 +1154,14 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		final List<List<Object>> response = (List<List<Object>>) runJavaScript(searchElementScript, startElement, tagName, attributes, attributes.length);
 		if(response != null && response.size() > 0){
 			final List<AtsElement> elements = response.parallelStream().filter(Objects::nonNull).map(e -> new AtsElement(e)).collect(Collectors.toCollection(ArrayList::new));
-			return elements.parallelStream().filter(Objects::nonNull).filter(predicate).map(e -> new FoundElement(this, e, channel, initElementX + offsetIframeX, initElementY + offsetIframeY, waitAnimation)).collect(Collectors.toCollection(ArrayList::new));
+
+			final Stream<FoundElement> st = elements.parallelStream().filter(
+					Objects::nonNull).filter(predicate).
+					map(e -> new FoundElement(
+							this, e, channel, initElementX + offsetIframeX, initElementY + offsetIframeY, waitAnimation));
+
+			//return st.collect(Collectors.toCollection(ArrayList::new));
+			return st.collect(Collectors.toList());
 		}
 
 		return Collections.<FoundElement>emptyList();
@@ -1178,7 +1185,9 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public void clearText(ActionStatus status, TestElement te, MouseDirection md) {
 
-		te.click(status, md);
+		if(!te.isPreElement()){
+			te.click(status, md);
+		}
 
 		if(status.isPassed()) {
 			final FoundElement element = te.getFoundElement();
@@ -1206,13 +1215,21 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		channel.waitBeforeEnterText(this);
 
 		final WebElement we = element.getWebElement();
-		executeScript(status, "result={size:window.getComputedStyle(arguments[0], null).getPropertyValue('font-size'), family:window.getComputedStyle(arguments[0], null).getPropertyValue('font-family'), weight:window.getComputedStyle(arguments[0], null).getPropertyValue('font-weight')};", we);
-
-		for(SendKeyData sequence : textActionList) {
-			we.sendKeys(getSequenceData(sequence));
+		
+		if(element.isPreElement()){
+			final StringBuilder seq = new StringBuilder();
+			for(SendKeyData sequence : textActionList) {
+				seq.append(getSequenceData(sequence));
+			}
+			executeScript(status, "arguments[0].textContent='" + seq.toString() + "';", we);
+		}else {
+			executeScript(status, "result={size:window.getComputedStyle(arguments[0], null).getPropertyValue('font-size'), family:window.getComputedStyle(arguments[0], null).getPropertyValue('font-family'), weight:window.getComputedStyle(arguments[0], null).getPropertyValue('font-weight')};", we);
+			for(SendKeyData sequence : textActionList) {
+				we.sendKeys(getSequenceData(sequence));
+			}
 		}
 	}
-	
+
 	protected CharSequence getSequenceData(SendKeyData seq) {
 		return seq.getSequenceWeb(true);
 	}
