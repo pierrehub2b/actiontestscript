@@ -332,6 +332,7 @@ public class CampaignReportGenerator {
 				copyResource("suite.jrxml", outputFolderPath);
 				copyResource("test.jrxml", outputFolderPath);
 
+				final String outputPath = outputFolderPath.toAbsolutePath().toString();
 				
 				//-------------------------------------------------------------------------------------------------
 				//-------------------------------------------------------------------------------------------------
@@ -341,7 +342,7 @@ public class CampaignReportGenerator {
 
 				final Element project = writeXmlDocument.createElement("project");
 				project.setAttribute("default", "run");
-				project.setAttribute("basedir", outputFolderPath.toAbsolutePath().toString());
+				project.setAttribute("basedir", outputPath);
 				
 				final Element path = writeXmlDocument.createElement("path");
 				path.setAttribute("id", "classpath");
@@ -399,15 +400,19 @@ public class CampaignReportGenerator {
 				
 				target.appendChild(delete);
 				
+				final Element echo3 = writeXmlDocument.createElement("echo");
+				echo3.setAttribute("message", "Generate and build Jasper files");
+				target.appendChild(echo3);
+				
 				final Element jrc = writeXmlDocument.createElement("jrc");
-				jrc.setAttribute("destdir", ".");
+				jrc.setAttribute("destdir", outputPath);
 				
 				final Element src = writeXmlDocument.createElement("src");
 				final Element fileset7 = writeXmlDocument.createElement("fileset");
-				fileset7.setAttribute("dir", ".");
+				fileset7.setAttribute("dir", outputPath);
 				
 				final Element include2 = writeXmlDocument.createElement("include");
-				include2.setAttribute("name", "*.jrxml");
+				include2.setAttribute("name", "**/*.jrxml");
 				fileset7.appendChild(include2);
 				src.appendChild(fileset7);
 				
@@ -434,7 +439,7 @@ public class CampaignReportGenerator {
 				java.appendChild(classpath3);
 				
 				final Element arg1 = writeXmlDocument.createElement("arg");
-				arg1.setAttribute("value", "${basedir}");
+				arg1.setAttribute("value", outputPath);
 				java.appendChild(arg1);
 				
 				final Element arg2 = writeXmlDocument.createElement("arg");
