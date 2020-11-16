@@ -250,7 +250,7 @@
 								</span>
 							</TD>
 							<TD COLSPAN="1" class="titleClass" width="120">
-								<a target='_blank' href='ats-report.pdf'>
+								<a target='_blank' href='summary.pdf'>
 								Summary<img align="right" alt="Download PDF report">
 									<xsl:attribute name="src">
 										<xsl:value-of select="$picPdf" />
