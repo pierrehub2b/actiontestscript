@@ -25,6 +25,8 @@ import com.ats.executor.ScriptStatus;
 
 public class ReportSummary {
 	
+	public static final String EMPTY_VALUE = "[empty]";
+	
 	private int status = 1;
 	private String data = "";
 	private String suiteName = "";
@@ -45,7 +47,7 @@ public class ReportSummary {
 	public Object[] toData(ScriptStatus st) {
 		
 		if(data == null || data.isEmpty()) {
-			data = "[empty]";
+			data = EMPTY_VALUE;
 		}
 		
 		final ArrayList<Object> result = new ArrayList<Object>();

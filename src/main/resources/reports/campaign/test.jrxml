@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.15.0.final using JasperReports Library version 6.15.0-dd49bfb94918336b8321d5507193f0169ead4e95  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reportNewForm_subreportElectronicDistributionList" language="groovy" pageWidth="555" pageHeight="802" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="b9a625d5-6c7d-4713-b6c4-4bd250a184cd">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
@@ -51,8 +52,11 @@
 	<field name="duration" class="java.lang.Integer">
 		<fieldDescription><![CDATA[@duration]]></fieldDescription>
 	</field>
+	<field name="summary" class="java.lang.String">
+		<fieldDescription><![CDATA[script/summary/data]]></fieldDescription>
+	</field>
 	<detail>
-		<band height="23" splitType="Stretch">
+		<band height="40" splitType="Stretch">
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<textField>
 				<reportElement style="Alternate" mode="Opaque" x="20" y="0" width="485" height="22" uuid="7557e80c-b639-4dd7-aa66-777934a7c319">
@@ -68,7 +72,7 @@
 				<textFieldExpression><![CDATA[$F{testName}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="20" y="22" width="485" height="1" uuid="01dcbf9d-7c12-4777-832b-37e703a09fc8">
+				<reportElement x="20" y="39" width="485" height="1" uuid="01dcbf9d-7c12-4777-832b-37e703a09fc8">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
@@ -79,8 +83,10 @@
 				</graphicElement>
 			</line>
 			<textField>
-				<reportElement style="Label" x="26" y="12" width="173" height="11" forecolor="#666600" uuid="da7f87a1-2f10-486b-a939-5cf7efc87142"/>
-				<textElement>
+				<reportElement style="Label" x="26" y="12" width="173" height="10" forecolor="#666600" uuid="da7f87a1-2f10-486b-a939-5cf7efc87142">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
 					<font size="7" isItalic="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["- " + $F{actionsCount} + " actions, exectuted in " + RIGHT("0" + ((int)(($F{duration}/1000)/3600)),2) + ":" + RIGHT("0" + ((int)(($F{duration}/1000)/60))%60,2) + ":" + RIGHT("0" + ((int)($F{duration}/1000))%60,2)]]></textFieldExpression>
@@ -94,6 +100,15 @@
 				</reportElement>
 				<imageExpression><![CDATA[$F{status} == 1 ?	javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(Base64.getDecoder().decode($P{iconTrue}))) : javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(Base64.getDecoder().decode($P{iconFalse})))]]></imageExpression>
 			</image>
+			<textField isBlankWhenNull="true">
+				<reportElement style="Label" x="30" y="22" width="475" height="16" isRemoveLineWhenBlank="true" isPrintInFirstWholeBand="true" uuid="07674e39-9f4b-447b-a939-9fade4e40a16">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle" markup="html">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{summary}]]></textFieldExpression>
+			</textField>
 		</band>
 	</detail>
 </jasperReport>

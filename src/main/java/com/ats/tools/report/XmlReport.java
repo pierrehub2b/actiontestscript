@@ -218,7 +218,9 @@ public class XmlReport {
 							summary.setAttribute("status", String.valueOf(reportSummary.getStatus()));
 							
 							final Element data = document.createElement("data");
-							data.setTextContent(reportSummary.getData());
+							if(!ReportSummary.EMPTY_VALUE.equals(reportSummary.getData())) {
+								data.setTextContent(reportSummary.getData());
+							}
 							summary.appendChild(data);
 							
 							if(reportSummary.getStatus() == 0 && reportSummary.getError() != null) {

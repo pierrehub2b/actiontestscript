@@ -297,7 +297,7 @@ public class Script {
 	public String getParameterValue(String name, String defaultValue) {
 
 		if(parameterList == null) {
-			return "";
+			return defaultValue;
 		}
 
 		try {

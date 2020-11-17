@@ -406,6 +406,7 @@ public class CampaignReportGenerator {
 				
 				final Element jrc = writeXmlDocument.createElement("jrc");
 				jrc.setAttribute("destdir", outputPath);
+				jrc.setAttribute("xmlvalidation", "false");
 				
 				final Element src = writeXmlDocument.createElement("src");
 				final Element fileset7 = writeXmlDocument.createElement("fileset");
@@ -474,10 +475,12 @@ public class CampaignReportGenerator {
 				p.addReference("ant.projectHelper", helper);
 				helper.parse(p, buildFile);
 
+				    
 				final DefaultLogger consoleLogger = new DefaultLogger();
 				consoleLogger.setErrorPrintStream(System.err);
 				consoleLogger.setOutputPrintStream(System.out);
-				consoleLogger.setMessageOutputLevel(Project.MSG_INFO);
+				consoleLogger.setEmacsMode(false);
+				consoleLogger.setMessageOutputLevel(Project.MSG_VERBOSE);
 
 				p.addBuildListener(consoleLogger);
 				p.executeTarget(p.getDefaultTarget());
