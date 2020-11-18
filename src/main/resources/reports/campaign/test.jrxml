@@ -56,9 +56,9 @@
 		<fieldDescription><![CDATA[script/summary/data]]></fieldDescription>
 	</field>
 	<detail>
-		<band height="40" splitType="Stretch">
+		<band height="44" splitType="Stretch">
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
-			<textField>
+			<textField textAdjust="StretchHeight">
 				<reportElement style="Alternate" mode="Opaque" x="20" y="0" width="485" height="22" uuid="7557e80c-b639-4dd7-aa66-777934a7c319">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
@@ -71,20 +71,10 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{testName}]]></textFieldExpression>
 			</textField>
-			<line>
-				<reportElement x="20" y="39" width="485" height="1" uuid="01dcbf9d-7c12-4777-832b-37e703a09fc8">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-				</reportElement>
-				<graphicElement>
-					<pen lineColor="#C2C2C2"/>
-				</graphicElement>
-			</line>
 			<textField>
-				<reportElement style="Label" x="26" y="12" width="173" height="10" forecolor="#666600" uuid="da7f87a1-2f10-486b-a939-5cf7efc87142">
+				<reportElement style="Label" x="26" y="11" width="173" height="10" forecolor="#666600" uuid="da7f87a1-2f10-486b-a939-5cf7efc87142">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
 				<textElement verticalAlignment="Middle">
 					<font size="7" isItalic="true"/>
@@ -100,12 +90,19 @@
 				</reportElement>
 				<imageExpression><![CDATA[$F{status} == 1 ?	javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(Base64.getDecoder().decode($P{iconTrue}))) : javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(Base64.getDecoder().decode($P{iconFalse})))]]></imageExpression>
 			</image>
-			<textField isBlankWhenNull="true">
-				<reportElement style="Label" x="30" y="22" width="475" height="16" isRemoveLineWhenBlank="true" isPrintInFirstWholeBand="true" uuid="07674e39-9f4b-447b-a939-9fade4e40a16">
+			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<reportElement style="Alternate" mode="Opaque" x="20" y="22" width="485" height="20" isRemoveLineWhenBlank="true" isPrintInFirstWholeBand="true" uuid="07674e39-9f4b-447b-a939-9fade4e40a16">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.spacingBefore" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.spacingAfter" value="px"/>
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
 				</reportElement>
-				<textElement verticalAlignment="Middle" markup="html">
+				<textElement verticalAlignment="Top" markup="html">
 					<font size="8"/>
+					<paragraph leftIndent="14"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{summary}]]></textFieldExpression>
 			</textField>
