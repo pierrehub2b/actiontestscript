@@ -143,8 +143,8 @@ public class FoundElement{
 	public FoundElement(WebDriverEngine engine, AtsElement element, Channel channel, Double offsetX, Double offsetY, boolean waitAnimation) {
 		this(element, channel, offsetX, offsetY);
 
-		if(waitAnimation) {
-			int maxTry = 10;
+		if(waitAnimation && element.getElement().isDisplayed()) {
+			int maxTry = 5;
 			while((this.width < 1 || this.height < 1) && maxTry > 0) {
 
 				final List<Double> rect = engine.getBoundingClientRect(element.getElement());
@@ -162,7 +162,7 @@ public class FoundElement{
 					this.width = rectW;
 					this.height = rectH;
 				}else {
-					channel.sleep(200);
+					channel.sleep(100);
 				}
 				maxTry--;
 			}

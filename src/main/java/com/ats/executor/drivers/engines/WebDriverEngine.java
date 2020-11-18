@@ -1155,12 +1155,11 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		if(response != null && response.size() > 0){
 			final List<AtsElement> elements = response.parallelStream().filter(Objects::nonNull).map(e -> new AtsElement(e)).collect(Collectors.toCollection(ArrayList::new));
 
-			final Stream<FoundElement> st = elements.parallelStream().filter(
-					Objects::nonNull).filter(predicate).
-					map(e -> new FoundElement(
-							this, e, channel, initElementX + offsetIframeX, initElementY + offsetIframeY, waitAnimation));
+			final Stream<FoundElement> st = elements.parallelStream().
+					filter(predicate).
+					map(e -> new FoundElement(this, e, channel, initElementX + offsetIframeX, initElementY + offsetIframeY, waitAnimation));
 
-			return st.collect(Collectors.toList());
+			return st.collect(Collectors.toCollection(ArrayList::new));
 		}
 
 		return Collections.<FoundElement>emptyList();
