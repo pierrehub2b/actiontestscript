@@ -91,7 +91,7 @@ public class AtsBaseElement {
 		if(attr instanceof ArrayList<?>) {
 			return Arrays.toString(((ArrayList<String>) attr).toArray());
 		}else {
-			return attr.toString();
+			return (String)attr;
 		}
 	}
 	
