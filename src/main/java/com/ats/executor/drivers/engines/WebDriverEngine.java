@@ -1160,7 +1160,6 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 					map(e -> new FoundElement(
 							this, e, channel, initElementX + offsetIframeX, initElementY + offsetIframeY, waitAnimation));
 
-			//return st.collect(Collectors.toCollection(ArrayList::new));
 			return st.collect(Collectors.toList());
 		}
 

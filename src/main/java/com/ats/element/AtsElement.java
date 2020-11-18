@@ -23,6 +23,7 @@ import com.ats.executor.drivers.desktop.DesktopData;
 import org.openqa.selenium.remote.RemoteWebElement;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -116,6 +117,19 @@ public class AtsElement extends AtsBaseElement {
 
 	public void setBoundY(Double boundY) {
 		this.boundY = boundY;
+	}
+	
+	//----------------------------------------------------------------------------------------
+	// Specifique attribute
+	//----------------------------------------------------------------------------------------
+	
+	public String getAttribute(String key) {
+		final Object attr = attributes.get(key);
+		if(attr instanceof ArrayList<?>) {
+			return Arrays.toString(((ArrayList<String>) attr).toArray());
+		}else {
+			return (String)attr;
+		}
 	}
 
 	//----------------------------------------------------------------------------------------

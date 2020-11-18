@@ -253,7 +253,7 @@
 				<textElement>
 					<font size="9" isBold="false"/>
 				</textElement>
-				<text><![CDATA[Duration]]></text>
+				<text><![CDATA[Total duration]]></text>
 			</staticText>
 			<textField>
 				<reportElement style="Label" x="70" y="162" width="60" height="20" forecolor="#808080" uuid="8c525b45-beb8-4a81-b123-9f815caf748d">
