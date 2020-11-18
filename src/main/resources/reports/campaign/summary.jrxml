@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.15.0.final using JasperReports Library version 6.15.0-dd49bfb94918336b8321d5507193f0169ead4e95  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="XMLDSReport" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="0" uuid="95bc676b-3069-4658-9b34-ad153d7f2bb8">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
@@ -133,6 +134,7 @@
 					<chartLegend/>
 				</chart>
 				<pieDataset maxCount="3">
+					<dataset resetType="Report"/>
 					<pieSeries>
 						<keyExpression><![CDATA["fail"]]></keyExpression>
 						<valueExpression><![CDATA[$F{suites}-$F{suitesPassed}]]></valueExpression>
@@ -265,7 +267,7 @@
 				<textElement textAlignment="Right">
 					<font size="9" isBold="false" isItalic="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[RIGHT("0" + ((int)(($F{duration}/1000)/3600)),2) + ":" + RIGHT("0" + ((int)(($F{duration}/1000)/60))%60,2) + ":" + RIGHT("0" + ((int)($F{duration}/1000))%60,2)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[String.format("%02d:%02d:%02d", (int)($F{duration} /1000/ (60 * 60)),((int)($F{duration}/1000 / 60)) % 60,((int)$F{duration}/1000) % 60)]]></textFieldExpression>
 			</textField>
 			<rectangle>
 				<reportElement x="284" y="103" width="130" height="80" backcolor="#E6E6E6" uuid="0e1bd3f6-8833-459f-885f-7d4de6c3c65a">
@@ -310,6 +312,7 @@
 					<chartLegend/>
 				</chart>
 				<pieDataset maxCount="3">
+					<dataset resetType="Report"/>
 					<pieSeries>
 						<keyExpression><![CDATA["fail"]]></keyExpression>
 						<valueExpression><![CDATA[$F{tests}-$F{testsPassed}]]></valueExpression>

@@ -231,12 +231,13 @@ public class CampaignReportGenerator {
 					atsTest.setAttribute("duration", String.valueOf(testDuration));
 
 					suiteDuration += testDuration;
-					totalDuration += suiteDuration;
 
 					tests.appendChild(writeXmlDocument.importNode(atsTest, true));
 				}
 			}
 
+			totalDuration += suiteDuration;
+			
 			if (suitePassed) {
 				totalSuitesPassed++;
 			}
