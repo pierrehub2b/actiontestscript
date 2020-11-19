@@ -214,8 +214,7 @@ public class CampaignReportGenerator {
 
 					final NodeList actionsList = atsTest.getElementsByTagName("action");
 					actionsExecuted += actionsList.getLength();
-					totalActions += actionsExecuted;
-
+					
 					for (int i = 0; i < actionsList.getLength(); i++) {
 						final Node action = actionsList.item(i);
 
@@ -236,6 +235,7 @@ public class CampaignReportGenerator {
 				}
 			}
 
+			totalActions += actionsExecuted;
 			totalDuration += suiteDuration;
 			
 			if (suitePassed) {
