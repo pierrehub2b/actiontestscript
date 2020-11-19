@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reportNewForm_subreportElectronicDistributionList" language="groovy" pageWidth="555" pageHeight="802" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="b9a625d5-6c7d-4713-b6c4-4bd250a184cd">
+<!-- Created with Jaspersoft Studio version 6.15.0.final using JasperReports Library version 6.15.0-dd49bfb94918336b8321d5507193f0169ead4e95  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reportNewForm_subreportElectronicDistributionList" pageWidth="555" pageHeight="802" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="b9a625d5-6c7d-4713-b6c4-4bd250a184cd">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
@@ -19,23 +20,26 @@
 	<field name="passed" class="java.lang.Boolean">
 		<fieldDescription><![CDATA[@passed]]></fieldDescription>
 	</field>
-	<field name="duration" class="java.lang.Integer">
+	<field name="duration" class="java.lang.Long">
 		<fieldDescription><![CDATA[@duration]]></fieldDescription>
 	</field>
 	<field name="testsCount" class="java.lang.Integer">
 		<fieldDescription><![CDATA[@testsCount]]></fieldDescription>
 	</field>
-	<field name="testsPassed" class="java.lang.Integer">
+	<field name="testsPassed" class="java.lang.Long">
 		<fieldDescription><![CDATA[@testsPassed]]></fieldDescription>
 	</field>
-	<field name="actions" class="java.lang.Integer">
+	<field name="actions" class="java.lang.Long">
 		<fieldDescription><![CDATA[@actions]]></fieldDescription>
 	</field>
+	<variable name="durationSec" class="java.lang.Long">
+		<variableExpression><![CDATA[$F{duration}/1000]]></variableExpression>
+	</variable>
 	<detail>
 		<band height="200" splitType="Stretch">
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<textField>
-				<reportElement style="Default" mode="Opaque" x="30" y="0" width="525" height="26" backcolor="#EDEDED" uuid="47ebff0e-6c48-4b30-8800-04c7a35bec97">
+				<reportElement style="Default" mode="Opaque" x="30" y="0" width="525" height="27" backcolor="#EDEDED" uuid="47ebff0e-6c48-4b30-8800-04c7a35bec97">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
@@ -73,15 +77,16 @@
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.spacingAfter" value="px"/>
 				</reportElement>
-				<box topPadding="4" leftPadding="4">
+				<box topPadding="2" leftPadding="4">
 					<pen lineColor="#F6F6F6"/>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#F6F6F6"/>
 					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#F6F6F6"/>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement>
+				<textElement textAlignment="Left" verticalAlignment="Top">
 					<font size="10" isBold="false" isItalic="false"/>
 				</textElement>
 				<text><![CDATA[Executed tests]]></text>
@@ -107,6 +112,7 @@
 					</chartLegend>
 				</chart>
 				<pieDataset maxCount="3">
+					<dataset resetType="Report"/>
 					<pieSeries>
 						<keyExpression><![CDATA["fail"]]></keyExpression>
 						<valueExpression><![CDATA[$F{testsCount}-$F{testsPassed}]]></valueExpression>
@@ -133,10 +139,10 @@
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
-				<box topPadding="4" leftPadding="0" rightPadding="6">
+				<box topPadding="2" leftPadding="0" rightPadding="6">
 					<pen lineStyle="Solid" lineColor="#F6F6F6"/>
 				</box>
-				<textElement textAlignment="Right" verticalAlignment="Top">
+				<textElement textAlignment="Right" verticalAlignment="Justified">
 					<font size="10" isBold="false" isItalic="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{testsCount}]]></textFieldExpression>
@@ -148,7 +154,7 @@
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
-				<box topPadding="4" leftPadding="4">
+				<box topPadding="3" leftPadding="4">
 					<pen lineColor="#F6F6F6"/>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#F6F6F6"/>
 					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -167,7 +173,7 @@
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
-				<box topPadding="4" leftPadding="0" rightPadding="6">
+				<box topPadding="3" leftPadding="0" rightPadding="6">
 					<pen lineStyle="Solid" lineColor="#F6F6F6"/>
 				</box>
 				<textElement textAlignment="Right">
@@ -243,8 +249,15 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{actions}]]></textFieldExpression>
 			</textField>
+			<textField>
+				<reportElement style="Label" x="329" y="9" width="180" height="14" uuid="3374235f-84ab-4386-92e5-72542d186df9"/>
+				<textElement textAlignment="Right">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Executed in  " + String.format("%02d:%02d:%02d", (int)($V{durationSec}/ (60 * 60)),((int)($V{durationSec} / 60)) % 60,$V{durationSec} % 60)]]></textFieldExpression>
+			</textField>
 			<line>
-				<reportElement x="275" y="101" width="260" height="1" forecolor="#60607F" uuid="a114e2a2-b0a3-4f8b-9440-c34078d4db5d">
+				<reportElement x="275" y="100" width="260" height="1" forecolor="#60607F" uuid="a114e2a2-b0a3-4f8b-9440-c34078d4db5d">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -263,11 +276,11 @@
 				<subreportParameter name="iconFalse">
 					<subreportParameterExpression><![CDATA[$P{iconFalse}]]></subreportParameterExpression>
 				</subreportParameter>
-				<dataSourceExpression><![CDATA[(net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}.subDataSource("//ats")]]></dataSourceExpression>
+				<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("//ats")]]></dataSourceExpression>
 				<subreportExpression><![CDATA["test.jasper"]]></subreportExpression>
 			</subreport>
 			<line>
-				<reportElement x="275" y="35" width="260" height="1" forecolor="#60607F" uuid="e6e4f847-5bf8-413d-a3d6-f913190c88fd">
+				<reportElement x="275" y="34" width="260" height="1" forecolor="#60607F" uuid="e6e4f847-5bf8-413d-a3d6-f913190c88fd">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -276,13 +289,6 @@
 					<pen lineWidth="0.3" lineColor="#636370"/>
 				</graphicElement>
 			</line>
-			<textField>
-				<reportElement style="Label" x="329" y="9" width="180" height="14" uuid="3374235f-84ab-4386-92e5-72542d186df9"/>
-				<textElement textAlignment="Right">
-					<font size="8" isItalic="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA["executed in " + RIGHT("0" + ((int)(($F{duration}/1000)/3600)),2) + ":" + RIGHT("0" + ((int)(($F{duration}/1000)/60))%60,2) + ":" + RIGHT("0" + ((int)($F{duration}/1000))%60,2)]]></textFieldExpression>
-			</textField>
 		</band>
 	</detail>
 </jasperReport>
