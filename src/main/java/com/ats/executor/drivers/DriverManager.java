@@ -32,6 +32,7 @@ import com.ats.executor.drivers.engines.IDriverEngine;
 import com.ats.executor.drivers.engines.MobileDriverEngine;
 import com.ats.executor.drivers.engines.browsers.ChromeDriverEngine;
 import com.ats.executor.drivers.engines.browsers.ChromiumDriverEngine;
+import com.ats.executor.drivers.engines.browsers.EdgeDriverEngine;
 import com.ats.executor.drivers.engines.browsers.FirefoxDriverEngine;
 import com.ats.executor.drivers.engines.browsers.IEDriverEngine;
 import com.ats.executor.drivers.engines.browsers.JxDriverEngine;
@@ -58,6 +59,7 @@ public class DriverManager {
 	public static final String MSEDGE_DRIVER_FILE_NAME = "msedgedriver";
 	public static final String OPERA_DRIVER_FILE_NAME = "operadriver";
 	public static final String FIREFOX_DRIVER_FILE_NAME = "geckodriver";
+	public static final String EDGE_DRIVER_FILE_NAME = "edgedriver-17134";
 
 	public static final String DESKTOP_EXPLORER = "explorer";
 	public static final String DESKTOP = "desktop";
@@ -136,7 +138,18 @@ public class DriverManager {
 				return new MsEdgeDriverEngine(
 						channel, 
 						status,
-						MSEDGE_BROWSER,
+						driverProcess, 
+						desktopDriver, 
+						props);	
+			}else {
+				return null;
+			}
+		}else if(EDGE_BROWSER.equals(appName)) {
+			driverProcess = getDriverProcess(status, appName, driverName, EDGE_DRIVER_FILE_NAME);
+			if(status.isPassed()) {
+				return new EdgeDriverEngine(
+						channel, 
+						status,
 						driverProcess, 
 						desktopDriver, 
 						props);	

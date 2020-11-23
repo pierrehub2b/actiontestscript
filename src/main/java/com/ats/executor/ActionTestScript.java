@@ -263,8 +263,10 @@ public class ActionTestScript extends Script implements ITest{
 			boolean xml = getEnvironmentValue("xml.report", "").equalsIgnoreCase("true");
 
 			final String atsReport = System.getProperty(CampaignReportGenerator.ATS_REPORT);
-			if(atsReport != null) {
-				visualQuality = 3;
+			if(atsReport != null && !atsReport.equals("0")) {
+				if(visualQuality == 0) {
+					visualQuality = 3;
+				}
 				xml = true;
 			}
 

@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -70,10 +71,10 @@ public class CampaignReportGenerator {
 
 	public static String ATS_JSON_SUITES = "ats-suites.json";
 	public static final String ATS_REPORT = "ats-report";
-	
+
 	private final static String xmlSourceName = ATS_REPORT + ".xml";
 	private final static String xmlSourceRoot = "ats-report";
-	
+
 	public static void main(String[] args) {
 
 		String output = null;
@@ -124,359 +125,381 @@ public class CampaignReportGenerator {
 		}
 	}
 
-	public CampaignReportGenerator(Path outputFolderPath, File jsonSuiteFilesFile, String details, String jasper)
+	public CampaignReportGenerator(Path outputFolderPath, File jsonSuiteFilesFile, String reportLevel, String jasper)
 			throws IOException, TransformerException, ParserConfigurationException, SAXException {
 
-		final int detailsValue = Utils.string2Int(details, 1);
+		final int detailsValue = Utils.string2Int(reportLevel, 0);
 
-		SuitesReport sr = null;
-		try {
+		if(detailsValue > 0) {
 
-			final JsonReader reader = new JsonReader(new FileReader(jsonSuiteFilesFile));
-			sr = new Gson().fromJson(reader, SuitesReport.class);
-			reader.close();
+			SuitesReport sr = null;
+			try {
 
-		} catch (IOException e) {
-		}
+				final JsonReader reader = new JsonReader(new FileReader(jsonSuiteFilesFile));
+				sr = new Gson().fromJson(reader, SuitesReport.class);
+				reader.close();
 
-		if (sr == null) {
-			System.out.println("No suites found, nothing to do !");
-			return;
-		}
-
-		DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-		Document writeXmlDocument = builder.newDocument();
-
-		final Element report = writeXmlDocument.createElement("ats-report");
-		report.setAttribute("details", String.valueOf(detailsValue));
-		report.setAttribute("projectId", sr.projectId);
-		writeXmlDocument.appendChild(report);
-
-		final Element picsList = writeXmlDocument.createElement("pics");
-
-		final String[] defaultImages = new String[] { "logo.png", "true.png", "false.png", "warning.png", "noStop.png",
-		"pdf.png" };
-		for (String img : defaultImages) {
-			final Element pic = writeXmlDocument.createElement("pic");
-			pic.setAttribute("name", img.replace(".png", ""));
-			pic.setTextContent("data:image/png;base64," + getBase64DefaultImages(
-					ResourceContent.class.getResourceAsStream("/reports/images/" + img).readAllBytes()));
-			picsList.appendChild(pic);
-		}
-		report.appendChild(picsList);
-
-		report.setAttribute("suitesCount", String.valueOf(sr.suites.length));
-		int totalTests = 0;
-		int totalTestsPassed = 0;
-		int totalSuitesPassed = 0;
-		int totalActions = 0;
-		int totalDuration = 0;
-
-		for (SuitesReportItem info : sr.suites) {
-
-			boolean suitePassed = true;
-			final Element suite = writeXmlDocument.createElement("suite");
-
-			suite.setAttribute("name", info.name);
-
-			final Element parameters = writeXmlDocument.createElement("parameters");
-			suite.appendChild(parameters);
-
-			for (Map.Entry<String, String> entry : info.parameters.entrySet()) {
-				final Element parameter = writeXmlDocument.createElement("parameter");
-				parameter.setAttribute("name", entry.getKey());
-				parameter.setAttribute("value", entry.getValue());
-
-				parameters.appendChild(parameter);
+			} catch (IOException e) {
 			}
 
-			final Element tests = writeXmlDocument.createElement("tests");
-			suite.appendChild(tests);
+			if (sr == null) {
+				System.out.println("No suites found, nothing to do !");
+				return;
+			}
 
-			int testsPassed = 0;
-			int actionsExecuted = 0;
-			int suiteDuration = 0;
+			DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+			Document writeXmlDocument = builder.newDocument();
 
-			suite.setAttribute("testsCount", String.valueOf(info.tests.length));
+			final Element report = writeXmlDocument.createElement("ats-report");
+			report.setAttribute("details", String.valueOf(detailsValue));
+			report.setAttribute("projectId", sr.projectId);
+			writeXmlDocument.appendChild(report);
 
-			for (String className : info.tests) {
+			final Element picsList = writeXmlDocument.createElement("pics");
 
-				final File xmlDataFile = outputFolderPath.resolve(info.name).resolve(className + "_xml")
-						.resolve(XmlReport.REPORT_FILE).toFile();
-				if (xmlDataFile.exists()) {
+			final String[] defaultImages = new String[] { "logo.png", "true.png", "false.png", "warning.png", "noStop.png",
+			"pdf.png" };
+			for (String img : defaultImages) {
+				final Element pic = writeXmlDocument.createElement("pic");
+				pic.setAttribute("name", img.replace(".png", ""));
+				pic.setTextContent("data:image/png;base64," + getBase64DefaultImages(
+						ResourceContent.class.getResourceAsStream("/reports/images/" + img).readAllBytes()));
+				picsList.appendChild(pic);
+			}
+			report.appendChild(picsList);
 
-					totalTests++;
-					int testDuration = 0;
+			report.setAttribute("suitesCount", String.valueOf(sr.suites.length));
+			int totalTests = 0;
+			int totalTestsPassed = 0;
+			int totalSuitesPassed = 0;
+			int totalActions = 0;
+			int totalDuration = 0;
 
-					final Element atsTest = builder.parse(xmlDataFile).getDocumentElement();
-					final NodeList summary = atsTest.getElementsByTagName("summary");
+			for (SuitesReportItem info : sr.suites) {
 
-					if (summary.getLength() > 0) {
-						if ("1".equals(summary.item(0).getAttributes().getNamedItem("status").getNodeValue())) {
-							testsPassed++;
-							totalTestsPassed++;
-						} else {
-							suitePassed = false;
+				boolean suitePassed = true;
+				final Element suite = writeXmlDocument.createElement("suite");
+
+				suite.setAttribute("name", info.name);
+
+				final Element parameters = writeXmlDocument.createElement("parameters");
+				suite.appendChild(parameters);
+
+				for (Map.Entry<String, String> entry : info.parameters.entrySet()) {
+					final Element parameter = writeXmlDocument.createElement("parameter");
+					parameter.setAttribute("name", entry.getKey());
+					parameter.setAttribute("value", entry.getValue());
+
+					parameters.appendChild(parameter);
+				}
+
+				final Element tests = writeXmlDocument.createElement("tests");
+				suite.appendChild(tests);
+
+				int testsPassed = 0;
+				int actionsExecuted = 0;
+				int suiteDuration = 0;
+
+				suite.setAttribute("testsCount", String.valueOf(info.tests.length));
+
+				for (String className : info.tests) {
+
+					final File xmlDataFile = outputFolderPath.resolve(info.name).resolve(className + "_xml")
+							.resolve(XmlReport.REPORT_FILE).toFile();
+					if (xmlDataFile.exists()) {
+
+						totalTests++;
+						int testDuration = 0;
+
+						final Element atsTest = builder.parse(xmlDataFile).getDocumentElement();
+						final NodeList summary = atsTest.getElementsByTagName("summary");
+
+						if (summary.getLength() > 0) {
+							if ("1".equals(summary.item(0).getAttributes().getNamedItem("status").getNodeValue())) {
+								testsPassed++;
+								totalTestsPassed++;
+							} else {
+								suitePassed = false;
+							}
 						}
+
+						final NodeList actionsList = atsTest.getElementsByTagName("action");
+						actionsExecuted += actionsList.getLength();
+
+						for (int i = 0; i < actionsList.getLength(); i++) {
+							final Node action = actionsList.item(i);
+
+							for (int j = 0; j < action.getChildNodes().getLength(); j++) {
+								final Node actionNode = action.getChildNodes().item(j);
+								if ("duration".equals(actionNode.getNodeName())) {
+									testDuration += Utils.string2Int(actionNode.getTextContent());
+									break;
+								}
+							}
+						}
+
+						atsTest.setAttribute("duration", String.valueOf(testDuration));
+
+						suiteDuration += testDuration;
+
+						tests.appendChild(writeXmlDocument.importNode(atsTest, true));
 					}
+				}
 
-					final NodeList actionsList = atsTest.getElementsByTagName("action");
-					actionsExecuted += actionsList.getLength();
+				totalActions += actionsExecuted;
+				totalDuration += suiteDuration;
 
-					for (int i = 0; i < actionsList.getLength(); i++) {
-						final Node action = actionsList.item(i);
+				if (suitePassed) {
+					totalSuitesPassed++;
+				}
+				suite.setAttribute("passed", String.valueOf(suitePassed));
+				suite.setAttribute("duration", String.valueOf(suiteDuration));
+				suite.setAttribute("actions", String.valueOf(actionsExecuted));
+				suite.setAttribute("testsPassed", String.valueOf(testsPassed));
+				report.appendChild(suite);
+			}
 
-						for (int j = 0; j < action.getChildNodes().getLength(); j++) {
-							final Node actionNode = action.getChildNodes().item(j);
-							if ("duration".equals(actionNode.getNodeName())) {
-								testDuration += Utils.string2Int(actionNode.getTextContent());
-								break;
+			report.setAttribute("duration", String.valueOf(totalDuration));
+			report.setAttribute("tests", String.valueOf(totalTests));
+			report.setAttribute("testsPassed", String.valueOf(totalTestsPassed));
+			report.setAttribute("suitesPassed", String.valueOf(totalSuitesPassed));
+			report.setAttribute("actions", String.valueOf(totalActions));
+
+			Transformer transformer = TransformerFactory.newInstance().newTransformer();
+			transformer.transform(new DOMSource(writeXmlDocument),
+					new StreamResult(new OutputStreamWriter(
+							new FileOutputStream(outputFolderPath.resolve(xmlSourceName).toFile()),
+							StandardCharsets.UTF_8)));
+
+			String html = null;
+
+			final File xsltFolder = Paths.get("").resolve("src/assets/resources/xslt").toFile();
+			if (xsltFolder != null && xsltFolder.exists()) {
+				for (File xslt : xsltFolder.listFiles()) {
+					if (xslt.getName().equalsIgnoreCase("campaign")) {
+						for (File stylesheets : xslt.listFiles()) {
+							if (stylesheets.getName().contains("_html_")) {
+								html = stylesheets.getAbsolutePath();
 							}
 						}
 					}
 
-					atsTest.setAttribute("duration", String.valueOf(testDuration));
+					if (xslt.getName().equalsIgnoreCase("images")) {
+						if (xslt.listFiles().length > 0) {
+							for (File images : xslt.listFiles()) {
+								InputStream initialStream = new FileInputStream(images);
+								byte[] buffer = new byte[initialStream.available()];
+								initialStream.read(buffer);
 
-					suiteDuration += testDuration;
-
-					tests.appendChild(writeXmlDocument.importNode(atsTest, true));
-				}
-			}
-
-			totalActions += actionsExecuted;
-			totalDuration += suiteDuration;
-
-			if (suitePassed) {
-				totalSuitesPassed++;
-			}
-			suite.setAttribute("passed", String.valueOf(suitePassed));
-			suite.setAttribute("duration", String.valueOf(suiteDuration));
-			suite.setAttribute("actions", String.valueOf(actionsExecuted));
-			suite.setAttribute("testsPassed", String.valueOf(testsPassed));
-			report.appendChild(suite);
-		}
-
-		report.setAttribute("duration", String.valueOf(totalDuration));
-		report.setAttribute("tests", String.valueOf(totalTests));
-		report.setAttribute("testsPassed", String.valueOf(totalTestsPassed));
-		report.setAttribute("suitesPassed", String.valueOf(totalSuitesPassed));
-		report.setAttribute("actions", String.valueOf(totalActions));
-		
-		Transformer transformer = TransformerFactory.newInstance().newTransformer();
-		transformer.transform(new DOMSource(writeXmlDocument),
-				new StreamResult(new OutputStreamWriter(
-						new FileOutputStream(outputFolderPath.resolve(xmlSourceName).toFile()),
-						StandardCharsets.UTF_8)));
-
-		String html = null;
-
-		final File xsltFolder = Paths.get("").resolve("src/assets/resources/xslt").toFile();
-		if (xsltFolder != null && xsltFolder.exists()) {
-			for (File xslt : xsltFolder.listFiles()) {
-				if (xslt.getName().equalsIgnoreCase("campaign")) {
-					for (File stylesheets : xslt.listFiles()) {
-						if (stylesheets.getName().contains("_html_")) {
-							html = stylesheets.getAbsolutePath();
-						}
-					}
-				}
-
-				if (xslt.getName().equalsIgnoreCase("images")) {
-					if (xslt.listFiles().length > 0) {
-						for (File images : xslt.listFiles()) {
-							InputStream initialStream = new FileInputStream(images);
-							byte[] buffer = new byte[initialStream.available()];
-							initialStream.read(buffer);
-
-							OutputStream outStream = new FileOutputStream(
-									outputFolderPath.resolve(images.getName()).toFile());
-							outStream.write(buffer);
-							outStream.close();
-							initialStream.close();
+								OutputStream outStream = new FileOutputStream(
+										outputFolderPath.resolve(images.getName()).toFile());
+								outStream.write(buffer);
+								outStream.close();
+								initialStream.close();
+							}
 						}
 					}
 				}
 			}
-		}
 
-		if (html == null || (!new File(html).exists())) {
-			try {
-				html = outputFolderPath.resolve("campaign_html_stylesheet.xml").toFile().getAbsolutePath();
-				copyResource(
-						ResourceContent.class.getResourceAsStream("/reports/campaign/campaign_html_stylesheet.xml"),
-						html);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-
-		if (html == null) {
-			return;
-		}
-
-		// HTML reports
-
-		final Path atsXmlDataPath = outputFolderPath.resolve(xmlSourceName);
-		final MinifyWriter filteredWriter = new MinifyWriter(
-				Files.newBufferedWriter(outputFolderPath.resolve(ATS_REPORT + ".html"), StandardCharsets.UTF_8));
-		final Transformer htmlTransformer = TransformerFactory.newInstance().newTransformer(new StreamSource(html));
-
-		htmlTransformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-		htmlTransformer.transform(
-				new DOMSource(builder.parse(new InputSource(
-						new InputStreamReader(Files.newInputStream(atsXmlDataPath), StandardCharsets.UTF_8)))),
-				new StreamResult(filteredWriter));
-
-		filteredWriter.close();
-
-		if (jasper != null) {
-
-			final File jasperFolder = new File(jasper);
-			if (jasperFolder.exists()) {
-
-				final String jasperFolderPath = jasperFolder.getAbsolutePath();
-				System.out.println("[ATS-SCRIPT] Jasper folder -> " + jasperFolderPath);
-
-				copyResource("summary.jrxml", outputFolderPath);
-				copyResource("suite.jrxml", outputFolderPath);
-				copyResource("test.jrxml", outputFolderPath);
-
-				final String outputPath = outputFolderPath.toAbsolutePath().toString();
-				final String reportName = "summary";
-
-				//-----------------------------------------------------------------------------------------------------
-				// Build Jasper reports
-				//-----------------------------------------------------------------------------------------------------	
-
-				builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-				writeXmlDocument = builder.newDocument();
-
-				final Element project = writeXmlDocument.createElement("project");
-				project.setAttribute("default", "run");
-				project.setAttribute("basedir", outputPath);
-
-				final Element path = writeXmlDocument.createElement("path");
-				path.setAttribute("id", "classpath");
-
-				final Element fileset = writeXmlDocument.createElement("fileset");
-				fileset.setAttribute("dir", jasperFolderPath);
-
-				final Element include = writeXmlDocument.createElement("include");
-				include.setAttribute("name", "**/*.jar");
-
-				fileset.appendChild(include);
-				path.appendChild(fileset);
-				project.appendChild(path);
-
-
-				final Element taskdef = writeXmlDocument.createElement("taskdef");
-				taskdef.setAttribute("name", "jrc");
-				taskdef.setAttribute("classname", "net.sf.jasperreports.ant.JRAntCompileTask");
-
-				final Element classpath = writeXmlDocument.createElement("classpath");
-				classpath.setAttribute("refid", "classpath");
-				taskdef.appendChild(classpath);
-				project.appendChild(taskdef);
-
-				final Element target = writeXmlDocument.createElement("target");
-				target.setAttribute("name", "run");
-
-				final Element echo = writeXmlDocument.createElement("echo");
-				echo.setAttribute("message", "Clean generated files");
-				target.appendChild(echo);
-
-				final Element delete = writeXmlDocument.createElement("delete");
-
-				final Element fileset2 = writeXmlDocument.createElement("fileset");
-				fileset2.setAttribute("dir", ".");
-				fileset2.setAttribute("includes", "**/*.jasper");
-				delete.appendChild(fileset2);
-
-				final Element fileset3 = writeXmlDocument.createElement("fileset");
-				fileset3.setAttribute("dir", ".");
-				fileset3.setAttribute("includes", "**/*.jrprint");
-				delete.appendChild(fileset3);
-
-				final Element fileset4 = writeXmlDocument.createElement("fileset");
-				fileset4.setAttribute("file", reportName + ".pdf");
-				delete.appendChild(fileset4);
-
-				final Element fileset5 = writeXmlDocument.createElement("fileset");
-				fileset5.setAttribute("file", reportName + ".html");
-				delete.appendChild(fileset5);
-
-				final Element fileset6 = writeXmlDocument.createElement("fileset");
-				fileset6.setAttribute("file", reportName + ".xls");
-				delete.appendChild(fileset6);
-
-				target.appendChild(delete);
-
-				final Element echo3 = writeXmlDocument.createElement("echo");
-				echo3.setAttribute("message", "Generate and build Jasper files");
-				target.appendChild(echo3);
-
-				final Element jrc = writeXmlDocument.createElement("jrc");
-				jrc.setAttribute("destdir", outputPath);
-				jrc.setAttribute("xmlvalidation", "false");
-
-				final Element src = writeXmlDocument.createElement("src");
-				final Element fileset7 = writeXmlDocument.createElement("fileset");
-				fileset7.setAttribute("dir", outputPath);
-
-				final Element include2 = writeXmlDocument.createElement("include");
-				include2.setAttribute("name", "**/*.jrxml");
-				fileset7.appendChild(include2);
-				src.appendChild(fileset7);
-
-				jrc.appendChild(src);
-
-				final Element classpath2 = writeXmlDocument.createElement("classpath");
-				classpath2.setAttribute("refid", "classpath");
-
-				jrc.appendChild(classpath2);
-				target.appendChild(jrc);
-
-				project.appendChild(target);
-
-				final File buildFile = outputFolderPath.resolve("build-report.xml").toFile();
-
-				transformer = TransformerFactory.newInstance().newTransformer();
-				transformer = TransformerFactory.newInstance().newTransformer();
-				transformer.transform(new DOMSource(project),
-						new StreamResult(new OutputStreamWriter(
-								new FileOutputStream(buildFile),
-								StandardCharsets.UTF_8)));
-
-
-				//-----------------------------------------------------------------------------------------------------
-				// Launch Ant task to build reports
-				//-----------------------------------------------------------------------------------------------------	
-
-				final Project p = new Project();
-				p.setUserProperty("ant.file", buildFile.getAbsolutePath());
-				p.init();
-
-				final ProjectHelper helper = ProjectHelper.getProjectHelper();
-				p.addReference("ant.projectHelper", helper);
-				helper.parse(p, buildFile);
-
-				final DefaultLogger consoleLogger = new DefaultLogger();
-				consoleLogger.setErrorPrintStream(System.err);
-				consoleLogger.setOutputPrintStream(System.out);
-				consoleLogger.setEmacsMode(false);
-				consoleLogger.setMessageOutputLevel(Project.MSG_INFO);
-
-				p.addBuildListener(consoleLogger);
-				p.executeTarget(p.getDefaultTarget());
-
-				//-----------------------------------------------------------------------------------------------------
-				// Generate pdf report
-				//-----------------------------------------------------------------------------------------------------		
-
+			if (html == null || (!new File(html).exists())) {
 				try {
-					generatePdf(reportName, outputPath, jasperFolder);
-				}catch(ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+					html = outputFolderPath.resolve("campaign_html_stylesheet.xml").toFile().getAbsolutePath();
+					copyResource(
+							ResourceContent.class.getResourceAsStream("/reports/campaign/campaign_html_stylesheet.xml"),
+							html);
+				} catch (IOException e) {
 					e.printStackTrace();
+				}
+			}
+
+			if (html == null) {
+				return;
+			}
+
+			// HTML reports
+
+			final Path atsXmlDataPath = outputFolderPath.resolve(xmlSourceName);
+			final MinifyWriter filteredWriter = new MinifyWriter(
+					Files.newBufferedWriter(outputFolderPath.resolve(ATS_REPORT + ".html"), StandardCharsets.UTF_8));
+			final Transformer htmlTransformer = TransformerFactory.newInstance().newTransformer(new StreamSource(html));
+
+			htmlTransformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+			htmlTransformer.transform(
+					new DOMSource(builder.parse(new InputSource(
+							new InputStreamReader(Files.newInputStream(atsXmlDataPath), StandardCharsets.UTF_8)))),
+					new StreamResult(filteredWriter));
+
+			filteredWriter.close();
+
+			if (jasper != null) {
+				final File jasperFolder = new File(jasper);
+				if (jasperFolder.exists()) {
+
+					final String jasperFolderPath = jasperFolder.getAbsolutePath();
+					System.out.println("[ATS-SCRIPT] Jasper folder -> " + jasperFolderPath);
+
+					copyResource("summary.jrxml", outputFolderPath);
+					copyResource("suite.jrxml", outputFolderPath);
+					copyResource("test.jrxml", outputFolderPath);
+
+					final String outputPath = outputFolderPath.toAbsolutePath().toString();
+					final String reportName = "summary";
+
+					//-----------------------------------------------------------------------------------------------------
+					// Clean files
+					//-----------------------------------------------------------------------------------------------------	
+
+					File [] filesToDelete = outputFolderPath.toFile().listFiles(new FilenameFilter() {
+						@Override
+						public boolean accept(File dir, String name) {
+							return name.endsWith(".jrprint") || name.endsWith(".jasper") || name.equals(reportName + ".pdf");
+						}
+					});
+
+					System.out.println("Delete files.");
+					for (File f : filesToDelete) {
+						try {
+							f.delete();
+							System.out.println("File : " + f.getAbsolutePath());
+						}catch(Exception e) {}
+					}
+
+					//-----------------------------------------------------------------------------------------------------
+					// Build Jasper reports
+					//-----------------------------------------------------------------------------------------------------	
+
+					builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+					writeXmlDocument = builder.newDocument();
+
+					final Element project = writeXmlDocument.createElement("project");
+					project.setAttribute("default", "run");
+					project.setAttribute("basedir", outputPath);
+
+					final Element path = writeXmlDocument.createElement("path");
+					path.setAttribute("id", "classpath");
+
+					final Element fileset = writeXmlDocument.createElement("fileset");
+					fileset.setAttribute("dir", jasperFolderPath);
+
+					final Element include = writeXmlDocument.createElement("include");
+					include.setAttribute("name", "**/*.jar");
+
+					fileset.appendChild(include);
+					path.appendChild(fileset);
+					project.appendChild(path);
+
+					final Element taskdef = writeXmlDocument.createElement("taskdef");
+					taskdef.setAttribute("name", "jrc");
+					taskdef.setAttribute("classname", "net.sf.jasperreports.ant.JRAntCompileTask");
+
+					final Element classpath = writeXmlDocument.createElement("classpath");
+					classpath.setAttribute("refid", "classpath");
+					taskdef.appendChild(classpath);
+					project.appendChild(taskdef);
+
+					final Element target = writeXmlDocument.createElement("target");
+					target.setAttribute("name", "run");
+
+					final Element jrc = writeXmlDocument.createElement("jrc");
+					jrc.setAttribute("destdir", outputPath);
+					jrc.setAttribute("xmlvalidation", "false");
+
+					final Element src = writeXmlDocument.createElement("src");
+					final Element fileset7 = writeXmlDocument.createElement("fileset");
+					fileset7.setAttribute("dir", outputPath);
+
+					final Element include2 = writeXmlDocument.createElement("include");
+					include2.setAttribute("name", "**/*.jrxml");
+					fileset7.appendChild(include2);
+					src.appendChild(fileset7);
+
+					jrc.appendChild(src);
+
+					final Element classpath2 = writeXmlDocument.createElement("classpath");
+					classpath2.setAttribute("refid", "classpath");
+					jrc.appendChild(classpath2);
+
+					target.appendChild(jrc);
+
+					project.appendChild(target);
+
+					final File buildFile = outputFolderPath.resolve("build-report.xml").toFile();
+
+					transformer = TransformerFactory.newInstance().newTransformer();
+					transformer = TransformerFactory.newInstance().newTransformer();
+					transformer.transform(new DOMSource(project),
+							new StreamResult(new OutputStreamWriter(
+									new FileOutputStream(buildFile),
+									StandardCharsets.UTF_8)));
+
+
+					//-----------------------------------------------------------------------------------------------------
+					// Launch Ant task to build reports
+					//-----------------------------------------------------------------------------------------------------	
+
+					final Project p = new Project();
+
+					p.setUserProperty("ant.file", buildFile.getAbsolutePath());
+
+
+					//				File outputFolder = outputFolderPath.toFile();
+					//				p.setDefault("run");
+					//				p.setBaseDir(outputFolder);
+					//				
+					//				Reference ref = new Reference(p, "classpath");
+					//				org.apache.tools.ant.types.Path ap = new org.apache.tools.ant.types.Path(p);
+					//				ap.setRefid(ref);
+					//				
+					//				FileSet afs = new FileSet();
+					//				afs.setDir(jasperFolder);
+					//				FilenameSelector afsSelector = new FilenameSelector();
+					//				afsSelector.setRegex(".*\\.jar");
+					//				afs.add(afsSelector);
+					//				ap.addFileset(afs);
+					//				
+					//				Taskdef tsk = new Taskdef();
+					//				tsk.setClassname("net.sf.jasperreports.ant.JRAntCompileTask");
+					//				tsk.setName("jrc");
+					//				tsk.setTaskName("jrc");
+					//				org.apache.tools.ant.types.Path ap2 = new org.apache.tools.ant.types.Path(p);
+					//				ap2.setRefid(ref);
+					//				
+					//				tsk.setProject(p);
+					//				
+					//				Target t = new Target();
+					//				t.setName("run");
+					//				
+					//				t.addTask(tsk);
+					//				
+					//				p.addTarget(t);
+
+					p.init();
+
+					final ProjectHelper helper = ProjectHelper.getProjectHelper();
+					p.addReference("ant.projectHelper", helper);
+					helper.parse(p, buildFile);
+
+					final DefaultLogger consoleLogger = new DefaultLogger();
+					consoleLogger.setErrorPrintStream(System.err);
+					consoleLogger.setOutputPrintStream(System.out);
+					consoleLogger.setEmacsMode(false);
+					consoleLogger.setMessageOutputLevel(Project.MSG_INFO);
+
+					p.addBuildListener(consoleLogger);
+					p.executeTarget(p.getDefaultTarget());
+
+					//-----------------------------------------------------------------------------------------------------
+					// Generate pdf report
+					//-----------------------------------------------------------------------------------------------------		
+
+					System.out.println("Generate reports.");
+
+					try {
+						generatePdf(reportName, outputPath, jasperFolder);
+					}catch(ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		}
@@ -484,8 +507,10 @@ public class CampaignReportGenerator {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static void generatePdf(String reportName, String outputPath, File jasperFolder) throws ClassNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException {
-		
+
 		outputPath += File.separator;
+		final String reportFullName = outputPath + reportName + ".pdf";
+		System.out.print("File : " + reportFullName + " ... ");
 
 		int len = jasperFolder.listFiles().length;
 		final URL[] urls = new URL[len];
@@ -510,7 +535,9 @@ public class CampaignReportGenerator {
 		clazz = loader.loadClass("net.sf.jasperreports.engine.JasperExportManager");
 		method = clazz.getMethod("exportReportToPdfFile", String.class, String.class);
 
-		method.invoke(null, fileName.toString(), outputPath + reportName + ".pdf");
+		method.invoke(null, fileName.toString(), reportFullName);
+		System.out.println("OK");
+		System.out.flush();
 
 		loader.close();
 	}

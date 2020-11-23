@@ -17,7 +17,7 @@ import com.ats.generator.variables.CalculatedProperty;
 
 public class MsEdgeDriverEngine extends ChromiumBasedDriverEngine {
 
-	public MsEdgeDriverEngine(Channel channel, ActionStatus status, String browser, DriverProcess driverProcess, DesktopDriver desktopDriver, ApplicationProperties props) {
+	public MsEdgeDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver desktopDriver, ApplicationProperties props) {
 		super(channel, status, DriverManager.MSEDGE_BROWSER, driverProcess, desktopDriver, props);
 		
 		final ChromeOptions options = initOptions(props, DriverManager.MSEDGE_BROWSER);
