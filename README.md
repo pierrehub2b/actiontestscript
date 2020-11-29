@@ -41,7 +41,7 @@ Pretty simple no ?
 
 ### Installing
 
-Download ATS components : http://www.actiontestscript.com/ats.zip .
+Download ATS components : http://www.actiontestscript.com/tools/ats.zip .
 
 You can unzip archive into the folder of your choice, but if you do not install ATS on *[User-Home-Directory]/.actiontestscript* folder, you have to create an environment variable named **ATS_HOME** and set it's value to your ATS installation folder.
 
