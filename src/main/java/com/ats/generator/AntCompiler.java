@@ -19,21 +19,20 @@ under the License.
 
 package com.ats.generator;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Path;
+
 import org.apache.tools.ant.DefaultLogger;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
 
 import com.ats.driver.AtsManager;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 public class AntCompiler {
 	
-	private static final String XML_SUITE_FILES = "-suiteXmlFiles=";
+	public static final String XML_SUITE_FILES = "-suiteXmlFiles=";
 	
 	public static void main(String[] args) throws IOException {
 		if(args.length > 0) {
@@ -71,7 +70,7 @@ public class AntCompiler {
 				fw.write("<suite-files>");
 
 				for (int i = 0; i < suites.length; i++) {
-					final String suitePath = findSuiteFile(suites[i]);
+					final String suitePath = Generator.findSuiteFile(suites[i]);
 					if(suitePath != null) {
 						fw.write("<suite-file path=\"" + suitePath + "\"/>");
 					}
@@ -87,18 +86,6 @@ public class AntCompiler {
 			
 			new AntCompiler(buildFile);
 		}
-	}
-	
-	private static String findSuiteFile(String s) {
-		if(Paths.get(s).toFile().exists()) {
-			return s;
-		}else {
-			s = "src/exec/" + s;
-			if(Paths.get(s).toFile().exists()) {
-				return s;
-			}
-		}
-		return null;
 	}
 
 	public AntCompiler(File buildFile) {

@@ -19,21 +19,25 @@ under the License.
 
 package com.ats.generator;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.stream.Stream;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.ats.generator.events.ScriptProcessedEvent;
 import com.ats.generator.events.ScriptProcessedNotifier;
 import com.ats.generator.parsers.Lexer;
 import com.ats.script.Project;
 import com.ats.script.ScriptLoader;
 import com.ats.tools.Utils;
-import org.apache.commons.lang3.StringUtils;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Scanner;
-import java.util.stream.Stream;
 
 public class Generator implements ScriptProcessedEvent{
 
@@ -45,7 +49,7 @@ public class Generator implements ScriptProcessedEvent{
 
 	private int remainingScripts = 0;
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 
 		ATS.logInfo("Java version : " + System.getProperty("java.version"));
 		ATS.logInfo(StringUtils.repeat("-", 72));
@@ -68,7 +72,7 @@ public class Generator implements ScriptProcessedEvent{
 
 			if(arguments.isCompile()) {
 
-				final String targetFolderPath = projectData.getTargetFolderPath().toFile().getAbsolutePath();
+				final String targetFolderPath = projectData.getTargetFolderPath().toString();
 
 				ATS.logInfo("Compile generated java files into folder -> " + targetFolderPath + "/" + Project.TARGET_FOLDER_CLASSES);
 
@@ -102,9 +106,54 @@ public class Generator implements ScriptProcessedEvent{
 
 				} catch (IOException e) {}
 			}
+
+			if(arguments.getSuites() != null) {
+
+				final String[] suites = arguments.getSuites();
+				if(suites.length > 0) {
+					final Path projectFolderPath = projectData.getTargetFolderPath();
+					final FileWriter fw = new FileWriter(projectFolderPath.resolve("suites.xml").toFile());
+
+					fw.write("<!DOCTYPE suite SYSTEM \"https://testng.org/testng-1.0.dtd\">");
+					fw.write("<suite name=\"allSuites\">");
+					fw.write("<suite-files>");
+
+					for (int i = 0; i < suites.length; i++) {
+						final String suitePath = findSuiteFile(suites[i]);
+						if(suitePath != null) {
+							fw.write("<suite-file path=\"" + suitePath + "\"/>");
+						}
+					}
+
+					fw.write("</suite-files>");
+					fw.write("</suite>");
+					fw.close();
+				}
+			}
+
 		}else {
 			ATS.logInfo("No valid Ats project found at -> " + arguments.getProjectFolder());
 		}
+	}
+
+	public static String findSuiteFile(String s) {
+		if(Paths.get(s).toFile().exists()) {
+			return s;
+		}else {
+			if(Paths.get(s + ".xml").toFile().exists()) {
+				return s + ".xml";
+			}else {
+				s = "src/exec/" + s;
+				if(Paths.get(s).toFile().exists()) {
+					return s;
+				}else {
+					if(Paths.get(s + ".xml").toFile().exists()) {
+						return s + ".xml";
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	public Generator(String projectPath){

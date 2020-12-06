@@ -129,6 +129,14 @@ public class DriverProcess {
 			return null;
 		}
 	}
+	
+	public URL getDriverLoopback(){
+		try {
+			return new URL("http://127.0.0.1:" + port);
+		} catch (MalformedURLException e) {
+			return null;
+		}
+	}
 
 	//--------------------------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------------------------

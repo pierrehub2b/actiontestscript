@@ -65,6 +65,7 @@ public class ATS {
 	private File destinationFolder = null;
 	private File reportFolder = null;
 	private File outputFolder = null;
+	private String[] suites = null;
 
 	private boolean compile = false;
 
@@ -78,6 +79,8 @@ public class ATS {
 		options.addOption("prj", "project", true, "ATS project folder");
 		options.addOption("dest", "destination", true, "Generated Java files destination folder");
 		options.addOption("rep", "report", true, "Execution report Java files destination folder");
+		options.addOption("suites", "suiteXmlFiles", true, "Execution suites to launch");
+		
 	}
 
 	public void parse() {
@@ -97,6 +100,10 @@ public class ATS {
 
 			final boolean force = cmd.hasOption("f");
 			compile = cmd.hasOption("comp");
+			
+			if (cmd.hasOption("suites")) {
+				suites = cmd.getOptionValue("suites").split(",");
+			}
 
 			String prjFolder = ".";
 			if (cmd.hasOption("prj")) {
@@ -169,5 +176,9 @@ public class ATS {
 
 	public File getOutputFolder() {
 		return outputFolder;
+	}
+	
+	public String[] getSuites() {
+		return suites;
 	}
 }
