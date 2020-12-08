@@ -85,9 +85,7 @@ public class Script {
 	public Script() {}
 
 	public Script(ExecutionLogger logger) {
-		if(logger != null) {
-			setLogger(logger);
-		}
+		setLogger(logger);
 	}
 
 	public String getPassword(String name) {
@@ -141,7 +139,9 @@ public class Script {
 	//---------------------------------------------------------------------------------------------------
 
 	public void setLogger(ExecutionLogger logger) {
-		this.logger = logger;
+		if(logger != null) {
+			this.logger = logger;
+		}
 	}
 
 	public void sleep(int ms) {

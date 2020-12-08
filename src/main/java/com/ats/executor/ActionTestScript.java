@@ -238,6 +238,9 @@ public class ActionTestScript extends Script implements ITest{
 		final TestRunner runner = (TestRunner) ctx;
 		final String suiteName = ctx.getSuite().getName();
 		
+		final SuitesReportItem currentSuite = new SuitesReportItem((TestRunner) ctx);
+		setLogger(new ExecutionLogger(System.out, currentSuite.logLevel));		
+		
 		final String outputFolder = System.getProperty("output-folder");
 		if(outputFolder != null) {
 			runner.setOutputDirectory(outputFolder + File.separator + suiteName);

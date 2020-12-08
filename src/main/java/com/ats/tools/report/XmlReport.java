@@ -275,7 +275,7 @@ public class XmlReport {
 				logger.sendError("XML report parser error ->", e4.getMessage());
 			}
 
-			logger.sendInfo("XML report generated -> ", xmlFolder.getAbsolutePath());
+			logger.sendInfo("XML report generated", xmlFolder.getAbsolutePath());
 		} else {
 			///TODO Create empty xml
 			final File xmlFolder = output.resolve(qualifiedName + "_xml").toFile();
@@ -344,7 +344,7 @@ public class XmlReport {
 					Element actions = document.createElement("actions");
 					atsRoot.appendChild(actions);
 				} catch (Exception e2) {
-					logger.sendError("XML report exception ->", e2.getMessage());
+					logger.sendError("XML report exception", e2.getMessage());
 				}finally {
 				}
 
@@ -360,18 +360,18 @@ public class XmlReport {
 											StandardCharsets.UTF_8)));
 
 				} catch (TransformerConfigurationException e2) {
-					logger.sendError("XML report config error ->", e2.getMessage());
+					logger.sendError("XML report config error", e2.getMessage());
 				} catch (TransformerException e3) {
-					logger.sendError("XML report transform error ->", e3.getMessage());
+					logger.sendError("XML report transform error", e3.getMessage());
 				} catch (FileNotFoundException e4) {
-					logger.sendError("XML report write file error ->", e4.getMessage());
+					logger.sendError("XML report write file error", e4.getMessage());
 				}
 
 			} catch (ParserConfigurationException e4) {
-				logger.sendError("XML report parser error ->", e4.getMessage());
+				logger.sendError("XML report parser error", e4.getMessage());
 			}
 
-			logger.sendInfo("XML report generated -> ", xmlFolder.getAbsolutePath());
+			logger.sendInfo("XML report generated", xmlFolder.getAbsolutePath());
 			
 		}
 	}
