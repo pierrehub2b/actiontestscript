@@ -19,6 +19,49 @@ under the License.
 
 package com.ats.executor.drivers.engines.webservices;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.StringWriter;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
 import com.ats.element.AtsBaseElement;
 import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
@@ -30,42 +73,21 @@ import com.ats.executor.channels.Channel;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.actions.ActionApi;
 import com.ats.tools.logger.MessageCode;
-import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.io.CharStreams;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonIOException;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.apache.commons.text.StringEscapeUtils;
-import org.w3c.dom.*;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
-import java.io.StringReader;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.function.Predicate;
-import java.util.regex.Pattern;
 
 public abstract class ApiExecutor implements IApiDriverExecutor {
 
-	private final static Pattern xmlPattern = Pattern.compile("<\\?xml (?:(?!>).)*>");
+	private final static String TRUNCATED_DATA = "TRUNCATED_DATA";
 	private final static Pattern xmlPropertyPattern = Pattern.compile(".*:");
-
-	private final static Pattern jsonObjectPattern = Pattern.compile("(?s)^\\{.*\\}$");
-	private final static Pattern jsonArrayPattern = Pattern.compile("(?s)^\\[.*\\]$");
 
 	private final static short TEXT_TYPE = 0;
 	private final static short JSON_TYPE = 1;
@@ -90,7 +112,7 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 
 	protected String authentication;
 	protected String authenticationValue;
-	
+
 	protected int timeout;
 	protected int maxTry;
 
@@ -98,7 +120,7 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 
 	protected OkHttpClient client;
 	private Response response;
-	
+
 	private PrintStream logStream;
 
 	public ApiExecutor(PrintStream logStream, OkHttpClient client, int timeout, int maxTry, Channel channel) {
@@ -116,7 +138,7 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 			this.uri = new URI(value);
 		} catch (URISyntaxException e) {}
 	}
-	
+
 	protected URI getUri() {
 		if(lastAction.getPort() > -1) {
 			try {
@@ -138,7 +160,7 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 		lastAction = action;
 
 		status.setMessage("authentication");
-		
+
 		headerProperties = new HashMap<String, String>();
 		if(authentication != null && authenticationValue != null && authentication.length() > 0 && authenticationValue.length() > 0) {
 			headerProperties.put("Authorization", authentication + " " + authenticationValue);
@@ -168,16 +190,16 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 	//------------------------------------------------------------------------------------------------------------
 
 	protected void executeRequest(ActionStatus status, final Request request) {
-		
+
 		logStream.println("call request -> " + request.url().toString());
-		
+
 		int max = maxTry;
 		while(!clientCall(status, request) && max > 0) {
 			channel.sendLog(MessageCode.PROPERTY_TRY_ASSERT, "Call webservice failed", max);
 			channel.sleep(500);
 			max--;
 		}
-		
+
 		if(max == 0) {
 			logStream.println("call request failed -> " + status.getFailMessage());
 		}
@@ -196,59 +218,97 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 				type = contentTypes.get(0);
 			}
 
-			parseResponse(type, CharStreams.toString(new InputStreamReader(response.body().byteStream(), Charsets.UTF_8)).trim());
+			File tempFile = Files.createTempFile("ats-", ".tmp").toFile();
+			try (OutputStream output = new FileOutputStream(tempFile)) {
+				response.body().byteStream().transferTo(output);
+			} catch (IOException ioException) {
+
+			}
+
+			source = parseResponse(type, tempFile);
+			tempFile.delete();
+
 			response.close();
-			
+
 			return true;
 
 		} catch (IOException e) {
 			status.setError(ActionStatus.WEB_DRIVER_ERROR, "call Webservice error -> " + e.getMessage());
 		}
-		
+
 		return false;
 	}
 
 	//------------------------------------------------------------------------------------------------------------
 	//------------------------------------------------------------------------------------------------------------
 
-	protected void parseResponse(String type, String source) {
+	private String parseResponse(String type, File temp) throws FileNotFoundException {
 
-		source = source.trim();
+		final InputStreamReader isr = new InputStreamReader(new FileInputStream(temp), StandardCharsets.UTF_8);
 		initAtsElements();
 
 		if(type.contains("/xml")) {
 
-			source = xmlPattern.matcher(StringEscapeUtils.unescapeXml(source)).replaceAll("");
-			this.type = XML_TYPE;			
-
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			try {
-				final Document doc = dbf.newDocumentBuilder().parse(new InputSource(new StringReader(source)));
+				final Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(isr));
+
+				this.type = XML_TYPE;	
+				
+				final NodeList streams = doc.getElementsByTagName("Stream");
+				if(streams != null && streams.getLength() > 0) {
+
+					for(int i=0; i<streams.getLength(); i++) {
+
+						final Element stream = (Element)streams.item(i);
+						final int len = stream.getTextContent().length();
+
+						if(len > 100000) {
+							final Node streamParent = stream.getParentNode();
+							streamParent.removeChild(stream);
+
+							final Element newStream = doc.createElement("Stream");
+							newStream.setTextContent("[" + TRUNCATED_DATA + ", size:" + len + "]");
+							streamParent.appendChild(newStream);
+						}
+					}
+					doc.normalize();
+				}
+
 				loadElementsList(doc.getElementsByTagName("*"));
-			} catch (SAXException | IOException | ParserConfigurationException e) {
 
-			} 
+				final Transformer transform = TransformerFactory.newInstance().newTransformer();
+				transform.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+				
+				final StringWriter writer = new StringWriter();
+				transform.transform(new DOMSource(doc), new StreamResult(writer));
+				
+				return "<root><RESPONSE code=\"" + response.code() + "\"><data>" + writer.getBuffer().toString() + "</data></RESPONSE></root>";
 
-			source = "<root><RESPONSE code=\"" + response.code() + "\"><data>" + source + "</data></RESPONSE></root>";
+			}catch(SAXException | IOException | TransformerException | ParserConfigurationException e) {
+
+			}
 
 		}else {
 
-			if(( type.contains("/json") || type.contains("/javascript")) && (jsonObjectPattern.matcher(source).matches() || jsonArrayPattern.matcher(source).matches())){
+			try {
+				final JsonElement root = JsonParser.parseReader(isr);
 
 				this.type = JSON_TYPE;
-				loadElementsList(JsonParser.parseString(source), "root");
+				loadElementsList(root, "root");
 
-				source = "{\"response\":{\"name\":\"response\",\"code\":" + response.code() + ",\"data\":" + source + "}}"; 
+				return "{\"response\":{\"name\":\"response\",\"code\":" + response.code() + ",\"data\":" + root.toString() + "}}"; 
 
-			}else {
-				this.type = TEXT_TYPE;
-				atsElements.add(new AtsApiElement(DATA, ImmutableMap.of("value", source)));
-				
-				source = "<ats_response><code>" + response.code() + "</code><data><![CDATA[" + source + "]]></data></ats_response>";
+			}catch(JsonIOException | JsonSyntaxException e) {
+
 			}
 		}
 		
-		this.source = source;
+		this.type = TEXT_TYPE;
+		
+		final String content = new BufferedReader(isr).lines().collect(Collectors.joining("\n"));
+		atsElements.add(new AtsApiElement(DATA, ImmutableMap.of("value", content)));
+
+		return "<ats_response><code>" + response.code() + "</code><data><![CDATA[" + content + "]]></data></ats_response>";
 	}
 
 	private void initAtsElements(){

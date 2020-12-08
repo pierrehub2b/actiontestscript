@@ -33,6 +33,8 @@ import java.util.Map.Entry;
 
 public class RestApiExecutor extends ApiExecutor {
 
+	private static final String contentTypeHeader = "Content-Type";
+
 	public RestApiExecutor(PrintStream logStream, OkHttpClient client, int timeout, int maxTry, Channel channel, String wsUrl) {
 
 		super(logStream, client, timeout, maxTry, channel);
@@ -59,17 +61,21 @@ public class RestApiExecutor extends ApiExecutor {
 		super.execute(status, api);
 
 		final String fullUri = getMethodUri().toString();
-		
+
 		String parameters = "";
 		if(api.getData() != null) {
 			parameters = api.getData().getCalculated();
 		}
 
+		boolean addContentType = true;
 		final Builder requestBuilder = new Builder();
 		for (Entry<String,String> header : headerProperties.entrySet()) {
+			if(contentTypeHeader.equals(header.getKey())) {
+				addContentType = false;
+			}
 			requestBuilder.addHeader(header.getKey(), header.getValue());
 		}
-		
+
 		final String apiType = api.getType().toUpperCase();
 		if(ActionApi.GET.equals(apiType) || ActionApi.DELETE.equals(apiType)) {
 
@@ -78,20 +84,22 @@ public class RestApiExecutor extends ApiExecutor {
 			}
 
 			requestBuilder.url(fullUri + parameters);
-						
+
 			if(ActionApi.GET.equals(apiType)) {
 				requestBuilder.get();
 			}else {
 				requestBuilder.delete();
 			}
-			
+
 		}else {
-			
+
 			requestBuilder.url(fullUri);
-			requestBuilder.addHeader("Content-Type", getContentType(parameters));
-			
+			if(addContentType) {
+				requestBuilder.addHeader(contentTypeHeader, getContentType(parameters));
+			}
+
 			final RequestBody body = RequestBody.create(null, parameters);
-						
+
 			if(ActionApi.PATCH.equals(apiType)) {
 				requestBuilder.patch(body);
 			}else if(ActionApi.PUT.equals(apiType)) {
@@ -100,7 +108,7 @@ public class RestApiExecutor extends ApiExecutor {
 				requestBuilder.post(body);
 			}
 		}
-		
+
 		executeRequest(status, requestBuilder.build());
 	}
 }
