@@ -7,6 +7,7 @@ import org.testng.TestRunner;
 public class SuitesReportItem {
 
 	public String name;
+	public String description;
 	public Map<String, String> parameters;
 	public String[] tests;
 	public String logLevel = "";
@@ -16,9 +17,21 @@ public class SuitesReportItem {
 		this.parameters = runner.getTest().getAllParameters();
 		this.tests = runner.getTest().getClasses().stream().map(c -> c.getName()).toArray(String[]::new);
 	
-		final Map<String, String> params = runner.getTest().getAllParameters();
-		if(params != null) {
-			this.logLevel = params.getOrDefault("ats.log.level", "");
+		if(this.parameters != null) {
+			setLogLevel(this.parameters.remove("ats.log.level"));
+			setDescription(this.parameters.remove("ats.suite.description"));
+		}
+	}
+	
+	private void setLogLevel(String value) {
+		if(value != null) {
+			logLevel = value;
+		}
+	}
+	
+	private void setDescription(String value) {
+		if(value != null) {
+			description = value;
 		}
 	}
 }

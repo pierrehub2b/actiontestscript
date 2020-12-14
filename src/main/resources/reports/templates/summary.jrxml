@@ -53,6 +53,7 @@
 	<field name="suitesPassed" class="java.lang.Integer">
 		<fieldDescription><![CDATA[@suitesPassed]]></fieldDescription>
 	</field>
+	<field name="projectDescription" class="java.lang.String"/>
 	<variable name="subReportCount" class="java.lang.Integer"/>
 	<variable name="testsFailed" class="java.lang.Integer">
 		<variableExpression><![CDATA[$F{tests}-$F{testsPassed}]]></variableExpression>

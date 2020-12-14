@@ -32,6 +32,9 @@
 	<field name="actions" class="java.lang.Long">
 		<fieldDescription><![CDATA[@actions]]></fieldDescription>
 	</field>
+	<field name="description" class="java.lang.String">
+		<fieldDescription><![CDATA[@description]]></fieldDescription>
+	</field>
 	<variable name="durationSec" class="java.lang.Long">
 		<variableExpression><![CDATA[$F{duration}/1000]]></variableExpression>
 	</variable>
@@ -289,6 +292,10 @@
 					<pen lineWidth="0.3" lineColor="#636370"/>
 				</graphicElement>
 			</line>
+			<textField>
+				<reportElement style="Label" x="50" y="38" width="211" height="61" uuid="6c601f9d-19c4-41ed-8ae8-a6df9a667479"/>
+				<textFieldExpression><![CDATA[$F{description}]]></textFieldExpression>
+			</textField>
 		</band>
 	</detail>
 </jasperReport>

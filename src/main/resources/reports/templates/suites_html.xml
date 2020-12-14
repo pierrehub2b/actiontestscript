@@ -307,6 +307,31 @@
 					<TD COLSPAN="1" style="padding: 0px 10px 0px 10px;" width="80">
 						<font size="2" color="#4d545d">
 							<i>
+								<b>Description</b>
+							</i>
+						</font>
+					</TD>
+					<TD COLSPAN="1" style="padding: 0px 10px 0px 20px;">
+						<font size="2">
+							<xsl:value-of select="@description" />
+						</font>
+					</TD>
+					<TD ROWSPAN="3" COLSPAN="1" width="44"
+						style="text-align:right;padding: 0px 5px 0px 0px;">
+						<xsl:choose>
+							<xsl:when test="$failedTests = 0">
+									<span class="ats-icon-true" width="32" height="32"/>
+							</xsl:when>
+							<xsl:otherwise>
+								<span class="ats-icon-false" width="32" height="32"/>
+							</xsl:otherwise>
+						</xsl:choose>
+					</TD>
+				</TR>
+				<TR height="25">
+					<TD COLSPAN="1" style="padding: 0px 10px 0px 10px;" width="80">
+						<font size="2" color="#4d545d">
+							<i>
 								<b>Parameters</b>
 							</i>
 						</font>
@@ -325,17 +350,6 @@
 								</span>
 							</xsl:for-each>
 						</font>
-					</TD>
-					<TD ROWSPAN="2" COLSPAN="1" width="44"
-						style="text-align:right;padding: 0px 5px 0px 0px;">
-						<xsl:choose>
-							<xsl:when test="$failedTests = 0">
-									<span class="ats-icon-true" width="32" height="32"/>
-							</xsl:when>
-							<xsl:otherwise>
-								<span class="ats-icon-false" width="32" height="32"/>
-							</xsl:otherwise>
-						</xsl:choose>
 					</TD>
 				</TR>
 				<TR height="25">

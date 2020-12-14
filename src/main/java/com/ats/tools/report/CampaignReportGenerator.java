@@ -20,7 +20,6 @@ under the License.
 package com.ats.tools.report;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FilenameFilter;
@@ -37,6 +36,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -125,6 +125,18 @@ public class CampaignReportGenerator {
 		}
 	}
 
+	private void copyReportsTemplate(Path path, Path toPath) {
+		if(Files.exists(path)) {
+			for(File f : path.toFile().listFiles()) {
+				if(f.isFile()) {
+					try {
+						Files.copy(f.toPath(), toPath.resolve(f.getName()), StandardCopyOption.REPLACE_EXISTING);
+					} catch (IOException e) {}
+				}
+			}
+		}
+	}
+
 	public CampaignReportGenerator(Path outputFolderPath, File jsonSuiteFilesFile, String reportLevel, String jasper)
 			throws IOException, TransformerException, ParserConfigurationException, SAXException {
 
@@ -132,17 +144,23 @@ public class CampaignReportGenerator {
 
 		if(detailsValue > 0) {
 
-			SuitesReport sr = null;
+			final Path reportPath = Paths.get("src", "assets", "resources", "reports");
+			if(Files.exists(reportPath)) {
+				copyReportsTemplate(reportPath.resolve("templates"), outputFolderPath);
+				copyReportsTemplate(reportPath.resolve("images"), outputFolderPath);
+			}
+
+			SuitesReport suiteReport = null;
 			try {
 
 				final JsonReader reader = new JsonReader(new FileReader(jsonSuiteFilesFile));
-				sr = new Gson().fromJson(reader, SuitesReport.class);
+				suiteReport = new Gson().fromJson(reader, SuitesReport.class);
 				reader.close();
 
 			} catch (IOException e) {
 			}
 
-			if (sr == null) {
+			if (suiteReport == null) {
 				System.out.println("No suites found, nothing to do !");
 				return;
 			}
@@ -152,35 +170,43 @@ public class CampaignReportGenerator {
 
 			final Element report = writeXmlDocument.createElement("ats-report");
 			report.setAttribute("details", String.valueOf(detailsValue));
-			report.setAttribute("projectId", sr.projectId);
+			report.setAttribute("projectId", suiteReport.projectId);
+			report.setAttribute("projectDescription", suiteReport.projectDescription);
 			writeXmlDocument.appendChild(report);
 
 			final Element picsList = writeXmlDocument.createElement("pics");
 
-			final String[] defaultImages = new String[] { "logo.png", "true.png", "false.png", "warning.png", "noStop.png",
-			"pdf.png" };
+			final String[] defaultImages = new String[] { "logo.png", "true.png", "false.png", "warning.png", "noStop.png", "pdf.png" };
 			for (String img : defaultImages) {
 				final Element pic = writeXmlDocument.createElement("pic");
 				pic.setAttribute("name", img.replace(".png", ""));
-				pic.setTextContent("data:image/png;base64," + getBase64DefaultImages(
-						ResourceContent.class.getResourceAsStream("/reports/images/" + img).readAllBytes()));
+
+				byte[] imgBytes = null;
+				if(Files.exists(outputFolderPath.resolve(img))){
+					imgBytes = Files.readAllBytes(outputFolderPath.resolve(img));
+				}else {
+					imgBytes = ResourceContent.class.getResourceAsStream("/reports/images/" + img).readAllBytes();
+				}
+
+				pic.setTextContent("data:image/png;base64," + getBase64DefaultImages(imgBytes));
 				picsList.appendChild(pic);
 			}
 			report.appendChild(picsList);
 
-			report.setAttribute("suitesCount", String.valueOf(sr.suites.length));
+			report.setAttribute("suitesCount", String.valueOf(suiteReport.suites.length));
 			int totalTests = 0;
 			int totalTestsPassed = 0;
 			int totalSuitesPassed = 0;
 			int totalActions = 0;
 			int totalDuration = 0;
 
-			for (SuitesReportItem info : sr.suites) {
+			for (SuitesReportItem info : suiteReport.suites) {
 
 				boolean suitePassed = true;
 				final Element suite = writeXmlDocument.createElement("suite");
 
 				suite.setAttribute("name", info.name);
+				suite.setAttribute("description", info.description);
 
 				final Element parameters = writeXmlDocument.createElement("parameters");
 				suite.appendChild(parameters);
@@ -204,8 +230,8 @@ public class CampaignReportGenerator {
 
 				for (String className : info.tests) {
 
-					final File xmlDataFile = outputFolderPath.resolve(info.name).resolve(className + "_xml")
-							.resolve(XmlReport.REPORT_FILE).toFile();
+					final File xmlDataFile = outputFolderPath.resolve(info.name).resolve(className + "_xml").resolve(XmlReport.REPORT_FILE).toFile();
+
 					if (xmlDataFile.exists()) {
 
 						totalTests++;
@@ -271,58 +297,15 @@ public class CampaignReportGenerator {
 							new FileOutputStream(outputFolderPath.resolve(xmlSourceName).toFile()),
 							StandardCharsets.UTF_8)));
 
-			String html = null;
 
-			final File xsltFolder = Paths.get("").resolve("src/assets/resources/xslt").toFile();
-			if (xsltFolder != null && xsltFolder.exists()) {
-				for (File xslt : xsltFolder.listFiles()) {
-					if (xslt.getName().equalsIgnoreCase("campaign")) {
-						for (File stylesheets : xslt.listFiles()) {
-							if (stylesheets.getName().contains("_html_")) {
-								html = stylesheets.getAbsolutePath();
-							}
-						}
-					}
-
-					if (xslt.getName().equalsIgnoreCase("images")) {
-						if (xslt.listFiles().length > 0) {
-							for (File images : xslt.listFiles()) {
-								InputStream initialStream = new FileInputStream(images);
-								byte[] buffer = new byte[initialStream.available()];
-								initialStream.read(buffer);
-
-								OutputStream outStream = new FileOutputStream(
-										outputFolderPath.resolve(images.getName()).toFile());
-								outStream.write(buffer);
-								outStream.close();
-								initialStream.close();
-							}
-						}
-					}
-				}
-			}
-
-			if (html == null || (!new File(html).exists())) {
-				try {
-					html = outputFolderPath.resolve("campaign_html_stylesheet.xml").toFile().getAbsolutePath();
-					copyResource(
-							ResourceContent.class.getResourceAsStream("/reports/campaign/campaign_html_stylesheet.xml"),
-							html);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-
-			if (html == null) {
-				return;
-			}
+			File htmlTemplateFile = copyResource("suites_html.xml", outputFolderPath);
 
 			// HTML reports
 
 			final Path atsXmlDataPath = outputFolderPath.resolve(xmlSourceName);
 			final MinifyWriter filteredWriter = new MinifyWriter(
 					Files.newBufferedWriter(outputFolderPath.resolve(ATS_REPORT + ".html"), StandardCharsets.UTF_8));
-			final Transformer htmlTransformer = TransformerFactory.newInstance().newTransformer(new StreamSource(html));
+			final Transformer htmlTransformer = TransformerFactory.newInstance().newTransformer(new StreamSource(htmlTemplateFile));
 
 			htmlTransformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
 			htmlTransformer.transform(
@@ -542,26 +525,20 @@ public class CampaignReportGenerator {
 		loader.close();
 	}
 
-	private static void copyResource(String resName, Path dest) throws IOException {
-		InputStream is = ResourceContent.class.getResourceAsStream("/reports/campaign/" + resName);
+	private static File copyResource(String resName, Path dest) throws IOException {
+		Path filePath = dest.resolve(resName);
+		if(!Files.exists(filePath)) {
+			InputStream is = ResourceContent.class.getResourceAsStream("/reports/templates/" + resName);
 
-		byte[] buffer = new byte[is.available()];
-		is.read(buffer);
+			byte[] buffer = new byte[is.available()];
+			is.read(buffer);
 
-		File targetFile = dest.resolve(resName).toFile();
-		OutputStream outStream = new FileOutputStream(targetFile);
-		outStream.write(buffer);
-		outStream.close();
-	}
-
-	private static void copyResource(InputStream res, String dest) throws IOException {
-		byte[] buffer = new byte[res.available()];
-		res.read(buffer);
-
-		File targetFile = new File(dest);
-		OutputStream outStream = new FileOutputStream(targetFile);
-		outStream.write(buffer);
-		outStream.close();
+			File targetFile = dest.resolve(resName).toFile();
+			OutputStream outStream = new FileOutputStream(targetFile);
+			outStream.write(buffer);
+			outStream.close();
+		}
+		return filePath.toFile();
 	}
 
 	private static String getBase64DefaultImages(byte[] b) throws IOException {
