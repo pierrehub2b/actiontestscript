@@ -11,7 +11,6 @@
 	<!-- ========================= -->
 	<!-- Calculations -->
 	<!-- ========================= -->
-
 	<xsl:variable name="picLogo"
 		select="//ats-report/pics/pic[@name='logo']" />
 			<xsl:variable name="picPdf"
@@ -122,7 +121,6 @@
 							sibling = sibling.previousElementSibling
 						}
 					};
-
 				</script>
 				<style>
 					html{background:#f0f0f0;padding:20px;font-family:
@@ -202,7 +200,10 @@
 					    center;
 					  padding: 5px 0 5px 36px;
 					}
-				</style>
+					
+					input[type='checkbox'] { display: none; } 
+					.lbl-toggle { color:#565656;font-weight: bold; font-family: monospace; font-size: 1.2rem; text-transform: uppercase; text-align: center; padding: 1rem; cursor: pointer; transition: all 0.25s ease-out; } .lbl-toggle::before { content: ' '; display: inline-block; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 5px solid currentColor; vertical-align: middle; margin-right: .7rem; transform: translateY(-2px); transition: transform .2s ease-out; } .toggle:checked+.lbl-toggle::before { transform: rotate(90deg) translateX(-3px); } .collapsible-content { max-height: 0px; overflow: hidden; transition: max-height .25s ease-in-out; } .toggle:checked + .lbl-toggle + .collapsible-content { max-height: none; } .toggle:checked+.lbl-toggle { border-bottom-right-radius: 0; border-bottom-left-radius: 0; }
+					</style>
 			</HEAD>
 			<BODY>
 				<TABLE width="100%">
@@ -423,202 +424,208 @@
 		<xsl:param name="suiteName" />
 		<xsl:variable name="testName"
 			select="concat($suiteName, '/', script[1]/@testName)" />
+		<xsl:variable name="i" select="position()" />
 		<xsl:variable name="actionsCount"
 			select="script/summary/@actions" />
-		<div class="ats-script" width="100%">
-			<FONT SIZE="4">
-				<B>
-					<span class="ats-script-drag">
-						<a>
-							<xsl:attribute name="href">
-							<xsl:value-of
-								select="concat('ats://', $projectId, '/', script/@testName)" />
-							</xsl:attribute>
-							<xsl:value-of select="script/@testName" />
-						</a>
-					</span>
-				</B>
-			</FONT>
-			<FONT SIZE="2" COLOR="#565656">
-				<I>
-					(executed in
-					<xsl:call-template name="seconds-to-time">
-						<xsl:with-param name="seconds"
-							select="sum(actions/action/duration) div 1000" />
-					</xsl:call-template>
-					)
-				</I>
-			</FONT>
-			<span style="float:right">
-				<span style="cursor: pointer" onclick="scrollToPrevAts(parentNode.parentNode)">
-				prev
-				</span>
-				 - 
-				<span style="cursor: pointer" onclick="scrollToNextAts(parentNode.parentNode)">
-				next
-				</span>
-			</span>
-		</div>
-
-		<TABLE border="1" bordercolor="#ffffff" cellpadding="10"
-			width="100%" style="background-color:#C4C4C4">
-			<THEAD>
-				<TR style="background-color:#575757;color:white;font-size:80%">
-					<TH>
-						Actions
-					</TH>
-					<TH>
-						Started
-					</TH>
-					<TH>
-						Author
-					</TH>
-					<TH>
-						Links
-					</TH>
-					<TH>
-						Result
-					</TH>
-				</TR>
-			</THEAD>
-			<TBODY>
-				<TR>
-					<TD style="text-align:center">
-						<xsl:choose>
-							<xsl:when test="$actionsCount != ''">
-								<xsl:value-of select="$actionsCount" />
-							</xsl:when>
-							<xsl:otherwise>
-								0
-							</xsl:otherwise>
-						</xsl:choose>
-					</TD>
-					<TD>
-						<xsl:call-template name="millisecs-to-ISO">
-							<xsl:with-param name="millisecs"
-								select="script/started" />
+			  		
+		  		<div class="ats-script" width="100%">		
+				<FONT SIZE="4">
+					<B>
+						<span class="ats-script-drag">
+							<a>
+								<xsl:attribute name="href">
+								<xsl:value-of
+									select="concat('ats://', $projectId, '/', script/@testName)" />
+								</xsl:attribute>
+								<xsl:value-of select="script/@testName" />
+							</a>
+						</span>
+					</B>
+				</FONT>
+				<FONT SIZE="2" COLOR="#565656">
+					<I>
+						(executed in
+						<xsl:call-template name="seconds-to-time">
+							<xsl:with-param name="seconds"
+								select="sum(actions/action/duration) div 1000" />
 						</xsl:call-template>
-					</TD>
-					<TD>
-						<xsl:value-of select="script/author" />
-					</TD>
-					<TD class="linkButtons">
-						<a>
-							<xsl:attribute name="href">
-							<xsl:value-of select="concat($testName,'.atsv')" />
-							</xsl:attribute>
-							ATSV report
-						</a>
-					</TD>
-					
-					<TD align="center">
+						)
+					</I>
+				</FONT>
+				<span style="float:right">
+					<span style="cursor: pointer" onclick="scrollToPrevAts(parentNode.parentNode)">
+					prev
+					</span>
+					 - 
+					<span style="cursor: pointer" onclick="scrollToNextAts(parentNode.parentNode)">
+					next
+					</span>
+				</span>
+			</div>
+	
+			<TABLE border="1" bordercolor="#ffffff" cellpadding="10"
+				width="100%" style="background-color:#C4C4C4">
+				<THEAD>
+					<TR style="background-color:#575757;color:white;font-size:80%">
+						<TH>
+							Actions
+						</TH>
+						<TH>
+							Started
+						</TH>
+						<TH>
+							Author
+						</TH>
+						<TH>
+							Links
+						</TH>
+						<TH>
+							Result
+						</TH>
+					</TR>
+				</THEAD>
+				<TBODY>
+					<TR>
+						<TD style="text-align:center">
+							<xsl:choose>
+								<xsl:when test="$actionsCount != ''">
+									<xsl:value-of select="$actionsCount" />
+								</xsl:when>
+								<xsl:otherwise>
+									0
+								</xsl:otherwise>
+							</xsl:choose>
+						</TD>
+						<TD>
+							<xsl:call-template name="millisecs-to-ISO">
+								<xsl:with-param name="millisecs"
+									select="script/started" />
+							</xsl:call-template>
+						</TD>
+						<TD>
+							<xsl:value-of select="script/author" />
+						</TD>
+						<TD class="linkButtons">
+							<a>
+								<xsl:attribute name="href">
+								<xsl:value-of select="concat($testName,'.atsv')" />
+								</xsl:attribute>
+								ATSV report
+							</a>
+						</TD>
+						
+						<TD align="center">
+						<xsl:choose>
+							<xsl:when test="script/summary/@status = '0'">
+								<span class="ats-icon-false" width="28" height="28" style="background-size: 28px 28px;"/>
+							</xsl:when>
+							<xsl:when test="script/summary/@status = '1'">
+								<span class="ats-icon-true" width="28" height="28" style="background-size: 28px 28px;"/>
+							</xsl:when>
+						</xsl:choose>
+						</TD>
+						
+					</TR>
 					<xsl:choose>
-						<xsl:when test="script/summary/@status = '0'">
-							<span class="ats-icon-false" width="28" height="28" style="background-size: 28px 28px;"/>
-						</xsl:when>
-						<xsl:when test="script/summary/@status = '1'">
-							<span class="ats-icon-true" width="28" height="28" style="background-size: 28px 28px;"/>
+						<xsl:when test="script/summary/data != '[empty]'">
+							<TR>
+								<TD colspan="1">
+									<font size="2" color="#5d5d5d">
+										<i>
+											<b>Summary</b>
+										</i>
+									</font>
+								</TD>
+								<TD colspan="7">
+									<xsl:value-of select="script/summary/data"
+										disable-output-escaping="yes" />
+								</TD>
+							</TR>
 						</xsl:when>
 					</xsl:choose>
-					</TD>
-					
-				</TR>
-				<xsl:choose>
-					<xsl:when test="script/summary/data != '[empty]'">
-						<TR>
-							<TD colspan="1">
-								<font size="2" color="#5d5d5d">
+					<xsl:choose>
+						<xsl:when test="script/summary/error != ''">
+							<TR>
+								<TD colspan="1" width="100">
+									<font color="#b32e42" size="2">
+										<i>
+											<b>
+												Execution error
+											</b>
+										</i>
+									</font>
+								</TD>
+								<TD colspan="7">
+									<b>
+										<span class="ats-script-drag">
+											<a>
+												<xsl:attribute name="href">
+												<xsl:value-of
+													select="concat('ats://', $projectId, '/', script/summary/error/@script)" />
+												</xsl:attribute>
+												<xsl:value-of
+													select="substring-before(script/summary/error/@script, ':')" />
+											</a>
+										</span>
+									</b>
 									<i>
-										<b>Summary</b>
+										( line
+										<xsl:value-of select="script/summary/error/@line"
+											disable-output-escaping="yes" />
+										) :
 									</i>
-								</font>
-							</TD>
-							<TD colspan="7">
-								<xsl:value-of select="script/summary/data"
-									disable-output-escaping="yes" />
-							</TD>
-						</TR>
-					</xsl:when>
-				</xsl:choose>
-				<xsl:choose>
-					<xsl:when test="script/summary/error != ''">
-						<TR>
-							<TD colspan="1" width="100">
-								<font color="#b32e42" size="2">
 									<i>
-										<b>
-											Execution error
-										</b>
+										<xsl:value-of select="script/summary/error"
+											disable-output-escaping="yes" />
 									</i>
-								</font>
-							</TD>
-							<TD colspan="7">
-								<b>
-									<span class="ats-script-drag">
-										<a>
-											<xsl:attribute name="href">
-											<xsl:value-of
-												select="concat('ats://', $projectId, '/', script/summary/error/@script)" />
-											</xsl:attribute>
-											<xsl:value-of
-												select="substring-before(script/summary/error/@script, ':')" />
-										</a>
-									</span>
-								</b>
-								<i>
-									( line
-									<xsl:value-of select="script/summary/error/@line"
+								</TD>
+							</TR>
+						</xsl:when>
+					</xsl:choose>
+					<xsl:choose>
+						<xsl:when test="script/prerequisite != ''">
+							<TR>
+								<TD colspan="1">
+									<font size="2" color="#5d5d5d">
+										<i>
+											<b>Prerequisite</b>
+										</i>
+									</font>
+								</TD>
+								<TD colspan="7">
+									<xsl:value-of select="script/prerequisite"
 										disable-output-escaping="yes" />
-									) :
-								</i>
-								<i>
-									<xsl:value-of select="script/summary/error"
+								</TD>
+							</TR>
+						</xsl:when>
+					</xsl:choose>
+					<xsl:choose>
+						<xsl:when test="script/description != ''">
+							<TR>
+								<TD colspan="1">
+									<font size="2" color="#5d5d5d">
+										<i>
+											<b>Description</b>
+										</i>
+									</font>
+								</TD>
+								<TD colspan="7">
+									<xsl:value-of select="script/description"
 										disable-output-escaping="yes" />
-								</i>
-							</TD>
-						</TR>
-					</xsl:when>
-				</xsl:choose>
-				<xsl:choose>
-					<xsl:when test="script/prerequisite != ''">
-						<TR>
-							<TD colspan="1">
-								<font size="2" color="#5d5d5d">
-									<i>
-										<b>Prerequisite</b>
-									</i>
-								</font>
-							</TD>
-							<TD colspan="7">
-								<xsl:value-of select="script/prerequisite"
-									disable-output-escaping="yes" />
-							</TD>
-						</TR>
-					</xsl:when>
-				</xsl:choose>
-				<xsl:choose>
-					<xsl:when test="script/description != ''">
-						<TR>
-							<TD colspan="1">
-								<font size="2" color="#5d5d5d">
-									<i>
-										<b>Description</b>
-									</i>
-								</font>
-							</TD>
-							<TD colspan="7">
-								<xsl:value-of select="script/description"
-									disable-output-escaping="yes" />
-							</TD>
-						</TR>
-					</xsl:when>
-				</xsl:choose>
-			</TBODY>
-		</TABLE>
-		<xsl:apply-templates select="actions">
-			<xsl:with-param name="fullTestName" select="$testName" />
-		</xsl:apply-templates>
-		<div style="height:1px;width:100%;border:none;margin-bottom:40px" />
+								</TD>
+							</TR>
+						</xsl:when>
+					</xsl:choose>
+				</TBODY>
+			</TABLE>
+			<input id="toogle{$suiteName}{$i}" class="toggle" type="checkbox"/> 
+			<label for="toogle{$suiteName}{$i}" class="lbl-toggle">Actions</label>
+			<div class="collapsible-content">
+				<xsl:apply-templates select="actions">
+					<xsl:with-param name="fullTestName" select="$testName" />
+				</xsl:apply-templates>
+			</div>
+			<div style="height:1px;width:100%;border:none;margin-bottom:40px" />
 	</xsl:template>
 
 	<!-- ========================= -->
