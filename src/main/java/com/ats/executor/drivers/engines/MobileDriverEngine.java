@@ -711,4 +711,9 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	public int getNumWindows() {
 		return 1;
 	}
+
+	@Override
+	public String getUrl() {
+		return applicationPath;
+	}
 }

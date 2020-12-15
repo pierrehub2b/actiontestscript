@@ -35,6 +35,7 @@ public class TestElementRoot extends TestElement {
 	private final static String VERSION = "version";
 	private final static String RECTANGLE = "rectangle";
 	private final static String TITLE = "title";
+	private final static String URL = "url";
 	private final static String PROCESS_ID = "process-id";
 	private final static String SCREEN_SHOT = "screenshot";
 	private final static String WINDOWS = "windows";
@@ -97,6 +98,8 @@ public class TestElementRoot extends TestElement {
 			return String.valueOf(channel.getProcessId());
 		case TITLE:
 			return engine.getTitle();
+		case URL:
+			return engine.getUrl();
 		case WINDOWS:
 			return String.valueOf(engine.getNumWindows());
 		default :
@@ -115,6 +118,7 @@ public class TestElementRoot extends TestElement {
 		attributes.add(new CalculatedProperty(RECTANGLE, channel.getBoundDimension()));
 		attributes.add(new CalculatedProperty(PROCESS_ID, String.valueOf(channel.getProcessId())));
 		attributes.add(new CalculatedProperty(TITLE, engine.getTitle()));
+		attributes.add(new CalculatedProperty(URL, engine.getUrl()));
 		attributes.add(new CalculatedProperty(WINDOWS, String.valueOf(engine.getNumWindows())));
 				
 		return attributes.toArray(new CalculatedProperty[attributes.size()]);

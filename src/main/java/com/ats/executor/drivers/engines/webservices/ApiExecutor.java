@@ -152,6 +152,10 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 	protected URI getMethodUri() {
 		return getUri().resolve(lastAction.getMethod().getCalculated());
 	}
+	
+	public String getCurrentUrl() {
+		return getMethodUri().toString();
+	}
 
 	@Override
 	public void execute(ActionStatus status, ActionApi action) {
@@ -252,7 +256,7 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 			try {
 				final Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(isr));
 
-				this.type = XML_TYPE;	
+				this.type = XML_TYPE;
 				
 				final NodeList streams = doc.getElementsByTagName("Stream");
 				if(streams != null && streams.getLength() > 0) {

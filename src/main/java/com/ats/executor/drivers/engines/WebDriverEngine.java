@@ -1286,4 +1286,9 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			return 1;
 		}
 	}
+
+	@Override
+	public String getUrl() {
+		return driver.getCurrentUrl();
+	}
 }

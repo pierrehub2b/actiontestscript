@@ -114,4 +114,5 @@ public interface IDriverEngine{
 	public void windowState(ActionStatus status, Channel channel, String state);
 	public String getTitle();
 	public int getNumWindows();
+	public String getUrl();
 }

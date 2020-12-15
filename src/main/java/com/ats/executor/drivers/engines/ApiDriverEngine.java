@@ -93,7 +93,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	private ApiExecutor executor;
 	
 	private PrintStream logStream;
-
+	
 	public ApiDriverEngine(Channel channel, ActionStatus status, String path, DesktopDriver desktopDriver, ApplicationProperties props) {
 
 		super(channel, desktopDriver, props, 0, 0);
@@ -466,5 +466,10 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	@Override
 	public int getNumWindows() {
 		return 0;
+	}
+
+	@Override
+	public String getUrl() {
+		return executor.getCurrentUrl();
 	}
 }

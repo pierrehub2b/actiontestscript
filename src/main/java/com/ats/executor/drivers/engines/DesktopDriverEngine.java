@@ -542,4 +542,9 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	public int getNumWindows() {
 		return getDesktopDriver().getWindowsByPid(channel.getProcessId()).size();
 	}
+
+	@Override
+	public String getUrl() {
+		return applicationPath;
+	}
 }
