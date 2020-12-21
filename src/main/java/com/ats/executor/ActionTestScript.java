@@ -317,8 +317,9 @@ public class ActionTestScript extends Script implements ITest{
 	}
 
 	@AfterClass(alwaysRun=true)
-	public void afterClass() {
-		sendScriptInfo("Script terminated -> " + status.endLogs());
+	public void afterClass(ITestContext ctx) {
+		final TestRunner runner = (TestRunner) ctx;
+		status.endLogs(this, runner);
 	}
 
 	@AfterTest(alwaysRun=true)

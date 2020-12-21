@@ -19,10 +19,21 @@ under the License.
 
 package com.ats.executor;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
+import org.testng.TestRunner;
+
 import com.google.gson.JsonObject;
+
+import io.netty.util.CharsetUtil;
 
 public class ScriptStatus {
 
@@ -32,9 +43,9 @@ public class ScriptStatus {
 
 	private String testName = "";
 	private String suiteName = "";
-	
+
 	private ArrayList<String> errorStack = new ArrayList<String>();
-	
+
 	public ScriptStatus() {
 		start = System.currentTimeMillis();
 		actions = 0;
@@ -46,7 +57,7 @@ public class ScriptStatus {
 		testName = script;
 		suiteName = suite;
 	}
-	
+
 	public void addCallscriptStack(String value) {
 		errorStack.add(value);
 	}
@@ -58,32 +69,60 @@ public class ScriptStatus {
 	public void failed() {
 		passed = false;
 	}
-	
+
 	public boolean isPassed() {
 		return passed;
 	}
-	
+
 	public String getTestName() {
 		return testName;
 	}
-	
+
 	public String getSuiteName() {
 		return suiteName;
 	}
-	
+
 	public int getActions() {
 		return actions;
 	}
 
-	public String endLogs() {
+	public void endLogs(ActionTestScript ts, TestRunner runner) {
 		final JsonObject logs = new JsonObject();
+		final long duration = System.currentTimeMillis() - start;
+
 		logs.addProperty("name", testName);
 		logs.addProperty("suite", suiteName);
-		logs.addProperty("duration", System.currentTimeMillis() - start);
+		logs.addProperty("duration", duration);
 		logs.addProperty("passed", passed);
 		logs.addProperty("actions", actions);
 
-		return logs.toString();
+		final String logsContent = logs.toString();
+
+		ts.sendScriptInfo("Script terminated -> " + logsContent);
+
+		final Path output = Paths.get(runner.getOutputDirectory(), "../ats-scripts.json");
+
+		PrintWriter out = null;
+		BufferedWriter bufWriter;
+
+		try{
+			bufWriter =
+					Files.newBufferedWriter(
+							output,
+							CharsetUtil.UTF_8,
+							StandardOpenOption.WRITE, 
+							StandardOpenOption.APPEND,
+							StandardOpenOption.CREATE);
+			out = new PrintWriter(bufWriter, true);
+			out.println(logsContent);
+			out.close();
+		}catch(IOException e){
+
+		}
+	}
+
+	public void saveStatus() {
+
 	}
 
 	public boolean isSuiteExecution() {
