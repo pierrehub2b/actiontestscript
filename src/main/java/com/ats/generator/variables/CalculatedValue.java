@@ -92,6 +92,11 @@ public class CalculatedValue{
 		dataList = data;
 	}
 
+	public CalculatedValue(Script script) {
+		setScript(script);
+		setCalculated("");
+	}
+	
 	public CalculatedValue(Script script, String dataValue) {
 		setScript(script);
 		if(dataValue.length() > 0){

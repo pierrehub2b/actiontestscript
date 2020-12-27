@@ -59,7 +59,6 @@ public class DriverManager {
 	public static final String MSEDGE_DRIVER_FILE_NAME = "msedgedriver";
 	public static final String OPERA_DRIVER_FILE_NAME = "operadriver";
 	public static final String FIREFOX_DRIVER_FILE_NAME = "geckodriver";
-	public static final String EDGE_DRIVER_FILE_NAME = "edgedriver-17134";
 
 	public static final String DESKTOP_EXPLORER = "explorer";
 	public static final String DESKTOP = "desktop";
@@ -145,7 +144,7 @@ public class DriverManager {
 				return null;
 			}
 		}else if(EDGE_BROWSER.equals(appName)) {
-			driverProcess = getDriverProcess(status, appName, driverName, EDGE_DRIVER_FILE_NAME);
+			driverProcess = getDriverProcess(status, appName, driverName, props.getDriver());
 			if(status.isPassed()) {
 				return new EdgeDriverEngine(
 						channel, 

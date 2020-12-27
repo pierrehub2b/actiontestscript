@@ -37,21 +37,35 @@ public class ActionComment extends Action {
 	private static final String SUMMARY_TYPE = "summary";
 
 	private CalculatedValue comment;
-	private String type = STEP_TYPE;
+	private String type = SCRIPT_TYPE;
 
 	public ActionComment() {}
 
 	public ActionComment(ScriptLoader script, String type, ArrayList<String> dataArray) {
 		super(script);
-		if(LOG_TYPE.equals(type) || SCRIPT_TYPE.equals(type) || SUMMARY_TYPE.equals(type)){
-			setType(type);
-		}
 
-		String data = "";
+		if(!SCRIPT_LABEL.equals(type)) {
+			int minusPos = type.indexOf("-");
+			if(minusPos > -1) {
+				setType(type.substring(minusPos+1));
+			}else {
+				setType(dataArray.remove(0).trim());
+			}
+		}
+		
 		if(dataArray.size() > 0){
-			data = dataArray.remove(0).trim();
+			if(dataArray.size() > 1){
+				setType(dataArray.remove(0).trim());
+			}
+			setComment(new CalculatedValue(script, dataArray.remove(0).trim()));
+		}else {
+			setComment(new CalculatedValue(script));
 		}
+	}
 
+	public ActionComment(ScriptLoader script, String data) {
+		super(script);
+		setType(SCRIPT_TYPE);
 		setComment(new CalculatedValue(script, data));
 	}
 
@@ -60,7 +74,7 @@ public class ActionComment extends Action {
 		setType(type);
 		setComment(value);
 	}
-	
+
 	//---------------------------------------------------------------------------------------------------------------------------------
 	// Code Generator
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -123,6 +137,10 @@ public class ActionComment extends Action {
 	}
 
 	public void setType(String value) {
-		this.type = value;
+		if(LOG_TYPE.equals(value) || STEP_TYPE.equals(value) || SUMMARY_TYPE.equals(value)){
+			this.type = value;
+		}else {
+			this.type = SCRIPT_TYPE;
+		}
 	}
 }

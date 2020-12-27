@@ -226,7 +226,11 @@ public class Lexer {
 					}
 					script.addAction(new ActionNeoloadStop(script, optionsFlat, userData, userOptions), disabled);
 				}
+				
+			}else if(actionType.startsWith(ActionComment.SCRIPT_LABEL)) {
 
+				script.addAction(new ActionComment(script, actionType, dataArray), disabled);
+				
 			} else if(dataArray.size() > 0) {
 
 				String dataOne = dataArray.remove(0).trim();
@@ -401,15 +405,7 @@ public class Lexer {
 
 					script.addAction(new ActionCallscript(script, options, dataOne, parameters, returnValues, csvFilePath, dataArray), disabled);
 
-				}else if(ActionComment.SCRIPT_LABEL.equals(actionType)){
-
-					//-----------------------
-					// Comment action
-					//-----------------------
-
-					script.addAction(new ActionComment(script, dataOne, dataArray), disabled);
-
-				}else if(ActionGotoUrl.SCRIPT_LABEL.equals(actionType)){
+				}else if(ActionGotoUrl.SCRIPT_LABEL.equals(actionType) || ActionGotoUrl.SCRIPT_LABEL_OPEN.equals(actionType) || ActionGotoUrl.SCRIPT_LABEL_SIMPLE.equals(actionType)){
 
 					//-----------------------
 					// Goto url action
@@ -470,7 +466,13 @@ public class Lexer {
 					//--------------------------
 
 					script.addAction(new ActionNeoloadRecord(script, dataOne), disabled);
-
+					
+				}
+			}else {
+				if(data.startsWith("<<<<<<<") || data.startsWith("=======") || data.startsWith(">>>>>>>")) {
+					//TODO whe have a problem here ! need a way to show that git merge has failed in actions file
+				}else {
+					script.addAction(new ActionComment(script, data), disabled);
 				}
 			}
 		}

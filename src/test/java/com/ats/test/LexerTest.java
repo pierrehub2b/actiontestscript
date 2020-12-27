@@ -32,6 +32,10 @@ public class LexerTest {
 		String[] data = new String[] {
 				"channel-start -> myFirstChannel -> chrome",
 				"comment -> step -> <i>comment ...</i>",
+				"comment-step -> <i>comment ...</i>",
+				"comment -> <i>comment ...</i>",
+				"comment -> script -> <i>comment ...</i>",
+				"comment-script -> <i>comment ...</i>",
 				"goto-url -> google.com",
 				"keyboard -> automated testing$key(ENTER) -> INPUT [id = lst-ib]",
 				"click -> A [text = Test automation - Wikipedia]",
@@ -60,7 +64,11 @@ public class LexerTest {
 
 		for (int i = 0; i <= 1; i++) {
 			expectedScript.addAction(new ActionChannelStart(expectedScript, "myFirstChannel", new ArrayList<>(), new CalculatedValue(script, "chrome"), new ArrayList<>()), i == 0);
-			expectedScript.addAction(new ActionComment(expectedScript, "step", new ArrayList<String>(Arrays.asList("<i>comment ...</i>"))), i == 0);
+			expectedScript.addAction(new ActionComment(expectedScript, "comment", new ArrayList<String>(Arrays.asList("step", "<i>comment ...</i>"))), i == 0);
+			expectedScript.addAction(new ActionComment(expectedScript, "comment-step", new ArrayList<String>(Arrays.asList("<i>comment ...</i>"))), i == 0);
+			expectedScript.addAction(new ActionComment(expectedScript, "comment", new ArrayList<String>(Arrays.asList("<i>comment ...</i>"))), i == 0);
+			expectedScript.addAction(new ActionComment(expectedScript, "comment", new ArrayList<String>(Arrays.asList("script", "<i>comment ...</i>"))), i == 0);
+			expectedScript.addAction(new ActionComment(expectedScript, "comment-script", new ArrayList<String>(Arrays.asList("<i>comment ...</i>"))), i == 0);
 			expectedScript.addAction(new ActionGotoUrl(expectedScript, true, new CalculatedValue(script, "google.com")), i == 0);
 			expectedScript.addAction(new ActionText(expectedScript, true, new ArrayList<>(), "automated testing$key(ENTER)", new ArrayList<String>(Arrays.asList("INPUT [id = lst-ib]"))), i == 0);
 			expectedScript.addAction(new ActionMouseKey(expectedScript, "click", true, new ArrayList<>(), new ArrayList<String>(Arrays.asList("A [text = Test automation - Wikipedia]"))), i == 0);

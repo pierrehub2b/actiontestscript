@@ -27,6 +27,8 @@ import com.google.gson.JsonObject;
 public class ActionGotoUrl extends ActionExecute {
 
 	public static final String SCRIPT_LABEL = "goto-url";
+	public static final String SCRIPT_LABEL_SIMPLE = "goto";
+	public static final String SCRIPT_LABEL_OPEN = "open-url";
 
 	public static final String NEXT = "next";
 	public static final String REFRESH = "refresh";

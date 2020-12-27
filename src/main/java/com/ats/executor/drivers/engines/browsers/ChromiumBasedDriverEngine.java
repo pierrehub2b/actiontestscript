@@ -40,13 +40,6 @@ public class ChromiumBasedDriverEngine extends WebDriverEngine {
 		options.addArguments("--allow-file-access-from-files");
 		options.addArguments("--allow-cross-origin-auth-prompt");
 		options.addArguments("--allow-file-access");
-		options.addArguments("--disable-dev-shm-usage");
-		options.addArguments("--disable-extensions");
-		options.addArguments("--disable-notifications");
-		options.addArguments("--disable-web-security");
-		options.addArguments("--disable-dev-shm-usage");
-		options.addArguments("--disable-popup-blocking");
-		
 		options.addArguments("--ignore-certificate-errors");
 		
 		if(props.getOptions() != null) {
