@@ -122,10 +122,9 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 		}
 
 		final String[] appData = applicationPath.split("/");
-		if (appData.length > 1) {
+		if (appData.length > 0) {
 
 			endPoint = appData[0];
-			final String application = appData[1];
 
 			this.applicationPath = "http://" + endPoint;
 			this.client = new Builder().cache(null).connectTimeout(30, TimeUnit.SECONDS).writeTimeout(30, TimeUnit.SECONDS).readTimeout(40, TimeUnit.SECONDS).build();
@@ -174,8 +173,15 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			channel.setDimensions(new TestBound(0D, 0D, deviceWidth, deviceHeight), new TestBound(0D, 0D, channelWidth, channelHeight));
 			
 			final int screenCapturePort = response.get("screenCapturePort").getAsInt();
-			
-			response = executeRequest(APP, START, application);
+
+			String application = null;
+			if (appData.length > 1) {
+				application = appData[1];
+				response = executeRequest(APP, START, application);
+			} else {
+				response = executeRequest(APP, START);
+			}
+
 			if (response == null) {
 				status.setError(ActionStatus.CHANNEL_START_ERROR, "unable to connect to : " + application);
 				return;
@@ -236,7 +242,10 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void close(boolean keepRunning) {
-		executeRequest(APP, STOP, channel.getApplication());
+		final String application = channel.getApplication();
+		if (application != null) {
+			executeRequest(APP, STOP, application);
+		}
 		this.channel = null;
 	}
 
@@ -603,7 +612,12 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void setWindowToFront() {
-		executeRequest(APP, SWITCH, channel.getApplication());
+		String application = channel.getApplication();
+		if (application != null) {
+			executeRequest(APP, SWITCH, channel.getApplication());
+		} else {
+			executeRequest(APP, SWITCH);
+		}
 	}
 
 	@Override
