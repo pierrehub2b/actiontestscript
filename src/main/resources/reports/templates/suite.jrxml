@@ -96,7 +96,7 @@
 			</staticText>
 			<pieChart>
 				<chart isShowLegend="false" customizerClass="ats.reports.charts.CustomPieChart">
-					<reportElement style="PieChartLabel" isPrintRepeatedValues="false" x="426" y="34" width="100" height="70" uuid="5d7712c9-644e-4d00-9679-7445af42b9d9">
+					<reportElement style="PieChartLabel" isPrintRepeatedValues="false" x="426" y="34" width="100" height="70" uuid="9c517c4b-b5d1-4e8f-8255-0a6087cc8256">
 						<property name="com.jaspersoft.studio.element.name" value="Tests"/>
 						<property name="com.jaspersoft.studio.unit.width" value="px"/>
 						<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -114,7 +114,7 @@
 						<font size="6"/>
 					</chartLegend>
 				</chart>
-				<pieDataset maxCount="3">
+				<pieDataset maxCount="2">
 					<dataset resetType="Report"/>
 					<pieSeries>
 						<keyExpression><![CDATA["fail"]]></keyExpression>
@@ -128,9 +128,9 @@
 					<otherLabelExpression><![CDATA[]]></otherLabelExpression>
 				</pieDataset>
 				<piePlot>
-					<plot backgroundAlpha="0.0" foregroundAlpha="0.93">
-						<seriesColor seriesOrder="0" color="#6C6378"/>
-						<seriesColor seriesOrder="1" color="#E3E3E3"/>
+					<plot orientation="Horizontal" backgroundAlpha="0.0" foregroundAlpha="0.93">
+						<seriesColor seriesOrder="0" color="#E3E3E3"/>
+						<seriesColor seriesOrder="1" color="#6C6378"/>
 					</plot>
 					<itemLabel/>
 				</piePlot>
