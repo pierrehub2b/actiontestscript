@@ -122,9 +122,10 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 		}
 
 		final String[] appData = applicationPath.split("/");
-		if (appData.length > 0) {
+		if (appData.length > 1) {
 
 			endPoint = appData[0];
+			final String application = appData[1];
 
 			this.applicationPath = "http://" + endPoint;
 			this.client = new Builder().cache(null).connectTimeout(30, TimeUnit.SECONDS).writeTimeout(30, TimeUnit.SECONDS).readTimeout(40, TimeUnit.SECONDS).build();
@@ -173,39 +174,32 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			channel.setDimensions(new TestBound(0D, 0D, deviceWidth, deviceHeight), new TestBound(0D, 0D, channelWidth, channelHeight));
 			
 			final int screenCapturePort = response.get("screenCapturePort").getAsInt();
-
-			final String[] endPointData = endPoint.split(":");
-			String udpInfo = endPointData[0] + ":" + screenCapturePort;
-
-			String application = "";
-			String version = "";
-			byte[] icon = new byte[0];
-
-			if (appData.length > 1) {
-				application = appData[1];
-
-				response = executeRequest(APP, START, application);
-				if (response == null) {
-					status.setError(ActionStatus.CHANNEL_START_ERROR, "unable to connect to : " + application);
-					return;
-				}
-
-				// handle app start error
-				if (response.get("status").getAsInt() != 0) {
-					status.setError(ActionStatus.CHANNEL_START_ERROR, response.get("message").getAsString());
-					return;
-				}
-
-				final String base64 = response.get("icon").getAsString();
-				if (base64.length() > 0) {
-					try {
-						icon = Base64.getDecoder().decode(base64);
-					} catch (Exception ignored) {}
-				}
-
-				version = response.get("version").getAsString();
+			
+			response = executeRequest(APP, START, application);
+			if (response == null) {
+				status.setError(ActionStatus.CHANNEL_START_ERROR, "unable to connect to : " + application);
+				return;
 			}
 
+			// handle app start error
+			if (response.get("status").getAsInt() != 0) {
+				status.setError(ActionStatus.CHANNEL_START_ERROR, response.get("message").getAsString());
+				return;
+			}
+
+			final String base64 = response.get("icon").getAsString();
+			byte[] icon = new byte[0];
+			if (base64.length() > 0) {
+				try {
+					icon = Base64.getDecoder().decode(base64);
+				} catch (Exception ignored) {}
+			}
+
+			final String[] endPointData = endPoint.split(":");
+			final String version = response.get("version").getAsString();
+			
+			String udpInfo = endPointData[0] + ":" + screenCapturePort;
+			
 			channel.setApplicationData(os, systemName, version, driverVersion, icon, udpInfo, application, userName, machineName, osBuild, country);
 
 			refreshElementMapLocation();
