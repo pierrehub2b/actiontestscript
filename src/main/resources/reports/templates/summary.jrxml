@@ -128,7 +128,7 @@
 			</staticText>
 			<pieChart>
 				<chart isShowLegend="false" evaluationTime="Report" customizerClass="ats.reports.charts.CustomPieChart" renderType="draw">
-					<reportElement style="PieChart" isPrintRepeatedValues="false" x="139" y="102" width="130" height="80" isPrintWhenDetailOverflows="true" uuid="69f3d25b-3f76-401c-a6ae-ca2ec815936b">
+					<reportElement style="PieChart" isPrintRepeatedValues="false" x="139" y="102" width="130" height="80" isPrintWhenDetailOverflows="true" uuid="33e97cb6-a6fc-4118-b549-592c892dd137">
 						<property name="com.jaspersoft.studio.element.name" value="Tests"/>
 						<property name="com.jaspersoft.studio.unit.width" value="px"/>
 						<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -140,16 +140,16 @@
 					<chartSubtitle/>
 					<chartLegend/>
 				</chart>
-				<pieDataset maxCount="2">
+				<pieDataset maxCount="2" minPercentage="101.0">
 					<dataset resetType="Report"/>
 					<pieSeries>
 						<keyExpression><![CDATA["fail"]]></keyExpression>
-						<valueExpression><![CDATA[$F{suites}-$F{suitesPassed}]]></valueExpression>
+						<valueExpression><![CDATA[$F{suitesPassed} == 0 ? 99 : $F{suites}-$F{suitesPassed}]]></valueExpression>
 						<labelExpression><![CDATA["fail"]]></labelExpression>
 					</pieSeries>
 					<pieSeries>
 						<keyExpression><![CDATA["pass"]]></keyExpression>
-						<valueExpression><![CDATA[$F{suitesPassed}]]></valueExpression>
+						<valueExpression><![CDATA[$F{suitesPassed} == 0 ? 1 : $F{suitesPassed}]]></valueExpression>
 						<labelExpression><![CDATA["pass"]]></labelExpression>
 					</pieSeries>
 					<otherKeyExpression><![CDATA[]]></otherKeyExpression>
@@ -306,7 +306,7 @@
 			</staticText>
 			<pieChart>
 				<chart isShowLegend="false" evaluationTime="Report" customizerClass="ats.reports.charts.CustomPieChart" renderType="draw">
-					<reportElement style="PieChart" isPrintRepeatedValues="false" x="423" y="103" width="130" height="80" isPrintWhenDetailOverflows="true" uuid="44c2d7a2-2bcd-4481-81e5-3478a6fd249b">
+					<reportElement style="PieChart" isPrintRepeatedValues="false" x="423" y="103" width="130" height="80" isPrintWhenDetailOverflows="true" uuid="bb181cc1-31a7-4989-99b9-09ebf9642544">
 						<property name="com.jaspersoft.studio.element.name" value="Tests"/>
 						<property name="com.jaspersoft.studio.unit.width" value="px"/>
 						<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -318,16 +318,16 @@
 					<chartSubtitle/>
 					<chartLegend/>
 				</chart>
-				<pieDataset maxCount="2">
+				<pieDataset maxCount="2" minPercentage="101.0">
 					<dataset resetType="Report"/>
 					<pieSeries>
 						<keyExpression><![CDATA["fail"]]></keyExpression>
-						<valueExpression><![CDATA[$F{tests}-$F{testsPassed}]]></valueExpression>
+						<valueExpression><![CDATA[$F{testsPassed} == 0 ? 99 : $F{tests}-$F{testsPassed}]]></valueExpression>
 						<labelExpression><![CDATA["fail"]]></labelExpression>
 					</pieSeries>
 					<pieSeries>
 						<keyExpression><![CDATA["pass"]]></keyExpression>
-						<valueExpression><![CDATA[$F{testsPassed}]]></valueExpression>
+						<valueExpression><![CDATA[$F{testsPassed} == 0 ? 1 : $F{testsPassed}]]></valueExpression>
 						<labelExpression><![CDATA["pass"]]></labelExpression>
 					</pieSeries>
 					<otherKeyExpression><![CDATA[]]></otherKeyExpression>
