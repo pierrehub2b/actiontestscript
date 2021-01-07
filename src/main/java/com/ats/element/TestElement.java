@@ -46,10 +46,10 @@ public class TestElement{
 
 	public final static String CLIENT_WIDTH = "clientWidth";
 	public final static String CLIENT_HEIGTH = "clientHeight";
-	
+
 	private final static String MAT_SELECT = "MAT-SELECT";
 	private final static String PRE = "PRE";
-	
+
 	protected Channel channel;
 	protected IDriverEngine engine;
 
@@ -79,7 +79,7 @@ public class TestElement{
 		this(channel, 1, 0);
 		this.foundElements = new ArrayList<FoundElement>(Arrays.asList(new FoundElement(channel)));
 	}
-	
+
 	public TestElement(Channel channel, int count, int index) {
 		this.channel = channel;
 		this.count = count;
@@ -128,7 +128,7 @@ public class TestElement{
 	protected void setEngine(IDriverEngine engine) {
 		this.engine = engine;
 	}
-	
+
 	protected void reloadFoundElements() {
 		this.foundElements = new ArrayList<FoundElement>(Arrays.asList(new FoundElement(channel)));
 	}
@@ -148,11 +148,11 @@ public class TestElement{
 			foundElements.remove(0).dispose();
 		}
 	}
-	
+
 	public boolean isAngularSelect() {
 		return MAT_SELECT.equalsIgnoreCase(searchedTag);
 	}
-	
+
 	public boolean isPreElement() {
 		return PRE.equalsIgnoreCase(searchedTag);
 	}
@@ -380,27 +380,29 @@ public class TestElement{
 	public void clearText(ActionStatus status, MouseDirection md) {
 		engine.clearText(status, this, md);
 	}
-	
+
 	public String enterText(ActionStatus status, CalculatedValue text, ActionTestScript script) {
-
 		final MouseDirection md = new MouseDirection();
-
 		over(status, md, false, 0, 0);
-			if(status.isPassed()) {
+		return finalizeEnterText(status, text, md, script);
+	}
+	
+	protected String finalizeEnterText(ActionStatus status, CalculatedValue text, MouseDirection md, ActionTestScript script) {
+		if(status.isPassed()) {
 
-				recorder.updateScreen(false);
+			recorder.updateScreen(false);
 
-				if(!text.getCalculated().startsWith("$key")) {
-					clearText(status, md);
-				}
-				
-				final String enteredText = sendText(script, status, text);
-				if(isPassword() || text.isCrypted()) {
-					return "########";
-				}else {
-					return enteredText;
-				}
+			if(!text.getCalculated().startsWith("$key")) {
+				clearText(status, md);
 			}
+
+			final String enteredText = sendText(script, status, text);
+			if(isPassword() || text.isCrypted()) {
+				return "########";
+			}else {
+				return enteredText;
+			}
+		}
 		return "";
 	}
 
@@ -498,15 +500,15 @@ public class TestElement{
 	public void rightClick() {
 		engine.rightClick();
 	}
-	
+
 	public void tap(int count) {
 		engine.tap(count, getFoundElement());
 	}
-	
+
 	public void press(int duration, ArrayList<String> paths) {
 		engine.press(duration, paths, getFoundElement());
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------------------------
 	// Attributes
 	//-------------------------------------------------------------------------------------------------------------------

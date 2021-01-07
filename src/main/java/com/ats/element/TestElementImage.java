@@ -55,11 +55,11 @@ public class TestElementImage extends TestElement {
 		}
 		return engine.findElements(parent, template);
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------------------------
 	// Mouse actions ...
 	//-------------------------------------------------------------------------------------------------------------------
-	
+
 	@Override
 	public void over(ActionStatus status, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {
 		final FoundElement fe = getFoundElement();
@@ -76,11 +76,11 @@ public class TestElementImage extends TestElement {
 	public void mouseWheel(int delta) {
 		// do nothing for the moment
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------------------------
 	// Text ...
 	//-------------------------------------------------------------------------------------------------------------------
-	
+
 	@Override
 	public void clearText(ActionStatus status, MouseDirection md) {
 		engine.getDesktopDriver().clearText();
@@ -88,36 +88,22 @@ public class TestElementImage extends TestElement {
 
 	@Override
 	public String sendText(ActionTestScript script, ActionStatus status, CalculatedValue text) {
-		for(SendKeyData sequence : text.getCalculatedText(script)) {
+
+		final String enterText = text.getCalculated();
+		channel.rootKeys(status, enterText);
+
+		/*for(SendKeyData sequence : text.getCalculatedText(script)) {
 			engine.getDesktopDriver().sendKeys(sequence.getSequenceDesktop(), "");
-		}
+		}*/
 		channel.actionTerminated(status);
-		return text.getCalculated();
+		return enterText;
 	}
-	
+
 	@Override
 	public String enterText(ActionStatus status, CalculatedValue text, ActionTestScript script) {
-
 		final MouseDirection md = new MouseDirection();
-
 		mouseClick(status, md, 0, 0);
-
-			if(status.isPassed()) {
-
-				recorder.updateScreen(false);
-
-				if(!text.getCalculated().startsWith("$key")) {
-					clearText(status, md);
-				}
-				
-				final String enteredText = sendText(script, status, text);
-				if(isPassword() || text.isCrypted()) {
-					return "########";
-				}else {
-					return enteredText;
-				}
-			}
-		return "";
+		return finalizeEnterText(status, text, md, script);
 	}
 
 	//-------------------------------------------------------------------------------------------------------------------
