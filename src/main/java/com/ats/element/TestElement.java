@@ -47,6 +47,8 @@ public class TestElement{
 	public final static String CLIENT_WIDTH = "clientWidth";
 	public final static String CLIENT_HEIGTH = "clientHeight";
 
+	public final static String ATS_OCCURRENCES = "ats-occurences";
+
 	private final static String MAT_SELECT = "MAT-SELECT";
 	private final static String PRE = "PRE";
 
@@ -386,7 +388,7 @@ public class TestElement{
 		over(status, md, false, 0, 0);
 		return finalizeEnterText(status, text, md, script);
 	}
-	
+
 	protected String finalizeEnterText(ActionStatus status, CalculatedValue text, MouseDirection md, ActionTestScript script) {
 		if(status.isPassed()) {
 
@@ -513,15 +515,33 @@ public class TestElement{
 	// Attributes
 	//-------------------------------------------------------------------------------------------------------------------
 
+	protected CalculatedProperty getOccurrencesProperty() {
+		return new CalculatedProperty(false, ATS_OCCURRENCES, new CalculatedValue(count));
+	}
+
 	public String getAttribute(ActionStatus status, String name){
-		if(isValidated()){
+		if(ATS_OCCURRENCES.equals(name)) {
+			return String.valueOf(count);
+		}else if(isValidated()){
 			return engine.getAttribute(status, getFoundElement(), name, maxTry);
 		}
 		return null;
 	}
 
 	public CalculatedProperty[] getAttributes(boolean reload) {
-		return engine.getAttributes(getFoundElement(), reload);
+
+		final CalculatedProperty[] props = engine.getAttributes(getFoundElement(), reload);
+
+		final CalculatedProperty[] result = new CalculatedProperty[props.length + 1];
+		result[0] = getOccurrencesProperty();
+		
+		int pos = 1;
+		for (CalculatedProperty prop : props) {
+            result[pos] = prop;
+            pos++;
+        }
+
+		return result;
 	}
 
 	public CalculatedProperty[] getCssAttributes() {

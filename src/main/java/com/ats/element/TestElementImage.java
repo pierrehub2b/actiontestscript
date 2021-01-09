@@ -19,9 +19,11 @@ under the License.
 
 package com.ats.element;
 
+import java.util.List;
+import java.util.function.Predicate;
+
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
-import com.ats.executor.SendKeyData;
 import com.ats.executor.channels.Channel;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
@@ -29,10 +31,12 @@ import com.ats.generator.variables.CalculatedValue;
 import com.ats.graphic.ImageTemplateMatchingSimple;
 import com.ats.tools.Utils;
 
-import java.util.List;
-import java.util.function.Predicate;
-
 public class TestElementImage extends TestElement {
+	
+	public final static String ATS_X = "picture-x";
+	public final static String ATS_Y = "picture-y";
+	public final static String ATS_WIDTH = "picture-width";
+	public final static String ATS_HEIGHT = "picture-height";
 
 	public TestElementImage(Channel channel, int maxTry, Predicate<Integer> predicate, SearchedElement searchElement) {
 		super(channel, maxTry,predicate, searchElement);
@@ -91,11 +95,8 @@ public class TestElementImage extends TestElement {
 
 		final String enterText = text.getCalculated();
 		channel.rootKeys(status, enterText);
-
-		/*for(SendKeyData sequence : text.getCalculatedText(script)) {
-			engine.getDesktopDriver().sendKeys(sequence.getSequenceDesktop(), "");
-		}*/
 		channel.actionTerminated(status);
+		
 		return enterText;
 	}
 
@@ -112,10 +113,16 @@ public class TestElementImage extends TestElement {
 
 	@Override
 	public String getAttribute(ActionStatus status, String name) {
-		if("x".equals(name)) {
-			return getFoundElement().getBoundX() + "";
-		}else if("y".equals(name)) {
-			return getFoundElement().getBoundY() + "";
+		if(ATS_OCCURRENCES.equals(name)) {
+			return String.valueOf(getCount());
+		}else if(ATS_X.equals(name)) {
+			return String.valueOf(getFoundElement().getBoundX().intValue());
+		}else if(ATS_Y.equals(name)) {
+			return String.valueOf(getFoundElement().getBoundY().intValue());
+		}else if(ATS_WIDTH.equals(name)) {
+			return String.valueOf(getFoundElement().getWidth().intValue());
+		}else if(ATS_HEIGHT.equals(name)) {
+			return String.valueOf(getFoundElement().getHeight().intValue());
 		}
 		return "";
 	}
@@ -127,7 +134,11 @@ public class TestElementImage extends TestElement {
 
 	@Override
 	public CalculatedProperty[] getAttributes(boolean reload) {
-		return new CalculatedProperty[0];
+		return new CalculatedProperty[] {getOccurrencesProperty(), 
+				new CalculatedProperty(ATS_X, String.valueOf(getFoundElement().getBoundX().intValue())),
+				new CalculatedProperty(ATS_Y, String.valueOf(getFoundElement().getBoundY().intValue())),
+				new CalculatedProperty(ATS_WIDTH, String.valueOf(getFoundElement().getWidth().intValue())),
+				new CalculatedProperty(ATS_HEIGHT, String.valueOf(getFoundElement().getHeight().intValue()))};
 	}
 
 	@Override
