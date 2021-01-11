@@ -50,8 +50,13 @@ public class ActionButton extends Action {
 		super.execute(ts, testName, testLine);
 
 		if (status.isPassed()) {
-			ts.getCurrentChannel().buttonClick(status, getButtonType());
-			status.endDuration();
+			
+			if(ts.getCurrentChannel() != null){
+				ts.getCurrentChannel().buttonClick(status, getButtonType());
+			}
+			
+			status.endAction();
+			ts.getRecorder().update(0, status.getDuration(), getButtonType());
 		}
 		
 		return true;

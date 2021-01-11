@@ -36,6 +36,9 @@ public class ActionPropertySet extends Action {
         Channel currentChannel = ts.getCurrentChannel();
         if (currentChannel != null) {
             currentChannel.setSysProperty(getName(), getValue().getCalculated());
+            
+            status.endAction();
+            ts.getRecorder().update(0, status.getDuration(), getName(), getValue().getCalculated());
         }
         
 		return true;
