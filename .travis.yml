@@ -1,5 +1,5 @@
 language: java
-jdk: openjdk12
+jdk: openjdk14
 branches:
   only:
   - master
