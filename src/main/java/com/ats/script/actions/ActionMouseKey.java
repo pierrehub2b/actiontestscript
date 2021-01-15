@@ -20,6 +20,7 @@ under the License.
 package com.ats.script.actions;
 
 import com.ats.element.SearchedElement;
+import com.ats.element.TestElementDialog;
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.objects.mouse.Mouse;
 import com.ats.generator.objects.mouse.MouseKey;
@@ -101,7 +102,12 @@ public class ActionMouseKey extends ActionMouse {
 			}
 			
 			status.endAction();
-			ts.getRecorder().updateScreen(0, status.getDuration());
+			if(status.getElement().getClass().getName().equals(TestElementDialog.class.getName())) {
+				TestElementDialog testElementDialog = (TestElementDialog)status.getElement();
+				ts.getRecorder().updateScreen(0, status.getDuration(), testElementDialog.getAlertAction());
+			} else {
+				ts.getRecorder().updateScreen(0, status.getDuration());
+			}
 		}
 	}
 	

@@ -59,6 +59,10 @@ public class TestElementDialog extends TestElement {
 	public TestElementDialog(FoundElement element, Channel currentChannel) {
 		super(element, currentChannel);
 	}
+	
+	public String getAlertAction() {
+		return alertAction;
+	}
 
 	private void initSearch(List<CalculatedProperty> properties) {
 
