@@ -48,7 +48,7 @@ public class ActionComment extends Action {
 			int minusPos = type.indexOf("-");
 			if(minusPos > -1) {
 				setType(type.substring(minusPos+1));
-			}else {
+			}else if(dataArray.size() > 0){
 				setType(dataArray.remove(0).trim());
 			}
 		}

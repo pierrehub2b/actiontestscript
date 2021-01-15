@@ -46,13 +46,6 @@ public class Variable implements Comparable<Variable>{
 		this.setValue(new CalculatedValue(script, ""));
 
 	}
-	
-	/*if(value.contains(".")) {
-	globalVariablePath = value;
-	value = GLOBAL_VARIABLE_PREFIX + value.replaceAll("\\.", "_");
-	
-			this.globalVariable = script.getScriptTreeVariable(variablePath);
-}*/
 
 	public Variable(String name, CalculatedValue value, Transformer transformer) {
 		this.setName(name);
