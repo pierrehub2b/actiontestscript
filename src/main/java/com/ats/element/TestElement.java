@@ -47,7 +47,7 @@ public class TestElement{
 	public final static String CLIENT_WIDTH = "clientWidth";
 	public final static String CLIENT_HEIGTH = "clientHeight";
 
-	public final static String ATS_OCCURRENCES = "ats-occurences";
+	public final static String ATS_OCCURRENCES = "-ats-occurences";
 
 	private final static String MAT_SELECT = "MAT-SELECT";
 	private final static String PRE = "PRE";

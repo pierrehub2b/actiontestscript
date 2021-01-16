@@ -33,10 +33,10 @@ import com.ats.tools.Utils;
 
 public class TestElementImage extends TestElement {
 	
-	public final static String ATS_X = "picture-x";
-	public final static String ATS_Y = "picture-y";
-	public final static String ATS_WIDTH = "picture-width";
-	public final static String ATS_HEIGHT = "picture-height";
+	public final static String ATS_X = "-ats-image-x";
+	public final static String ATS_Y = "-ats-image-y";
+	public final static String ATS_WIDTH = "-ats-image-width";
+	public final static String ATS_HEIGHT = "-ats-image-height";
 
 	public TestElementImage(Channel channel, int maxTry, Predicate<Integer> predicate, SearchedElement searchElement) {
 		super(channel, maxTry,predicate, searchElement);
