@@ -156,22 +156,22 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 			final String osBuild = response.get("osBuild").getAsString();
 			final String country = response.get("country").getAsString();
 			final String os = response.get("os").getAsString();
-			
-			if (os.equals("ios")) {
-				rootElement = new IosRootElement(this);
-				cachedElement = new IosRootElement(this);
-			} else {
+
+			double deviceWidth = 0;
+			double deviceHeight = 0;
+			double channelWidth = 0;
+			double channelHeight = 0;
+
+			if (os.equals("android")) {
 				rootElement = new AndroidRootElement(this);
 				cachedElement = new AndroidRootElement(this);
+
+				deviceWidth = response.get("deviceWidth").getAsDouble();
+				deviceHeight = response.get("deviceHeight").getAsDouble();
+				channelWidth = response.get("channelWidth").getAsDouble();
+				channelHeight = response.get("channelHeight").getAsDouble();
 			}
-			
-			final double deviceWidth = response.get("deviceWidth").getAsDouble();
-			final double deviceHeight = response.get("deviceHeight").getAsDouble();
-			final double channelWidth = response.get("channelWidth").getAsDouble();
-			final double channelHeight = response.get("channelHeight").getAsDouble();
-			
-			channel.setDimensions(new TestBound(0D, 0D, deviceWidth, deviceHeight), new TestBound(0D, 0D, channelWidth, channelHeight));
-			
+
 			final int screenCapturePort = response.get("screenCapturePort").getAsInt();
 
 			String application = null;
@@ -201,11 +201,22 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 				} catch (Exception ignored) {}
 			}
 
+			if (os.equals("ios")) {
+				rootElement = new IosRootElement(this);
+				cachedElement = new IosRootElement(this);
+
+				deviceWidth = response.get("deviceWidth").getAsDouble();
+				deviceHeight = response.get("deviceHeight").getAsDouble();
+				channelWidth = response.get("channelWidth").getAsDouble();
+				channelHeight = response.get("channelHeight").getAsDouble();
+			}
+
 			final String[] endPointData = endPoint.split(":");
 			final String version = response.get("version").getAsString();
 			
 			String udpInfo = endPointData[0] + ":" + screenCapturePort;
-			
+
+			channel.setDimensions(new TestBound(0D, 0D, deviceWidth, deviceHeight), new TestBound(0D, 0D, channelWidth, channelHeight));
 			channel.setApplicationData(os, systemName, version, driverVersion, icon, udpInfo, application, userName, machineName, osBuild, country);
 
 			refreshElementMapLocation();
