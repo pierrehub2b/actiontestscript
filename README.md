@@ -308,6 +308,22 @@ comment : Add comment to script
 * [Selenium](https://www.seleniumhq.org/) - The testing framework used
 * [TestNG](http://testng.org/doc/) - Test runner
 
+## HTML Player component
+### How to install
+Download the "Release.zip" file available ine the current repository. After, you have two options:
+* you can deploy the application directly on your own WebApp or server
+* for local use, you can run the "player.bar" file. Your default browser will launch automatically
+	
+### How to use
+Simply open a ATSV file using the browse file component in the applivation page 
+
+### Features
+You can put some of your own ATSV in a directory (located in the src directory) and reference the relative path to that in the "library.json" file. The referenced files will be available when you open the player.
+* exemple: if you create a directory named "My ATSV" and put a "test.atsv" inside, you juste have to insert "My ATSV/test.atsv" in the "library.json" (according to the JSON nomenclature)
+
+You can reference a ATSV file directly in the player URL. The called file will be opened and read when you access to the page
+* exemple: if you put "http://localhost?url=/ATSV/test.atsv", the file "test.atsv" located in the ATSV folder will be launched at start. **Note that only relative path to the server or full Web public URL will work**
+
 ## Authors
 
 * **Pierre Huber** - *Initial work* - [Pierrehub2b](https://github.com/pierrehub2b)
