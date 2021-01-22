@@ -95,7 +95,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	private final static String OPTION = "option";
 	private final static String ANGULAR_OPTION = "mat-option";
-
+	
 	//-----------------------------------------------------------------------------------------------------------------------------
 	// Javascript static code
 	//-----------------------------------------------------------------------------------------------------------------------------
@@ -103,8 +103,8 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	//protected static final String JS_AUTO_SCROLL = "var e=arguments[0];e.scrollIntoView();var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
 	//protected static final String JS_AUTO_SCROLL_CALC = "var e=arguments[0];var r=e.getBoundingClientRect();var top=r.top + window.pageYOffset;window.scrollTo(0, top-(window.innerHeight / 2));r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
 	//protected static final String JS_AUTO_SCROLL_MOZ = "var e=arguments[0];e.scrollIntoView({behavior:'auto',block:'center',inline:'center'});var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
-
 	//protected String JS_SCROLL_IF_NEEDED = "var e=arguments[0], result=[], r=e.getBoundingClientRect(), top0=r.top, left0=r.left;if(r.top < 0 || r.left < 0 || r.bottom > (window.innerHeight || document.documentElement.clientHeight) || r.right > (window.innerWidth || document.documentElement.clientWidth)) {e.scrollIntoView({behavior:'instant',block:'center',inline:'nearest'});r=e.getBoundingClientRect();result=[r.left+0.0001, r.top+0.0001, left0+0.0001, top0+0.0001];}";
+	
 	protected String JS_SCROLL_IF_NEEDED = "var e=arguments[0], result=[], r=e.getBoundingClientRect(), top0=r.top, left0=r.left; e.scrollIntoView({behavior:'instant',block:'center',inline:'nearest'});r=e.getBoundingClientRect();if(r.left!=left0 || r.top!=top0) {result=[r.left+0.0001, r.top+0.0001];}";
 
 	protected static final String JS_ELEMENT_SCROLL = "var e=arguments[0];var d=arguments[1];e.scrollTop += d;var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]";
