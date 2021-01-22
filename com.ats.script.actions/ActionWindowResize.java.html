@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActionWindowResize.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.script.actions</a> &gt; <span class="el_source">ActionWindowResize.java</span></div><h1>ActionWindowResize.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+*/
+
+package com.ats.script.actions;
+
+import com.ats.executor.channels.Channel;
+import com.ats.generator.objects.BoundData;
+import com.ats.script.Script;
+import com.google.gson.JsonObject;
+
+public class ActionWindowResize extends ActionWindow {
+
+	public static final String SCRIPT_RESIZE_LABEL = SCRIPT_LABEL + &quot;resize&quot;;
+
+	private static final String X=&quot;x&quot;;
+	private static final String Y=&quot;y&quot;;
+	private static final String WIDTH=&quot;width&quot;;
+	private static final String HEIGHT=&quot;height&quot;;
+
+	private BoundData x;
+	private BoundData y;
+	private BoundData width;
+	private BoundData height;
+
+<span class="nc" id="L41">	public ActionWindowResize() {}</span>
+
+	public ActionWindowResize(Script script, String size) {
+<span class="fc" id="L44">		super(script);</span>
+<span class="fc" id="L45">		String[] sizeData = size.split(&quot;,&quot;);</span>
+
+<span class="fc bfc" id="L47" title="All 2 branches covered.">		for(String data : sizeData) {</span>
+<span class="fc" id="L48">			String[] dataValue = data.split(&quot;=&quot;);</span>
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">			if(dataValue.length == 2) {</span>
+<span class="pc bpc" id="L50" title="1 of 5 branches missed.">				switch (dataValue[0].trim().toLowerCase()) {</span>
+				case X:
+<span class="fc" id="L52">					x = getBoundData(dataValue[1].trim());</span>
+<span class="fc" id="L53">					break;</span>
+				case Y:
+<span class="fc" id="L55">					y = getBoundData(dataValue[1].trim());</span>
+<span class="fc" id="L56">					break;</span>
+				case WIDTH:
+<span class="fc" id="L58">					width = getBoundData(dataValue[1].trim());</span>
+<span class="fc" id="L59">					break;</span>
+				case HEIGHT:
+<span class="fc" id="L61">					height = getBoundData(dataValue[1].trim());</span>
+					break;
+				}
+			}
+		}
+<span class="fc" id="L66">	}</span>
+
+	private BoundData getBoundData(String data) {
+		try {
+<span class="fc" id="L70">			return new BoundData(Integer.parseInt(data));</span>
+<span class="nc" id="L71">		}catch(NumberFormatException ex) {</span>
+<span class="nc" id="L72">			return null;</span>
+		}
+	}
+
+	public ActionWindowResize(Script script, Integer x, Integer y, Integer width, Integer height) {
+<span class="nc" id="L77">		super(script);</span>
+<span class="nc" id="L78">		setX(getBoundDataValue(x));</span>
+<span class="nc" id="L79">		setY(getBoundDataValue(y));</span>
+<span class="nc" id="L80">		setWidth(getBoundDataValue(width));</span>
+<span class="nc" id="L81">		setHeight(getBoundDataValue(height));</span>
+<span class="nc" id="L82">	}</span>
+	
+	private BoundData getBoundDataValue(Integer value) {
+<span class="nc bnc" id="L85" title="All 2 branches missed.">		if(value != null) {</span>
+<span class="nc" id="L86">			return new BoundData(value.intValue());</span>
+		}
+<span class="nc" id="L88">		return null;</span>
+	}
+	
+	private String getBoundDataJavaCode(BoundData value) {
+<span class="pc bpc" id="L92" title="1 of 2 branches missed.">		if(value != null) {</span>
+<span class="fc" id="L93">			return value.getValue() + &quot;&quot;;</span>
+		}
+<span class="nc" id="L95">		return null;</span>
+	}
+
+	@Override
+	public StringBuilder getJavaCode() {
+<span class="fc" id="L100">		StringBuilder codeBuilder = super.getJavaCode();</span>
+<span class="fc" id="L101">		codeBuilder.append(getBoundDataJavaCode(x))</span>
+<span class="fc" id="L102">		.append(&quot;, &quot;).append(getBoundDataJavaCode(y))</span>
+<span class="fc" id="L103">		.append(&quot;, &quot;).append(getBoundDataJavaCode(width))</span>
+<span class="fc" id="L104">		.append(&quot;, &quot;).append(getBoundDataJavaCode(height))</span>
+<span class="fc" id="L105">		.append(&quot;)&quot;);</span>
+<span class="fc" id="L106">		return codeBuilder;</span>
+	}
+	
+	@Override
+	public String exec(Channel channel) {
+<span class="nc" id="L111">		return channel.setWindowBound(x, y, width, height);</span>
+	}
+		
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+
+<span class="nc bnc" id="L117" title="All 2 branches missed.">		if(x != null) {</span>
+<span class="nc" id="L118">			data.addProperty(&quot;x&quot;, x.getValue());</span>
+		}
+		
+<span class="nc bnc" id="L121" title="All 2 branches missed.">		if(y != null) {</span>
+<span class="nc" id="L122">			data.addProperty(&quot;y&quot;, y.getValue());</span>
+		}
+		
+<span class="nc bnc" id="L125" title="All 2 branches missed.">		if(width != null) {</span>
+<span class="nc" id="L126">			data.addProperty(&quot;width&quot;, width.getValue());</span>
+		}
+		
+<span class="nc bnc" id="L129" title="All 2 branches missed.">		if(height != null) {</span>
+<span class="nc" id="L130">			data.addProperty(&quot;height&quot;, height.getValue());</span>
+		}
+		
+<span class="nc" id="L133">		data.addProperty(&quot;duration&quot;, status.getDuration());</span>
+<span class="nc" id="L134">		return super.getActionLogs(scriptName, scriptLine, data);</span>
+	}
+
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------	
+
+	public BoundData getX() {
+<span class="nc" id="L142">		return x;</span>
+	}
+
+	public void setX(BoundData x) {
+<span class="nc" id="L146">		this.x = x;</span>
+<span class="nc" id="L147">	}</span>
+
+	public BoundData getY() {
+<span class="nc" id="L150">		return y;</span>
+	}
+
+	public void setY(BoundData y) {
+<span class="nc" id="L154">		this.y = y;</span>
+<span class="nc" id="L155">	}</span>
+
+	public BoundData getWidth() {
+<span class="nc" id="L158">		return width;</span>
+	}
+
+	public void setWidth(BoundData width) {
+<span class="nc" id="L162">		this.width = width;</span>
+<span class="nc" id="L163">	}</span>
+
+	public BoundData getHeight() {
+<span class="nc" id="L166">		return height;</span>
+	}
+
+	public void setHeight(BoundData height) {
+<span class="nc" id="L170">		this.height = height;</span>
+<span class="nc" id="L171">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

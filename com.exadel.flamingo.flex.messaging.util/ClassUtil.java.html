@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ClassUtil.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.exadel.flamingo.flex.messaging.util</a> &gt; <span class="el_source">ClassUtil.java</span></div><h1>ClassUtil.java</h1><pre class="source lang-java linenums">/*
+  GRANITE DATA SERVICES
+  Copyright (C) 2007 ADEQUATE SYSTEMS SARL
+
+  This file is part of Granite Data Services.
+
+  Granite Data Services is free software; you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or (at your
+  option) any later version.
+ 
+  Granite Data Services is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+  for more details.
+ 
+  You should have received a copy of the GNU Lesser General Public License
+  along with this library; if not, see &lt;http://www.gnu.org/licenses/&gt;.
+*/
+
+package com.exadel.flamingo.flex.messaging.util;
+
+import java.lang.reflect.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * @author Franck WOLFF
+ */
+<span class="nc" id="L32">public abstract class ClassUtil {</span>
+
+    public static Object newInstance(String type)
+        throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+<span class="nc" id="L36">        return forName(type).newInstance();</span>
+    }
+
+    public static &lt;T&gt; T newInstance(String type, Class&lt;T&gt; cast)
+        throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+<span class="nc" id="L41">        return forName(type, cast).newInstance();</span>
+    }
+
+    public static Object newInstance(String type, Class&lt;?&gt;[] argsClass, Object[] argsValues)
+        throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+<span class="nc" id="L46">        return newInstance(forName(type), argsClass, argsValues);</span>
+    }
+
+    public static &lt;T&gt; T newInstance(Class&lt;T&gt; type, Class&lt;?&gt;[] argsClass, Object[] argsValues)
+        throws InstantiationException, IllegalAccessException {
+<span class="nc" id="L51">        T instance = null;</span>
+        try {
+<span class="nc" id="L53">            Constructor&lt;T&gt; constructorDef = type.getConstructor(argsClass);</span>
+<span class="nc" id="L54">            instance = constructorDef.newInstance(argsValues);</span>
+<span class="nc" id="L55">        } catch (SecurityException e) {</span>
+<span class="nc" id="L56">            throw new InstantiationException(e.getMessage());</span>
+<span class="nc" id="L57">        } catch (NoSuchMethodException e) {</span>
+<span class="nc" id="L58">            throw new InstantiationException(e.getMessage());            </span>
+<span class="nc" id="L59">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L60">            throw new InstantiationException(e.getMessage());            </span>
+<span class="nc" id="L61">        } catch (InvocationTargetException e) {</span>
+<span class="nc" id="L62">            throw new InstantiationException(e.getMessage());            </span>
+<span class="nc" id="L63">        }</span>
+<span class="nc" id="L64">        return instance;</span>
+    }
+
+    public static Class&lt;?&gt; forName(String type) throws ClassNotFoundException {
+<span class="nc" id="L68">        return Thread.currentThread().getContextClassLoader().loadClass(type);</span>
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public static &lt;T&gt; Class&lt;T&gt; forName(String type, Class&lt;T&gt; cast) throws ClassNotFoundException {
+<span class="nc" id="L73">        return (Class&lt;T&gt;)Thread.currentThread().getContextClassLoader().loadClass(type);</span>
+    }
+    
+    public static Constructor&lt;?&gt; getConstructor(String type, Class&lt;?&gt;[] paramTypes)
+        throws ClassNotFoundException, NoSuchMethodException {
+<span class="nc" id="L78">        return getConstructor(forName(type), paramTypes);</span>
+    }
+    
+    public static &lt;T&gt; Constructor&lt;T&gt; getConstructor(Class&lt;T&gt; type, Class&lt;?&gt;[] paramTypes)
+        throws NoSuchMethodException {
+<span class="nc" id="L83">        return type.getConstructor(paramTypes);</span>
+    }
+    
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public static &lt;T&gt; List&lt;T&gt; emptyList(Class&lt;T&gt; type) {
+<span class="nc" id="L88">        return Collections.EMPTY_LIST;</span>
+    }
+    
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public static &lt;T&gt; Set&lt;T&gt; emptySet(Class&lt;T&gt; type) {
+<span class="nc" id="L93">        return Collections.EMPTY_SET;</span>
+    }
+    
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public static &lt;T, U&gt; Map&lt;T, U&gt; emptyMap(Class&lt;T&gt; keyType, Class&lt;U&gt; valueType) {
+<span class="nc" id="L98">        return Collections.EMPTY_MAP;</span>
+    }
+    
+    public static Class&lt;?&gt; classOfType(Type type) {
+<span class="nc bnc" id="L102" title="All 2 branches missed.">        if (type instanceof Class&lt;?&gt;)</span>
+<span class="nc" id="L103">            return (Class&lt;?&gt;)type;</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">        if (type instanceof ParameterizedType)</span>
+<span class="nc" id="L105">            return (Class&lt;?&gt;)((ParameterizedType)type).getRawType();</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">        if (type instanceof WildcardType) {</span>
+            // Forget lower bounds and only deal with first upper bound...
+<span class="nc" id="L108">            Type[] ubs = ((WildcardType)type).getUpperBounds();</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">            if (ubs.length &gt; 0)</span>
+<span class="nc" id="L110">                return classOfType(ubs[0]);</span>
+        }
+<span class="nc bnc" id="L112" title="All 2 branches missed.">        if (type instanceof GenericArrayType) {</span>
+<span class="nc" id="L113">            Class&lt;?&gt; ct = classOfType(((GenericArrayType)type).getGenericComponentType());</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">            return (ct != null ? Array.newInstance(ct, 0).getClass() : Object[].class);</span>
+        }
+<span class="nc bnc" id="L116" title="All 2 branches missed.">        if (type instanceof TypeVariable) {</span>
+            // Only deal with first (upper) bound...
+<span class="nc" id="L118">            Type[] ubs = ((TypeVariable&lt;?&gt;)type).getBounds();</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">            if (ubs.length &gt; 0)</span>
+<span class="nc" id="L120">                return classOfType(ubs[0]);</span>
+        }
+        // Should never append...
+<span class="nc" id="L123">        return Object.class;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SearchedElement.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.element</a> &gt; <span class="el_source">SearchedElement.java</span></div><h1>SearchedElement.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.element;
+
+import com.ats.executor.ActionTestScript;
+import com.ats.generator.variables.CalculatedProperty;
+import com.ats.script.Project;
+import com.ats.script.Script;
+import com.ats.tools.Utils;
+import org.apache.commons.lang3.StringUtils;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.StringJoiner;
+import java.util.regex.Matcher;
+
+public class SearchedElement {
+
+	public static final String WILD_CHAR = &quot;*&quot;;
+
+	private static final String DIALOG = &quot;DIALOG&quot;;
+	private static final String SYSCOMP = &quot;SYSCOMP&quot;;
+	public static final String IMAGE_TAG = &quot;@IMAGE&quot;;
+	
+	public static final String INDEX_PROPERTY = &quot;@index&quot;;
+
+<span class="pc" id="L47">	private String tag = WILD_CHAR;</span>
+	private SearchedElement parent;
+
+<span class="pc" id="L50">	private int index = 0;</span>
+	private List&lt;CalculatedProperty&gt; criterias;
+	
+	private byte[] image;
+
+<span class="nc" id="L55">	public SearchedElement() {} // default constructor</span>
+	
+<span class="nc" id="L57">	public SearchedElement(String tag) {</span>
+<span class="nc" id="L58">		this.tag = tag;</span>
+<span class="nc" id="L59">		this.criterias = new ArrayList&lt;CalculatedProperty&gt;();</span>
+<span class="nc" id="L60">	}</span>
+
+<span class="fc" id="L62">	public SearchedElement(Script script, ArrayList&lt;String&gt; elements) {</span>
+
+<span class="fc" id="L64">		final String value = elements.remove(0);</span>
+<span class="fc" id="L65">		final Matcher objectMatcher = Script.OBJECT_PATTERN.matcher(value);</span>
+
+<span class="fc" id="L67">		setCriterias(new ArrayList&lt;CalculatedProperty&gt;());</span>
+
+<span class="fc bfc" id="L69" title="All 2 branches covered.">		if (objectMatcher.find()) {</span>
+
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">			if(objectMatcher.groupCount() &gt;= 1){</span>
+
+<span class="fc" id="L73">				setTag(objectMatcher.group(1).trim());</span>
+
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">				if(objectMatcher.groupCount() &gt;= 2){</span>
+<span class="fc" id="L76">					Arrays.stream(objectMatcher.group(2).split(&quot;,&quot;)).parallel().map(String::trim).forEach(s -&gt; addCriteria(script, s));</span>
+				}
+
+			}else{
+<span class="nc" id="L80">				setTag(value.trim());</span>
+			}
+
+<span class="pc bpc" id="L83" title="1 of 2 branches missed.">		}else if(value != null){</span>
+<span class="fc" id="L84">			setTag(value.trim());</span>
+		}
+
+<span class="pc bpc" id="L87" title="1 of 2 branches missed.">		if(elements.size() &gt; 0){</span>
+<span class="nc" id="L88">			this.setParent(new SearchedElement(script, elements));</span>
+		}
+<span class="fc" id="L90">	}</span>
+
+	public SearchedElement(int index, String tag, CalculatedProperty[] properties) {
+<span class="nc" id="L93">		this(null, index, tag, properties);</span>
+<span class="nc" id="L94">	}</span>
+
+<span class="nc" id="L96">	public SearchedElement(SearchedElement parent, int index, String tag, CalculatedProperty[] properties) {</span>
+<span class="nc" id="L97">		setParent(parent);</span>
+<span class="nc" id="L98">		setIndex(index);</span>
+<span class="nc" id="L99">		setTag(tag);</span>
+<span class="nc" id="L100">		setCriterias(Arrays.asList(properties));</span>
+<span class="nc" id="L101">	}</span>
+
+	public void dispose() {
+<span class="nc bnc" id="L104" title="All 2 branches missed.">		if(parent != null) {</span>
+<span class="nc" id="L105">			parent.dispose();</span>
+		}
+
+<span class="nc bnc" id="L108" title="All 2 branches missed.">		if(criterias != null) {</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">			while(criterias.size() &gt; 0) {</span>
+<span class="nc" id="L110">				criterias.remove(0).dispose();</span>
+			}
+		}
+<span class="nc" id="L113">	}</span>
+
+	private void addCriteria(Script script, String data){
+<span class="pc bpc" id="L116" title="1 of 2 branches missed.">		if(data.startsWith(INDEX_PROPERTY)) {</span>
+<span class="nc" id="L117">			this.index = Utils.string2Int(StringUtils.getDigits(data));</span>
+		}else{
+<span class="fc" id="L119">			this.criterias.add(new CalculatedProperty(script, data));</span>
+		}
+<span class="fc" id="L121">	}</span>
+
+	//----------------------------------------------------------------------------------------------------------------
+	// image management
+	//----------------------------------------------------------------------------------------------------------------
+	
+	public void setImage(byte[] value) {
+<span class="nc" id="L128">		this.image = value;</span>
+<span class="nc" id="L129">	}</span>
+
+	public byte[] getImage() {
+<span class="nc bnc" id="L132" title="All 2 branches missed.">		if(image == null) {</span>
+<span class="nc" id="L133">			final CalculatedProperty prop = criterias.stream().filter(c -&gt; &quot;source&quot;.equals(c.getName())).findFirst().orElse(null);</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">			if(prop != null) {</span>
+
+<span class="nc" id="L136">				final String imagePath = prop.getValue().getCalculated();</span>
+				
+<span class="nc" id="L138">				URL imageUrl = null;</span>
+<span class="nc bnc" id="L139" title="All 6 branches missed.">				if(imagePath.startsWith(&quot;http://&quot;) || imagePath.startsWith(&quot;https://&quot;) || imagePath.startsWith(&quot;file://&quot;)) {</span>
+					try {
+<span class="nc" id="L141">						imageUrl = new URL(imagePath);</span>
+<span class="nc" id="L142">					} catch (MalformedURLException e) {}</span>
+				}else {
+<span class="nc" id="L144">					final String relativePath = Project.ASSETS_FOLDER + &quot;/&quot; + Project.RESOURCES_FOLDER + &quot;/&quot; + Project.IMAGES_FOLDER + &quot;/&quot; + imagePath;</span>
+<span class="nc" id="L145">					imageUrl = getClass().getClassLoader().getResource(relativePath);</span>
+				}
+
+<span class="nc bnc" id="L148" title="All 2 branches missed.">				if(imageUrl != null) {</span>
+<span class="nc" id="L149">					image = Utils.loadImage(imageUrl);</span>
+				}
+			}
+		}
+<span class="nc" id="L153">		return image;</span>
+	}
+
+	//----------------------------------------------------------------------------------------------------------------
+	// types
+	//----------------------------------------------------------------------------------------------------------------
+
+	public boolean isImageSearch() {
+<span class="nc" id="L161">		return IMAGE_TAG.equals(tag.toUpperCase());</span>
+	}
+
+	public boolean isDialog() {
+<span class="nc" id="L165">		return DIALOG.equals(tag.toUpperCase());</span>
+	}
+	
+	public boolean isSysComp() {
+<span class="nc bnc" id="L169" title="All 2 branches missed.">		if(parent != null) {</span>
+<span class="nc" id="L170">			return parent.isSysComp();</span>
+		}
+<span class="nc" id="L172">		return SYSCOMP.equals(tag.toUpperCase());</span>
+	}
+
+	//----------------------------------------------------------------------------------------------------------------
+	//
+	//----------------------------------------------------------------------------------------------------------------
+
+	public String getJavaCode() {
+
+<span class="fc" id="L181">		final StringBuilder codeBuilder = new StringBuilder(ActionTestScript.JAVA_ELEMENT_FUNCTION_NAME);</span>
+<span class="fc" id="L182">		codeBuilder.append(&quot;(&quot;);</span>
+
+<span class="pc bpc" id="L184" title="1 of 2 branches missed.">		if(parent != null){</span>
+<span class="nc" id="L185">			codeBuilder.append(parent.getJavaCode());</span>
+<span class="nc" id="L186">			codeBuilder.append(&quot;, &quot;);</span>
+		}
+
+<span class="fc" id="L189">		codeBuilder.append(index);</span>
+<span class="fc" id="L190">		codeBuilder.append(&quot;, \&quot;&quot;);</span>
+<span class="fc" id="L191">		codeBuilder.append(getTag());</span>
+
+<span class="pc bpc" id="L193" title="1 of 4 branches missed.">		if(criterias != null &amp;&amp; criterias.size() &gt; 0){</span>
+
+<span class="fc" id="L195">			codeBuilder.append(&quot;\&quot;, &quot;);</span>
+
+<span class="fc" id="L197">			final StringJoiner joiner = new StringJoiner(&quot;, &quot;);</span>
+<span class="fc bfc" id="L198" title="All 2 branches covered.">			for (CalculatedProperty criteria : criterias){</span>
+<span class="fc" id="L199">				joiner.add(criteria.getJavaCode());</span>
+<span class="fc" id="L200">			}</span>
+<span class="fc" id="L201">			codeBuilder.append(joiner.toString());</span>
+
+<span class="fc" id="L203">		}else{</span>
+<span class="fc" id="L204">			codeBuilder.append(&quot;\&quot;&quot;);</span>
+		}
+
+<span class="fc" id="L207">		codeBuilder.append(&quot;)&quot;);</span>
+
+<span class="fc" id="L209">		return codeBuilder.toString();</span>
+	}
+
+	//----------------------------------------------------------------------------------------------------------------------
+	// Getter and setter for serialization
+	//----------------------------------------------------------------------------------------------------------------------
+
+	public SearchedElement getParent() {
+<span class="nc" id="L217">		return parent;</span>
+	}
+
+	public void setParent(SearchedElement value) {
+<span class="nc" id="L221">		this.parent = value;</span>
+<span class="nc" id="L222">	}</span>
+
+	public String getTag() {
+<span class="fc" id="L225">		return tag;</span>
+	}
+
+	public void setTag(String tag) {
+<span class="fc" id="L229">		this.tag = tag;</span>
+<span class="fc" id="L230">	}</span>
+
+	public int getIndex() {
+<span class="nc" id="L233">		return index;</span>
+	}
+
+	public void setIndex(int value) {
+<span class="nc" id="L237">		this.index = value;</span>
+<span class="nc" id="L238">	}</span>
+
+	public List&lt;CalculatedProperty&gt; getCriterias() {
+<span class="nc" id="L241">		return criterias;</span>
+	}
+
+	public void setCriterias(List&lt;CalculatedProperty&gt; value) {
+<span class="fc" id="L245">		this.criterias = value;</span>
+<span class="fc" id="L246">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

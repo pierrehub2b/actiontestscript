@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TestElementRoot.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.element</a> &gt; <span class="el_source">TestElementRoot.java</span></div><h1>TestElementRoot.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.element;
+
+import java.util.ArrayList;
+import java.util.Base64;
+
+import com.ats.executor.ActionStatus;
+import com.ats.executor.ActionTestScript;
+import com.ats.executor.channels.Channel;
+import com.ats.generator.objects.MouseDirection;
+import com.ats.generator.variables.CalculatedProperty;
+import com.ats.generator.variables.CalculatedValue;
+
+public class TestElementRoot extends TestElement {
+
+	private final static String SOURCE = &quot;source&quot;;
+	private final static String VERSION = &quot;version&quot;;
+	private final static String RECTANGLE = &quot;rectangle&quot;;
+	private final static String TITLE = &quot;title&quot;;
+	private final static String URL = &quot;url&quot;;
+	private final static String PROCESS_ID = &quot;process-id&quot;;
+	private final static String SCREEN_SHOT = &quot;screenshot&quot;;
+	private final static String WINDOWS = &quot;windows&quot;;
+		
+<span class="nc" id="L43">	public TestElementRoot() {}</span>
+
+	public TestElementRoot(Channel channel) {
+<span class="nc" id="L46">		super(channel, 1, 0);</span>
+<span class="nc" id="L47">		setCriterias(&quot;root&quot;);</span>
+<span class="nc" id="L48">	}</span>
+
+	@Override
+	protected void startSearch(boolean sysComp, SearchedElement searchedElement) {
+<span class="nc" id="L52">	}</span>
+
+	@Override
+	public String enterText(ActionStatus status, CalculatedValue text, ActionTestScript script) {
+<span class="nc" id="L56">		final String enterText = text.getCalculated();</span>
+<span class="nc" id="L57">		channel.rootKeys(status, enterText);</span>
+<span class="nc" id="L58">		return enterText;</span>
+	}
+
+	@Override
+	public Object executeScript(ActionStatus status, String script, boolean returnValue) {
+<span class="nc" id="L63">		return engine.executeJavaScript(status, script, returnValue);</span>
+	}
+
+	@Override
+	public void mouseWheel(int delta) {
+<span class="nc" id="L68">		engine.scroll(delta);</span>
+<span class="nc" id="L69">	}</span>
+
+	@Override
+	public void over(ActionStatus status, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {
+		
+		// do nothing, this is the root, no need to scroll over the root element
+<span class="nc" id="L75">		channel.setWindowToFront();</span>
+<span class="nc" id="L76">		channel.refreshLocation();</span>
+		
+<span class="nc" id="L78">		super.over(status, position, desktopDragDrop, offsetX, offsetY);</span>
+<span class="nc" id="L79">	}</span>
+
+	@Override
+	public String getAttribute(ActionStatus status, String name) {
+		
+<span class="nc bnc" id="L84" title="All 11 branches missed.">		switch (name.toLowerCase()) {</span>
+		case SOURCE:
+<span class="nc" id="L86">			return engine.getSource();</span>
+		case RECTANGLE:
+<span class="nc" id="L88">			return channel.getBoundDimension();</span>
+		case CLIENT_WIDTH:
+<span class="nc" id="L90">			return channel.getDimension().getWidth().toString();</span>
+		case CLIENT_HEIGTH:
+<span class="nc" id="L92">			return channel.getDimension().getHeight().toString();</span>
+		case SCREEN_SHOT:
+<span class="nc" id="L94">			return Base64.getEncoder().encodeToString(channel.getScreenShot());</span>
+		case VERSION:
+<span class="nc" id="L96">			return channel.getApplicationVersion();</span>
+		case PROCESS_ID:
+<span class="nc" id="L98">			return String.valueOf(channel.getProcessId());</span>
+		case TITLE:
+<span class="nc" id="L100">			return engine.getTitle();</span>
+		case URL:
+<span class="nc" id="L102">			return engine.getUrl();</span>
+		case WINDOWS:
+<span class="nc" id="L104">			return String.valueOf(engine.getNumWindows());</span>
+		default :
+<span class="nc" id="L106">			reloadFoundElements();</span>
+<span class="nc" id="L107">			return engine.getAttribute(status, getFoundElement(), name, 5);</span>
+		}
+	}
+
+	@Override
+	public CalculatedProperty[] getAttributes(boolean reload) {
+		
+<span class="nc" id="L114">		final ArrayList&lt;CalculatedProperty&gt; attributes = new ArrayList&lt;CalculatedProperty&gt;();</span>
+
+<span class="nc" id="L116">		attributes.add(new CalculatedProperty(SOURCE, &quot;[...]&quot;));</span>
+<span class="nc" id="L117">		attributes.add(new CalculatedProperty(VERSION, channel.getApplicationVersion()));</span>
+<span class="nc" id="L118">		attributes.add(new CalculatedProperty(RECTANGLE, channel.getBoundDimension()));</span>
+<span class="nc" id="L119">		attributes.add(new CalculatedProperty(PROCESS_ID, String.valueOf(channel.getProcessId())));</span>
+<span class="nc" id="L120">		attributes.add(new CalculatedProperty(TITLE, engine.getTitle()));</span>
+<span class="nc" id="L121">		attributes.add(new CalculatedProperty(URL, engine.getUrl()));</span>
+<span class="nc" id="L122">		attributes.add(new CalculatedProperty(WINDOWS, String.valueOf(engine.getNumWindows())));</span>
+				
+<span class="nc" id="L124">		return attributes.toArray(new CalculatedProperty[attributes.size()]);</span>
+	}
+
+	@Override
+	public CalculatedProperty[] getCssAttributes() {
+<span class="nc" id="L129">		reloadFoundElements();</span>
+<span class="nc" id="L130">		return super.getCssAttributes();</span>
+	}
+	
+	@Override
+	public FoundElement getFoundElement() {
+<span class="nc" id="L135">		return new FoundElement(channel); </span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ExecutionListener.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.executor</a> &gt; <span class="el_source">ExecutionListener.java</span></div><h1>ExecutionListener.java</h1><pre class="source lang-java linenums">package com.ats.executor;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+
+import org.testng.IExecutionListener;
+import org.testng.TestNG;
+import org.xml.sax.SAXException;
+
+import com.ats.generator.ATS;
+import com.ats.tools.report.CampaignReportGenerator;
+
+<span class="nc" id="L20">public class ExecutionListener implements IExecutionListener {</span>
+
+	private static final String TESTNG_FILE_NAME = &quot;testng-results.xml&quot;;
+<span class="nc" id="L23">	private static final String[] JASPER_PROPERTY_NAME = {&quot;jasper&quot;, &quot;jasper.home&quot;, &quot;jasper-home&quot;};</span>
+	private static final String JASPER_HOME_ENVIRONMENT = &quot;JASPER_HOME&quot;;
+
+	@SuppressWarnings(&quot;deprecation&quot;)
+	private Path getOutputFolderPath() {
+<span class="nc" id="L28">		final String outputFolder = System.getProperty(&quot;output-folder&quot;);</span>
+<span class="nc bnc" id="L29" title="All 2 branches missed.">		if(outputFolder != null) {</span>
+<span class="nc" id="L30">			return Paths.get(outputFolder);</span>
+		}
+<span class="nc" id="L32">		return Paths.get(TestNG.getDefault().getOutputDirectory());</span>
+	}
+
+	private File getJsonSuitesFile() {
+<span class="nc" id="L36">		final Path p = getOutputFolderPath();</span>
+<span class="nc bnc" id="L37" title="All 2 branches missed.">		if(p != null) {</span>
+<span class="nc" id="L38">			return p.resolve(CampaignReportGenerator.ATS_JSON_SUITES).toFile();</span>
+		}
+<span class="nc" id="L40">		return null;</span>
+	}
+
+	@Override
+	public void onExecutionStart() {
+<span class="nc" id="L45">		IExecutionListener.super.onExecutionStart();</span>
+
+		try {
+<span class="nc" id="L48">			getJsonSuitesFile().delete();</span>
+<span class="nc" id="L49">		} catch (Exception e) {</span>
+<span class="nc" id="L50">		}</span>
+
+<span class="nc" id="L52">		System.out.println(&quot;[ATS-SCRIPT] ------------------------------------&quot;);</span>
+<span class="nc" id="L53">		System.out.println(&quot;[ATS-SCRIPT]   ATS &quot; + ATS.VERSION + &quot; execution start&quot;);</span>
+<span class="nc" id="L54">		System.out.println(&quot;[ATS-SCRIPT] ------------------------------------&quot;);</span>
+<span class="nc" id="L55">	}</span>
+
+	@Override
+	public void onExecutionFinish() {
+<span class="nc" id="L59">		IExecutionListener.super.onExecutionFinish();</span>
+
+<span class="nc" id="L61">		System.out.println(&quot;[ATS-SCRIPT] ------------------------------------&quot;);</span>
+<span class="nc" id="L62">		System.out.println(&quot;[ATS-SCRIPT]   ATS execution complete&quot;);</span>
+<span class="nc" id="L63">		System.out.println(&quot;[ATS-SCRIPT] ------------------------------------&quot;);</span>
+
+<span class="nc" id="L65">		final String atsReport = System.getProperty(CampaignReportGenerator.ATS_REPORT);</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">		if(atsReport != null) {</span>
+
+<span class="nc" id="L68">			final String outputPath = getOutputFolderPath().toAbsolutePath().toFile().getAbsolutePath();</span>
+<span class="nc" id="L69">			System.out.println(&quot;[ATS-SCRIPT] Generate ATS report -&gt; &quot; + outputPath);</span>
+
+<span class="nc" id="L71">			final File jsonSuiteFile = getJsonSuitesFile();</span>
+<span class="nc bnc" id="L72" title="All 4 branches missed.">			if(jsonSuiteFile != null &amp;&amp; jsonSuiteFile.exists()) {</span>
+				
+<span class="nc" id="L74">				String jasperHome = null;</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">				for (String s : JASPER_PROPERTY_NAME) {</span>
+<span class="nc" id="L76">					jasperHome = System.getProperty(s);</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">					if(jasperHome != null) {</span>
+<span class="nc" id="L78">						break;</span>
+					}
+				}
+				
+<span class="nc bnc" id="L82" title="All 2 branches missed.">				if(jasperHome == null) {</span>
+<span class="nc" id="L83">					jasperHome = System.getenv(JASPER_HOME_ENVIRONMENT);</span>
+				}
+								
+				try {
+<span class="nc" id="L87">					new CampaignReportGenerator(getOutputFolderPath(), jsonSuiteFile, atsReport, jasperHome);</span>
+<span class="nc" id="L88">				} catch (IOException | TransformerException | ParserConfigurationException | SAXException e) {</span>
+<span class="nc" id="L89">					e.printStackTrace();</span>
+<span class="nc" id="L90">				}</span>
+			}
+		}
+
+<span class="nc" id="L94">		final Path testNGResultsPath = Paths.get(&quot;target&quot;, &quot;surefire-reports&quot;, TESTNG_FILE_NAME);</span>
+<span class="nc" id="L95">		final Path destResultsPath = getOutputFolderPath().resolve(TESTNG_FILE_NAME);</span>
+
+		try {
+<span class="nc bnc" id="L98" title="All 2 branches missed.">			if(testNGResultsPath.toFile().exists()) {</span>
+<span class="nc" id="L99">				Files.copy(testNGResultsPath, destResultsPath, StandardCopyOption.REPLACE_EXISTING);</span>
+			}
+<span class="nc" id="L101">		} catch (IOException e) {</span>
+<span class="nc" id="L102">			e.printStackTrace();</span>
+<span class="nc" id="L103">		}</span>
+<span class="nc" id="L104">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

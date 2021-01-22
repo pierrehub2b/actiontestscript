@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChromiumBasedDriverEngine.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.executor.drivers.engines.browsers</a> &gt; <span class="el_source">ChromiumBasedDriverEngine.java</span></div><h1>ChromiumBasedDriverEngine.java</h1><pre class="source lang-java linenums">package com.ats.executor.drivers.engines.browsers;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.openqa.selenium.chrome.ChromeOptions;
+
+import com.ats.driver.ApplicationProperties;
+import com.ats.executor.ActionStatus;
+import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.DriverProcess;
+import com.ats.executor.drivers.desktop.DesktopDriver;
+import com.ats.executor.drivers.engines.WebDriverEngine;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+public class ChromiumBasedDriverEngine extends WebDriverEngine {
+
+<span class="nc" id="L27">	protected String profileFolder = null;</span>
+
+	public ChromiumBasedDriverEngine(Channel channel, ActionStatus status, String browser, DriverProcess driverProcess, DesktopDriver desktopDriver, ApplicationProperties props) {
+<span class="nc" id="L30">		super(channel, browser, driverProcess, desktopDriver, props);</span>
+<span class="nc" id="L31">	}</span>
+
+	protected ChromeOptions initOptions(ApplicationProperties props, String browserName) {
+
+<span class="nc" id="L35">		final ChromeOptions options = new ChromeOptions();</span>
+<span class="nc" id="L36">		options.addArguments(&quot;--no-default-browser-check&quot;);</span>
+<span class="nc" id="L37">		options.addArguments(&quot;--test-type&quot;);</span>
+<span class="nc" id="L38">		options.addArguments(&quot;--allow-file-access-from-files&quot;);</span>
+<span class="nc" id="L39">		options.addArguments(&quot;--allow-running-insecure-content&quot;);</span>
+<span class="nc" id="L40">		options.addArguments(&quot;--allow-file-access-from-files&quot;);</span>
+<span class="nc" id="L41">		options.addArguments(&quot;--allow-cross-origin-auth-prompt&quot;);</span>
+<span class="nc" id="L42">		options.addArguments(&quot;--allow-file-access&quot;);</span>
+<span class="nc" id="L43">		options.addArguments(&quot;--ignore-certificate-errors&quot;);</span>
+		
+<span class="nc bnc" id="L45" title="All 2 branches missed.">		if(props.getOptions() != null) {</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">			for (String s: props.getOptions()) {</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">				if(s.length() &gt; 0) {</span>
+<span class="nc" id="L48">					options.addArguments(s);</span>
+				}
+			}
+		}
+
+<span class="nc" id="L53">		profileFolder = props.getUserDataDir();</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">		if(profileFolder != null) {</span>
+<span class="nc" id="L55">			removeMetricsData();</span>
+<span class="nc" id="L56">			options.addArguments(&quot;--user-data-dir=&quot; + profileFolder);</span>
+		}
+
+<span class="nc bnc" id="L59" title="All 2 branches missed.">		if(lang != null) {</span>
+<span class="nc" id="L60">			options.addArguments(&quot;--lang=&quot; + lang);</span>
+		}
+
+<span class="nc bnc" id="L63" title="All 2 branches missed.">		if(applicationPath != null) {</span>
+<span class="nc" id="L64">			final File browserBinaryFile = new File(applicationPath);</span>
+<span class="nc bnc" id="L65" title="All 2 branches missed.">			if(browserBinaryFile.exists()) {</span>
+<span class="nc" id="L66">				options.setBinary(browserBinaryFile.getAbsolutePath());</span>
+			}
+		}
+
+<span class="nc" id="L70">		options.setExperimentalOption(&quot;excludeSwitches&quot;, Collections.singletonList(&quot;enable-automation&quot;));</span>
+
+<span class="nc" id="L72">		final Map&lt;String, Object&gt; prefs = new HashMap&lt;String, Object&gt;();</span>
+<span class="nc" id="L73">		prefs.put(&quot;credentials_enable_service&quot;, false);</span>
+<span class="nc" id="L74">		prefs.put(&quot;profile.password_manager_enabled&quot;, false);</span>
+<span class="nc" id="L75">		options.setExperimentalOption(&quot;prefs&quot;, prefs);</span>
+
+<span class="nc" id="L77">		return options;</span>
+	}
+
+	private void removeMetricsData() {
+
+<span class="nc" id="L82">		final Path atsProfilePath = Paths.get(profileFolder);</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">		if(atsProfilePath.toFile().exists()) {</span>
+<span class="nc" id="L84">			final Path localStatePath = atsProfilePath.resolve(&quot;Local State&quot;);</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">			if(localStatePath.toFile().exists()) {</span>
+				try {
+<span class="nc" id="L87">					final JsonObject localStateObject = JsonParser.parseString(new String(Files.readAllBytes(localStatePath))).getAsJsonObject();</span>
+<span class="nc" id="L88">					final JsonObject metrics = localStateObject.get(&quot;user_experience_metrics&quot;).getAsJsonObject();</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">					if(metrics != null) {</span>
+<span class="nc" id="L90">						final JsonObject stability = metrics.get(&quot;stability&quot;).getAsJsonObject();</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">						if(stability != null) {</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">							if(!stability.get(&quot;exited_cleanly&quot;).getAsBoolean()) {</span>
+<span class="nc" id="L93">								stability.remove(&quot;exited_cleanly&quot;);</span>
+<span class="nc" id="L94">								stability.addProperty(&quot;exited_cleanly&quot;, true);</span>
+
+<span class="nc" id="L96">								metrics.remove(&quot;stability&quot;);</span>
+<span class="nc" id="L97">								metrics.add(&quot;stability&quot;, stability);</span>
+
+<span class="nc" id="L99">								localStateObject.remove(&quot;user_experience_metrics&quot;);</span>
+<span class="nc" id="L100">								localStateObject.add(&quot;user_experience_metrics&quot;, metrics);</span>
+
+<span class="nc" id="L102">								final FileWriter fileWriter = new FileWriter(localStatePath.toFile());</span>
+<span class="nc" id="L103">								new Gson().toJson(localStateObject, fileWriter);</span>
+<span class="nc" id="L104">								fileWriter.close();</span>
+							}
+						}
+					}
+<span class="nc" id="L108">				} catch (Exception e) {	}</span>
+			}
+
+<span class="nc" id="L111">			final Path preferencesPath = atsProfilePath.resolve(&quot;Default&quot;).resolve(&quot;Preferences&quot;);</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">			if(preferencesPath.toFile().exists()) {</span>
+				try {
+<span class="nc" id="L114">					final JsonObject PreferencesObject = JsonParser.parseString(new String(Files.readAllBytes(preferencesPath))).getAsJsonObject();</span>
+
+<span class="nc" id="L116">					final JsonObject profile = PreferencesObject.get(&quot;profile&quot;).getAsJsonObject();</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">					if(profile != null) {</span>
+
+<span class="nc" id="L119">						final JsonElement exitType = profile.get(&quot;exit_type&quot;);</span>
+						
+<span class="nc bnc" id="L121" title="All 2 branches missed.">						if(exitType != null) {</span>
+<span class="nc" id="L122">							profile.remove(&quot;exit_type&quot;);</span>
+						}
+						
+<span class="nc" id="L125">						profile.addProperty(&quot;exit_type&quot;, &quot;Normal&quot;);</span>
+
+<span class="nc" id="L127">						PreferencesObject.remove(&quot;profile&quot;);</span>
+<span class="nc" id="L128">						PreferencesObject.add(&quot;profile&quot;, profile);</span>
+
+<span class="nc" id="L130">						final FileWriter fileWriter = new FileWriter(preferencesPath.toFile());</span>
+<span class="nc" id="L131">						new Gson().toJson(PreferencesObject, fileWriter);</span>
+<span class="nc" id="L132">						fileWriter.close();</span>
+						
+					}
+<span class="nc" id="L135">				} catch (Exception e) {	}</span>
+			}
+		}
+<span class="nc" id="L138">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

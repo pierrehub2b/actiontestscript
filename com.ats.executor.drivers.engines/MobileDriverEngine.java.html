@@ -1,0 +1,745 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MobileDriverEngine.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.executor.drivers.engines</a> &gt; <span class="el_source">MobileDriverEngine.java</span></div><h1>MobileDriverEngine.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.executor.drivers.engines;
+
+import java.awt.Graphics;
+import java.awt.Point;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.imageio.ImageIO;
+
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebElement;
+
+import com.ats.driver.ApplicationProperties;
+import com.ats.element.AtsBaseElement;
+import com.ats.element.AtsMobileElement;
+import com.ats.element.DialogBox;
+import com.ats.element.FoundElement;
+import com.ats.element.MobileRootElement;
+import com.ats.element.MobileTestElement;
+import com.ats.element.TestElement;
+import com.ats.executor.ActionStatus;
+import com.ats.executor.SendKeyData;
+import com.ats.executor.TestBound;
+import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.desktop.DesktopDriver;
+import com.ats.executor.drivers.engines.mobiles.AndroidRootElement;
+import com.ats.executor.drivers.engines.mobiles.IosRootElement;
+import com.ats.executor.drivers.engines.mobiles.RootElement;
+import com.ats.generator.ATS;
+import com.ats.generator.objects.BoundData;
+import com.ats.generator.objects.MouseDirection;
+import com.ats.generator.variables.CalculatedProperty;
+import com.ats.graphic.ImageTemplateMatchingSimple;
+import com.ats.script.actions.ActionApi;
+import com.google.common.base.Charsets;
+import com.google.common.io.CharStreams;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+
+import okhttp3.OkHttpClient;
+import okhttp3.OkHttpClient.Builder;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
+public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
+
+	private final static String DRIVER = &quot;driver&quot;;
+	private final static String APP = &quot;app&quot;;
+	private final static String START = &quot;start&quot;;
+	private final static String STOP = &quot;stop&quot;;
+	private final static String SWITCH = &quot;switch&quot;;
+	private final static String CAPTURE = &quot;capture&quot;;
+	private final static String INPUT = &quot;input&quot;;
+	public final static String ELEMENT = &quot;element&quot;;
+	public final static String TAP = &quot;tap&quot;;
+	public final static String PRESS = &quot;press&quot;;
+	public final static String SWIPE = &quot;swipe&quot;;
+	public final static String SCRIPTING = &quot;scripting&quot;;
+	public final static String SET_PROP = &quot;property-set&quot;;
+	public final static String GET_PROP = &quot;property&quot;;
+	public final static String SYS_BUTTON = &quot;sysbutton&quot;;
+
+	private final static String SCREENSHOT_METHOD = &quot;/screenshot&quot;;
+
+	private JsonObject source;
+	private MobileTestElement testElement;
+	private OkHttpClient client;
+
+	protected RootElement rootElement;
+	protected RootElement cachedElement;
+<span class="nc" id="L106">	protected long cachedElementTime = 0L;</span>
+
+	private String userAgent;
+	private String token;
+	private String endPoint;
+
+	public MobileDriverEngine(Channel channel, ActionStatus status, String app, DesktopDriver desktopDriver, ApplicationProperties props, String token) {
+<span class="nc" id="L113">		super(channel, desktopDriver, props, 0, 60);</span>
+
+<span class="nc bnc" id="L115" title="All 2 branches missed.">		if (applicationPath == null) {</span>
+<span class="nc" id="L116">			applicationPath = app;</span>
+		}
+
+<span class="nc" id="L119">		final int start = applicationPath.indexOf(&quot;://&quot;);</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">		if (start &gt; -1) {</span>
+<span class="nc" id="L121">			applicationPath = applicationPath.substring(start + 3);</span>
+		}
+
+<span class="nc" id="L124">		final String[] appData = applicationPath.split(&quot;/&quot;);</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">		if (appData.length &gt; 0) {</span>
+
+<span class="nc" id="L127">			endPoint = appData[0];</span>
+
+<span class="nc" id="L129">			this.applicationPath = &quot;http://&quot; + endPoint;</span>
+<span class="nc" id="L130">			this.client = new Builder().cache(null).connectTimeout(30, TimeUnit.SECONDS).writeTimeout(30, TimeUnit.SECONDS).readTimeout(40, TimeUnit.SECONDS).build();</span>
+
+<span class="nc" id="L132">			this.userAgent = &quot;AtsMobileDriver/&quot; + ATS.VERSION + &quot;,&quot; + System.getProperty(&quot;user.name&quot;) + &quot;,&quot;;</span>
+<span class="nc" id="L133">			this.token = token;</span>
+
+<span class="nc" id="L135">			JsonObject response = executeRequest(DRIVER, START);</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">			if (response == null) {</span>
+<span class="nc" id="L137">				status.setError(ActionStatus.CHANNEL_START_ERROR, &quot;unable to connect to : mobile://&quot; + endPoint);</span>
+<span class="nc" id="L138">				return;</span>
+			}
+
+			// handle driver start error
+<span class="nc bnc" id="L142" title="All 2 branches missed.">			if (response.get(&quot;status&quot;).getAsInt() != 0) {</span>
+<span class="nc" id="L143">				status.setError(ActionStatus.CHANNEL_START_ERROR, response.get(&quot;message&quot;).getAsString());</span>
+<span class="nc" id="L144">				return;</span>
+			}
+
+<span class="nc" id="L147">			this.token = response.get(&quot;token&quot;).getAsString();</span>
+
+<span class="nc" id="L149">			channel.addSystemProperties(response.getAsJsonArray(&quot;systemProperties&quot;));</span>
+<span class="nc" id="L150">			channel.addSystemButtons(response.getAsJsonArray(&quot;systemButtons&quot;));</span>
+			
+<span class="nc" id="L152">			final String systemName = response.get(&quot;systemName&quot;).getAsString();</span>
+<span class="nc" id="L153">			final String driverVersion = response.get(&quot;driverVersion&quot;).getAsString();</span>
+<span class="nc" id="L154">			final String userName = response.get(&quot;mobileUser&quot;).getAsString();</span>
+<span class="nc" id="L155">			final String machineName = response.get(&quot;mobileName&quot;).getAsString();</span>
+<span class="nc" id="L156">			final String osBuild = response.get(&quot;osBuild&quot;).getAsString();</span>
+<span class="nc" id="L157">			final String country = response.get(&quot;country&quot;).getAsString();</span>
+<span class="nc" id="L158">			final String os = response.get(&quot;os&quot;).getAsString();</span>
+
+<span class="nc" id="L160">			double deviceWidth = 0;</span>
+<span class="nc" id="L161">			double deviceHeight = 0;</span>
+<span class="nc" id="L162">			double channelWidth = 0;</span>
+<span class="nc" id="L163">			double channelHeight = 0;</span>
+
+<span class="nc bnc" id="L165" title="All 2 branches missed.">			if (os.equals(&quot;android&quot;)) {</span>
+<span class="nc" id="L166">				rootElement = new AndroidRootElement(this);</span>
+<span class="nc" id="L167">				cachedElement = new AndroidRootElement(this);</span>
+
+<span class="nc" id="L169">				deviceWidth = response.get(&quot;deviceWidth&quot;).getAsDouble();</span>
+<span class="nc" id="L170">				deviceHeight = response.get(&quot;deviceHeight&quot;).getAsDouble();</span>
+<span class="nc" id="L171">				channelWidth = response.get(&quot;channelWidth&quot;).getAsDouble();</span>
+<span class="nc" id="L172">				channelHeight = response.get(&quot;channelHeight&quot;).getAsDouble();</span>
+			}
+
+<span class="nc" id="L175">			final int screenCapturePort = response.get(&quot;screenCapturePort&quot;).getAsInt();</span>
+
+<span class="nc" id="L177">			String application = null;</span>
+<span class="nc bnc" id="L178" title="All 2 branches missed.">			if (appData.length &gt; 1) {</span>
+<span class="nc" id="L179">				application = appData[1];</span>
+<span class="nc" id="L180">				response = executeRequest(APP, START, application);</span>
+			} else {
+<span class="nc" id="L182">				response = executeRequest(APP, START);</span>
+			}
+
+<span class="nc bnc" id="L185" title="All 2 branches missed.">			if (response == null) {</span>
+<span class="nc" id="L186">				status.setError(ActionStatus.CHANNEL_START_ERROR, &quot;unable to connect to : &quot; + application);</span>
+<span class="nc" id="L187">				return;</span>
+			}
+
+			// handle app start error
+<span class="nc bnc" id="L191" title="All 2 branches missed.">			if (response.get(&quot;status&quot;).getAsInt() != 0) {</span>
+<span class="nc" id="L192">				status.setError(ActionStatus.CHANNEL_START_ERROR, response.get(&quot;message&quot;).getAsString());</span>
+<span class="nc" id="L193">				return;</span>
+			}
+
+<span class="nc" id="L196">			final String base64 = response.get(&quot;icon&quot;).getAsString();</span>
+<span class="nc" id="L197">			byte[] icon = new byte[0];</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">			if (base64.length() &gt; 0) {</span>
+				try {
+<span class="nc" id="L200">					icon = Base64.getDecoder().decode(base64);</span>
+<span class="nc" id="L201">				} catch (Exception ignored) {}</span>
+			}
+
+<span class="nc bnc" id="L204" title="All 2 branches missed.">			if (os.equals(&quot;ios&quot;)) {</span>
+<span class="nc" id="L205">				rootElement = new IosRootElement(this);</span>
+<span class="nc" id="L206">				cachedElement = new IosRootElement(this);</span>
+
+<span class="nc" id="L208">				deviceWidth = response.get(&quot;deviceWidth&quot;).getAsDouble();</span>
+<span class="nc" id="L209">				deviceHeight = response.get(&quot;deviceHeight&quot;).getAsDouble();</span>
+<span class="nc" id="L210">				channelWidth = response.get(&quot;channelWidth&quot;).getAsDouble();</span>
+<span class="nc" id="L211">				channelHeight = response.get(&quot;channelHeight&quot;).getAsDouble();</span>
+			}
+
+<span class="nc" id="L214">			final String[] endPointData = endPoint.split(&quot;:&quot;);</span>
+<span class="nc" id="L215">			final String version = response.get(&quot;version&quot;).getAsString();</span>
+			
+<span class="nc" id="L217">			String udpInfo = endPointData[0] + &quot;:&quot; + screenCapturePort;</span>
+
+<span class="nc" id="L219">			channel.setDimensions(new TestBound(0D, 0D, deviceWidth, deviceHeight), new TestBound(0D, 0D, channelWidth, channelHeight));</span>
+<span class="nc" id="L220">			channel.setApplicationData(os, systemName, version, driverVersion, icon, udpInfo, application, userName, machineName, osBuild, country);</span>
+
+<span class="nc" id="L222">			refreshElementMapLocation();</span>
+		}
+<span class="nc" id="L224">	}</span>
+
+	@Override
+	public WebElement getRootElement(Channel cnl) {
+<span class="nc" id="L228">		refreshElementMapLocation();</span>
+<span class="nc" id="L229">		return new MobileRootElement(rootElement.getValue());</span>
+	}
+
+	@Override
+	public TestElement getTestElementRoot() {
+<span class="nc" id="L234">		refreshElementMapLocation();</span>
+<span class="nc" id="L235">		return new TestElement(new FoundElement(rootElement.getValue()), channel);</span>
+	}
+
+	@Override
+	public void refreshElementMapLocation() {
+<span class="nc" id="L240">		source = executeRequest(CAPTURE);</span>
+<span class="nc" id="L241">		rootElement.refresh(source);</span>
+<span class="nc" id="L242">	}</span>
+
+	protected void loadCapturedElement() {
+<span class="nc" id="L245">		long current = System.currentTimeMillis();</span>
+<span class="nc bnc" id="L246" title="All 4 branches missed.">		if(cachedElement == null || current - 2500 &gt; cachedElementTime) {</span>
+<span class="nc bnc" id="L247" title="All 2 branches missed.">			if (cachedElement != null) {</span>
+<span class="nc" id="L248">				cachedElement.refresh(executeRequest(CAPTURE));</span>
+			}
+<span class="nc" id="L250">			cachedElementTime = System.currentTimeMillis();</span>
+		}
+<span class="nc" id="L252">	}</span>
+
+	@Override
+	public void close(boolean keepRunning) {
+<span class="nc" id="L256">		final String application = channel.getApplication();</span>
+<span class="nc bnc" id="L257" title="All 2 branches missed.">		if (application != null) {</span>
+<span class="nc" id="L258">			executeRequest(APP, STOP, application);</span>
+		}
+<span class="nc" id="L260">		this.channel = null;</span>
+<span class="nc" id="L261">	}</span>
+
+	public void tearDown() {
+<span class="nc" id="L264">		JsonObject jsonObject = executeRequest(DRIVER, STOP);</span>
+<span class="nc bnc" id="L265" title="All 2 branches missed.">		if (jsonObject != null) {</span>
+<span class="nc" id="L266">			this.token = null;</span>
+		}
+<span class="nc" id="L268">	}</span>
+
+	@Override
+	public FoundElement getElementFromPoint(Boolean syscomp, Double x, Double y) {
+
+<span class="nc" id="L273">		loadCapturedElement();</span>
+
+<span class="nc" id="L275">		ArrayList&lt;AtsMobileElement&gt; listElements = new ArrayList&lt;AtsMobileElement&gt;();</span>
+
+<span class="nc" id="L277">		loadList(cachedElement.getValue(), listElements, &quot;A&quot;);</span>
+
+<span class="nc" id="L279">		final int mouseX = (int)(channel.getSubDimension().getX() + x);</span>
+<span class="nc" id="L280">		final int mouseY = (int)(channel.getSubDimension().getY() + y);</span>
+
+<span class="nc" id="L282">		AtsMobileElement element = cachedElement.getValue();</span>
+
+<span class="nc" id="L284">		listElements.sort(Comparator.comparing(AtsMobileElement::getPositionInDom));</span>
+
+<span class="nc bnc" id="L286" title="All 2 branches missed.">		for (AtsMobileElement child : listElements) {</span>
+<span class="nc" id="L287">			int coordinateX = child.getX().intValue();</span>
+<span class="nc" id="L288">			int coordinateY = child.getY().intValue();</span>
+<span class="nc" id="L289">			int coordinateW = child.getWidth().intValue();</span>
+<span class="nc" id="L290">			int coordinateH = child.getHeight().intValue();</span>
+
+<span class="nc bnc" id="L292" title="All 2 branches missed.">			if (child.getRect().contains(new Point(mouseX, mouseY)) &amp;&amp;</span>
+					(
+<span class="nc bnc" id="L294" title="All 2 branches missed.">							element.getRect().contains(new Point(coordinateX, coordinateY)) ||</span>
+<span class="nc bnc" id="L295" title="All 2 branches missed.">							element.getRect().contains(new Point(coordinateX + coordinateW, coordinateY)) ||</span>
+<span class="nc bnc" id="L296" title="All 2 branches missed.">							element.getRect().contains(new Point(coordinateX + coordinateW, coordinateY + coordinateH)) ||</span>
+<span class="nc bnc" id="L297" title="All 2 branches missed.">							element.getRect().contains(new Point(coordinateX, coordinateY + coordinateH))</span>
+							)
+					) {
+<span class="nc" id="L300">				element = child;</span>
+			}
+<span class="nc" id="L302">		}</span>
+
+<span class="nc" id="L304">		return element.getFoundElement();</span>
+	}
+
+	@Override
+	public FoundElement getElementFromRect(Boolean syscomp, Double x, Double y, Double w, Double h) {
+
+<span class="nc" id="L310">		loadCapturedElement();</span>
+
+<span class="nc" id="L312">		ArrayList&lt;AtsMobileElement&gt; listElements = new ArrayList&lt;AtsMobileElement&gt;();</span>
+
+<span class="nc" id="L314">		loadList(cachedElement.getValue(), listElements, &quot;A&quot;);</span>
+
+<span class="nc" id="L316">		final int mouseX = (int)(channel.getSubDimension().getX() + x);</span>
+<span class="nc" id="L317">		final int mouseY = (int)(channel.getSubDimension().getY() + y);</span>
+
+<span class="nc" id="L319">		AtsMobileElement element = cachedElement.getValue();</span>
+
+<span class="nc" id="L321">		listElements.sort(Comparator.comparing(AtsMobileElement::getPositionInDom));</span>
+
+<span class="nc bnc" id="L323" title="All 2 branches missed.">		for (AtsMobileElement child : listElements) {</span>
+<span class="nc bnc" id="L324" title="All 8 branches missed.">			if (child.getRect().contains(new Point(mouseX, mouseY)) &amp;&amp; child.getRect().getWidth() &lt;= w &amp;&amp; child.getRect().getHeight() &lt;= h &amp;&amp; element.getRect().contains(child.getRect())) {</span>
+<span class="nc" id="L325">				element = child;</span>
+			}
+<span class="nc" id="L327">		}</span>
+
+<span class="nc" id="L329">		return element.getFoundElement();</span>
+	}
+
+	public String getToken() {
+<span class="nc" id="L333">		return token;</span>
+	}
+
+	public String getEndPoint() {
+<span class="nc" id="L337">		return endPoint;</span>
+	}
+
+	private void loadList(AtsMobileElement element, ArrayList&lt;AtsMobileElement&gt; list, String order) {
+<span class="nc" id="L341">		final AtsMobileElement[] children = element.getChildren();</span>
+<span class="nc bnc" id="L342" title="All 2 branches missed.">		if(children != null) {</span>
+<span class="nc bnc" id="L343" title="All 2 branches missed.">			for (int i=0; i&lt;children.length; i++) {</span>
+<span class="nc bnc" id="L344" title="All 2 branches missed.">				if(element.getChildren() != null) {</span>
+<span class="nc" id="L345">					final AtsMobileElement child = element.getChildren()[i];</span>
+<span class="nc" id="L346">					String newOrder = order  + getCharForNumber(i+1);</span>
+<span class="nc" id="L347">					child.setPositionInDom(newOrder);</span>
+<span class="nc" id="L348">					list.add(child);</span>
+<span class="nc" id="L349">					loadList(child, list, newOrder);</span>
+				}
+			}
+		}
+<span class="nc" id="L353">	}</span>
+
+	private String getCharForNumber(int i) {
+<span class="nc bnc" id="L356" title="All 4 branches missed.">		return i &gt; 0 &amp;&amp; i &lt; 27 ? String.valueOf((char)(i + 64)) : &quot;Z&quot;;</span>
+	}
+
+	@Override
+	public void loadParents(FoundElement element) {
+<span class="nc" id="L361">		final AtsMobileElement atsElement = getCapturedElementById(element.getId(), false);</span>
+<span class="nc bnc" id="L362" title="All 2 branches missed.">		if(atsElement != null) {</span>
+			FoundElement currentParent;
+<span class="nc" id="L364">			AtsMobileElement parent = atsElement.getParent();</span>
+<span class="nc bnc" id="L365" title="All 2 branches missed.">			if(parent != null) {</span>
+
+<span class="nc" id="L367">				element.setParent(parent.getFoundElement());</span>
+<span class="nc" id="L368">				currentParent = element.getParent();</span>
+
+<span class="nc" id="L370">				parent = parent.getParent();</span>
+<span class="nc bnc" id="L371" title="All 4 branches missed.">				while (parent != null &amp;&amp; !parent.isRoot()) {</span>
+<span class="nc" id="L372">					currentParent.setParent(parent.getFoundElement());</span>
+<span class="nc" id="L373">					currentParent = currentParent.getParent();</span>
+
+<span class="nc" id="L375">					parent = parent.getParent();</span>
+				}
+			}
+		}
+<span class="nc" id="L379">	}</span>
+
+	@Override
+	public CalculatedProperty[] getAttributes(FoundElement element, boolean reload) {
+<span class="nc" id="L383">		final AtsMobileElement atsElement = getCapturedElementById(element.getId(), reload);</span>
+<span class="nc bnc" id="L384" title="All 2 branches missed.">		if(atsElement != null) {</span>
+<span class="nc" id="L385">			return atsElement.getMobileAttributes();</span>
+		}
+<span class="nc" id="L387">		return new CalculatedProperty[0];</span>
+	}
+
+	private AtsMobileElement getCapturedElementById(String id, boolean reload) {
+<span class="nc bnc" id="L391" title="All 2 branches missed.">		if (reload) {</span>
+<span class="nc" id="L392">			return getElementById(rootElement.getValue(), id);</span>
+<span class="nc bnc" id="L393" title="All 2 branches missed.">		} else if(cachedElement != null) {</span>
+<span class="nc" id="L394">			return getElementById(cachedElement.getValue(), id);</span>
+		} else {
+<span class="nc" id="L396">			return null;</span>
+		}
+	}
+
+	@Override
+	public String getAttribute(ActionStatus status, FoundElement element, String attributeName, int maxTry) {
+<span class="nc" id="L402">		final AtsMobileElement atsElement = getElementById(element.getId());</span>
+<span class="nc bnc" id="L403" title="All 2 branches missed.">		if(atsElement != null) {</span>
+<span class="nc" id="L404">			return atsElement.getAttribute(attributeName);</span>
+		}
+<span class="nc" id="L406">		return null;</span>
+	}
+
+	@Override
+	public List&lt;FoundElement&gt; findElements(boolean sysComp, TestElement testObject, String tagName, String[] attributes, String[] attributesValues, Predicate&lt;AtsBaseElement&gt; searchPredicate, WebElement startElement, boolean waitAnimation) {
+
+<span class="nc" id="L412">		final List&lt;AtsMobileElement&gt; list = new ArrayList&lt;AtsMobileElement&gt;();</span>
+
+<span class="nc bnc" id="L414" title="All 2 branches missed.">		if(testObject.getParent() == null) {</span>
+<span class="nc" id="L415">			refreshElementMapLocation();</span>
+<span class="nc" id="L416">			loadElementsByTag(rootElement.getValue(), tagName, list);</span>
+		}else {
+<span class="nc" id="L418">			loadElementsByTag(getElementById(testObject.getParent().getWebElementId()), tagName, list);</span>
+		}
+
+<span class="nc" id="L421">		return list.parallelStream().filter(searchPredicate).map(FoundElement::new).collect(Collectors.toCollection(ArrayList::new));</span>
+	}
+
+	@Override
+	public List&lt;FoundElement&gt; findElements(TestElement parent, ImageTemplateMatchingSimple template) {
+<span class="nc" id="L426">		final byte[] screenshot = getDesktopDriver().getMobileScreenshotByte(getScreenshotPath());</span>
+<span class="nc" id="L427">		return template.findOccurrences(screenshot).parallelStream().map(r -&gt; new FoundElement(channel, parent, r)).collect(Collectors.toCollection(ArrayList::new));</span>
+	}
+
+	private void loadElementsByTag(AtsMobileElement root, String tag, List&lt;AtsMobileElement&gt; list)
+	{
+<span class="nc bnc" id="L432" title="All 2 branches missed.">		if(root == null) return;</span>
+<span class="nc bnc" id="L433" title="All 2 branches missed.">		if(root.checkTag(tag)) {</span>
+<span class="nc" id="L434">			list.add(root);</span>
+		}
+
+<span class="nc bnc" id="L437" title="All 2 branches missed.">		for (AtsMobileElement child : root.getChildren()) {</span>
+<span class="nc" id="L438">			loadElementsByTag(child, tag, list);</span>
+		}
+<span class="nc" id="L440">	}</span>
+
+	//-------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public void buttonClick(ActionStatus status, String type) {
+<span class="nc" id="L446">		final JsonObject result = executeRequest(SYS_BUTTON, type);</span>
+
+<span class="nc" id="L448">		final int code = result.get(&quot;status&quot;).getAsInt();</span>
+<span class="nc" id="L449">		final String message = result.get(&quot;message&quot;).getAsString();</span>
+
+<span class="nc" id="L451">		status.setCode(code);</span>
+<span class="nc" id="L452">		status.setMessage(message);</span>
+<span class="nc" id="L453">		status.setPassed(true);</span>
+<span class="nc" id="L454">	}</span>
+
+	@Override
+	public void tap(int count, FoundElement element) {
+<span class="nc" id="L458">		rootElement.tap(element, count);</span>
+<span class="nc" id="L459">	}</span>
+
+	@Override
+	public void press(int duration, ArrayList&lt;String&gt; paths, FoundElement element) {
+<span class="nc" id="L463">		rootElement.press(element, paths, duration);</span>
+<span class="nc" id="L464">	}</span>
+
+	@Override
+	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {
+<span class="nc" id="L468">		cachedElementTime = 0L;</span>
+<span class="nc" id="L469">		rootElement.tap(status, element, position);</span>
+<span class="nc" id="L470">	}</span>
+
+	@Override
+	public void drag(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {
+<span class="nc" id="L474">		testElement = rootElement.getCurrentElement(element, position);</span>
+<span class="nc" id="L475">	}</span>
+
+	@Override
+	public void moveByOffset(int hDirection, int vDirection) {
+<span class="nc" id="L479">		rootElement.swipe(testElement, hDirection, vDirection);</span>
+<span class="nc" id="L480">	}</span>
+
+	@Override
+	public void sendTextData(ActionStatus status, TestElement element, ArrayList&lt;SendKeyData&gt; textActionList) {
+<span class="nc bnc" id="L484" title="All 2 branches missed.">		for(SendKeyData sequence : textActionList) {</span>
+<span class="nc" id="L485">			executeRequest(ELEMENT, element.getFoundElement().getId(), INPUT, sequence.getSequenceMobile());</span>
+<span class="nc" id="L486">		}</span>
+<span class="nc" id="L487">	}</span>
+
+	@Override
+	public List&lt;String[]&gt; loadSelectOptions(TestElement element) {
+<span class="nc" id="L491">		return Collections.emptyList();</span>
+	}
+
+	@Override
+	public List&lt;FoundElement&gt; findSelectOptions(TestBound dimension, TestElement element) {
+<span class="nc" id="L496">		return Collections.emptyList();</span>
+	}
+
+	@Override
+	public void selectOptionsItem(ActionStatus status, TestElement element, CalculatedProperty selectProperty) {
+<span class="nc" id="L501">	}</span>
+
+	@Override
+	public void clearText(ActionStatus status, TestElement te, MouseDirection md) {
+<span class="nc" id="L505">		mouseClick(status, te.getFoundElement(), md, 0, 0);</span>
+<span class="nc" id="L506">		executeRequest(ELEMENT, te.getFoundElement().getId(), INPUT, SendKeyData.EMPTY_DATA);</span>
+<span class="nc" id="L507">	}</span>
+
+	@Override
+	public void updateScreenshot(TestBound dimension, boolean isRef) {
+<span class="nc" id="L511">		getDesktopDriver().updateMobileScreenshot(channel.getSubDimension(), isRef, getScreenshotPath());</span>
+<span class="nc" id="L512">	}</span>
+
+	@Override
+	public byte[] getScreenshot(Double x, Double y, Double width, Double height) {
+
+<span class="nc" id="L517">		final byte[] screen = getDesktopDriver().getMobileScreenshotByte(getScreenshotPath());</span>
+
+<span class="nc bnc" id="L519" title="All 2 branches missed.">		if(screen != null) {</span>
+<span class="nc" id="L520">			ImageIO.setUseCache(false);</span>
+
+<span class="nc" id="L522">			final InputStream in = new ByteArrayInputStream(screen);</span>
+<span class="nc" id="L523">			final ByteArrayOutputStream baos = new ByteArrayOutputStream();</span>
+
+<span class="nc" id="L525">			final BufferedImage subImage = new BufferedImage(width.intValue(), height.intValue(), BufferedImage.TYPE_INT_RGB);</span>
+<span class="nc" id="L526">			final Graphics g = subImage.getGraphics();</span>
+
+			try {
+				//final BufferedImage subImage = ImageIO.read(in).getSubimage(x.intValue(), y.intValue(), width.intValue(), height.intValue());
+<span class="nc" id="L530">				g.drawImage(ImageIO.read(in), 0, 0, width.intValue(), height.intValue(), x.intValue(), y.intValue(), x.intValue() + width.intValue(), y.intValue() + height.intValue(), null);</span>
+<span class="nc" id="L531">				g.dispose();</span>
+
+<span class="nc" id="L533">				ImageIO.write(subImage, &quot;png&quot;, baos);</span>
+<span class="nc" id="L534">				baos.flush();</span>
+
+<span class="nc" id="L536">				final byte[] result = baos.toByteArray();</span>
+<span class="nc" id="L537">				baos.close();</span>
+
+<span class="nc" id="L539">				return result;</span>
+
+<span class="nc" id="L541">			} catch (IOException ignored) {}</span>
+		}
+
+<span class="nc" id="L544">		return new byte[1];</span>
+	}
+
+	@Override
+	public void createVisualAction(Channel channel, boolean stop, String actionType, int scriptLine, String scriptName, long timeline, boolean sync) {
+<span class="nc" id="L549">		getDesktopDriver().createMobileRecord(stop, actionType, scriptLine, scriptName, timeline,	channel.getName(), channel.getSubDimension(), getScreenshotPath(), sync);</span>
+<span class="nc" id="L550">	}</span>
+
+	private String getScreenshotPath() {
+<span class="nc" id="L553">		return getApplicationPath() + SCREENSHOT_METHOD;</span>
+	}
+
+	//----------------------------------------------------------------------------------------------------------------------------------------------
+
+	@Override
+<span class="nc" id="L559">	public void api(ActionStatus status, ActionApi api) {}</span>
+
+	@Override
+<span class="nc" id="L562">	public void switchWindow(ActionStatus status, int index, int tries) {}</span>
+
+	@Override
+<span class="nc" id="L565">	public void closeWindow(ActionStatus status) {}</span>
+
+	@Override
+	public Object executeScript(ActionStatus status, String script, Object... params) {
+<span class="nc" id="L569">		return null;</span>
+	}
+
+	@Override
+<span class="nc" id="L573">	public void goToUrl(ActionStatus status, String url) {}</span>
+
+	@Override
+<span class="nc" id="L576">	public void waitAfterAction(ActionStatus status) {}</span>
+
+	@Override
+<span class="nc" id="L579">	public void scroll(FoundElement element) {}</span>
+
+	@Override
+<span class="nc" id="L582">	public void scroll(int value) {}</span>
+
+	@Override
+<span class="nc" id="L585">	public void scroll(FoundElement element, int delta) {}</span>
+
+	@Override
+<span class="nc" id="L588">	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {}</span>
+
+	@Override
+<span class="nc" id="L591">	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {}</span>
+
+	@Override
+<span class="nc" id="L594">	public String setWindowBound(BoundData x, BoundData y, BoundData width, BoundData height) {return &quot;&quot;;}</span>
+
+	@Override
+<span class="nc" id="L597">	public void keyDown(Keys key) {}</span>
+
+	@Override
+<span class="nc" id="L600">	public void keyUp(Keys key) {}</span>
+
+	@Override
+<span class="nc" id="L603">	public void drop(MouseDirection md, boolean desktopDriver) {}</span>
+
+	@Override
+<span class="nc" id="L606">	public void doubleClick() {}</span>
+
+	@Override
+<span class="nc" id="L609">	public void rightClick() {}</span>
+
+	@Override
+	public DialogBox switchToAlert() {
+<span class="nc" id="L613">		return null;</span>
+	}
+
+	@Override
+	public String getTitle() {
+<span class="nc" id="L618">		return &quot;&quot;;</span>
+	}
+
+	@Override
+<span class="nc" id="L622">	public boolean switchToDefaultContent() {return true;}</span>
+
+	@Override
+	public void setWindowToFront() {
+<span class="nc" id="L626">		String application = channel.getApplication();</span>
+<span class="nc bnc" id="L627" title="All 2 branches missed.">		if (application != null) {</span>
+<span class="nc" id="L628">			executeRequest(APP, SWITCH, channel.getApplication());</span>
+		} else {
+<span class="nc" id="L630">			executeRequest(APP, SWITCH);</span>
+		}
+<span class="nc" id="L632">	}</span>
+
+	@Override
+<span class="nc" id="L635">	public void switchToFrameId(String id) {}</span>
+
+	@Override
+<span class="nc" id="L638">	public void updateDimensions() {}</span>
+
+	//----------------------------------------------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------------------------------------------------------------
+
+	private AtsMobileElement getElementById(String id) {
+<span class="nc" id="L644">		return getElementById(rootElement.getValue(), id);</span>
+	}
+
+	private AtsMobileElement getElementById(AtsMobileElement root, String id) {
+
+<span class="nc bnc" id="L649" title="All 2 branches missed.">		if(root.getId().equals(id)) {</span>
+<span class="nc" id="L650">			return root;</span>
+		}
+
+<span class="nc bnc" id="L653" title="All 2 branches missed.">		for(AtsMobileElement elem : root.getChildren()) {</span>
+<span class="nc" id="L654">			elem.setParent(root);</span>
+<span class="nc" id="L655">			AtsMobileElement found = getElementById(elem, id);</span>
+<span class="nc bnc" id="L656" title="All 2 branches missed.">			if(found != null) {</span>
+<span class="nc" id="L657">				return found;</span>
+			}
+		}
+<span class="nc" id="L660">		return null;</span>
+	}
+
+	public JsonObject executeRequest(String type, String ... data) {
+
+<span class="nc" id="L665">		final String url = applicationPath + &quot;/&quot; + type;</span>
+
+<span class="nc" id="L667">		final Request.Builder requestBuilder = new Request.Builder();</span>
+<span class="nc" id="L668">		requestBuilder.url(url);</span>
+
+<span class="nc bnc" id="L670" title="All 2 branches missed.">		if (token != null) {</span>
+<span class="nc" id="L671">			requestBuilder.addHeader(&quot;Token&quot;, token);</span>
+		}
+
+<span class="nc" id="L674">		final Request request = requestBuilder</span>
+<span class="nc" id="L675">				.addHeader(&quot;User-Agent&quot;, userAgent)</span>
+<span class="nc" id="L676">				.addHeader(&quot;Content-Type&quot;,&quot;application/x-www-form-urlencoded;charset=UTF8&quot;)</span>
+<span class="nc" id="L677">				.post(RequestBody.create(null, Stream.of(data).map(Object::toString).collect(Collectors.joining(&quot;\n&quot;))))</span>
+<span class="nc" id="L678">				.build();</span>
+
+		try {
+<span class="nc" id="L681">			final Response response = client.newCall(request).execute();</span>
+<span class="nc" id="L682">			final String responseData = CharStreams.toString(new InputStreamReader(response.body().byteStream(), Charsets.UTF_8));</span>
+<span class="nc" id="L683">			response.close();</span>
+<span class="nc" id="L684">			return JsonParser.parseString(responseData).getAsJsonObject();</span>
+<span class="nc" id="L685">		} catch (JsonSyntaxException | IOException e) {</span>
+<span class="nc" id="L686">			return null;</span>
+		}
+	}
+
+	@Override
+	public String getSource() {
+<span class="nc" id="L692">		refreshElementMapLocation();</span>
+<span class="nc" id="L693">		return source.toString();</span>
+	}
+
+	@Override
+<span class="nc" id="L697">	public void windowState(ActionStatus status, Channel channel, String state) { }</span>
+
+	@Override
+	public void setSysProperty(String propertyName, String propertyValue) {
+<span class="nc" id="L701">		executeRequest(SET_PROP, propertyName, propertyValue);</span>
+<span class="nc" id="L702">	}</span>
+
+	@Override
+	public Object executeJavaScript(ActionStatus status, String script, TestElement element) {
+<span class="nc" id="L706">		final JsonObject result = (JsonObject)rootElement.scripting(script, element.getFoundElement());</span>
+<span class="nc" id="L707">		return handleResult(status, result);</span>
+	}
+
+	@Override
+	public Object executeJavaScript(ActionStatus status, String script, boolean returnValue) {
+<span class="nc" id="L712">		final JsonObject result = (JsonObject)rootElement.scripting(script);</span>
+<span class="nc" id="L713">		return handleResult(status, result);</span>
+	}
+
+	private Object handleResult(ActionStatus status, JsonObject result) {
+<span class="nc" id="L717">		int code = result.get(&quot;status&quot;).getAsInt();</span>
+<span class="nc" id="L718">		String message = result.get(&quot;message&quot;).getAsString();</span>
+
+<span class="nc bnc" id="L720" title="All 2 branches missed.">		if (code == 0) {</span>
+<span class="nc" id="L721">			status.setNoError(message);</span>
+		} else {
+<span class="nc" id="L723">			status.setError(ActionStatus.JAVASCRIPT_ERROR, message);</span>
+		}
+
+<span class="nc" id="L726">		return result;</span>
+	}
+
+	@Override
+<span class="nc" id="L730">	protected void setPosition(org.openqa.selenium.Point pt) { }</span>
+
+	@Override
+<span class="nc" id="L733">	protected void setSize(Dimension dim) { }</span>
+
+	@Override
+	public int getNumWindows() {
+<span class="nc" id="L737">		return 1;</span>
+	}
+
+	@Override
+	public String getUrl() {
+<span class="nc" id="L742">		return applicationPath;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

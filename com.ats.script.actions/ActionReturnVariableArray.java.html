@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActionReturnVariableArray.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.script.actions</a> &gt; <span class="el_source">ActionReturnVariableArray.java</span></div><h1>ActionReturnVariableArray.java</h1><pre class="source lang-java linenums">package com.ats.script.actions;
+
+import com.ats.generator.variables.Variable;
+import com.ats.script.Script;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+
+public abstract class ActionReturnVariableArray extends Action {
+	
+	private ArrayList&lt;Variable&gt; variables;
+	
+<span class="nc" id="L14">	public ActionReturnVariableArray() { }</span>
+	
+	public ActionReturnVariableArray(Script script) {
+<span class="fc" id="L17">		super(script);</span>
+<span class="fc" id="L18">	}</span>
+	
+	public ActionReturnVariableArray(Script script, ArrayList&lt;Variable&gt; variables) {
+<span class="nc" id="L21">		super(script);</span>
+<span class="nc" id="L22">		setVariables(variables);</span>
+<span class="nc" id="L23">	}</span>
+	
+	public ActionReturnVariableArray(Script script, Variable variable) {
+<span class="nc" id="L26">		super(script);</span>
+<span class="nc" id="L27">		setVariables(new ArrayList&lt;&gt;(Collections.singletonList(variable)));</span>
+<span class="nc" id="L28">	}</span>
+	
+	public ActionReturnVariableArray(Script script, Variable[] variables) {
+<span class="nc" id="L31">		super(script);</span>
+<span class="nc" id="L32">		setVariables(new ArrayList&lt;&gt;(Arrays.asList(variables)));</span>
+<span class="nc" id="L33">	}</span>
+	
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------
+	
+	public ArrayList&lt;Variable&gt; getVariables() {
+<span class="fc" id="L40">		return variables;</span>
+	}
+	
+	public void setVariables(ArrayList&lt;Variable&gt; variables) {
+<span class="nc" id="L44">		this.variables = variables;</span>
+<span class="nc" id="L45">	}</span>
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

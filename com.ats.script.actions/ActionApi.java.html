@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActionApi.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.script.actions</a> &gt; <span class="el_source">ActionApi.java</span></div><h1>ActionApi.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.script.actions;
+
+import com.ats.executor.ActionTestScript;
+import com.ats.generator.variables.CalculatedProperty;
+import com.ats.generator.variables.CalculatedValue;
+import com.ats.script.Script;
+import com.ats.tools.Utils;
+import com.google.gson.JsonObject;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.StringJoiner;
+
+public class ActionApi extends Action {
+
+	public static final String SCRIPT_LABEL = &quot;api-&quot;;
+<span class="nc" id="L37">	private static final int SCRIPT_LABEL_LENGTH = SCRIPT_LABEL.length();</span>
+
+	public static final String GET = &quot;GET&quot;;
+	public static final String POST = &quot;POST&quot;;
+	public static final String PUT = &quot;PUT&quot;;
+	public static final String PATCH = &quot;PATCH&quot;;
+	public static final String DELETE = &quot;DELETE&quot;;
+
+	public static final String SOAP = &quot;SOAP&quot;;
+	public static final String REST = &quot;REST&quot;;
+	
+	private static final String CACHE_LABEL = &quot;cache&quot;;
+
+	private CalculatedValue method;
+	private CalculatedValue data;
+<span class="nc" id="L52">	private boolean useCache = false;</span>
+
+	private List&lt;CalculatedProperty&gt; header;
+
+<span class="nc" id="L56">	private String type = GET;</span>
+	
+<span class="nc" id="L58">	private int port = -1;</span>
+
+<span class="nc" id="L60">	public ActionApi() {}</span>
+
+	public ActionApi(Script script, String type, String options, String method, String headerData, ArrayList&lt;String&gt; data) {
+<span class="nc" id="L63">		super(script);</span>
+
+<span class="nc" id="L65">		setType(type.substring(SCRIPT_LABEL_LENGTH));</span>
+<span class="nc" id="L66">		setMethod(new CalculatedValue(script, method));</span>
+
+<span class="nc" id="L68">		this.header = new ArrayList&lt;CalculatedProperty&gt;();</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">		if(headerData.length() &gt; 0) {</span>
+<span class="nc" id="L70">			Arrays.stream(headerData.split(&quot;,&quot;)).forEach(s -&gt; this.header.add(new CalculatedProperty(script, s)));</span>
+		}
+
+<span class="nc bnc" id="L73" title="All 2 branches missed.">		if(data.size() &gt; 0) {</span>
+<span class="nc" id="L74">			setData(new CalculatedValue(script, data.get(0).trim()));</span>
+		}
+		
+<span class="nc bnc" id="L77" title="All 2 branches missed.">		if(options.contains(CACHE_LABEL)) {</span>
+<span class="nc" id="L78">			this.useCache = true;</span>
+<span class="nc" id="L79">			options.replace(CACHE_LABEL, &quot;&quot;);</span>
+		}
+		
+<span class="nc" id="L82">		this.port = Utils.string2Int(options.replace(&quot;,&quot;, &quot;&quot;), -1);</span>
+<span class="nc" id="L83">	}</span>
+	
+	public ActionApi(Script script, String type, CalculatedValue method, CalculatedValue data) {
+<span class="nc" id="L86">		this(script, type, -1, false, method, data, new CalculatedProperty[0]);</span>
+<span class="nc" id="L87">	}</span>
+
+	public ActionApi(Script script, String type, int port, boolean cache, CalculatedValue method, CalculatedValue data, CalculatedProperty ... headerData) {
+<span class="nc" id="L90">		super(script);</span>
+<span class="nc" id="L91">		setType(type);</span>
+<span class="nc" id="L92">		setPort(port);</span>
+<span class="nc" id="L93">		setUseCache(cache);</span>
+<span class="nc" id="L94">		setMethod(method);</span>
+<span class="nc" id="L95">		setData(data);</span>
+<span class="nc" id="L96">		setHeader(new ArrayList&lt;CalculatedProperty&gt;(Arrays.asList(headerData)));</span>
+<span class="nc" id="L97">	}</span>
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// Code Generator
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public StringBuilder getJavaCode() {
+
+<span class="nc" id="L106">		StringBuilder codeBuilder = super.getJavaCode();</span>
+<span class="nc" id="L107">		codeBuilder.append(&quot;\&quot;&quot;)</span>
+<span class="nc" id="L108">		.append(type)</span>
+<span class="nc" id="L109">		.append(&quot;\&quot;, &quot;)</span>
+<span class="nc" id="L110">		.append(port)</span>
+<span class="nc" id="L111">		.append(&quot;, &quot;)</span>
+<span class="nc" id="L112">		.append(useCache)</span>
+<span class="nc" id="L113">		.append(&quot;, &quot;)</span>
+<span class="nc" id="L114">		.append(method.getJavaCode())</span>
+<span class="nc" id="L115">		.append(&quot;, &quot;);</span>
+
+<span class="nc bnc" id="L117" title="All 2 branches missed.">		if(data != null){</span>
+<span class="nc" id="L118">			codeBuilder.append(data.getJavaCode());</span>
+		}else {
+<span class="nc" id="L120">			codeBuilder.append(&quot;null&quot;);</span>
+		}
+
+<span class="nc bnc" id="L123" title="All 4 branches missed.">		if(header != null &amp;&amp; header.size() &gt; 0){</span>
+
+<span class="nc" id="L125">			codeBuilder.append(&quot;, &quot;);</span>
+
+<span class="nc" id="L127">			StringJoiner joiner = new StringJoiner(&quot;, &quot;);</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">			for (CalculatedProperty head : header){</span>
+<span class="nc" id="L129">				joiner.add(head.getJavaCode());</span>
+<span class="nc" id="L130">			}</span>
+
+<span class="nc" id="L132">			codeBuilder.append(joiner.toString());</span>
+		}
+
+<span class="nc" id="L135">		codeBuilder.append(&quot;)&quot;);</span>
+<span class="nc" id="L136">		return codeBuilder;</span>
+	}
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public boolean execute(ActionTestScript ts, String testName, int testLine) {
+<span class="nc" id="L144">		super.execute(ts, testName, testLine);</span>
+<span class="nc" id="L145">		getCurrentChannel().api(status, this);</span>
+<span class="nc" id="L146">		status.endDuration();</span>
+<span class="nc" id="L147">		return true;</span>
+	}
+	
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+<span class="nc" id="L152">		data.addProperty(&quot;type&quot;, type);</span>
+<span class="nc" id="L153">		data.addProperty(&quot;method&quot;, method.getCalculated());</span>
+<span class="nc" id="L154">		data.addProperty(status.getMessage(), status.getData().toString());</span>
+<span class="nc" id="L155">		return super.getActionLogs(scriptName, scriptLine, data);</span>
+	}
+
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------
+
+	public int getPort() {
+<span class="nc" id="L163">		return port;</span>
+	}
+
+	public void setPort(int port) {
+<span class="nc" id="L167">		this.port = port;</span>
+<span class="nc" id="L168">	}</span>
+	
+	public List&lt;CalculatedProperty&gt; getHeader() {
+<span class="nc" id="L171">		return header;</span>
+	}
+
+	public void setHeader(List&lt;CalculatedProperty&gt; data) {
+<span class="nc" id="L175">		this.header = data;</span>
+<span class="nc" id="L176">	}</span>
+
+	public CalculatedValue getMethod() {
+<span class="nc" id="L179">		return method;</span>
+	}
+
+	public void setMethod(CalculatedValue endPoint) {
+<span class="nc" id="L183">		this.method = endPoint;</span>
+<span class="nc" id="L184">	}</span>
+
+	public String getType() {
+<span class="nc" id="L187">		return type;</span>
+	}
+
+	public void setType(String type) {
+<span class="nc bnc" id="L191" title="All 10 branches missed.">		if(POST.equalsIgnoreCase(type) || PUT.equalsIgnoreCase(type) || DELETE.equalsIgnoreCase(type) || SOAP.equalsIgnoreCase(type) || PATCH.equalsIgnoreCase(type)) {</span>
+<span class="nc" id="L192">			this.type = type.toUpperCase();</span>
+		}else {
+<span class="nc" id="L194">			this.type = GET;</span>
+		}
+<span class="nc" id="L196">	}</span>
+
+	public CalculatedValue getData() {
+<span class="nc" id="L199">		return data;</span>
+	}
+
+	public void setData(CalculatedValue value) {
+<span class="nc" id="L203">		this.data = value;</span>
+<span class="nc" id="L204">	}</span>
+
+	public boolean isUseCache() {
+<span class="nc" id="L207">		return useCache;</span>
+	}
+
+	public void setUseCache(boolean value) {
+<span class="nc" id="L211">		this.useCache = value;</span>
+<span class="nc" id="L212">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

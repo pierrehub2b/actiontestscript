@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ScriptStatus.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.executor</a> &gt; <span class="el_source">ScriptStatus.java</span></div><h1>ScriptStatus.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.executor;
+
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+
+import org.testng.TestRunner;
+
+import com.google.gson.JsonObject;
+
+import io.netty.util.CharsetUtil;
+
+public class ScriptStatus {
+
+	private long start;
+	private int actions;
+	private boolean passed;
+
+<span class="fc" id="L44">	private String testName = &quot;&quot;;</span>
+<span class="fc" id="L45">	private String suiteName = &quot;&quot;;</span>
+
+<span class="fc" id="L47">	private ArrayList&lt;String&gt; errorStack = new ArrayList&lt;String&gt;();</span>
+
+<span class="fc" id="L49">	public ScriptStatus() {</span>
+<span class="fc" id="L50">		start = System.currentTimeMillis();</span>
+<span class="fc" id="L51">		actions = 0;</span>
+<span class="fc" id="L52">		passed = true;</span>
+<span class="fc" id="L53">	}</span>
+
+	public ScriptStatus(String script, String suite) {
+<span class="nc" id="L56">		this();</span>
+<span class="nc" id="L57">		testName = script;</span>
+<span class="nc" id="L58">		suiteName = suite;</span>
+<span class="nc" id="L59">	}</span>
+
+	public void addCallscriptStack(String value) {
+<span class="nc" id="L62">		errorStack.add(value);</span>
+<span class="nc" id="L63">	}</span>
+
+	public void addAction() {
+<span class="nc" id="L66">		actions++;</span>
+<span class="nc" id="L67">	}</span>
+
+	public void failed() {
+<span class="nc" id="L70">		passed = false;</span>
+<span class="nc" id="L71">	}</span>
+
+	public boolean isPassed() {
+<span class="nc" id="L74">		return passed;</span>
+	}
+
+	public String getTestName() {
+<span class="nc" id="L78">		return testName;</span>
+	}
+
+	public String getSuiteName() {
+<span class="nc" id="L82">		return suiteName;</span>
+	}
+
+	public int getActions() {
+<span class="nc" id="L86">		return actions;</span>
+	}
+
+	public void endLogs(ActionTestScript ts, TestRunner runner) {
+<span class="nc" id="L90">		final JsonObject logs = new JsonObject();</span>
+<span class="nc" id="L91">		final long duration = System.currentTimeMillis() - start;</span>
+
+<span class="nc" id="L93">		logs.addProperty(&quot;name&quot;, testName);</span>
+<span class="nc" id="L94">		logs.addProperty(&quot;suite&quot;, suiteName);</span>
+<span class="nc" id="L95">		logs.addProperty(&quot;duration&quot;, duration);</span>
+<span class="nc" id="L96">		logs.addProperty(&quot;passed&quot;, passed);</span>
+<span class="nc" id="L97">		logs.addProperty(&quot;actions&quot;, actions);</span>
+
+<span class="nc" id="L99">		final String logsContent = logs.toString();</span>
+
+<span class="nc" id="L101">		ts.sendScriptInfo(&quot;Script terminated -&gt; &quot; + logsContent);</span>
+
+<span class="nc" id="L103">		final Path output = Paths.get(runner.getOutputDirectory(), &quot;../ats-scripts.json&quot;);</span>
+
+<span class="nc" id="L105">		PrintWriter out = null;</span>
+		BufferedWriter bufWriter;
+
+		try{
+<span class="nc" id="L109">			bufWriter =</span>
+<span class="nc" id="L110">					Files.newBufferedWriter(</span>
+							output,
+							CharsetUtil.UTF_8,
+							StandardOpenOption.WRITE, 
+							StandardOpenOption.APPEND,
+							StandardOpenOption.CREATE);
+<span class="nc" id="L116">			out = new PrintWriter(bufWriter, true);</span>
+<span class="nc" id="L117">			out.println(logsContent);</span>
+<span class="nc" id="L118">			out.close();</span>
+<span class="nc" id="L119">		}catch(IOException e){</span>
+
+<span class="nc" id="L121">		}</span>
+<span class="nc" id="L122">	}</span>
+
+	public void saveStatus() {
+
+<span class="nc" id="L126">	}</span>
+
+	public boolean isSuiteExecution() {
+<span class="nc bnc" id="L129" title="All 8 branches missed.">		return testName != null &amp;&amp; suiteName != null &amp;&amp; testName.length() != 0 &amp;&amp; suiteName.length() != 0;</span>
+	}
+
+	public void addErrorStack(String value) {
+<span class="nc" id="L133">		errorStack.add(value);</span>
+<span class="nc" id="L134">	}</span>
+
+	public String getCallscriptStack() {
+<span class="nc bnc" id="L137" title="All 2 branches missed.">		if(errorStack.size() &gt; 0) {</span>
+<span class="nc" id="L138">			return errorStack.stream().collect(Collectors.joining(&quot; &lt;- &quot;));</span>
+		}
+<span class="nc" id="L140">		return null;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

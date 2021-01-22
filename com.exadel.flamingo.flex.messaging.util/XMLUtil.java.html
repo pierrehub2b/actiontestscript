@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>XMLUtil.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.exadel.flamingo.flex.messaging.util</a> &gt; <span class="el_source">XMLUtil.java</span></div><h1>XMLUtil.java</h1><pre class="source lang-java linenums">/*
+  GRANITE DATA SERVICES
+  Copyright (C) 2007 ADEQUATE SYSTEMS SARL
+
+  This file is part of Granite Data Services.
+
+  Granite Data Services is free software; you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or (at your
+  option) any later version.
+ 
+  Granite Data Services is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+  for more details.
+ 
+  You should have received a copy of the GNU Lesser General Public License
+  along with this library; if not, see &lt;http://www.gnu.org/licenses/&gt;.
+*/
+
+package com.exadel.flamingo.flex.messaging.util;
+
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.StringReader;
+import java.io.StringWriter;
+
+/**
+ * @author Franck WOLFF
+ */
+<span class="nc" id="L38">public class XMLUtil {</span>
+
+<span class="nc" id="L40">    private DocumentBuilderFactory documentBuilderFactory = null;</span>
+<span class="nc" id="L41">    private TransformerFactory transformerFactory = null;</span>
+    
+    public Document buildDocument(String xml) {
+        try {
+<span class="nc" id="L45">            DocumentBuilder builder = getDocumentBuilderFactory().newDocumentBuilder();</span>
+<span class="nc" id="L46">            return builder.parse(new InputSource(new StringReader(xml)));</span>
+<span class="nc" id="L47">        } catch (Exception e) {</span>
+<span class="nc" id="L48">            throw new RuntimeException(&quot;Could not parse XML string&quot;, e);</span>
+        }
+    }
+    
+    public String toString(Document doc) {
+        try {
+<span class="nc" id="L54">            Transformer transformer = getTransformerFactory().newTransformer();</span>
+<span class="nc" id="L55">            StringWriter writer = new StringWriter();</span>
+<span class="nc" id="L56">            transformer.transform(new DOMSource(doc), new StreamResult(writer));</span>
+<span class="nc" id="L57">            return writer.toString();</span>
+<span class="nc" id="L58">        } catch (Exception e) {</span>
+<span class="nc" id="L59">            throw new RuntimeException(&quot;Could not serialize document&quot;, e);</span>
+        }
+    }
+    
+    private TransformerFactory getTransformerFactory() {
+<span class="nc bnc" id="L64" title="All 2 branches missed.">        if (transformerFactory == null)</span>
+<span class="nc" id="L65">            transformerFactory = TransformerFactory.newInstance();</span>
+<span class="nc" id="L66">        return transformerFactory;</span>
+    }
+    
+    private DocumentBuilderFactory getDocumentBuilderFactory() {
+<span class="nc bnc" id="L70" title="All 2 branches missed.">        if (documentBuilderFactory == null)</span>
+<span class="nc" id="L71">            documentBuilderFactory = DocumentBuilderFactory.newInstance();</span>
+<span class="nc" id="L72">        return documentBuilderFactory;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

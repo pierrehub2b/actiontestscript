@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MouseDirection.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.generator.objects</a> &gt; <span class="el_source">MouseDirection.java</span></div><h1>MouseDirection.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.generator.objects;
+
+import com.ats.executor.ActionTestScript;
+import com.ats.generator.variables.CalculatedValue;
+import com.ats.script.Script;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
+public class MouseDirection {
+
+	private MouseDirectionData horizontalPos;
+	private MouseDirectionData verticalPos;
+
+<span class="nc" id="L36">	public MouseDirection() {}</span>
+
+<span class="fc" id="L38">	public MouseDirection(Script script, List&lt;String&gt; options, boolean canBeEmpty) {</span>
+<span class="fc" id="L39">		final Iterator&lt;String&gt; itr = options.iterator();</span>
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">		while (itr.hasNext()){</span>
+<span class="nc bnc" id="L41" title="All 2 branches missed.">			if(addPosition(script, itr.next())){</span>
+<span class="nc" id="L42">				itr.remove();</span>
+			}
+		}
+
+<span class="pc bpc" id="L46" title="5 of 6 branches missed.">		if(!canBeEmpty &amp;&amp; this.horizontalPos == null &amp;&amp; this.verticalPos == null) {</span>
+<span class="nc" id="L47">			this.setHorizontalPos(new MouseDirectionData(Cartesian.CENTER, new CalculatedValue(script, &quot;0&quot;)));</span>
+		}
+<span class="fc" id="L49">	}</span>
+
+<span class="nc" id="L51">	public MouseDirection(MouseDirectionData hpos, MouseDirectionData vpos) {</span>
+<span class="nc" id="L52">		setHorizontalPos(hpos);</span>
+<span class="nc" id="L53">		setVerticalPos(vpos);</span>
+<span class="nc" id="L54">	}</span>
+
+	private boolean addPosition(Script script, String value) {
+
+<span class="nc" id="L58">		String data = Cartesian.RIGHT.getData(value);</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">		if(data != null) {</span>
+<span class="nc" id="L60">			setHorizontalPos(new MouseDirectionData(Cartesian.RIGHT.toString(), new CalculatedValue(script, data)));</span>
+<span class="nc" id="L61">			return true;</span>
+		}
+
+<span class="nc" id="L64">		data = Cartesian.LEFT.getData(value);</span>
+<span class="nc bnc" id="L65" title="All 2 branches missed.">		if(data != null) {</span>
+<span class="nc" id="L66">			setHorizontalPos(new MouseDirectionData(Cartesian.LEFT.toString(), new CalculatedValue(script, data)));</span>
+<span class="nc" id="L67">			return true;</span>
+		}
+
+<span class="nc" id="L70">		data = Cartesian.CENTER.getData(value);</span>
+<span class="nc bnc" id="L71" title="All 4 branches missed.">		if(data != null &amp;&amp; !&quot;0&quot;.equals(data)) {</span>
+<span class="nc" id="L72">			setHorizontalPos(new MouseDirectionData(Cartesian.CENTER.toString(), new CalculatedValue(script, data)));</span>
+<span class="nc" id="L73">			return true;</span>
+		}
+
+<span class="nc" id="L76">		data = Cartesian.TOP.getData(value);</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">		if(data != null) {</span>
+<span class="nc" id="L78">			setVerticalPos(new MouseDirectionData(Cartesian.TOP.toString(), new CalculatedValue(script, data)));</span>
+<span class="nc" id="L79">			return true;</span>
+		}
+
+<span class="nc" id="L82">		data = Cartesian.BOTTOM.getData(value);</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">		if(data != null) {</span>
+<span class="nc" id="L84">			setVerticalPos(new MouseDirectionData(Cartesian.BOTTOM.toString(), new CalculatedValue(script, data)));</span>
+<span class="nc" id="L85">			return true;</span>
+		}
+
+<span class="nc" id="L88">		data = Cartesian.MIDDLE.getData(value);</span>
+<span class="nc bnc" id="L89" title="All 4 branches missed.">		if(data != null &amp;&amp; !&quot;0&quot;.equals(data)) {</span>
+<span class="nc" id="L90">			setVerticalPos(new MouseDirectionData(Cartesian.MIDDLE.toString(), new CalculatedValue(script, data)));</span>
+<span class="nc" id="L91">			return true;</span>
+		}
+
+<span class="nc" id="L94">		return false;</span>
+	}
+
+	public int getHorizontalDirection() {
+<span class="nc bnc" id="L98" title="All 2 branches missed.">		if(horizontalPos != null) {</span>
+<span class="nc" id="L99">			return horizontalPos.getHorizontalDirection();</span>
+		}
+<span class="nc" id="L101">		return 0;</span>
+	}
+
+	public int getVerticalDirection() {
+<span class="nc bnc" id="L105" title="All 2 branches missed.">		if(verticalPos != null) {</span>
+<span class="nc" id="L106">			return verticalPos.getVerticalDirection();</span>
+		}
+<span class="nc" id="L108">		return 0;</span>
+	}
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// Code Generator
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	private String getJavaCode(ArrayList&lt;String&gt; codeData) {
+<span class="pc bpc" id="L116" title="2 of 4 branches missed.">		if(horizontalPos != null || verticalPos != null) {</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">			if(horizontalPos != null){</span>
+<span class="nc" id="L118">				codeData.add(ActionTestScript.JAVA_POS_FUNCTION_NAME + &quot;(&quot; + horizontalPos.getJavaCode() + &quot;)&quot;);</span>
+			}else {
+<span class="nc" id="L120">				codeData.add(&quot;null&quot;);</span>
+			}
+
+<span class="nc bnc" id="L123" title="All 2 branches missed.">			if(verticalPos != null){</span>
+<span class="nc" id="L124">				codeData.add(ActionTestScript.JAVA_POS_FUNCTION_NAME + &quot;(&quot; + verticalPos.getJavaCode() + &quot;)&quot;);</span>
+			}else {
+<span class="nc" id="L126">				codeData.add(&quot;null&quot;);</span>
+			}
+<span class="nc" id="L128">			return String.join(&quot;, &quot;, codeData);</span>
+		}
+<span class="fc" id="L130">		return &quot;&quot;;</span>
+	}
+
+	public String getPositionJavaCode() {
+<span class="fc" id="L134">		return getJavaCode(new ArrayList&lt;String&gt;(Arrays.asList(new String[]{&quot;&quot;})));</span>
+	}
+
+	public String getDirectionJavaCode() {
+<span class="nc" id="L138">		return getJavaCode(new ArrayList&lt;String&gt;());</span>
+	}
+
+	//----------------------------------------------------------------------------------------------------------------------
+	// Getter and setter for serialization
+	//----------------------------------------------------------------------------------------------------------------------
+
+	public MouseDirectionData getHorizontalPos() {
+<span class="nc" id="L146">		return horizontalPos;</span>
+	}
+
+	public void setHorizontalPos(MouseDirectionData horizontalPos) {
+<span class="nc" id="L150">		this.horizontalPos = horizontalPos;</span>
+<span class="nc" id="L151">	}</span>
+
+	public MouseDirectionData getVerticalPos() {
+<span class="nc" id="L154">		return verticalPos;</span>
+	}
+
+	public void setVerticalPos(MouseDirectionData verticalPos) {
+<span class="nc" id="L158">		this.verticalPos = verticalPos;</span>
+<span class="nc" id="L159">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

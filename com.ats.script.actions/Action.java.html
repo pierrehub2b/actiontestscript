@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Action.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.script.actions</a> &gt; <span class="el_source">Action.java</span></div><h1>Action.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+*/
+
+package com.ats.script.actions;
+
+import com.ats.executor.ActionStatus;
+import com.ats.executor.ActionTestScript;
+import com.ats.executor.channels.Channel;
+import com.ats.script.Script;
+import com.google.gson.JsonObject;
+
+public abstract class Action {
+
+	protected Script script;
+	protected ActionStatus status;
+	protected int line;
+<span class="pc" id="L33">	protected boolean disabled = false;</span>
+	
+	private Channel currentChannel;
+	
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// Constructors
+	//---------------------------------------------------------------------------------------------------------------------------------
+	
+<span class="nc" id="L41">	public Action(){}</span>
+
+<span class="fc" id="L43">	public Action(Script script){</span>
+<span class="fc" id="L44">		this.script = script;</span>
+<span class="fc" id="L45">	}</span>
+	
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// Code Generator
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	public StringBuilder getJavaCode(){
+		
+<span class="fc" id="L53">		StringBuilder codeBuilder = new StringBuilder(ActionTestScript.JAVA_EXECUTE_FUNCTION_NAME);</span>
+<span class="fc" id="L54">		codeBuilder.append(&quot;(&quot;)</span>
+<span class="fc" id="L55">		.append(getLine())</span>
+<span class="fc" id="L56">		.append(&quot;,&quot;)</span>
+<span class="fc" id="L57">		.append(&quot;new &quot;)</span>
+<span class="fc" id="L58">		.append(this.getClass().getSimpleName()).append(&quot;(this, &quot;);</span>
+		
+<span class="fc" id="L60">		return codeBuilder;</span>
+	}
+	
+	public boolean isScriptComment() {
+<span class="nc" id="L64">		return false;</span>
+	}
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------------------------------------------------
+	
+	public boolean execute(ActionTestScript ts, String testName, int line){
+		
+<span class="nc" id="L72">		currentChannel = ts.getCurrentChannel();</span>
+<span class="nc" id="L73">		status = currentChannel.newActionStatus(testName, line);</span>
+<span class="nc" id="L74">		currentChannel.startHarAction(this, status.getTestLine());</span>
+		
+<span class="nc" id="L76">		ts.getRecorder().createVisualAction(this, testName, line);</span>
+		
+<span class="nc" id="L78">		return true;</span>
+	}
+	
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+<span class="nc bnc" id="L82" title="All 2 branches missed.">		if(!status.isPassed()) {</span>
+<span class="nc" id="L83">			data = new JsonObject();</span>
+<span class="nc" id="L84">			data.addProperty(&quot;status&quot;, &quot;non blocking action&quot;);</span>
+<span class="nc" id="L85">			data.addProperty(&quot;message&quot;, status.getFailMessage());</span>
+		}
+<span class="nc" id="L87">		data.addProperty(&quot;passed&quot;, status.isPassed());</span>
+<span class="nc" id="L88">		data.addProperty(&quot;duration&quot;, status.getDuration());</span>
+<span class="nc" id="L89">		return new StringBuilder(getClass().getSimpleName()).append(&quot; (&quot;).append(scriptName).append(&quot;:&quot;).append(scriptLine).append(&quot;) -&gt; &quot;).append(data.toString());</span>
+	}
+
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------
+
+	public boolean isDisabled() {
+<span class="nc" id="L97">		return disabled;</span>
+	}
+
+	public void setDisabled(boolean disabled) {
+<span class="fc" id="L101">		this.disabled = disabled;</span>
+<span class="fc" id="L102">	}</span>
+
+	public int getLine() {
+<span class="fc" id="L105">		return line;</span>
+	}
+
+	public void setLine(int line) {
+<span class="fc" id="L109">		this.line = line;</span>
+<span class="fc" id="L110">	}</span>
+
+	public Script getScript() {
+<span class="nc" id="L113">		return script;</span>
+	}
+
+	public void setScript(Script script) {
+<span class="nc" id="L117">		this.script = script;</span>
+<span class="nc" id="L118">	}</span>
+
+	public ActionStatus getStatus() {
+<span class="nc" id="L121">		return status;</span>
+	}
+
+	public void setStatus(ActionStatus status) {
+<span class="nc" id="L125">		this.status = status;</span>
+<span class="nc" id="L126">	}</span>
+	
+	protected Channel getCurrentChannel() {
+<span class="nc" id="L129">		return currentChannel;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

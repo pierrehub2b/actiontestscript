@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActionNeoload.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.script.actions.neoload</a> &gt; <span class="el_source">ActionNeoload.java</span></div><h1>ActionNeoload.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.script.actions.neoload;
+
+import com.ats.executor.ActionStatus;
+import com.ats.executor.ActionTestScript;
+import com.ats.executor.channels.Channel;
+import com.ats.generator.ATS;
+import com.ats.script.Script;
+import com.ats.script.actions.Action;
+import com.google.gson.Gson;
+import okhttp3.OkHttpClient;
+import okhttp3.Request.Builder;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+public class ActionNeoload extends Action {
+
+	public static final String SCRIPT_NEOLOAD_LABEL = &quot;neoload&quot;;
+
+<span class="fc" id="L41">	private static final String USER_AGENT = &quot;ATS-Neoload-Recoder/&quot; + ATS.VERSION;</span>
+
+	private OkHttpClient client;
+
+	private String apiUrl;
+
+<span class="nc" id="L47">	public ActionNeoload() {}</span>
+
+	public ActionNeoload(Script script) {
+<span class="fc" id="L50">		super(script);</span>
+<span class="fc" id="L51">	}</span>
+
+	private void initClient() {
+<span class="nc" id="L54">		client = new okhttp3.OkHttpClient.Builder()</span>
+<span class="nc" id="L55">				.connectTimeout(30, TimeUnit.SECONDS)</span>
+<span class="nc" id="L56">				.writeTimeout(30, TimeUnit.SECONDS)</span>
+<span class="nc" id="L57">				.readTimeout(30, TimeUnit.SECONDS)</span>
+<span class="nc" id="L58">				.cache(null).build();</span>
+<span class="nc" id="L59">	}</span>
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// Execution
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public boolean execute(ActionTestScript ts, String testName, int testLine) {
+<span class="nc" id="L67">		ts.getCurrentChannel().neoloadAction(this, testName, testLine);</span>
+<span class="nc" id="L68">		return true;</span>
+	}
+
+	public void executeRequest(Channel channel, String designApiUrl) {
+<span class="nc" id="L72">		initClient();</span>
+<span class="nc" id="L73">		apiUrl = designApiUrl;</span>
+<span class="nc" id="L74">		status.setPassed(true);</span>
+<span class="nc" id="L75">		status.setMessage(designApiUrl);</span>
+<span class="nc" id="L76">	}</span>
+
+	protected boolean postDesignData(Object data) {
+<span class="nc" id="L79">		return postData(new Gson().toJson(getDesignRequest(data)));</span>
+	}
+
+	protected boolean postData(String data) {
+
+<span class="nc" id="L84">		final RequestBody body = RequestBody.create(null, data);</span>
+
+<span class="nc" id="L86">		final Builder request = </span>
+<span class="nc" id="L87">				new Builder().url(apiUrl).post(body)</span>
+<span class="nc" id="L88">				.addHeader(&quot;User-Agent&quot;, USER_AGENT)</span>
+<span class="nc" id="L89">				.addHeader(&quot;Accept&quot;, &quot;application/json&quot;)</span>
+<span class="nc" id="L90">				.addHeader(&quot;Content-Type&quot;, &quot;application/json&quot;);</span>
+
+		try {
+			
+<span class="nc" id="L94">			final Response response = client.newCall(request.build()).execute();</span>
+<span class="nc bnc" id="L95" title="All 4 branches missed.">			if(response.code() &gt;= 200 &amp;&amp; response.code() &lt; 300) {</span>
+<span class="nc" id="L96">				status.setPassed(true);</span>
+			}else {
+<span class="nc" id="L98">				status.setError(ActionStatus.NEOLOAD_POST_ERROR, response.message());</span>
+			}
+<span class="nc" id="L100">			response.close();</span>
+			
+<span class="nc" id="L102">		} catch (IOException e) {</span>
+<span class="nc" id="L103">			status.setError(ActionStatus.NEOLOAD_POST_ERROR, e.getMessage());</span>
+<span class="nc" id="L104">		}</span>
+		
+<span class="nc" id="L106">		return status.isPassed();</span>
+	}
+
+	//--------------------------------------------------------
+	// Json serialization
+	//--------------------------------------------------------
+
+	protected class DesignRequest {
+		public Object d;
+<span class="nc" id="L115">		public DesignRequest(Object data) {</span>
+<span class="nc" id="L116">			this.d = data;</span>
+<span class="nc" id="L117">		}</span>
+	}
+
+	protected DesignRequest getDesignRequest(Object data) {
+<span class="nc" id="L121">		return new DesignRequest(data);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

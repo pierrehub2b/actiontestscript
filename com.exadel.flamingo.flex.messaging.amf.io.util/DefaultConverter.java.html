@@ -1,0 +1,479 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DefaultConverter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.exadel.flamingo.flex.messaging.amf.io.util</a> &gt; <span class="el_source">DefaultConverter.java</span></div><h1>DefaultConverter.java</h1><pre class="source lang-java linenums">/*
+GRANITE DATA SERVICES
+Copyright (C) 2007 ADEQUATE SYSTEMS SARL
+
+This file is part of Granite Data Services.
+
+Granite Data Services is free software; you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation; either version 3 of the License, or (at your
+option) any later version.
+
+Granite Data Services is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this library; if not, see &lt;http://www.gnu.org/licenses/&gt;.
+ */
+package com.exadel.flamingo.flex.messaging.amf.io.util;
+
+import com.exadel.flamingo.flex.messaging.amf.io.util.externalizer.Externalizer;
+import com.exadel.flamingo.flex.messaging.amf.io.util.instanciator.AbstractInstanciator;
+import com.exadel.flamingo.flex.messaging.util.ClassUtil;
+
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.*;
+
+/**
+ * @author Franck WOLFF
+ */
+<span class="nc" id="L37">public class DefaultConverter implements Converter {</span>
+
+    public Object convertForSerialization(Object value) {
+<span class="nc" id="L40">        Object resultOfConverting = value;</span>
+
+<span class="nc bnc" id="L42" title="All 2 branches missed.">        if (value != null) {</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">            if (value.getClass().isEnum()) {</span>
+<span class="nc" id="L44">                resultOfConverting = value.toString();</span>
+            }
+        }
+
+<span class="nc" id="L48">        return resultOfConverting;</span>
+    }
+
+    public Object convertForDeserialization(Object value, Type targetType) {
+
+<span class="nc" id="L53">        final Class&lt;?&gt; targetClass = ClassUtil.classOfType(targetType);</span>
+
+        // Deal with primitive type for null.
+<span class="nc bnc" id="L56" title="All 2 branches missed.">        if (value == null) {</span>
+<span class="nc bnc" id="L57" title="All 2 branches missed.">            if (targetClass.isPrimitive()) {</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">                if (targetClass == Integer.TYPE) {</span>
+<span class="nc" id="L59">                    value = Integer.valueOf(0);</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">                } else if (targetClass == Double.TYPE) {</span>
+<span class="nc" id="L61">                    value = Double.valueOf(0.0);</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">                } else if (targetClass == Boolean.TYPE) {</span>
+<span class="nc" id="L63">                    value = Boolean.FALSE;</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">                } else if (targetClass == Character.TYPE) {</span>
+<span class="nc" id="L65">                    value = Character.valueOf((char) 0);</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">                } else if (targetClass == Long.TYPE) {</span>
+<span class="nc" id="L67">                    value = Long.valueOf(0);</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">                } else if (targetClass == Byte.TYPE) {</span>
+<span class="nc" id="L69">                    value = Byte.valueOf((byte) 0);</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">                } else if (targetClass == Float.TYPE) {</span>
+<span class="nc" id="L71">                    value = Float.valueOf(0);</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">                } else if (targetClass == Short.TYPE) {</span>
+<span class="nc" id="L73">                    value = Short.valueOf((short) 0);</span>
+                }
+            }
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        } else if (!targetClass.isAssignableFrom(value.getClass())) {</span>
+
+            // Should be an ArrayCollection.
+<span class="nc bnc" id="L79" title="All 2 branches missed.">            if (value instanceof Collection) {</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">                if (Set.class.isAssignableFrom(targetClass)) {</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">                    if (SortedSet.class.isAssignableFrom(targetClass)) {</span>
+<span class="nc" id="L82">                        value = new TreeSet&lt;Object&gt;((Collection&lt;?&gt;) value);</span>
+                    } else {
+<span class="nc" id="L84">                        value = new HashSet&lt;Object&gt;((Collection&lt;?&gt;) value);</span>
+                    }
+<span class="nc bnc" id="L86" title="All 2 branches missed.">                } else if (List.class.isAssignableFrom(targetClass)) {</span>
+<span class="nc" id="L87">                    value = new ArrayList&lt;Object&gt;((Collection&lt;?&gt;) value);</span>
+                }
+            } // Should only be an Integer or Double (after AMF3 deserialization).
+<span class="nc bnc" id="L90" title="All 2 branches missed.">            else if (value instanceof Number) {</span>
+<span class="nc" id="L91">                Number number = (Number) value;</span>
+<span class="nc bnc" id="L92" title="All 4 branches missed.">                if (targetClass == Double.class || targetClass == Double.TYPE) {</span>
+<span class="nc" id="L93">                    value = Double.valueOf(number.doubleValue());</span>
+<span class="nc bnc" id="L94" title="All 4 branches missed.">                } else if (targetClass == Integer.class || targetClass == Integer.TYPE) {</span>
+<span class="nc" id="L95">                    value = Integer.valueOf(number.intValue());</span>
+<span class="nc bnc" id="L96" title="All 4 branches missed.">                } else if (targetClass == Long.class || targetClass == Long.TYPE) {</span>
+<span class="nc" id="L97">                    value = Long.valueOf(number.longValue());</span>
+<span class="nc bnc" id="L98" title="All 4 branches missed.">                } else if (targetClass == Float.class || targetClass == Float.TYPE) {</span>
+<span class="nc" id="L99">                    value = Float.valueOf(number.floatValue());</span>
+<span class="nc bnc" id="L100" title="All 4 branches missed.">                } else if (targetClass == Byte.class || targetClass == Byte.TYPE) {</span>
+<span class="nc" id="L101">                    value = Byte.valueOf(number.byteValue());</span>
+<span class="nc bnc" id="L102" title="All 4 branches missed.">                } else if (targetClass == Short.class || targetClass == Short.TYPE) {</span>
+<span class="nc" id="L103">                    value = Short.valueOf(number.shortValue());</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">                } else if (targetClass == BigDecimal.class) {</span>
+<span class="nc" id="L105">                    value = BigDecimal.valueOf(number.doubleValue());</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">                } else if (targetClass == BigInteger.class) {</span>
+<span class="nc" id="L107">                    value = BigInteger.valueOf(number.longValue());</span>
+                }
+<span class="nc" id="L109">            } // Java Character -[AMF3]-&gt; AS3 String[1] -[AMF3]-&gt; java Character.</span>
+<span class="nc bnc" id="L110" title="All 6 branches missed.">            else if (targetClass == Character.class &amp;&amp; value.getClass() == String.class &amp;&amp; ((String) value).length() == 1) {</span>
+<span class="nc" id="L111">                value = Character.valueOf(((String) value).charAt(0));</span>
+            } // Various date conversion.
+<span class="nc bnc" id="L113" title="All 2 branches missed.">            else if (value instanceof Date) {</span>
+<span class="nc" id="L114">                Date date = (Date) value;</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">                if (targetClass.isAssignableFrom(Calendar.class)) {</span>
+<span class="nc" id="L116">                    Calendar cal = Calendar.getInstance();</span>
+<span class="nc" id="L117">                    cal.setTime(date);</span>
+<span class="nc" id="L118">                    value = cal;</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">                } else if (targetClass.isAssignableFrom(java.sql.Timestamp.class)) {</span>
+<span class="nc" id="L120">                    value = new java.sql.Timestamp(date.getTime());</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">                } else if (targetClass.isAssignableFrom(java.sql.Date.class)) {</span>
+<span class="nc" id="L122">                    value = new java.sql.Date(date.getTime());</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">                } else if (targetClass.isAssignableFrom(java.sql.Time.class)) {</span>
+<span class="nc" id="L124">                    value = new java.sql.Time(date.getTime());</span>
+                }
+<span class="nc" id="L126">            } // Array to List conversion (assume compatible component type).</span>
+<span class="nc bnc" id="L127" title="All 4 branches missed.">            else if (value.getClass().isArray() &amp;&amp; List.class.isAssignableFrom(targetClass)) {</span>
+<span class="nc" id="L128">                final int arrayLength = Array.getLength(value);</span>
+<span class="nc" id="L129">                final List&lt;Object&gt; list = new ArrayList&lt;Object&gt;(arrayLength);</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">                for (int j = 0; j &lt; arrayLength; j++) {</span>
+<span class="nc" id="L131">                    list.add(Array.get(value, j));</span>
+                }
+<span class="nc" id="L133">                value = list;</span>
+<span class="nc bnc" id="L134" title="All 6 branches missed.">            } else if (value instanceof Map &amp;&amp; SortedMap.class.isAssignableFrom(targetClass) &amp;&amp; !(value instanceof SortedMap)) {</span>
+<span class="nc" id="L135">                value = new TreeMap&lt;Object, Object&gt;((Map&lt;?, ?&gt;) value);</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">            } else if (targetClass.isEnum()) {</span>
+<span class="nc" id="L137">                value = Enum.valueOf((Class)targetClass, value.toString());</span>
+            }
+        }
+        
+<span class="nc" id="L141">        Class genericInfo = getGenericInfo(targetType);</span>
+        
+<span class="nc bnc" id="L143" title="All 4 branches missed.">        if (value != null &amp;&amp; genericInfo != null) {</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">            if (genericInfo.isEnum()) {</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">                if (value instanceof Set) {</span>
+<span class="nc" id="L146">                    Set valueAsSet = (Set) value;</span>
+<span class="nc" id="L147">                    HashSet tmpSet = new HashSet();</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">                    for (Iterator it = valueAsSet.iterator(); it.hasNext();) {</span>
+<span class="nc" id="L149">                        tmpSet.add(Enum.valueOf(genericInfo, it.next().toString()));</span>
+                    }
+<span class="nc" id="L151">                    valueAsSet.clear();</span>
+<span class="nc" id="L152">                    valueAsSet.addAll(tmpSet);</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">                } else if (value instanceof List) {</span>
+<span class="nc" id="L154">                    List valueList = (List) value;</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">                    for (int i = 0; i &lt; valueList.size(); i++) {</span>
+<span class="nc" id="L156">                        Object object = valueList.get(i);</span>
+<span class="nc" id="L157">                        valueList.set(i, Enum.valueOf(genericInfo, object.toString()));</span>
+                    }
+                }
+            }
+        }
+
+<span class="nc" id="L163">        return value;</span>
+    }
+    
+    private Class getGenericInfo(Type type) {
+<span class="nc" id="L167">        Class clazz = null;</span>
+<span class="nc bnc" id="L168" title="All 4 branches missed.">        if (type instanceof ParameterizedType &amp;&amp; ((ParameterizedType) type).getActualTypeArguments().length &gt; 0) {</span>
+<span class="nc" id="L169">            clazz = (Class) ((ParameterizedType) type).getActualTypeArguments()[0];</span>
+        }
+<span class="nc" id="L171">        return clazz;</span>
+    }
+
+    public Object[] convertForDeserialization(Object[] values, Type[] targetTypes) {
+<span class="nc bnc" id="L175" title="All 2 branches missed.">        if (values == null) {</span>
+<span class="nc" id="L176">            return values;</span>
+        }
+<span class="nc" id="L178">        Object[] convertedArgs = new Object[values.length];</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">        for (int i = 0; i &lt; convertedArgs.length; i++) {</span>
+<span class="nc" id="L180">            convertedArgs[i] = convertForDeserialization(values[i], targetTypes[i]);</span>
+        }
+<span class="nc" id="L182">        return convertedArgs;</span>
+    }
+
+    protected boolean canConvertForMethodInvocation(Object value, Type targetType) {
+<span class="nc bnc" id="L186" title="All 2 branches missed.">        if (value == null) {</span>
+<span class="nc" id="L187">            return true;</span>
+        }
+<span class="nc" id="L189">        Class&lt;?&gt; valueClass = value.getClass();</span>
+<span class="nc bnc" id="L190" title="All 2 branches missed.">        if (valueClass == targetType) {</span>
+<span class="nc" id="L191">            return true;</span>
+        }
+<span class="nc" id="L193">        Class&lt;?&gt; targetClass = ClassUtil.classOfType(targetType);</span>
+<span class="nc bnc" id="L194" title="All 2 branches missed.">        if (targetClass.isAssignableFrom(valueClass)) {</span>
+<span class="nc" id="L195">            return true;        // Class/Primitive Identity &amp; Widening Primitive Conversion.</span>
+        }
+<span class="nc bnc" id="L197" title="All 2 branches missed.">        if (targetClass.isPrimitive()) {</span>
+<span class="nc bnc" id="L198" title="All 66 branches missed.">            if ((valueClass == Integer.class &amp;&amp; (targetClass == Integer.TYPE || targetClass == Long.TYPE ||</span>
+                    targetClass == Float.TYPE || targetClass == Double.TYPE)) ||
+                    (valueClass == Boolean.class &amp;&amp; targetClass == Boolean.TYPE) ||
+                    (valueClass == Long.class &amp;&amp; (targetClass == Long.TYPE || targetClass == Float.TYPE || targetClass == Double.TYPE)) ||
+                    (valueClass == Float.class &amp;&amp; (targetClass == Float.TYPE || targetClass == Double.TYPE)) ||
+                    (valueClass == Byte.class &amp;&amp; (targetClass == Byte.TYPE || targetClass == Short.TYPE || targetClass == Integer.TYPE ||
+                    targetClass == Long.TYPE || targetClass == Float.TYPE || targetClass == Double.TYPE)) ||
+                    (valueClass == Short.class &amp;&amp; (targetClass == Short.TYPE || targetClass == Integer.TYPE || targetClass == Long.TYPE ||
+                    targetClass == Float.TYPE || targetClass == Double.TYPE)) ||
+                    (valueClass == Character.class &amp;&amp; (targetClass == Character.TYPE || targetClass == Integer.TYPE || targetClass == Long.TYPE ||
+                    targetClass == Float.TYPE || targetClass == Double.TYPE))) {
+<span class="nc" id="L209">                return true;</span>
+            }
+        } // Widening Number Conversion.
+<span class="nc bnc" id="L212" title="All 2 branches missed.">        else if (Number.class.isAssignableFrom(targetClass)) {</span>
+<span class="nc bnc" id="L213" title="All 74 branches missed.">            if ((valueClass == Integer.class &amp;&amp; (targetClass == Long.class || targetClass == Float.class || targetClass == Double.class ||</span>
+                    targetClass == BigDecimal.class || targetClass == BigInteger.class)) ||
+                    (valueClass == Long.class &amp;&amp; (targetClass == Float.class || targetClass == Double.class ||
+                    targetClass == BigDecimal.class || targetClass == BigInteger.class)) ||
+                    (valueClass == Float.class &amp;&amp; (targetClass == Double.class || targetClass == BigDecimal.class ||
+                    targetClass == BigInteger.class)) ||
+                    (valueClass == Byte.class &amp;&amp; (targetClass == Short.class || targetClass == Integer.class || targetClass == Long.class ||
+                    targetClass == Float.class || targetClass == Double.class ||
+                    targetClass == BigDecimal.class || targetClass == BigInteger.class)) ||
+                    (valueClass == Short.class &amp;&amp; (targetClass == Integer.class || targetClass == Long.class ||
+                    targetClass == Float.class || targetClass == Double.class ||
+                    targetClass == BigDecimal.class || targetClass == BigInteger.class)) ||
+                    (valueClass == Character.class &amp;&amp; (targetClass == Integer.class || targetClass == Long.class ||
+                    targetClass == Float.class || targetClass == Double.class ||
+                    targetClass == BigDecimal.class || targetClass == BigInteger.class))) {
+<span class="nc" id="L228">                return true;</span>
+            }
+        } // If it's an array, can we find a matching list?
+<span class="nc bnc" id="L231" title="All 4 branches missed.">        else if (valueClass.isArray() &amp;&amp; List.class.isAssignableFrom(targetClass)) {</span>
+            // List (not parameterized)
+<span class="nc bnc" id="L233" title="All 2 branches missed.">            if (targetType instanceof Class&lt;?&gt;) {</span>
+<span class="nc" id="L234">                return true;</span>
+            // List&lt;...&gt; (parameterized)
+            }
+<span class="nc bnc" id="L237" title="All 2 branches missed.">            if (targetType instanceof ParameterizedType) {</span>
+<span class="nc" id="L238">                Type[] lcts = ((ParameterizedType) targetType).getActualTypeArguments();</span>
+<span class="nc bnc" id="L239" title="All 2 branches missed.">                if (lcts.length == 1) { // Should always be true for a list...</span>
+<span class="nc" id="L240">                    Class&lt;?&gt; lct = ClassUtil.classOfType(lcts[0]);</span>
+<span class="nc bnc" id="L241" title="All 2 branches missed.">                    if (lct.isAssignableFrom(valueClass.getComponentType())) {</span>
+<span class="nc" id="L242">                        return true;</span>
+                    }
+                }
+            }
+        }
+
+<span class="nc" id="L248">        return false;</span>
+    }
+
+    protected boolean canConvertForMethodInvocation(Object[] values, Type[] targetTypes) {
+<span class="nc" id="L252">        boolean canConvert = true;</span>
+<span class="nc bnc" id="L253" title="All 4 branches missed.">        for (int i = 0; i &lt; targetTypes.length &amp;&amp; canConvert; i++) {</span>
+<span class="nc" id="L254">            canConvert = canConvertForMethodInvocation(values[i], targetTypes[i]);</span>
+        }
+<span class="nc" id="L256">        return canConvert;</span>
+    }
+
+    /**
+     * @author Franck WOLFF
+     */
+    public abstract static class ActionScriptClassDescriptor {
+
+        protected final String type;
+        protected final byte encoding;
+        protected final Externalizer externalizer;
+        protected final Converter converter;
+        protected final List&lt;Property&gt; properties;
+
+<span class="nc" id="L270">        protected ActionScriptClassDescriptor(String type, byte encoding) {</span>
+<span class="nc bnc" id="L271" title="All 2 branches missed.">            this.type = (type == null ? &quot;&quot; : type);</span>
+<span class="nc" id="L272">            this.encoding = encoding;</span>
+<span class="nc" id="L273">            this.externalizer = findExternalizer();</span>
+<span class="nc" id="L274">            this.converter = new DefaultConverter();</span>
+<span class="nc" id="L275">            this.properties = new ArrayList&lt;Property&gt;();</span>
+<span class="nc" id="L276">        }</span>
+
+        private Externalizer findExternalizer() {
+<span class="nc bnc" id="L279" title="All 2 branches missed.">            if (encoding != 0x01) {</span>
+<span class="nc" id="L280">                return null;</span>
+            }
+<span class="nc" id="L282">            return null;</span>
+        }
+
+        public String getType() {
+<span class="nc" id="L286">            return type;</span>
+        }
+
+        public Externalizer getExternalizer() {
+<span class="nc" id="L290">            return externalizer;</span>
+        }
+
+        public byte getEncoding() {
+<span class="nc" id="L294">            return encoding;</span>
+        }
+
+        public boolean isExternalizable() {
+<span class="nc bnc" id="L298" title="All 2 branches missed.">            return encoding == 0x01;</span>
+        }
+
+        public boolean isDynamic() {
+<span class="nc bnc" id="L302" title="All 2 branches missed.">            return encoding == 0x02;</span>
+        }
+
+        public abstract void defineProperty(String name);
+
+        public abstract Object newJavaInstance();
+
+        public int getPropertiesCount() {
+<span class="nc" id="L310">            return properties.size();</span>
+        }
+
+        public String getPropertyName(int index) {
+<span class="nc" id="L314">            return properties.get(index).getName();</span>
+        }
+
+        public void setPropertyValue(int index, Object instance, Object value) {
+<span class="nc" id="L318">            Property prop = properties.get(index);</span>
+<span class="nc bnc" id="L319" title="All 2 branches missed.">            if (value instanceof AbstractInstanciator) {</span>
+<span class="nc" id="L320">                ((AbstractInstanciator&lt;?&gt;) value).addReferer(instance, prop);</span>
+            } else {
+<span class="nc" id="L322">                prop.setProperty(instance, value);</span>
+            }
+<span class="nc" id="L324">        }</span>
+
+        public void setPropertyValue(String name, Object instance, Object value) {
+            // instance must be an instance of Map...
+<span class="nc" id="L328">            Property prop = new MapProperty(converter, name);</span>
+<span class="nc bnc" id="L329" title="All 2 branches missed.">            if (value instanceof AbstractInstanciator) {</span>
+<span class="nc" id="L330">                ((AbstractInstanciator&lt;?&gt;) value).addReferer(instance, prop);</span>
+            } else {
+<span class="nc" id="L332">                prop.setProperty(instance, value);</span>
+            }
+<span class="nc" id="L334">        }</span>
+
+        @Override
+        public String toString() {
+<span class="nc" id="L338">            return getClass().getName() + &quot; {\n&quot; +</span>
+                    &quot;  type=&quot; + type + &quot;,\n&quot; +
+                    &quot;  encoding=&quot; + encoding + &quot;,\n&quot; +
+                    &quot;  externalizer=&quot; + externalizer + &quot;,\n&quot; +
+                    &quot;  converter=&quot; + converter + &quot;,\n&quot; +
+                    &quot;  properties=&quot; + properties + &quot;\n&quot; +
+                    &quot;}&quot;;
+        }
+    }
+
+    /**
+     * @author Franck WOLFF
+     */
+    public static class DefaultActionScriptClassDescriptor extends ActionScriptClassDescriptor {
+
+        public DefaultActionScriptClassDescriptor(String type, byte encoding) {
+<span class="nc" id="L354">            super(type, encoding);</span>
+<span class="nc" id="L355">        }</span>
+
+        @Override
+        public void defineProperty(String name) {
+
+<span class="nc bnc" id="L360" title="All 2 branches missed.">            if (type.length() == 0) {</span>
+<span class="nc" id="L361">                properties.add(new MapProperty(converter, name));</span>
+<span class="nc bnc" id="L362" title="All 2 branches missed.">            } else if (&quot;uid&quot;.equals(name)) // ObjectProxy specific property...</span>
+            {
+<span class="nc" id="L364">                properties.add(new UIDProperty(converter));</span>
+            } else {
+                try {
+<span class="nc" id="L367">                    Class&lt;?&gt; clazz = ClassUtil.forName(type);</span>
+
+                    // Try to find public getter/setter.
+<span class="nc" id="L370">                    BeanInfo info = Introspector.getBeanInfo(clazz);</span>
+<span class="nc" id="L371">                    PropertyDescriptor[] props = info.getPropertyDescriptors();</span>
+<span class="nc bnc" id="L372" title="All 2 branches missed.">                    for (PropertyDescriptor prop : props) {</span>
+<span class="nc bnc" id="L373" title="All 6 branches missed.">                        if (name.equals(prop.getName()) &amp;&amp; prop.getWriteMethod() != null &amp;&amp; prop.getReadMethod() != null) {</span>
+<span class="nc" id="L374">                            properties.add(new MethodProperty(converter, name, prop.getWriteMethod(), prop.getReadMethod()));</span>
+<span class="nc" id="L375">                            return;</span>
+                        }
+                    }
+
+                    // Try to find public field.
+<span class="nc" id="L380">                    Field field = clazz.getField(name);</span>
+<span class="nc bnc" id="L381" title="All 4 branches missed.">                    if (!Modifier.isStatic(field.getModifiers()) &amp;&amp; !Modifier.isTransient(field.getModifiers())) {</span>
+<span class="nc" id="L382">                        properties.add(new FieldProperty(converter, name, field));</span>
+                    }
+<span class="nc" id="L384">                } catch (Exception e) {</span>
+<span class="nc" id="L385">                    throw new RuntimeException(e);</span>
+<span class="nc" id="L386">                }</span>
+            }
+<span class="nc" id="L388">        }</span>
+
+        @Override
+        public Object newJavaInstance() {
+
+<span class="nc bnc" id="L393" title="All 2 branches missed.">            if (type.length() == 0) {</span>
+<span class="nc" id="L394">                return new HashMap&lt;String, Object&gt;();</span>
+            }
+<span class="nc" id="L396">            String className = type;</span>
+            try {
+<span class="nc" id="L398">                return ClassUtil.newInstance(className);</span>
+<span class="nc" id="L399">            } catch (Exception e) {</span>
+<span class="nc" id="L400">                throw new RuntimeException(&quot;Could not create instance of: &quot; + className, e);</span>
+            }
+        }
+    }
+
+    /**
+     * @author Franck WOLFF
+     */
+    public static class DefaultJavaClassDescriptor extends JavaClassDescriptor {
+
+        public DefaultJavaClassDescriptor(Class&lt;?&gt; type) {
+<span class="nc" id="L411">            super(type);</span>
+<span class="nc" id="L412">        }</span>
+
+        @Override
+        protected List&lt;Property&gt; introspectProperties() {
+<span class="nc" id="L416">            List&lt;Property&gt; properties = new ArrayList&lt;Property&gt;();</span>
+<span class="nc" id="L417">            Class&lt;?&gt; type = getType();</span>
+
+<span class="nc bnc" id="L419" title="All 6 branches missed.">            if (!isExternalizable() &amp;&amp; !Map.class.isAssignableFrom(type) &amp;&amp; !Hashtable.class.isAssignableFrom(type)) {</span>
+                try {
+
+<span class="nc" id="L422">                    Set&lt;String&gt; propertyNames = new HashSet&lt;String&gt;();</span>
+
+                    // Add read/write properties (ie: public getter/setter).
+<span class="nc" id="L425">                    BeanInfo info = Introspector.getBeanInfo(type);</span>
+<span class="nc bnc" id="L426" title="All 2 branches missed.">                    for (PropertyDescriptor property : info.getPropertyDescriptors()) {</span>
+<span class="nc" id="L427">                        String propertyName = property.getName();</span>
+<span class="nc bnc" id="L428" title="All 4 branches missed.">                        if (property.getWriteMethod() != null &amp;&amp; property.getReadMethod() != null) {</span>
+<span class="nc" id="L429">                            properties.add(new MethodProperty(converter, propertyName, property.getWriteMethod(), property.getReadMethod()));</span>
+<span class="nc" id="L430">                            propertyNames.add(propertyName);</span>
+                        }
+                    }
+
+                    // Add other public fields.
+<span class="nc" id="L435">                    Field[] fields = type.getFields();</span>
+<span class="nc bnc" id="L436" title="All 2 branches missed.">                    for (Field field : fields) {</span>
+<span class="nc" id="L437">                        String propertyName = field.getName();</span>
+<span class="nc bnc" id="L438" title="All 2 branches missed.">                        if (!propertyNames.contains(propertyName) &amp;&amp;</span>
+<span class="nc bnc" id="L439" title="All 2 branches missed.">                                !Modifier.isStatic(field.getModifiers()) &amp;&amp;</span>
+<span class="nc bnc" id="L440" title="All 2 branches missed.">                                !Modifier.isTransient(field.getModifiers())) {</span>
+<span class="nc" id="L441">                            properties.add(new FieldProperty(converter, field.getName(), field));</span>
+<span class="nc" id="L442">                            propertyNames.add(propertyName);</span>
+                        }
+                    }
+
+<span class="nc" id="L446">                } catch (RuntimeException e) {</span>
+<span class="nc" id="L447">                    throw e;</span>
+<span class="nc" id="L448">                } catch (Exception e) {</span>
+<span class="nc" id="L449">                    throw new RuntimeException(e);</span>
+<span class="nc" id="L450">                }</span>
+            }
+
+<span class="nc" id="L453">            return properties;</span>
+        }
+    }
+
+    /**
+     * @author Franck WOLFF
+     */
+    public static class IndexedJavaClassDescriptor {
+
+        private final int index;
+        private final JavaClassDescriptor descriptor;
+
+<span class="nc" id="L465">        public IndexedJavaClassDescriptor(int index, JavaClassDescriptor descriptor) {</span>
+<span class="nc" id="L466">            this.index = index;</span>
+<span class="nc" id="L467">            this.descriptor = descriptor;</span>
+<span class="nc" id="L468">        }</span>
+
+        public JavaClassDescriptor getDescriptor() {
+<span class="nc" id="L471">            return descriptor;</span>
+        }
+
+        public int getIndex() {
+<span class="nc" id="L475">            return index;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

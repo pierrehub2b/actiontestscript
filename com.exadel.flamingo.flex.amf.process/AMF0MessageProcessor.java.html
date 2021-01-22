@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AMF0MessageProcessor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.exadel.flamingo.flex.amf.process</a> &gt; <span class="el_source">AMF0MessageProcessor.java</span></div><h1>AMF0MessageProcessor.java</h1><pre class="source lang-java linenums">/*
+  Exadel Flamingo
+  Copyright (C) 2008 Exadel, Inc.
+
+  Exadel Flamingo is free software; you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation
+
+  AMF0MessageProcessor.java
+  Last modified by: $Author$
+  $Revision$   $Date$
+ */
+
+package com.exadel.flamingo.flex.amf.process;
+
+import com.exadel.flamingo.flex.amf.AMF0Body;
+import com.exadel.flamingo.flex.amf.AMF0Message;
+import com.exadel.flamingo.flex.amf.AMF3Object;
+import com.exadel.flamingo.flex.messaging.util.UUIDUtil;
+import flex.messaging.messages.ErrorMessage;
+import flex.messaging.messages.Message;
+
+import java.util.Iterator;
+import java.util.List;
+
+/**
+ * Process AMF0Message.
+ * 
+ * @author apleskatsevich
+ */
+public class AMF0MessageProcessor {
+
+    private IAMF3MessageProcessor amf3MessageProcessor;
+
+<span class="nc" id="L35">    public AMF0MessageProcessor(IAMF3MessageProcessor amf3MessageProcessor) {</span>
+<span class="nc" id="L36">        this.amf3MessageProcessor = amf3MessageProcessor;</span>
+<span class="nc" id="L37">    }</span>
+
+    public AMF0Message process(AMF0Message amf0RequestMessage) {
+<span class="nc" id="L40">        return process(amf0RequestMessage, false, null);</span>
+    }
+
+    public AMF0Message process(AMF0Message amf0RequestMessage, boolean needSessionTimeoutException,
+            Throwable sessionException) {
+<span class="nc" id="L45">        AMF0Message amf0ResponseMessage = new AMF0Message();</span>
+<span class="nc" id="L46">        amf0ResponseMessage.setVersion(amf0RequestMessage.getVersion());</span>
+
+<span class="nc" id="L48">        ErrorMessage loginError = null;</span>
+<span class="nc" id="L49">        String dsId = null;</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        for (Iterator&lt;AMF0Body&gt; bodies = amf0RequestMessage.getBodies(); bodies.hasNext();) {</span>
+<span class="nc" id="L51">            AMF0Body requestBody = bodies.next();</span>
+
+<span class="nc" id="L53">            Message amf3RequestMessage = (Message) ((List&lt;?&gt;) requestBody.getValue()).get(0);</span>
+
+<span class="nc" id="L55">            Message amf3ResponseMessage = null;</span>
+
+<span class="nc bnc" id="L57" title="All 2 branches missed.">            if (needSessionTimeoutException) {</span>
+<span class="nc" id="L58">                ErrorMessage sessionExceptionMessage = new ErrorMessage(sessionException);</span>
+<span class="nc" id="L59">                amf3ResponseMessage = sessionExceptionMessage.copy(amf3RequestMessage);</span>
+<span class="nc" id="L60">            } else {</span>
+
+<span class="nc bnc" id="L62" title="All 2 branches missed.">                if (loginError == null) {</span>
+<span class="nc" id="L63">                    amf3ResponseMessage = amf3MessageProcessor.process(amf3RequestMessage);</span>
+
+<span class="nc bnc" id="L65" title="All 2 branches missed.">                    if ((amf3ResponseMessage instanceof ErrorMessage)</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">                            &amp;&amp; ((ErrorMessage) amf3ResponseMessage).loginError()) {</span>
+<span class="nc" id="L67">                        loginError = (ErrorMessage) amf3ResponseMessage;</span>
+                    }
+
+                    // For SDK 2.0.1_Hotfix2+ (LCDS 2.5+).
+<span class="nc bnc" id="L71" title="All 2 branches missed.">                    if (&quot;nil&quot;.equals(amf3ResponseMessage.getHeader(Message.DS_ID_HEADER))) {</span>
+<span class="nc" id="L72">                        amf3ResponseMessage.getHeaders().put(Message.DS_ID_HEADER,</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">                                (dsId == null ? (dsId = UUIDUtil.randomUUID()) : dsId));</span>
+                    }
+                } else {
+<span class="nc" id="L76">                    amf3ResponseMessage = loginError.copy(amf3RequestMessage);</span>
+                }
+
+            }
+<span class="nc" id="L80">            AMF3Object data = new AMF3Object(amf3ResponseMessage);</span>
+<span class="nc" id="L81">            AMF0Body responseBody = new AMF0Body(getResponseTarget(requestBody, amf3ResponseMessage), &quot;&quot;, data,</span>
+                    AMF0Body.DATA_TYPE_AMF3_OBJECT);
+<span class="nc" id="L83">            amf0ResponseMessage.addBody(responseBody);</span>
+<span class="nc" id="L84">        }</span>
+
+<span class="nc" id="L86">        return amf0ResponseMessage;</span>
+    }
+
+    private static String getResponseTarget(AMF0Body requestBody, Message responseMessage) {
+<span class="nc bnc" id="L90" title="All 2 branches missed.">        if (responseMessage instanceof ErrorMessage) {</span>
+<span class="nc" id="L91">            return requestBody.getResponse() + &quot;/onStatus&quot;;</span>
+        }
+<span class="nc" id="L93">        return requestBody.getResponse() + &quot;/onResult&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

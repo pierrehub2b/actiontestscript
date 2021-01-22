@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActionPerformanceStart.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.script.actions.performance</a> &gt; <span class="el_source">ActionPerformanceStart.java</span></div><h1>ActionPerformanceStart.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.script.actions.performance;
+
+import com.ats.executor.ActionTestScript;
+import com.ats.executor.channels.Channel;
+import com.ats.script.Script;
+import com.ats.tools.Utils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class ActionPerformanceStart extends ActionPerformance {
+
+	public static final String SCRIPT_LABEL = ActionPerformance.SCRIPT_PERFORMANCE_LABEL + &quot;-start&quot;;
+
+	public static final String SEND_LABEL = &quot;upload&quot;;
+	public static final String RECEIVE_LABEL = &quot;download&quot;;
+	public static final String IDLE_LABEL = &quot;idle&quot;;
+	public static final String LATENCY_LABEL = &quot;latency&quot;;
+
+<span class="nc" id="L44">	private static final String[] LABEL_REPLACE = new String[]{SEND_LABEL, RECEIVE_LABEL, IDLE_LABEL, LATENCY_LABEL, &quot;=&quot;, &quot; &quot;};</span>
+<span class="nc" id="L45">	private static final String[] LABEL_REPLACEMENT = new String[]{&quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;};</span>
+
+<span class="nc" id="L47">	private long sendBandWidth = 0L;</span>
+<span class="nc" id="L48">	private long receiveBandWidth = 0L;</span>
+<span class="nc" id="L49">	private int latency = 0;</span>
+<span class="nc" id="L50">	private int trafficIdle = 0;</span>
+
+<span class="nc" id="L52">	private List&lt;String&gt; whiteList = null;</span>
+<span class="nc" id="L53">	private String filters = &quot;&quot;;</span>
+
+<span class="nc" id="L55">	public ActionPerformanceStart() {}</span>
+
+	public ActionPerformanceStart(Script script, ArrayList&lt;String&gt; options, ArrayList&lt;String&gt; dataArray) {
+<span class="nc" id="L58">		super(script);</span>
+<span class="nc" id="L59">		setWhiteList(dataArray.stream().map(String :: trim).collect(Collectors.toList()));</span>
+<span class="nc" id="L60">		loadBandwidthValues(options);</span>
+<span class="nc" id="L61">	}</span>
+
+	public ActionPerformanceStart(Script script, int iddle, int ltcy, long sbw, long rbw, String[] whiteList) {
+<span class="nc" id="L64">		super(script);</span>
+<span class="nc" id="L65">		setTrafficIdle(iddle);</span>
+<span class="nc" id="L66">		setSendBandWidth(sbw);</span>
+<span class="nc" id="L67">		setReceiveBandWidth(rbw);</span>
+<span class="nc" id="L68">		setWhiteList(Arrays.asList(whiteList));</span>
+<span class="nc" id="L69">	}</span>
+
+	private void loadBandwidthValues(ArrayList&lt;String&gt; options) {
+<span class="nc" id="L72">		final Iterator&lt;String&gt; itr = options.iterator();</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">		while (itr.hasNext())</span>
+		{
+<span class="nc" id="L75">			final String opt = itr.next().toLowerCase();</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">			if(opt.contains(SEND_LABEL)) {</span>
+<span class="nc" id="L77">				sendBandWidth = Utils.string2Long(StringUtils.replaceEach(opt, LABEL_REPLACE, LABEL_REPLACEMENT));</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">			}else if(opt.contains(RECEIVE_LABEL)) {</span>
+<span class="nc" id="L79">				receiveBandWidth = Utils.string2Long(StringUtils.replaceEach(opt, LABEL_REPLACE, LABEL_REPLACEMENT));</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">			}else if(opt.contains(LATENCY_LABEL)) {</span>
+<span class="nc" id="L81">				latency = Utils.string2Int(StringUtils.replaceEach(opt, LABEL_REPLACE, LABEL_REPLACEMENT));</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">			}else if(opt.contains(IDLE_LABEL)) {</span>
+<span class="nc" id="L83">				trafficIdle = Utils.string2Int(StringUtils.replaceEach(opt, LABEL_REPLACE, LABEL_REPLACEMENT));</span>
+			}
+<span class="nc" id="L85">		}</span>
+<span class="nc" id="L86">	}</span>
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// Code Generator
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public StringBuilder getJavaCode() {
+<span class="nc" id="L94">		final ArrayList&lt;String&gt; list = new ArrayList&lt;String&gt;();</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">		for(String s : whiteList) {</span>
+<span class="nc" id="L96">			list.add(&quot;\&quot;&quot; + StringEscapeUtils.escapeJava(s) + &quot;\&quot;&quot;);</span>
+<span class="nc" id="L97">		}</span>
+<span class="nc" id="L98">		return super.getJavaCode().append(trafficIdle).append(&quot;, &quot;).append(latency).append(&quot;, &quot;).append(sendBandWidth).append(&quot;L, &quot;).append(receiveBandWidth).append(&quot;L, new String[]{&quot;).append(String.join(&quot;, &quot;, list)).append(&quot;})&quot;);</span>
+	}
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// Execution
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public boolean execute(ActionTestScript ts, String testName, int testLine) {
+<span class="nc" id="L107">		final Channel channel = ts.getCurrentChannel();</span>
+<span class="nc" id="L108">		setStatus(channel.newActionStatus(testName, testLine));</span>
+<span class="nc" id="L109">		channel.startHarServer(status, whiteList, trafficIdle, latency, sendBandWidth, receiveBandWidth);</span>
+<span class="nc" id="L110">		status.endDuration();</span>
+<span class="nc" id="L111">		return true;</span>
+	}
+
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------	
+
+	public int getLatency() {
+<span class="nc" id="L119">		return latency;</span>
+	}
+
+	public void setLatency(int latency) {
+<span class="nc" id="L123">		this.latency = latency;</span>
+<span class="nc" id="L124">	}</span>
+
+	public int getTrafficIdle() {
+<span class="nc" id="L127">		return trafficIdle;</span>
+	}
+
+	public void setTrafficIdle(int value) {
+<span class="nc" id="L131">		this.trafficIdle = value;</span>
+<span class="nc" id="L132">	}</span>
+
+	public long getSendBandWidth() {
+<span class="nc" id="L135">		return sendBandWidth;</span>
+	}
+
+	public void setSendBandWidth(long value) {
+<span class="nc" id="L139">		this.sendBandWidth = value;</span>
+<span class="nc" id="L140">	}</span>
+
+	public long getReceiveBandWidth() {
+<span class="nc" id="L143">		return receiveBandWidth;</span>
+	}
+
+	public void setReceiveBandWidth(long value) {
+<span class="nc" id="L147">		this.receiveBandWidth = value;</span>
+<span class="nc" id="L148">	}</span>
+
+	public List&lt;String&gt; getWhiteList() {
+<span class="nc" id="L151">		return whiteList;</span>
+	}
+
+	public void setWhiteList(List&lt;String&gt; data) {
+<span class="nc" id="L155">		this.whiteList = data;</span>
+<span class="nc" id="L156">	}	</span>
+
+	public String getFilters() {
+<span class="nc" id="L159">		return filters;</span>
+	}
+
+	public void setFilters(String filters) {
+<span class="nc" id="L163">		this.filters = filters;</span>
+<span class="nc" id="L164">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChannelManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.executor.channels</a> &gt; <span class="el_source">ChannelManager.java</span></div><h1>ChannelManager.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.executor.channels;
+
+import com.ats.driver.AtsManager;
+import com.ats.executor.ActionStatus;
+import com.ats.executor.ActionTestScript;
+import com.ats.executor.drivers.DriverManager;
+import com.ats.script.actions.ActionChannelStart;
+
+import java.util.ArrayList;
+import java.util.Optional;
+
+public class ChannelManager {
+
+	private Channel currentChannel;
+	private ArrayList&lt;Channel&gt; channelsList;
+	private ActionTestScript mainScript;
+	private DriverManager driverManager;
+
+<span class="fc" id="L38">	public ChannelManager(ActionTestScript script) {</span>
+
+<span class="fc" id="L40">		this.mainScript = script;</span>
+<span class="fc" id="L41">		this.channelsList = new ArrayList&lt;Channel&gt;();</span>
+<span class="fc" id="L42">		this.driverManager = new DriverManager();</span>
+<span class="fc" id="L43">		this.currentChannel = new EmptyChannel();</span>
+
+<span class="fc" id="L45">		script.sendInfoLog(&quot;ATS drivers folder&quot;, AtsManager.getInstance().getDriversFolderPath().toFile().getAbsolutePath());</span>
+<span class="pc bpc" id="L46" title="1 of 2 branches missed.">		if(AtsManager.getInstance().getError() != null) {</span>
+<span class="nc" id="L47">			script.sendInfoLog(&quot;ActionTestScript properties file found, but an error occured !&quot;, AtsManager.getInstance().getError());</span>
+		}
+
+<span class="pc bpc" id="L50" title="1 of 2 branches missed.">		if(AtsManager.getInstance().getWaitGuiReady() != null) {</span>
+<span class="fc" id="L51">			script.sendInfoLog(&quot;Custom WaitGuiReady class found !&quot;, &quot;&quot;);</span>
+		}
+<span class="fc" id="L53">	}</span>
+
+	public int getMaxTry() {
+<span class="nc" id="L56">		return AtsManager.getInstance().getMaxTrySearch();</span>
+	}
+
+	public Channel getCurrentChannel(){
+<span class="nc" id="L60">		return currentChannel;</span>
+	}
+
+	public Channel[] getChannelsList(){
+<span class="nc bnc" id="L64" title="All 2 branches missed.">		if(channelsList.size() &gt; 0){</span>
+<span class="nc" id="L65">			return channelsList.toArray(new Channel[channelsList.size()]);</span>
+		}else{
+<span class="nc" id="L67">			return new Channel[0];</span>
+		}
+	}
+
+	private void setCurrentChannel(Channel channel){
+<span class="nc bnc" id="L72" title="All 2 branches missed.">		for(Channel cnl : channelsList){</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">			cnl.setCurrent(cnl == channel);</span>
+<span class="nc" id="L74">		}</span>
+<span class="nc" id="L75">		currentChannel = channel;</span>
+<span class="nc" id="L76">		channel.setCurrent(true);</span>
+<span class="nc" id="L77">	}</span>
+
+	public void closeAllChannels(){
+<span class="nc bnc" id="L80" title="All 2 branches missed.">		while(channelsList.size() &gt; 0){</span>
+<span class="nc" id="L81">			channelsList.remove(0).close();</span>
+		}
+<span class="nc" id="L83">	}</span>
+
+	public Channel getChannel(String name){
+<span class="nc bnc" id="L86" title="All 2 branches missed.">		for(Channel cnl : channelsList){</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">			if(cnl.getName().equals(name)){</span>
+<span class="nc" id="L88">				return cnl;</span>
+			}
+<span class="nc" id="L90">		}</span>
+<span class="nc" id="L91">		return new EmptyChannel();// Channel with name : does not exists or has been closed</span>
+	}
+
+	public String startChannel(ActionStatus status, ActionChannelStart action){
+
+<span class="nc" id="L96">		final String name = action.getName();</span>
+<span class="nc" id="L97">		final String appName = action.getApplication().getCalculated();</span>
+
+<span class="nc bnc" id="L99" title="All 2 branches missed.">		if(getChannel(name) instanceof EmptyChannel){</span>
+
+<span class="nc" id="L101">			final Channel newChannel = new Channel(status, mainScript, driverManager, action);</span>
+
+<span class="nc bnc" id="L103" title="All 2 branches missed.">			if(status.isPassed()) {</span>
+
+<span class="nc bnc" id="L105" title="All 2 branches missed.">				for(Channel cn : channelsList) {</span>
+<span class="nc" id="L106">					cn.clearData();</span>
+<span class="nc" id="L107">				}</span>
+
+<span class="nc" id="L109">				channelsList.add(newChannel);</span>
+<span class="nc" id="L110">				setCurrentChannel(newChannel);</span>
+
+<span class="nc" id="L112">				status.setChannel(newChannel);</span>
+<span class="nc" id="L113">				status.endDuration();</span>
+
+<span class="nc" id="L115">				mainScript.getRecorder().createVisualStartChannelAction(action, status.getDuration(), mainScript.getTestName(), action.getLine());</span>
+			}
+
+<span class="nc" id="L118">			status.setData(getChannelsList());</span>
+		}
+
+<span class="nc" id="L121">		return appName;</span>
+	}
+
+	public void switchChannel(ActionStatus status, String name){
+
+<span class="nc" id="L126">		status.startDuration();</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">		if(channelsList != null){</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">			for(Channel cnl : channelsList){</span>
+<span class="nc bnc" id="L129" title="All 2 branches missed.">				if(cnl.getName().equals(name)){</span>
+
+<span class="nc bnc" id="L131" title="All 2 branches missed.">					if(!cnl.isCurrent()) {</span>
+<span class="nc" id="L132">						setCurrentChannel(cnl);</span>
+
+<span class="nc" id="L134">						status.setData(getChannelsList());</span>
+<span class="nc" id="L135">						status.setChannel(cnl);</span>
+					}
+
+<span class="nc" id="L138">					status.setPassed(true);</span>
+<span class="nc" id="L139">					status.endDuration();</span>
+
+<span class="nc" id="L141">					return;</span>
+				}
+<span class="nc" id="L143">			}</span>
+		}
+
+<span class="nc" id="L146">		status.setError(ActionStatus.CHANNEL_NOT_FOUND, &quot;channel [&quot; + name + &quot;] is not running&quot;);</span>
+<span class="nc" id="L147">	}</span>
+
+	public void closeChannel(ActionStatus status, String channelName, boolean keepRunning){
+<span class="nc" id="L150">		final Optional&lt;Channel&gt; cn = channelsList.stream().filter(c -&gt; c.getName().equals(channelName)).findFirst();</span>
+<span class="nc bnc" id="L151" title="All 2 branches missed.">		if(cn.isPresent()) {</span>
+<span class="nc" id="L152">			cn.get().close(status, keepRunning);</span>
+		}
+<span class="nc" id="L154">	}</span>
+
+	public void channelClosed(ActionStatus status, Channel channel){
+<span class="nc" id="L157">		status.startDuration();</span>
+
+<span class="nc bnc" id="L159" title="All 2 branches missed.">		if(channelsList.remove(channel)) {</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">			if(channelsList.size() &gt; 0){</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">				if(channel.isCurrent()) {</span>
+<span class="nc" id="L162">					final Channel current = channelsList.get(0);</span>
+<span class="nc" id="L163">					setCurrentChannel(current);</span>
+<span class="nc" id="L164">					status.setChannel(current);</span>
+<span class="nc" id="L165">				}</span>
+			}else{
+<span class="nc" id="L167">				currentChannel = new EmptyChannel();</span>
+			}
+
+<span class="nc" id="L170">			status.setNoError();</span>
+<span class="nc" id="L171">			status.setData(getChannelsList());</span>
+		}else {
+<span class="nc" id="L173">			status.setError(ActionStatus.CHANNEL_START_ERROR, &quot;channel '&quot; + channel.getName() + &quot;' not found&quot;);</span>
+		}
+<span class="nc" id="L175">		status.endDuration();</span>
+<span class="nc" id="L176">	}</span>
+
+	//----------------------------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------------------------------------------
+
+	public void tearDown() {
+<span class="nc" id="L182">		closeAllChannels();</span>
+<span class="nc" id="L183">		driverManager.tearDown();</span>
+<span class="nc" id="L184">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

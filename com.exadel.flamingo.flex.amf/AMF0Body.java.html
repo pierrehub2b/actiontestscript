@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AMF0Body.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.exadel.flamingo.flex.amf</a> &gt; <span class="el_source">AMF0Body.java</span></div><h1>AMF0Body.java</h1><pre class="source lang-java linenums">/*
+ * www.openamf.org
+ *
+ * Distributable under LGPL license.
+ * See terms of license at gnu.org.
+ */
+
+package com.exadel.flamingo.flex.amf;
+
+import flex.messaging.messages.Message;
+
+import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
+
+
+public class AMF0Body implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    protected String target;
+    protected String serviceName;
+    protected String serviceMethodName;
+    protected String response;
+    protected Object value;
+    protected byte type;
+    /**
+     * Unknow object type
+     */
+    public static final byte DATA_TYPE_UNKNOWN = -1;
+    /**
+     * Number object type
+     */
+    public static final byte DATA_TYPE_NUMBER = 0;
+    /**
+     * Boolean object type
+     */
+    public static final byte DATA_TYPE_BOOLEAN = 1;
+    /**
+     * String object type
+     */
+    public static final byte DATA_TYPE_STRING = 2;
+    /**
+     * Object object type
+     */
+    public static final byte DATA_TYPE_OBJECT = 3;
+    /**
+     * Movie clip object type
+     */
+    public static final byte DATA_TYPE_MOVIE_CLIP = 4;
+    /**
+     * NULL object type
+     */
+    public static final byte DATA_TYPE_NULL = 5;
+    /**
+     * Undefined object type
+     */
+    public static final byte DATA_TYPE_UNDEFINED = 6;
+    /**
+     * Reference object type
+     */
+    public static final byte DATA_TYPE_REFERENCE_OBJECT = 7;
+    /**
+     * Mixed Array Object type
+     */
+    public static final byte DATA_TYPE_MIXED_ARRAY = 8;
+    /**
+     * Object end type
+     */
+    public static final byte DATA_TYPE_OBJECT_END = 9;
+    /**
+     * Array Object type
+     */
+    public static final byte DATA_TYPE_ARRAY = 10;
+    /**
+     * Date object type
+     */
+    public static final byte DATA_TYPE_DATE = 11;
+    /**
+     * Long String object type
+     */
+    public static final byte DATA_TYPE_LONG_STRING = 12;
+    /**
+     * General Object type
+     */
+    public static final byte DATA_TYPE_AS_OBJECT = 13;
+    /**
+     * RecordSet object type
+     */
+    public static final byte DATA_TYPE_RECORDSET = 14;
+    /**
+     * XML Document object type
+     */
+    public static final byte DATA_TYPE_XML = 15;
+
+    public static final byte DATA_TYPE_CUSTOM_CLASS = 16;
+
+    public static final byte DATA_TYPE_AMF3_OBJECT = 17;
+
+    public AMF0Body(String target, String response, Object value) {
+<span class="nc" id="L102">        this(target, response, value, DATA_TYPE_UNKNOWN);</span>
+<span class="nc" id="L103">    }</span>
+
+<span class="nc" id="L105">    public AMF0Body(String target, String response, Object value, byte type) {</span>
+<span class="nc" id="L106">        this.response = response;</span>
+<span class="nc" id="L107">        this.value = value;</span>
+<span class="nc" id="L108">        this.type = type;</span>
+<span class="nc" id="L109">        setTarget(target);</span>
+<span class="nc" id="L110">    }</span>
+
+    public String getTarget() {
+<span class="nc" id="L113">        return target;</span>
+    }
+
+    public void setTarget(String target) {
+<span class="nc" id="L117">        this.target = target;</span>
+<span class="nc" id="L118">        int dotIndex = target.lastIndexOf('.');</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">        if (dotIndex &gt; 0) {</span>
+<span class="nc" id="L120">            this.serviceName = target.substring(0, dotIndex);</span>
+<span class="nc" id="L121">            this.serviceMethodName = target.substring(dotIndex + 1);</span>
+        }
+<span class="nc" id="L123">    }</span>
+
+    public String getServiceName() {
+<span class="nc" id="L126">        return serviceName;</span>
+    }
+
+    public String getServiceMethodName() {
+<span class="nc" id="L130">        return serviceMethodName;</span>
+    }
+
+    public String getResponse() {
+<span class="nc" id="L134">        return response;</span>
+    }
+
+    public void setResponse(String response) {
+<span class="nc" id="L138">        this.response = response;</span>
+<span class="nc" id="L139">    }</span>
+    
+    public boolean isFirstBody() {
+<span class="nc" id="L142">        return &quot;/1&quot;.equals(response);</span>
+    }
+    
+    public int getBodyIndex() {
+<span class="nc bnc" id="L146" title="All 4 branches missed.">        if (response != null &amp;&amp; response.length() &gt; 1) {</span>
+            try {
+<span class="nc" id="L148">                return Integer.parseInt(response.substring(1));</span>
+<span class="nc" id="L149">            } catch (Exception e) {</span>
+            }
+        }
+<span class="nc" id="L152">        return 0; // response starts with 1.</span>
+    }
+
+    public Object getValue() {
+<span class="nc" id="L156">        return value;</span>
+    }
+
+    public void setValue(Object value) {
+<span class="nc" id="L160">        this.value = value;</span>
+<span class="nc" id="L161">    }</span>
+
+    public byte getType() {
+<span class="nc" id="L164">        return type;</span>
+    }
+
+    public void setType(byte type) {
+<span class="nc" id="L168">        this.type = type;</span>
+<span class="nc" id="L169">    }</span>
+
+    public static String getObjectTypeDescription(byte type) {
+<span class="nc bnc" id="L172" title="All 20 branches missed.">        switch (type) {</span>
+            case DATA_TYPE_UNKNOWN:
+<span class="nc" id="L174">                return &quot;UNKNOWN&quot;;</span>
+            case DATA_TYPE_NUMBER:
+<span class="nc" id="L176">                return &quot;NUMBER&quot;;</span>
+            case DATA_TYPE_BOOLEAN:
+<span class="nc" id="L178">                return &quot;BOOLEAN&quot;;</span>
+            case DATA_TYPE_STRING:
+<span class="nc" id="L180">                return &quot;STRING&quot;;</span>
+            case DATA_TYPE_OBJECT:
+<span class="nc" id="L182">                return &quot;OBJECT&quot;;</span>
+            case DATA_TYPE_MOVIE_CLIP:
+<span class="nc" id="L184">                return &quot;MOVIECLIP&quot;;</span>
+            case DATA_TYPE_NULL:
+<span class="nc" id="L186">                return &quot;NULL&quot;;</span>
+            case DATA_TYPE_UNDEFINED:
+<span class="nc" id="L188">                return &quot;UNDEFINED&quot;;</span>
+            case DATA_TYPE_REFERENCE_OBJECT:
+<span class="nc" id="L190">                return &quot;REFERENCE&quot;;</span>
+            case DATA_TYPE_MIXED_ARRAY:
+<span class="nc" id="L192">                return &quot;MIXED_ARRAY&quot;;</span>
+            case DATA_TYPE_OBJECT_END:
+<span class="nc" id="L194">                return &quot;OBJECT_END&quot;;</span>
+            case DATA_TYPE_ARRAY:
+<span class="nc" id="L196">                return &quot;ARRAY&quot;;</span>
+            case DATA_TYPE_DATE:
+<span class="nc" id="L198">                return &quot;DATE&quot;;</span>
+            case DATA_TYPE_LONG_STRING:
+<span class="nc" id="L200">                return &quot;LONG_STRING&quot;;</span>
+            case DATA_TYPE_AS_OBJECT:
+<span class="nc" id="L202">                return &quot;AS_OBJECT&quot;;</span>
+            case DATA_TYPE_RECORDSET:
+<span class="nc" id="L204">                return &quot;RECORDSET&quot;;</span>
+            case DATA_TYPE_XML:
+<span class="nc" id="L206">                return &quot;XML&quot;;</span>
+            case DATA_TYPE_CUSTOM_CLASS:
+<span class="nc" id="L208">                return &quot;CUSTOM_CLASS&quot;;</span>
+            case DATA_TYPE_AMF3_OBJECT:
+<span class="nc" id="L210">                return &quot;AMF3_OBJECT&quot;;</span>
+            default:
+<span class="nc" id="L212">                return &quot;UNKNOWN: 0x&quot; + Integer.toBinaryString(type);</span>
+        }
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L218">    	return toString(&quot;&quot;);</span>
+    }
+
+    public String toString(String indent) {
+<span class="nc" id="L222">        return (new StringBuffer(1024)</span>
+<span class="nc" id="L223">        	.append('\n').append(indent).append(AMF0Body.class.getName()).append(&quot; {&quot;)</span>
+<span class="nc" id="L224">        	.append('\n').append(indent).append(&quot;  target = &quot;).append(getTarget())</span>
+<span class="nc" id="L225">        	.append('\n').append(indent).append(&quot;  serviceName = &quot;).append(getServiceName())</span>
+<span class="nc" id="L226">        	.append('\n').append(indent).append(&quot;  serviceMethodName = &quot;).append(getServiceMethodName())</span>
+<span class="nc" id="L227">        	.append('\n').append(indent).append(&quot;  response = &quot;).append(getResponse())</span>
+<span class="nc" id="L228">        	.append('\n').append(indent).append(&quot;  type = &quot;).append(getObjectTypeDescription(type))</span>
+<span class="nc" id="L229">        	.append('\n').append(indent).append(&quot;  value = &quot;).append(printValue(value, indent + &quot;  &quot;))</span>
+<span class="nc" id="L230">        	.append('\n').append(indent).append('}')</span>
+<span class="nc" id="L231">        	.toString()</span>
+        );
+    }
+    
+    private static String printValue(Object value, String indent) {
+
+<span class="nc bnc" id="L237" title="All 2 branches missed.">    	if (value == null)</span>
+<span class="nc" id="L238">    		return &quot;null&quot;;</span>
+
+<span class="nc bnc" id="L240" title="All 2 branches missed.">    	if (value instanceof AMF3Object)</span>
+<span class="nc" id="L241">    		return ((AMF3Object)value).toString(indent);</span>
+<span class="nc bnc" id="L242" title="All 2 branches missed.">    	if (value instanceof Message)</span>
+<span class="nc" id="L243">    		return ((Message)value).toString(indent);</span>
+    	
+<span class="nc bnc" id="L245" title="All 2 branches missed.">    	if (value.getClass().isArray()) {</span>
+<span class="nc" id="L246">    		final int length = Array.getLength(value);</span>
+<span class="nc" id="L247">    		List&lt;Object&gt; list = new ArrayList&lt;Object&gt;(length);</span>
+<span class="nc bnc" id="L248" title="All 2 branches missed.">    		for (int i = 0; i &lt; length; i++)</span>
+<span class="nc" id="L249">    			list.add(Array.get(value, i));</span>
+<span class="nc" id="L250">    		value = list;</span>
+    	}
+    	
+<span class="nc bnc" id="L253" title="All 2 branches missed.">    	if (value instanceof List) {</span>
+<span class="nc" id="L254">    		List&lt;?&gt; list = (List&lt;?&gt;)value;</span>
+    		
+<span class="nc" id="L256">    		StringBuilder sb = new StringBuilder(512);</span>
+    		
+<span class="nc" id="L258">    		final String innerIndent = indent + &quot;  &quot;;</span>
+<span class="nc" id="L259">    		sb.append('[');</span>
+<span class="nc bnc" id="L260" title="All 2 branches missed.">    		for (int i = 0; i &lt; list.size(); i++) {</span>
+<span class="nc bnc" id="L261" title="All 2 branches missed.">    			if (i &gt; 0)</span>
+<span class="nc" id="L262">    				sb.append(',');</span>
+<span class="nc" id="L263">    			sb.append('\n').append(indent).append(&quot;  &quot;).append(printValue(list.get(i), innerIndent));</span>
+    		}
+<span class="nc bnc" id="L265" title="All 2 branches missed.">    		if (list.size() &gt; 0)</span>
+<span class="nc" id="L266">    			sb.append('\n').append(indent);</span>
+<span class="nc" id="L267">    		sb.append(']');</span>
+    		
+<span class="nc" id="L269">    		return sb.toString();</span>
+    	}
+    	
+<span class="nc" id="L272">    	return value.toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActionProperty.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.script.actions</a> &gt; <span class="el_source">ActionProperty.java</span></div><h1>ActionProperty.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.script.actions;
+
+import com.ats.element.SearchedElement;
+import com.ats.executor.ActionStatus;
+import com.ats.executor.ActionTestScript;
+import com.ats.generator.variables.Variable;
+import com.ats.script.Script;
+import com.google.gson.JsonObject;
+
+import java.util.ArrayList;
+
+public class ActionProperty extends ActionReturnVariable {
+	
+	public static final String SCRIPT_LABEL = &quot;property&quot;;
+	
+	private String name;
+	
+<span class="nc" id="L37">	public ActionProperty() {}</span>
+	
+	public ActionProperty(Script script, boolean stop, ArrayList&lt;String&gt; options, String name, Variable variable, ArrayList&lt;String&gt; objectArray) {
+<span class="fc" id="L40">		super(script, stop, options, objectArray, variable);</span>
+<span class="fc" id="L41">		setName(name);</span>
+<span class="fc" id="L42">	}</span>
+	
+	public ActionProperty(Script script, boolean stop, int maxTry, int delay, SearchedElement element, String name, Variable variable) {
+<span class="nc" id="L45">		super(script, stop, maxTry, delay, element, variable);</span>
+<span class="nc" id="L46">		setName(name);</span>
+<span class="nc" id="L47">	}</span>
+	
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// Code Generator
+	//---------------------------------------------------------------------------------------------------------------------------------
+	
+	@Override
+	public StringBuilder getJavaCode() {
+<span class="fc" id="L55">		StringBuilder codeBuilder = super.getJavaCode();</span>
+<span class="fc" id="L56">		codeBuilder.append(&quot;, \&quot;&quot;)</span>
+<span class="fc" id="L57">				.append(name)</span>
+<span class="fc" id="L58">				.append(&quot;\&quot;, &quot;)</span>
+<span class="fc" id="L59">				.append(variable.getName())</span>
+<span class="fc" id="L60">				.append(&quot;)&quot;);</span>
+<span class="fc" id="L61">		return codeBuilder;</span>
+	}
+	
+	//---------------------------------------------------------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------------------------------------------------
+	
+	@Override
+	public void terminateExecution(ActionTestScript ts) {
+<span class="nc" id="L69">		super.terminateExecution(ts);</span>
+		
+<span class="nc bnc" id="L71" title="All 2 branches missed.">		if (status.isPassed()) {</span>
+			
+<span class="nc" id="L73">			final String attributeValue = getTestElement().getAttribute(status, name);</span>
+<span class="nc" id="L74">			status.endDuration();</span>
+			
+<span class="nc bnc" id="L76" title="All 2 branches missed.">			if (attributeValue == null) {</span>
+<span class="nc" id="L77">				status.setError(ActionStatus.ATTRIBUTE_NOT_SET, &quot;attribute '&quot; + name + &quot;' not found&quot;, name);</span>
+<span class="nc" id="L78">				ts.getRecorder().update(ActionStatus.ATTRIBUTE_NOT_SET, status.getDuration(), name);</span>
+			} else {
+<span class="nc" id="L80">				status.setMessage(attributeValue);</span>
+<span class="nc" id="L81">				updateVariableValue(attributeValue);</span>
+<span class="nc" id="L82">				ts.getRecorder().update(0, status.getDuration(), name, attributeValue);</span>
+			}
+		}
+<span class="nc" id="L85">	}</span>
+	
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+<span class="nc" id="L89">		data.addProperty(&quot;property&quot;, name);</span>
+<span class="nc" id="L90">		return super.getActionLogs(scriptName, scriptLine, data);</span>
+	}
+	
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------
+	
+	public String getName() {
+<span class="nc" id="L98">		return name;</span>
+	}
+	
+	public void setName(String value) {
+<span class="fc" id="L102">		this.name = value;</span>
+<span class="fc" id="L103">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

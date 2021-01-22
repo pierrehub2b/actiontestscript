@@ -1,0 +1,551 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DesktopDriverEngine.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.executor.drivers.engines</a> &gt; <span class="el_source">DesktopDriverEngine.java</span></div><h1>DesktopDriverEngine.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.executor.drivers.engines;
+
+import com.ats.driver.ApplicationProperties;
+import com.ats.element.*;
+import com.ats.executor.ActionStatus;
+import com.ats.executor.SendKeyData;
+import com.ats.executor.StreamGobbler;
+import com.ats.executor.TestBound;
+import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.desktop.DesktopData;
+import com.ats.executor.drivers.desktop.DesktopDriver;
+import com.ats.executor.drivers.desktop.DesktopResponse;
+import com.ats.executor.drivers.desktop.DesktopWindow;
+import com.ats.executor.drivers.engines.desktop.DesktopAlert;
+import com.ats.generator.objects.MouseDirection;
+import com.ats.generator.variables.CalculatedProperty;
+import com.ats.script.actions.ActionApi;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.Point;
+import org.openqa.selenium.WebElement;
+
+import java.awt.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
+
+public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
+
+	private final static String PROCESS_PROTOCOL = &quot;process://&quot;;
+	private final static String DESKTOP_TYPE = &quot;desktop&quot;;
+	private final static int DEFAULT_WAIT = 100;
+
+	protected DesktopWindow window;
+<span class="nc" id="L60">	private int windowIndex = -1;</span>
+
+	public DesktopDriverEngine(Channel channel, DesktopWindow window) {
+<span class="nc" id="L63">		super(channel);</span>
+<span class="nc" id="L64">		this.window = window;</span>
+<span class="nc" id="L65">	}</span>
+
+	public DesktopDriverEngine(Channel channel, DesktopDriver desktopDriver, ApplicationProperties props, int defaultWait) {
+<span class="nc" id="L68">		super(channel, desktopDriver, props, DEFAULT_WAIT, 0);</span>
+<span class="nc" id="L69">		desktopDriver.setEngine(this);</span>
+<span class="nc" id="L70">	}</span>
+
+	public DesktopDriverEngine(Channel channel, ActionStatus status, String application, DesktopDriver desktopDriver, ApplicationProperties props) {
+
+<span class="nc" id="L74">		this(channel, desktopDriver, props, DEFAULT_WAIT);</span>
+
+<span class="nc" id="L76">		long processId = -1;</span>
+
+<span class="nc bnc" id="L78" title="All 2 branches missed.">		if(application.startsWith(PROCESS_PROTOCOL)) {</span>
+
+<span class="nc" id="L80">			final Pattern procPattern = Pattern.compile(application.substring(PROCESS_PROTOCOL.length()));</span>
+
+<span class="nc" id="L82">			processId = getProcessId(procPattern);</span>
+<span class="nc" id="L83">			int maxTry = 20;</span>
+
+<span class="nc bnc" id="L85" title="All 4 branches missed.">			while (processId &lt; 0 &amp;&amp; maxTry &gt; 0) {</span>
+<span class="nc" id="L86">				processId = getProcessId(procPattern);</span>
+<span class="nc" id="L87">				channel.sleep(200);</span>
+<span class="nc" id="L88">				maxTry--;</span>
+			}
+
+<span class="nc bnc" id="L91" title="All 2 branches missed.">			if(processId &lt; 0) {</span>
+<span class="nc" id="L92">				status.setError(ActionStatus.CHANNEL_START_ERROR, &quot;unable to attach process with command like -&gt; &quot; + procPattern.pattern());</span>
+<span class="nc" id="L93">				return;</span>
+			}
+
+<span class="nc bnc" id="L96" title="All 2 branches missed.">		}else if(application.startsWith(DESKTOP_TYPE)) {</span>
+			
+<span class="nc" id="L98">			channel.setApplicationData(desktopDriver.getOsName() + &quot; (&quot; + desktopDriver.getOsVersion() +&quot;)&quot;, &quot;&quot;, desktopDriver.getDriverVersion(), 0L);</span>
+<span class="nc" id="L99">			final FoundElement desktop = desktopDriver.getRootElement(-1);</span>
+<span class="nc" id="L100">			channel.setDimensions(desktop.getTestScreenBound(), desktop.getTestScreenBound());</span>
+			
+<span class="nc" id="L102">			return;</span>
+			
+		}else {
+
+<span class="nc" id="L106">			URI fileUri = null;</span>
+<span class="nc" id="L107">			File exeFile = null;</span>
+
+<span class="nc bnc" id="L109" title="All 2 branches missed.">			if(applicationPath != null) {</span>
+<span class="nc" id="L110">				exeFile = new File(applicationPath);</span>
+<span class="nc bnc" id="L111" title="All 4 branches missed.">				if(exeFile.exists() &amp;&amp; exeFile.isFile()) {</span>
+<span class="nc" id="L112">					fileUri = exeFile.toURI();</span>
+				}
+			}
+
+<span class="nc bnc" id="L116" title="All 2 branches missed.">			if(fileUri == null) {</span>
+				try {
+<span class="nc" id="L118">					fileUri = new URI(application);</span>
+<span class="nc" id="L119">					exeFile = new File(fileUri);</span>
+<span class="nc" id="L120">				} catch (URISyntaxException | IllegalArgumentException e1) {}</span>
+			}
+
+<span class="nc bnc" id="L123" title="All 2 branches missed.">			if(exeFile == null) {//last chance to find exe file ....</span>
+<span class="nc" id="L124">				exeFile = new File(application);</span>
+			}
+
+<span class="nc bnc" id="L127" title="All 6 branches missed.">			if(exeFile != null &amp;&amp; exeFile.exists() &amp;&amp; exeFile.isFile()){</span>
+
+<span class="nc" id="L129">				applicationPath = exeFile.getAbsolutePath();</span>
+
+<span class="nc" id="L131">				final ArrayList&lt;String&gt; args = new ArrayList&lt;String&gt;();</span>
+<span class="nc" id="L132">				args.add(applicationPath);</span>
+<span class="nc" id="L133">				channel.getArguments().forEach(c -&gt; args.add(c.getCalculated()));</span>
+
+<span class="nc" id="L135">				Runtime rt = Runtime.getRuntime();</span>
+				
+				try{
+					String line;
+<span class="nc" id="L139">					boolean alreadyStarted = false; </span>
+<span class="nc" id="L140">					String programExe = exeFile.getAbsolutePath().substring(exeFile.getAbsolutePath().lastIndexOf(&quot;\\&quot;)+1);</span>
+<span class="nc" id="L141">					Process p = Runtime.getRuntime().exec</span>
+<span class="nc" id="L142">						    (System.getenv(&quot;windir&quot;) +&quot;\\system32\\&quot;+&quot;tasklist.exe&quot;);</span>
+<span class="nc" id="L143">					BufferedReader input =</span>
+<span class="nc" id="L144">				            new BufferedReader(new InputStreamReader(p.getInputStream()));</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">				    while ((line = input.readLine()) != null) {</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">				    	if(line.startsWith(programExe)) {</span>
+<span class="nc" id="L147">				    		alreadyStarted = true;</span>
+<span class="nc" id="L148">				    		String[] splitted = line.split(&quot;\\s+&quot;);</span>
+<span class="nc" id="L149">				    		processId = Long.parseLong(splitted[1]);</span>
+<span class="nc" id="L150">				    		break;</span>
+				    	}
+				    }
+<span class="nc" id="L153">				    input.close();</span>
+					
+<span class="nc bnc" id="L155" title="All 2 branches missed.">				    if(!alreadyStarted) {</span>
+<span class="nc" id="L156">				    	final Process proc = rt.exec(args.toArray(new String[args.size()]), null, exeFile.getParentFile());</span>
+<span class="nc" id="L157">				    	final StreamGobbler errorGobbler = new StreamGobbler(proc.getErrorStream(), &quot;ERROR&quot;);            </span>
+<span class="nc" id="L158">						final StreamGobbler outputGobbler = new StreamGobbler(proc.getInputStream(), &quot;OUTPUT&quot;);</span>
+						
+<span class="nc" id="L160">						errorGobbler.start();</span>
+<span class="nc" id="L161">						outputGobbler.start();</span>
+						
+<span class="nc" id="L163">				    	processId = proc.pid();</span>
+				    }
+
+<span class="nc" id="L166">					status.setNoError();</span>
+
+<span class="nc" id="L168">				} catch (Exception e) {</span>
+<span class="nc" id="L169">					status.setError(ActionStatus.CHANNEL_START_ERROR, e.getMessage());</span>
+<span class="nc" id="L170">					return;</span>
+<span class="nc" id="L171">				}</span>
+
+<span class="nc" id="L173">			}else {</span>
+<span class="nc" id="L174">				status.setError(ActionStatus.CHANNEL_START_ERROR, &quot;app file path not found -&gt; &quot; + application);</span>
+<span class="nc" id="L175">				return;</span>
+			}
+		}
+
+<span class="nc" id="L179">		String appVersion = &quot;N/A&quot;;</span>
+<span class="nc" id="L180">		String appBuildVersion = &quot;N/A&quot;;</span>
+<span class="nc" id="L181">		String appName = &quot;&quot;;</span>
+
+<span class="nc" id="L183">		final List&lt;DesktopData&gt; appInfo = desktopDriver.getVersion(applicationPath);</span>
+<span class="nc bnc" id="L184" title="All 2 branches missed.">		for (DesktopData data : appInfo) {</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">			if(&quot;ApplicationBuildVersion&quot;.equals(data.getName())) {</span>
+<span class="nc" id="L186">				appBuildVersion = data.getValue();</span>
+<span class="nc bnc" id="L187" title="All 2 branches missed.">			}else if(&quot;ApplicationVersion&quot;.equals(data.getName())) {</span>
+<span class="nc" id="L188">				appVersion = data.getValue();</span>
+<span class="nc bnc" id="L189" title="All 2 branches missed.">			}else if(&quot;ApplicationName&quot;.equals(data.getName())) {</span>
+<span class="nc" id="L190">				appName = data.getValue();</span>
+			}
+<span class="nc" id="L192">		}</span>
+
+<span class="nc" id="L194">		channel.setApplicationData(desktopDriver.getOsName() + &quot; (&quot; + desktopDriver.getOsVersion() +&quot;)&quot;, appName, appVersion + &quot; (&quot; + appBuildVersion + &quot;)&quot;, desktopDriver.getDriverVersion(), processId);</span>
+
+<span class="nc" id="L196">		int maxTry = 30;</span>
+<span class="nc bnc" id="L197" title="All 2 branches missed.">		while(maxTry &gt; 0){</span>
+<span class="nc" id="L198">			int handle = channel.getHandle(desktopDriver);</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">			if(handle &gt; 0) {</span>
+<span class="nc" id="L200">				maxTry = 0;</span>
+<span class="nc" id="L201">				window = desktopDriver.getWindowByHandle(handle);</span>
+			}else {
+<span class="nc" id="L203">				channel.sleep(200);</span>
+<span class="nc" id="L204">				maxTry--;</span>
+			}
+<span class="nc" id="L206">		}</span>
+
+<span class="nc" id="L208">		desktopDriver.moveWindow(channel, channel.getDimension().getPoint());</span>
+<span class="nc" id="L209">		desktopDriver.resizeWindow(channel, channel.getDimension().getSize());</span>
+<span class="nc" id="L210">	}</span>
+	
+	public void setWindow(DesktopWindow window) {
+<span class="nc" id="L213">		this.window = window;</span>
+<span class="nc" id="L214">	}</span>
+
+	private long getProcessId(Pattern procPattern) {
+		try {
+<span class="nc bnc" id="L218" title="All 4 branches missed.">			ProcessHandle proc = ProcessHandle.allProcesses().filter(p -&gt; p.info().command().isPresent() &amp;&amp; procPattern.matcher(p.info().command().get()).matches()).findFirst().get();</span>
+<span class="nc" id="L219">			applicationPath = proc.info().command().get();</span>
+<span class="nc" id="L220">			return proc.pid();</span>
+<span class="nc" id="L221">		}catch(Exception e) {</span>
+<span class="nc" id="L222">			return -1;</span>
+		}
+	}
+
+	//---------------------------------------------------------------------------------------------------------------------
+	// 
+	//---------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public void waitAfterAction(ActionStatus status) {
+<span class="nc" id="L232">		actionWait();</span>
+<span class="nc" id="L233">	}</span>
+
+	@Override
+	public DesktopDriver getDesktopDriver() {
+<span class="nc" id="L237">		return (DesktopDriver)driver;</span>
+	}
+
+	@Override
+	public void loadParents(FoundElement hoverElement){
+<span class="nc" id="L242">		hoverElement.setParent(getDesktopDriver().getTestElementParent(hoverElement.getId(), channel));</span>
+<span class="nc" id="L243">	}</span>
+
+	@Override
+	public String getAttribute(ActionStatus status, FoundElement element, String attributeName, int maxTry) {
+<span class="nc" id="L247">		return getDesktopDriver().getElementAttribute(element.getId(), attributeName);</span>
+	}
+
+	@Override
+	public CalculatedProperty[] getAttributes(FoundElement element, boolean reload){
+<span class="nc" id="L252">		return getAttributes(element.getId());</span>
+	}
+	
+	@Override
+	public void setSysProperty(String propertyName, String propertyValue) {
+	
+<span class="nc" id="L258">	}</span>
+	
+	public CalculatedProperty[] getAttributes(String elementId){
+<span class="nc" id="L261">		return getDesktopDriver().getElementAttributes(elementId);</span>
+	}
+	
+	@Override
+	public List&lt;String[]&gt; loadSelectOptions(TestElement element) {
+<span class="nc" id="L266">		final ArrayList&lt;String[]&gt; result = new ArrayList&lt;String[]&gt;();</span>
+<span class="nc" id="L267">		final List&lt;FoundElement&gt; options = findSelectOptions(channel.getDimension(), element);</span>
+		
+<span class="nc bnc" id="L269" title="All 4 branches missed.">		if(options != null &amp;&amp; options.size() &gt; 0) {</span>
+<span class="nc" id="L270">			options.stream().forEachOrdered(e -&gt; result.add(e.getItemAttribute()));</span>
+		}
+<span class="nc" id="L272">		return result;</span>
+	}
+	
+	@Override
+	public List&lt;FoundElement&gt; findSelectOptions(TestBound dimension, TestElement element) {
+<span class="nc" id="L277">		return getDesktopDriver().getListItems(dimension, element.getFoundElement().getId());</span>
+	}
+
+	@Override
+	public void selectOptionsItem(ActionStatus status, TestElement element, CalculatedProperty selectProperty) {
+<span class="nc" id="L282">		getDesktopDriver().selectItem(element.getFoundElement().getId(), selectProperty.getName(), selectProperty.getValue().getCalculated(), selectProperty.isRegexp());</span>
+<span class="nc" id="L283">	}</span>
+
+	//---------------------------------------------------------------------------------------------------------------------
+	// 
+	//---------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public FoundElement getElementFromPoint(Boolean syscomp, Double x, Double y){
+<span class="nc" id="L291">		return getDesktopDriver().getElementFromPoint(x, y);</span>
+	}
+
+	@Override
+	public FoundElement getElementFromRect(Boolean syscomp, Double x, Double y, Double w, Double h){
+<span class="nc" id="L296">		return getDesktopDriver().getElementFromRect(x, y, w, h);</span>
+	}
+	
+	@Override
+	public List&lt;FoundElement&gt; findElements(boolean sysComp, TestElement testElement, String tag, String[] attributes, String[] attributesValues, Predicate&lt;AtsBaseElement&gt; predicate, WebElement startElement, boolean waitAnimation) {
+<span class="nc bnc" id="L301" title="All 2 branches missed.">		if(sysComp) {</span>
+<span class="nc bnc" id="L302" title="All 2 branches missed.">			if(SYSCOMP.equals(tag.toUpperCase())) {</span>
+<span class="nc" id="L303">				return new ArrayList&lt;FoundElement&gt;(List.of(new FoundElement(window)));</span>
+			}else {
+<span class="nc" id="L305">				return getDesktopDriver().findElements(channel, testElement, tag, attributesValues, predicate);</span>
+			}
+		}else {
+<span class="nc" id="L308">			return getDesktopDriver().findElements(channel, testElement, tag, attributesValues, predicate);</span>
+		}
+	}
+
+	@Override
+	public void updateDimensions() {
+<span class="nc" id="L314">		final DesktopWindow win = getDesktopDriver().getWindowByHandle(channel.getHandle(desktopDriver));</span>
+<span class="nc bnc" id="L315" title="All 6 branches missed.">		if(win != null &amp;&amp; win.getWidth() &gt; 0 &amp;&amp; win.getHeight() &gt; 0){</span>
+<span class="nc" id="L316">			channel.setDimensions(new TestBound(</span>
+<span class="nc" id="L317">					win.getX(),</span>
+<span class="nc" id="L318">					win.getY(),</span>
+<span class="nc" id="L319">					win.getWidth(),</span>
+<span class="nc" id="L320">					win.getHeight()), channel.getSubDimension());</span>
+		}
+<span class="nc" id="L322">	}</span>
+
+	@Override
+	public void close(boolean keepRunning) {
+<span class="nc" id="L326">		getDesktopDriver().closeWindows(channel.getProcessId());</span>
+<span class="nc" id="L327">		getDesktopDriver().closeDriver();</span>
+<span class="nc" id="L328">	}</span>
+
+	@Override
+	public void switchWindow(ActionStatus status, int index, int tries) {
+		
+<span class="nc" id="L333">		DesktopResponse resp = getDesktopDriver().switchTo(channel.getProcessId(), index);</span>
+<span class="nc" id="L334">		int maxTry = 1 + tries;</span>
+<span class="nc bnc" id="L335" title="All 4 branches missed.">		while(resp.errorCode == ActionStatus.WINDOW_NOT_FOUND &amp;&amp; maxTry &gt; 0) {</span>
+<span class="nc" id="L336">			channel.sleep(1000);</span>
+<span class="nc" id="L337">			resp = getDesktopDriver().switchTo(channel.getProcessId(), index);</span>
+<span class="nc" id="L338">			maxTry--;</span>
+		}
+		
+<span class="nc bnc" id="L341" title="All 2 branches missed.">		if(resp.errorCode == ActionStatus.WINDOW_NOT_FOUND) {</span>
+<span class="nc" id="L342">			status.setError(ActionStatus.WINDOW_NOT_FOUND, &quot;cannot switch to window index '&quot; + index + &quot;'&quot;);</span>
+		}else {
+<span class="nc" id="L344">			channel.updateWinHandle(getDesktopDriver(), index);</span>
+<span class="nc" id="L345">			windowIndex = index;</span>
+<span class="nc" id="L346">			status.setPassed(true);</span>
+		}
+<span class="nc" id="L348">	}</span>
+
+	@Override
+	public void setWindowToFront() {
+<span class="nc" id="L352">		channel.toFront();</span>
+<span class="nc" id="L353">		getDesktopDriver().switchTo(channel.getProcessId(), windowIndex);</span>
+<span class="nc" id="L354">	}</span>
+
+	@Override
+	public void closeWindow(ActionStatus status) {
+<span class="nc" id="L358">		getDesktopDriver().closeWindow(channel);</span>
+<span class="nc" id="L359">	}</span>
+
+	@Override
+	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {
+<span class="nc" id="L363">		getDesktopDriver().mouseMiddleClick();</span>
+<span class="nc" id="L364">	}</span>
+
+	@Override
+	public void doubleClick() {
+<span class="nc" id="L368">		getDesktopDriver().doubleClick();</span>
+<span class="nc" id="L369">	}</span>
+
+	@Override
+	public void rightClick() {
+<span class="nc" id="L373">		getDesktopDriver().mouseRightClick();</span>
+<span class="nc" id="L374">	}</span>
+
+	@Override
+	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {
+<span class="nc" id="L378">		final Rectangle rect = foundElement.getRectangle();</span>
+<span class="nc" id="L379">		getDesktopDriver().mouseMove(</span>
+<span class="nc" id="L380">				getOffsetX(rect, position) + foundElement.getScreenX().intValue() - foundElement.getCenterWidth(), </span>
+<span class="nc" id="L381">				getOffsetY(rect, position) + foundElement.getScreenY().intValue() - foundElement.getCenterHeight());</span>
+<span class="nc" id="L382">	}</span>
+
+	@Override
+	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {
+<span class="nc" id="L386">		getDesktopDriver().mouseClick();</span>
+<span class="nc" id="L387">	}</span>
+
+	@Override
+	public void drag(ActionStatus status, FoundElement element, MouseDirection md, int offsetX, int offsetY) {
+<span class="nc" id="L391">		getDesktopDriver().drag();</span>
+<span class="nc" id="L392">	}</span>
+
+	@Override
+	public void drop(MouseDirection md, boolean desktopDriver) {
+<span class="nc" id="L396">		getDesktopDriver().mouseRelease();</span>
+<span class="nc" id="L397">	}</span>
+
+	@Override
+	public void keyDown(Keys key) {
+<span class="nc" id="L401">		getDesktopDriver().keyDown(key.getCodePoint());</span>
+<span class="nc" id="L402">	}</span>
+
+	@Override
+	public void keyUp(Keys key) {
+<span class="nc" id="L406">		getDesktopDriver().keyUp(key.getCodePoint());</span>
+<span class="nc" id="L407">	}</span>
+
+	@Override
+	public void moveByOffset(int hDirection, int vDirection) {
+<span class="nc" id="L411">		final java.awt.Point pt = MouseInfo.getPointerInfo().getLocation();</span>
+<span class="nc" id="L412">		getDesktopDriver().mouseMove(pt.x + hDirection, pt.y + vDirection);</span>
+<span class="nc" id="L413">	}</span>
+
+	@Override
+	protected void setPosition(Point pt) {
+<span class="nc" id="L417">		getDesktopDriver().moveWindow(channel, pt);</span>
+<span class="nc" id="L418">	}</span>
+
+	@Override
+	protected void setSize(Dimension size) {
+<span class="nc" id="L422">		getDesktopDriver().resizeWindow(channel, size);</span>
+<span class="nc" id="L423">	}</span>
+
+	@Override
+	public void clearText(ActionStatus status, TestElement te, MouseDirection md) {
+		
+<span class="nc" id="L428">		final FoundElement element = te.getFoundElement();</span>
+		
+<span class="nc" id="L430">		mouseMoveToElement(status, element, md, false, 0, 0);</span>
+<span class="nc" id="L431">		mouseClick(status, element, null, 0, 0);</span>
+		
+<span class="nc" id="L433">		getDesktopDriver().clearText(te.getWebElementId());</span>
+<span class="nc" id="L434">	}</span>
+
+	@Override
+	public void sendTextData(ActionStatus status, TestElement element, ArrayList&lt;SendKeyData&gt; textActionList) {
+<span class="nc bnc" id="L438" title="All 2 branches missed.">		for(SendKeyData sequence : textActionList) {</span>
+<span class="nc bnc" id="L439" title="All 2 branches missed.">			if(sequence.getDownKey() != null) {</span>
+<span class="nc" id="L440">				getDesktopDriver().keyDown(sequence.getDownKey().getCodePoint());</span>
+<span class="nc" id="L441">				getDesktopDriver().sendKeys(sequence.getSequenceDesktop(), element.getWebElementId());</span>
+<span class="nc" id="L442">				getDesktopDriver().keyUp(sequence.getDownKey().getCodePoint());</span>
+			} else {
+<span class="nc" id="L444">				getDesktopDriver().sendKeys(sequence.getSequenceDesktop(), element.getWebElementId());</span>
+			}
+<span class="nc" id="L446">		}</span>
+<span class="nc" id="L447">	}</span>
+
+	@Override
+	public void refreshElementMapLocation() {
+<span class="nc" id="L451">		getDesktopDriver().refreshElementMapLocation(channel);</span>
+<span class="nc" id="L452">	}</span>
+
+	//--------------------------------------------------
+	//do nothing with followings methods for the moment ....
+	//--------------------------------------------------
+
+	@Override
+	public String getTitle() {
+<span class="nc" id="L460">		return &quot;&quot;;</span>
+	}
+
+	@Override
+	public Object executeScript(ActionStatus status, String script, Object... params) {
+<span class="nc" id="L465">		status.setPassed(true);</span>
+<span class="nc" id="L466">		return null;</span>
+	}
+
+	@Override
+	public void goToUrl(ActionStatus status, String url) {
+<span class="nc" id="L471">		getDesktopDriver().gotoUrl(status, window.getHandle(), url);</span>
+<span class="nc" id="L472">	}</span>
+
+	@Override
+	public WebElement getRootElement(Channel cnl) {
+<span class="nc" id="L476">		return new DesktopRootElement(getDesktopDriver().getRootElement(cnl));</span>
+	}
+
+	@Override
+<span class="nc" id="L480">	public void scroll(FoundElement element) {}</span>
+
+	@Override
+	public void scroll(int delta) {
+<span class="nc" id="L484">		getDesktopDriver().mouseWheel(delta);</span>
+<span class="nc" id="L485">	}</span>
+
+	@Override
+	public void scroll(FoundElement element, int delta) {
+<span class="nc" id="L489">		getDesktopDriver().mouseWheel(delta);</span>
+<span class="nc" id="L490">	}</span>
+
+	@Override
+	public DialogBox switchToAlert() {
+<span class="nc" id="L494">		return new DesktopAlert(this, channel.getDimension());</span>
+	}
+
+	@Override
+<span class="nc" id="L498">	public boolean switchToDefaultContent() {return true;}</span>
+
+	@Override
+<span class="nc" id="L501">	public void switchToFrameId(String id) {}</span>
+
+	@Override
+	public String getSource() {
+<span class="nc" id="L505">		getDesktopDriver().refreshElementMap(channel);</span>
+<span class="nc" id="L506">		return getDesktopDriver().getSource();</span>
+	}
+
+	@Override
+<span class="nc" id="L510">	public void api(ActionStatus status, ActionApi api) {}</span>
+
+	@Override
+<span class="nc" id="L513">	public void buttonClick(ActionStatus status, String id) {}</span>
+
+	@Override
+<span class="nc" id="L516">	public void tap(int count, FoundElement element) {}</span>
+	
+	@Override
+<span class="nc" id="L519">	public void press(int duration, ArrayList&lt;String&gt; paths, FoundElement element) {}</span>
+	
+	@Override
+	public void windowState(ActionStatus status, Channel channel, String state) {
+<span class="nc" id="L523">		getDesktopDriver().windowState(status, channel, state);</span>
+<span class="nc" id="L524">	}</span>
+
+	@Override
+	public Object executeJavaScript(ActionStatus status, String script, TestElement element) {
+<span class="nc" id="L528">		return getDesktopDriver().executeScript(status, script, element.getFoundElement());</span>
+	}
+
+	@Override
+	public Object executeJavaScript(ActionStatus status, String script, boolean returnValue) {
+<span class="nc" id="L533">		status.setPassed(true);</span>
+<span class="nc" id="L534">		return null;</span>
+	}
+
+	public List&lt;FoundElement&gt; getDialogBox() {
+<span class="nc" id="L538">		return getDesktopDriver().getDialogBox(channel.getDimension());</span>
+	}
+	
+	@Override
+	public int getNumWindows() {
+<span class="nc" id="L543">		return getDesktopDriver().getWindowsByPid(channel.getProcessId()).size();</span>
+	}
+
+	@Override
+	public String getUrl() {
+<span class="nc" id="L548">		return applicationPath;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

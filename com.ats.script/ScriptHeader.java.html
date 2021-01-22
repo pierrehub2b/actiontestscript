@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ScriptHeader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.script</a> &gt; <span class="el_source">ScriptHeader.java</span></div><h1>ScriptHeader.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.script;
+
+import java.io.File;
+import java.nio.file.Path;
+import java.text.DateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
+
+import org.apache.commons.text.StringEscapeUtils;
+import org.testng.annotations.Test;
+
+import com.ats.executor.ActionTestScript;
+import com.ats.executor.channels.SystemValues;
+import com.ats.generator.ATS;
+import com.ats.generator.objects.Cartesian;
+import com.ats.generator.objects.mouse.Mouse;
+import com.ats.generator.variables.ConditionalValue;
+import com.ats.generator.variables.Variable;
+import com.ats.script.actions.Action;
+import com.ats.script.actions.neoload.ActionNeoload;
+import com.ats.script.actions.performance.ActionPerformance;
+import com.ats.script.actions.performance.octoperf.ActionOctoperfVirtualUser;
+import com.ats.tools.Operators;
+import com.ats.tools.Utils;
+
+public class ScriptHeader {
+
+	private Project project;
+
+<span class="nc" id="L52">	private String path = &quot;&quot;;</span>
+<span class="nc" id="L53">	private String projectPath = &quot;&quot;;</span>
+<span class="nc" id="L54">	private String packageName = &quot;&quot;;</span>
+<span class="nc" id="L55">	private String name = &quot;&quot;;</span>
+<span class="nc" id="L56">	private String id = &quot;&quot;;</span>
+<span class="nc" id="L57">	private String squashId = &quot;&quot;;</span>
+<span class="nc" id="L58">	private String jiraId = &quot;&quot;;</span>
+
+<span class="nc" id="L60">	private List&lt;String&gt; groups = null;</span>
+<span class="nc" id="L61">	private String description = &quot;&quot;;</span>
+<span class="nc" id="L62">	private String author = &quot;&quot;;</span>
+<span class="nc" id="L63">	private String prerequisite = &quot;&quot;;</span>
+<span class="nc" id="L64">	private Date createdAt = new Date();</span>
+
+<span class="nc" id="L66">	public ScriptHeader(){} // needed for serialization</span>
+
+<span class="nc" id="L68">	public ScriptHeader(String id, String author, String description, String prerequisites, String groups){</span>
+<span class="nc" id="L69">		this.id = id;</span>
+<span class="nc" id="L70">		this.author = author;</span>
+<span class="nc" id="L71">		this.description = description;</span>
+<span class="nc" id="L72">		this.prerequisite = prerequisites;</span>
+<span class="nc" id="L73">		this.groups = Arrays.asList(groups.split(&quot;,&quot;));</span>
+<span class="nc" id="L74">	}</span>
+
+<span class="nc" id="L76">	public ScriptHeader(Project prj, File file){</span>
+
+<span class="nc" id="L78">		this.project = prj;</span>
+
+<span class="nc" id="L80">		this.setProjectPath(project.getFolderPath());</span>
+<span class="nc" id="L81">		this.setPath(file.getAbsolutePath());</span>
+<span class="nc" id="L82">		this.setName(Utils.removeExtension(file.getName()));</span>
+
+		try {
+<span class="nc" id="L85">			final Path relative = project.getAtsSourceFolder().relativize(file.getParentFile().toPath());</span>
+<span class="nc" id="L86">			this.setPackageName(relative.toString().replace(File.separator, &quot;.&quot;));</span>
+<span class="nc" id="L87">		}catch (IllegalArgumentException e) {}</span>
+<span class="nc" id="L88">	}</span>
+
+	public File getTestReportFolder(Path path) {
+<span class="nc" id="L91">		return project.getReportFolder().toFile();</span>
+	}
+
+	public File getReportFolder() {
+<span class="nc" id="L95">		return project.getReportFolder().toFile();</span>
+	}
+
+	public File getJavaDestinationFolder() {
+<span class="nc" id="L99">		return project.getJavaDestinationFolder().toFile();</span>
+	}
+
+	public File getJavaFile() {
+<span class="nc" id="L103">		return project.getJavaFile(getPackagePath() + name + &quot;.java&quot;);</span>
+	}
+
+	public String getPackagePath() {
+<span class="nc" id="L107">		String path = packageName.replace(&quot;.&quot;, File.separator);</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">		if(path.length() &gt; 0) {</span>
+<span class="nc" id="L109">			path += File.separator;</span>
+		}
+<span class="nc" id="L111">		return path;</span>
+	}
+
+	public void parseGroups(String data) {
+<span class="nc bnc" id="L115" title="All 2 branches missed.">		groups = Arrays.stream(data.split(&quot;,&quot;)).map(String :: trim).filter(s -&gt; (s.length() &gt; 0)).collect(Collectors.toList());</span>
+<span class="nc" id="L116">	}</span>
+
+	public String getDataGroups() {
+<span class="nc bnc" id="L119" title="All 2 branches missed.">		if(groups != null){</span>
+<span class="nc" id="L120">			return String.join(&quot;,&quot;, groups);</span>
+		}
+<span class="nc" id="L122">		return &quot;&quot;;</span>
+	}
+
+	public String getJoinedGroups() {
+<span class="nc bnc" id="L126" title="All 2 branches missed.">		if(groups != null){</span>
+<span class="nc" id="L127">			StringJoiner joiner = new StringJoiner(&quot;, &quot;);</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">			for(int i = 0; i &lt; groups.size(); i++){</span>
+<span class="nc bnc" id="L129" title="All 2 branches missed.">				if(groups.get(i).length() &gt; 0) {</span>
+<span class="nc" id="L130">					joiner.add(&quot;\&quot;&quot; + groups.get(i) + &quot;\&quot;&quot;);</span>
+				}
+			}
+<span class="nc" id="L133">			return joiner.toString();</span>
+		}
+<span class="nc" id="L135">		return &quot;&quot;;</span>
+	}
+
+	private String getGroupCode() {
+<span class="nc" id="L139">		String code = getJoinedGroups();</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">		if(code.length() &gt; 0){</span>
+<span class="nc" id="L141">			return &quot;(groups={&quot; + code + &quot;})&quot;;</span>
+		}
+<span class="nc" id="L143">		return &quot;&quot;;</span>
+	}
+
+	public String getQualifiedName() {
+<span class="nc bnc" id="L147" title="All 2 branches missed.">		if(packageName.length() &gt; 0) {</span>
+<span class="nc" id="L148">			return packageName + &quot;.&quot; + name;</span>
+		}else {
+<span class="nc" id="L150">			return name;</span>
+		}
+	}
+
+<span class="nc" id="L154">	private static final String javaCode = String.join(</span>
+<span class="nc" id="L155">			System.getProperty(&quot;line.separator&quot;)</span>
+			, &quot;&quot;
+			, &quot;//---------------------------------------------------------------------------------------&quot;
+			, &quot;//\t    _  _____ ____     ____                           _             &quot;
+			, &quot;//\t   / \\|_   _/ ___|   / ___| ___ _ __   ___ _ __ __ _| |_ ___  _ __ &quot;
+			, &quot;//\t  / _ \\ | | \\___ \\  | |  _ / _ \\ '_ \\ / _ \\ '__/ _` | __/ _ \\| '__|&quot;
+			, &quot;//\t / ___ \\| |  ___) | | |_| |  __/ | | |  __/ | | (_| | || (_) | |   &quot;
+			, &quot;//\t/_/   \\_\\_| |____/   \\____|\\___|_| |_|\\___|_|  \\__,_|\\__\\___/|_|   &quot;
+			, &quot;//&quot;
+			, &quot;//---------------------------------------------------------------------------------------&quot;
+			, &quot;//\t/!\\ Warning /!\\&quot;
+			, &quot;//\tThis class has been automatically generated by ATS Script Generator (ver. #ATS_VERSION#)&quot;
+			, &quot;//\tYou may loose modifications if you edit this file manually !&quot;
+			, &quot;//---------------------------------------------------------------------------------------&quot;
+			, &quot;&quot;
+<span class="nc" id="L170">			, &quot;import &quot; + Test.class.getName() + &quot;;&quot;</span>
+<span class="nc" id="L171">			, &quot;import &quot; + ScriptHeader.class.getPackageName() + &quot;.*;&quot;</span>
+<span class="nc" id="L172">			, &quot;import &quot; + Action.class.getPackageName() + &quot;.*;&quot;</span>
+<span class="nc" id="L173">			, &quot;import &quot; + ActionNeoload.class.getPackageName() + &quot;.*;&quot;</span>
+<span class="nc" id="L174">			, &quot;import &quot; + ActionPerformance.class.getPackageName() + &quot;.*;&quot;</span>
+<span class="nc" id="L175">			, &quot;import &quot; + ActionOctoperfVirtualUser.class.getPackageName() + &quot;.*;&quot;</span>
+<span class="nc" id="L176">			, &quot;import &quot; + ActionTestScript.class.getName() + &quot;;&quot;</span>
+<span class="nc" id="L177">			, &quot;import &quot; + Cartesian.class.getName() + &quot;;&quot;</span>
+<span class="nc" id="L178">			, &quot;import &quot; + Mouse.class.getName() + &quot;;&quot;</span>
+<span class="nc" id="L179">			, &quot;import &quot; + Variable.class.getName() + &quot;;&quot;</span>
+<span class="nc" id="L180">			, &quot;import &quot; + ConditionalValue.class.getName() + &quot;;&quot;</span>
+<span class="nc" id="L181">			, &quot;import &quot; + Operators.class.getName() + &quot;;&quot;</span>
+			, &quot;&quot;
+<span class="nc" id="L183">			, &quot;public class #CLASS_NAME# extends &quot; + ActionTestScript.class.getSimpleName() + &quot;{&quot;</span>
+			, &quot;&quot;
+			, &quot;\t/**&quot;
+			, &quot;\t* Test Name : &lt;b&gt;#TEST_NAME#&lt;/b&gt;&quot;
+<span class="nc" id="L187">			, &quot;\t* Generated at : &lt;b&gt;&quot; + DateFormat.getDateTimeInstance().format(new Date()) + &quot;&lt;/b&gt;&quot;</span>
+			, &quot;\t*/&quot;
+			, &quot;&quot;
+			, &quot;\tpublic #CLASS_NAME#(){super();}&quot;
+<span class="nc" id="L191">			, &quot;\tpublic #CLASS_NAME#(&quot; + ActionTestScript.class.getName() + &quot; sc){super(sc);}&quot;</span>
+			, &quot;&quot;
+			, &quot;\t@Override&quot;
+			, &quot;\tpublic final String &quot; + ActionTestScript.JAVA_GAV_FUNCTION_NAME + &quot;(){return \&quot;#PROJECT_GAV#\&quot;;}&quot;
+			, &quot;&quot;
+			, &quot;\t@Override&quot;
+<span class="nc" id="L197">			, &quot;\tprotected &quot; + ScriptHeader.class.getSimpleName() + &quot; getHeader(){&quot;</span>
+			, &quot;\t\treturn new ScriptHeader(&quot;
+			, &quot;\t\t\t\&quot;#SCRIPT_ID#\&quot;,&quot;
+			, &quot;\t\t\t\&quot;#AUTHOR_NAME#\&quot;,&quot;
+			, &quot;\t\t\t\&quot;#DESCRIPTION#\&quot;,&quot;
+			, &quot;\t\t\t\&quot;#PREREQUISITES#\&quot;,&quot;
+			, &quot;\t\t\t\&quot;#GROUP_DESCRIPTION#\&quot;);&quot;
+			, &quot;\t}&quot;
+			, &quot;&quot;
+			, &quot;\t@Test#GROUP_DATA#&quot;
+			, &quot;\tpublic void &quot; + ActionTestScript.MAIN_TEST_FUNCTION + &quot;(){&quot;
+			);
+
+	public String getJavaCode(Project project) {
+
+<span class="nc" id="L212">		String code = javaCode.replace(&quot;#CLASS_NAME#&quot;, name)</span>
+<span class="nc" id="L213">				.replace(&quot;#TEST_NAME#&quot;, getQualifiedName())</span>
+<span class="nc" id="L214">				.replace(&quot;#SCRIPT_ID#&quot;, StringEscapeUtils.escapeJava(id))</span>
+<span class="nc" id="L215">				.replace(&quot;#DESCRIPTION#&quot;, StringEscapeUtils.escapeJava(description))</span>
+<span class="nc" id="L216">				.replace(&quot;#PREREQUISITES#&quot;, StringEscapeUtils.escapeJava(prerequisite))</span>
+<span class="nc" id="L217">				.replace(&quot;#AUTHOR_NAME#&quot;, StringEscapeUtils.escapeJava(author))</span>
+<span class="nc" id="L218">				.replace(&quot;#GROUP_DATA#&quot;, getGroupCode())</span>
+<span class="nc" id="L219">				.replace(&quot;#ATS_VERSION#&quot;, ATS.VERSION)</span>
+<span class="nc" id="L220">				.replace(&quot;#GROUP_DESCRIPTION#&quot;, getDataGroups())</span>
+<span class="nc" id="L221">				.replace(&quot;#PROJECT_GAV#&quot;, StringEscapeUtils.escapeJava(project.getGav()));</span>
+
+<span class="nc bnc" id="L223" title="All 2 branches missed.">		if(packageName.length() &gt; 0) {</span>
+<span class="nc" id="L224">			code = &quot;package &quot; + packageName + &quot;;\r\n&quot; + code;</span>
+		}
+
+<span class="nc" id="L227">		return code;</span>
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	//  getters and setters for serialization
+	//-------------------------------------------------------------------------------------------------
+
+	public List&lt;String&gt; getGroups() {
+<span class="nc" id="L235">		return groups;</span>
+	}
+	public void setGroups(List&lt;String&gt; value) {
+<span class="nc" id="L238">		this.groups = value;</span>
+<span class="nc" id="L239">	}</span>
+	public String getDescription() {
+<span class="nc" id="L241">		return description;</span>
+	}
+	public void setDescription(String value) {
+<span class="nc" id="L244">		this.description = value;</span>
+<span class="nc" id="L245">	}</span>
+	public String getAuthor() {
+<span class="nc" id="L247">		return author;</span>
+	}
+	public void setAuthor(String value) {
+<span class="nc" id="L250">		this.author = value;</span>
+<span class="nc" id="L251">	}</span>
+	public String getPrerequisite() {
+<span class="nc" id="L253">		return prerequisite;</span>
+	}
+	public void setPrerequisite(String value) {
+<span class="nc" id="L256">		this.prerequisite = value;</span>
+<span class="nc" id="L257">	}</span>
+
+	public String getName() {
+<span class="nc" id="L260">		return name;</span>
+	}
+
+	public void setName(String value) {
+<span class="nc" id="L264">		this.name = value;</span>
+<span class="nc" id="L265">	}</span>
+
+	public String getId() {
+<span class="nc" id="L268">		return id;</span>
+	}
+
+	public void setId(String value) {
+<span class="nc" id="L272">		this.id = value;</span>
+<span class="nc" id="L273">	}</span>
+
+	public String getJiraId() {
+<span class="nc" id="L276">		return jiraId;</span>
+	}
+
+	public void setJiraId(String value) {
+<span class="nc" id="L280">		this.jiraId = value;</span>
+<span class="nc" id="L281">	}</span>
+
+	public String getSquashId() {
+<span class="nc" id="L284">		return squashId;</span>
+	}
+
+	public void setSquashId(String value) {
+<span class="nc" id="L288">		this.squashId = value;</span>
+<span class="nc" id="L289">	}</span>
+
+	public String getPackageName() {
+<span class="nc" id="L292">		return packageName;</span>
+	}
+
+	public void setPackageName(String value) {
+<span class="nc" id="L296">		this.packageName = value;</span>
+<span class="nc" id="L297">	}</span>
+
+	public String getPath() {
+<span class="nc" id="L300">		return path;</span>
+	}
+
+	public void setPath(String path) {
+<span class="nc" id="L304">		this.path = path;</span>
+<span class="nc" id="L305">	}</span>
+
+	public String getProjectPath() {
+<span class="nc" id="L308">		return projectPath;</span>
+	}
+
+	public void setProjectPath(String value) {
+<span class="nc" id="L312">		this.projectPath = value;</span>
+<span class="nc" id="L313">	}</span>
+
+	public Date getCreatedAt() {
+<span class="nc" id="L316">		return createdAt;</span>
+	}
+
+	public void setCreatedAt(Date createdAt) {
+<span class="nc" id="L320">		this.createdAt = createdAt;</span>
+<span class="nc" id="L321">	}</span>
+	
+<span class="nc" id="L323">	public void setSystemProperties(String value) {}</span>
+	
+	public String getSystemProperties() {
+<span class="nc" id="L326">		return String.join(&quot;,&quot;, SystemValues.VALUES_NAME);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

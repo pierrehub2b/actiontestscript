@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DesktopAlert.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.executor.drivers.engines.desktop</a> &gt; <span class="el_source">DesktopAlert.java</span></div><h1>DesktopAlert.java</h1><pre class="source lang-java linenums">package com.ats.executor.drivers.engines.desktop;
+
+import com.ats.element.DialogBox;
+import com.ats.element.FoundElement;
+import com.ats.executor.ActionStatus;
+import com.ats.executor.TestBound;
+import com.ats.executor.drivers.engines.DesktopDriverEngine;
+import com.ats.generator.objects.MouseDirection;
+import com.ats.generator.variables.CalculatedProperty;
+import org.openqa.selenium.NoAlertPresentException;
+
+import java.util.List;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
+
+public class DesktopAlert extends DialogBox {
+
+	private FoundElement dialog;
+	private DesktopDriverEngine engine;
+	
+	public DesktopAlert(DesktopDriverEngine engine, TestBound dimension) {
+<span class="nc" id="L22">		super(engine, dimension);</span>
+		
+<span class="nc" id="L24">		waitBox = 200;</span>
+		
+<span class="nc" id="L26">		final List&lt;FoundElement&gt; elements = engine.getDesktopDriver().getDialogBox(dimension);</span>
+<span class="nc bnc" id="L27" title="All 2 branches missed.">		if(elements.size() &gt; 0) {</span>
+<span class="nc" id="L28">			this.dialog = elements.get(0);</span>
+<span class="nc" id="L29">			this.engine = engine;</span>
+		}else {
+<span class="nc" id="L31">			throw new NoAlertPresentException();</span>
+		}
+<span class="nc" id="L33">	}</span>
+
+	@Override
+	public void dismiss(ActionStatus status) {
+<span class="nc bnc" id="L37" title="All 2 branches missed.">		if(dialog != null) {</span>
+			
+<span class="nc" id="L39">			FoundElement closebutton = null;</span>
+			
+<span class="nc" id="L41">			List&lt;FoundElement&gt; buttons = dialog.getChildren().stream().filter(p -&gt; p.getTag().equals(&quot;Button&quot;)).collect(Collectors.toList());</span>
+<span class="nc bnc" id="L42" title="All 2 branches missed.">			if(buttons.size() &gt; 1) {</span>
+<span class="nc" id="L43">				closebutton = buttons.get(1);</span>
+			}else {
+<span class="nc" id="L45">				List&lt;FoundElement&gt; title = dialog.getChildren().stream().filter(p -&gt; p.getTag().equals(&quot;TitleBar&quot;)).collect(Collectors.toList());</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">				if(title.size() &gt; 0) {</span>
+<span class="nc" id="L47">					FoundElement close = title.get(0).getChildren().get(0);</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">					if(&quot;Button&quot;.equals(close.getTag())){</span>
+<span class="nc" id="L49">						closebutton = close;</span>
+					}
+				}
+			}
+			
+<span class="nc bnc" id="L54" title="All 2 branches missed.">			if(closebutton != null) {</span>
+<span class="nc" id="L55">				engine.mouseMoveToElement(status, closebutton, new MouseDirection(), false, 0, 0);</span>
+<span class="nc" id="L56">				engine.getDesktopDriver().mouseClick();</span>
+			}else {
+				//TODO click on close button of the window
+			}
+		}
+<span class="nc" id="L61">	}</span>
+
+	@Override
+	public void accept(ActionStatus status) {
+<span class="nc bnc" id="L65" title="All 2 branches missed.">		if(dialog != null) {</span>
+<span class="nc" id="L66">			List&lt;FoundElement&gt; buttons = dialog.getChildren().stream().filter(p -&gt; p.getTag().equals(&quot;Button&quot;)).collect(Collectors.toList());</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">			if(buttons.size() &gt; 0) {</span>
+<span class="nc" id="L68">				engine.mouseMoveToElement(status, buttons.get(0), new MouseDirection(), false, 0, 0);</span>
+<span class="nc" id="L69">				engine.getDesktopDriver().mouseClick();</span>
+			}else {
+				//TODO execute enter key ?
+			}
+		}
+<span class="nc" id="L74">	}</span>
+
+	@Override
+	public void defaultButton(ActionStatus status) {
+<span class="nc bnc" id="L78" title="All 2 branches missed.">		if(dialog != null) {</span>
+<span class="nc" id="L79">			engine.mouseMoveToElement(status, dialog, new MouseDirection(), false, 0, 0);</span>
+			//engine.sendTextData(status, dialog, textActionList);
+		}
+<span class="nc" id="L82">	}</span>
+
+	@Override
+	public String getText() {
+<span class="nc bnc" id="L86" title="All 2 branches missed.">		if(dialog != null) {</span>
+<span class="nc" id="L87">			List&lt;FoundElement&gt; labels = dialog.getChildren().stream().filter(p -&gt; p.getTag().equals(&quot;Text&quot;)).collect(Collectors.toList());</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">			if(labels.size() &gt; 0) {</span>
+<span class="nc" id="L89">				final StringJoiner joiner = new StringJoiner(&quot;\n&quot;);</span>
+<span class="nc" id="L90">				labels.forEach(l -&gt; joiner.add(engine.getAttribute(null, l, &quot;Name&quot;, 1)));</span>
+<span class="nc" id="L91">				return joiner.toString();</span>
+			}
+		}
+<span class="nc" id="L94">		return &quot;&quot;;</span>
+	}
+
+	@Override
+	public void sendKeys(String text) {
+<span class="nc bnc" id="L99" title="All 2 branches missed.">		if(dialog != null) {</span>
+<span class="nc" id="L100">			List&lt;FoundElement&gt; edits = dialog.getChildren().stream().filter(p -&gt; p.getTag().equals(&quot;Edit&quot;)).collect(Collectors.toList());</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">			if(edits.size() &gt; 0) {</span>
+<span class="nc" id="L102">				engine.getDesktopDriver().executeScript(null, &quot;SetValue(&quot; + text + &quot;)&quot;, edits.get(0));</span>
+			}
+		}
+<span class="nc" id="L105">	}</span>
+
+	@Override
+	public String getTitle() {
+<span class="nc bnc" id="L109" title="All 2 branches missed.">		if(dialog != null) {</span>
+<span class="nc" id="L110">			List&lt;FoundElement&gt; title = dialog.getChildren().stream().filter(p -&gt; p.getTag().equals(&quot;TitleBar&quot;)).collect(Collectors.toList());</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">			if(title.size() &gt; 0) {</span>
+<span class="nc" id="L112">				return engine.getAttribute(null, title.get(0), &quot;Value&quot;, 1);</span>
+			}
+		}
+<span class="nc" id="L115">		return &quot;&quot;;</span>
+	}
+
+	@Override
+	public CalculatedProperty[] getAttributes() {
+<span class="nc" id="L120">		return new CalculatedProperty[] {</span>
+<span class="nc" id="L121">				new CalculatedProperty(&quot;text&quot;, getText()),</span>
+<span class="nc" id="L122">				new CalculatedProperty(&quot;title&quot;, getTitle())};</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

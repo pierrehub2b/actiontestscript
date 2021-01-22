@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Variable.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.generator.variables</a> &gt; <span class="el_source">Variable.java</span></div><h1>Variable.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+*/
+
+package com.ats.generator.variables;
+
+import com.ats.executor.ActionTestScript;
+import com.ats.generator.variables.transform.Transformer;
+
+public class Variable implements Comparable&lt;Variable&gt;{
+
+	public static final String SCRIPT_LABEL = &quot;var&quot;;
+<span class="fc" id="L28">	public static final int SCRIPT_LABEL_LENGTH = SCRIPT_LABEL.length();</span>
+
+<span class="pc" id="L30">	private boolean calculation = true;</span>
+<span class="pc" id="L31">	private String name = &quot;&quot;;</span>
+
+	private CalculatedValue value;
+	private Transformer transformation;
+<span class="pc" id="L35">	private String data = null;</span>
+
+<span class="nc" id="L37">	public Variable() {}</span>
+
+<span class="fc" id="L39">	public Variable(String name, CalculatedValue value) {</span>
+<span class="fc" id="L40">		this.setName(name);</span>
+<span class="fc" id="L41">		this.setValue(value);</span>
+<span class="fc" id="L42">	}</span>
+	
+<span class="nc" id="L44">	public Variable(ActionTestScript script, String variablePath) {</span>
+<span class="nc" id="L45">		this.setName(name);</span>
+<span class="nc" id="L46">		this.setValue(new CalculatedValue(script, &quot;&quot;));</span>
+
+<span class="nc" id="L48">	}</span>
+
+<span class="fc" id="L50">	public Variable(String name, CalculatedValue value, Transformer transformer) {</span>
+<span class="fc" id="L51">		this.setName(name);</span>
+<span class="fc" id="L52">		this.setValue(value);</span>
+<span class="fc" id="L53">		this.setTransformation(transformer);</span>
+<span class="fc" id="L54">	}</span>
+	
+	@Override
+	public String toString() {
+<span class="nc" id="L58">		return getCalculatedValue();</span>
+	}
+
+	public String getCalculatedValue() {
+<span class="fc" id="L62">		String result = data; </span>
+<span class="pc bpc" id="L63" title="1 of 2 branches missed.">		if(result == null) {</span>
+<span class="fc" id="L64">			result = value.getCalculated();</span>
+		}
+
+<span class="fc bfc" id="L67" title="All 2 branches covered.">		if(transformation == null) {</span>
+<span class="fc" id="L68">			return result;</span>
+		}else {
+<span class="fc" id="L70">			return transformation.format(result);</span>
+		}
+	}	
+
+	public void setData(String value) {
+<span class="nc" id="L75">		data = value;</span>
+<span class="nc" id="L76">	}</span>
+	
+	//----------------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public int compareTo(Variable variable) {
+<span class="nc" id="L82">		return Boolean.valueOf(isCalculation()).compareTo(Boolean.valueOf(variable.isCalculation()));</span>
+	}
+	
+	public boolean equals(CalculatedValue clv) {
+<span class="nc" id="L86">		return clv.getCalculated().equals(getCalculatedValue());</span>
+	}
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// Code Generator
+	//---------------------------------------------------------------------------------------------------------------------------------
+	
+	public String getJavaCode(){
+
+<span class="nc" id="L95">		final String varName = getName();</span>
+<span class="nc" id="L96">		final StringBuilder codeBuilder = new StringBuilder(this.getClass().getSimpleName());</span>
+<span class="nc" id="L97">		codeBuilder.append(&quot; &quot;);</span>
+<span class="nc" id="L98">		codeBuilder.append(varName);</span>
+<span class="nc" id="L99">		codeBuilder.append(&quot; = &quot;);</span>
+<span class="nc" id="L100">		codeBuilder.append(ActionTestScript.JAVA_VAR_FUNCTION_NAME);</span>
+<span class="nc" id="L101">		codeBuilder.append(&quot;(\&quot;&quot;);</span>
+<span class="nc" id="L102">		codeBuilder.append(varName);</span>
+<span class="nc" id="L103">		codeBuilder.append(&quot;\&quot;&quot;);</span>
+
+<span class="nc bnc" id="L105" title="All 2 branches missed.">		if(isCalculation()) {</span>
+<span class="nc" id="L106">			codeBuilder.append(&quot;, &quot;);</span>
+<span class="nc" id="L107">			codeBuilder.append(value.getJavaCode());</span>
+		}
+
+<span class="nc bnc" id="L110" title="All 2 branches missed.">		if(transformation != null) {</span>
+<span class="nc" id="L111">			codeBuilder.append(&quot;, &quot;);</span>
+<span class="nc" id="L112">			codeBuilder.append(transformation.getJavaCode());</span>
+		}
+<span class="nc" id="L114">		codeBuilder.append(&quot;)&quot;);</span>
+
+<span class="nc" id="L116">		return codeBuilder.toString();</span>
+	}
+
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------
+
+	public String getName() {
+<span class="fc" id="L124">		return name;</span>
+	}
+
+	public void setName(String value) {
+<span class="fc" id="L128">		this.name = value;</span>
+<span class="fc" id="L129">	}</span>
+
+	public CalculatedValue getValue() {
+<span class="fc" id="L132">		return value;</span>
+	}
+
+	public void setValue(CalculatedValue value) {
+<span class="fc" id="L136">		this.value = value;</span>
+<span class="fc" id="L137">	}</span>
+
+	public Transformer getTransformation() {
+<span class="nc" id="L140">		return transformation;</span>
+	}
+
+	public void setTransformation(Transformer value) {
+<span class="fc" id="L144">		this.transformation = value;</span>
+<span class="fc" id="L145">	}</span>
+
+	public boolean isCalculation() {
+<span class="nc" id="L148">		return calculation;</span>
+	}
+
+	public void setCalculation(boolean value) {
+<span class="fc" id="L152">		this.calculation = value;</span>
+<span class="fc" id="L153">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

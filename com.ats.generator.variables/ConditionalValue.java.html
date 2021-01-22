@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConditionalValue.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.generator.variables</a> &gt; <span class="el_source">ConditionalValue.java</span></div><h1>ConditionalValue.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.generator.variables;
+
+import com.ats.executor.ActionTestScript;
+import com.ats.script.Script;
+import com.google.gson.JsonObject;
+
+public class ConditionalValue {
+
+	public static final String EQUALS = &quot;=&quot;;
+	public static final String DIFFERENT = &quot;&lt;&gt;&quot;;
+
+	private Variable variable;
+<span class="nc" id="L32">	private String operator = EQUALS;</span>
+	private CalculatedValue value;
+	
+<span class="nc" id="L35">	private boolean exec = false;</span>
+
+<span class="nc" id="L37">	public ConditionalValue(Script script, String variableName, String value) {</span>
+<span class="nc" id="L38">		this.setVariable(script.getVariable(variableName, false));</span>
+<span class="nc" id="L39">		this.setValue(new CalculatedValue(script, value));</span>
+<span class="nc" id="L40">	}</span>
+	
+	public ConditionalValue(Script script, String variableName, String value, String operator) {
+<span class="nc" id="L43">		this(script, variableName, value);</span>
+<span class="nc" id="L44">		this.setOperator(operator);</span>
+<span class="nc" id="L45">	}</span>
+
+<span class="nc" id="L47">	public ConditionalValue(String op, Variable va, CalculatedValue cv) {</span>
+<span class="nc" id="L48">		this.operator = op;</span>
+<span class="nc" id="L49">		this.variable = va;</span>
+<span class="nc" id="L50">		this.value = cv;</span>
+<span class="nc" id="L51">	}</span>
+	
+	public boolean isExec() {
+<span class="nc" id="L54">		final boolean isEquals = variable.getCalculatedValue().equals(value.getCalculated());</span>
+<span class="nc bnc" id="L55" title="All 8 branches missed.">		exec = (isEquals &amp;&amp; ConditionalValue.EQUALS.equals(operator)) || (!isEquals &amp;&amp; ConditionalValue.DIFFERENT.equals(operator));</span>
+<span class="nc" id="L56">		return exec;</span>
+	}
+	
+	public JsonObject getLog() {
+<span class="nc" id="L60">		return getLog(new JsonObject());</span>
+	}
+	
+	public JsonObject getLog(JsonObject log) {
+		
+<span class="nc" id="L65">		final JsonObject varData = new JsonObject();</span>
+<span class="nc" id="L66">		varData.addProperty(variable.getName(), variable.getCalculatedValue());</span>
+		
+<span class="nc" id="L68">		final JsonObject compareData = new JsonObject();</span>
+<span class="nc" id="L69">		compareData.addProperty(&quot;operator&quot;, operator);</span>
+<span class="nc" id="L70">		compareData.addProperty(&quot;value&quot;, value.getCalculated());</span>
+		
+<span class="nc" id="L72">		final JsonObject data = new JsonObject();</span>
+<span class="nc" id="L73">		data.add(&quot;variable&quot;, varData);</span>
+<span class="nc" id="L74">		data.add(&quot;compare&quot;, compareData);</span>
+<span class="nc" id="L75">		data.addProperty(&quot;continue&quot;, exec);</span>
+		
+<span class="nc" id="L77">		log.add(&quot;condition&quot;, data);</span>
+<span class="nc" id="L78">		return log;</span>
+	}
+
+	public StringBuilder getJavaCode(StringBuilder builder, int codeLine) {
+
+<span class="nc" id="L83">		final StringBuilder codeBuilder = </span>
+				new StringBuilder(&quot;if(&quot;)
+<span class="nc" id="L85">				.append(ActionTestScript.JAVA_CONDITION_FUNCTION).append(&quot;(&quot;)</span>
+<span class="nc" id="L86">				.append(this.getClass().getSimpleName()).append(&quot;.&quot;);</span>
+
+<span class="nc bnc" id="L88" title="All 2 branches missed.">		if(DIFFERENT.equals(operator)) {</span>
+<span class="nc" id="L89">			codeBuilder.append(&quot;DIFFERENT&quot;);</span>
+		}else {
+<span class="nc" id="L91">			codeBuilder.append(&quot;EQUALS&quot;);</span>
+		}
+
+<span class="nc" id="L94">		codeBuilder.append(&quot;, &quot;)</span>
+<span class="nc" id="L95">		.append(codeLine)</span>
+<span class="nc" id="L96">		.append(&quot;, &quot;)</span>
+<span class="nc" id="L97">		.append(variable.getName()).append(&quot;, &quot;)</span>
+<span class="nc" id="L98">		.append(value.getJavaCode())</span>
+<span class="nc" id="L99">		.append(&quot;)) &quot;)</span>
+<span class="nc" id="L100">		.append(builder);</span>
+<span class="nc" id="L101">		return codeBuilder;</span>
+	}
+
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------
+
+	public Variable getVariable() {
+<span class="nc" id="L109">		return variable;</span>
+	}
+	public void setVariable(Variable variable) {
+<span class="nc" id="L112">		this.variable = variable;</span>
+<span class="nc" id="L113">	}</span>
+	public String getOperator() {
+<span class="nc" id="L115">		return operator;</span>
+	}
+	public void setOperator(String operator) {
+<span class="nc" id="L118">		this.operator = operator;</span>
+<span class="nc" id="L119">	}</span>
+	public CalculatedValue getValue() {
+<span class="nc" id="L121">		return value;</span>
+	}
+	public void setValue(CalculatedValue value) {
+<span class="nc" id="L124">		this.value = value;</span>
+<span class="nc" id="L125">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AtsMobileElement.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.element</a> &gt; <span class="el_source">AtsMobileElement.java</span></div><h1>AtsMobileElement.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+*/
+
+package com.ats.element;
+
+import com.ats.generator.variables.CalculatedProperty;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+public class AtsMobileElement extends AtsBaseElement {
+	
+	private static final String INNER_TEXT = &quot;innerText&quot;;
+	private static final String TEXT = &quot;text&quot;;
+	private static final String ROOT = &quot;root&quot;;
+
+<span class="nc" id="L37">	private boolean clickable = false;</span>
+
+	private AtsMobileElement parent;
+	private AtsMobileElement[] children;
+	private String positionInDom;
+
+	private Rectangle rect;
+	public Rectangle getRect() {
+<span class="nc bnc" id="L45" title="All 2 branches missed.">		if (rect == null) {</span>
+<span class="nc" id="L46">			rect = new Rectangle(x.intValue(), y.intValue(), width.intValue(), height.intValue());</span>
+		}
+<span class="nc" id="L48">		return rect;</span>
+	}
+	
+<span class="nc" id="L51">	public AtsMobileElement(String id, String tag, Double width, Double height, Double x, Double y, Boolean clickable, Map&lt;String, String&gt; attributes) {</span>
+<span class="nc" id="L52">		this.id = id;</span>
+<span class="nc" id="L53">		this.tag = tag;</span>
+<span class="nc" id="L54">		this.width = width;</span>
+<span class="nc" id="L55">		this.height = height;</span>
+<span class="nc" id="L56">		this.clickable = clickable;</span>
+<span class="nc" id="L57">		this.x = x;</span>
+<span class="nc" id="L58">		this.y = y;</span>
+<span class="nc" id="L59">		this.attributes = attributes;</span>
+<span class="nc" id="L60">	}</span>
+	
+	public void setPositionInDom(String value) {
+<span class="nc" id="L63">		this.positionInDom = value;</span>
+<span class="nc" id="L64">	}</span>
+	
+	public String getPositionInDom() {
+<span class="nc" id="L67">		return this.positionInDom;</span>
+	}
+	
+	
+	public boolean isClickable() {
+<span class="nc" id="L72">		return clickable;</span>
+	}
+
+	public void setClickable(boolean clickable) {
+<span class="nc" id="L76">		this.clickable = clickable;</span>
+<span class="nc" id="L77">	}</span>
+
+	private String getText() {
+<span class="nc" id="L80">		final String result = attributes.get(TEXT);</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">		if(result == null) {</span>
+<span class="nc" id="L82">			return &quot;&quot;;</span>
+		}
+<span class="nc" id="L84">		return result;</span>
+	}
+
+	private String getInnerText() {
+<span class="nc" id="L88">		String result = getText();</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">		if(children != null) {</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">			for(int i=0; i&lt;children.length; i++) {</span>
+<span class="nc" id="L91">				result += &quot; &quot; + children[i].getInnerText();</span>
+			}
+		}
+<span class="nc" id="L94">		return result.trim();</span>
+	}
+
+	public CalculatedProperty[] getMobileAttributes() {
+<span class="nc" id="L98">		final List&lt;CalculatedProperty&gt; properties = attributes.entrySet().stream().parallel().map(e -&gt; new CalculatedProperty(e.getKey(), e.getValue())).collect(Collectors.toCollection(ArrayList::new));</span>
+<span class="nc" id="L99">		properties.add(new CalculatedProperty(INNER_TEXT, getInnerText()));</span>
+
+<span class="nc" id="L101">		return properties.toArray(new CalculatedProperty[properties.size()]);</span>
+	}
+	
+	@Override
+	public String getAttribute(String key) {
+<span class="nc bnc" id="L106" title="All 2 branches missed.">		if(INNER_TEXT.equals(key)) {</span>
+<span class="nc" id="L107">			return getInnerText();</span>
+		}
+<span class="nc" id="L109">		return super.getAttribute(key);</span>
+	}
+
+	public boolean isRoot() {
+<span class="nc" id="L113">		return ROOT.equals(tag);</span>
+	}
+
+	public boolean checkTag(String value) {
+<span class="nc bnc" id="L117" title="All 4 branches missed.">		return SearchedElement.WILD_CHAR.equals(value) || tag.toLowerCase().equals(value.toLowerCase());</span>
+	}
+
+	public FoundElement getFoundElement() {
+<span class="nc" id="L121">		return new FoundElement(this);</span>
+	}
+
+	public AtsMobileElement getParent() {
+<span class="nc" id="L125">		return parent;</span>
+	}
+
+	public void setParent(AtsMobileElement parent) {
+<span class="nc" id="L129">		this.parent = parent;</span>
+<span class="nc" id="L130">	}</span>
+
+	public AtsMobileElement[] getChildren() {
+<span class="nc bnc" id="L133" title="All 2 branches missed.">		if(this.children == null) {</span>
+<span class="nc" id="L134">			return new AtsMobileElement[0];</span>
+		}
+<span class="nc" id="L136">		return children;</span>
+	}
+
+	public void setChildren(AtsMobileElement[] children) {
+<span class="nc" id="L140">		this.children = children;</span>
+<span class="nc" id="L141">	}</span>
+	
+	public void addChildren(AtsMobileElement element) {
+<span class="nc" id="L144">		ArrayList&lt;AtsMobileElement&gt; tmpChild = new ArrayList&lt;AtsMobileElement&gt;();</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">		if(this.children != null) {</span>
+<span class="nc" id="L146">			tmpChild = new ArrayList&lt;AtsMobileElement&gt;(Arrays.asList(this.children));</span>
+		}
+<span class="nc" id="L148">		tmpChild.add(element);</span>
+<span class="nc" id="L149">		this.children = tmpChild.toArray(new AtsMobileElement[tmpChild.size()]);</span>
+<span class="nc" id="L150">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

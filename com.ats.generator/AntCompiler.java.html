@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AntCompiler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.generator</a> &gt; <span class="el_source">AntCompiler.java</span></div><h1>AntCompiler.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+*/
+
+package com.ats.generator;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Path;
+
+import org.apache.tools.ant.DefaultLogger;
+import org.apache.tools.ant.Project;
+import org.apache.tools.ant.ProjectHelper;
+
+import com.ats.driver.AtsManager;
+
+public class AntCompiler {
+	
+	public static final String XML_SUITE_FILES = &quot;-suiteXmlFiles=&quot;;
+	
+	public static void main(String[] args) throws IOException {
+<span class="nc bnc" id="L38" title="All 2 branches missed.">		if(args.length &gt; 0) {</span>
+<span class="nc" id="L39">			final File buildFile = new File(args[0]);</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">			if(!buildFile.exists()) {</span>
+			
+<span class="nc" id="L42">				buildFile.getParentFile().mkdirs();</span>
+				
+<span class="nc" id="L44">				final FileWriter fw = new FileWriter(buildFile);</span>
+<span class="nc" id="L45">				fw.write(&quot;&lt;project basedir=\&quot;.\&quot; default=\&quot;compile\&quot;&gt;&quot;);</span>
+<span class="nc" id="L46">				fw.write(&quot;&lt;copy todir=\&quot;classes\&quot;&gt; &quot;);</span>
+<span class="nc" id="L47">				fw.write(&quot;&lt;fileset dir=\&quot;..\\src\&quot; includes='assets/**'/&gt;&quot;);</span>
+<span class="nc" id="L48">				fw.write(&quot;&lt;/copy&gt;&quot;);</span>
+<span class="nc" id="L49">				fw.write(&quot;&lt;property name=\&quot;lib.dir\&quot; value=\&quot;lib\&quot;/&gt;&quot;);</span>
+<span class="nc" id="L50">				fw.write(&quot;&lt;path id=\&quot;classpath\&quot;&gt;&quot;);</span>
+<span class="nc" id="L51">				fw.write(&quot;&lt;fileset dir=\&quot;&quot; + AtsManager.getAtsHomeFolder() + &quot;\\libs\&quot; includes=\&quot;**/*.jar\&quot;/&gt;&quot;);</span>
+<span class="nc" id="L52">				fw.write(&quot;&lt;/path&gt;&quot;);</span>
+<span class="nc" id="L53">				fw.write(&quot;&lt;target name=\&quot;compile\&quot;&gt;&quot;);</span>
+<span class="nc" id="L54">				fw.write(&quot;&lt;mkdir dir=\&quot;classes\&quot;/&gt;&quot;);</span>
+<span class="nc" id="L55">				fw.write(&quot;&lt;javac srcdir=\&quot;generated\&quot; destdir=\&quot;classes\&quot; classpathref=\&quot;classpath\&quot;/&gt;&quot;);</span>
+<span class="nc" id="L56">				fw.write(&quot;&lt;/target&gt;&quot;);</span>
+<span class="nc" id="L57">				fw.write(&quot;&lt;/project&gt;&quot;);</span>
+
+<span class="nc" id="L59">				fw.close();</span>
+			}
+			
+<span class="nc bnc" id="L62" title="All 4 branches missed.">			if(args.length &gt; 1 &amp;&amp; args[1].startsWith(XML_SUITE_FILES)) {</span>
+				
+<span class="nc" id="L64">				final String[] suites = args[1].replace(XML_SUITE_FILES, &quot;&quot;).split(&quot;,&quot;);</span>
+<span class="nc" id="L65">				final Path projectFolderPath = buildFile.getParentFile().toPath();</span>
+<span class="nc" id="L66">				final FileWriter fw = new FileWriter(projectFolderPath.resolve(&quot;suites.xml&quot;).toFile());</span>
+
+<span class="nc" id="L68">				fw.write(&quot;&lt;!DOCTYPE suite SYSTEM \&quot;https://testng.org/testng-1.0.dtd\&quot;&gt;&quot;);</span>
+<span class="nc" id="L69">				fw.write(&quot;&lt;suite name=\&quot;allSuites\&quot;&gt;&quot;);</span>
+<span class="nc" id="L70">				fw.write(&quot;&lt;suite-files&gt;&quot;);</span>
+
+<span class="nc bnc" id="L72" title="All 2 branches missed.">				for (int i = 0; i &lt; suites.length; i++) {</span>
+<span class="nc" id="L73">					final String suitePath = Generator.findSuiteFile(suites[i]);</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">					if(suitePath != null) {</span>
+<span class="nc" id="L75">						fw.write(&quot;&lt;suite-file path=\&quot;&quot; + suitePath + &quot;\&quot;/&gt;&quot;);</span>
+					}
+				}
+
+<span class="nc" id="L79">				fw.write(&quot;&lt;/suite-files&gt;&quot;);</span>
+<span class="nc" id="L80">				fw.write(&quot;&lt;/suite&gt;&quot;);</span>
+
+<span class="nc" id="L82">				fw.close();</span>
+				
+<span class="nc" id="L84">				System.out.println(&quot;[ATS] &quot; + suites.length + &quot; suite(s) added to job execution&quot;);</span>
+			}
+			
+<span class="nc" id="L87">			new AntCompiler(buildFile);</span>
+		}
+<span class="nc" id="L89">	}</span>
+
+<span class="nc" id="L91">	public AntCompiler(File buildFile) {</span>
+<span class="nc" id="L92">		Project p = new Project();</span>
+<span class="nc" id="L93">		p.setUserProperty(&quot;ant.file&quot;, buildFile.getAbsolutePath());</span>
+<span class="nc" id="L94">		p.init();</span>
+
+<span class="nc" id="L96">		ProjectHelper helper = ProjectHelper.getProjectHelper();</span>
+<span class="nc" id="L97">		p.addReference(&quot;ant.projectHelper&quot;, helper);</span>
+<span class="nc" id="L98">		helper.parse(p, buildFile);</span>
+
+<span class="nc" id="L100">		DefaultLogger consoleLogger = new DefaultLogger();</span>
+<span class="nc" id="L101">		consoleLogger.setErrorPrintStream(System.err);</span>
+<span class="nc" id="L102">		consoleLogger.setOutputPrintStream(System.out);</span>
+<span class="nc" id="L103">		consoleLogger.setMessageOutputLevel(Project.MSG_INFO);</span>
+
+<span class="nc" id="L105">		p.addBuildListener(consoleLogger);</span>
+<span class="nc" id="L106">		p.executeTarget(p.getDefaultTarget());</span>
+<span class="nc" id="L107">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ScriptLoader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.script</a> &gt; <span class="el_source">ScriptLoader.java</span></div><h1>ScriptLoader.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.script;
+
+import com.ats.executor.ActionTestScript;
+import com.ats.generator.GeneratorReport;
+import com.ats.generator.parsers.Lexer;
+import com.ats.generator.parsers.ScriptParser;
+import com.ats.generator.variables.CalculatedValue;
+import com.ats.generator.variables.Variable;
+import com.ats.generator.variables.parameter.ParameterList;
+import com.ats.script.actions.Action;
+import com.ats.script.actions.ActionCallscript;
+
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
+
+public class ScriptLoader extends Script {
+
+	private ScriptParser parser;
+	private ScriptHeader header;
+<span class="pc" id="L45">	private String javaCode = null;</span>
+	
+	private Charset charset;
+	
+	private ArrayList&lt;Action&gt; actions;
+	
+<span class="pc" id="L51">	private String projectGav = &quot;&quot;;</span>
+
+<span class="nc" id="L53">	public ScriptLoader(){}</span>
+	
+<span class="fc" id="L55">	public ScriptLoader(Lexer lexer){</span>
+<span class="fc" id="L56">		this.actions = new ArrayList&lt;Action&gt;();</span>
+<span class="fc" id="L57">		this.parser = new ScriptParser(lexer);</span>
+<span class="fc" id="L58">		this.parser.addScript();</span>
+<span class="fc" id="L59">	}</span>
+
+	public ScriptLoader(String type, Lexer lexer, File file, Project projectData){
+<span class="nc" id="L62">		this(type, lexer, file, projectData, DEFAULT_CHARSET);</span>
+<span class="nc" id="L63">	}</span>
+
+<span class="nc" id="L65">	public ScriptLoader(String type, Lexer lexer, File file, Project prj, Charset charset){</span>
+
+<span class="nc" id="L67">		final ScriptHeader header = new ScriptHeader(prj, file);</span>
+		
+<span class="nc" id="L69">		this.setHeader(header);</span>
+<span class="nc" id="L70">		this.setCharset(charset);</span>
+<span class="nc" id="L71">		this.projectGav = prj.getGav();</span>
+
+<span class="nc bnc" id="L73" title="All 2 branches missed.">		if(ATS_EXTENSION.equals(type)){</span>
+
+<span class="nc" id="L75">			this.setParameterList(new ParameterList(0));</span>
+<span class="nc" id="L76">			this.setVariables(new ArrayList&lt;Variable&gt;());</span>
+
+<span class="nc" id="L78">			this.actions = new ArrayList&lt;Action&gt;();</span>
+<span class="nc" id="L79">			this.parser = new ScriptParser(lexer);</span>
+<span class="nc" id="L80">			this.parser.addScript();</span>
+
+			try {
+<span class="nc" id="L83">				Stream &lt;String&gt; lines = Files.lines(file.toPath(), this.charset);</span>
+<span class="nc" id="L84">				lines</span>
+<span class="nc" id="L85">				.map(String::trim)</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">				.filter(a -&gt; !a.isEmpty())</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">				.filter(a -&gt; !a.startsWith(&quot;[&quot;))</span>
+<span class="nc" id="L88">				.forEach(a -&gt; parser.parse(this, header, a));</span>
+<span class="nc" id="L89">				lines.close();</span>
+<span class="nc" id="L90">			} catch (IOException e) {</span>
+<span class="nc" id="L91">				e.printStackTrace();</span>
+<span class="nc" id="L92">			}</span>
+
+<span class="nc bnc" id="L94" title="All 2 branches missed.">		}else if(&quot;java&quot;.equals(type)) {</span>
+			try {
+<span class="nc" id="L96">				this.javaCode = new String(Files.readAllBytes(file.toPath()));</span>
+<span class="nc" id="L97">			} catch (IOException e) {}</span>
+		}
+<span class="nc" id="L99">	}</span>
+
+	private void setCharset(Charset value) {
+<span class="nc" id="L102">		this.charset = value;</span>
+<span class="nc" id="L103">	}</span>
+
+	public void addAction(Action data, boolean disabled){
+<span class="fc" id="L106">		data.setDisabled(disabled);</span>
+<span class="fc" id="L107">		data.setLine(actions.size());</span>
+<span class="fc" id="L108">		actions.add(data);</span>
+<span class="fc" id="L109">	}</span>
+	
+	public boolean isSubscriptCalled(String scriptName) {
+<span class="nc bnc" id="L112" title="All 2 branches missed.">		for (Action action : actions) {</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">			if(action instanceof ActionCallscript) {</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">				if(((ActionCallscript)action).isSubscriptCalled(scriptName)) {</span>
+<span class="nc" id="L115">					return true;</span>
+				}
+			}
+<span class="nc" id="L118">		}</span>
+<span class="nc" id="L119">		return false;</span>
+	}
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// Java Code Generator
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	public String getJavaCode(Project project){
+
+<span class="nc bnc" id="L128" title="All 2 branches missed.">		if(javaCode != null) {</span>
+
+<span class="nc" id="L130">			return javaCode;</span>
+
+		}else {
+
+<span class="nc" id="L134">			final StringBuilder code = new StringBuilder(header.getJavaCode(project));</span>
+
+			//-------------------------------------------------------------------------------------------------
+			// variables 
+			//-------------------------------------------------------------------------------------------------
+			
+<span class="nc" id="L140">			code.append(&quot;\r\n\r\n\t\t//   ---&lt; Variables &gt;---   //\r\n&quot;);</span>
+			
+<span class="nc" id="L142">			final List&lt;Variable&gt; variables = getVariables();</span>
+<span class="nc" id="L143">			Collections.sort(variables);</span>
+
+<span class="nc bnc" id="L145" title="All 2 branches missed.">			for(Variable variable : variables){</span>
+<span class="nc" id="L146">				code.append(&quot;\r\n\t\t&quot;)</span>
+<span class="nc" id="L147">				.append(variable.getJavaCode())</span>
+<span class="nc" id="L148">				.append(&quot;;&quot;);</span>
+<span class="nc" id="L149">			}</span>
+
+			//-------------------------------------------------------------------------------------------------
+			// actions 
+			//-------------------------------------------------------------------------------------------------
+
+<span class="nc" id="L155">			code.append(&quot;\r\n\r\n\t\t//   ---&lt; Actions &gt;---   //\r\n&quot;);</span>
+
+<span class="nc bnc" id="L157" title="All 2 branches missed.">			for(Action action : actions){</span>
+<span class="nc bnc" id="L158" title="All 4 branches missed.">				if(!action.isDisabled() &amp;&amp; !action.isScriptComment()){</span>
+<span class="nc" id="L159">					code.append(&quot;\r\n\t\t&quot;).append(action.getJavaCode()).append(&quot;);&quot;);</span>
+				}
+<span class="nc" id="L161">			}</span>
+			
+			//-------------------------------------------------------------------------------------------------
+			// returns 
+			//-------------------------------------------------------------------------------------------------
+			
+<span class="nc" id="L167">			final CalculatedValue[] returnValues = getReturns();</span>
+<span class="nc bnc" id="L168" title="All 2 branches missed.">			if(returnValues != null) {</span>
+				
+<span class="nc" id="L170">				code.append(&quot;\r\n\r\n\t\t//   ---&lt; Return &gt;---   //\r\n\r\n\t\t&quot;)</span>
+<span class="nc" id="L171">				.append(ActionTestScript.JAVA_RETURNS_FUNCTION_NAME)</span>
+<span class="nc" id="L172">				.append(&quot;(&quot;);</span>
+
+<span class="nc" id="L174">				final ArrayList&lt;String&gt; returnValuesCode = new ArrayList&lt;String&gt;();</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">				for(CalculatedValue ret : returnValues){</span>
+<span class="nc" id="L176">					returnValuesCode.add(ret.getJavaCode());</span>
+				}
+
+<span class="nc" id="L179">				code.append(String.join(&quot;, &quot;, returnValuesCode)).append(&quot;);&quot;);</span>
+			}
+			
+<span class="nc" id="L182">			code.append(&quot;\r\n\t}\r\n}&quot;);</span>
+
+<span class="nc" id="L184">			return code.toString();</span>
+		}
+	}
+
+	public void generateJavaFile(Project project){
+<span class="nc bnc" id="L189" title="All 2 branches missed.">		if(header.getJavaDestinationFolder() != null){</span>
+
+<span class="nc" id="L191">			final File javaFile = header.getJavaFile();</span>
+			try {
+<span class="nc" id="L193">				javaFile.getParentFile().mkdirs();</span>
+
+<span class="nc" id="L195">				final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter( new FileOutputStream(javaFile, false), charset));</span>
+<span class="nc" id="L196">				writer.write(getJavaCode(project));</span>
+<span class="nc" id="L197">				writer.close();</span>
+
+<span class="nc" id="L199">			} catch (IOException e) {</span>
+<span class="nc" id="L200">			}</span>
+		}
+<span class="nc" id="L202">	}</span>
+
+	//-------------------------------------------------------------------------------------------------
+	//  getters and setters for serialization
+	//-------------------------------------------------------------------------------------------------
+
+	public ScriptHeader getHeader() {
+<span class="nc" id="L209">		return header;</span>
+	}
+
+	public void setHeader(ScriptHeader header) {
+<span class="nc" id="L213">		this.header = header;</span>
+<span class="nc" id="L214">	}</span>
+
+	public Action[] getActions() {
+<span class="fc" id="L217">		return actions.toArray(new Action[actions.size()]);</span>
+	}
+
+	public void setActions(Action[] data) {
+<span class="nc" id="L221">		this.actions = new ArrayList&lt;Action&gt;(Arrays.asList(data));</span>
+<span class="nc" id="L222">	}	</span>
+	
+	public String getProjectGav() {
+<span class="nc" id="L225">		return projectGav;</span>
+	}
+<span class="nc" id="L227">	public void setProjectGav(String value) {} // read only</span>
+
+	//-------------------------------------------------------------------------------------------------
+	//  transient getters and setters
+	//-------------------------------------------------------------------------------------------------
+
+	public Lexer getLexer() {
+<span class="nc" id="L234">		return parser.getLexer();</span>
+	}	
+
+	//----------------------------------------------------------------------------------------------------
+	// Script content java
+	//----------------------------------------------------------------------------------------------------
+
+	public static void main(String[] args) {
+<span class="nc bnc" id="L242" title="All 2 branches missed.">		if(args.length == 1){</span>
+
+<span class="nc" id="L244">			final File scriptFile = new File(args[0]);</span>
+<span class="nc bnc" id="L245" title="All 6 branches missed.">			if(scriptFile.exists() &amp;&amp; scriptFile.isFile() &amp;&amp; scriptFile.getName().toLowerCase().endsWith(ATS_EXTENSION)){</span>
+
+<span class="nc" id="L247">				final GeneratorReport report = new GeneratorReport();</span>
+<span class="nc" id="L248">				final Lexer lexer = new Lexer(report);</span>
+<span class="nc" id="L249">				lexer.loadScript(scriptFile);</span>
+			}
+		}
+<span class="nc" id="L252">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,810 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Channel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.executor.channels</a> &gt; <span class="el_source">Channel.java</span></div><h1>Channel.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.executor.channels;
+
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.openqa.selenium.Proxy;
+import org.openqa.selenium.WebElement;
+
+import com.ats.driver.AtsManager;
+import com.ats.element.DialogBox;
+import com.ats.element.FoundElement;
+import com.ats.element.TestElement;
+import com.ats.executor.ActionStatus;
+import com.ats.executor.ActionTestScript;
+import com.ats.executor.ScriptStatus;
+import com.ats.executor.TestBound;
+import com.ats.executor.drivers.DriverManager;
+import com.ats.executor.drivers.desktop.DesktopDriver;
+import com.ats.executor.drivers.desktop.DesktopResponse;
+import com.ats.executor.drivers.desktop.DesktopWindow;
+import com.ats.executor.drivers.engines.DesktopDriverEngine;
+import com.ats.executor.drivers.engines.IDriverEngine;
+import com.ats.executor.drivers.engines.MobileDriverEngine;
+import com.ats.executor.drivers.engines.WebDriverEngine;
+import com.ats.generator.ATS;
+import com.ats.generator.objects.BoundData;
+import com.ats.generator.objects.MouseDirection;
+import com.ats.generator.objects.MouseDirectionData;
+import com.ats.generator.variables.CalculatedProperty;
+import com.ats.generator.variables.CalculatedValue;
+import com.ats.recorder.ReportSummary;
+import com.ats.script.ScriptHeader;
+import com.ats.script.actions.Action;
+import com.ats.script.actions.ActionApi;
+import com.ats.script.actions.ActionChannelStart;
+import com.ats.script.actions.ActionExecute;
+import com.ats.script.actions.neoload.ActionNeoload;
+import com.ats.script.actions.neoload.ActionNeoloadStop;
+import com.ats.script.actions.performance.octoperf.ActionOctoperfVirtualUser;
+import com.ats.tools.ResourceContent;
+import com.ats.tools.logger.ExecutionLogger;
+import com.ats.tools.performance.proxy.AtsNoProxy;
+import com.ats.tools.performance.proxy.AtsProxy;
+import com.ats.tools.performance.proxy.IAtsProxy;
+import com.google.gson.JsonArray;
+
+public class Channel {
+
+	private IDriverEngine engine;
+
+	private ActionChannelStart actionStart;
+<span class="pc" id="L72">	private boolean current = false;</span>
+
+	private ActionTestScript mainScript;
+
+<span class="pc" id="L76">	private int scrollUnit = AtsManager.getScrollUnit();</span>
+<span class="pc" id="L77">	private TestBound dimension = AtsManager.getInstance().getApplicationBound();</span>
+<span class="pc" id="L78">	private TestBound subDimension = new TestBound();</span>
+
+<span class="pc" id="L80">	private String driverVersion = &quot;&quot;;</span>
+
+<span class="pc" id="L82">	private SystemValues systemValues = new SystemValues();</span>
+
+	private byte[] icon;
+	private String screenServer;
+<span class="pc" id="L86">	private ArrayList&lt;String&gt; operations = new ArrayList&lt;String&gt;();</span>
+
+<span class="pc" id="L88">	private int winHandle = -1;</span>
+<span class="pc" id="L89">	private long processId = 0;	</span>
+
+	private String neoloadDesignApi;
+
+<span class="pc" id="L93">	private ArrayList&lt;String&gt; systemProperties = new ArrayList&lt;&gt;();</span>
+	public void addSystemProperties(JsonArray info) {
+<span class="nc bnc" id="L95" title="All 2 branches missed.">		if(info != null) {</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">			for (int i = 0; i &lt; info.size(); i++) {</span>
+<span class="nc" id="L97">				systemProperties.add(info.get(i).getAsString());</span>
+			}
+		}
+<span class="nc" id="L100">	}</span>
+
+<span class="pc" id="L102">	private ArrayList&lt;String&gt; systemButtons = new ArrayList&lt;&gt;();</span>
+	public void addSystemButtons(JsonArray info) {
+<span class="nc bnc" id="L104" title="All 2 branches missed.">		if(info != null) {</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">			for (int i = 0; i &lt; info.size(); i++) {</span>
+<span class="nc" id="L106">				systemButtons.add(info.get(i).getAsString());</span>
+			}
+		}
+<span class="nc" id="L109">	}</span>
+
+	//----------------------------------------------------------------------------------------------------------------------
+	// Constructor
+	//----------------------------------------------------------------------------------------------------------------------
+
+<span class="fc" id="L115">	public Channel() {}</span>
+
+	public Channel(
+			ActionStatus status,
+			ActionTestScript script,
+			DriverManager driverManager, 
+<span class="nc" id="L121">			ActionChannelStart action) {</span>
+
+<span class="nc" id="L123">		final DesktopDriver desktopDriver = new DesktopDriver(status, driverManager);</span>
+
+<span class="nc bnc" id="L125" title="All 2 branches missed.">		if(status.isPassed()) {</span>
+
+<span class="nc" id="L127">			status.setChannel(this);</span>
+			
+<span class="nc" id="L129">			systemValues.setOsName(desktopDriver.getOsName());</span>
+<span class="nc" id="L130">			systemValues.setApplicationName(action.getApplication().getCalculated());</span>
+<span class="nc" id="L131">			systemValues.setCountry(desktopDriver.getCountryCode());</span>
+<span class="nc" id="L132">			systemValues.setMachineName(desktopDriver.getMachineName());</span>
+<span class="nc" id="L133">			systemValues.setOsVersion(desktopDriver.getOsVersion());</span>
+<span class="nc" id="L134">			systemValues.setOsBuild(desktopDriver.getOsBuildVersion());</span>
+			
+<span class="nc" id="L136">			this.mainScript = script;</span>
+<span class="nc" id="L137">			this.current = true;</span>
+<span class="nc" id="L138">			this.actionStart = action;</span>
+<span class="nc" id="L139">			this.engine = driverManager.getDriverEngine(this, status, desktopDriver);</span>
+
+<span class="nc bnc" id="L141" title="All 2 branches missed.">			if(status.isPassed()) {</span>
+				
+<span class="nc" id="L143">				systemValues.setApplicationPath(engine.getApplicationPath());</span>
+				
+<span class="nc" id="L145">				refreshLocation();</span>
+<span class="nc" id="L146">				engine.started(status);</span>
+				
+			}else {
+<span class="nc" id="L149">				status.setChannel(null);</span>
+			}
+		}
+<span class="nc" id="L152">	}</span>
+
+	public void waitBeforeMouseMoveToElement(WebDriverEngine webDriverEngine) {
+<span class="nc" id="L155">		AtsManager.getInstance().getWaitGuiReady().waitBeforeMouseMoveToElement(this, webDriverEngine);</span>
+<span class="nc" id="L156">	}</span>
+
+	public void waitBeforeSwitchWindow(WebDriverEngine webDriverEngine) {
+<span class="nc" id="L159">		AtsManager.getInstance().getWaitGuiReady().waitBeforeSwitchWindow(this, webDriverEngine);</span>
+<span class="nc" id="L160">	}</span>
+
+	public void waitBeforeSearchElement(WebDriverEngine webDriverEngine) {
+<span class="nc" id="L163">		AtsManager.getInstance().getWaitGuiReady().waitBeforeSearchElement(this, webDriverEngine);</span>
+<span class="nc" id="L164">	}</span>
+
+	public void waitBeforeEnterText(WebDriverEngine webDriverEngine) {
+<span class="nc" id="L167">		AtsManager.getInstance().getWaitGuiReady().waitBeforeEnterText(this, webDriverEngine);</span>
+<span class="nc" id="L168">	}</span>
+
+	public void waitBeforeGotoUrl(WebDriverEngine webDriverEngine) {
+<span class="nc" id="L171">		AtsManager.getInstance().getWaitGuiReady().waitBeforeGotoUrl(this, webDriverEngine);</span>
+<span class="nc" id="L172">	}</span>
+
+	public Class&lt;ActionTestScript&gt; loadTestScriptClass(String name){
+<span class="nc" id="L175">		return AtsManager.getInstance().loadTestScriptClass(name);</span>
+	}
+
+	//----------------------------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------------------------------------------
+
+	public String getTopScriptPackage() {
+<span class="nc" id="L182">		final String topScriptName = mainScript.getTopScript().getTestName();</span>
+<span class="nc" id="L183">		final int lastDot = topScriptName.lastIndexOf(&quot;.&quot;);</span>
+
+<span class="nc bnc" id="L185" title="All 2 branches missed.">		if(lastDot &gt; 0) {</span>
+<span class="nc" id="L186">			return topScriptName.substring(0, lastDot);</span>
+		}else {
+<span class="nc" id="L188">			return topScriptName;</span>
+		}
+	}
+
+	public ActionStatus newActionStatus() {
+<span class="nc" id="L193">		return new ActionStatus(this, &quot;&quot;, 0);</span>
+	}
+
+	public ActionStatus newActionStatus(String testName, int testLine) {
+<span class="nc" id="L197">		return new ActionStatus(this, testName, testLine);</span>
+	}
+
+	public DesktopDriver getDesktopDriver() {
+<span class="nc" id="L201">		return engine.getDesktopDriver();</span>
+	}
+
+	public void cleanHandle() {
+<span class="nc" id="L205">		winHandle = -1;</span>
+<span class="nc" id="L206">		setWindowToFront();</span>
+<span class="nc" id="L207">	}</span>
+
+	public void setWinHandle(int hdl) {
+<span class="nc" id="L210">		winHandle = hdl;</span>
+<span class="nc" id="L211">	}</span>
+
+	public void updateWinHandle(DesktopDriver drv, int index) {
+<span class="nc" id="L214">		winHandle = getHandle(drv, index);</span>
+<span class="nc" id="L215">	}</span>
+
+	public int getHandle(DesktopDriver drv) {
+<span class="nc bnc" id="L218" title="All 2 branches missed.">		if(winHandle &lt; 0) {</span>
+<span class="nc" id="L219">			winHandle = getHandle(drv, 0);</span>
+		}
+<span class="nc" id="L221">		return winHandle;</span>
+	}
+
+	public int getHandle(DesktopDriver drv, int index) {
+<span class="nc" id="L225">		List&lt;DesktopWindow&gt; processWindows = drv.getWindowsByPid(getProcessId());</span>
+<span class="nc bnc" id="L226" title="All 4 branches missed.">		if(processWindows != null &amp;&amp; processWindows.size() &gt; index) {</span>
+<span class="nc" id="L227">			return processWindows.get(index).getHandle();</span>
+		}
+<span class="nc" id="L229">		return -1;</span>
+	}
+
+	public void refreshLocation(){
+<span class="nc" id="L233">		engine.updateDimensions();</span>
+<span class="nc" id="L234">	}</span>
+
+	public void setDimensions(TestBound dim1, TestBound dim2) {
+<span class="nc" id="L237">		setDimension(dim1);</span>
+<span class="nc" id="L238">		setSubDimension(dim2);</span>
+<span class="nc" id="L239">	}</span>
+
+	public double getOffsetY() {
+<span class="nc" id="L242">		return dimension.getHeight() - subDimension.getHeight();</span>
+	}
+
+	public void refreshMapElementLocation(){
+<span class="nc" id="L246">		refreshLocation();</span>
+<span class="nc" id="L247">		engine.refreshElementMapLocation();</span>
+<span class="nc" id="L248">	}</span>
+
+	public void defineRoot(String id) {
+<span class="nc" id="L251">		getDesktopDriver().defineRoot(dimension, id);</span>
+<span class="nc" id="L252">	}</span>
+
+	public void toFront(){
+<span class="nc" id="L255">		getDesktopDriver().setChannelToFront(getHandle(getDesktopDriver()), processId);</span>
+<span class="nc" id="L256">	}</span>
+
+	public void setWindowToFront(){
+<span class="nc" id="L259">		engine.setWindowToFront();</span>
+<span class="nc" id="L260">	}</span>
+
+	public void rootKeys(ActionStatus status, String keys){
+<span class="nc" id="L263">		getDesktopDriver().rootKeys(getHandle(getDesktopDriver()), keys);</span>
+<span class="nc" id="L264">		actionTerminated(status);</span>
+<span class="nc" id="L265">	}</span>
+
+	public String getSource(){
+<span class="nc" id="L268">		return engine.getSource();</span>
+	}
+
+	public void checkStatus(ActionExecute actionExecute, String testName, int testLine) {
+		//do nothing in non empty channel
+<span class="nc" id="L273">	}</span>
+
+	//---------------------------------------------------------------------------
+	// Screen shot management
+	//---------------------------------------------------------------------------
+
+	public byte[] getScreenShot(TestBound dim) {
+<span class="nc" id="L280">		dim.setX(dim.getX() + dimension.getX());</span>
+<span class="nc" id="L281">		dim.setY(dim.getY() + dimension.getY());</span>
+
+<span class="nc" id="L283">		return getScreenShotEngine(dim);</span>
+	}
+
+	public byte[] getScreenShot(){
+<span class="nc" id="L287">		return getScreenShotEngine(dimension);</span>
+	}
+
+	private byte[] getScreenShotEngine(TestBound dim) {
+<span class="nc" id="L291">		mainScript.sleep(50);</span>
+<span class="nc" id="L292">		return engine.getScreenshot(dim.getX(), dim.getY(), dim.getWidth(), dim.getHeight());</span>
+	}
+
+	//---------------------------------------------------------------------------
+	//---------------------------------------------------------------------------
+
+	public String getAuthenticationValue() {
+<span class="nc" id="L299">		return actionStart.getAuthenticationValue();</span>
+	}
+
+	public ArrayList&lt;CalculatedValue&gt; getArguments() {
+<span class="nc" id="L303">		return actionStart.getArguments();</span>
+	}
+
+	public void setNeoloadDesignApi(String value) {
+<span class="nc" id="L307">		this.neoloadDesignApi = value;</span>
+<span class="nc" id="L308">	}</span>
+
+	//--------------------------------------------------------------------------------------------------
+	// Mobile channel init
+	//--------------------------------------------------------------------------------------------------
+
+	public void setApplicationData(String os, String system, String version, String dVersion, byte[] icon, String udp, String appName, String userName, String machineName, String osBuild, String country) {
+<span class="nc" id="L315">		setApplicationData(os + &quot;:&quot; + system, version, dVersion, -1, icon, udp);</span>
+<span class="nc" id="L316">		systemValues.setApplicationName(appName);</span>
+<span class="nc" id="L317">		systemValues.setUserName(userName);</span>
+<span class="nc" id="L318">		systemValues.setMachineName(machineName);</span>
+<span class="nc" id="L319">		systemValues.setOsVersion(system);</span>
+<span class="nc" id="L320">		systemValues.setOsBuild(osBuild);</span>
+<span class="nc" id="L321">		systemValues.setCountry(country);</span>
+<span class="nc" id="L322">	}</span>
+
+	//--------------------------------------------------------------------------------------------------
+	// Api webservices init
+	//--------------------------------------------------------------------------------------------------
+
+	public void setApplicationData(String os) {
+<span class="nc" id="L329">		icon = ResourceContent.getAtsByteLogo();</span>
+<span class="nc" id="L330">		driverVersion = ATS.VERSION;</span>
+<span class="nc" id="L331">		dimension = new TestBound(0D, 0D, 1D, 1D);</span>
+<span class="nc" id="L332">		systemValues.setOsName(os);</span>
+<span class="nc" id="L333">	}</span>
+
+	public void setApplicationData(String os, String type, ArrayList&lt;String&gt; op) {
+<span class="nc" id="L336">		operations = op;</span>
+<span class="nc" id="L337">		systemValues.setOsName(os);</span>
+<span class="nc" id="L338">		systemValues.setApplicationName(type);</span>
+<span class="nc" id="L339">	}</span>
+
+	//--------------------------------------------------------------------------------------------------
+	//--------------------------------------------------------------------------------------------------
+
+	public void setApplicationData(String os, String version, String dv, long pid, byte[] ic, String screen) {
+<span class="nc" id="L345">		driverVersion = dv;</span>
+<span class="nc" id="L346">		processId = pid;</span>
+<span class="nc" id="L347">		icon = ic;</span>
+<span class="nc" id="L348">		screenServer = screen;</span>
+
+<span class="nc" id="L350">		systemValues.setOsName(os);</span>
+<span class="nc" id="L351">		systemValues.setApplicationVersion(version);</span>
+<span class="nc" id="L352">	}</span>
+
+	public void setApplicationData(String os, String serviceType) {
+<span class="nc" id="L355">		systemValues.setOsName(os);</span>
+<span class="nc" id="L356">		systemValues.setApplicationName(serviceType);</span>
+<span class="nc" id="L357">	}</span>
+
+	public void setApplicationData(String os, int handle) {
+<span class="nc" id="L360">		driverVersion = &quot;&quot;;</span>
+<span class="nc" id="L361">		winHandle = handle;</span>
+<span class="nc" id="L362">		systemValues.setOsName(os);</span>
+<span class="nc" id="L363">	}</span>
+
+	public void setApplicationData(String os, String version, String dVersion, long pid) {
+<span class="nc" id="L366">		setApplicationData(os, version, dVersion, pid, new byte[0], &quot;&quot;);</span>
+<span class="nc" id="L367">	}</span>
+
+	public void setApplicationData(String os, String name, String version, String dVersion, long pid) {
+<span class="nc" id="L370">		setApplicationData(os, version, dVersion, pid, new byte[0], &quot;&quot;);</span>
+<span class="nc" id="L371">		systemValues.setApplicationName(name);</span>
+<span class="nc" id="L372">	}</span>
+
+	public void setApplicationData(String os, String version, String dVersion, long pid, long handle) {
+<span class="nc" id="L375">		setApplicationData(os, version, dVersion, pid, new byte[0], &quot;&quot;);</span>
+<span class="nc" id="L376">		winHandle = (int) handle;</span>
+<span class="nc" id="L377">	}</span>
+
+	public String getSystemValue(String name) {
+<span class="nc bnc" id="L380" title="All 2 branches missed.">		if(name != null) {</span>
+<span class="nc" id="L381">			return systemValues.get(name);</span>
+		}
+<span class="nc" id="L383">		return &quot;&quot;;</span>
+	}
+
+	//--------------------------------------------------------------------------------------------------
+	//--------------------------------------------------------------------------------------------------
+
+	public void switchToFrame(String id) {
+<span class="nc" id="L390">		engine.switchToFrameId(id);</span>
+<span class="nc" id="L391">	}</span>
+
+	public void clearData() {
+<span class="nc" id="L394">		icon = null;</span>
+<span class="nc" id="L395">		operations.clear();</span>
+<span class="nc" id="L396">	}</span>
+
+	//----------------------------------------------------------------------------------------------------------------------
+	// Elements
+	//----------------------------------------------------------------------------------------------------------------------
+
+	public FoundElement getElementFromPoint(Boolean syscomp, Double x, Double y){
+<span class="nc" id="L403">		return engine.getElementFromPoint(syscomp, x, y);</span>
+	}
+
+	public FoundElement getElementFromRect(Boolean syscomp, Double x, Double y, Double w, Double h){
+<span class="nc" id="L407">		return engine.getElementFromRect(syscomp, x, y, w, h);</span>
+	}
+
+	public void loadParents(FoundElement hoverElement) {
+<span class="nc bnc" id="L411" title="All 2 branches missed.">		if(hoverElement != null) {</span>
+<span class="nc" id="L412">			engine.loadParents(hoverElement);</span>
+		}
+<span class="nc" id="L414">	}</span>
+
+	public CalculatedProperty[] getCssAttributes(FoundElement element){
+<span class="nc" id="L417">		return engine.getCssAttributes(element);</span>
+	}
+
+	public CalculatedProperty[] getAttributes(FoundElement element){
+<span class="nc" id="L421">		return engine.getAttributes(element, false);</span>
+	}
+
+	public List&lt;String[]&gt; findSelectOptions(TestElement element){
+<span class="nc" id="L425">		return engine.loadSelectOptions(element);</span>
+	}
+
+	public String getAttribute(ActionStatus status, FoundElement element, String attributeName, int maxTry){
+<span class="nc" id="L429">		return engine.getAttribute(status, element, attributeName, maxTry + AtsManager.getInstance().getMaxTryProperty());</span>
+	}
+
+	public void setSysProperty(String attributeName, String attributeValue) {
+<span class="nc" id="L433">		engine.setSysProperty(attributeName, attributeValue);</span>
+<span class="nc" id="L434">	}</span>
+	
+	//----------------------------------------------------------------------------------------------------------------------
+
+	public String getOs() {
+<span class="nc" id="L439">		return systemValues.getOsName();</span>
+	}
+	
+	public String getApplication() {
+<span class="nc" id="L443">		return systemValues.getApplicationName();</span>
+	}
+	
+	public String getApplicationVersion() {
+<span class="nc" id="L447">		return systemValues.getApplicationVersion();</span>
+	}
+
+	//----------------------------------------------------------------------------------------------------------------------
+	// logs
+	//----------------------------------------------------------------------------------------------------------------------
+
+	public void sendLog(int code, String message, Object value) {
+<span class="nc" id="L455">		mainScript.sendLog(code, message, value);</span>
+<span class="nc" id="L456">	}</span>
+
+	public void sendWarningLog(String message, String value) {
+<span class="nc" id="L459">		mainScript.sendWarningLog(message, value);</span>
+<span class="nc" id="L460">	}</span>
+
+	//----------------------------------------------------------------------------------------------------------------------
+	// Getter and setter for serialization
+	//----------------------------------------------------------------------------------------------------------------------
+
+	public ArrayList&lt;String&gt; getSystemProperties() {
+<span class="nc" id="L467">		return systemProperties; </span>
+	}
+	public void setSystemProperties(ArrayList&lt;String&gt; props) { 
+<span class="nc" id="L470">		systemProperties = props; </span>
+<span class="nc" id="L471">	}</span>
+
+	public ArrayList&lt;String&gt; getSystemButtons() { 
+<span class="nc" id="L474">		return systemButtons; </span>
+	}
+	public void setSystemButtons(ArrayList&lt;String&gt; buttons) { 
+<span class="nc" id="L477">		systemButtons = buttons;</span>
+<span class="nc" id="L478">	}</span>
+
+	public ArrayList&lt;String&gt; getOperations() {
+<span class="nc" id="L481">		return operations;</span>
+	}
+
+	public void setOperations(ArrayList&lt;String&gt; operations) {
+<span class="nc" id="L485">		this.operations = operations;</span>
+<span class="nc" id="L486">	}</span>
+
+	public SystemValues getSystemValues(){
+<span class="nc" id="L489">		return systemValues;</span>
+	}
+<span class="nc" id="L491">	public void setSystemValues(SystemValues value) {} //read only</span>
+	
+	public String getDriverVersion() {
+<span class="nc" id="L494">		return driverVersion;</span>
+	}
+<span class="nc" id="L496">	public void setDriverVersion(String url) {} // read only	</span>
+
+	public boolean isDesktop() {
+<span class="nc" id="L499">		return engine instanceof DesktopDriverEngine;</span>
+	}
+<span class="nc" id="L501">	public void setDesktop(boolean value) {} // read only</span>
+
+	public boolean isMobile() {
+<span class="nc" id="L504">		return engine instanceof MobileDriverEngine;</span>
+	}
+<span class="nc" id="L506">	public void setMobile(boolean value) {} // read only</span>
+
+	public String getName() {
+<span class="nc" id="L509">		return actionStart.getName();</span>
+	}
+<span class="nc" id="L511">	public void setName(String name) {} // read only</span>
+
+	public String getAuthentication() {
+<span class="nc bnc" id="L514" title="All 8 branches missed.">		if(actionStart.getAuthentication() != null &amp;&amp; actionStart.getAuthenticationValue() != null &amp;&amp; actionStart.getAuthentication().length() &gt; 0 &amp;&amp; actionStart.getAuthenticationValue().length() &gt; 0) {</span>
+<span class="nc" id="L515">			return actionStart.getAuthentication();</span>
+		}
+<span class="nc" id="L517">		return &quot;&quot;;</span>
+	}
+<span class="nc" id="L519">	public void setAuthentication(String value) {} // read only</span>
+
+	public int getPerformance() {
+<span class="nc" id="L522">		return actionStart.getPerformance();</span>
+	}
+	public void setPerformance(int value) {
+<span class="nc" id="L525">		actionStart.setPerformance(value);</span>
+<span class="nc" id="L526">	}</span>
+
+	public boolean isCurrent() {
+<span class="nc" id="L529">		return current;</span>
+	}
+
+	public void setCurrent(boolean value) {
+<span class="nc" id="L533">		this.current = value;</span>
+<span class="nc bnc" id="L534" title="All 2 branches missed.">		if(value){</span>
+<span class="nc" id="L535">			setWindowToFront();</span>
+		}
+<span class="nc" id="L537">	}</span>
+
+	public byte[] getIcon() {
+<span class="nc" id="L540">		return icon;</span>
+	}
+
+	public void setIcon(byte[] value) {
+<span class="nc" id="L544">		this.icon = value;</span>
+<span class="nc" id="L545">	}</span>
+
+	public String getScreenServer() {
+<span class="nc" id="L548">		return screenServer;</span>
+	}
+
+	public void setScreenServer(String value) {
+<span class="nc" id="L552">		this.screenServer = value;</span>
+<span class="nc" id="L553">	}</span>
+
+	public TestBound getDimension() {
+<span class="nc" id="L556">		return dimension;</span>
+	}
+
+	public void setDimension(TestBound dimension) {
+<span class="nc" id="L560">		this.dimension = dimension;</span>
+<span class="nc" id="L561">	}</span>
+
+	public String getBoundDimension() {
+<span class="nc" id="L564">		return dimension.getX().intValue() + &quot;,&quot; + dimension.getY().intValue() + &quot;,&quot; + dimension.getWidth().intValue() + &quot;,&quot; + dimension.getHeight().intValue();</span>
+	}
+
+	public Long getProcessId() {
+<span class="nc" id="L568">		return processId;</span>
+	}
+<span class="nc" id="L570">	public void setProcessId(Long value) {} //read only</span>
+
+	public TestBound getSubDimension(){
+<span class="nc" id="L573">		return subDimension;</span>
+	}
+
+	public void setSubDimension(TestBound dimension){
+<span class="nc" id="L577">		this.subDimension = dimension;</span>
+<span class="nc" id="L578">	}</span>
+
+	//----------------------------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------------------------------------------
+
+	public void close(){
+<span class="nc" id="L584">		close(newActionStatus(), false);</span>
+<span class="nc" id="L585">	}</span>
+
+	public void close(ActionStatus status, boolean keepRunning){
+
+<span class="nc bnc" id="L589" title="All 2 branches missed.">		if(stopNeoloadRecord != null) {</span>
+<span class="nc" id="L590">			neoloadAction(stopNeoloadRecord, &quot;&quot;, 0);</span>
+		}
+
+<span class="nc" id="L593">		closeAtsProxy();</span>
+
+<span class="nc" id="L595">		engine.close(keepRunning);</span>
+<span class="nc" id="L596">		mainScript.getChannelManager().channelClosed(status, this);</span>
+<span class="nc" id="L597">	}</span>
+
+	//----------------------------------------------------------------------------------------------------------
+	// Browser's secific parameters
+	//----------------------------------------------------------------------------------------------------------
+
+	public void progressiveWait(int value) {
+<span class="nc" id="L604">		sleep(200 + value*50);</span>
+<span class="nc" id="L605">	}</span>
+
+	public void sleep(int ms){
+<span class="nc" id="L608">		mainScript.sleep(ms);</span>
+<span class="nc" id="L609">	}</span>
+
+	public void actionTerminated(ActionStatus status){
+<span class="nc" id="L612">		engine.waitAfterAction(status);</span>
+<span class="nc" id="L613">	}</span>
+
+	//----------------------------------------------------------------------------------------------------------
+	// driver actions
+	//----------------------------------------------------------------------------------------------------------
+
+	public WebElement getRootElement() {
+<span class="nc" id="L620">		return engine.getRootElement(this);</span>
+	}
+
+	public void switchWindow(ActionStatus status, int index, int tries){
+<span class="nc" id="L624">		engine.switchWindow(status, index, tries);</span>
+<span class="nc bnc" id="L625" title="All 2 branches missed.">		if(status.isPassed()) {</span>
+<span class="nc" id="L626">			engine.updateDimensions();</span>
+<span class="nc" id="L627">			updateWinHandle(getDesktopDriver(), index);</span>
+		}
+<span class="nc" id="L629">	}</span>
+
+	public String setWindowBound(BoundData x, BoundData y, BoundData w, BoundData h) {
+<span class="nc" id="L632">		String bounds = engine.setWindowBound(x, y, w, h);</span>
+<span class="nc" id="L633">		engine.updateDimensions();</span>
+<span class="nc" id="L634">		return bounds;</span>
+	}
+
+	public void closeWindow(ActionStatus status){
+<span class="nc" id="L638">		engine.closeWindow(status);</span>
+<span class="nc" id="L639">	}</span>
+
+	public void windowState(ActionStatus status, String state){
+<span class="nc" id="L642">		engine.windowState(status, this, state);</span>
+<span class="nc" id="L643">	}</span>
+
+	public Object executeScript(ActionStatus status, String script, Object ... params){
+<span class="nc" id="L646">		return engine.executeScript(status, script, params);</span>
+	}	
+
+	public DialogBox switchToAlert() {
+<span class="nc" id="L650">		return engine.switchToAlert();</span>
+	}
+
+	public void switchToDefaultContent() {
+<span class="nc" id="L654">		engine.switchToDefaultContent();</span>
+<span class="nc" id="L655">	}</span>
+
+	public void navigate(ActionStatus status, String url) {
+<span class="nc" id="L658">		engine.goToUrl(status, url);</span>
+<span class="nc" id="L659">	}</span>
+
+	public void api(ActionStatus status, ActionApi api) {
+<span class="nc" id="L662">		engine.api(status, api);</span>
+<span class="nc" id="L663">	}</span>
+
+	public IDriverEngine getDesktopDriverEngine() {
+<span class="nc" id="L666">		return getDesktopDriver().getEngine();</span>
+	}
+
+	public IDriverEngine getDriverEngine() {
+<span class="nc" id="L670">		return engine;</span>
+	}
+
+	//----------------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------------------------------
+
+	public void scroll(int delta) {
+<span class="nc" id="L677">		engine.scroll(delta*scrollUnit);</span>
+<span class="nc" id="L678">	}</span>
+
+	public void scroll(FoundElement foundElement, int delta) {
+<span class="nc" id="L681">		engine.scroll(foundElement, delta*scrollUnit);</span>
+<span class="nc" id="L682">	}</span>
+
+	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position) {
+<span class="nc" id="L685">		engine.mouseMoveToElement(status, foundElement, position, false, 0, 0);</span>
+<span class="nc" id="L686">		actionTerminated(status);</span>
+<span class="nc" id="L687">	}</span>
+
+	public void buttonClick(ActionStatus status, String buttonType) {
+<span class="nc" id="L690">		engine.buttonClick(status, buttonType);</span>
+<span class="nc" id="L691">	}</span>
+
+	//----------------------------------------------------------------------------------------------------------
+	// Performance
+	//----------------------------------------------------------------------------------------------------------
+
+<span class="pc" id="L697">	private ActionNeoloadStop stopNeoloadRecord = null;</span>
+
+	public void neoloadAction(ActionNeoload action, String testName, int testLine) {
+<span class="nc" id="L700">		action.setStatus(newActionStatus(testName, testLine));</span>
+<span class="nc bnc" id="L701" title="All 2 branches missed.">		if(getPerformance() == ActionChannelStart.NEOLOAD) {</span>
+<span class="nc bnc" id="L702" title="All 2 branches missed.">			if(neoloadDesignApi != null) {</span>
+<span class="nc" id="L703">				action.executeRequest(this, neoloadDesignApi);</span>
+			}else {
+<span class="nc" id="L705">				action.getStatus().setPassed(false);</span>
+<span class="nc" id="L706">				action.getStatus().setMessage(&quot;Neoload design API is not defined in .atsProperties !&quot;);</span>
+			}
+		}else {
+<span class="nc" id="L709">			action.getStatus().setPassed(true);</span>
+		}
+<span class="nc" id="L711">	}</span>
+
+	public void setStopNeoloadRecord(ActionNeoloadStop value) {
+<span class="nc" id="L714">		this.stopNeoloadRecord = value;</span>
+<span class="nc" id="L715">	}</span>
+
+	//----------------------------------------------------------------------------------------------------------
+
+<span class="pc" id="L719">	private IAtsProxy atsProxy = new AtsNoProxy();</span>
+
+	public Proxy startAtsProxy(AtsManager ats) {
+<span class="nc" id="L722">		atsProxy = new AtsProxy(getName(), getApplication(), ats.getBlackListServers(), ats.getTrafficIdle(), ats.getOctoperf());</span>
+<span class="nc" id="L723">		return atsProxy.startProxy();</span>
+	}
+
+	public void startHarServer(ActionStatus status, List&lt;String&gt; whiteList, int trafficIddle, int latency, long sendBandWidth, long receiveBandWidth) {
+<span class="nc" id="L727">		atsProxy.startRecord(status, whiteList, trafficIddle, latency, sendBandWidth, receiveBandWidth);</span>
+<span class="nc" id="L728">	}</span>
+
+	public void pauseHarRecord() {
+<span class="nc" id="L731">		atsProxy.pauseRecord();</span>
+<span class="nc" id="L732">	}</span>
+
+	public void resumeHarRecord() {
+<span class="nc" id="L735">		atsProxy.resumeRecord();</span>
+<span class="nc" id="L736">	}</span>
+
+	public void startHarAction(Action action, String testLine) {
+<span class="nc" id="L739">		atsProxy.startAction(action, testLine);</span>
+<span class="nc" id="L740">	}</span>
+
+	public void endHarAction() {
+<span class="nc" id="L743">		atsProxy.endAction();</span>
+<span class="nc" id="L744">	}</span>
+
+	public void sendToOctoperfServer(ActionOctoperfVirtualUser action) {
+<span class="nc" id="L747">		atsProxy.sendToOctoperfServer(this, action);</span>
+<span class="nc" id="L748">	}</span>
+
+	public void closeAtsProxy() {
+<span class="nc" id="L751">		atsProxy.terminate(getName());</span>
+<span class="nc" id="L752">		atsProxy = null;</span>
+<span class="nc" id="L753">	}</span>
+
+	//----------------------------------------------------------------------------------------------------------
+	// Visual reporting
+	//----------------------------------------------------------------------------------------------------------
+
+	public DesktopResponse startVisualRecord(ScriptHeader script, int quality, long started) {
+<span class="nc" id="L760">		return getDesktopDriver().startVisualRecord(this, script, quality, started);</span>
+	}
+
+	public void stopVisualRecord(ScriptStatus status, ReportSummary summary) {
+<span class="nc" id="L764">		getDesktopDriver().saveSummary(status, summary);</span>
+<span class="nc" id="L765">		getDesktopDriver().stopVisualRecord();</span>
+<span class="nc" id="L766">	}</span>
+
+	public void saveVisualReportFile(Path path, String fileName, ExecutionLogger logger) {
+<span class="nc" id="L769">		getDesktopDriver().saveVisualReportFile(path.resolve(fileName), logger);</span>
+<span class="nc" id="L770">	}</span>
+
+	public void createVisualAction(boolean stop, String actionName, int scriptLine, String scriptName, long timeline, boolean sync) {
+<span class="nc" id="L773">		this.engine.createVisualAction(this, stop, actionName, scriptLine, scriptName, timeline, sync);</span>
+<span class="nc" id="L774">	}</span>
+
+	public void updateVisualAction(boolean isRef) {
+<span class="nc" id="L777">		this.engine.updateScreenshot(this.dimension, isRef);</span>
+<span class="nc" id="L778">	}</span>
+
+	public void updateVisualAction(String value) {
+<span class="nc" id="L781">		getDesktopDriver().updateVisualValue(value);</span>
+<span class="nc" id="L782">	}</span>
+
+	public void updateVisualAction(String value, String data) {
+<span class="nc" id="L785">		getDesktopDriver().updateVisualData(value, data);</span>
+<span class="nc" id="L786">	}</span>
+
+	public void updateVisualAction(String type, MouseDirectionData hdir, MouseDirectionData vdir) {
+<span class="nc" id="L789">		getDesktopDriver().updateVisualPosition(type, hdir, vdir);</span>
+<span class="nc" id="L790">	}</span>
+
+	public void updateVisualAction(TestElement element) {
+<span class="nc" id="L793">		getDesktopDriver().updateVisualElement(element);</span>
+<span class="nc" id="L794">	}</span>
+
+	public void updateVisualAction(int error, long duration) {
+<span class="nc" id="L797">		getDesktopDriver().updateVisualStatus(error, duration);</span>
+<span class="nc" id="L798">	}</span>
+
+	public void updateVisualAction(int error, long duration, String value) {
+<span class="nc" id="L801">		getDesktopDriver().updateVisualStatus(error, duration);</span>
+<span class="nc" id="L802">		getDesktopDriver().updateVisualValue(value);</span>
+<span class="nc" id="L803">	}</span>
+
+	public void updateVisualAction(int error, long duration, String value, String data) {
+<span class="nc" id="L806">		getDesktopDriver().updateVisualStatus(error, duration);</span>
+<span class="nc" id="L807">		getDesktopDriver().updateVisualData(value, data);</span>
+<span class="nc" id="L808">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

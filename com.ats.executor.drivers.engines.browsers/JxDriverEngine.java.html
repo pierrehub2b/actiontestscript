@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JxDriverEngine.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.executor.drivers.engines.browsers</a> &gt; <span class="el_source">JxDriverEngine.java</span></div><h1>JxDriverEngine.java</h1><pre class="source lang-java linenums">package com.ats.executor.drivers.engines.browsers;
+
+import com.ats.driver.ApplicationProperties;
+import com.ats.executor.ActionStatus;
+import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.DriverManager;
+import com.ats.executor.drivers.desktop.DesktopDriver;
+import com.ats.executor.drivers.desktop.DesktopWindow;
+import com.ats.executor.drivers.engines.DesktopDriverEngine;
+import com.ats.executor.drivers.engines.WebDriverEngine;
+import com.ats.tools.Utils;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Point;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+public class JxDriverEngine extends WebDriverEngine {
+
+	private final static int DEFAULT_WAIT = 150;
+	private final static int DEFAULT_PROPERTY_WAIT = 200;
+
+	private final static String JX_WINDOW_SIZE = &quot;var result=[window.screenX+7.0001, window.screenY+8.0001, window.innerWidth+0.0001, window.innerHeight+0.0001];&quot;;
+
+	private ProcessHandle jxProcess;
+
+	@SuppressWarnings(&quot;unchecked&quot;)
+	public JxDriverEngine(DriverManager driverManager, Path driversPath, String driverName, Channel channel, ActionStatus status, DesktopDriver desktopDriver, ApplicationProperties props) {
+<span class="nc" id="L40">		super(channel, desktopDriver, props.getUri(), props, DEFAULT_WAIT, DEFAULT_PROPERTY_WAIT);</span>
+
+<span class="nc" id="L42">		final ProcessBuilder builder = new ProcessBuilder(getApplicationPath());</span>
+		
+		try {
+<span class="nc" id="L45">			builder.start();</span>
+<span class="nc" id="L46">			status.setPassed(true);</span>
+<span class="nc" id="L47">		} catch (IOException e1) {</span>
+<span class="nc" id="L48">			status.setException(ActionStatus.CHANNEL_START_ERROR, e1);</span>
+<span class="nc" id="L49">		}</span>
+
+<span class="nc" id="L51">		this.setDriverProcess(driverManager.getDriverProcess(status, DriverManager.JX_BROWSER, driverName, null));</span>
+
+<span class="nc bnc" id="L53" title="All 2 branches missed.">		if(status.isPassed()) {</span>
+			try {
+<span class="nc" id="L55">				DesiredCapabilities capabilities = new DesiredCapabilities();</span>
+
+<span class="nc" id="L57">				ChromeOptions options = new ChromeOptions();</span>
+<span class="nc" id="L58">				options.setExperimentalOption(&quot;debuggerAddress&quot;, &quot;localhost:9222&quot;);</span>
+<span class="nc" id="L59">				capabilities.setCapability(ChromeOptions.CAPABILITY, options);</span>
+
+<span class="nc" id="L61">				driver = new RemoteWebDriver(getDriverProcess().getDriverServerUrl(), capabilities);</span>
+
+<span class="nc" id="L63">			} catch (Exception e) {</span>
+<span class="nc" id="L64">				close(false);</span>
+<span class="nc" id="L65">				status.setError(ActionStatus.CHANNEL_START_ERROR, e.getMessage());</span>
+<span class="nc" id="L66">			}</span>
+
+<span class="nc bnc" id="L68" title="All 2 branches missed.">			if(driver != null) {</span>
+<span class="nc" id="L69">				status.setPassed(true);</span>
+
+<span class="nc" id="L71">				actions = new Actions(driver);</span>
+
+<span class="nc" id="L73">				driver.manage().timeouts().setScriptTimeout(50, TimeUnit.SECONDS);</span>
+<span class="nc" id="L74">				driver.manage().timeouts().pageLoadTimeout(60, TimeUnit.SECONDS);</span>
+
+<span class="nc" id="L76">				String applicationVersion = &quot;N/A&quot;;</span>
+<span class="nc" id="L77">				String driverVersion = &quot;N/A&quot;;</span>
+
+<span class="nc" id="L79">				Map&lt;String, ?&gt; infos = driver.getCapabilities().asMap();</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">				for (Map.Entry&lt;String, ?&gt; entry : infos.entrySet()){</span>
+<span class="nc bnc" id="L81" title="All 4 branches missed.">					if(&quot;browserVersion&quot;.equals(entry.getKey()) || &quot;version&quot;.equals(entry.getKey())){</span>
+<span class="nc" id="L82">						applicationVersion = entry.getValue().toString();</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">					}else if(&quot;chrome&quot;.equals(entry.getKey())) {</span>
+<span class="nc" id="L84">						Map&lt;String, String&gt; chromeData = (Map&lt;String, String&gt;) entry.getValue();</span>
+<span class="nc" id="L85">						driverVersion = chromeData.get(&quot;chromedriverVersion&quot;);</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">						if(driverVersion != null) {</span>
+<span class="nc" id="L87">							driverVersion = driverVersion.replaceFirst(&quot;\\(.*\\)&quot;, &quot;&quot;).trim();</span>
+						}
+					}
+<span class="nc" id="L90">				}</span>
+
+<span class="nc" id="L92">				final String titleUid = UUID.randomUUID().toString();</span>
+<span class="nc" id="L93">				String atsStartPageUri = null;</span>
+				try {
+<span class="nc" id="L95">					final File tempHtml = File.createTempFile(&quot;ats_&quot;, &quot;.html&quot;);</span>
+<span class="nc" id="L96">					tempHtml.deleteOnExit();</span>
+
+<span class="nc" id="L98">					Files.write(tempHtml.toPath(), Utils.getAtsBrowserContent(titleUid, channel.getApplication(), applicationPath, applicationVersion, driverVersion, channel.getDimension(), getActionWait(), getPropertyWait(), 20, 20, 20, 20, 20, getDesktopDriver(), null));</span>
+<span class="nc" id="L99">					atsStartPageUri = tempHtml.toURI().toString();</span>
+<span class="nc" id="L100">				} catch (IOException e) {}</span>
+
+				
+<span class="nc" id="L103">				final DesktopWindow window = getJxBrowserWindow(atsStartPageUri, props.getTitle());</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">				if(window != null) {</span>
+
+<span class="nc" id="L106">					int maxTry = 10;</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">					while(maxTry &gt; 0) {</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">						Optional&lt;ProcessHandle&gt; opt = ProcessHandle.allProcesses().filter(p -&gt; p.pid() == window.getPid()).findFirst();</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">						if(opt.isPresent()) {</span>
+<span class="nc" id="L110">							maxTry = 0;</span>
+<span class="nc" id="L111">							jxProcess = opt.get();</span>
+							
+<span class="nc" id="L113">							desktopDriver.setEngine(new DesktopDriverEngine(channel, window));</span>
+<span class="nc" id="L114">							channel.setApplicationData(</span>
+									&quot;windows&quot;,
+									applicationVersion,
+									driverVersion,
+<span class="nc" id="L118">									window.getPid(),</span>
+<span class="nc" id="L119">									window.getHandle());							</span>
+							
+<span class="nc" id="L121">							setSize(channel.getDimension().getSize());</span>
+<span class="nc" id="L122">							setPosition(channel.getDimension().getPoint());</span>
+							
+<span class="nc" id="L124">							return;</span>
+							
+						}else {
+<span class="nc" id="L127">							maxTry--;</span>
+						}
+<span class="nc" id="L129">					}</span>
+
+<span class="nc" id="L131">					status.setError(ActionStatus.CHANNEL_START_ERROR, &quot;unable to find JxBrowser running process&quot;);</span>
+<span class="nc" id="L132">				}else {</span>
+<span class="nc" id="L133">					status.setError(ActionStatus.CHANNEL_START_ERROR, &quot;unable to find JxBrowser main window&quot;);</span>
+				}
+			}
+		}
+<span class="nc" id="L137">	}</span>
+
+	private DesktopWindow getJxBrowserWindow(String atsStartPage, String title) {
+
+<span class="nc" id="L141">		int maxTry = 10;</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">		while(maxTry &gt; 0) {</span>
+			
+<span class="nc" id="L144">			driver.get(atsStartPage);</span>
+			
+<span class="nc" id="L146">			final DesktopWindow window = desktopDriver.getWindowByTitle(&quot;jx&quot;, title);</span>
+<span class="nc bnc" id="L147" title="All 4 branches missed.">			if(window != null &amp;&amp; window.getPid() &gt; 0) {</span>
+<span class="nc" id="L148">				return window;</span>
+			}else {
+<span class="nc" id="L150">				channel.sleep(300);</span>
+<span class="nc" id="L151">				maxTry--;</span>
+			}
+<span class="nc" id="L153">		}</span>
+<span class="nc" id="L154">		return null;</span>
+	}
+
+	@Override
+	protected void setPosition(Point pt) {
+<span class="nc" id="L159">		getDesktopDriver().moveWindow(channel, pt);</span>
+<span class="nc" id="L160">	}</span>
+
+	@Override
+	protected void setSize(Dimension size) {
+<span class="nc" id="L164">		getDesktopDriver().resizeWindow(channel, size);</span>
+<span class="nc" id="L165">	}</span>
+
+	@Override
+	public void updateDimensions() {
+
+<span class="nc" id="L170">		final DesktopWindow win = getDesktopDriver().getWindowByHandle(channel.getHandle(desktopDriver));</span>
+<span class="nc" id="L171">		final Double channelX = win.getX();</span>
+<span class="nc" id="L172">		final Double channelY = win.getY();</span>
+
+<span class="nc" id="L174">		channel.getDimension().update(channelX, channelY, win.getWidth(), win.getHeight());</span>
+
+		@SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L177">		final ArrayList&lt;Double&gt; response = (ArrayList&lt;Double&gt;) runJavaScript(JX_WINDOW_SIZE);</span>
+<span class="nc" id="L178">		channel.getSubDimension().update(response.get(0) - channelX, response.get(1) - channelY, response.get(2), response.get(3));</span>
+<span class="nc" id="L179">	}</span>
+
+	@Override
+	public void close(boolean keepRunning) {
+
+		try {
+
+<span class="nc" id="L186">			jxProcess.destroyForcibly();</span>
+<span class="nc" id="L187">			driver.close();</span>
+<span class="nc" id="L188">			getDriverProcess().close(keepRunning);</span>
+
+<span class="nc" id="L190">		}catch(Exception e) {}</span>
+<span class="nc" id="L191">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

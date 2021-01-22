@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DriverEngine.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.executor.drivers.engines</a> &gt; <span class="el_source">DriverEngine.java</span></div><h1>DriverEngine.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+*/
+
+package com.ats.executor.drivers.engines;
+
+import java.awt.Rectangle;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Point;
+import org.openqa.selenium.remote.RemoteWebDriver;
+
+import com.ats.driver.ApplicationProperties;
+import com.ats.element.FoundElement;
+import com.ats.element.TestElement;
+import com.ats.executor.ActionStatus;
+import com.ats.executor.TestBound;
+import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.desktop.DesktopDriver;
+import com.ats.generator.objects.BoundData;
+import com.ats.generator.objects.Cartesian;
+import com.ats.generator.objects.MouseDirection;
+import com.ats.generator.objects.MouseDirectionData;
+import com.ats.generator.variables.CalculatedProperty;
+import com.ats.graphic.ImageTemplateMatchingSimple;
+
+public abstract class DriverEngine {
+	
+<span class="nc" id="L47">	protected static String BODY = &quot;BODY&quot;;</span>
+<span class="nc" id="L48">	protected static String SYSCOMP = &quot;SYSCOMP&quot;;</span>
+	
+	protected Channel channel;
+	
+	protected RemoteWebDriver driver;
+	protected DesktopDriver desktopDriver;
+		
+	protected String applicationPath;
+	protected String lang;
+	
+<span class="nc" id="L58">	protected int currentWindow = 0;</span>
+	
+<span class="nc" id="L60">	private int actionWait = -1;</span>
+<span class="nc" id="L61">	private int propertyWait = -1;</span>
+
+<span class="nc" id="L63">	public DriverEngine(Channel channel) {</span>
+<span class="nc" id="L64">		this.channel = channel;</span>
+<span class="nc" id="L65">	}</span>
+	
+	public DriverEngine(Channel channel, DesktopDriver desktopDriver, ApplicationProperties props) {
+<span class="nc" id="L68">		this(channel);</span>
+<span class="nc" id="L69">		this.desktopDriver = desktopDriver;</span>
+<span class="nc" id="L70">	}</span>
+	
+	public DriverEngine(Channel channel, DesktopDriver desktopDriver, ApplicationProperties props, int defaultWait, int defaultCheck){
+		
+<span class="nc" id="L74">		this(channel);</span>
+<span class="nc" id="L75">		this.desktopDriver = desktopDriver;</span>
+		
+<span class="nc" id="L77">		actionWait = props.getWait();</span>
+<span class="nc" id="L78">		propertyWait = props.getCheck();</span>
+<span class="nc" id="L79">		applicationPath = props.getUri();</span>
+<span class="nc" id="L80">		lang = props.getLang();</span>
+		
+<span class="nc bnc" id="L82" title="All 2 branches missed.">		if(actionWait == -1) {</span>
+<span class="nc" id="L83">			actionWait = defaultWait;</span>
+		}
+		
+<span class="nc bnc" id="L86" title="All 2 branches missed.">		if(propertyWait == -1) {</span>
+<span class="nc" id="L87">			propertyWait = defaultCheck;</span>
+		}
+<span class="nc" id="L89">	}</span>
+	
+	public void started(ActionStatus status) {
+		//nothing to do by default
+<span class="nc" id="L93">	}</span>
+	
+	public void updateScreenshot(TestBound dimension, boolean isRef) {
+<span class="nc" id="L96">		getDesktopDriver().updateVisualImage(dimension, isRef);</span>
+<span class="nc" id="L97">	}</span>
+	
+	public void createVisualAction(Channel channel, boolean stop, String actionType, int scriptLine, String scriptName, long timeline, boolean sync) {
+<span class="nc" id="L100">		getDesktopDriver().createVisualAction(channel, stop, actionType, scriptLine, scriptName, timeline, sync);</span>
+<span class="nc" id="L101">	}</span>
+
+	public TestElement getTestElementRoot() {
+<span class="nc" id="L104">		return new TestElement(channel);</span>
+	}
+		
+	public DesktopDriver getDesktopDriver() {
+<span class="nc" id="L108">		return desktopDriver;</span>
+	}
+	
+	public int getCurrentWindow() {
+<span class="nc" id="L112">		return currentWindow;</span>
+	}
+	
+	public void setDriver(RemoteWebDriver driver) {
+<span class="nc" id="L116">		this.driver = driver;</span>
+<span class="nc" id="L117">	}</span>
+	
+	public String getApplicationPath() {
+<span class="nc" id="L120">		return applicationPath;</span>
+	}
+	
+	public void actionWait() {
+<span class="nc" id="L124">		channel.sleep(actionWait);</span>
+<span class="nc" id="L125">	}</span>
+	
+	public int getActionWait() {
+<span class="nc" id="L128">		return actionWait;</span>
+	}
+	
+	public int getPropertyWait() {
+<span class="nc" id="L132">		return propertyWait;</span>
+	}
+
+	protected int getCartesianOffset(int value, MouseDirectionData direction, Cartesian cart1, Cartesian cart2, Cartesian cart3) {
+<span class="nc bnc" id="L136" title="All 2 branches missed.">		if(direction != null) {</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">			if(cart1.equals(direction.getName())) {				// &lt;-- left or top</span>
+<span class="nc" id="L138">				return direction.getIntValue() + 1;				//</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">			}else if(cart3.equals(direction.getName())) {		// &lt;-- right or bottom</span>
+<span class="nc" id="L140">				return value - direction.getIntValue() - 2;		//</span>
+			}													//
+<span class="nc" id="L142">			return direction.getIntValue() + (value/2); 			// &lt;-- middle or center</span>
+		}
+<span class="nc" id="L144">		return value/2;</span>
+	}
+
+	public int getOffsetX(Rectangle rect, MouseDirection position) {
+<span class="nc" id="L148">		return getCartesianOffset(rect.width, position.getHorizontalPos(), Cartesian.LEFT, Cartesian.CENTER, Cartesian.RIGHT);</span>
+	}
+
+	public int getOffsetY(Rectangle rect, MouseDirection position) {
+<span class="nc" id="L152">		return getCartesianOffset(rect.height, position.getVerticalPos(), Cartesian.TOP, Cartesian.MIDDLE, Cartesian.BOTTOM);</span>
+	}
+		
+	public String setWindowBound(BoundData x, BoundData y, BoundData w, BoundData h) {
+
+<span class="nc" id="L157">		int newX = 0;</span>
+<span class="nc" id="L158">		int newY = 0;</span>
+<span class="nc" id="L159">		int newWidth = 0;</span>
+<span class="nc" id="L160">		int newHeight = 0;</span>
+		
+<span class="nc bnc" id="L162" title="All 4 branches missed.">		if(w != null || h != null){</span>
+			
+<span class="nc bnc" id="L164" title="All 2 branches missed.">			if(w != null) {</span>
+<span class="nc" id="L165">				newWidth = w.getValue();</span>
+			}else {
+<span class="nc" id="L167">				newWidth = channel.getDimension().getWidth().intValue();</span>
+			}
+			
+<span class="nc bnc" id="L170" title="All 2 branches missed.">			if(h != null) {</span>
+<span class="nc" id="L171">				newHeight = h.getValue();</span>
+			}else {
+<span class="nc" id="L173">				newHeight = channel.getDimension().getHeight().intValue();</span>
+			}
+
+<span class="nc" id="L176">			setSize(new Dimension(newWidth, newHeight));</span>
+		}
+
+<span class="nc bnc" id="L179" title="All 4 branches missed.">		if(x != null || y != null){</span>
+
+<span class="nc bnc" id="L181" title="All 2 branches missed.">			if(x != null) {</span>
+<span class="nc" id="L182">				newX = x.getValue();</span>
+			}else {
+<span class="nc" id="L184">				newX = channel.getDimension().getX().intValue();</span>
+			}
+
+<span class="nc bnc" id="L187" title="All 2 branches missed.">			if(y != null) {</span>
+<span class="nc" id="L188">				newY = y.getValue();</span>
+			}else {
+<span class="nc" id="L190">				newY = channel.getDimension().getY().intValue();</span>
+			}
+
+<span class="nc" id="L193">			setPosition(new Point(newX, newY));</span>
+		}
+		
+<span class="nc" id="L196">		return newX + &quot;,&quot; + newY + &quot;,&quot; + newWidth + &quot;,&quot; + newHeight;</span>
+	}
+	
+	protected void desktopMoveToElement(FoundElement foundElement, MouseDirection position, int offsetX, int offsetY) {
+<span class="nc" id="L200">		final Rectangle rect = foundElement.getRectangle();</span>
+<span class="nc" id="L201">		getDesktopDriver().mouseMove(</span>
+<span class="nc" id="L202">				getOffsetX(rect, position) + foundElement.getScreenX().intValue() + offsetX,</span>
+<span class="nc" id="L203">				getOffsetY(rect, position) + foundElement.getScreenY().intValue() + offsetY);</span>
+<span class="nc" id="L204">	}</span>
+
+	abstract protected void setPosition(Point pt);
+	abstract protected void setSize(Dimension dim);
+	
+	public List&lt;FoundElement&gt; findElements(TestElement parent, ImageTemplateMatchingSimple template) {
+
+<span class="nc" id="L211">		channel.setWindowToFront();</span>
+<span class="nc" id="L212">		channel.refreshLocation();</span>
+		
+<span class="nc" id="L214">		TestBound outterBound = null;</span>
+<span class="nc bnc" id="L215" title="All 2 branches missed.">		if(parent != null) {</span>
+<span class="nc" id="L216">			outterBound = parent.getFoundElement().getTestScreenBound();</span>
+		}else {
+<span class="nc" id="L218">			outterBound = channel.getDimension();</span>
+		}
+
+<span class="nc" id="L221">		return template.findOccurrences(</span>
+<span class="nc" id="L222">				getDesktopDriver().getScreenshotByte(outterBound.getX(), outterBound.getY(), outterBound.getWidth(), outterBound.getHeight()))</span>
+<span class="nc" id="L223">				.parallelStream().map(r -&gt; new FoundElement(channel, parent, r)).collect(Collectors.toCollection(ArrayList::new));</span>
+	}
+	
+	public byte[] getScreenshot(Double x, Double y, Double width, Double height) {
+<span class="nc" id="L227">		return getDesktopDriver().getScreenshotByte(x, y, width, height);</span>
+	}
+	
+	public CalculatedProperty[] getCssAttributes(FoundElement element) {
+<span class="nc" id="L231">		return new CalculatedProperty[0];</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

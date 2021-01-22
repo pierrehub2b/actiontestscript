@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActionNeoloadRecord.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.script.actions.neoload</a> &gt; <span class="el_source">ActionNeoloadRecord.java</span></div><h1>ActionNeoloadRecord.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+*/
+
+package com.ats.script.actions.neoload;
+
+import com.ats.executor.channels.Channel;
+import com.ats.script.Script;
+
+public class ActionNeoloadRecord extends ActionNeoload {
+
+	public static final String SCRIPT_LABEL = SCRIPT_NEOLOAD_LABEL + &quot;-record&quot;;
+	
+	public static final String PAUSE = &quot;pause&quot;;
+	public static final String RESUME = &quot;resume&quot;;
+	public static final String SCREENSHOT = &quot;screenshot&quot;;
+	
+<span class="pc" id="L33">	private String type = PAUSE;</span>
+	
+	private static final String API_SERVICE_RESUME = &quot;ResumeRecording&quot;;
+	private static final String API_SERVICE_PAUSE = &quot;PauseRecording&quot;;
+	
+<span class="nc" id="L38">	public ActionNeoloadRecord() {}</span>
+	
+	public ActionNeoloadRecord(Script script, String type) {
+<span class="fc" id="L41">		super(script);</span>
+<span class="fc" id="L42">		setType(type);</span>
+<span class="fc" id="L43">	}</span>
+	
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// Code Generator
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public StringBuilder getJavaCode() {
+<span class="fc" id="L51">		StringBuilder codeBuilder = super.getJavaCode();</span>
+<span class="fc" id="L52">		codeBuilder.append(getRecordType()).append(&quot;)&quot;);</span>
+<span class="fc" id="L53">		return codeBuilder;</span>
+	}
+	
+	private String getRecordType() {
+<span class="pc bpc" id="L57" title="2 of 4 branches missed.">		if(RESUME.equals(type) || SCREENSHOT.equals(type)) {</span>
+<span class="nc" id="L58">			return this.getClass().getSimpleName() + &quot;.&quot; + type.toUpperCase();</span>
+		}
+<span class="fc" id="L60">		return this.getClass().getSimpleName() + &quot;.&quot; + PAUSE.toUpperCase();</span>
+	}
+	
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// Execution
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public void executeRequest(Channel channel, String designApiUrl) {
+<span class="nc" id="L69">		super.executeRequest(channel, designApiUrl + getServiceName());</span>
+<span class="nc" id="L70">		postData(&quot;{\&quot;d\&quot;: {}}&quot;);</span>
+<span class="nc" id="L71">	}</span>
+
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------	
+
+	private String getServiceName() {
+<span class="nc bnc" id="L78" title="All 2 branches missed.">		if(RESUME.equals(type)){</span>
+<span class="nc" id="L79">			return API_SERVICE_RESUME;</span>
+		}else {
+<span class="nc" id="L81">			return API_SERVICE_PAUSE;</span>
+		}
+	}
+
+	public String getType() {
+<span class="nc" id="L86">		return type;</span>
+	}
+
+	public void setType(String type) {
+<span class="pc bpc" id="L90" title="2 of 4 branches missed.">		if(RESUME.equals(type) || SCREENSHOT.equals(type)) {</span>
+<span class="nc" id="L91">			this.type = type;</span>
+		}else {
+<span class="fc" id="L93">			this.type = PAUSE;</span>
+		}
+<span class="fc" id="L95">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

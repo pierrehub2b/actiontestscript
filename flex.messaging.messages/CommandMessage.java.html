@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CommandMessage.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">flex.messaging.messages</a> &gt; <span class="el_source">CommandMessage.java</span></div><h1>CommandMessage.java</h1><pre class="source lang-java linenums">/*
+  GRANITE DATA SERVICES
+  Copyright (C) 2007 ADEQUATE SYSTEMS SARL
+
+  This file is part of Granite Data Services.
+
+  Granite Data Services is free software; you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or (at your
+  option) any later version.
+ 
+  Granite Data Services is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+  for more details.
+ 
+  You should have received a copy of the GNU Lesser General Public License
+  along with this library; if not, see &lt;http://www.gnu.org/licenses/&gt;.
+*/
+
+package flex.messaging.messages;
+
+/**
+ * @author Franck WOLFF
+ */
+public class CommandMessage extends AsyncMessage {
+
+    private static final long serialVersionUID = 1L;
+
+    public static final int SUBSCRIBE_OPERATION = 0;
+    public static final int UNSUBSCRIBE_OPERATION = 1;
+    public static final int POLL_OPERATION = 2;
+    public static final int CLIENT_SYNC_OPERATION = 4;
+    public static final int CLIENT_PING_OPERATION = 5;
+    public static final int CLUSTER_REQUEST_OPERATION = 7;
+    public static final int LOGIN_OPERATION = 8;
+    public static final int LOGOUT_OPERATION = 9;
+    public static final int SESSION_INVALIDATE_OPERATION = 10;
+    public static final int UNKNOWN_OPERATION = 10000;
+    
+    private String messageRefType;
+    private int operation;
+
+    public CommandMessage() {
+<span class="nc" id="L45">        super();</span>
+<span class="nc" id="L46">    }</span>
+
+    public String getMessageRefType() {
+<span class="nc" id="L49">        return messageRefType;</span>
+    }
+    public void setMessageRefType(String messageRefType) {
+<span class="nc" id="L52">        this.messageRefType = messageRefType;</span>
+<span class="nc" id="L53">    }</span>
+
+    public int getOperation() {
+<span class="nc" id="L56">        return operation;</span>
+    }
+    public void setOperation(int operation) {
+<span class="nc" id="L59">        this.operation = operation;</span>
+<span class="nc" id="L60">    }</span>
+
+    public boolean isSecurityOperation() {
+<span class="nc bnc" id="L63" title="All 4 branches missed.">        return isLoginOperation() || isLogoutOperation();</span>
+    }
+    public boolean isLoginOperation() {
+<span class="nc bnc" id="L66" title="All 2 branches missed.">        return operation == LOGIN_OPERATION;</span>
+    }
+    public boolean isLogoutOperation() {
+<span class="nc bnc" id="L69" title="All 2 branches missed.">        return operation == LOGOUT_OPERATION;</span>
+    }
+    
+    public boolean isClientPingOperation() {
+<span class="nc bnc" id="L73" title="All 2 branches missed.">        return operation == CLIENT_PING_OPERATION;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L78">    	return toString(&quot;&quot;);</span>
+    }
+    
+    public String toString(String indent) {
+<span class="nc" id="L82">        StringBuilder sb = new StringBuilder(512);</span>
+<span class="nc" id="L83">        sb.append(getClass().getName()).append(&quot; {&quot;);</span>
+<span class="nc" id="L84">        sb.append('\n').append(indent).append(&quot;  messageRefType: &quot;).append(messageRefType);</span>
+<span class="nc" id="L85">        sb.append('\n').append(indent).append(&quot;  operation: &quot;).append(getReadableOperation(operation));</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">        super.toString(sb, indent, (isLoginOperation() ? HIDDEN_CREDENTIALS : null));</span>
+<span class="nc" id="L87">        sb.append('\n').append(indent).append('}');</span>
+<span class="nc" id="L88">        return sb.toString();</span>
+    }
+    
+    private static String getReadableOperation(int operation) {
+<span class="nc bnc" id="L92" title="All 11 branches missed.">        switch (operation) {</span>
+        case SUBSCRIBE_OPERATION:
+<span class="nc" id="L94">            return &quot;SUBSCRIBE&quot;;</span>
+        case UNSUBSCRIBE_OPERATION:
+<span class="nc" id="L96">            return &quot;UNSUBSCRIBE&quot;;</span>
+        case POLL_OPERATION:
+<span class="nc" id="L98">            return &quot;POLL&quot;;</span>
+        case CLIENT_SYNC_OPERATION:
+<span class="nc" id="L100">            return &quot;CLIENT_SYNC&quot;;</span>
+        case CLIENT_PING_OPERATION:
+<span class="nc" id="L102">            return &quot;CLIENT_PING&quot;;</span>
+        case CLUSTER_REQUEST_OPERATION:
+<span class="nc" id="L104">            return &quot;CLUSTER_REQUEST&quot;;</span>
+        case LOGIN_OPERATION:
+<span class="nc" id="L106">            return &quot;LOGIN&quot;;</span>
+        case LOGOUT_OPERATION:
+<span class="nc" id="L108">            return &quot;LOGOUT&quot;;</span>
+        case SESSION_INVALIDATE_OPERATION:
+<span class="nc" id="L110">            return &quot;SESSION_INVALIDATE&quot;;</span>
+        case UNKNOWN_OPERATION:
+<span class="nc" id="L112">            return &quot;UNKNOWN&quot;;</span>
+        default: 
+<span class="nc" id="L114">            return &quot;REALLY UNKNOWN: 0x&quot; + Integer.toBinaryString(operation);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

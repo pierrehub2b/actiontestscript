@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActionNeoloadStop.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.script.actions.neoload</a> &gt; <span class="el_source">ActionNeoloadStop.java</span></div><h1>ActionNeoloadStop.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.script.actions.neoload;
+
+import com.ats.executor.channels.Channel;
+import com.ats.generator.variables.CalculatedValue;
+import com.ats.script.Script;
+import com.ats.script.ScriptLoader;
+
+import java.util.StringJoiner;
+
+public class ActionNeoloadStop extends ActionNeoloadRun {
+
+	public static final String SCRIPT_LABEL = SCRIPT_NEOLOAD_LABEL + &quot;-stop&quot;;
+
+	private static final String FRAMEWORK_PARAM = &quot;framework&quot;;
+	private static final String GENERIC_PARAM = &quot;generic&quot;;
+
+	private static final String SHARED_CONTAINER = &quot;sharedcont&quot;;
+	private static final String INCLUDE_VARIABLE = &quot;includevar&quot;;
+	private static final String DELETE_RECORD = &quot;deleterec&quot;;
+	
+	private static final String API_SERVICE_NAME = &quot;StopRecording&quot;;
+	
+<span class="pc" id="L42">	private int threshold = 60;</span>
+<span class="pc" id="L43">	private boolean updateSharedContainer = false;</span>
+<span class="pc" id="L44">	private boolean includeVariable = false;</span>
+<span class="pc" id="L45">	private boolean deleteRecording = false;</span>
+<span class="pc" id="L46">	private boolean searchFrameworkParameter = false;</span>
+<span class="pc" id="L47">	private boolean searchGenericParameter = false;</span>
+
+<span class="nc" id="L49">	public ActionNeoloadStop() {}</span>
+
+	public ActionNeoloadStop(ScriptLoader script, String options, String userData, String userOptions) {
+<span class="fc" id="L52">		super(script, options, userData);</span>
+<span class="fc" id="L53">		checkOptions(options, userOptions);</span>
+<span class="fc" id="L54">	}</span>
+
+	public ActionNeoloadStop(Script script, String options, CalculatedValue user, String userOptions) {
+<span class="fc" id="L57">		super(script, options, user);</span>
+<span class="fc" id="L58">		checkOptions(options, userOptions);</span>
+<span class="fc" id="L59">	}</span>
+
+	private void checkOptions(String options, String userOptions) {
+
+<span class="fc" id="L63">		searchFrameworkParameter = options.contains(FRAMEWORK_PARAM);</span>
+<span class="fc" id="L64">		searchGenericParameter = options.contains(GENERIC_PARAM);</span>
+
+<span class="fc bfc" id="L66" title="All 2 branches covered.">		for (String opt : userOptions.split(&quot;,&quot;)) {</span>
+			try {
+<span class="nc" id="L68">				threshold = Integer.parseInt(opt);</span>
+<span class="fc" id="L69">			}catch (NumberFormatException e) {</span>
+<span class="fc" id="L70">				opt = opt.trim().toLowerCase();</span>
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">				if(SHARED_CONTAINER.equals(opt)) {</span>
+<span class="nc" id="L72">					updateSharedContainer = true;</span>
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">				}else if(INCLUDE_VARIABLE.equals(opt)) {</span>
+<span class="nc" id="L74">					includeVariable = true;</span>
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">				}else if(DELETE_RECORD.equals(opt)) {</span>
+<span class="nc" id="L76">					deleteRecording = true;</span>
+				}
+<span class="nc" id="L78">			}</span>
+		}
+<span class="fc" id="L80">	}</span>
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// Code Generator
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public StringBuilder getJavaCode() {
+
+<span class="fc" id="L89">		StringJoiner joiner = new StringJoiner(&quot;, &quot;);</span>
+<span class="pc bpc" id="L90" title="1 of 2 branches missed.">		if(searchFrameworkParameter) {</span>
+<span class="nc" id="L91">			joiner.add(FRAMEWORK_PARAM);</span>
+		}
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">		if(searchGenericParameter) {</span>
+<span class="nc" id="L94">			joiner.add(GENERIC_PARAM);</span>
+		}
+<span class="fc" id="L96">		setOptions(joiner.toString());</span>
+
+<span class="fc" id="L98">		StringBuilder codeBuilder = super.getJavaCode();</span>
+
+<span class="fc" id="L100">		joiner = new StringJoiner(&quot;, &quot;);</span>
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">		if(threshold != 60) {</span>
+<span class="nc" id="L102">			joiner.add(threshold + &quot;&quot;);</span>
+		}
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">		if(updateSharedContainer) {</span>
+<span class="nc" id="L105">			joiner.add(SHARED_CONTAINER);</span>
+		}
+<span class="pc bpc" id="L107" title="1 of 2 branches missed.">		if(deleteRecording) {</span>
+<span class="nc" id="L108">			joiner.add(DELETE_RECORD);</span>
+		}
+<span class="pc bpc" id="L110" title="1 of 2 branches missed.">		if(includeVariable) {</span>
+<span class="nc" id="L111">			joiner.add(INCLUDE_VARIABLE);</span>
+		}
+
+<span class="fc" id="L114">		codeBuilder.append(&quot;, \&quot;&quot;).append(joiner.toString()).append(&quot;\&quot;)&quot;);</span>
+
+<span class="fc" id="L116">		return codeBuilder;</span>
+	}
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// Execution
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public void executeRequest(Channel channel, String designApiUrl) {
+<span class="nc" id="L125">		super.executeRequest(channel, designApiUrl + API_SERVICE_NAME);</span>
+<span class="nc" id="L126">	    postDesignData(new StopUser(this));</span>
+<span class="nc" id="L127">	    channel.setStopNeoloadRecord(null);</span>
+<span class="nc" id="L128">	}</span>
+
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------	
+
+	public int getThreshold() {
+<span class="nc" id="L135">		return threshold;</span>
+	}
+	public void setThreshold(int threshold) {
+<span class="nc" id="L138">		this.threshold = threshold;</span>
+<span class="nc" id="L139">	}</span>
+	public boolean isUpdateSharedContainer() {
+<span class="nc" id="L141">		return updateSharedContainer;</span>
+	}
+	public void setUpdateSharedContainer(boolean updateSharedContainer) {
+<span class="nc" id="L144">		this.updateSharedContainer = updateSharedContainer;</span>
+<span class="nc" id="L145">	}</span>
+	public boolean isIncludeVariable() {
+<span class="nc" id="L147">		return includeVariable;</span>
+	}
+	public void setIncludeVariable(boolean includeVariable) {
+<span class="nc" id="L150">		this.includeVariable = includeVariable;</span>
+<span class="nc" id="L151">	}</span>
+	public boolean isDeleteRecording() {
+<span class="nc" id="L153">		return deleteRecording;</span>
+	}
+	public void setDeleteRecording(boolean deleteRecording) {
+<span class="nc" id="L156">		this.deleteRecording = deleteRecording;</span>
+<span class="nc" id="L157">	}</span>
+	public boolean isSearchFrameworkParameter() {
+<span class="nc" id="L159">		return searchFrameworkParameter;</span>
+	}
+	public void setSearchFrameworkParameter(boolean searchFrameworkParameter) {
+<span class="nc" id="L162">		this.searchFrameworkParameter = searchFrameworkParameter;</span>
+<span class="nc" id="L163">	}</span>
+	public boolean isSearchGenericParameter() {
+<span class="nc" id="L165">		return searchGenericParameter;</span>
+	}
+	public void setSearchGenericParameter(boolean searchGenericParameter) {
+<span class="nc" id="L168">		this.searchGenericParameter = searchGenericParameter;</span>
+<span class="nc" id="L169">	}</span>
+	
+	//--------------------------------------------------------
+	// Json serialization
+	//--------------------------------------------------------
+	
+	@SuppressWarnings(&quot;unused&quot;)
+	private class StopUser{
+
+<span class="nc" id="L178">		public boolean FrameworkParameterSearch = false;</span>
+<span class="nc" id="L179">		public boolean GenericParameterSearch = false;</span>
+<span class="nc" id="L180">		public String Name = null;</span>
+<span class="nc" id="L181">		public int MatchingThreshold = 60;</span>
+<span class="nc" id="L182">		public boolean UpdateSharedContainers = false;</span>
+<span class="nc" id="L183">		public boolean IncludeVariables  = false;</span>
+<span class="nc" id="L184">		public boolean DeleteRecording  = false;</span>
+		
+<span class="nc" id="L186">		public StopUser(ActionNeoloadStop action) {</span>
+			
+<span class="nc" id="L188">			this.FrameworkParameterSearch = action.isSearchFrameworkParameter();</span>
+<span class="nc" id="L189">			this.GenericParameterSearch = action.isSearchGenericParameter();</span>
+			
+<span class="nc bnc" id="L191" title="All 2 branches missed.">			if(action.getUser() != null) {</span>
+<span class="nc" id="L192">				this.Name = action.getUser().getCalculated();</span>
+<span class="nc" id="L193">				this.MatchingThreshold = action.getThreshold();</span>
+<span class="nc" id="L194">				this.UpdateSharedContainers = action.isUpdateSharedContainer();</span>
+<span class="nc" id="L195">				this.IncludeVariables = action.isIncludeVariable();</span>
+<span class="nc" id="L196">				this.DeleteRecording = action.isDeleteRecording();</span>
+			}
+<span class="nc" id="L198">		}</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GeneratorAnt.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.generator</a> &gt; <span class="el_source">GeneratorAnt.java</span></div><h1>GeneratorAnt.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.generator;
+
+import com.ats.script.Project;
+import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Task;
+
+import java.io.File;
+
+<span class="nc" id="L28">public class GeneratorAnt extends Task{</span>
+
+	String destinationFolder;
+	public void setDestinationFolder(String dest) {
+<span class="nc" id="L32">		destinationFolder = dest;</span>
+<span class="nc" id="L33">	}</span>
+
+	String sourceFolder;
+	public void setSourceFolder(String src) {
+<span class="nc" id="L37">		sourceFolder = src;</span>
+<span class="nc" id="L38">	}</span>
+
+	String reportFolder;
+	public void setReportFolder(String report) {
+<span class="nc" id="L42">		reportFolder = report;</span>
+<span class="nc" id="L43">	}</span>
+
+	@Override
+	public void execute() {
+<span class="nc bnc" id="L47" title="All 4 branches missed.">		if(destinationFolder != null &amp;&amp; sourceFolder != null){</span>
+
+<span class="nc" id="L49">			final File destination = new File(destinationFolder);</span>
+<span class="nc" id="L50">			final File source = new File(sourceFolder);</span>
+<span class="nc" id="L51">			File report = null;</span>
+
+<span class="nc bnc" id="L53" title="All 2 branches missed.">			if(reportFolder != null) {</span>
+<span class="nc" id="L54">				report = new File(reportFolder);</span>
+			}
+
+<span class="nc bnc" id="L57" title="All 2 branches missed.">			if(source.exists()){</span>
+
+<span class="nc" id="L59">				log(&quot;Start Script Generator&quot;);</span>
+<span class="nc" id="L60">				log(&quot; - Source folder -&gt; &quot; + sourceFolder);</span>
+<span class="nc" id="L61">				log(&quot; - Destination folder -&gt; &quot; + destination);</span>
+
+<span class="nc" id="L63">				Project projectData = Project.getProjectData(source, destination, report);</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">				if(projectData.isValidated()) {</span>
+<span class="nc" id="L65">					Generator generator = new Generator(projectData);</span>
+<span class="nc" id="L66">					GeneratorReport generatorReport = generator.launch();</span>
+
+<span class="nc" id="L68">					log(&quot;Script Generator executed in &quot; + generatorReport.getGenerationEllapsedTime() + &quot; ms&quot;);</span>
+<span class="nc" id="L69">					log(&quot; - Main scripts -&gt; &quot; + generatorReport.getGeneratedScriptsCount());</span>
+<span class="nc" id="L70">				}else {</span>
+<span class="nc" id="L71">					throw new BuildException(&quot;Source folder [&quot; + sourceFolder + &quot;] does not exists !&quot;);</span>
+				}
+
+<span class="nc" id="L74">			}else{</span>
+<span class="nc" id="L75">				throw new BuildException(&quot;Source folder [&quot; + sourceFolder + &quot;] does not exists !&quot;);</span>
+			}
+
+<span class="nc" id="L78">		}else{</span>
+<span class="nc" id="L79">			throw new BuildException(&quot;'destinationFolder' and 'sourceFolder' cannot be null or empty !&quot;);</span>
+		}
+<span class="nc" id="L81">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TestElementDialog.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.element</a> &gt; <span class="el_source">TestElementDialog.java</span></div><h1>TestElementDialog.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.element;
+
+import com.ats.executor.ActionStatus;
+import com.ats.executor.ActionTestScript;
+import com.ats.executor.channels.Channel;
+import com.ats.generator.objects.MouseDirection;
+import com.ats.generator.variables.CalculatedProperty;
+import com.ats.generator.variables.CalculatedValue;
+import org.openqa.selenium.NoAlertPresentException;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Predicate;
+
+public class TestElementDialog extends TestElement {
+
+	private static final String ACCEPT = &quot;accept&quot;;
+	private static final String DISMISS = &quot;dismiss&quot;;
+
+<span class="nc" id="L40">	private DialogBox alert = null;</span>
+<span class="nc" id="L41">	private String alertAction = null;</span>
+
+<span class="nc" id="L43">	public TestElementDialog() {}</span>
+
+	public TestElementDialog(Channel channel) {
+<span class="nc" id="L46">		super(channel);</span>
+<span class="nc" id="L47">	}</span>
+
+	public TestElementDialog(Channel channel, int maxTry, SearchedElement searchElement, Predicate&lt;Integer&gt; predicate) {
+<span class="nc" id="L50">		super(channel, maxTry, predicate);</span>
+<span class="nc" id="L51">		initSearch(searchElement.getCriterias());</span>
+<span class="nc" id="L52">	}</span>
+
+	public TestElementDialog(Channel channel, int maxTry, List&lt;CalculatedProperty&gt; criterias) {
+<span class="nc" id="L55">		super(channel, maxTry);</span>
+<span class="nc" id="L56">		initSearch(criterias);</span>
+<span class="nc" id="L57">	}</span>
+
+	public TestElementDialog(FoundElement element, Channel currentChannel) {
+<span class="nc" id="L60">		super(element, currentChannel);</span>
+<span class="nc" id="L61">	}</span>
+	
+	public String getAlertAction() {
+<span class="nc" id="L64">		return alertAction;</span>
+	}
+
+	private void initSearch(List&lt;CalculatedProperty&gt; properties) {
+
+<span class="nc" id="L69">		this.setDialogBox();</span>
+
+<span class="nc bnc" id="L71" title="All 2 branches missed.">		if(properties.size() &gt; 0) {</span>
+<span class="nc" id="L72">			alertAction = properties.get(0).getValue().getDataListItem();</span>
+		}
+
+		try {
+
+<span class="nc" id="L77">			alert = getChannel().switchToAlert();</span>
+
+<span class="nc" id="L79">			setFoundElements(new ArrayList&lt;FoundElement&gt;(Arrays.asList(new FoundElement())));</span>
+<span class="nc" id="L80">			setCount(1);</span>
+
+<span class="nc" id="L82">		}catch(NoAlertPresentException ex) {</span>
+<span class="nc" id="L83">			getChannel().sleep(500);</span>
+<span class="nc" id="L84">			setCount(0);</span>
+<span class="nc" id="L85">		}</span>
+<span class="nc" id="L86">	}</span>
+
+	@Override
+	public void updateScreen() {
+<span class="nc" id="L90">		recorder.updateScreen(true);</span>
+<span class="nc" id="L91">	}</span>
+
+	@Override
+	public FoundElement getFoundElement() {
+<span class="nc" id="L95">		return null;</span>
+	}
+
+	@Override
+	public void over(ActionStatus status, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {
+<span class="nc" id="L100">	}</span>
+
+	@Override
+	public String enterText(ActionStatus status, CalculatedValue text, ActionTestScript script) {
+<span class="nc" id="L104">		sendText(script, status, text);</span>
+<span class="nc" id="L105">		return text.getCalculated();</span>
+	}
+
+	@Override
+	public void clearText(ActionStatus status, MouseDirection md) {
+<span class="nc" id="L110">	}</span>
+
+	@Override
+	public String sendText(ActionTestScript script, ActionStatus status, CalculatedValue text) {
+<span class="nc" id="L114">		final String enterText = text.getCalculated();</span>
+<span class="nc" id="L115">		getChannel().sleep(alert.getWaitBox());</span>
+<span class="nc" id="L116">		alert.sendKeys(enterText);</span>
+		
+<span class="nc bnc" id="L118" title="All 2 branches missed.">		if(ACCEPT.equals(alertAction)) {</span>
+<span class="nc" id="L119">			alert.accept(status);</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">		}else if(DISMISS.equals(alertAction)) {</span>
+<span class="nc" id="L121">			alert.dismiss(status);</span>
+		}
+		
+<span class="nc" id="L124">		return enterText;</span>
+	}
+
+	@Override
+	public String getAttribute(ActionStatus status, String name) {
+<span class="nc" id="L129">		getChannel().sleep(alert.getWaitBox());</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">		if(&quot;title&quot;.equals(name.toLowerCase())) {</span>
+<span class="nc" id="L131">			return alert.getTitle();</span>
+		}
+<span class="nc" id="L133">		return alert.getText();</span>
+	}
+
+	@Override
+	public void click(ActionStatus status, MouseDirection position) {
+
+<span class="nc" id="L139">		getChannel().sleep(alert.getWaitBox());</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">		if(DISMISS.equals(alertAction)) {</span>
+<span class="nc" id="L141">			alert.dismiss(status);</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">		}else if(ACCEPT.equals(alertAction)) {</span>
+<span class="nc" id="L143">			alert.accept(status);</span>
+		}else {
+<span class="nc" id="L145">			alert.defaultButton(status);</span>
+		}
+		
+<span class="nc" id="L148">		getChannel().sleep(alert.getWaitBox());</span>
+<span class="nc" id="L149">		getChannel().switchToDefaultContent();</span>
+
+<span class="nc" id="L151">		status.setPassed(true);</span>
+<span class="nc" id="L152">	}</span>
+
+	@Override
+	public CalculatedProperty[] getAttributes(boolean reload) {
+<span class="nc" id="L156">		return alert.getAttributes();</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

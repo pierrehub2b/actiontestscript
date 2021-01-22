@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ScriptInfo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.script</a> &gt; <span class="el_source">ScriptInfo.java</span></div><h1>ScriptInfo.java</h1><pre class="source lang-java linenums">package com.ats.script;
+
+import com.ats.generator.parsers.Lexer;
+import com.ats.script.actions.Action;
+import com.ats.script.actions.ActionCallscript;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
+public class ScriptInfo {
+	
+<span class="nc" id="L14">	private int actions = 0;</span>
+<span class="nc" id="L15">	private int callscripts = 0;</span>
+	private String author;
+	private String description ;
+	private String id;
+	private List&lt;String&gt; groups;
+	private String prerequisite;
+	private Date createdAt;
+	private Date modifiedAt;
+	private String name;
+	private String packageName;
+	private String nativePath;
+	private long size;
+	
+<span class="nc" id="L28">	public ScriptInfo(Lexer lexer, File f) {</span>
+<span class="nc" id="L29">		final ScriptLoader sc = lexer.loadScript(f);</span>
+		
+<span class="nc" id="L31">		Arrays.asList(sc.getActions()).parallelStream().forEach(a -&gt; count(a));</span>
+
+<span class="nc" id="L33">		author = sc.getHeader().getAuthor();</span>
+<span class="nc" id="L34">		description = sc.getHeader().getDescription();</span>
+<span class="nc" id="L35">		id = sc.getHeader().getId();</span>
+<span class="nc" id="L36">		groups = sc.getHeader().getGroups();</span>
+<span class="nc" id="L37">		prerequisite = sc.getHeader().getPrerequisite();</span>
+<span class="nc" id="L38">		createdAt = sc.getHeader().getCreatedAt();</span>
+<span class="nc" id="L39">		packageName = sc.getHeader().getPackageName();</span>
+<span class="nc" id="L40">		name = sc.getHeader().getName();</span>
+
+<span class="nc" id="L42">		size = f.length();</span>
+<span class="nc" id="L43">		modifiedAt = new Date(f.lastModified());</span>
+<span class="nc" id="L44">		nativePath = f.getAbsolutePath();</span>
+<span class="nc" id="L45">	}</span>
+
+	private void count(Action a) {
+<span class="nc" id="L48">		actions++;</span>
+<span class="nc bnc" id="L49" title="All 2 branches missed.">		if(a instanceof ActionCallscript) {</span>
+<span class="nc" id="L50">			callscripts++;</span>
+		}
+<span class="nc" id="L52">	}</span>
+
+	//-------------------------------------------------------------------------------------------------
+	//  getters and setters for serialization
+	//-------------------------------------------------------------------------------------------------
+	
+	public int getActions() {
+<span class="nc" id="L59">		return actions;</span>
+	}
+
+	public void setActions(int actions) {
+<span class="nc" id="L63">		this.actions = actions;</span>
+<span class="nc" id="L64">	}</span>
+
+	public int getCallscripts() {
+<span class="nc" id="L67">		return callscripts;</span>
+	}
+
+	public void setCallscripts(int callscripts) {
+<span class="nc" id="L71">		this.callscripts = callscripts;</span>
+<span class="nc" id="L72">	}</span>
+
+	public String getAuthor() {
+<span class="nc" id="L75">		return author;</span>
+	}
+
+	public void setAuthor(String author) {
+<span class="nc" id="L79">		this.author = author;</span>
+<span class="nc" id="L80">	}</span>
+
+	public String getDescription() {
+<span class="nc" id="L83">		return description;</span>
+	}
+
+	public void setDescription(String description) {
+<span class="nc" id="L87">		this.description = description;</span>
+<span class="nc" id="L88">	}</span>
+
+	public String getId() {
+<span class="nc" id="L91">		return id;</span>
+	}
+
+	public void setId(String id) {
+<span class="nc" id="L95">		this.id = id;</span>
+<span class="nc" id="L96">	}</span>
+
+	public List&lt;String&gt; getGroups() {
+<span class="nc" id="L99">		return groups;</span>
+	}
+
+	public void setGroups(List&lt;String&gt; groups) {
+<span class="nc" id="L103">		this.groups = groups;</span>
+<span class="nc" id="L104">	}</span>
+
+	public String getPrerequisite() {
+<span class="nc" id="L107">		return prerequisite;</span>
+	}
+
+	public void setPrerequisite(String prerequisite) {
+<span class="nc" id="L111">		this.prerequisite = prerequisite;</span>
+<span class="nc" id="L112">	}</span>
+
+	public Date getCreatedAt() {
+<span class="nc" id="L115">		return createdAt;</span>
+	}
+
+	public void setCreatedAt(Date createdAt) {
+<span class="nc" id="L119">		this.createdAt = createdAt;</span>
+<span class="nc" id="L120">	}</span>
+
+	public Date getModifiedAt() {
+<span class="nc" id="L123">		return modifiedAt;</span>
+	}
+
+	public void setModifiedAt(Date modifiedAt) {
+<span class="nc" id="L127">		this.modifiedAt = modifiedAt;</span>
+<span class="nc" id="L128">	}</span>
+
+	public String getName() {
+<span class="nc" id="L131">		return name;</span>
+	}
+
+	public void setName(String name) {
+<span class="nc" id="L135">		this.name = name;</span>
+<span class="nc" id="L136">	}</span>
+
+	public String getPackageName() {
+<span class="nc" id="L139">		return packageName;</span>
+	}
+
+	public void setPackageName(String packageName) {
+<span class="nc" id="L143">		this.packageName = packageName;</span>
+<span class="nc" id="L144">	}</span>
+
+	public long getSize() {
+<span class="nc" id="L147">		return size;</span>
+	}
+
+	public void setSize(long size) {
+<span class="nc" id="L151">		this.size = size;</span>
+<span class="nc" id="L152">	}</span>
+
+	public String getNativePath() {
+<span class="nc" id="L155">		return nativePath;</span>
+	}
+
+	public void setNativePath(String nativePath) {
+<span class="nc" id="L159">		this.nativePath = nativePath;</span>
+<span class="nc" id="L160">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

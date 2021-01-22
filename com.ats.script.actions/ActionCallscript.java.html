@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActionCallscript.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.script.actions</a> &gt; <span class="el_source">ActionCallscript.java</span></div><h1>ActionCallscript.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.script.actions;
+
+import com.ats.executor.ActionStatus;
+import com.ats.executor.ActionTestScript;
+import com.ats.executor.channels.Channel;
+import com.ats.generator.variables.CalculatedValue;
+import com.ats.generator.variables.ConditionalValue;
+import com.ats.generator.variables.Variable;
+import com.ats.generator.variables.parameter.Parameter;
+import com.ats.generator.variables.parameter.ParameterDataFile;
+import com.ats.generator.variables.parameter.ParameterList;
+import com.ats.script.Project;
+import com.ats.script.Script;
+import com.ats.script.ScriptLoader;
+import com.ats.tools.Utils;
+import com.ats.tools.logger.MessageCode;
+import com.ats.tools.logger.levels.AtsFailError;
+import com.google.gson.JsonObject;
+
+import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.StringJoiner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.testng.Assert.fail;
+
+public class ActionCallscript extends ActionReturnVariableArray {
+
+	public static final String SCRIPT_LABEL = &quot;subscript&quot;;
+	private static final int RND_INDEX_VALUE = -1;
+	private static final int NO_INDEX_VALUE = -2;
+
+	private static final String SCRIPT_LOOP = &quot;loop&quot;;
+<span class="fc" id="L61">	public static final Pattern LOOP_REGEXP = Pattern.compile(SCRIPT_LOOP + &quot; ?\\((\\d+)\\)&quot;, Pattern.CASE_INSENSITIVE);</span>
+	private static final String ASSETS_PROTOCOLE = &quot;assets:///&quot;;
+	private static final String FILE_PROTOCOLE = &quot;file:///&quot;;
+	private static final String HTTP_PROTOCOLE = &quot;http://&quot;;
+	private static final String HTTPS_PROTOCOLE = &quot;https://&quot;;
+
+	private CalculatedValue name;
+<span class="pc" id="L68">	private int type = -1;</span>
+
+	private ArrayList&lt;Variable&gt; scriptVariables;
+
+	private ParameterList parameters;
+
+<span class="pc" id="L74">	private int loop = 1;</span>
+<span class="pc" id="L75">	private int parameterFileIndex = NO_INDEX_VALUE;</span>
+	private CalculatedValue parameterFilePath;
+
+	private ConditionalValue condition;
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// Constructors
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+<span class="nc" id="L84">	public ActionCallscript() {}</span>
+
+	public ActionCallscript(ScriptLoader script, ArrayList&lt;String&gt; options, String name, String[] parameters, String[] returnValue, String csvFilePath, List&lt;String&gt; dataArray) {
+
+<span class="fc" id="L88">		super(script);</span>
+<span class="fc" id="L89">		this.setName(new CalculatedValue(script, name));</span>
+
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">		if(setParameterFilePathData(csvFilePath)) {</span>
+<span class="nc bnc" id="L92" title="All 4 branches missed.">			if(dataArray != null &amp;&amp; dataArray.size() &gt; 0) {</span>
+<span class="nc" id="L93">				final String l = dataArray.remove(0);</span>
+<span class="nc bnc" id="L94" title="All 4 branches missed.">				if(l.contains(&quot;rnd&quot;) || l.contains(&quot;random&quot;)) {</span>
+<span class="nc" id="L95">					this.parameterFileIndex = RND_INDEX_VALUE;</span>
+				}else {
+<span class="nc" id="L97">					this.parameterFileIndex = Utils.string2Int(l, NO_INDEX_VALUE);</span>
+				}
+<span class="nc" id="L99">			}</span>
+		}else {
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">			if(parameters.length &gt; 0) {</span>
+<span class="nc" id="L102">				final String firstParam = parameters[0].trim();</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">				if(!setParameterFilePathData(firstParam)) {</span>
+<span class="nc" id="L104">					final ArrayList&lt;CalculatedValue&gt; paramsValues = new ArrayList&lt;CalculatedValue&gt;();</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">					for(String param : parameters){</span>
+
+<span class="nc" id="L107">						param = param.replaceAll(&quot;\n&quot;, &quot;,&quot;);</span>
+
+<span class="nc" id="L109">						final Matcher match = LOOP_REGEXP.matcher(param);</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">						if(match.find()){</span>
+<span class="nc" id="L111">							this.loop = Utils.string2Int(match.group(1), 1);</span>
+						}else {
+<span class="nc" id="L113">							paramsValues.add(new CalculatedValue(script, param.trim()));</span>
+						}
+					}
+<span class="nc" id="L116">					this.setParameters(paramsValues);</span>
+				}
+			}
+		}
+
+<span class="pc bpc" id="L121" title="3 of 4 branches missed.">		if(returnValue.length &gt; 0 &amp;&amp; this.loop == 1){</span>
+<span class="nc" id="L122">			final ArrayList&lt;Variable&gt; variableValues = new ArrayList&lt;Variable&gt;();</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">			for (String varName : returnValue ){</span>
+<span class="nc" id="L124">				variableValues.add(script.getVariable(varName.trim(), true));</span>
+			}
+<span class="nc" id="L126">			this.setVariables(variableValues);</span>
+		}
+
+<span class="pc bpc" id="L129" title="1 of 2 branches missed.">		if(options.size() &gt; 0) {</span>
+<span class="nc" id="L130">			final String option = options.get(0);</span>
+<span class="nc" id="L131">			int operatorIndex = option.indexOf(ConditionalValue.EQUALS);</span>
+<span class="nc bnc" id="L132" title="All 2 branches missed.">			if(operatorIndex &gt; 1) {</span>
+<span class="nc" id="L133">				condition = new ConditionalValue(script, option.substring(0, operatorIndex).trim(), option.substring(operatorIndex+1).trim());</span>
+			}else {
+<span class="nc" id="L135">				operatorIndex = option.indexOf(ConditionalValue.DIFFERENT);</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">				if(operatorIndex &gt; 1) {</span>
+<span class="nc" id="L137">					condition = new ConditionalValue(script, option.substring(0, operatorIndex).trim(), option.substring(operatorIndex+2).trim(), ConditionalValue.DIFFERENT);</span>
+				}
+			}
+		}
+<span class="fc" id="L141">	}</span>
+
+	public ActionCallscript(Script script, CalculatedValue name) {
+<span class="nc" id="L144">		super(script);</span>
+<span class="nc" id="L145">		this.setName(name);</span>
+<span class="nc" id="L146">	}</span>
+
+	public ActionCallscript(Script script, CalculatedValue name, CalculatedValue[] parameters) {
+<span class="nc" id="L149">		this(script, name);</span>
+<span class="nc" id="L150">		this.setParameters(new ArrayList&lt;CalculatedValue&gt;(Arrays.asList(parameters)));</span>
+<span class="nc" id="L151">	}</span>
+
+	public ActionCallscript(Script script, CalculatedValue name, Variable ... variables) {
+<span class="nc" id="L154">		this(script, name);</span>
+<span class="nc" id="L155">		this.setVariables(new ArrayList&lt;Variable&gt;(Arrays.asList(variables)));</span>
+<span class="nc" id="L156">	}</span>
+
+	public ActionCallscript(Script script, CalculatedValue name, CalculatedValue[] parameters, Variable ... variables) {
+<span class="nc" id="L159">		this(script, name);</span>
+<span class="nc" id="L160">		this.setParameters(new ArrayList&lt;CalculatedValue&gt;(Arrays.asList(parameters)));</span>
+<span class="nc" id="L161">		this.setVariables(new ArrayList&lt;Variable&gt;(Arrays.asList(variables)));</span>
+<span class="nc" id="L162">	}</span>
+
+	public ActionCallscript(Script script, CalculatedValue name, CalculatedValue csvFilePath, int index) {
+<span class="nc" id="L165">		this(script, name);</span>
+<span class="nc" id="L166">		this.setParameterFilePath(csvFilePath);</span>
+<span class="nc" id="L167">		this.setParameterFileIndex(index);</span>
+<span class="nc" id="L168">	}</span>
+
+	public ActionCallscript(Script script, CalculatedValue name, CalculatedValue[] parameters, int loop) {
+<span class="nc" id="L171">		this(script, name, parameters);</span>
+<span class="nc" id="L172">		this.setLoop(loop);</span>
+<span class="nc" id="L173">	}</span>
+
+	public ActionCallscript(Script script, CalculatedValue name, int loop) {
+<span class="nc" id="L176">		this(script, name);</span>
+<span class="nc" id="L177">		this.setLoop(loop);</span>
+<span class="nc" id="L178">	}</span>
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// Logs
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	public static String getScriptLog(String testName, int line, JsonObject log) {
+<span class="nc" id="L185">		final StringBuilder sb = new StringBuilder(&quot;Subscript init (&quot;)</span>
+<span class="nc" id="L186">				.append(testName).append(&quot;:&quot;).append(line).append(&quot;) -&gt; &quot;).append(log.toString());</span>
+<span class="nc" id="L187">		return sb.toString();</span>
+	}
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	public boolean isSubscriptCalled(String scriptName) {
+<span class="nc" id="L194">		return name.getCalculated().equals(scriptName);</span>
+	}
+
+	private boolean setParameterFilePathData(String value) {
+<span class="pc bpc" id="L198" title="1 of 2 branches missed.">		if(value != null) {</span>
+<span class="nc bnc" id="L199" title="All 8 branches missed.">			if(value.startsWith(ASSETS_PROTOCOLE) || value.startsWith(FILE_PROTOCOLE) || value.startsWith(HTTP_PROTOCOLE) || value.startsWith(HTTPS_PROTOCOLE)) {</span>
+<span class="nc" id="L200">				this.setParameterFilePath(new CalculatedValue(script, value));</span>
+<span class="nc" id="L201">				return true;</span>
+			}
+		}
+<span class="fc" id="L204">		return false;</span>
+	}
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// Code Generator
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public StringBuilder getJavaCode() {
+
+<span class="fc" id="L214">		final StringBuilder codeBuilder = super.getJavaCode();</span>
+
+<span class="fc" id="L216">		codeBuilder.append(name.getJavaCode());</span>
+
+<span class="pc bpc" id="L218" title="1 of 2 branches missed.">		if(parameterFilePath != null) {</span>
+<span class="nc" id="L219">			codeBuilder.append(&quot;, &quot;)</span>
+<span class="nc" id="L220">			.append(parameterFilePath.getJavaCode())</span>
+<span class="nc" id="L221">			.append(&quot;, &quot;)</span>
+<span class="nc" id="L222">			.append(parameterFileIndex);</span>
+		}else {
+<span class="pc bpc" id="L224" title="1 of 2 branches missed.">			if(parameters != null){</span>
+<span class="nc" id="L225">				parameters.getJavaCode(codeBuilder);</span>
+			}
+
+<span class="pc bpc" id="L228" title="1 of 2 branches missed.">			if(loop &gt; 1) {</span>
+<span class="nc" id="L229">				codeBuilder.append(&quot;, &quot;)</span>
+<span class="nc" id="L230">				.append(loop);</span>
+<span class="pc bpc" id="L231" title="1 of 2 branches missed.">			}else if(getVariables() != null){</span>
+<span class="nc" id="L232">				final StringJoiner joiner = new StringJoiner(&quot;, &quot;);</span>
+<span class="nc bnc" id="L233" title="All 2 branches missed.">				for (Variable variable : getVariables()){</span>
+<span class="nc" id="L234">					joiner.add(variable.getName());</span>
+<span class="nc" id="L235">				}</span>
+<span class="nc" id="L236">				codeBuilder.append(&quot;, &quot;)</span>
+<span class="nc" id="L237">				.append(joiner.toString());</span>
+			}
+		}
+
+<span class="fc" id="L241">		codeBuilder.append(&quot;)&quot;);</span>
+
+<span class="pc bpc" id="L243" title="1 of 2 branches missed.">		if(condition != null) {</span>
+<span class="nc" id="L244">			return condition.getJavaCode(codeBuilder, getLine());</span>
+		}
+
+<span class="fc" id="L247">		return codeBuilder;</span>
+	}
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public boolean execute(ActionTestScript ts, String testName, int line) {
+
+<span class="nc" id="L256">		final Channel currentChannel = ts.getCurrentChannel();</span>
+<span class="nc" id="L257">		setStatus(currentChannel.newActionStatus(testName, line));</span>
+
+<span class="nc" id="L259">		final String scriptName = name.getCalculated();</span>
+<span class="nc" id="L260">		final Class&lt;ActionTestScript&gt; clazz = currentChannel.loadTestScriptClass(scriptName);</span>
+
+<span class="nc bnc" id="L262" title="All 2 branches missed.">		if(clazz == null) {</span>
+<span class="nc" id="L263">			status.setError(MessageCode.SCRIPT_NOT_FOUND, &quot;ATS script not found : '&quot; + scriptName + &quot;' (maybe a letter case issue ?)\n&quot;);</span>
+		}else {
+			
+			try {
+
+<span class="nc" id="L268">				final ActionTestScript ats = clazz.getDeclaredConstructor().newInstance();</span>
+<span class="nc" id="L269">				ats.setTopScript(ts.getTopScript(), scriptName);</span>
+
+<span class="nc bnc" id="L271" title="All 2 branches missed.">				if(parameterFilePath != null) {</span>
+
+<span class="nc" id="L273">					final String csvPath = parameterFilePath.getCalculated();</span>
+<span class="nc" id="L274">					URL csvUrl = null;</span>
+
+<span class="nc bnc" id="L276" title="All 2 branches missed.">					if(csvPath.startsWith(ASSETS_PROTOCOLE)) {</span>
+
+<span class="nc" id="L278">						final String csvFilePath = csvPath.replace(ASSETS_PROTOCOLE, Project.ASSETS_FOLDER + File.separator);</span>
+<span class="nc" id="L279">						csvUrl = getClass().getClassLoader().getResource(csvFilePath);</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">						if(csvUrl == null) {</span>
+<span class="nc" id="L281">							csvUrl = getClass().getClassLoader().getResource(csvFilePath + &quot;.csv&quot;);</span>
+						}
+
+<span class="nc" id="L284">					}else {</span>
+						try {
+<span class="nc" id="L286">							csvUrl = new URL(csvPath);</span>
+<span class="nc" id="L287">						} catch (MalformedURLException e) {}</span>
+					}
+
+<span class="nc bnc" id="L290" title="All 2 branches missed.">					if(csvUrl == null) {</span>
+<span class="nc" id="L291">						status.setError(ActionStatus.FILE_NOT_FOUND, &quot;CSV file not found : &quot; + csvPath);</span>
+<span class="nc" id="L292">						return true;</span>
+					}
+
+<span class="nc" id="L295">					final ParameterDataFile data = Utils.loadData(csvUrl);</span>
+
+<span class="nc bnc" id="L297" title="All 4 branches missed.">					if(data.noError() &amp;&amp; data.getSize() &gt; 0) {</span>
+
+<span class="nc" id="L299">						File csvFile = null;</span>
+						try {
+<span class="nc" id="L301">							csvFile = new File(csvUrl.toURI());</span>
+<span class="nc" id="L302">						} catch (URISyntaxException e) {}</span>
+
+<span class="nc" id="L304">						final Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});</span>
+<span class="nc" id="L305">						final int iterationMax = data.getSize();</span>
+<span class="nc" id="L306">						int iteration = 0;</span>
+
+<span class="nc bnc" id="L308" title="All 2 branches missed.">						if(parameterFileIndex &gt; NO_INDEX_VALUE ) {</span>
+
+<span class="nc" id="L310">							int selectedIndex = parameterFileIndex;</span>
+<span class="nc bnc" id="L311" title="All 2 branches missed.">							if(selectedIndex == RND_INDEX_VALUE) {</span>
+<span class="nc" id="L312">								selectedIndex = (int)(Math.random() * iterationMax);</span>
+							}
+
+<span class="nc" id="L315">							final ParameterList row = data.getData(selectedIndex);</span>
+<span class="nc bnc" id="L316" title="All 2 branches missed.">							if(row != null) {</span>
+<span class="nc" id="L317">								callScriptWithParametersFile(testMain, ats, ts, testName, line, row, 0, 1, scriptName, csvFile);</span>
+							}
+<span class="nc" id="L319">						}else {</span>
+<span class="nc bnc" id="L320" title="All 2 branches missed.">							for (ParameterList row : data.getData()) {</span>
+<span class="nc" id="L321">								callScriptWithParametersFile(testMain, ats, ts, testName, line, row, iteration, iterationMax, scriptName, csvFile);</span>
+<span class="nc" id="L322">								iteration++;</span>
+<span class="nc" id="L323">							}</span>
+						}
+
+<span class="nc" id="L326">					}else {</span>
+<span class="nc" id="L327">						status.setError(ActionStatus.JAVA_EXCEPTION, &quot;Data load file error : &quot; + csvPath + &quot; -&gt; &quot; + data.getError());</span>
+					}
+
+<span class="nc" id="L330">				}else {</span>
+
+<span class="nc" id="L332">					final Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});</span>
+
+<span class="nc bnc" id="L334" title="All 2 branches missed.">					for (int iteration=0; iteration&lt;loop; iteration++) {</span>
+<span class="nc" id="L335">						ats.initCalledScript(ts, testName, line, parameters, getVariables(), iteration, loop, scriptName, SCRIPT_LOOP, null);</span>
+<span class="nc" id="L336">						testMain.invoke(ats);</span>
+					}
+
+<span class="nc" id="L339">					status.setData(ats.getReturnValues());</span>
+				}
+
+<span class="nc" id="L342">			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | NoSuchMethodException | SecurityException e) {</span>
+<span class="nc" id="L343">				fail(e.getMessage());</span>
+<span class="nc" id="L344">			} catch (InvocationTargetException e) {</span>
+<span class="nc bnc" id="L345" title="All 2 branches missed.">				if (e.getTargetException() instanceof AtsFailError) {</span>
+<span class="nc" id="L346">					final AtsFailError target = (AtsFailError) e.getTargetException();</span>
+<span class="nc" id="L347">					ts.getTopScript().addErrorStack(target.getInfo());</span>
+<span class="nc" id="L348">					ts.getTopScript().addErrorStack(testName + &quot;:&quot; + line);</span>
+<span class="nc" id="L349">					fail(target.getFullMessage());</span>
+<span class="nc" id="L350">				} else {</span>
+<span class="nc" id="L351">					ts.getTopScript().addErrorStack(testName + &quot;:&quot; + line);</span>
+<span class="nc" id="L352">					fail(e.getTargetException().getMessage());</span>
+				}
+<span class="nc" id="L354">			}</span>
+		}
+
+<span class="nc" id="L357">		condition = null;</span>
+<span class="nc" id="L358">		status.endDuration();</span>
+		
+<span class="nc" id="L360">		return true;</span>
+	}
+	
+	private void callScriptWithParametersFile(Method testMain, ActionTestScript ats, ActionTestScript ts, String testName, int line, ParameterList row, int iteration, int iterationMax, String scriptName, File csvFile) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+<span class="nc" id="L364">		row.updateCalculated(ts);</span>
+<span class="nc" id="L365">		ats.initCalledScript(ts, testName, line, row, null, iteration, iterationMax, scriptName, &quot;dataFile&quot;, csvFile);</span>
+<span class="nc" id="L366">		testMain.invoke(ats);</span>
+<span class="nc" id="L367">	}</span>
+
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+<span class="nc" id="L371">		data.addProperty(&quot;status&quot;, &quot;terminated&quot;);</span>
+<span class="nc" id="L372">		return super.getActionLogs(scriptName, scriptLine, data);</span>
+	}
+
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------
+
+	public CalculatedValue getName() {
+<span class="nc" id="L380">		return name;</span>
+	}
+
+	public void setName(CalculatedValue name) {
+<span class="fc" id="L384">		this.name = name;</span>
+<span class="fc" id="L385">	}</span>
+	
+	public void setVariables(ArrayList&lt;Variable&gt; value) {
+<span class="nc bnc" id="L388" title="All 4 branches missed.">		if (value != null &amp;&amp; value.size() &gt; 0) {</span>
+<span class="nc" id="L389">			super.setVariables(value);</span>
+<span class="nc" id="L390">			this.parameterFilePath = null;</span>
+<span class="nc" id="L391">			this.loop = 1;</span>
+		}
+<span class="nc" id="L393">	}</span>
+
+	public ParameterList getParameters() {
+<span class="nc" id="L396">		return parameters;</span>
+	}
+
+	public void setParameters(ParameterList value) {
+<span class="nc bnc" id="L400" title="All 4 branches missed.">		if(value != null &amp;&amp; value.getParametersSize() &gt; 0) {</span>
+<span class="nc" id="L401">			this.parameters = value;</span>
+<span class="nc" id="L402">			this.parameterFilePath = null;</span>
+		}
+<span class="nc" id="L404">	}</span>
+
+	public void setParameters(ArrayList&lt;CalculatedValue&gt; calcs) {
+<span class="nc" id="L407">		parameters = new ParameterList(0);</span>
+<span class="nc" id="L408">		int i = 0;</span>
+<span class="nc bnc" id="L409" title="All 2 branches missed.">		for(CalculatedValue calc : calcs) {</span>
+<span class="nc" id="L410">			parameters.addParameter(new Parameter(i, calc));</span>
+<span class="nc" id="L411">			i++;</span>
+<span class="nc" id="L412">		}</span>
+<span class="nc" id="L413">	}</span>
+
+	public int getLoop() {
+<span class="nc" id="L416">		return loop;</span>
+	}
+
+	public void setLoop(int loop) {
+
+<span class="nc bnc" id="L421" title="All 2 branches missed.">		if(loop &lt;= 0) {</span>
+<span class="nc" id="L422">			loop = 1;</span>
+		}
+
+<span class="nc bnc" id="L425" title="All 2 branches missed.">		if(loop &gt; 1) {</span>
+<span class="nc" id="L426">			this.parameterFilePath = null;</span>
+<span class="nc" id="L427">			setVariables(null);</span>
+		}
+<span class="nc" id="L429">		this.loop = loop;</span>
+<span class="nc" id="L430">	}</span>
+
+	public int getParameterFileIndex() {
+<span class="nc" id="L433">		return parameterFileIndex;</span>
+	}
+
+	public void setParameterFileIndex(int parameterFileIndex) {
+<span class="nc" id="L437">		this.parameterFileIndex = parameterFileIndex;</span>
+<span class="nc" id="L438">	}</span>
+
+	public CalculatedValue getParameterFilePath() {
+<span class="nc" id="L441">		return parameterFilePath;</span>
+	}
+
+	public void setParameterFilePath(CalculatedValue value) {
+<span class="nc" id="L445">		this.parameterFilePath = value;</span>
+<span class="nc bnc" id="L446" title="All 2 branches missed.">		if(value != null) {</span>
+<span class="nc" id="L447">			this.parameters = null;</span>
+<span class="nc" id="L448">			setVariables(null);</span>
+<span class="nc" id="L449">			this.loop = 1;</span>
+		}
+<span class="nc" id="L451">	}	</span>
+
+	public ConditionalValue getCondition() {
+<span class="nc" id="L454">		return condition;</span>
+	}
+
+	public void setCondition(ConditionalValue condition) {
+<span class="nc" id="L458">		this.condition = condition;</span>
+<span class="nc" id="L459">	}</span>
+
+	public int getType() {
+<span class="nc" id="L462">		return type;</span>
+	}
+
+	public void setType(int type) {
+<span class="nc" id="L466">		this.type = type;</span>
+<span class="nc" id="L467">	}</span>
+
+	public ArrayList&lt;Variable&gt; getScriptVariables() {
+<span class="nc" id="L470">		return scriptVariables;</span>
+	}
+
+	public void setScriptVariables(ArrayList&lt;Variable&gt; scriptVariable) {
+<span class="nc" id="L474">		this.scriptVariables = scriptVariable;</span>
+<span class="nc" id="L475">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

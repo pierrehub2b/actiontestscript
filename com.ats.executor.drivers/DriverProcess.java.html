@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DriverProcess.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.executor.drivers</a> &gt; <span class="el_source">DriverProcess.java</span></div><h1>DriverProcess.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.executor.drivers;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.ProcessBuilder.Redirect;
+import java.net.MalformedURLException;
+import java.net.ServerSocket;
+import java.net.URL;
+import java.nio.file.Path;
+import java.util.stream.Stream;
+
+import com.ats.executor.ActionStatus;
+import com.ats.executor.StreamGobbler;
+
+public class DriverProcess {
+
+	private String name;
+
+<span class="nc" id="L38">	private int port = 4444;</span>
+	private Process process;
+	private DriverManager manager;
+
+<span class="nc" id="L42">	private boolean keepRunning = false;</span>
+
+<span class="nc" id="L44">	public DriverProcess(ActionStatus status, String name, DriverManager manager, Path driverFolderPath, String driverName, String[] args) {</span>
+
+<span class="nc" id="L46">		this.name = name;</span>
+<span class="nc" id="L47">		this.manager = manager;</span>
+
+<span class="nc" id="L49">		final File driverFile = driverFolderPath.resolve(driverName).toFile();</span>
+
+<span class="nc bnc" id="L51" title="All 2 branches missed.">		if(driverFile.exists()){</span>
+
+<span class="nc" id="L53">			port = findFreePort();</span>
+
+<span class="nc" id="L55">			String[] arguments = {driverFile.getAbsolutePath(), &quot;--port=&quot; + port};</span>
+
+<span class="nc bnc" id="L57" title="All 2 branches missed.">			if(args != null) {</span>
+<span class="nc" id="L58">				arguments = Stream.of(arguments, args).flatMap(Stream::of).toArray(String[]::new);</span>
+			}
+
+<span class="nc" id="L61">			final ProcessBuilder builder = new ProcessBuilder(arguments);</span>
+<span class="nc" id="L62">			builder.redirectErrorStream(true);</span>
+<span class="nc" id="L63">			builder.redirectInput(Redirect.INHERIT);</span>
+
+			try {
+
+<span class="nc" id="L67">				process = builder.start();</span>
+
+<span class="nc" id="L69">				final StreamGobbler errorGobbler = new StreamGobbler(process.getErrorStream(), &quot;ERROR&quot;);            </span>
+<span class="nc" id="L70">				final StreamGobbler outputGobbler = new StreamGobbler(process.getInputStream(), &quot;OUTPUT&quot;);</span>
+
+<span class="nc" id="L72">				errorGobbler.start();</span>
+<span class="nc" id="L73">				outputGobbler.start();</span>
+
+<span class="nc" id="L75">			} catch (IOException e1) {</span>
+<span class="nc" id="L76">				status.setError(ActionStatus.CHANNEL_START_ERROR, e1.getMessage());</span>
+<span class="nc" id="L77">				return;</span>
+<span class="nc" id="L78">			}</span>
+
+<span class="nc" id="L80">		}else{</span>
+<span class="nc" id="L81">			status.setError(ActionStatus.CHANNEL_START_ERROR, &quot;unable to launch driver process, driver file is missing : &quot; + driverFile.getAbsolutePath());</span>
+<span class="nc" id="L82">			return;</span>
+		}
+
+<span class="nc" id="L85">		Runtime.getRuntime().addShutdownHook(new CloseProcess(this));</span>
+<span class="nc" id="L86">		status.setNoError();</span>
+<span class="nc" id="L87">	}</span>
+
+	public void quit() {
+<span class="nc bnc" id="L90" title="All 4 branches missed.">		if(process != null &amp;&amp; process.isAlive()) {</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">			if(!keepRunning) {</span>
+<span class="nc" id="L92">				process.descendants().forEach(p -&gt; p.destroy());</span>
+<span class="nc" id="L93">				process.destroy();</span>
+
+				try {
+<span class="nc" id="L96">					process.waitFor();</span>
+<span class="nc" id="L97">				} catch (InterruptedException e) {</span>
+<span class="nc" id="L98">					e.printStackTrace();</span>
+<span class="nc" id="L99">				}</span>
+			}
+<span class="nc" id="L101">			process = null;</span>
+		}
+<span class="nc" id="L103">	}</span>
+
+	static class CloseProcess extends Thread {
+
+		private DriverProcess driver;
+<span class="nc" id="L108">		public CloseProcess(DriverProcess driver) {</span>
+<span class="nc" id="L109">			this.driver = driver;</span>
+<span class="nc" id="L110">		}</span>
+
+		@Override
+		public void run() {
+<span class="nc" id="L114">			driver.quit();</span>
+<span class="nc" id="L115">		}</span>
+	}
+
+	//--------------------------------------------------------------------------------------------------
+	//--------------------------------------------------------------------------------------------------
+
+	public String getName() {
+<span class="nc" id="L122">		return name;</span>
+	}
+
+	public URL getDriverServerUrl(){
+		try {
+<span class="nc" id="L127">			return new URL(&quot;http://localhost:&quot; + port);</span>
+<span class="nc" id="L128">		} catch (MalformedURLException e) {</span>
+<span class="nc" id="L129">			return null;</span>
+		}
+	}
+	
+	public URL getDriverLoopback(){
+		try {
+<span class="nc" id="L135">			return new URL(&quot;http://127.0.0.1:&quot; + port);</span>
+<span class="nc" id="L136">		} catch (MalformedURLException e) {</span>
+<span class="nc" id="L137">			return null;</span>
+		}
+	}
+
+	//--------------------------------------------------------------------------------------------------
+	//--------------------------------------------------------------------------------------------------
+
+	private static Integer findFreePort() {
+<span class="nc" id="L145">		try (ServerSocket socket = new ServerSocket(0);) {</span>
+<span class="nc" id="L146">			return socket.getLocalPort();</span>
+<span class="nc" id="L147">		} catch (IOException e) {</span>
+<span class="nc" id="L148">			return 2106;</span>
+		}
+	}
+
+	/*private static int getPortUsedByDriver(String driverName) {
+
+		final Stream&lt;ProcessHandle&gt; procs = ProcessHandle
+				.allProcesses()
+				.parallel()
+				.filter(p -&gt; p.info().command().isPresent())
+				.filter(p -&gt; p.info().command().get().contains(driverName));
+
+		final Optional&lt;ProcessHandle&gt; firstProc = procs.findFirst();
+		if(firstProc.isPresent()) {
+			return getPortUsedByProcess(firstProc.get().pid());
+		}
+		return 0;
+	}*/
+
+	/*private static int getPortUsedByProcess(long pid) {
+
+		try {
+			final Process p = Runtime.getRuntime().exec(&quot;cmd /c netstat -ano | findstr &quot; + pid);
+			final BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+			String line;
+
+			while ((line = input.readLine()) != null) {    
+				final String[] data = line.split(&quot;\\s+&quot;);  
+				if(data.length &gt; 1) {
+					final String[] ipPort = data[2].split(&quot;:&quot;);
+					if(ipPort.length == 2) {
+						try {
+							return Integer.parseInt(ipPort[1]);
+						}catch (NumberFormatException e) {}
+					}
+				}
+			}  
+
+		} catch (IOException e1) {}
+
+		return 0;
+	}*/
+
+	//--------------------------------------------------------------------------------------------------
+	//--------------------------------------------------------------------------------------------------
+
+	public void close(boolean keepRunning){
+
+		//this.keepRunning = keepRunning;
+
+<span class="nc" id="L199">		quit();</span>
+<span class="nc" id="L200">		manager.processTerminated(this);</span>
+<span class="nc" id="L201">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

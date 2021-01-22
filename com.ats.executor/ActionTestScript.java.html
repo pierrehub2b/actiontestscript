@@ -1,0 +1,836 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActionTestScript.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.executor</a> &gt; <span class="el_source">ActionTestScript.java</span></div><h1>ActionTestScript.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.executor;
+
+import static org.testng.Assert.fail;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.logging.Level;
+
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.interactions.Actions;
+import org.testng.ITest;
+import org.testng.ITestContext;
+import org.testng.SkipException;
+import org.testng.TestRunner;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.AfterSuite;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.Listeners;
+
+import com.ats.crypto.Passwords;
+import com.ats.element.SearchedElement;
+import com.ats.executor.channels.Channel;
+import com.ats.executor.channels.ChannelManager;
+import com.ats.generator.objects.Cartesian;
+import com.ats.generator.objects.MouseDirectionData;
+import com.ats.generator.objects.mouse.Mouse;
+import com.ats.generator.objects.mouse.MouseKey;
+import com.ats.generator.objects.mouse.MouseScroll;
+import com.ats.generator.objects.mouse.MouseSwipe;
+import com.ats.generator.variables.CalculatedProperty;
+import com.ats.generator.variables.CalculatedValue;
+import com.ats.generator.variables.ConditionalValue;
+import com.ats.generator.variables.RandomStringValue;
+import com.ats.generator.variables.Variable;
+import com.ats.generator.variables.parameter.Parameter;
+import com.ats.generator.variables.parameter.ParameterList;
+import com.ats.generator.variables.transform.DateTransformer;
+import com.ats.generator.variables.transform.NumericTransformer;
+import com.ats.generator.variables.transform.RegexpTransformer;
+import com.ats.generator.variables.transform.TimeTransformer;
+import com.ats.generator.variables.transform.Transformer;
+import com.ats.recorder.IVisualRecorder;
+import com.ats.recorder.VisualRecorder;
+import com.ats.recorder.VisualRecorderNull;
+import com.ats.script.Project;
+import com.ats.script.Script;
+import com.ats.script.ScriptHeader;
+import com.ats.script.actions.Action;
+import com.ats.script.actions.ActionCallscript;
+import com.ats.script.actions.ActionComment;
+import com.ats.script.actions.ActionExecute;
+import com.ats.tools.Utils;
+import com.ats.tools.logger.ExecutionLogger;
+import com.ats.tools.logger.levels.AtsFailError;
+import com.ats.tools.report.CampaignReportGenerator;
+import com.ats.tools.report.SuitesReport;
+import com.ats.tools.report.SuitesReportItem;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonReader;
+
+import okhttp3.OkHttpClient;
+
+@Listeners({ExecutionListener.class, TestListener.class})
+public class ActionTestScript extends Script implements ITest{
+
+	public static final String MAIN_TEST_FUNCTION = &quot;testMain&quot;;
+
+	protected ActionTestScript topScript;
+
+	private String[] returnValues;
+
+	private String testName;
+	private Project projectData;
+
+<span class="nc" id="L108">	protected ScriptHeader getHeader() {return new ScriptHeader();}</span>
+
+<span class="pc" id="L110">	private ScriptStatus status = new ScriptStatus();</span>
+
+	public ActionTestScript() {
+<span class="nc" id="L113">		super(null);</span>
+<span class="nc" id="L114">		init(new Passwords(getAssetsFile(&quot;&quot;)));</span>
+<span class="nc" id="L115">	}</span>
+
+	public ActionTestScript(File assetsFolder) {
+<span class="fc" id="L118">		super(null);</span>
+<span class="fc" id="L119">		init(new Passwords(assetsFolder.toPath()));</span>
+<span class="fc" id="L120">	}</span>
+
+	public ActionTestScript(ExecutionLogger logger) {
+<span class="nc" id="L123">		super(logger);</span>
+<span class="nc" id="L124">		init(null);</span>
+<span class="nc" id="L125">	}</span>
+
+<span class="nc" id="L127">	public ActionTestScript(ActionTestScript topScript) {</span>
+<span class="nc" id="L128">		setTopScript(topScript);</span>
+<span class="nc" id="L129">	}</span>
+
+	public void setTopScript(ActionTestScript topScript, String scriptName) {
+<span class="nc" id="L132">		setTopScript(topScript);</span>
+<span class="nc" id="L133">		this.testName = scriptName;</span>
+<span class="nc" id="L134">		topScript.addToScriptCallTree(this, scriptName);</span>
+<span class="nc" id="L135">	}</span>
+
+	public void setTopScript(ActionTestScript topScript) {
+<span class="nc" id="L138">		init(topScript, topScript.getChannelManager(), topScript.getPasswords());</span>
+<span class="nc" id="L139">	}</span>
+
+	private void init(Passwords passwords) {
+<span class="fc" id="L142">		init(this, new ChannelManager(this), passwords);</span>
+<span class="fc" id="L143">	}</span>
+
+	private void init(ActionTestScript topScript, ChannelManager channelManager, Passwords passwords) {
+<span class="fc" id="L146">		this.topScript = topScript;</span>
+<span class="fc" id="L147">		this.channelManager = channelManager;</span>
+<span class="fc" id="L148">		this.passwords = passwords;</span>
+
+<span class="fc" id="L150">		java.util.logging.Logger.getLogger(&quot;org.openqa.selenium&quot;).setLevel(Level.OFF);</span>
+<span class="fc" id="L151">		java.util.logging.Logger.getLogger(Actions.class.getName()).setLevel(Level.OFF);</span>
+<span class="fc" id="L152">		java.util.logging.Logger.getLogger(OkHttpClient.class.getName()).setLevel(Level.FINE);</span>
+<span class="fc" id="L153">	}</span>
+
+	public String[] getReturnValues() {
+<span class="nc" id="L156">		return returnValues;</span>
+	}
+
+	public Passwords getPasswords() {
+<span class="fc" id="L160">		return passwords;</span>
+	}
+
+	public void updateTestName(String name) {
+<span class="nc" id="L164">		this.testName = name;</span>
+<span class="nc" id="L165">	}</span>
+
+	public void scriptFail(String message) {
+<span class="nc" id="L168">		fail(message);</span>
+<span class="nc" id="L169">	}</span>
+
+	public void addErrorStack(String value) {
+<span class="nc" id="L172">		status.addErrorStack(value);</span>
+<span class="nc" id="L173">	}</span>
+
+	public ScriptStatus getStatus() {
+<span class="nc" id="L176">		return status;</span>
+	}
+
+	//----------------------------------------------------------------------------------------------------------
+	// TestNG management
+	//----------------------------------------------------------------------------------------------------------
+
+	@BeforeSuite(alwaysRun=true)
+	public void beforeSuite(ITestContext ctx) {
+		
+<span class="nc" id="L186">		final SuitesReportItem currentSuite = new SuitesReportItem((TestRunner) ctx);</span>
+		
+<span class="nc" id="L188">		setLogger(new ExecutionLogger(System.out, currentSuite.logLevel));</span>
+		
+<span class="nc" id="L190">		sendScriptInfo(&quot;Start suite -&gt; &quot; + ctx.getSuite().getName());</span>
+		
+<span class="nc" id="L192">		Path outputPath = null;</span>
+<span class="nc" id="L193">		final String outputFolder = System.getProperty(&quot;output-folder&quot;);</span>
+<span class="nc bnc" id="L194" title="All 2 branches missed.">		if(outputFolder != null) {</span>
+<span class="nc" id="L195">			outputPath = Paths.get(outputFolder);</span>
+		}else {
+<span class="nc" id="L197">			outputPath = Paths.get(ctx.getOutputDirectory()).getParent();</span>
+		}
+<span class="nc" id="L199">		outputPath.toFile().mkdirs();</span>
+		
+<span class="nc" id="L201">		final File jsonSuiteFile = outputPath.resolve(CampaignReportGenerator.ATS_JSON_SUITES).toFile();</span>
+		
+<span class="nc" id="L203">		final Gson gson = new Gson();</span>
+<span class="nc" id="L204">		SuitesReport suiteReport = null;</span>
+		
+		try{
+<span class="nc bnc" id="L207" title="All 2 branches missed.">			if(jsonSuiteFile.exists()) {</span>
+<span class="nc" id="L208">				final JsonReader reader = new JsonReader(new FileReader(jsonSuiteFile));</span>
+<span class="nc" id="L209">				suiteReport = gson.fromJson(reader, SuitesReport.class);</span>
+<span class="nc" id="L210">				reader.close();</span>
+				
+<span class="nc" id="L212">				suiteReport.add(currentSuite);	</span>
+				
+<span class="nc" id="L214">			}else {</span>
+<span class="nc" id="L215">				suiteReport = new SuitesReport(gav(), currentSuite);</span>
+			}
+			
+<span class="nc" id="L218">			final FileWriter writer = new FileWriter(jsonSuiteFile);</span>
+<span class="nc" id="L219">			gson.toJson(</span>
+					suiteReport, 
+					writer);
+
+<span class="nc" id="L223">			writer.close();</span>
+			
+<span class="nc" id="L225">		}catch (IOException e) {</span>
+<span class="nc" id="L226">			System.out.println(e.getMessage());</span>
+<span class="nc" id="L227">		}</span>
+<span class="nc" id="L228">	}</span>
+
+	@AfterSuite(alwaysRun=true)
+	public void afterSuite(ITestContext ctx) {
+<span class="nc" id="L232">		sendScriptInfo(&quot;Suite terminated -&gt; &quot; + ctx.getSuite().getName());</span>
+<span class="nc" id="L233">	}</span>
+
+	@BeforeClass(alwaysRun=true)
+	public void beforeClass(ITestContext ctx) {
+
+<span class="nc" id="L238">		final TestRunner runner = (TestRunner) ctx;</span>
+<span class="nc" id="L239">		final String suiteName = ctx.getSuite().getName();</span>
+		
+<span class="nc" id="L241">		final SuitesReportItem currentSuite = new SuitesReportItem((TestRunner) ctx);</span>
+<span class="nc" id="L242">		setLogger(new ExecutionLogger(System.out, currentSuite.logLevel));		</span>
+		
+<span class="nc" id="L244">		final String outputFolder = System.getProperty(&quot;output-folder&quot;);</span>
+<span class="nc bnc" id="L245" title="All 2 branches missed.">		if(outputFolder != null) {</span>
+<span class="nc" id="L246">			runner.setOutputDirectory(outputFolder + File.separator + suiteName);</span>
+		}
+		
+<span class="nc" id="L249">		testName = this.getClass().getName();</span>
+<span class="nc" id="L250">		scriptCallTree = new ArrayList&lt;ActionTestScript&gt;(Arrays.asList(this));</span>
+
+<span class="nc" id="L252">		status = new ScriptStatus(testName, suiteName);</span>
+
+<span class="nc bnc" id="L254" title="All 2 branches missed.">		if(&quot;true&quot;.equalsIgnoreCase(runner.getTest().getParameter(&quot;check.mode&quot;))) {</span>
+<span class="nc" id="L255">			throw new SkipException(&quot;check mode : &quot; + testName);</span>
+		}else {
+
+<span class="nc" id="L258">			final Map&lt;String, String&gt; params = runner.getTest().getAllParameters();</span>
+<span class="nc" id="L259">			setTestExecutionVariables(params);</span>
+
+			//-----------------------------------------------------------
+			// check report output specified
+			//-----------------------------------------------------------
+
+<span class="nc" id="L265">			int visualQuality = Utils.string2Int(getEnvironmentValue(&quot;visual.report&quot;, &quot;0&quot;));</span>
+<span class="nc" id="L266">			boolean xml = getEnvironmentValue(&quot;xml.report&quot;, &quot;&quot;).equalsIgnoreCase(&quot;true&quot;);</span>
+
+<span class="nc" id="L268">			final String atsReport = System.getProperty(CampaignReportGenerator.ATS_REPORT);</span>
+<span class="nc bnc" id="L269" title="All 4 branches missed.">			if(atsReport != null &amp;&amp; !atsReport.equals(&quot;0&quot;)) {</span>
+<span class="nc bnc" id="L270" title="All 2 branches missed.">				if(visualQuality == 0) {</span>
+<span class="nc" id="L271">					visualQuality = 3;</span>
+				}
+<span class="nc" id="L273">				xml = true;</span>
+			}
+
+<span class="nc bnc" id="L276" title="All 4 branches missed.">			if(visualQuality &gt; 0 || xml) {</span>
+
+<span class="nc" id="L278">				final ScriptHeader header = getHeader();</span>
+
+<span class="nc" id="L280">				header.setName(getTestName());</span>
+
+<span class="nc" id="L282">				final File output = new File(runner.getOutputDirectory());</span>
+<span class="nc bnc" id="L283" title="All 2 branches missed.">				if(!output.exists()) {</span>
+<span class="nc" id="L284">					output.mkdirs();</span>
+				}
+
+<span class="nc" id="L287">				setRecorder(new VisualRecorder(this, output, header, xml, visualQuality, logger));</span>
+			}
+
+<span class="nc" id="L290">			final JsonObject logs = new JsonObject();</span>
+<span class="nc" id="L291">			logs.addProperty(&quot;suite&quot;, suiteName);</span>
+<span class="nc" id="L292">			logs.addProperty(&quot;xmlReport&quot;, xml);</span>
+<span class="nc" id="L293">			logs.addProperty(&quot;visualQuality&quot;, visualQuality);</span>
+
+<span class="nc" id="L295">			final JsonArray parameters = new JsonArray();</span>
+<span class="nc bnc" id="L296" title="All 2 branches missed.">			for(Entry&lt;String, String&gt;param : params.entrySet()) {</span>
+<span class="nc" id="L297">				final JsonObject elem = new JsonObject();</span>
+<span class="nc" id="L298">				elem.addProperty(param.getKey(), param.getValue());</span>
+<span class="nc" id="L299">				parameters.add(elem);</span>
+<span class="nc" id="L300">			}</span>
+<span class="nc" id="L301">			logs.add(&quot;parameters&quot;, parameters);</span>
+
+<span class="nc" id="L303">			sendScriptInfo(&quot;Starting script (&quot; + testName + &quot;) -&gt; &quot; + logs.toString());</span>
+
+			//-----------------------------------------------------------
+			//-----------------------------------------------------------
+
+<span class="nc" id="L308">			Runtime.getRuntime().addShutdownHook(new Thread() {</span>
+				@Override
+				public void run() {
+<span class="nc" id="L311">					tearDown();</span>
+<span class="nc" id="L312">				}</span>
+			});
+
+<span class="nc" id="L315">			new StopExecutionThread(System.in).start();</span>
+		}
+<span class="nc" id="L317">	}</span>
+
+	@AfterClass(alwaysRun=true)
+	public void afterClass(ITestContext ctx) {
+<span class="nc" id="L321">		final TestRunner runner = (TestRunner) ctx;</span>
+<span class="nc" id="L322">		status.endLogs(this, runner);</span>
+<span class="nc" id="L323">	}</span>
+
+	@AfterTest(alwaysRun=true)
+	public void testFinished(ITestContext ctx) {
+
+<span class="nc" id="L328">	}</span>
+
+	@AfterMethod(alwaysRun=true)
+	public void cleanup(){
+<span class="nc" id="L332">		sendScriptFail(status.getCallscriptStack());</span>
+<span class="nc" id="L333">		stopRecorder();</span>
+<span class="nc" id="L334">		tearDown();</span>
+<span class="nc" id="L335">	}</span>
+
+	@Override
+	public String getTestName() {
+<span class="nc" id="L339">		return testName;</span>
+	}
+
+	//----------------------------------------------------------------------------------------------------------
+	// Channels management
+	//----------------------------------------------------------------------------------------------------------
+
+	public Channel getCurrentChannel(){
+<span class="nc" id="L347">		return getChannelManager().getCurrentChannel();</span>
+	}
+
+	public Channel getChannel(String name){
+<span class="nc" id="L351">		return getChannelManager().getChannel(name);</span>
+	}
+
+	//----------------------------------------------------------------------------------------------------------
+	// Call script
+	//----------------------------------------------------------------------------------------------------------
+
+	public ActionTestScript getTopScript() {
+<span class="nc" id="L359">		return topScript;</span>
+	}
+
+	public void initCalledScript(ActionTestScript testScript, String testName, int line, ParameterList parameters, List&lt;Variable&gt; variables, int iteration, int iterationMax, String scriptName, String type, File csvFile) {
+
+<span class="nc" id="L364">		this.iteration = iteration;</span>
+<span class="nc" id="L365">		this.csvFile = csvFile;</span>
+<span class="nc" id="L366">		this.testName = getClass().getName();</span>
+
+<span class="nc" id="L368">		final JsonObject log = testScript.getConditionLogs();</span>
+
+<span class="nc" id="L370">		log.addProperty(&quot;called&quot;, scriptName);</span>
+<span class="nc" id="L371">		log.addProperty(&quot;iteration&quot;, iteration+1 + &quot;/&quot; + iterationMax);</span>
+<span class="nc" id="L372">		log.addProperty(&quot;type&quot;, type);</span>
+
+<span class="nc bnc" id="L374" title="All 2 branches missed.">		if(csvFile != null) {</span>
+<span class="nc" id="L375">			log.addProperty(&quot;url&quot;, csvFile.getAbsolutePath());</span>
+		}
+
+<span class="nc bnc" id="L378" title="All 2 branches missed.">		if(parameters != null) {</span>
+<span class="nc" id="L379">			setParameterList(parameters);</span>
+<span class="nc bnc" id="L380" title="All 2 branches missed.">			if(parameters.getList().size() &gt; 0) {</span>
+<span class="nc" id="L381">				final JsonArray parametersArray = new JsonArray();</span>
+<span class="nc bnc" id="L382" title="All 2 branches missed.">				for (Parameter p : parameters.getList()) {</span>
+<span class="nc" id="L383">					final JsonObject jo = new JsonObject();</span>
+<span class="nc" id="L384">					jo.addProperty(p.getName(), p.getCalculated());</span>
+<span class="nc" id="L385">					parametersArray.add(jo);</span>
+<span class="nc" id="L386">				}</span>
+<span class="nc" id="L387">				log.add(&quot;parameters&quot;, parametersArray);</span>
+			}
+		}
+
+<span class="nc bnc" id="L391" title="All 2 branches missed.">		if(variables != null) {</span>
+<span class="nc" id="L392">			setVariables(variables);</span>
+		}
+<span class="nc" id="L394">		setTestExecutionVariables(topScript.getTestExecutionVariables());</span>
+
+<span class="nc" id="L396">		topScript.sendScriptInfo(ActionCallscript.getScriptLog(testName, line, log));</span>
+<span class="nc" id="L397">	}</span>
+
+	public ChannelManager getChannelManager() {
+<span class="nc" id="L400">		return channelManager;</span>
+	}
+
+	//----------------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------------------------------
+
+	public void setProjectData(Project value) {
+<span class="nc" id="L407">		projectData = value;</span>
+<span class="nc" id="L408">		projectData.synchronize();</span>
+<span class="nc" id="L409">		passwords = new Passwords(projectData.getAssetsFolderPath().toFile());</span>
+<span class="nc" id="L410">	}</span>
+
+	public void tearDown(){
+<span class="nc" id="L413">		sendInfoLog(&quot;Drivers&quot;, &quot;closing ...&quot;);</span>
+<span class="nc" id="L414">		getChannelManager().tearDown();</span>
+<span class="nc" id="L415">	}</span>
+
+	//----------------------------------------------------------------------------------------------------------
+	// Generated methods
+	//----------------------------------------------------------------------------------------------------------
+
+	public static final String JAVA_VAR_FUNCTION_NAME = &quot;var&quot;;
+	public Variable var(String name, CalculatedValue value){
+<span class="nc" id="L423">		return createVariable(name, value, null);</span>
+	}
+
+	public Variable var(String name){
+<span class="nc" id="L427">		return createVariable(name, new CalculatedValue(&quot;&quot;), null);</span>
+	}
+
+	public Variable var(String name, Transformer transformer){
+<span class="nc" id="L431">		return createVariable(name, new CalculatedValue(&quot;&quot;), transformer);</span>
+	}
+
+	public Variable var(String name, CalculatedValue value, Transformer transformer){
+<span class="nc" id="L435">		return createVariable(name, value, transformer);</span>
+	}
+
+	public static final String JAVA_GLOBAL_VAR_FUNCTION_NAME = &quot;globalVariable&quot;;
+	public String globalVariable(String varPath){
+<span class="nc" id="L440">		return topScript.getGlobalVariableValue(varPath);</span>
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_VALUE_FUNCTION_NAME = &quot;clv&quot;;
+	public CalculatedValue clv(Object ... data) {
+<span class="nc" id="L447">		return new CalculatedValue(this, data);</span>
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_PARAM_FUNCTION_NAME = &quot;prm&quot;;
+
+	public String prm(String name) {
+<span class="nc" id="L455">		return getParameterValue(name);</span>
+	}
+
+	public String prm(String name, String defaultValue) {
+<span class="nc" id="L459">		return getParameterValue(name, defaultValue);</span>
+	}
+
+	public String prm(int index) {
+<span class="nc" id="L463">		return getParameterValue(index);</span>
+	}
+
+	public String prm(int index, String defaultValue) {
+<span class="nc" id="L467">		return getParameterValue(index, defaultValue);</span>
+	}
+
+	public CalculatedValue[] prm(CalculatedValue ... values) {
+<span class="nc" id="L471">		return values;</span>
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_RETURNS_FUNCTION_NAME = &quot;rtn&quot;;
+	public void rtn(CalculatedValue ... values) {
+
+<span class="nc" id="L479">		int i = 0;</span>
+<span class="nc" id="L480">		returnValues = new String[values.length];</span>
+
+<span class="nc bnc" id="L482" title="All 2 branches missed.">		for(CalculatedValue calc : values) {</span>
+<span class="nc" id="L483">			returnValues[i] = calc.getCalculated();</span>
+<span class="nc" id="L484">			i++;</span>
+		}
+
+<span class="nc" id="L487">		updateVariables();</span>
+<span class="nc" id="L488">	}</span>
+
+	//---------------------------------------------------------------------------------------------
+
+	public void rtn(String ... values) {
+
+<span class="nc" id="L494">		int i = 0;</span>
+<span class="nc" id="L495">		returnValues = new String[values.length];</span>
+
+<span class="nc bnc" id="L497" title="All 2 branches missed.">		for(String value : values) {</span>
+<span class="nc" id="L498">			returnValues[i] = value;</span>
+<span class="nc" id="L499">			i++;</span>
+		}
+
+<span class="nc" id="L502">		updateVariables();</span>
+<span class="nc" id="L503">	}</span>
+
+	private void updateVariables() {
+<span class="nc" id="L506">		List&lt;Variable&gt; variables = getVariables();</span>
+
+<span class="nc" id="L508">		int index = 0;</span>
+<span class="nc bnc" id="L509" title="All 2 branches missed.">		for(String value : returnValues) {</span>
+<span class="nc bnc" id="L510" title="All 2 branches missed.">			if(variables.size() &lt; index + 1) {</span>
+<span class="nc" id="L511">				break;</span>
+			}
+<span class="nc" id="L513">			variables.get(index).setData(value);</span>
+<span class="nc" id="L514">			index++;</span>
+		}
+<span class="nc" id="L516">	}</span>
+
+	//---------------------------------------------------------------------------------------------
+
+	public void returnValues(String... values) {
+<span class="nc" id="L521">		returnValues = values;</span>
+<span class="nc" id="L522">		updateVariables();</span>
+<span class="nc" id="L523">	}</span>
+
+	public void returnValues(Object... values) {
+<span class="nc" id="L526">		returnValues = Arrays.stream(values).map(Object::toString).toArray(String[]::new);</span>
+<span class="nc" id="L527">		updateVariables();</span>
+<span class="nc" id="L528">	}</span>
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_RNDSTRING_FUNCTION_NAME = &quot;rds&quot;;
+	public String rds(int len) {
+<span class="nc" id="L534">		return new RandomStringValue(len, null).exec();</span>
+	}
+
+	public String rds(int len, String type) {
+<span class="nc" id="L538">		return new RandomStringValue(len, type).exec();</span>
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_ENV_FUNCTION_NAME = &quot;env&quot;;
+	public String env(String name) {
+<span class="nc" id="L545">		return getEnvironmentValue(name, &quot;&quot;);</span>
+	}
+
+	public String env(String name, String defaultValue) {
+<span class="nc" id="L549">		return getEnvironmentValue(name, defaultValue);</span>
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_SYSTEM_FUNCTION_NAME = &quot;sys&quot;;
+	public String sys(String name){
+<span class="nc" id="L556">		return getSystemValue(name);</span>
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_PROPERTY_FUNCTION_NAME = &quot;prp&quot;;
+	public CalculatedProperty prp(boolean isRegexp, String name, CalculatedValue value){
+<span class="nc" id="L563">		return new CalculatedProperty(isRegexp, name, value);</span>
+	}
+
+	//---------------------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_UUID_FUNCTION_NAME = &quot;uid&quot;;
+	public String uid() {
+<span class="nc" id="L571">		return getUuidValue();</span>
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_TODAY_FUNCTION_NAME = &quot;td&quot;;
+	public String td() {
+<span class="nc" id="L578">		return getTodayValue();</span>
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_NOW_FUNCTION_NAME = &quot;nw&quot;;
+	public String nw() {
+<span class="nc" id="L585">		return getNowValue();</span>
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_ITERATION_FUNCTION_NAME = &quot;itr&quot;;
+	public int itr() {
+<span class="nc" id="L592">		return getIteration();</span>
+	}
+
+	//---------------------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_ELEMENT_FUNCTION_NAME = &quot;el&quot;;
+	public SearchedElement el(SearchedElement parent, int index, String tagName, CalculatedProperty ... properties) {
+<span class="nc" id="L600">		return new SearchedElement(parent, index, tagName, properties);</span>
+	}
+
+	public SearchedElement el(int index, String tagName, CalculatedProperty ... properties) {
+<span class="nc" id="L604">		return new SearchedElement(null, index, tagName, properties);</span>
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_REGEX_FUNCTION_NAME = &quot;rx&quot;;
+	public RegexpTransformer rx(String patt, int group) {
+<span class="nc" id="L611">		return new RegexpTransformer(patt, group);</span>
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_DATE_FUNCTION_NAME = &quot;dt&quot;;
+	public DateTransformer dt(String ... data) {
+<span class="nc" id="L618">		return new DateTransformer(data);</span>
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_TIME_FUNCTION_NAME = &quot;tm&quot;;
+	public TimeTransformer tm(String ... data) {
+<span class="nc" id="L625">		return new TimeTransformer(data);</span>
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_NUMERIC_FUNCTION_NAME = &quot;nm&quot;;
+	public NumericTransformer nm(int dp, boolean comma) {
+<span class="nc" id="L632">		return new NumericTransformer(dp, comma);</span>
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_POS_FUNCTION_NAME = &quot;ps&quot;;
+	public MouseDirectionData ps(Cartesian cart, CalculatedValue value) {
+<span class="nc" id="L639">		return new MouseDirectionData(cart, value);</span>
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_MOUSE_FUNCTION_NAME = &quot;ms&quot;;
+	public Mouse ms(String type) {
+<span class="nc" id="L646">		return new Mouse(type);</span>
+	}
+
+	public Mouse ms(String type, MouseDirectionData hpos, MouseDirectionData vpos) {
+<span class="nc" id="L650">		return new Mouse(type, hpos, vpos);</span>
+	}
+
+	public MouseKey ms(String type, Keys key, MouseDirectionData hpos, MouseDirectionData vpos) {
+<span class="nc" id="L654">		return new MouseKey(type, key, hpos, vpos);</span>
+	}
+
+	public MouseKey ms(String type, Keys key) {
+<span class="nc" id="L658">		return new MouseKey(type, key);</span>
+	}
+
+	public MouseScroll ms(int scroll, MouseDirectionData hpos, MouseDirectionData vpos) {
+<span class="nc" id="L662">		return new MouseScroll(scroll, hpos, vpos);</span>
+	}
+
+	public MouseScroll ms(int scroll) {
+<span class="nc" id="L666">		return new MouseScroll(scroll);</span>
+	}
+
+	public MouseSwipe ms(MouseDirectionData hdir, MouseDirectionData vdir, MouseDirectionData hpos, MouseDirectionData vpos) {
+<span class="nc" id="L670">		return new MouseSwipe(hdir, vdir, hpos, vpos);</span>
+	}
+
+	public MouseSwipe ms(MouseDirectionData hdir, MouseDirectionData vdir) {
+<span class="nc" id="L674">		return new MouseSwipe(hdir, vdir);</span>
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_EMBEDED_FUNCTION_NAME = &quot;emb&quot;;
+	public String emb(String relativePath) {
+<span class="nc" id="L681">		return getAssetsUrl(relativePath);</span>
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_GAV_FUNCTION_NAME = &quot;gav&quot;;
+	public String gav() {
+<span class="nc" id="L688">		return &quot;&quot;;</span>
+	}
+
+	//----------------------------------------------------------------------------------------------------------
+	// Actions
+	//----------------------------------------------------------------------------------------------------------
+
+	public static final String JAVA_CONDITION_FUNCTION = &quot;condition&quot;;
+	public boolean condition(String type, int line, Variable variable, CalculatedValue calculatedValue) {
+
+<span class="nc" id="L698">		condition = new ConditionalValue(type, variable, calculatedValue);</span>
+
+<span class="nc bnc" id="L700" title="All 2 branches missed.">		if(condition.isExec()) {</span>
+<span class="nc" id="L701">			return true;</span>
+		}else {
+<span class="nc" id="L703">			getTopScript().sendScriptInfo(ActionCallscript.getScriptLog(getTestName(), line, condition.getLog()));</span>
+<span class="nc" id="L704">			condition = null;</span>
+<span class="nc" id="L705">			return false;</span>
+		}
+	}
+
+	private ConditionalValue condition;
+	public JsonObject getConditionLogs() {
+<span class="nc" id="L711">		JsonObject result = new JsonObject();</span>
+<span class="nc bnc" id="L712" title="All 2 branches missed.">		if(condition != null) {</span>
+<span class="nc" id="L713">			result = condition.getLog(result);</span>
+<span class="nc" id="L714">			condition = null;</span>
+		}
+<span class="nc" id="L716">		return result;</span>
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	public static final String JAVA_EXECUTE_FUNCTION_NAME = &quot;exec&quot;;
+
+	public void exec(int line, Action action){
+<span class="nc" id="L724">		action.execute(this, getTestName(), line);</span>
+<span class="nc" id="L725">		getTopScript().actionFinished(getTestName(), line, action, true);</span>
+<span class="nc" id="L726">	}</span>
+
+	public void exec(int line, ActionComment action){
+<span class="nc bnc" id="L729" title="All 2 branches missed.">		if(action.execute(this, getTestName(), line)) {</span>
+<span class="nc" id="L730">			getTopScript().actionFinished(getTestName(), line, action, true);</span>
+		}
+<span class="nc" id="L732">	}</span>
+
+	public void exec(int line, ActionCallscript action){
+<span class="nc" id="L735">		action.execute(this, getTestName(), line);</span>
+<span class="nc" id="L736">		getTopScript().actionFinished(getTestName(), line, action, true);</span>
+<span class="nc" id="L737">	}</span>
+
+	public void exec(int line, ActionExecute action){
+<span class="nc" id="L740">		action.execute(this, getTestName(), line);</span>
+<span class="nc" id="L741">		getTopScript().actionFinished(getTestName(), line, action, action.isStop());</span>
+<span class="nc" id="L742">	}</span>
+
+	//---------------------------------------------------------------------------------------------
+
+	private void failedAt(String actionClass, String script, int line, String app, int errorCode, String errorMessage) {
+<span class="nc" id="L747">		status.failed();</span>
+
+<span class="nc" id="L749">		final JsonObject logs = new JsonObject();</span>
+<span class="nc" id="L750">		logs.addProperty(&quot;app&quot;, app);</span>
+<span class="nc" id="L751">		logs.addProperty(&quot;errorCode&quot;, errorCode);</span>
+<span class="nc" id="L752">		logs.addProperty(&quot;errorMessage&quot;, errorMessage);</span>
+
+<span class="nc" id="L754">		final StringBuilder sb = </span>
+				new StringBuilder(actionClass)
+<span class="nc" id="L756">				.append(&quot; (&quot;)</span>
+<span class="nc" id="L757">				.append(script)</span>
+<span class="nc" id="L758">				.append(&quot;:&quot;)</span>
+<span class="nc" id="L759">				.append(line)</span>
+<span class="nc" id="L760">				.append(&quot;)&quot;);</span>
+
+<span class="nc" id="L762">		final String errorScript = sb.toString();</span>
+<span class="nc" id="L763">		final String errorInfo = logs.toString();</span>
+
+<span class="nc" id="L765">		sendErrorLog(errorScript, errorInfo);</span>
+
+<span class="nc bnc" id="L767" title="All 2 branches missed.">		if(status.isSuiteExecution()) {</span>
+<span class="nc" id="L768">			getRecorder().updateSummaryFail(script, line, app, errorMessage);</span>
+<span class="nc" id="L769">			throw new AtsFailError(errorScript, errorInfo);</span>
+		}
+<span class="nc" id="L771">	}</span>
+
+	public void actionFinished(String testName, int line, Action action, boolean stop) {
+<span class="nc" id="L774">		status.addAction();</span>
+
+<span class="nc" id="L776">		final ActionStatus actionStatus = action.getStatus();</span>
+
+<span class="nc bnc" id="L778" title="All 2 branches missed.">		if(actionStatus.isPassed()) {</span>
+<span class="nc" id="L779">			sendActionLog(action, testName, line);</span>
+		}else {
+<span class="nc bnc" id="L781" title="All 2 branches missed.">			if(stop) {</span>
+<span class="nc" id="L782">				getTopScript().failedAt(action.getClass().getSimpleName(), testName, line, actionStatus.getChannelApplication(), actionStatus.getCode(), actionStatus.getFailMessage());</span>
+			}else {
+<span class="nc" id="L784">				sendActionLog(action, testName, line);</span>
+			}
+		}
+<span class="nc" id="L787">	}</span>
+
+	public void la (String message) {
+<span class="nc" id="L790">		fail(message);</span>
+<span class="nc" id="L791">	}</span>
+
+	//-----------------------------------------------------------------------------------------------------------
+	//  - Drag drop management
+	//-----------------------------------------------------------------------------------------------------------
+
+<span class="pc" id="L797">	private boolean dragWithDesktop = false;</span>
+
+	public void startDrag() {
+<span class="nc" id="L800">		topScript.dragWithDesktop = getCurrentChannel().isDesktop();</span>
+<span class="nc" id="L801">	}</span>
+
+	public boolean isDesktopDragDrop() {
+<span class="nc" id="L804">		return topScript.dragWithDesktop;</span>
+	}
+
+	public void endDrag() {
+<span class="nc" id="L808">		topScript.dragWithDesktop = false;</span>
+<span class="nc" id="L809">	}</span>
+
+	//-----------------------------------------------------------------------------------------------------------
+	//  - Animation recorder
+	//-----------------------------------------------------------------------------------------------------------
+
+<span class="pc" id="L815">	private IVisualRecorder recorder = new VisualRecorderNull();</span>
+
+	public IVisualRecorder getRecorder() {
+<span class="nc" id="L818">		return topScript.recorder;</span>
+	}
+
+	public void setRecorder(IVisualRecorder value) {
+<span class="nc bnc" id="L822" title="All 8 branches missed.">		if((value instanceof VisualRecorderNull &amp;&amp; this.recorder instanceof VisualRecorder) || (value instanceof VisualRecorder &amp;&amp; this.recorder instanceof VisualRecorderNull)) {</span>
+<span class="nc" id="L823">			this.topScript.recorder.terminate();</span>
+<span class="nc" id="L824">			this.topScript.recorder = value;</span>
+		}
+<span class="nc" id="L826">	}</span>
+
+	public void startRecorder(ScriptHeader info, int quality, boolean xml) {
+<span class="nc" id="L829">		topScript.setRecorder(new VisualRecorder(topScript, info, projectData, xml, quality));</span>
+<span class="nc" id="L830">	}</span>
+
+	public void stopRecorder() {
+<span class="nc" id="L833">		topScript.setRecorder(new VisualRecorderNull());</span>
+<span class="nc" id="L834">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

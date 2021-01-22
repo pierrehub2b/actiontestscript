@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OctoperfApi.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.tools.performance.external</a> &gt; <span class="el_source">OctoperfApi.java</span></div><h1>OctoperfApi.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.tools.performance.external;
+
+import com.ats.executor.ActionStatus;
+import com.ats.executor.channels.Channel;
+import com.ats.script.actions.performance.octoperf.ActionOctoperfVirtualUser;
+import com.ats.tools.logger.MessageCode;
+import com.google.common.base.Charsets;
+import com.google.common.io.CharStreams;
+import com.google.gson.*;
+import okhttp3.*;
+import okhttp3.Request.Builder;
+import okhttp3.internal.Util;
+import okio.BufferedSink;
+import okio.Okio;
+import okio.Source;
+
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.zip.GZIPOutputStream;
+
+public class OctoperfApi {
+
+	private final static int BUFFER = 2048;
+
+	private final static String WORKSPACES_API = &quot;workspaces&quot;;
+	private final static String MEMBER_OF_API = WORKSPACES_API + &quot;/member-of&quot;;
+
+	private final static String USERS_CURRENT_API = &quot;users/current&quot;;
+
+	private final static String DESIGN_API = &quot;design&quot;;
+	private final static String VIRTUAL_USER_API = DESIGN_API + &quot;/virtual-users&quot;;
+	private final static String PROJECT_API = DESIGN_API + &quot;/projects&quot;;
+
+	private final static String VIRTUAL_USER_PROJECT_API = VIRTUAL_USER_API + &quot;/by-project/&quot;;
+	private final static String PROJECT_WORKSPACE_API = PROJECT_API + &quot;/by-workspace/&quot;;
+	private final static String IMPORT_HAR_API = DESIGN_API + &quot;/imports/har/&quot;;
+
+<span class="nc" id="L59">	private final String MIME_TYPE = &quot;multipart/form-data&quot;;</span>
+<span class="nc" id="L60">	private final String JSON_CONTENT_TYPE = &quot;application/json&quot;;</span>
+
+	private String host;
+	private String apiKey;
+
+	private String userId;
+	private String workspaceId;
+	private String projectId;
+
+<span class="nc" id="L69">	private boolean serverEnabled = false;</span>
+
+<span class="nc" id="L71">	public OctoperfApi(String host, String apiKey, String workspaceName, String projectName) {</span>
+
+<span class="nc bnc" id="L73" title="All 2 branches missed.">		if(!host.endsWith(&quot;/&quot;)) {</span>
+<span class="nc" id="L74">			host = host + &quot;/&quot;;</span>
+		}
+
+<span class="nc bnc" id="L77" title="All 2 branches missed.">		if(workspaceName == null) {</span>
+<span class="nc" id="L78">			workspaceName = &quot;AtsWorkspace&quot;;</span>
+		}
+
+<span class="nc bnc" id="L81" title="All 2 branches missed.">		if(projectName == null) {</span>
+<span class="nc" id="L82">			projectName = &quot;AtsCaptureProject&quot;;</span>
+		}
+
+<span class="nc" id="L85">		this.host = host;</span>
+<span class="nc" id="L86">		this.apiKey = apiKey;</span>
+
+<span class="nc" id="L88">		checkProjectData(workspaceName, projectName);</span>
+<span class="nc" id="L89">	}</span>
+
+	private void checkProjectData(String workspaceName, String projectName) {
+<span class="nc" id="L92">		userId = getCurrentUserId();</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">		if(userId != null) {</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">			if(checkWorkspaceExists(workspaceName)) {</span>
+<span class="nc" id="L95">				serverEnabled = checkProjectExists(projectName);</span>
+			}
+		}
+<span class="nc" id="L98">	}</span>
+
+	public void sendHarFileToUser(Channel channel, ActionOctoperfVirtualUser action, Path currentFile) {
+
+<span class="nc bnc" id="L102" title="All 2 branches missed.">		if(serverEnabled) {</span>
+<span class="nc" id="L103">			File gzipFile = null;</span>
+<span class="nc" id="L104">			Path tempFolder = null;</span>
+
+			try {
+<span class="nc" id="L107">				tempFolder = Files.createTempDirectory(&quot;ats-octoperf_&quot;);</span>
+<span class="nc" id="L108">				tempFolder.toFile().mkdirs();</span>
+
+<span class="nc" id="L110">				gzipFile = createGZipFile(tempFolder, currentFile.toFile());</span>
+<span class="nc" id="L111">			} catch (IOException e) {</span>
+<span class="nc" id="L112">				action.getStatus().setError(ActionStatus.OCTOPERF_FILE_ERROR, e.getMessage());</span>
+<span class="nc" id="L113">			}</span>
+
+<span class="nc bnc" id="L115" title="All 2 branches missed.">			if(gzipFile != null) {</span>
+
+<span class="nc" id="L117">				final String[] tags = action.getTags().split(&quot;,&quot;);</span>
+<span class="nc" id="L118">				final JsonArray tagsArray = new JsonArray();</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">				for(String tag : tags) {</span>
+<span class="nc" id="L120">					tagsArray.add(tag.trim());</span>
+				}
+
+<span class="nc" id="L123">				final String virtualUserId = getVirtualUser(action.getUser().getCalculated(), action.getComment().getCalculated(), tagsArray, action.isAppend());</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">				if(virtualUserId != null) {</span>
+<span class="nc" id="L125">					executeRequest(</span>
+<span class="nc" id="L126">							getMultiPartRequest(</span>
+									channel,
+									gzipFile,
+									IMPORT_HAR_API, 
+									projectId,
+									&quot;?containers=PAGE_REF&amp;resources=KEEP_ALL&amp;virtualUserId=&quot;,
+									virtualUserId
+									));
+				}
+
+<span class="nc" id="L136">				gzipFile.delete();</span>
+			}
+
+<span class="nc bnc" id="L139" title="All 2 branches missed.">			if(tempFolder != null) {</span>
+<span class="nc" id="L140">				tempFolder.toFile().delete();</span>
+			}
+		}
+<span class="nc" id="L143">	}</span>
+
+	private String getCurrentUserId() {
+<span class="nc" id="L146">		final JsonElement response = executeRequest(getGetRequest(USERS_CURRENT_API));</span>
+<span class="nc bnc" id="L147" title="All 4 branches missed.">		if (response != null &amp;&amp; response.isJsonObject()) {</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">			if(response.getAsJsonObject().has(&quot;id&quot;)) {</span>
+<span class="nc" id="L149">				final String id = response.getAsJsonObject().get(&quot;id&quot;).getAsString();</span>
+<span class="nc bnc" id="L150" title="All 4 branches missed.">				if(id != null &amp;&amp; id.length() &gt; 0) {</span>
+<span class="nc" id="L151">					return id;</span>
+				}
+			}
+		}
+<span class="nc" id="L155">		return null; // user doesn't exists</span>
+	}
+
+	//----------------------------------------------------------------------------------------------------------
+	// Virtual User
+	//----------------------------------------------------------------------------------------------------------
+
+	private String getVirtualUser(String name, String comment, JsonArray tags, boolean append) {
+<span class="nc" id="L163">		final JsonElement response = executeRequest(getGetRequest(VIRTUAL_USER_PROJECT_API, projectId));</span>
+<span class="nc bnc" id="L164" title="All 4 branches missed.">		if(response != null &amp;&amp; response.isJsonArray()) {</span>
+<span class="nc" id="L165">			final JsonArray virtualUsers = response.getAsJsonArray();</span>
+<span class="nc bnc" id="L166" title="All 2 branches missed.">			for (int i=0; i&lt; virtualUsers.size(); i++) {</span>
+<span class="nc" id="L167">				final JsonElement virtualUser = virtualUsers.get(i);</span>
+<span class="nc bnc" id="L168" title="All 2 branches missed.">				if(virtualUser.isJsonObject() </span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">						&amp;&amp; virtualUser.getAsJsonObject().has(&quot;name&quot;) </span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">						&amp;&amp; virtualUser.getAsJsonObject().get(&quot;name&quot;).getAsString().equals(name)) {</span>
+
+<span class="nc" id="L172">					final JsonObject virtualUserObject = virtualUser.getAsJsonObject();</span>
+<span class="nc" id="L173">					final String virtualUserId = virtualUser.getAsJsonObject().get(&quot;id&quot;).getAsString();</span>
+
+<span class="nc" id="L175">					virtualUserObject.remove(&quot;tags&quot;);</span>
+<span class="nc" id="L176">					virtualUserObject.add(&quot;tags&quot;, tags);</span>
+
+<span class="nc" id="L178">					virtualUserObject.remove(&quot;description&quot;);</span>
+<span class="nc" id="L179">					virtualUserObject.addProperty(&quot;description&quot;, comment);</span>
+
+<span class="nc bnc" id="L181" title="All 2 branches missed.">					if(!append) {</span>
+<span class="nc" id="L182">						virtualUserObject.remove(&quot;children&quot;);</span>
+<span class="nc" id="L183">						virtualUserObject.add(&quot;children&quot;, new JsonArray());</span>
+					}
+
+<span class="nc" id="L186">					executeRequest(</span>
+<span class="nc" id="L187">							getPutRequest(</span>
+									virtualUser,
+									VIRTUAL_USER_API,
+									&quot;/&quot;,
+									virtualUserId
+									));
+
+<span class="nc" id="L194">					return virtualUserId;</span>
+				}
+			}
+		}
+<span class="nc" id="L198">		return createVirtualUser(name, comment, tags);</span>
+	}
+
+	private String createVirtualUser(String name, String comment, JsonArray tags) {
+
+<span class="nc" id="L203">		final JsonObject virtualUser = createJsonDataWithTag(userId, name, comment, &quot;JMETER&quot;, tags);</span>
+<span class="nc" id="L204">		virtualUser.addProperty(&quot;projectId&quot;, projectId);</span>
+<span class="nc" id="L205">		virtualUser.addProperty(&quot;@type&quot;, &quot;VirtualUser&quot;);</span>
+<span class="nc" id="L206">		virtualUser.add(&quot;children&quot;, new JsonArray());</span>
+
+<span class="nc" id="L208">		final JsonElement response = executeRequest(getPostRequest(virtualUser, VIRTUAL_USER_API));</span>
+<span class="nc bnc" id="L209" title="All 4 branches missed.">		if(response != null &amp;&amp; response.isJsonObject()) {</span>
+<span class="nc" id="L210">			final JsonObject createdUser = response.getAsJsonObject();</span>
+<span class="nc bnc" id="L211" title="All 2 branches missed.">			if(createdUser.has(&quot;id&quot;)) {</span>
+<span class="nc" id="L212">				return createdUser.get(&quot;id&quot;).getAsString();</span>
+			}
+		}
+<span class="nc" id="L215">		return null;</span>
+	}
+
+	//----------------------------------------------------------------------------------------------------------
+	// Workspace data
+	//----------------------------------------------------------------------------------------------------------
+
+	private boolean createWorkspace(String name) {
+
+<span class="nc" id="L224">		final JsonObject newWorkspace = createJsonData(userId, name, &quot;New Workspace created by ATS framework&quot;);</span>
+
+<span class="nc" id="L226">		final JsonElement createWorskpace = executeRequest(getPostRequest(newWorkspace, WORKSPACES_API));</span>
+<span class="nc bnc" id="L227" title="All 4 branches missed.">		if(createWorskpace != null &amp;&amp; createWorskpace.isJsonObject()) {</span>
+<span class="nc" id="L228">			final JsonObject obj = createWorskpace.getAsJsonObject();</span>
+<span class="nc bnc" id="L229" title="All 2 branches missed.">			if(obj.has(&quot;id&quot;)) {</span>
+<span class="nc" id="L230">				workspaceId = obj.get(&quot;id&quot;).getAsString();</span>
+<span class="nc" id="L231">				return true;</span>
+			}
+		}
+<span class="nc" id="L234">		return false;</span>
+	}
+
+	private boolean createProject(String name) {
+
+<span class="nc" id="L239">		final JsonArray tags = new JsonArray();</span>
+<span class="nc" id="L240">		tags.add(&quot;ats&quot;);</span>
+
+<span class="nc" id="L242">		final JsonObject newProject = createJsonDataWithTag(userId, name, &quot;New Project created by ATS framework&quot;, &quot;DESIGN&quot;, tags);</span>
+<span class="nc" id="L243">		newProject.addProperty(&quot;workspaceId&quot;, workspaceId);</span>
+
+<span class="nc" id="L245">		final JsonElement createProject = executeRequest(getPostRequest(newProject, PROJECT_API));</span>
+<span class="nc bnc" id="L246" title="All 4 branches missed.">		if(createProject != null &amp;&amp; createProject.isJsonObject()) {</span>
+<span class="nc" id="L247">			final JsonObject obj = createProject.getAsJsonObject();</span>
+<span class="nc bnc" id="L248" title="All 2 branches missed.">			if(obj.has(&quot;id&quot;)) {</span>
+<span class="nc" id="L249">				projectId = obj.get(&quot;id&quot;).getAsString();</span>
+<span class="nc" id="L250">				return true;</span>
+			}
+		}
+<span class="nc" id="L253">		return false;</span>
+	}
+
+	private boolean checkWorkspaceExists(String workspaceName) {
+<span class="nc" id="L257">		final JsonElement response = executeRequest(getGetRequest(MEMBER_OF_API));</span>
+<span class="nc bnc" id="L258" title="All 4 branches missed.">		if(response != null &amp;&amp; response.isJsonArray()) {</span>
+<span class="nc" id="L259">			final JsonArray workspaces = response.getAsJsonArray();</span>
+<span class="nc bnc" id="L260" title="All 2 branches missed.">			for (int i=0; i&lt; workspaces.size(); i++) {</span>
+<span class="nc" id="L261">				final JsonElement item = workspaces.get(i);</span>
+<span class="nc bnc" id="L262" title="All 2 branches missed.">				if(item.isJsonObject() </span>
+<span class="nc bnc" id="L263" title="All 2 branches missed.">						&amp;&amp; item.getAsJsonObject().has(&quot;name&quot;) </span>
+<span class="nc bnc" id="L264" title="All 2 branches missed.">						&amp;&amp; item.getAsJsonObject().get(&quot;name&quot;).getAsString().equals(workspaceName)) {</span>
+
+<span class="nc" id="L266">					workspaceId = item.getAsJsonObject().get(&quot;id&quot;).getAsString();</span>
+<span class="nc" id="L267">					return true;</span>
+				}
+			}
+		}
+<span class="nc" id="L271">		return createWorkspace(workspaceName);</span>
+	}
+
+	private boolean checkProjectExists(String projectName) {
+<span class="nc" id="L275">		final JsonElement response = executeRequest(getGetRequest(PROJECT_WORKSPACE_API, workspaceId, &quot;/DESIGN&quot;));</span>
+<span class="nc bnc" id="L276" title="All 4 branches missed.">		if(response != null &amp;&amp; response.isJsonArray()) {</span>
+<span class="nc" id="L277">			final JsonArray projects = response.getAsJsonArray();</span>
+<span class="nc bnc" id="L278" title="All 2 branches missed.">			for (int i=0; i&lt; projects.size(); i++) {</span>
+<span class="nc" id="L279">				final JsonElement item = projects.get(i);</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">				if(item.isJsonObject() </span>
+<span class="nc bnc" id="L281" title="All 2 branches missed.">						&amp;&amp; item.getAsJsonObject().has(&quot;name&quot;) </span>
+<span class="nc bnc" id="L282" title="All 2 branches missed.">						&amp;&amp; item.getAsJsonObject().get(&quot;name&quot;).getAsString().equals(projectName)) {</span>
+
+<span class="nc" id="L284">					projectId = item.getAsJsonObject().get(&quot;id&quot;).getAsString();</span>
+<span class="nc" id="L285">					return true;</span>
+				}
+			}
+		}
+<span class="nc" id="L289">		return createProject(projectName);</span>
+	}
+
+	//----------------------------------------------------------------------------------------------------------
+	// Utils
+	//----------------------------------------------------------------------------------------------------------
+
+	private static JsonObject createJsonDataWithTag(String userId, String name, String description, String type, JsonArray tags) {
+
+<span class="nc" id="L298">		final JsonObject obj = createJsonData(userId, name, description);</span>
+<span class="nc" id="L299">		obj.addProperty(&quot;type&quot;, type);</span>
+<span class="nc" id="L300">		obj.add(&quot;tags&quot;, tags);</span>
+
+<span class="nc" id="L302">		return obj;</span>
+	}
+
+	private static JsonObject createJsonData(String userId, String name, String description) {
+
+<span class="nc" id="L307">		final String currentDate = Instant.now().toString();</span>
+
+<span class="nc" id="L309">		final JsonObject obj = new JsonObject();</span>
+<span class="nc" id="L310">		obj.addProperty(&quot;created&quot;, currentDate);</span>
+<span class="nc" id="L311">		obj.addProperty(&quot;description&quot;, description);</span>
+<span class="nc" id="L312">		obj.addProperty(&quot;id&quot;, &quot;&quot;);</span>
+<span class="nc" id="L313">		obj.addProperty(&quot;lastModified&quot;, currentDate);</span>
+<span class="nc" id="L314">		obj.addProperty(&quot;name&quot;, name);</span>
+<span class="nc" id="L315">		obj.addProperty(&quot;userId&quot;, userId);</span>
+
+<span class="nc" id="L317">		return obj;</span>
+	}
+
+	private static File createGZipFile(Path tempFolder, File harFile) throws IOException {
+
+<span class="nc bnc" id="L322" title="All 2 branches missed.">		if(harFile.exists()) {</span>
+<span class="nc" id="L323">			final String harFileName = harFile.getName();</span>
+<span class="nc" id="L324">			final File gzipFile = tempFolder.resolve(harFileName + &quot;.gzip&quot;).toFile();</span>
+
+			try {
+<span class="nc" id="L327">				FileInputStream fis = new FileInputStream(harFile);</span>
+<span class="nc" id="L328">				FileOutputStream fos = new FileOutputStream(gzipFile);</span>
+<span class="nc" id="L329">				GZIPOutputStream gzipOS = new GZIPOutputStream(fos);</span>
+
+<span class="nc" id="L331">				byte[] buffer = new byte[1024];</span>
+				int len;
+<span class="nc bnc" id="L333" title="All 2 branches missed.">				while((len=fis.read(buffer)) != -1){</span>
+<span class="nc" id="L334">					gzipOS.write(buffer, 0, len);</span>
+				}
+
+<span class="nc" id="L337">				gzipOS.close();</span>
+<span class="nc" id="L338">				fos.close();</span>
+<span class="nc" id="L339">				fis.close();</span>
+
+<span class="nc" id="L341">			} catch (IOException e) {</span>
+<span class="nc" id="L342">				e.printStackTrace();</span>
+<span class="nc" id="L343">			}</span>
+
+<span class="nc" id="L345">			return gzipFile;</span>
+		}
+<span class="nc" id="L347">		return null;</span>
+	}
+
+	//----------------------------------------------------------------------------------------------------------
+	// Requests
+	//----------------------------------------------------------------------------------------------------------
+
+	private Builder getRequest(String ... queryParts) {
+
+<span class="nc" id="L356">		final StringBuilder urlBuilder = new StringBuilder(host);</span>
+<span class="nc bnc" id="L357" title="All 2 branches missed.">		for(String str : queryParts) {</span>
+<span class="nc" id="L358">			urlBuilder.append(str);</span>
+		}
+
+<span class="nc" id="L361">		final Builder request = new Request.Builder()</span>
+<span class="nc" id="L362">				.url(urlBuilder.toString())</span>
+<span class="nc" id="L363">				.addHeader(&quot;User-Agent&quot;, &quot;ats&quot;)</span>
+<span class="nc" id="L364">				.addHeader(&quot;Authorization&quot;, apiKey);</span>
+<span class="nc" id="L365">		return request;</span>
+	}
+
+	private Request getPostRequest(JsonElement element, String ... queryParts) {
+<span class="nc" id="L369">		final Request request = getRequest(queryParts)</span>
+<span class="nc" id="L370">				.addHeader(&quot;Content-Type&quot;, JSON_CONTENT_TYPE)</span>
+<span class="nc" id="L371">				.post(RequestBody.create(null, element.toString()))</span>
+<span class="nc" id="L372">				.build();</span>
+<span class="nc" id="L373">		return request;</span>
+	}
+
+	private Request getPutRequest(JsonElement element, String ... queryParts) {
+<span class="nc" id="L377">		final Request request = getRequest(queryParts)</span>
+<span class="nc" id="L378">				.addHeader(&quot;Content-Type&quot;, JSON_CONTENT_TYPE)</span>
+<span class="nc" id="L379">				.put(RequestBody.create(null, element.toString()))</span>
+<span class="nc" id="L380">				.build();</span>
+<span class="nc" id="L381">		return request;</span>
+	}
+
+	private Request getGetRequest(String ... queryParts) {
+<span class="nc" id="L385">		final Request request = getRequest(queryParts)</span>
+<span class="nc" id="L386">				.get()</span>
+<span class="nc" id="L387">				.build();</span>
+<span class="nc" id="L388">		return request;</span>
+	}
+
+	public Request getMultiPartRequest(Channel channel, File f, String... queryParts) {
+
+<span class="nc" id="L393">		String fileType = &quot;&quot;;</span>
+<span class="nc bnc" id="L394" title="All 2 branches missed.">		if(f.getName().endsWith(&quot;.gzip&quot;)) {</span>
+<span class="nc" id="L395">			fileType = &quot;application/x-gzip&quot;;</span>
+		}
+
+<span class="nc" id="L398">		final RequestBody requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)</span>
+<span class="nc" id="L399">				.addFormDataPart(&quot;file&quot;, f.getName(), new RequestBodyWithUploadProgress(f, fileType, channel))</span>
+<span class="nc" id="L400">				.build();</span>
+
+<span class="nc" id="L402">		final Request request = getRequest(queryParts)</span>
+<span class="nc" id="L403">				.addHeader(&quot;Content-Type&quot;, JSON_CONTENT_TYPE)</span>
+<span class="nc" id="L404">				.addHeader(&quot;MimeType&quot;, MIME_TYPE)</span>
+<span class="nc" id="L405">				.post(requestBody)</span>
+<span class="nc" id="L406">				.build();</span>
+
+<span class="nc" id="L408">		return request;</span>
+	}
+
+	private JsonElement executeRequest(Request request) {
+<span class="nc" id="L412">		final OkHttpClient client = new OkHttpClient.Builder().build();</span>
+		try {
+<span class="nc" id="L414">			final Response response = client.newCall(request).execute();</span>
+
+<span class="nc" id="L416">			final String responseData = CharStreams.toString(</span>
+					new InputStreamReader(
+							response
+<span class="nc" id="L419">							.body()</span>
+<span class="nc" id="L420">							.byteStream(), </span>
+							Charsets.UTF_8));
+<span class="nc" id="L422">			response.close();</span>
+<span class="nc" id="L423">			return JsonParser.parseString(responseData);</span>
+<span class="nc" id="L424">		} catch (JsonSyntaxException | IOException e) {</span>
+<span class="nc" id="L425">			return null;</span>
+		}
+	}
+
+	//----------------------------------------------------------------------------------------------
+
+	public class RequestBodyWithUploadProgress extends RequestBody {
+
+		private final File file;
+		private final String contentType;
+		private final long fileLength;
+		private final Channel channel;
+
+<span class="nc" id="L438">		public RequestBodyWithUploadProgress(File file, String contentType, Channel channel) {</span>
+<span class="nc" id="L439">			this.file = file;</span>
+<span class="nc" id="L440">			this.contentType = contentType;</span>
+<span class="nc" id="L441">			this.fileLength = file.length();</span>
+<span class="nc" id="L442">			this.channel = channel;</span>
+<span class="nc" id="L443">		}</span>
+
+		@Override
+		public long contentLength() {
+<span class="nc" id="L447">			return fileLength;</span>
+		}
+
+		@Override
+		public MediaType contentType() {
+<span class="nc" id="L452">			return MediaType.parse(contentType);</span>
+		}
+
+		@Override
+		public void writeTo(BufferedSink sink) throws IOException {
+<span class="nc" id="L457">			Source source = null;</span>
+			try {
+<span class="nc" id="L459">				source = Okio.source(file);</span>
+<span class="nc" id="L460">				long total = 0;</span>
+				long read;
+
+<span class="nc bnc" id="L463" title="All 2 branches missed.">				if(fileLength &gt; BUFFER) {</span>
+<span class="nc" id="L464">					int threshold = 0;</span>
+<span class="nc bnc" id="L465" title="All 2 branches missed.">					while ((read = source.read(sink.buffer(), BUFFER)) != -1) {</span>
+<span class="nc" id="L466">						total += read;</span>
+<span class="nc" id="L467">						sink.flush();</span>
+
+<span class="nc" id="L469">						final int percent = (int)((float)total/((float)fileLength)*100);</span>
+<span class="nc bnc" id="L470" title="All 2 branches missed.">						if(percent &gt; threshold) {</span>
+<span class="nc" id="L471">							threshold += 10;</span>
+<span class="nc" id="L472">							channel.sendLog(MessageCode.UPLOAD_FILE, &quot;Uploading HAR file, remaining bytes percent to upload&quot;, (100-percent) + 1);</span>
+						}
+<span class="nc" id="L474">					}</span>
+<span class="nc" id="L475">					channel.sendLog(MessageCode.UPLOAD_FILE, &quot;Uploading HAR file done&quot;, 0);</span>
+<span class="nc" id="L476">				}else {</span>
+<span class="nc" id="L477">					source.read(sink.buffer(), fileLength);</span>
+<span class="nc" id="L478">					sink.flush();</span>
+				}
+			}
+<span class="nc" id="L481">			catch (FileNotFoundException e) {</span>
+			}
+			finally {
+<span class="nc" id="L484">				Util.closeQuietly(source);</span>
+			}
+<span class="nc" id="L486">		}</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

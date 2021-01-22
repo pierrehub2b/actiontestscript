@@ -1,0 +1,512 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AMF0Serializer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.exadel.flamingo.flex.messaging.amf.io</a> &gt; <span class="el_source">AMF0Serializer.java</span></div><h1>AMF0Serializer.java</h1><pre class="source lang-java linenums">/*
+ * www.openamf.org
+ *
+ * Distributable under LGPL license.
+ * See terms of license at gnu.org.
+ */
+
+package com.exadel.flamingo.flex.messaging.amf.io;
+
+import com.exadel.flamingo.flex.amf.AMF0Body;
+import com.exadel.flamingo.flex.amf.AMF0Header;
+import com.exadel.flamingo.flex.amf.AMF0Message;
+import com.exadel.flamingo.flex.amf.AMF3Object;
+import flex.messaging.io.ASObject;
+import flex.messaging.io.ASRecordSet;
+import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.*;
+
+import java.beans.PropertyDescriptor;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutput;
+import java.lang.reflect.Method;
+import java.sql.ResultSet;
+import java.util.*;
+
+public class AMF0Serializer {
+
+<span class="nc" id="L32">	private static final Log log = LogFactory.getLog(AMF0Serializer.class);</span>
+
+	private static final int MILLS_PER_HOUR = 60000;
+	/**
+	 * Null message
+	 */
+	private static final String NULL_MESSAGE = &quot;null&quot;;
+
+	/**
+	 * The output stream
+	 */
+	protected DataOutputStream outputStream;
+
+<span class="nc" id="L45">	private Map&lt;Object, Integer&gt; storedObjects = new IdentityHashMap&lt;Object, Integer&gt;();</span>
+<span class="nc" id="L46">	private int storedObjectCount = 0;</span>
+
+<span class="nc" id="L48">	public AMF0Serializer(DataOutputStream outputStream) {</span>
+<span class="nc" id="L49">		this.outputStream = outputStream;</span>
+<span class="nc" id="L50">	}</span>
+
+	public void serializeMessage(AMF0Message message) throws IOException {
+		//if (log.isInfoEnabled())
+		//    log.info(&quot;Serializing Message, for more info turn on debug level&quot;);
+
+<span class="nc" id="L56">		clearStoredObjects();</span>
+<span class="nc" id="L57">		outputStream.writeShort(message.getVersion());</span>
+		// write header
+<span class="nc" id="L59">		outputStream.writeShort(message.getHeaderCount());</span>
+<span class="nc" id="L60">		Iterator&lt;AMF0Header&gt; headers = message.getHeaders().iterator();</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">		while (headers.hasNext()) {</span>
+<span class="nc" id="L62">			AMF0Header header = headers.next();</span>
+<span class="nc" id="L63">			writeHeader(header);</span>
+<span class="nc" id="L64">		}</span>
+		// write body
+<span class="nc" id="L66">		outputStream.writeShort(message.getBodyCount());</span>
+<span class="nc" id="L67">		Iterator&lt;AMF0Body&gt; bodies = message.getBodies();</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">		while (bodies.hasNext()) {</span>
+<span class="nc" id="L69">			AMF0Body body = bodies.next();</span>
+<span class="nc" id="L70">			writeBody(body);</span>
+<span class="nc" id="L71">		}</span>
+<span class="nc" id="L72">	}</span>
+
+	protected void writeHeader(AMF0Header header) throws IOException {
+<span class="nc" id="L75">		outputStream.writeUTF(header.getKey());</span>
+<span class="nc" id="L76">		outputStream.writeBoolean(header.isRequired());</span>
+		// Always, always there is four bytes of FF, which is -1 of course
+<span class="nc" id="L78">		outputStream.writeInt(-1);</span>
+<span class="nc" id="L79">		writeData(header.getValue());</span>
+<span class="nc" id="L80">	}</span>
+
+	protected void writeBody(AMF0Body body) throws IOException {
+		// write url
+<span class="nc bnc" id="L84" title="All 2 branches missed.">		if (body.getTarget() == null) {</span>
+<span class="nc" id="L85">			outputStream.writeUTF(NULL_MESSAGE);</span>
+		} else {
+<span class="nc" id="L87">			outputStream.writeUTF(body.getTarget());</span>
+		}
+		// write response
+<span class="nc bnc" id="L90" title="All 2 branches missed.">		if (body.getResponse() == null) {</span>
+<span class="nc" id="L91">			outputStream.writeUTF(NULL_MESSAGE);</span>
+		} else {
+<span class="nc" id="L93">			outputStream.writeUTF(body.getResponse());</span>
+		}
+		// Always, always there is four bytes of FF, which is -1 of course
+<span class="nc" id="L96">		outputStream.writeInt(-1);</span>
+		// Write the data to the output stream
+<span class="nc" id="L98">		writeData(body.getValue());</span>
+<span class="nc" id="L99">	}</span>
+
+	protected void writeData(Object value) throws IOException {
+<span class="nc bnc" id="L102" title="All 2 branches missed.">		if (value == null) {</span>
+			// write null object
+<span class="nc" id="L104">			outputStream.writeByte(AMF0Body.DATA_TYPE_NULL);</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">		} else if (value instanceof AMF3Object) {</span>
+<span class="nc" id="L106">			writeAMF3Data((AMF3Object)value);</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">		} else if (isPrimitiveArray(value)) {</span>
+<span class="nc" id="L108">			writePrimitiveArray(value);</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">		} else if (value instanceof Number) {</span>
+			// write number object
+<span class="nc" id="L111">			outputStream.writeByte(AMF0Body.DATA_TYPE_NUMBER);</span>
+<span class="nc" id="L112">			outputStream.writeDouble(((Number) value).doubleValue());</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">		} else if (value instanceof String) {</span>
+<span class="nc" id="L114">			writeString((String)value);</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">		} else if (value instanceof Character) {</span>
+			// write String object
+<span class="nc" id="L117">			outputStream.writeByte(AMF0Body.DATA_TYPE_STRING);</span>
+<span class="nc" id="L118">			outputStream.writeUTF(value.toString());</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">		} else if (value instanceof Boolean) {</span>
+			// write boolean object
+<span class="nc" id="L121">			outputStream.writeByte(AMF0Body.DATA_TYPE_BOOLEAN);</span>
+<span class="nc" id="L122">			outputStream.writeBoolean(((Boolean) value).booleanValue());</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">		} else if (value instanceof Date) {</span>
+			// write Date object
+<span class="nc" id="L125">			outputStream.writeByte(AMF0Body.DATA_TYPE_DATE);</span>
+<span class="nc" id="L126">			outputStream.writeDouble(((Date) value).getTime());</span>
+<span class="nc" id="L127">			int offset = TimeZone.getDefault().getRawOffset();</span>
+<span class="nc" id="L128">			outputStream.writeShort(offset / MILLS_PER_HOUR);</span>
+<span class="nc" id="L129">		} else {</span>
+
+<span class="nc bnc" id="L131" title="All 2 branches missed.">			if (storedObjects.containsKey(value)) {</span>
+<span class="nc" id="L132">				writeStoredObject(value);</span>
+<span class="nc" id="L133">				return;</span>
+			}
+<span class="nc" id="L135">			storeObject(value);</span>
+
+<span class="nc bnc" id="L137" title="All 2 branches missed.">			if (value instanceof Object[]) {</span>
+				// write Object Array
+<span class="nc" id="L139">				writeArray((Object[]) value);</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">			} else if (value instanceof Iterator) {</span>
+<span class="nc" id="L141">				write((Iterator&lt;?&gt;) value);</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">			} else if (value instanceof Collection) {</span>
+<span class="nc" id="L143">				write((Collection&lt;?&gt;) value);</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">			} else if (value instanceof Map) {</span>
+<span class="nc" id="L145">				writeMap((Map&lt;?, ?&gt;) value);</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">			} else if (value instanceof ResultSet) {</span>
+<span class="nc" id="L147">				ASRecordSet asRecordSet = new ASRecordSet();</span>
+<span class="nc" id="L148">				asRecordSet.populate((ResultSet) value);</span>
+<span class="nc" id="L149">				writeData(asRecordSet);</span>
+<span class="nc bnc" id="L150" title="All 2 branches missed.">			} else if (value instanceof Document) {</span>
+<span class="nc" id="L151">				write((Document) value);</span>
+			} else {
+				/*
+                MM's gateway requires all objects to be marked with the
+                Serializable interface in order to be serialized
+                That should still be followed if possible, but there is
+                no good reason to enforce it.
+				 */
+<span class="nc" id="L159">				writeObject(value);</span>
+			}
+		}
+<span class="nc" id="L162">	}</span>
+
+	protected void writeObject(Object object) throws IOException {
+<span class="nc bnc" id="L165" title="All 2 branches missed.">		if (log.isDebugEnabled())</span>
+		{
+<span class="nc bnc" id="L167" title="All 2 branches missed.">			if (object == null)</span>
+			{
+<span class="nc" id="L169">				log.debug(&quot;Writing object, object param == null&quot;);</span>
+			}
+			else
+			{
+<span class="nc" id="L173">				log.debug(&quot;Writing object, class = &quot; + object.getClass());</span>
+			}
+		}
+		//String customClassName = null;
+		/*
+            OpenAMFConfig.getInstance().getCustomClassName(
+                object.getClass().getName());
+		 */
+		//if (customClassName == null) {
+<span class="nc" id="L182">		outputStream.writeByte(AMF0Body.DATA_TYPE_OBJECT);</span>
+		/*} else {
+            if (log.isDebugEnabled()) {
+                log.debug(&quot;customClassName : &quot; + customClassName);
+            }
+            outputStream.writeByte(AMF0Body.DATA_TYPE_CUSTOM_CLASS);
+            outputStream.writeUTF(customClassName);
+        }*/
+		try {
+<span class="nc" id="L191">			PropertyDescriptor[] properties =</span>
+<span class="nc" id="L192">					PropertyUtils.getPropertyDescriptors(object);</span>
+<span class="nc bnc" id="L193" title="All 2 branches missed.">			for (int i = 0; i &lt; properties.length; i++) {</span>
+<span class="nc bnc" id="L194" title="All 2 branches missed.">				if (!properties[i].getName().equals(&quot;class&quot;)) {</span>
+<span class="nc" id="L195">					String propertyName = properties[i].getName();</span>
+<span class="nc" id="L196">					Method readMethod = properties[i].getReadMethod();</span>
+<span class="nc" id="L197">					Object propertyValue = null;</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">					if (readMethod == null) {</span>
+<span class="nc" id="L199">						log.error(</span>
+								&quot;unable to find readMethod for : &quot;
+										+ propertyName
+										+ &quot; writing null!&quot;);
+					} else {
+<span class="nc" id="L204">						log.debug(&quot;invoking readMethod &quot; + readMethod);</span>
+<span class="nc" id="L205">						propertyValue =</span>
+<span class="nc" id="L206">								readMethod.invoke(object, new Object[0]);</span>
+					}
+<span class="nc" id="L208">					log.debug(propertyName + &quot; = &quot; + propertyValue);</span>
+<span class="nc" id="L209">					outputStream.writeUTF(propertyName);</span>
+<span class="nc" id="L210">					writeData(propertyValue);</span>
+				}
+			}
+<span class="nc" id="L213">			outputStream.writeShort(0);</span>
+<span class="nc" id="L214">			outputStream.writeByte(AMF0Body.DATA_TYPE_OBJECT_END);</span>
+<span class="nc" id="L215">		} catch (RuntimeException e) {</span>
+<span class="nc" id="L216">			throw e;</span>
+<span class="nc" id="L217">		} catch (Exception e) {</span>
+<span class="nc" id="L218">			log.error(e, e);</span>
+<span class="nc" id="L219">			throw new IOException(e.getMessage());</span>
+<span class="nc" id="L220">		}</span>
+<span class="nc" id="L221">	}</span>
+
+	protected void writeArray(Object[] array) throws IOException {
+<span class="nc" id="L224">		outputStream.writeByte(AMF0Body.DATA_TYPE_ARRAY);</span>
+<span class="nc" id="L225">		outputStream.writeInt(array.length);</span>
+<span class="nc bnc" id="L226" title="All 2 branches missed.">		for (int i = 0; i &lt; array.length; i++) {</span>
+<span class="nc" id="L227">			writeData(array[i]);</span>
+		}
+<span class="nc" id="L229">	}</span>
+
+	protected void writePrimitiveArray(Object array) throws IOException {
+<span class="nc" id="L232">		writeArray(convertPrimitiveArrayToObjectArray(array));</span>
+<span class="nc" id="L233">	}</span>
+
+	protected Object[] convertPrimitiveArrayToObjectArray(Object array) {
+<span class="nc" id="L236">		Class&lt;?&gt; componentType = array.getClass().getComponentType();</span>
+
+<span class="nc" id="L238">		Object[] result = null;</span>
+
+<span class="nc bnc" id="L240" title="All 2 branches missed.">		if (componentType == null)</span>
+		{
+<span class="nc" id="L242">			throw new NullPointerException(&quot;componentType is null&quot;);</span>
+		}
+<span class="nc bnc" id="L244" title="All 2 branches missed.">		else if (componentType == Character.TYPE)</span>
+		{
+<span class="nc" id="L246">			char[] carray = (char[]) array;</span>
+<span class="nc" id="L247">			result = new Object[carray.length];</span>
+<span class="nc bnc" id="L248" title="All 2 branches missed.">			for (int i = 0; i &lt; carray.length; i++)</span>
+			{
+<span class="nc" id="L250">				result[i] = Character.valueOf(carray[i]);</span>
+			}
+<span class="nc" id="L252">		}</span>
+<span class="nc bnc" id="L253" title="All 2 branches missed.">		else if (componentType == Byte.TYPE)</span>
+		{
+<span class="nc" id="L255">			byte[] barray = (byte[]) array;</span>
+<span class="nc" id="L256">			result = new Object[barray.length];</span>
+<span class="nc bnc" id="L257" title="All 2 branches missed.">			for (int i = 0; i &lt; barray.length; i++)</span>
+			{
+<span class="nc" id="L259">				result[i] = Byte.valueOf(barray[i]);</span>
+			}
+<span class="nc" id="L261">		}</span>
+<span class="nc bnc" id="L262" title="All 2 branches missed.">		else if (componentType == Short.TYPE)</span>
+		{
+<span class="nc" id="L264">			short[] sarray = (short[]) array;</span>
+<span class="nc" id="L265">			result = new Object[sarray.length];</span>
+<span class="nc bnc" id="L266" title="All 2 branches missed.">			for (int i = 0; i &lt; sarray.length; i++)</span>
+			{
+<span class="nc" id="L268">				result[i] = Short.valueOf(sarray[i]);</span>
+			}
+<span class="nc" id="L270">		}</span>
+<span class="nc bnc" id="L271" title="All 2 branches missed.">		else if (componentType == Integer.TYPE)</span>
+		{
+<span class="nc" id="L273">			int[] iarray = (int[]) array;</span>
+<span class="nc" id="L274">			result = new Object[iarray.length];</span>
+<span class="nc bnc" id="L275" title="All 2 branches missed.">			for (int i = 0; i &lt; iarray.length; i++)</span>
+			{
+<span class="nc" id="L277">				result[i] = Integer.valueOf(iarray[i]);</span>
+			}
+<span class="nc" id="L279">		}</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">		else if (componentType == Long.TYPE)</span>
+		{
+<span class="nc" id="L282">			long[] larray = (long[]) array;</span>
+<span class="nc" id="L283">			result = new Object[larray.length];</span>
+<span class="nc bnc" id="L284" title="All 2 branches missed.">			for (int i = 0; i &lt; larray.length; i++)</span>
+			{
+<span class="nc" id="L286">				result[i] = Long.valueOf(larray[i]);</span>
+			}
+<span class="nc" id="L288">		}</span>
+<span class="nc bnc" id="L289" title="All 2 branches missed.">		else if (componentType == Double.TYPE)</span>
+		{
+<span class="nc" id="L291">			double[] darray = (double[]) array;</span>
+<span class="nc" id="L292">			result = new Object[darray.length];</span>
+<span class="nc bnc" id="L293" title="All 2 branches missed.">			for (int i = 0; i &lt; darray.length; i++)</span>
+			{
+<span class="nc" id="L295">				result[i] = Double.valueOf(darray[i]);</span>
+			}
+<span class="nc" id="L297">		}</span>
+<span class="nc bnc" id="L298" title="All 2 branches missed.">		else if (componentType == Float.TYPE)</span>
+		{
+<span class="nc" id="L300">			float[] farray = (float[]) array;</span>
+<span class="nc" id="L301">			result = new Object[farray.length];</span>
+<span class="nc bnc" id="L302" title="All 2 branches missed.">			for (int i = 0; i &lt; farray.length; i++)</span>
+			{
+<span class="nc" id="L304">				result[i] = Float.valueOf(farray[i]);</span>
+			}
+<span class="nc" id="L306">		}</span>
+<span class="nc bnc" id="L307" title="All 2 branches missed.">		else if (componentType == Boolean.TYPE)</span>
+		{
+<span class="nc" id="L309">			boolean[] barray = (boolean[]) array;</span>
+<span class="nc" id="L310">			result = new Object[barray.length];</span>
+<span class="nc bnc" id="L311" title="All 2 branches missed.">			for (int i = 0; i &lt; barray.length; i++)</span>
+			{
+<span class="nc" id="L313">				result[i] = Boolean.valueOf(barray[i]);</span>
+			}
+<span class="nc" id="L315">		}</span>
+		else {
+<span class="nc" id="L317">			throw new IllegalArgumentException(</span>
+					&quot;unexpected component type: &quot;
+<span class="nc" id="L319">							+ componentType.getClass().getName());</span>
+		}
+
+<span class="nc" id="L322">		return result;</span>
+	}
+
+	protected void write(Iterator&lt;?&gt; iterator) throws IOException {
+<span class="nc" id="L326">		List&lt;Object&gt; list = new ArrayList&lt;Object&gt;();</span>
+<span class="nc bnc" id="L327" title="All 2 branches missed.">		while (iterator.hasNext()) {</span>
+<span class="nc" id="L328">			list.add(iterator.next());</span>
+		}
+<span class="nc" id="L330">		write(list);</span>
+<span class="nc" id="L331">	}</span>
+
+	protected void write(Collection&lt;?&gt; collection) throws IOException {
+<span class="nc" id="L334">		outputStream.writeByte(AMF0Body.DATA_TYPE_ARRAY);</span>
+<span class="nc" id="L335">		outputStream.writeInt(collection.size());</span>
+<span class="nc bnc" id="L336" title="All 2 branches missed.">		for (Iterator&lt;?&gt; objects = collection.iterator(); objects.hasNext();) {</span>
+<span class="nc" id="L337">			Object object = objects.next();</span>
+<span class="nc" id="L338">			writeData(object);</span>
+<span class="nc" id="L339">		}</span>
+<span class="nc" id="L340">	}</span>
+
+	protected void writeMap(Map&lt;?, ?&gt; map) throws IOException {
+<span class="nc bnc" id="L343" title="All 4 branches missed.">		if (map instanceof ASObject &amp;&amp; ((ASObject) map).getType() != null) {</span>
+<span class="nc bnc" id="L344" title="All 2 branches missed.">			if (log.isDebugEnabled())</span>
+<span class="nc" id="L345">				log.debug(</span>
+<span class="nc" id="L346">						&quot;Writing Custom Class: &quot; + ((ASObject) map).getType());</span>
+<span class="nc" id="L347">			outputStream.writeByte(AMF0Body.DATA_TYPE_CUSTOM_CLASS);</span>
+<span class="nc" id="L348">			outputStream.writeUTF(((ASObject) map).getType());</span>
+		} else {
+<span class="nc bnc" id="L350" title="All 2 branches missed.">			if (log.isDebugEnabled())</span>
+			{
+<span class="nc" id="L352">				log.debug(&quot;Writing Map&quot;);</span>
+			}
+<span class="nc" id="L354">			outputStream.writeByte(AMF0Body.DATA_TYPE_MIXED_ARRAY);</span>
+<span class="nc" id="L355">			outputStream.writeInt(0);</span>
+		}
+<span class="nc bnc" id="L357" title="All 2 branches missed.">		for (Iterator&lt;?&gt; entrys = map.entrySet().iterator(); entrys.hasNext();) {</span>
+<span class="nc" id="L358">			Map.Entry&lt;?, ?&gt; entry = (Map.Entry&lt;?, ?&gt;)entrys.next();</span>
+<span class="nc" id="L359">			log.debug(entry.getKey() + &quot;: &quot; + entry.getValue());</span>
+<span class="nc" id="L360">			outputStream.writeUTF(entry.getKey().toString());</span>
+<span class="nc" id="L361">			writeData(entry.getValue());</span>
+<span class="nc" id="L362">		}</span>
+<span class="nc" id="L363">		outputStream.writeShort(0);</span>
+<span class="nc" id="L364">		outputStream.writeByte(AMF0Body.DATA_TYPE_OBJECT_END);</span>
+<span class="nc" id="L365">	}</span>
+
+	protected void write(Document document) throws IOException {
+<span class="nc" id="L368">		outputStream.writeByte(AMF0Body.DATA_TYPE_XML);</span>
+<span class="nc" id="L369">		Element docElement = document.getDocumentElement();</span>
+<span class="nc" id="L370">		String xmlData = convertDOMToString(docElement);</span>
+<span class="nc bnc" id="L371" title="All 2 branches missed.">		if (log.isDebugEnabled())</span>
+<span class="nc" id="L372">			log.debug(&quot;Writing xmlData: \n&quot; + xmlData);</span>
+<span class="nc" id="L373">		ByteArrayOutputStream baOutputStream = new ByteArrayOutputStream();</span>
+<span class="nc" id="L374">		baOutputStream.write(xmlData.getBytes(&quot;UTF-8&quot;));</span>
+<span class="nc" id="L375">		outputStream.writeInt(baOutputStream.size());</span>
+<span class="nc" id="L376">		baOutputStream.writeTo(outputStream);</span>
+<span class="nc" id="L377">	}</span>
+
+	protected int writeString(String str)
+			throws IOException {
+<span class="nc" id="L381">		int strlen = str.length();</span>
+<span class="nc" id="L382">		int utflen = 0;</span>
+<span class="nc" id="L383">		char[] charr = new char[strlen];</span>
+<span class="nc" id="L384">		int c, count = 0;</span>
+
+<span class="nc" id="L386">		str.getChars(0, strlen, charr, 0);</span>
+
+		// check the length of the UTF-encoded string
+<span class="nc bnc" id="L389" title="All 2 branches missed.">		for (int i = 0; i &lt; strlen; i++) {</span>
+<span class="nc" id="L390">			c = charr[i];</span>
+<span class="nc bnc" id="L391" title="All 4 branches missed.">			if ((c &gt;= 0x0001) &amp;&amp; (c &lt;= 0x007F)) {</span>
+<span class="nc" id="L392">				utflen++;</span>
+<span class="nc bnc" id="L393" title="All 2 branches missed.">			} else if (c &gt; 0x07FF) {</span>
+<span class="nc" id="L394">				utflen += 3;</span>
+			} else {
+<span class="nc" id="L396">				utflen += 2;</span>
+			}
+		}
+
+
+		byte[] bytearr;
+<span class="nc bnc" id="L402" title="All 2 branches missed.">		if (utflen &lt;= 65535) {</span>
+<span class="nc" id="L403">			outputStream.writeByte(AMF0Body.DATA_TYPE_STRING);</span>
+<span class="nc" id="L404">			bytearr = new byte[utflen+2];</span>
+		} else {
+<span class="nc" id="L406">			outputStream.writeByte(AMF0Body.DATA_TYPE_LONG_STRING);</span>
+<span class="nc" id="L407">			bytearr = new byte[utflen+4];</span>
+<span class="nc" id="L408">			bytearr[count++] = (byte) ((utflen &gt;&gt;&gt; 24) &amp; 0xFF);</span>
+<span class="nc" id="L409">			bytearr[count++] = (byte) ((utflen &gt;&gt;&gt; 16) &amp; 0xFF);</span>
+		}
+
+<span class="nc" id="L412">		bytearr[count++] = (byte) ((utflen &gt;&gt;&gt; 8) &amp; 0xFF);</span>
+<span class="nc" id="L413">		bytearr[count++] = (byte) ((utflen &gt;&gt;&gt; 0) &amp; 0xFF);</span>
+<span class="nc bnc" id="L414" title="All 2 branches missed.">		for (int i = 0; i &lt; strlen; i++) {</span>
+<span class="nc" id="L415">			c = charr[i];</span>
+<span class="nc bnc" id="L416" title="All 4 branches missed.">			if ((c &gt;= 0x0001) &amp;&amp; (c &lt;= 0x007F)) {</span>
+<span class="nc" id="L417">				bytearr[count++] = (byte) c;</span>
+<span class="nc bnc" id="L418" title="All 2 branches missed.">			} else if (c &gt; 0x07FF) {</span>
+<span class="nc" id="L419">				bytearr[count++] = (byte) (0xE0 | ((c &gt;&gt; 12) &amp; 0x0F));</span>
+<span class="nc" id="L420">				bytearr[count++] = (byte) (0x80 | ((c &gt;&gt;  6) &amp; 0x3F));</span>
+<span class="nc" id="L421">				bytearr[count++] = (byte) (0x80 | ((c &gt;&gt;  0) &amp; 0x3F));</span>
+			} else {
+<span class="nc" id="L423">				bytearr[count++] = (byte) (0xC0 | ((c &gt;&gt;  6) &amp; 0x1F));</span>
+<span class="nc" id="L424">				bytearr[count++] = (byte) (0x80 | ((c &gt;&gt;  0) &amp; 0x3F));</span>
+			}
+		}
+
+<span class="nc" id="L428">		outputStream.write(bytearr);</span>
+<span class="nc" id="L429">		return utflen + 2;</span>
+	}
+
+	private void writeStoredObject(Object obj) throws IOException {
+<span class="nc bnc" id="L433" title="All 2 branches missed.">		if (log.isDebugEnabled())</span>
+<span class="nc" id="L434">			log.debug(&quot;Writing object reference for &quot; + obj);</span>
+<span class="nc" id="L435">		outputStream.write(AMF0Body.DATA_TYPE_REFERENCE_OBJECT);</span>
+<span class="nc" id="L436">		outputStream.writeShort((storedObjects.get(obj)).intValue());</span>
+<span class="nc" id="L437">	}</span>
+
+	private void storeObject(Object obj) {
+<span class="nc" id="L440">		storedObjects.put(obj, Integer.valueOf(storedObjectCount++));</span>
+<span class="nc" id="L441">	}</span>
+
+	private void clearStoredObjects() {
+<span class="nc" id="L444">		storedObjects = new IdentityHashMap&lt;Object, Integer&gt;();</span>
+<span class="nc" id="L445">		storedObjectCount = 0;</span>
+<span class="nc" id="L446">	}</span>
+
+	protected boolean isPrimitiveArray(Object obj) {
+<span class="nc bnc" id="L449" title="All 2 branches missed.">		if (obj == null)</span>
+<span class="nc" id="L450">			return false;</span>
+<span class="nc bnc" id="L451" title="All 4 branches missed.">		return obj.getClass().isArray() &amp;&amp; obj.getClass().getComponentType().isPrimitive();</span>
+	}
+
+	private void writeAMF3Data(AMF3Object data) throws IOException {
+<span class="nc" id="L455">		outputStream.writeByte(AMF0Body.DATA_TYPE_AMF3_OBJECT);</span>
+		//ObjectOutput amf3 = GraniteContext.getCurrentInstance().getGraniteConfig().newAMF3Serializer(outputStream);
+<span class="nc" id="L457">		ObjectOutput amf3 = new AMF3Serializer(outputStream);</span>
+<span class="nc" id="L458">		amf3.writeObject(data.getValue());</span>
+<span class="nc" id="L459">	}</span>
+
+	public static String convertDOMToString(Node node) {
+<span class="nc" id="L462">		StringBuffer sb = new StringBuffer();</span>
+<span class="nc bnc" id="L463" title="All 2 branches missed.">		if (node.getNodeType() == Node.TEXT_NODE) {</span>
+<span class="nc" id="L464">			sb.append(node.getNodeValue());</span>
+		} else {
+<span class="nc" id="L466">			String currentTag = node.getNodeName();</span>
+<span class="nc" id="L467">			sb.append('&lt;');</span>
+<span class="nc" id="L468">			sb.append(currentTag);</span>
+<span class="nc" id="L469">			appendAttributes(node, sb);</span>
+<span class="nc" id="L470">			sb.append('&gt;');</span>
+<span class="nc bnc" id="L471" title="All 2 branches missed.">			if (node.getNodeValue() != null) {</span>
+<span class="nc" id="L472">				sb.append(node.getNodeValue());</span>
+			}
+
+<span class="nc" id="L475">			appendChildren(node, sb);</span>
+
+<span class="nc" id="L477">			appendEndTag(sb, currentTag);</span>
+		}
+<span class="nc" id="L479">		return sb.toString();</span>
+	}
+
+	private static void appendAttributes(Node node, StringBuffer sb) {
+<span class="nc bnc" id="L483" title="All 2 branches missed.">		if (node instanceof Element) {</span>
+<span class="nc" id="L484">			NamedNodeMap nodeMap = node.getAttributes();</span>
+<span class="nc bnc" id="L485" title="All 2 branches missed.">			for (int i = 0; i &lt; nodeMap.getLength(); i++) {</span>
+<span class="nc" id="L486">				sb.append(' ');</span>
+<span class="nc" id="L487">				sb.append(nodeMap.item(i).getNodeName());</span>
+<span class="nc" id="L488">				sb.append('=');</span>
+<span class="nc" id="L489">				sb.append('&quot;');</span>
+<span class="nc" id="L490">				sb.append(nodeMap.item(i).getNodeValue());</span>
+<span class="nc" id="L491">				sb.append('&quot;');</span>
+			}
+		}
+<span class="nc" id="L494">	}</span>
+
+	private static void appendChildren(Node node, StringBuffer sb) {
+<span class="nc bnc" id="L497" title="All 2 branches missed.">		if (node.hasChildNodes()) {</span>
+<span class="nc" id="L498">			NodeList children = node.getChildNodes();</span>
+<span class="nc bnc" id="L499" title="All 2 branches missed.">			for (int i = 0; i &lt; children.getLength(); i++) {</span>
+<span class="nc" id="L500">				sb.append(convertDOMToString(children.item(i)));</span>
+			}
+		}
+<span class="nc" id="L503">	}</span>
+
+	private static void appendEndTag(StringBuffer sb, String currentTag) {
+<span class="nc" id="L506">		sb.append('&lt;');</span>
+<span class="nc" id="L507">		sb.append('/');</span>
+<span class="nc" id="L508">		sb.append(currentTag);</span>
+<span class="nc" id="L509">		sb.append('&gt;');</span>
+<span class="nc" id="L510">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

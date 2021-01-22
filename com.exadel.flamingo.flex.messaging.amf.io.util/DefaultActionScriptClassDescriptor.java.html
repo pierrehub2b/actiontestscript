@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DefaultActionScriptClassDescriptor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.exadel.flamingo.flex.messaging.amf.io.util</a> &gt; <span class="el_source">DefaultActionScriptClassDescriptor.java</span></div><h1>DefaultActionScriptClassDescriptor.java</h1><pre class="source lang-java linenums">/*
+  GRANITE DATA SERVICES
+  Copyright (C) 2007 ADEQUATE SYSTEMS SARL
+
+  This file is part of Granite Data Services.
+
+  Granite Data Services is free software; you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or (at your
+  option) any later version.
+
+  Granite Data Services is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+  for more details.
+
+  You should have received a copy of the GNU Lesser General Public License
+  along with this library; if not, see &lt;http://www.gnu.org/licenses/&gt;.
+*/
+
+package com.exadel.flamingo.flex.messaging.amf.io.util;
+
+import com.exadel.flamingo.flex.messaging.util.ClassUtil;
+
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.HashMap;
+
+/**
+ * @author Franck WOLFF
+ */
+public class DefaultActionScriptClassDescriptor extends ActionScriptClassDescriptor {
+
+    public DefaultActionScriptClassDescriptor(String type, byte encoding) {
+<span class="nc" id="L38">        super(type, encoding);</span>
+<span class="nc" id="L39">    }</span>
+
+    @Override
+    public void defineProperty(String name) {
+
+<span class="nc bnc" id="L44" title="All 2 branches missed.">        if (type.length() == 0)</span>
+<span class="nc" id="L45">            properties.add(new MapProperty(converter, name));</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">        else if (&quot;uid&quot;.equals(name)) // ObjectProxy specific property...</span>
+<span class="nc" id="L47">            properties.add(new UIDProperty(converter));</span>
+        else {
+            try {
+<span class="nc" id="L50">                Class&lt;?&gt; clazz = ClassUtil.forName(type);</span>
+
+                // Try to find public getter/setter.
+<span class="nc" id="L53">                BeanInfo info = Introspector.getBeanInfo(clazz);</span>
+<span class="nc" id="L54">                PropertyDescriptor[] props = info.getPropertyDescriptors();</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">                for (PropertyDescriptor prop : props) {</span>
+<span class="nc bnc" id="L56" title="All 6 branches missed.">                    if (name.equals(prop.getName()) &amp;&amp; prop.getWriteMethod() != null &amp;&amp; prop.getReadMethod() != null) {</span>
+<span class="nc" id="L57">                        properties.add(new MethodProperty(converter, name, prop.getWriteMethod(), prop.getReadMethod()));</span>
+<span class="nc" id="L58">                        return;</span>
+                    }
+                }
+
+                // Try to find public field.
+<span class="nc" id="L63">                Field field = clazz.getField(name);</span>
+<span class="nc bnc" id="L64" title="All 4 branches missed.">                if (!Modifier.isStatic(field.getModifiers()) &amp;&amp; !Modifier.isTransient(field.getModifiers()))</span>
+<span class="nc" id="L65">                    properties.add(new FieldProperty(converter, name, field));</span>
+
+<span class="nc" id="L67">            } catch (Exception e) {</span>
+<span class="nc" id="L68">                throw new RuntimeException(e);</span>
+<span class="nc" id="L69">            }</span>
+        }
+<span class="nc" id="L71">    }</span>
+
+    @Override
+    public Object newJavaInstance() {
+
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        if (type.length() == 0)</span>
+<span class="nc" id="L77">            return new HashMap&lt;String, Object&gt;();</span>
+
+<span class="nc" id="L79">        String className = type;</span>
+        try {
+<span class="nc" id="L81">            return ClassUtil.newInstance(className);</span>
+<span class="nc" id="L82">        } catch (Exception e) {</span>
+<span class="nc" id="L83">            throw new RuntimeException(&quot;Could not create instance of: &quot; + className, e);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

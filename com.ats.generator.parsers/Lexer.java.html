@@ -1,0 +1,481 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Lexer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.generator.parsers</a> &gt; <span class="el_source">Lexer.java</span></div><h1>Lexer.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.generator.parsers;
+
+import com.ats.executor.drivers.engines.MobileDriverEngine;
+import com.ats.generator.GeneratorReport;
+import com.ats.generator.events.ScriptProcessedNotifier;
+import com.ats.generator.objects.mouse.Mouse;
+import com.ats.generator.variables.*;
+import com.ats.script.Project;
+import com.ats.script.Script;
+import com.ats.script.ScriptLoader;
+import com.ats.script.actions.*;
+import com.ats.script.actions.neoload.ActionNeoloadContainer;
+import com.ats.script.actions.neoload.ActionNeoloadRecord;
+import com.ats.script.actions.neoload.ActionNeoloadStart;
+import com.ats.script.actions.neoload.ActionNeoloadStop;
+import com.ats.script.actions.performance.ActionPerformanceRecord;
+import com.ats.script.actions.performance.ActionPerformanceStart;
+import com.ats.script.actions.performance.octoperf.ActionOctoperfVirtualUser;
+import com.ats.tools.Utils;
+
+import java.io.File;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class Lexer {
+
+<span class="pc" id="L51">	private final Pattern ACTION_PATTERN = Pattern.compile(&quot;(.*)\\[(.*?)\\]&quot;, Pattern.CASE_INSENSITIVE);</span>
+
+	private GeneratorReport report; //TODO create report with list of failed ATS to java conversions steps
+
+	private Project projectData;
+
+<span class="pc" id="L57">	private Charset charset = StandardCharsets.UTF_8;</span>
+
+<span class="pc" id="L59">	public int countScript = 0;</span>
+
+<span class="pc" id="L61">	private boolean isGenerator = true;</span>
+
+	public boolean isGenerator() {
+<span class="nc" id="L64">		return isGenerator;</span>
+	}
+
+<span class="fc" id="L67">	public Lexer(GeneratorReport report){</span>
+<span class="fc" id="L68">		this.isGenerator = false;</span>
+<span class="fc" id="L69">		this.report = report;</span>
+<span class="fc" id="L70">	}</span>
+
+<span class="nc" id="L72">	public Lexer(Project projectData, GeneratorReport report, String charset) {</span>
+<span class="nc" id="L73">		this.projectData = projectData;</span>
+<span class="nc" id="L74">		this.report = report;</span>
+
+		try {
+<span class="nc" id="L77">			this.charset = Charset.forName(charset);</span>
+<span class="nc" id="L78">		} catch (IllegalArgumentException e) {}</span>
+<span class="nc" id="L79">	}</span>
+
+<span class="nc" id="L81">	public Lexer(Project projectData, GeneratorReport report, Charset charset) {</span>
+<span class="nc" id="L82">		this.projectData = projectData;</span>
+<span class="nc" id="L83">		this.report = report;</span>
+<span class="nc" id="L84">		this.charset = charset;</span>
+<span class="nc" id="L85">	}</span>
+
+	public void addScript(){
+<span class="fc" id="L88">		countScript++;</span>
+<span class="fc" id="L89">	}</span>
+
+	public ScriptLoader loadScript(File f, ScriptProcessedNotifier notifier){
+<span class="nc" id="L92">		final ScriptLoader script = getScript(f);</span>
+<span class="nc" id="L93">		notifier.scriptProcessed();</span>
+<span class="nc" id="L94">		return script;</span>
+	}
+
+	public ScriptLoader loadScript(File f) {
+<span class="nc" id="L98">		return getScript(f);</span>
+	}
+
+	private ScriptLoader getScript(File f) {
+<span class="nc bnc" id="L102" title="All 4 branches missed.">		if (f.exists() &amp;&amp; f.isFile()) {</span>
+<span class="nc" id="L103">			return new ScriptLoader(Script.ATS_EXTENSION, this, f, projectData, charset);</span>
+		}
+<span class="nc" id="L105">		return null;</span>
+	}
+
+	//---------------------------------------------------------------------------------------------------------------
+	// Steps creation
+	//---------------------------------------------------------------------------------------------------------------
+
+	public void createAction(ScriptLoader script, String data, boolean disabled) {
+
+<span class="fc" id="L114">		final ArrayList&lt;String&gt; dataArray = new ArrayList&lt;String&gt;(Arrays.asList(data.split(ScriptParser.ATS_SEPARATOR)));</span>
+
+<span class="pc bpc" id="L116" title="1 of 2 branches missed.">		if (dataArray.size() &gt; 0) {</span>
+
+<span class="fc" id="L118">			String actionType = dataArray.remove(0).trim();</span>
+<span class="fc" id="L119">			String optionsFlat = &quot;&quot;;</span>
+<span class="fc" id="L120">			ArrayList&lt;String&gt; options = new ArrayList&lt;String&gt;();</span>
+<span class="fc" id="L121">			boolean stopExec = true;;</span>
+
+<span class="fc" id="L123">			Matcher matcher = ACTION_PATTERN.matcher(actionType);</span>
+<span class="fc bfc" id="L124" title="All 2 branches covered.">			if (matcher.find()) {</span>
+<span class="fc" id="L125">				actionType = matcher.group(1).trim().toLowerCase();</span>
+<span class="fc" id="L126">				optionsFlat = matcher.group(2).trim();</span>
+<span class="fc" id="L127">				Collections.addAll(options, optionsFlat.split(&quot;,&quot;));</span>
+
+<span class="pc bpc" id="L129" title="1 of 2 branches missed.">				stopExec = !options.removeIf(s -&gt; s.equalsIgnoreCase(ActionExecute.NO_FAIL_LABEL));</span>
+			}
+
+			//-------------------------------------------------------------------------------------------
+			// Start decision tree ...
+			//-------------------------------------------------------------------------------------------
+
+<span class="pc bpc" id="L136" title="1 of 2 branches missed.">			if (ActionGesturePress.SCRIPT_LABEL.equals(actionType)) {</span>
+
+				//-----------------------
+				// gesture press action
+				//-----------------------
+
+<span class="nc" id="L142">				String elementInfo = dataArray.remove(dataArray.size() - 1).trim();</span>
+<span class="nc" id="L143">				ArrayList&lt;String&gt; elements = new ArrayList&lt;String&gt;(Arrays.asList(elementInfo));</span>
+<span class="nc" id="L144">				script.addAction(new ActionGesturePress(script, stopExec, options, dataArray, elements), disabled);</span>
+
+<span class="pc bfc" id="L146" title="All 2 branches covered.">			} else if (Mouse.OVER.equals(actionType)) {</span>
+
+				//-----------------------
+				// Mouse over action
+				//-----------------------
+
+<span class="fc" id="L152">				script.addAction(new ActionMouse(script, Mouse.OVER, stopExec, options, dataArray), disabled);</span>
+
+<span class="pc bpc" id="L154" title="2 of 4 branches missed.">			} else if (Mouse.DRAG.equals(actionType) || Mouse.DROP.equals(actionType)) {</span>
+
+				//-----------------------
+				// Drag drop action
+				//-----------------------
+
+<span class="nc" id="L160">				script.addAction(new ActionMouseDragDrop(script, actionType, stopExec, options, dataArray), disabled);</span>
+
+<span class="fc bfc" id="L162" title="All 2 branches covered.">			} else if (actionType.startsWith(Mouse.CLICK)) {</span>
+
+				//-----------------------
+				// Mouse button action
+				//-----------------------
+
+				//TODO remove sysbutton legacy in 01/01/2021 !!!
+<span class="pc bpc" id="L169" title="2 of 4 branches missed.">				if(dataArray.size() &gt; 0 &amp;&amp; dataArray.get(0).contains(MobileDriverEngine.SYS_BUTTON)) {</span>
+<span class="nc" id="L170">					script.addAction(new ActionButton(script, dataArray), disabled);</span>
+				}else {
+<span class="fc" id="L172">					script.addAction(new ActionMouseKey(script, actionType, stopExec, options, dataArray), disabled);</span>
+				}
+
+<span class="fc bfc" id="L175" title="All 2 branches covered.">			} else if (ActionChannelClose.SCRIPT_CLOSE_LABEL.equals(actionType)) {</span>
+
+				//-----------------------
+				// Channel close action
+				//-----------------------
+
+<span class="fc" id="L181">				String cname = &quot;&quot;;</span>
+<span class="pc bpc" id="L182" title="1 of 2 branches missed.">				if (dataArray.size() &gt; 0) {</span>
+<span class="fc" id="L183">					cname = dataArray.remove(0).trim();</span>
+				}
+<span class="fc" id="L185">				script.addAction(new ActionChannelClose(script, cname, options.contains(ActionChannelClose.NO_STOP_LABEL)), disabled);</span>
+
+<span class="pc bpc" id="L187" title="1 of 2 branches missed.">			} else if(ActionPerformanceRecord.SCRIPT_LABEL.equals(actionType)) {</span>
+
+<span class="nc bnc" id="L189" title="All 2 branches missed.">				if (dataArray.size() &gt; 0) {</span>
+<span class="nc" id="L190">					script.addAction(new ActionPerformanceRecord(script, dataArray.remove(0).trim()), disabled);</span>
+				}
+
+<span class="pc bpc" id="L193" title="1 of 2 branches missed.">			}else if(ActionPerformanceStart.SCRIPT_LABEL.equals(actionType)){</span>
+
+<span class="nc" id="L195">				script.addAction(new ActionPerformanceStart(script, options, dataArray), disabled);</span>
+
+<span class="pc bpc" id="L197" title="1 of 2 branches missed.">			}else if(ActionOctoperfVirtualUser.SCRIPT_OCTOPERF_LABEL.equals(actionType)){</span>
+
+<span class="nc bnc" id="L199" title="All 2 branches missed.">				if(dataArray.size() &gt; 0) {</span>
+<span class="nc" id="L200">					script.addAction(new ActionOctoperfVirtualUser(script, options, dataArray), disabled);</span>
+				}
+
+<span class="fc bfc" id="L203" title="All 4 branches covered.">			}else if(ActionNeoloadStart.SCRIPT_LABEL.equals(actionType) || ActionNeoloadStop.SCRIPT_LABEL.equals(actionType)){</span>
+
+				//-------------------------------
+				// Neoload start and stop actions
+				//-------------------------------
+
+<span class="fc" id="L209">				String userData = null;</span>
+<span class="pc bpc" id="L210" title="1 of 2 branches missed.">				if(dataArray.size() &gt; 0) {</span>
+<span class="nc" id="L211">					userData = dataArray.remove(0).trim();</span>
+				}
+
+<span class="fc" id="L214">				optionsFlat = optionsFlat.toLowerCase();</span>
+
+<span class="fc bfc" id="L216" title="All 2 branches covered.">				if(ActionNeoloadStart.SCRIPT_LABEL.equals(actionType)) {</span>
+<span class="fc" id="L217">					script.addAction(new ActionNeoloadStart(script, optionsFlat, userData), disabled);</span>
+				}else {
+<span class="fc" id="L219">					String userOptions = &quot;&quot;;</span>
+<span class="pc bpc" id="L220" title="1 of 2 branches missed.">					if(userData != null) {</span>
+<span class="nc" id="L221">						matcher = ACTION_PATTERN.matcher(userData);</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">						if (matcher.find()){</span>
+<span class="nc" id="L223">							userData = matcher.group(1).trim();</span>
+<span class="nc" id="L224">							userOptions = matcher.group(2).trim().toLowerCase();</span>
+						}
+					}
+<span class="fc" id="L227">					script.addAction(new ActionNeoloadStop(script, optionsFlat, userData, userOptions), disabled);</span>
+				}
+				
+<span class="fc bfc" id="L230" title="All 2 branches covered.">			}else if(actionType.startsWith(ActionComment.SCRIPT_LABEL)) {</span>
+
+<span class="fc" id="L232">				script.addAction(new ActionComment(script, actionType, dataArray), disabled);</span>
+				
+<span class="pc bpc" id="L234" title="1 of 2 branches missed.">			} else if(dataArray.size() &gt; 0) {</span>
+
+<span class="fc" id="L236">				String dataOne = dataArray.remove(0).trim();</span>
+
+<span class="pc bpc" id="L238" title="1 of 2 branches missed.">				if (ActionPropertySet.SCRIPT_LABEL.equals(actionType)) {</span>
+
+<span class="nc" id="L240">					String propertyValue = &quot;&quot;;</span>
+<span class="nc bnc" id="L241" title="All 2 branches missed.">					if(dataArray.size() &gt; 0) {</span>
+<span class="nc" id="L242">						propertyValue = dataArray.remove(0).trim();</span>
+					}
+<span class="nc" id="L244">					script.addAction(new ActionPropertySet(script, dataOne, propertyValue), disabled);</span>
+
+<span class="pc bpc" id="L246" title="1 of 2 branches missed.">				}else if(ActionButton.SCRIPT_LABEL.equals(actionType)) {</span>
+
+<span class="nc" id="L248">					script.addAction(new ActionButton(script, dataOne), disabled);</span>
+
+<span class="pc bpc" id="L250" title="1 of 2 branches missed.">				}else if (ActionGestureTap.SCRIPT_LABEL.equals(actionType)) {</span>
+
+					//-----------------------
+					// Gesture tap action
+					//-----------------------
+
+<span class="nc" id="L256">					script.addAction(new ActionGestureTap(script, dataOne, stopExec, options, dataArray), disabled);</span>
+
+<span class="fc bfc" id="L258" title="All 2 branches covered.">				} else if(ActionChannelSwitch.SCRIPT_SWITCH_LABEL.equals(actionType)) {</span>
+
+					//-----------------------
+					// Channel switch
+					//-----------------------
+
+<span class="fc" id="L264">					script.addAction(new ActionChannelSwitch(script, dataOne), disabled);</span>
+
+<span class="fc bfc" id="L266" title="All 2 branches covered.">				} else if(ActionChannelStart.SCRIPT_START_LABEL.equals(actionType)) {</span>
+
+					//-----------------------
+					// Channel start action
+					//-----------------------
+
+<span class="pc bpc" id="L272" title="1 of 2 branches missed.">					if (dataArray.size() &gt; 0) {</span>
+<span class="fc" id="L273">						script.addAction(new ActionChannelStart(script, dataOne, options, new CalculatedValue(script, dataArray.remove(0).trim()), dataArray), disabled);</span>
+					}
+
+<span class="fc bfc" id="L276" title="All 2 branches covered.">				} else if(ActionText.SCRIPT_LABEL.equals(actionType)) {</span>
+
+					//-----------------------
+					// Text action
+					//-----------------------
+
+<span class="fc" id="L282">					script.addAction(new ActionText(script, stopExec, options, dataOne, dataArray), disabled);</span>
+
+<span class="pc bpc" id="L284" title="1 of 2 branches missed.">				} else if(actionType.startsWith(ActionApi.SCRIPT_LABEL)) {</span>
+
+					//-----------------------
+					// Api action
+					//-----------------------
+
+<span class="nc" id="L290">					String headerData = &quot;&quot;;</span>
+
+<span class="nc" id="L292">					matcher = ACTION_PATTERN.matcher(dataOne);</span>
+<span class="nc bnc" id="L293" title="All 2 branches missed.">					if (matcher.find()){</span>
+<span class="nc" id="L294">						dataOne = matcher.group(1).trim();</span>
+<span class="nc" id="L295">						headerData = matcher.group(2).trim();</span>
+					}
+<span class="nc" id="L297">					script.addAction(new ActionApi(script, actionType, optionsFlat.toLowerCase(), dataOne, headerData, dataArray), disabled);</span>
+
+<span class="pc bfc" id="L299" title="All 2 branches covered.">				}else if(ActionWindowResize.SCRIPT_RESIZE_LABEL.equals(actionType)){</span>
+
+					//-----------------------
+					// Window resize action
+					//-----------------------
+
+<span class="fc" id="L305">					script.addAction(new ActionWindowResize(script, dataOne), disabled);</span>
+
+<span class="fc bfc" id="L307" title="All 2 branches covered.">				}else if(ActionWindowState.SCRIPT_STATE_LABEL.equals(actionType)){</span>
+
+<span class="fc" id="L309">					script.addAction(new ActionWindowState(script, dataOne), disabled);</span>
+
+<span class="fc bfc" id="L311" title="All 2 branches covered.">				}else if(actionType.startsWith(ActionWindow.SCRIPT_LABEL)){</span>
+
+					//-----------------------
+					// Window action
+					//-----------------------
+
+<span class="fc" id="L317">					script.addAction(new ActionWindowSwitch(script, Utils.string2Int(dataOne), options), disabled);</span>
+
+<span class="pc bpc" id="L319" title="1 of 2 branches missed.">					if(ActionWindowState.SCRIPT_CLOSE_LABEL.equals(actionType)){</span>
+<span class="nc" id="L320">						script.addAction(new ActionWindowState(script, ActionWindowState.CLOSE), disabled);</span>
+					}
+
+<span class="pc bpc" id="L323" title="1 of 4 branches missed.">				} else if (actionType.equals(ActionScripting.SCRIPT_LABEL) || actionType.equals(ActionScripting.JAVASCRIPT_LABEL)) {</span>
+
+					//-----------------------
+					// Javascript action
+					//-----------------------
+
+<span class="fc" id="L329">					final String[] jsDataArray = dataOne.split(ScriptParser.ATS_ASSIGN_SEPARATOR);</span>
+
+<span class="pc bpc" id="L331" title="1 of 2 branches missed.">					if (jsDataArray.length &gt; 0) {</span>
+
+<span class="fc" id="L333">						Variable variable = null;</span>
+<span class="fc" id="L334">						final String jsCode = jsDataArray[0].trim();</span>
+
+<span class="pc bpc" id="L336" title="1 of 2 branches missed.">						if(jsDataArray.length &gt; 1) {</span>
+<span class="nc" id="L337">							variable = script.getVariable(jsDataArray[1].trim(), true);</span>
+						}
+
+<span class="fc" id="L340">						script.addAction(new ActionScripting(script, stopExec, options, jsCode, variable, dataArray), disabled);</span>
+					}
+
+<span class="fc bfc" id="L343" title="All 2 branches covered.">				} else if(actionType.startsWith(ActionProperty.SCRIPT_LABEL)){</span>
+
+					//-----------------------
+					// Get property action
+					//-----------------------
+
+<span class="fc" id="L349">					final String[] propertyArray = dataOne.split(ScriptParser.ATS_ASSIGN_SEPARATOR);</span>
+
+<span class="pc bpc" id="L351" title="1 of 2 branches missed.">					if (propertyArray.length &gt; 1) {</span>
+<span class="fc" id="L352">						final String propertyName = propertyArray[0].trim();</span>
+<span class="fc" id="L353">						final Variable variable = script.getVariable(propertyArray[1].trim(), true);</span>
+<span class="fc" id="L354">						script.addAction(new ActionProperty(script, stopExec, options, propertyName, variable, dataArray), disabled);</span>
+					}
+
+<span class="fc bfc" id="L357" title="All 2 branches covered.">				} else if(actionType.contains(ActionSelect.SCRIPT_LABEL_SELECT)){</span>
+
+					//-----------------------
+					// Select action
+					//-----------------------
+
+<span class="fc" id="L363">					script.addAction(new ActionSelect(script, dataOne, stopExec, options, dataArray), disabled);</span>
+
+<span class="fc bfc" id="L365" title="All 2 branches covered.">				}else if(ActionCallscript.SCRIPT_LABEL.equals(actionType)){</span>
+
+					//-----------------------
+					// Callscript action
+					//-----------------------
+
+<span class="fc" id="L371">					String[] parameters = new String[0];</span>
+<span class="fc" id="L372">					String[] returnValues = new String[0];</span>
+<span class="fc" id="L373">					String csvFilePath = null;</span>
+
+<span class="pc bpc" id="L375" title="1 of 2 branches missed.">					if(dataOne.contains(ScriptParser.ATS_ASSIGN_SEPARATOR)) {</span>
+<span class="nc" id="L376">						final String[] callscriptData = dataOne.split(ScriptParser.ATS_ASSIGN_SEPARATOR);</span>
+<span class="nc" id="L377">						dataOne = callscriptData[0].trim();</span>
+<span class="nc" id="L378">						returnValues = callscriptData[1].split(&quot;,&quot;);</span>
+					}
+
+<span class="pc bpc" id="L381" title="1 of 2 branches missed.">					if (dataArray.size() &gt; 0) {</span>
+<span class="nc" id="L382">						csvFilePath = dataArray.remove(0).trim();</span>
+					} else {
+
+<span class="fc" id="L385">						matcher = ACTION_PATTERN.matcher(dataOne);</span>
+<span class="pc bpc" id="L386" title="1 of 2 branches missed.">						if (matcher.find()){</span>
+<span class="nc" id="L387">							dataOne = matcher.group(1).trim();</span>
+<span class="nc" id="L388">							String parametersData = matcher.group(2);</span>
+
+<span class="nc" id="L390">							Matcher mv = CalculatedValue.PARAMETER_PATTERN.matcher(parametersData);</span>
+<span class="nc bnc" id="L391" title="All 2 branches missed.">							while (mv.find()) {</span>
+<span class="nc" id="L392">								ParameterValue sp = new ParameterValue(mv);</span>
+<span class="nc" id="L393">								parametersData = parametersData.replace(sp.getReplace(), sp.getNoComma());</span>
+<span class="nc" id="L394">							}</span>
+
+<span class="nc" id="L396">							mv = CalculatedValue.ENV_PATTERN.matcher(parametersData);</span>
+<span class="nc bnc" id="L397" title="All 2 branches missed.">							while (mv.find()) {</span>
+<span class="nc" id="L398">								final EnvironmentValue sp = new EnvironmentValue(mv);</span>
+<span class="nc" id="L399">								parametersData = parametersData.replace(sp.getReplace(), sp.getNoComma());</span>
+<span class="nc" id="L400">							}</span>
+
+<span class="nc" id="L402">							parameters = parametersData.split(&quot;,&quot;);</span>
+						}
+					}
+
+<span class="fc" id="L406">					script.addAction(new ActionCallscript(script, options, dataOne, parameters, returnValues, csvFilePath, dataArray), disabled);</span>
+
+<span class="pc bpc" id="L408" title="2 of 6 branches missed.">				}else if(ActionGotoUrl.SCRIPT_LABEL.equals(actionType) || ActionGotoUrl.SCRIPT_LABEL_OPEN.equals(actionType) || ActionGotoUrl.SCRIPT_LABEL_SIMPLE.equals(actionType)){</span>
+
+					//-----------------------
+					// Goto url action
+					//-----------------------
+
+<span class="fc" id="L414">					script.addAction(new ActionGotoUrl(script, stopExec, new CalculatedValue(script, dataOne)), disabled);</span>
+
+<span class="fc bfc" id="L416" title="All 2 branches covered.">				}else if(ActionMouseScroll.SCRIPT_LABEL.equals(actionType)){</span>
+
+					//-----------------------
+					// Mouse scroll action
+					//-----------------------
+
+<span class="fc" id="L422">					script.addAction(new ActionMouseScroll(script, dataOne, stopExec, options, dataArray), disabled);</span>
+
+<span class="pc bpc" id="L424" title="1 of 2 branches missed.">				}else if(ActionMouseSwipe.SCRIPT_LABEL.equals(actionType)){</span>
+
+<span class="nc" id="L426">					script.addAction(new ActionMouseSwipe(script, actionType, dataOne, stopExec, options, dataArray), disabled);</span>
+
+<span class="fc bfc" id="L428" title="All 2 branches covered.">				}else if(ActionAssertCount.SCRIPT_LABEL.equals(actionType)){</span>
+
+					//-----------------------
+					// Assert count action
+					//-----------------------
+
+<span class="fc" id="L434">					script.addAction(new ActionAssertCount(script, stopExec, options, dataOne, dataArray), disabled);</span>
+
+<span class="fc bfc" id="L436" title="All 2 branches covered.">				}else if(ActionAssertProperty.SCRIPT_LABEL.equals(actionType)){</span>
+
+					//-----------------------
+					// Assert property action
+					//-----------------------
+
+<span class="fc" id="L442">					script.addAction(new ActionAssertProperty(script, stopExec, options, dataOne, dataArray), disabled);</span>
+
+<span class="fc bfc" id="L444" title="All 2 branches covered.">				}else if(ActionAssertValue.SCRIPT_LABEL.equals(actionType)){</span>
+
+					//-----------------------
+					// Assert value action
+					//-----------------------
+
+<span class="fc" id="L450">					script.addAction(new ActionAssertValue(script, stopExec, dataOne), disabled);</span>
+
+<span class="fc bfc" id="L452" title="All 2 branches covered.">				}else if(ActionNeoloadContainer.SCRIPT_LABEL.equals(actionType)){</span>
+
+					//--------------------------
+					// Neoload container action
+					//--------------------------
+
+<span class="pc bpc" id="L458" title="1 of 2 branches missed.">					if(dataOne.length() &gt; 0){</span>
+<span class="fc" id="L459">						script.addAction(new ActionNeoloadContainer(script, dataOne), disabled);</span>
+					}
+
+<span class="pc bpc" id="L462" title="1 of 2 branches missed.">				}else if(ActionNeoloadRecord.SCRIPT_LABEL.equals(actionType)){</span>
+
+					//--------------------------
+					// Neoload record actions
+					//--------------------------
+
+<span class="fc" id="L468">					script.addAction(new ActionNeoloadRecord(script, dataOne), disabled);</span>
+					
+				}
+<span class="fc" id="L471">			}else {</span>
+<span class="nc bnc" id="L472" title="All 6 branches missed.">				if(data.startsWith(&quot;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&quot;) || data.startsWith(&quot;=======&quot;) || data.startsWith(&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&quot;)) {</span>
+					//TODO whe have a problem here ! need a way to show that git merge has failed in actions file
+				}else {
+<span class="nc" id="L475">					script.addAction(new ActionComment(script, data), disabled);</span>
+				}
+			}
+		}
+<span class="fc" id="L479">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

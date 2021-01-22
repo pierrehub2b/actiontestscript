@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActionAssertProperty.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.script.actions</a> &gt; <span class="el_source">ActionAssertProperty.java</span></div><h1>ActionAssertProperty.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.script.actions;
+
+import com.ats.element.SearchedElement;
+import com.ats.executor.ActionStatus;
+import com.ats.executor.ActionTestScript;
+import com.ats.generator.variables.CalculatedProperty;
+import com.ats.script.Script;
+import com.ats.script.ScriptLoader;
+import com.google.gson.JsonObject;
+
+import java.util.ArrayList;
+
+public class ActionAssertProperty extends ActionExecuteElement {
+
+	public static final String SCRIPT_LABEL = &quot;check-property&quot;;
+
+	private CalculatedProperty value;
+	private String attributeValue;
+
+<span class="nc" id="L39">	public ActionAssertProperty() {}</span>
+
+	public ActionAssertProperty(ScriptLoader script, boolean stop, ArrayList&lt;String&gt; options, String data, ArrayList&lt;String&gt; objectArray) {
+<span class="fc" id="L42">		super(script, stop, options, objectArray);</span>
+<span class="fc" id="L43">		setValue(new CalculatedProperty(script, data));</span>
+<span class="fc" id="L44">	}</span>
+
+	public ActionAssertProperty(Script script, boolean stop, int maxTry, int delay, SearchedElement element, CalculatedProperty property) {
+<span class="nc" id="L47">		super(script, stop, maxTry, delay, element);</span>
+<span class="nc" id="L48">		setValue(property);</span>
+<span class="nc" id="L49">	}</span>
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// Code Generator
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public StringBuilder getJavaCode() {
+<span class="fc" id="L57">		StringBuilder codeBuilder = super.getJavaCode();</span>
+<span class="fc" id="L58">		codeBuilder.append(&quot;, &quot;).append(value.getJavaCode()).append(&quot;)&quot;);</span>
+<span class="fc" id="L59">		return codeBuilder;</span>
+	}
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public void terminateExecution(ActionTestScript ts) {
+
+<span class="nc" id="L68">		super.terminateExecution(ts);</span>
+
+<span class="nc bnc" id="L70" title="All 2 branches missed.">		if(status.isPassed()) {</span>
+			
+<span class="nc" id="L72">			getTestElement().updateScreen();</span>
+			
+<span class="nc" id="L74">			int maxCheckTry = getActionMaxTry();</span>
+<span class="nc" id="L75">			int checkValue = checkProperty(value.getName());</span>
+			
+<span class="nc bnc" id="L77" title="All 4 branches missed.">			while(checkValue &lt; 0 &amp;&amp; maxCheckTry &gt; 0) {</span>
+<span class="nc" id="L78">				getCurrentChannel().sendWarningLog(&quot;Assert property&quot;, maxCheckTry + &quot; try&quot;);</span>
+<span class="nc" id="L79">				getCurrentChannel().progressiveWait(getActionMaxTry() - maxCheckTry);</span>
+				
+<span class="nc" id="L81">				checkValue = checkProperty(value.getName());</span>
+<span class="nc" id="L82">				maxCheckTry--;</span>
+			}
+			
+<span class="nc" id="L85">			status.endDuration();</span>
+			
+<span class="nc bnc" id="L87" title="All 2 branches missed.">			if(checkValue == ActionStatus.ATTRIBUTE_NOT_SET) {</span>
+<span class="nc" id="L88">				ts.getRecorder().update(ActionStatus.ATTRIBUTE_NOT_SET, status.getDuration(), value.getName());</span>
+			}else {
+<span class="nc" id="L90">				ts.getRecorder().update(checkValue, status.getDuration(), value.getExpectedResult(), attributeValue);</span>
+			}
+		}
+<span class="nc" id="L93">	}</span>
+	
+	private int checkProperty(String name) {
+		
+<span class="nc" id="L97">		attributeValue = getTestElement().getAttribute(status, name);</span>
+		
+<span class="nc bnc" id="L99" title="All 2 branches missed.">		if(attributeValue == null) {</span>
+<span class="nc" id="L100">			status.setError(ActionStatus.ATTRIBUTE_NOT_SET, &quot;attribute '&quot; + name + &quot;' not found&quot;, value.getName());</span>
+<span class="nc" id="L101">			return ActionStatus.ATTRIBUTE_NOT_SET;</span>
+		}else {
+							
+<span class="nc" id="L104">			final boolean passed = value.checkProperty(attributeValue);</span>
+<span class="nc" id="L105">			final String shortAttribute = value.getShortActualValue();</span>
+			
+<span class="nc bnc" id="L107" title="All 2 branches missed.">			if(passed) {</span>
+<span class="nc" id="L108">				status.setNoError(shortAttribute);</span>
+<span class="nc" id="L109">				return 0;</span>
+			}else {
+<span class="nc" id="L111">				status.setError(ActionStatus.ATTRIBUTE_CHECK_FAIL, value.getExpectedResultLogs(), new String[]{shortAttribute, value.getValue().getCalculated()});</span>
+<span class="nc" id="L112">				return ActionStatus.ATTRIBUTE_CHECK_FAIL;</span>
+			}
+		}
+	}
+	
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+<span class="nc" id="L119">		data.addProperty(&quot;property&quot;, value.getName());</span>
+<span class="nc" id="L120">		data.addProperty(&quot;value&quot;, attributeValue);</span>
+<span class="nc" id="L121">		return super.getActionLogs(scriptName, scriptLine, data);</span>
+	}
+	
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------
+
+	public CalculatedProperty getValue() {
+<span class="nc" id="L129">		return value;</span>
+	}
+
+	public void setValue(CalculatedProperty value) {
+<span class="fc" id="L133">		this.value = value;</span>
+<span class="fc" id="L134">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

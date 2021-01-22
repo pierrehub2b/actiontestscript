@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CalculatedProperty.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.generator.variables</a> &gt; <span class="el_source">CalculatedProperty.java</span></div><h1>CalculatedProperty.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.generator.variables;
+
+import com.ats.element.AtsBaseElement;
+import com.ats.executor.ActionTestScript;
+import com.ats.script.Script;
+import com.ats.tools.Operators;
+import com.ats.tools.Utils;
+
+import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
+public class CalculatedProperty implements Comparable&lt;CalculatedProperty&gt;{
+
+	private CalculatedValue value;
+<span class="pc" id="L36">	private String name = &quot;id&quot;;</span>
+<span class="pc" id="L37">	private boolean regexp = false;</span>
+
+	private Pattern regexpPattern;
+
+<span class="nc" id="L41">	public CalculatedProperty() {}</span>
+
+<span class="fc" id="L43">	public CalculatedProperty(Script script, String data) {</span>
+
+<span class="fc" id="L45">		Matcher objectMatcher = Operators.REGEXP_PATTERN.matcher(data);</span>
+<span class="fc" id="L46">		boolean dataFound = objectMatcher.find();</span>
+
+<span class="fc bfc" id="L48" title="All 2 branches covered.">		if (dataFound) {</span>
+<span class="fc" id="L49">			setRegexp(true);</span>
+		}else {
+<span class="fc" id="L51">			objectMatcher = Operators.EQUAL_PATTERN.matcher(data);</span>
+<span class="fc" id="L52">			dataFound = objectMatcher.find();</span>
+		}
+
+<span class="pc bpc" id="L55" title="2 of 4 branches missed.">		if(dataFound &amp;&amp; objectMatcher.groupCount() &gt;= 2){</span>
+
+<span class="fc" id="L57">			setName(objectMatcher.group(1).trim());</span>
+<span class="fc" id="L58">			setValue(new CalculatedValue(script, objectMatcher.group(2).trim()));</span>
+
+		}else{
+<span class="nc" id="L61">			setValue(new CalculatedValue(script, &quot;true&quot;));</span>
+		}
+<span class="fc" id="L63">	}</span>
+
+<span class="nc" id="L65">	public CalculatedProperty(String name, String data) {</span>
+<span class="nc" id="L66">		setName(name);</span>
+<span class="nc" id="L67">		setValue(new CalculatedValue(data));</span>
+<span class="nc" id="L68">	}</span>
+
+<span class="nc" id="L70">	public CalculatedProperty(boolean isRegexp, String name, CalculatedValue value) {</span>
+<span class="nc" id="L71">		setRegexp(isRegexp);</span>
+<span class="nc" id="L72">		setName(name);</span>
+<span class="nc" id="L73">		setValue(value);</span>
+<span class="nc" id="L74">	}</span>
+
+	public void dispose() {
+<span class="nc" id="L77">		value.dispose();</span>
+<span class="nc" id="L78">		value = null;</span>
+<span class="nc" id="L79">	}</span>
+
+	public String getJavaCode(){
+<span class="fc" id="L82">		return ActionTestScript.JAVA_PROPERTY_FUNCTION_NAME + &quot;(&quot; + isRegexp() + &quot;, \&quot;&quot; + name + &quot;\&quot;, &quot; + value.getJavaCode() + &quot;)&quot;;</span>
+	}
+
+	public Predicate&lt;AtsBaseElement&gt; getPredicate(Predicate&lt;AtsBaseElement&gt; predicate){
+<span class="nc bnc" id="L86" title="All 2 branches missed.">		if(isRegexp()) {</span>
+<span class="nc" id="L87">			return predicate.and(p -&gt; regexpMatch(p.getAttribute(name)));</span>
+		}else {
+<span class="nc" id="L89">			return predicate.and(p -&gt; textEquals(p.getAttribute(name)));</span>
+		}
+	}
+
+	private String actualValue;
+	public boolean checkProperty(String data) {
+<span class="nc" id="L95">		this.actualValue = data;</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">		if(regexp){</span>
+<span class="nc" id="L97">			return regexpMatch(data);</span>
+		}else{
+<span class="nc" id="L99">			return textEquals(data);</span>
+		}
+	}
+
+	public boolean textEquals(String data){
+<span class="nc bnc" id="L104" title="All 2 branches missed.">		if(data == null) {</span>
+<span class="nc" id="L105">			return false;</span>
+		}
+<span class="nc" id="L107">		return data.equals(value.getCalculated());</span>
+	}
+
+	public boolean regexpMatch(String data){
+<span class="nc bnc" id="L111" title="All 2 branches missed.">		if(data == null) {</span>
+<span class="nc" id="L112">			return false;</span>
+		}
+<span class="nc" id="L114">		return regexpPattern.matcher(data).matches();</span>
+	}
+	
+	public String getExpectedResultLogs() {
+		
+<span class="nc" id="L119">		final StringBuilder builder = new StringBuilder(&quot;property '&quot;);</span>
+<span class="nc" id="L120">		builder.append(name).append(&quot;' with actual value '&quot;).append(actualValue);</span>
+		
+<span class="nc bnc" id="L122" title="All 2 branches missed.">		if(regexp) {</span>
+<span class="nc" id="L123">			builder.append(&quot;' do not match '&quot;);</span>
+		}else {
+<span class="nc" id="L125">			builder.append(&quot;' is not equals to '&quot;);</span>
+		}
+		
+<span class="nc" id="L128">		builder.append(value.getCalculated()).append(&quot;'&quot;);</span>
+
+<span class="nc" id="L130">		return builder.toString();</span>
+	}
+	
+	public String getShortActualValue() {
+<span class="nc" id="L134">		return Utils.truncateString(actualValue, 200);</span>
+	}
+	
+	public String getExpectedResult() {
+<span class="nc" id="L138">		final String result = getName();</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">		if(regexp) {</span>
+<span class="nc" id="L140">			return result + &quot; match &quot; + getValue().getCalculated();</span>
+		}else {
+<span class="nc" id="L142">			return result + &quot; == &quot; + getValue().getCalculated();</span>
+		}
+	}
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------
+
+	public boolean isRegexp(){
+<span class="fc" id="L150">		return regexp;</span>
+	}
+
+	public void setRegexp(boolean value){
+<span class="fc" id="L154">		this.regexp = value;</span>
+<span class="fc" id="L155">	}</span>
+
+	public String getName() {
+<span class="nc" id="L158">		return name;</span>
+	}
+
+	public void setName(String name) {
+<span class="fc" id="L162">		this.name = name;</span>
+<span class="fc" id="L163">	}</span>
+
+	public CalculatedValue getValue() {
+<span class="nc" id="L166">		return value;</span>
+	}
+
+	public void setValue(CalculatedValue value) {
+<span class="fc" id="L170">		this.value = value;</span>
+		
+		try {
+<span class="fc" id="L173">			regexpPattern = Pattern.compile(value.getCalculated());</span>
+<span class="nc" id="L174">		}catch(PatternSyntaxException e) {</span>
+<span class="nc" id="L175">			regexpPattern = Pattern.compile(&quot;.*&quot;);</span>
+<span class="fc" id="L176">		}</span>
+<span class="fc" id="L177">	}</span>
+
+	//----------------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public String toString() {
+<span class="nc" id="L183">		return name;</span>
+	}
+
+	@Override
+	public int compareTo(CalculatedProperty prop) {
+<span class="nc" id="L188">		return toString().compareTo(prop.toString());</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

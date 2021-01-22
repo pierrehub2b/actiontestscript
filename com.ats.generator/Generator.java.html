@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Generator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.generator</a> &gt; <span class="el_source">Generator.java</span></div><h1>Generator.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.generator;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.stream.Stream;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.ats.generator.events.ScriptProcessedEvent;
+import com.ats.generator.events.ScriptProcessedNotifier;
+import com.ats.generator.parsers.Lexer;
+import com.ats.script.Project;
+import com.ats.script.ScriptLoader;
+import com.ats.tools.Utils;
+
+public class Generator implements ScriptProcessedEvent{
+
+	private GeneratorReport genReport;
+	private Lexer lexer;
+	private ArrayList&lt;File&gt; filesList;
+
+	private Project project;
+
+<span class="nc" id="L50">	private int remainingScripts = 0;</span>
+
+	public static void main(String[] args) throws IOException {
+
+<span class="nc" id="L54">		ATS.logInfo(&quot;Java version : &quot; + System.getProperty(&quot;java.version&quot;));</span>
+<span class="nc" id="L55">		ATS.logInfo(StringUtils.repeat(&quot;-&quot;, 72));</span>
+
+<span class="nc" id="L57">		final ATS arguments = new ATS(args);</span>
+<span class="nc" id="L58">		arguments.parse();</span>
+
+<span class="nc" id="L60">		final Project projectData = Project.getProjectData(arguments.getProjectFolder(), arguments.getDestinationFolder(), arguments.getReportFolder());</span>
+
+<span class="nc bnc" id="L62" title="All 2 branches missed.">		if(projectData.isValidated()) {</span>
+
+<span class="nc" id="L64">			final Generator generator = new Generator(projectData);</span>
+<span class="nc" id="L65">			final GeneratorReport report = generator.launch();</span>
+
+<span class="nc" id="L67">			ATS.logInfo(StringUtils.repeat(&quot;-&quot;, 72));</span>
+<span class="nc" id="L68">			ATS.logInfo(&quot;ATS Generator finished :&quot;);</span>
+<span class="nc" id="L69">			ATS.logInfo(&quot;- Java files generated -&gt; &quot; + report.getGeneratedScriptsCount());</span>
+<span class="nc" id="L70">			ATS.logInfo(&quot;- Ellapsed time -&gt; &quot; + report.getGenerationEllapsedTime() + &quot; ms&quot;);</span>
+<span class="nc" id="L71">			ATS.logInfo(StringUtils.repeat(&quot;-&quot;, 72));</span>
+
+<span class="nc bnc" id="L73" title="All 2 branches missed.">			if(arguments.isCompile()) {</span>
+
+<span class="nc" id="L75">				final String targetFolderPath = projectData.getTargetFolderPath().toString();</span>
+
+<span class="nc" id="L77">				ATS.logInfo(&quot;Compile generated java files into folder -&gt; &quot; + targetFolderPath + &quot;/&quot; + Project.TARGET_FOLDER_CLASSES);</span>
+
+<span class="nc" id="L79">				StringBuilder xmlBuilder = new StringBuilder();</span>
+<span class="nc" id="L80">				xmlBuilder.append(&quot;&lt;project basedir=\&quot;&quot;);</span>
+<span class="nc" id="L81">				xmlBuilder.append(targetFolderPath);</span>
+<span class="nc" id="L82">				xmlBuilder.append(&quot;\&quot; default=\&quot;compile\&quot;&gt;&quot;);</span>
+<span class="nc" id="L83">				xmlBuilder.append(&quot;&lt;copy todir=\&quot;&quot;);</span>
+<span class="nc" id="L84">				xmlBuilder.append(Project.TARGET_FOLDER_CLASSES);</span>
+<span class="nc" id="L85">				xmlBuilder.append(&quot;\&quot;&gt;&lt;fileset dir=\&quot;../&quot;);</span>
+<span class="nc" id="L86">				xmlBuilder.append(Project.SRC_FOLDER);</span>
+<span class="nc" id="L87">				xmlBuilder.append(&quot;\&quot; includes=\&quot;&quot;);</span>
+<span class="nc" id="L88">				xmlBuilder.append(Project.ASSETS_FOLDER);</span>
+<span class="nc" id="L89">				xmlBuilder.append(&quot;/**\&quot;/&gt;&lt;/copy&gt;&quot;);</span>
+<span class="nc" id="L90">				xmlBuilder.append(&quot;&lt;property name=\&quot;lib.dir\&quot; value=\&quot;lib\&quot;/&gt;&quot;);</span>
+<span class="nc" id="L91">				xmlBuilder.append(&quot;&lt;target name=\&quot;compile\&quot;&gt;&lt;mkdir dir=\&quot;&quot;);</span>
+<span class="nc" id="L92">				xmlBuilder.append(Project.TARGET_FOLDER_CLASSES);</span>
+<span class="nc" id="L93">				xmlBuilder.append(&quot;\&quot;/&gt;&lt;javac includeantruntime=\&quot;true\&quot; srcdir=\&quot;&quot;);</span>
+<span class="nc" id="L94">				xmlBuilder.append(Project.TARGET_FOLDER_GENERATED);</span>
+<span class="nc" id="L95">				xmlBuilder.append(&quot;\&quot; destdir=\&quot;&quot;);</span>
+<span class="nc" id="L96">				xmlBuilder.append(Project.TARGET_FOLDER_CLASSES);</span>
+<span class="nc" id="L97">				xmlBuilder.append(&quot;\&quot;/&gt;&lt;/target&gt;&lt;/project&gt;&quot;);</span>
+
+				try {
+<span class="nc" id="L100">					File tempXml = File.createTempFile(&quot;ant_&quot;, &quot;.xml&quot;);</span>
+<span class="nc" id="L101">					tempXml.deleteOnExit();</span>
+
+<span class="nc" id="L103">					Files.write(tempXml.toPath(), xmlBuilder.toString().getBytes());</span>
+
+<span class="nc" id="L105">					new AntCompiler(tempXml);</span>
+
+<span class="nc" id="L107">				} catch (IOException e) {}</span>
+			}
+
+<span class="nc bnc" id="L110" title="All 2 branches missed.">			if(arguments.getSuites() != null) {</span>
+
+<span class="nc" id="L112">				final String[] suites = arguments.getSuites();</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">				if(suites.length &gt; 0) {</span>
+<span class="nc" id="L114">					final Path projectFolderPath = projectData.getTargetFolderPath();</span>
+<span class="nc" id="L115">					final FileWriter fw = new FileWriter(projectFolderPath.resolve(&quot;suites.xml&quot;).toFile());</span>
+
+<span class="nc" id="L117">					fw.write(&quot;&lt;!DOCTYPE suite SYSTEM \&quot;https://testng.org/testng-1.0.dtd\&quot;&gt;&quot;);</span>
+<span class="nc" id="L118">					fw.write(&quot;&lt;suite name=\&quot;allSuites\&quot;&gt;&quot;);</span>
+<span class="nc" id="L119">					fw.write(&quot;&lt;suite-files&gt;&quot;);</span>
+
+<span class="nc bnc" id="L121" title="All 2 branches missed.">					for (int i = 0; i &lt; suites.length; i++) {</span>
+<span class="nc" id="L122">						final String suitePath = findSuiteFile(suites[i]);</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">						if(suitePath != null) {</span>
+<span class="nc" id="L124">							fw.write(&quot;&lt;suite-file path=\&quot;&quot; + suitePath + &quot;\&quot;/&gt;&quot;);</span>
+						}
+					}
+
+<span class="nc" id="L128">					fw.write(&quot;&lt;/suite-files&gt;&quot;);</span>
+<span class="nc" id="L129">					fw.write(&quot;&lt;/suite&gt;&quot;);</span>
+<span class="nc" id="L130">					fw.close();</span>
+				}
+			}
+
+<span class="nc" id="L134">		}else {</span>
+<span class="nc" id="L135">			ATS.logInfo(&quot;No valid Ats project found at -&gt; &quot; + arguments.getProjectFolder());</span>
+		}
+<span class="nc" id="L137">	}</span>
+
+	public static String findSuiteFile(String s) {
+<span class="nc bnc" id="L140" title="All 2 branches missed.">		if(Paths.get(s).toFile().exists()) {</span>
+<span class="nc" id="L141">			return s;</span>
+		}else {
+<span class="nc bnc" id="L143" title="All 2 branches missed.">			if(Paths.get(s + &quot;.xml&quot;).toFile().exists()) {</span>
+<span class="nc" id="L144">				return s + &quot;.xml&quot;;</span>
+			}else {
+<span class="nc" id="L146">				s = &quot;src/exec/&quot; + s;</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">				if(Paths.get(s).toFile().exists()) {</span>
+<span class="nc" id="L148">					return s;</span>
+				}else {
+<span class="nc bnc" id="L150" title="All 2 branches missed.">					if(Paths.get(s + &quot;.xml&quot;).toFile().exists()) {</span>
+<span class="nc" id="L151">						return s + &quot;.xml&quot;;</span>
+					}
+				}
+			}
+		}
+<span class="nc" id="L156">		return null;</span>
+	}
+
+	public Generator(String projectPath){
+<span class="nc" id="L160">		this(new File(projectPath));</span>
+<span class="nc" id="L161">	}</span>
+
+	public Generator(File atsFile){
+<span class="nc" id="L164">		this(Project.getProjectData(atsFile, null, null));</span>
+<span class="nc" id="L165">	}</span>
+
+<span class="nc" id="L167">	public Generator(Project project){</span>
+
+<span class="nc bnc" id="L169" title="All 4 branches missed.">		if(init(project) &amp;&amp; remainingScripts &gt; 0){</span>
+
+<span class="nc" id="L171">			project.initFolders();</span>
+<span class="nc" id="L172">			genReport.startGenerator(remainingScripts);</span>
+
+<span class="nc" id="L174">			lexer = new Lexer(project, genReport, StandardCharsets.UTF_8);</span>
+
+		}else{
+<span class="nc" id="L177">			ATS.logInfo(&quot;Nothing to be done (no ATS files found !)&quot;);</span>
+		}
+<span class="nc" id="L179">	}</span>
+
+	private boolean init(Project p) {
+<span class="nc bnc" id="L182" title="All 2 branches missed.">		if(p.isValidated()) {</span>
+
+<span class="nc" id="L184">			genReport = new GeneratorReport();</span>
+<span class="nc" id="L185">			project = p;</span>
+
+<span class="nc" id="L187">			filesList = project.getAtsScripts();</span>
+<span class="nc" id="L188">			remainingScripts = filesList.size();</span>
+
+<span class="nc" id="L190">			return true;</span>
+		}
+<span class="nc" id="L192">		return false;</span>
+	}
+
+	private void addDataFile(ArrayList&lt;File&gt; list, File f) {
+<span class="nc bnc" id="L196" title="All 4 branches missed.">		if(f.getName().toLowerCase().endsWith(&quot;.csv&quot;) || f.getName().toLowerCase().endsWith(&quot;.json&quot;)) {</span>
+<span class="nc" id="L197">			list.add(f);</span>
+		}
+<span class="nc" id="L199">	}</span>
+
+	public GeneratorReport launch(){
+
+<span class="nc bnc" id="L203" title="All 2 branches missed.">		if(project.getJavaSourceFolder().toFile().exists()){</span>
+<span class="nc" id="L204">			Utils.copyDir(project.getJavaSourceFolder().toString(), project.getJavaDestinationFolder().toString(), true);</span>
+		}
+
+<span class="nc" id="L207">		final Stream&lt;File&gt; stream = filesList.parallelStream();</span>
+<span class="nc" id="L208">		stream.forEach(f -&gt; loadScript(f));</span>
+<span class="nc" id="L209">		stream.close();</span>
+
+<span class="nc" id="L211">		genReport.endGenerator();</span>
+
+<span class="nc" id="L213">		filesList.clear();</span>
+<span class="nc" id="L214">		lexer = null;</span>
+
+<span class="nc" id="L216">		return genReport;</span>
+	}
+
+	private void loadScript(File f){
+<span class="nc" id="L220">		final ScriptLoader sc = lexer.loadScript(f, new ScriptProcessedNotifier(this));</span>
+<span class="nc" id="L221">		sc.generateJavaFile(project);</span>
+<span class="nc" id="L222">	}</span>
+
+	public ArrayList&lt;String&gt; findSubscriptRef(String calledScript){
+<span class="nc" id="L225">		final ArrayList&lt;String&gt; result = new ArrayList&lt;String&gt;();</span>
+<span class="nc bnc" id="L226" title="All 2 branches missed.">		for(File f : filesList) {</span>
+<span class="nc" id="L227">			final ScriptLoader sc = lexer.loadScript(f, new ScriptProcessedNotifier(this));</span>
+<span class="nc bnc" id="L228" title="All 2 branches missed.">			if(sc.isSubscriptCalled(calledScript)) {</span>
+<span class="nc" id="L229">				result.add(sc.getHeader().getQualifiedName());</span>
+			}
+<span class="nc" id="L231">		}</span>
+
+<span class="nc" id="L233">		final ArrayList&lt;File&gt; dataFiles = new ArrayList&lt;File&gt;();</span>
+		try {
+<span class="nc" id="L235">			Files.find(project.getAssetsFolderPath(), 99999, (p, bfa) -&gt; bfa.isRegularFile()).forEach(p -&gt; addDataFile(dataFiles, p.toFile()));</span>
+
+<span class="nc bnc" id="L237" title="All 2 branches missed.">			for(File f : dataFiles) {</span>
+<span class="nc" id="L238">				Scanner scanner = new Scanner(f);</span>
+<span class="nc bnc" id="L239" title="All 2 branches missed.">				while (scanner.hasNext()) {</span>
+<span class="nc" id="L240">					final String line = scanner.next();</span>
+<span class="nc bnc" id="L241" title="All 12 branches missed.">					if(line.equals(calledScript) || line.contains(&quot;\&quot;&quot; + calledScript + &quot;\&quot;&quot;) || line.contains(calledScript + &quot;,&quot;) || line.contains(&quot;,&quot; + calledScript) || line.contains(calledScript + &quot;;&quot;) || line.contains(&quot;;&quot; + calledScript)) {</span>
+<span class="nc" id="L242">						result.add(f.getCanonicalPath());</span>
+<span class="nc" id="L243">						break;</span>
+					}
+<span class="nc" id="L245">				}</span>
+<span class="nc" id="L246">				scanner.close();</span>
+<span class="nc" id="L247">			}</span>
+
+<span class="nc" id="L249">		} catch (IOException e) {</span>
+<span class="nc" id="L250">			e.printStackTrace();</span>
+<span class="nc" id="L251">		}</span>
+
+<span class="nc" id="L253">		return result;</span>
+	}
+
+	@Override
+	public void scriptProcessed() {
+<span class="nc" id="L258">		remainingScripts--;</span>
+
+		//int percent = (int)(10000-(double)remainingScripts/(double)totalScript*10000)/100;
+		//log.info(&quot;Generator in progress : &quot; + percent + &quot; % done&quot;);
+<span class="nc" id="L262">	}</span>
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

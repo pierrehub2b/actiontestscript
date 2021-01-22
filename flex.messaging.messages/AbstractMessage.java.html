@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractMessage.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">flex.messaging.messages</a> &gt; <span class="el_source">AbstractMessage.java</span></div><h1>AbstractMessage.java</h1><pre class="source lang-java linenums">/*
+  GRANITE DATA SERVICES
+  Copyright (C) 2007 ADEQUATE SYSTEMS SARL
+
+  This file is part of Granite Data Services.
+
+  Granite Data Services is free software; you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or (at your
+  option) any later version.
+ 
+  Granite Data Services is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+  for more details.
+ 
+  You should have received a copy of the GNU Lesser General Public License
+  along with this library; if not, see &lt;http://www.gnu.org/licenses/&gt;.
+*/
+
+package flex.messaging.messages;
+
+import com.exadel.flamingo.flex.messaging.util.StringUtil;
+import com.exadel.flamingo.flex.messaging.util.UUIDUtil;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * @author Franck WOLFF
+ */
+@SuppressWarnings(&quot;serial&quot;)
+public abstract class AbstractMessage implements Message {
+
+<span class="nc" id="L37">    private Object body = null;</span>
+<span class="nc" id="L38">    private Object clientId = null;</span>
+<span class="nc" id="L39">    private String destination = null;</span>
+<span class="nc" id="L40">    private Map&lt;String, Object&gt; headers = null;</span>
+<span class="nc" id="L41">    private String messageId = null;</span>
+<span class="nc" id="L42">    private long timestamp = 0L;</span>
+<span class="nc" id="L43">    private long timeToLive = 0L;</span>
+    
+    public AbstractMessage() {
+<span class="nc" id="L46">        super();</span>
+<span class="nc" id="L47">    }</span>
+    
+    public AbstractMessage(Message request) {
+<span class="nc" id="L50">        super();</span>
+<span class="nc" id="L51">        this.messageId = UUIDUtil.randomUUID();</span>
+<span class="nc" id="L52">        this.timestamp = new Date().getTime();</span>
+<span class="nc" id="L53">        this.clientId = UUIDUtil.randomUUID();</span>
+<span class="nc" id="L54">    }</span>
+
+    public Object getBody() {
+<span class="nc" id="L57">        return body;</span>
+    }
+
+    public void setBody(Object body) {
+<span class="nc" id="L61">        this.body = body;</span>
+<span class="nc" id="L62">    }</span>
+
+    public Object getClientId() {
+<span class="nc" id="L65">        return clientId;</span>
+    }
+
+    public void setClientId(Object clientId) {
+<span class="nc" id="L69">        this.clientId = clientId;</span>
+<span class="nc" id="L70">    }</span>
+
+    public String getDestination() {
+<span class="nc" id="L73">        return destination;</span>
+    }
+
+    public void setDestination(String destination) {
+<span class="nc" id="L77">        this.destination = destination;</span>
+<span class="nc" id="L78">    }</span>
+
+    public Map&lt;String, Object&gt; getHeaders() {
+<span class="nc" id="L81">        return headers;</span>
+    }
+
+    public void setHeaders(Map&lt;String, Object&gt; headers) {
+<span class="nc" id="L85">        this.headers = headers;</span>
+<span class="nc" id="L86">    }</span>
+
+    public Object getHeader(String name) {
+<span class="nc bnc" id="L89" title="All 2 branches missed.">        return (headers != null ? headers.get(name) : null);</span>
+    }
+
+    public boolean headerExists(String name) {
+<span class="nc bnc" id="L93" title="All 2 branches missed.">        return (headers != null ? headers.containsKey(name) : false);</span>
+    }
+
+    public void setHeader(String name, Object value) {
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        if (headers == null)</span>
+<span class="nc" id="L98">            headers = new HashMap&lt;String, Object&gt;();</span>
+        
+<span class="nc" id="L100">    }</span>
+
+    public String getMessageId() {
+<span class="nc" id="L103">        return messageId;</span>
+    }
+
+    public void setMessageId(String messageId) {
+<span class="nc" id="L107">        this.messageId = messageId;</span>
+<span class="nc" id="L108">    }</span>
+
+    public long getTimestamp() {
+<span class="nc" id="L111">        return timestamp;</span>
+    }
+
+    public void setTimestamp(long timestamp) {
+<span class="nc" id="L115">        this.timestamp = timestamp;</span>
+<span class="nc" id="L116">    }</span>
+
+    public long getTimeToLive() {
+<span class="nc" id="L119">        return timeToLive;</span>
+    }
+
+    public void setTimeToLive(long timeToLive) {
+<span class="nc" id="L123">        this.timeToLive = timeToLive;</span>
+<span class="nc" id="L124">    }</span>
+
+    protected void toString(StringBuilder sb, String indent, String bodyAlternative) {
+<span class="nc" id="L127">        sb.append('\n').append(indent).append(&quot;  destination = &quot;).append(destination);</span>
+        
+<span class="nc bnc" id="L129" title="All 4 branches missed.">        if (headers != null &amp;&amp; headers.containsKey(REMOTE_CREDENTIALS_HEADER)) {</span>
+<span class="nc" id="L130">            Map&lt;String, Object&gt; headersCopy = new HashMap&lt;String, Object&gt;(headers);</span>
+<span class="nc" id="L131">            headersCopy.put(REMOTE_CREDENTIALS_HEADER, HIDDEN_CREDENTIALS);</span>
+<span class="nc" id="L132">            sb.append('\n').append(indent).append(&quot;  headers = &quot;).append(headersCopy);</span>
+<span class="nc" id="L133">        }</span>
+        else
+<span class="nc" id="L135">            sb.append('\n').append(indent).append(&quot;  headers = &quot;).append(headers);</span>
+        
+<span class="nc" id="L137">        sb.append('\n').append(indent).append(&quot;  messageId = &quot;).append(messageId);</span>
+<span class="nc" id="L138">        sb.append('\n').append(indent).append(&quot;  timestamp = &quot;).append(timestamp);</span>
+<span class="nc" id="L139">        sb.append('\n').append(indent).append(&quot;  clientId = &quot;).append(clientId);</span>
+<span class="nc" id="L140">        sb.append('\n').append(indent).append(&quot;  timeToLive = &quot;).append(timeToLive);</span>
+<span class="nc" id="L141">        sb.append('\n').append(indent).append(&quot;  body = &quot;).append(printBody(body, bodyAlternative));</span>
+<span class="nc" id="L142">    }</span>
+    
+    private static String printBody(Object body, String bodyAlternative) {
+        
+<span class="nc bnc" id="L146" title="All 2 branches missed.">    	body = (bodyAlternative != null ? bodyAlternative : body);</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">        if (body == null)</span>
+<span class="nc" id="L148">            return null;</span>
+    	
+<span class="nc bnc" id="L150" title="All 6 branches missed.">    	if (body.getClass().isArray() || body instanceof Collection || body instanceof Map)</span>
+<span class="nc" id="L151">    		return StringUtil.toString(body, 100); // limit to first 100 elements.</span>
+
+<span class="nc" id="L153">        return body.toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

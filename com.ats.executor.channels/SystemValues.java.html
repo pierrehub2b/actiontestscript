@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SystemValues.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.executor.channels</a> &gt; <span class="el_source">SystemValues.java</span></div><h1>SystemValues.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.executor.channels;
+
+<span class="fc" id="L22">public class SystemValues {</span>
+
+	public static final String SYS_OS_NAME = &quot;os-name&quot;;
+	public static final String SYS_OS_VERSION = &quot;os-version&quot;;
+	public static final String SYS_OS_BUILD = &quot;os-build&quot;;
+	public static final String SYS_COUNTRY = &quot;country&quot;;
+	public static final String SYS_MACHINE_NAME = &quot;machine-name&quot;;
+	public static final String SYS_APP_NAME = &quot;app-name&quot;;
+	public static final String SYS_APP_VERSION = &quot;app-version&quot;;
+	public static final String SYS_APP_PATH = &quot;app-path&quot;;
+	public static final String SYS_USER_NAME = &quot;user-name&quot;;
+
+<span class="fc" id="L34">	public final static String[] VALUES_NAME = new String[]{SYS_OS_NAME, SYS_OS_VERSION, SYS_OS_BUILD, SYS_COUNTRY, SYS_MACHINE_NAME, SYS_APP_NAME, SYS_APP_VERSION, SYS_USER_NAME};</span>
+
+	//----------------------------------------------------------------------------------------------------------------------
+	// Instance
+	//----------------------------------------------------------------------------------------------------------------------
+
+<span class="fc" id="L40">	private String osName = &quot;&quot;;</span>
+<span class="fc" id="L41">	private String osVersion = &quot;&quot;;</span>
+<span class="fc" id="L42">	private String osBuild = &quot;&quot;;</span>
+<span class="fc" id="L43">	private String country = &quot;&quot;;</span>
+<span class="fc" id="L44">	private String machineName = &quot;&quot;;</span>
+<span class="fc" id="L45">	private String applicationName = &quot;&quot;;</span>
+<span class="fc" id="L46">	private String applicationPath = &quot;&quot;;</span>
+<span class="fc" id="L47">	private String applicationVersion = &quot;&quot;;</span>
+<span class="fc" id="L48">	private String userName = System.getProperty(&quot;user.name&quot;);</span>
+
+	public String get(String name) {
+<span class="nc bnc" id="L51" title="All 9 branches missed.">		switch(name) {</span>
+		case SYS_OS_NAME:
+<span class="nc" id="L53">			return osName;</span>
+		case SYS_OS_VERSION:
+<span class="nc" id="L55">			return osVersion;</span>
+		case SYS_OS_BUILD:
+<span class="nc" id="L57">			return osBuild;</span>
+		case SYS_COUNTRY:
+<span class="nc" id="L59">			return country;</span>
+		case SYS_MACHINE_NAME:
+<span class="nc" id="L61">			return machineName;</span>
+		case SYS_APP_NAME:
+<span class="nc" id="L63">			return applicationName;</span>
+		case SYS_APP_VERSION:
+<span class="nc" id="L65">			return applicationVersion;</span>
+		case SYS_USER_NAME:
+<span class="nc" id="L67">			return userName;</span>
+		}
+<span class="nc" id="L69">		return &quot;&quot;;</span>
+	}
+
+	//----------------------------------------------------------------------------------------------------------------------
+	// Getter and setter for serialization
+	//----------------------------------------------------------------------------------------------------------------------
+
+	public String getOsName() {
+<span class="nc" id="L77">		return osName;</span>
+	}
+	public void setOsName(String osName) {
+<span class="nc" id="L80">		this.osName = osName;</span>
+<span class="nc" id="L81">	}</span>
+	public String getOsVersion() {
+<span class="nc" id="L83">		return osVersion;</span>
+	}
+	public void setOsVersion(String osVersion) {
+<span class="nc" id="L86">		this.osVersion = osVersion;</span>
+<span class="nc" id="L87">	}</span>
+	public String getOsBuild() {
+<span class="nc" id="L89">		return osBuild;</span>
+	}
+	public void setOsBuild(String osBuild) {
+<span class="nc" id="L92">		this.osBuild = osBuild;</span>
+<span class="nc" id="L93">	}</span>
+	public String getCountry() {
+<span class="nc" id="L95">		return country;</span>
+	}
+	public void setCountry(String country) {
+<span class="nc" id="L98">		this.country = country;</span>
+<span class="nc" id="L99">	}</span>
+	public String getMachineName() {
+<span class="nc" id="L101">		return machineName;</span>
+	}
+	public void setMachineName(String machineName) {
+<span class="nc" id="L104">		this.machineName = machineName;</span>
+<span class="nc" id="L105">	}</span>
+	public String getApplicationName() {
+<span class="nc" id="L107">		return applicationName;</span>
+	}
+	public void setApplicationName(String applicationName) {
+<span class="nc" id="L110">		this.applicationName = applicationName;</span>
+<span class="nc" id="L111">	}</span>
+	public String getApplicationPath() {
+<span class="nc" id="L113">		return applicationPath;</span>
+	}
+	public void setApplicationPath(String applicationPath) {
+<span class="nc" id="L116">		this.applicationPath = applicationPath;</span>
+<span class="nc" id="L117">	}</span>
+	public String getApplicationVersion() {
+<span class="nc" id="L119">		return applicationVersion;</span>
+	}
+	public void setApplicationVersion(String applicationVersion) {
+<span class="nc" id="L122">		this.applicationVersion = applicationVersion;</span>
+<span class="nc" id="L123">	}</span>
+	public String getUserName() {
+<span class="nc" id="L125">		return userName;</span>
+	}
+	public void setUserName(String userName) {
+<span class="nc" id="L128">		this.userName = userName;</span>
+<span class="nc" id="L129">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

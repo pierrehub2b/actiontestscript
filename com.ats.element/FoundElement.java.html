@@ -1,0 +1,518 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FoundElement.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.element</a> &gt; <span class="el_source">FoundElement.java</span></div><h1>FoundElement.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.element;
+
+import com.ats.element.api.AtsApiElement;
+import com.ats.executor.TestBound;
+import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.desktop.DesktopElement;
+import com.ats.executor.drivers.desktop.DesktopWindow;
+import com.ats.executor.drivers.engines.WebDriverEngine;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.RemoteWebElement;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+public class FoundElement{
+
+	public final static String HTML = &quot;html&quot;;
+	public final static String DESKTOP = &quot;desktop&quot;;
+	public final static String MOBILE = &quot;mobile&quot;;
+	public final static String API = &quot;api&quot;;
+
+	private String id;
+
+<span class="nc" id="L47">	private Double x = 0.0;</span>
+<span class="nc" id="L48">	private Double y = 0.0;</span>
+
+<span class="nc" id="L50">	private Double screenX = 0.0;</span>
+<span class="nc" id="L51">	private Double screenY = 0.0;</span>
+	
+<span class="nc" id="L53">	private Double innerX = 0.0;</span>
+<span class="nc" id="L54">	private Double innerY = 0.0;</span>
+
+<span class="nc" id="L56">	private Double boundX = 0.0;</span>
+<span class="nc" id="L57">	private Double boundY = 0.0;</span>
+
+<span class="nc" id="L59">	private Double width = 0.0;</span>
+<span class="nc" id="L60">	private Double height = 0.0;</span>
+
+<span class="nc" id="L62">	private int centerWidth = 0;</span>
+<span class="nc" id="L63">	private int centerHeight = 0;</span>
+
+<span class="nc" id="L65">	private String tag = &quot;*&quot;;</span>
+
+<span class="nc" id="L67">	private String type = HTML;</span>
+
+	private RemoteWebElement value;
+	private FoundElement parent;
+<span class="nc" id="L71">	private boolean visible = true;</span>
+<span class="nc" id="L72">	private boolean numeric = false;</span>
+<span class="nc" id="L73">	private boolean password = false;</span>
+<span class="nc" id="L74">	private boolean clickable = true;</span>
+	private ArrayList&lt;FoundElement&gt; children;
+
+<span class="nc" id="L77">	private boolean active = true;</span>
+
+	private ArrayList&lt;AtsElement&gt; iframes;
+	
+	private Map&lt;String, String&gt; attributes;
+
+	//------------------------------------------------------------------------------------------------------------------------------
+	// contructors
+	//------------------------------------------------------------------------------------------------------------------------------
+
+<span class="nc" id="L87">	public FoundElement() {}</span>
+
+<span class="nc" id="L89">	public FoundElement(Channel channel) {</span>
+<span class="nc" id="L90">		final RemoteWebElement root = (RemoteWebElement) channel.getRootElement();</span>
+
+<span class="nc" id="L92">		this.setRemoteWebElement(root);</span>
+<span class="nc" id="L93">		this.width = (double) root.getSize().getWidth(); //channel.getDimension().getWidth();</span>
+<span class="nc" id="L94">		this.height = (double) root.getSize().getHeight(); //channel.getDimension().getHeight();</span>
+<span class="nc" id="L95">	}</span>
+
+<span class="nc" id="L97">	public FoundElement(AtsElement element) {</span>
+<span class="nc" id="L98">		this.setRemoteWebElement(element.getElement());</span>
+<span class="nc" id="L99">		this.tag = element.getTag();</span>
+<span class="nc" id="L100">		this.width = element.getWidth();</span>
+<span class="nc" id="L101">		this.height = element.getHeight();</span>
+<span class="nc" id="L102">		this.numeric = element.isNumeric();</span>
+<span class="nc" id="L103">		this.password = element.isPassword();</span>
+<span class="nc" id="L104">	}</span>
+	
+<span class="nc" id="L106">	public FoundElement(DesktopElement element) {</span>
+<span class="nc" id="L107">		this.setRemoteWebElement(element.getElement());</span>
+<span class="nc" id="L108">		this.tag = element.getTag();</span>
+<span class="nc" id="L109">		this.width = element.getWidth();</span>
+<span class="nc" id="L110">		this.height = element.getHeight();</span>
+<span class="nc" id="L111">		this.x = element.getX();</span>
+<span class="nc" id="L112">		this.x = element.getY();</span>
+<span class="nc" id="L113">		this.screenX = element.getX();</span>
+<span class="nc" id="L114">		this.screenY = element.getY();</span>
+<span class="nc" id="L115">	}</span>
+
+<span class="nc" id="L117">	public FoundElement(DesktopWindow win) {</span>
+<span class="nc" id="L118">		this.id = win.getId();</span>
+<span class="nc" id="L119">		this.tag = win.getTag();</span>
+<span class="nc" id="L120">		this.width = win.getWidth();</span>
+<span class="nc" id="L121">		this.height = win.getHeight();</span>
+<span class="nc" id="L122">	}</span>
+
+	public FoundElement(AtsElement element, Channel channel, Double offsetX, Double offsetY) {
+
+<span class="nc" id="L126">		this(element);</span>
+
+<span class="nc" id="L128">		final Double elemX = element.getX();</span>
+<span class="nc" id="L129">		final Double elemY = element.getY();</span>
+
+<span class="nc" id="L131">		this.updatePosition(elemX, elemY, channel, offsetX, offsetY);</span>
+<span class="nc" id="L132">		this.screenX = element.getScreenX() + elemX;</span>
+<span class="nc" id="L133">		this.screenY = element.getScreenY() + elemY;</span>
+<span class="nc" id="L134">		this.boundX = element.getBoundX();</span>
+<span class="nc" id="L135">		this.boundY = element.getBoundY();</span>
+<span class="nc" id="L136">	}</span>
+
+	public FoundElement(AtsElement element, ArrayList&lt;AtsElement&gt; iframes, Channel channel, Double offsetX, Double offsetY) {
+<span class="nc" id="L139">		this(element, channel, offsetX, offsetY);</span>
+<span class="nc" id="L140">		this.iframes = iframes;</span>
+<span class="nc" id="L141">	}</span>
+
+	public FoundElement(WebDriverEngine engine, AtsElement element, Channel channel, Double offsetX, Double offsetY, boolean waitAnimation) {
+<span class="nc" id="L144">		this(element, channel, offsetX, offsetY);</span>
+
+<span class="nc bnc" id="L146" title="All 4 branches missed.">		if(waitAnimation &amp;&amp; element.getElement().isDisplayed()) {</span>
+<span class="nc" id="L147">			int maxTry = 5;</span>
+<span class="nc bnc" id="L148" title="All 6 branches missed.">			while((this.width &lt; 1 || this.height &lt; 1) &amp;&amp; maxTry &gt; 0) {</span>
+
+<span class="nc" id="L150">				final List&lt;Double&gt; rect = engine.getBoundingClientRect(element.getElement());</span>
+
+<span class="nc" id="L152">				final Double rectX = rect.get(0);</span>
+<span class="nc" id="L153">				final Double rectY = rect.get(1);</span>
+<span class="nc" id="L154">				final Double rectW = rect.get(2);</span>
+<span class="nc" id="L155">				final Double rectH = rect.get(3);</span>
+
+<span class="nc bnc" id="L157" title="All 12 branches missed.">				if(rectX != null &amp;&amp; rectY != null &amp;&amp; rectW != null &amp;&amp; rectH != null &amp;&amp; rectW &gt;= 1 &amp;&amp; rectH &gt;=1) {</span>
+<span class="nc" id="L158">					this.x = rectX;</span>
+<span class="nc" id="L159">					this.y = rectY;</span>
+<span class="nc" id="L160">					this.boundX = rectX;</span>
+<span class="nc" id="L161">					this.boundY = rectY;</span>
+<span class="nc" id="L162">					this.width = rectW;</span>
+<span class="nc" id="L163">					this.height = rectH;</span>
+				}else {
+<span class="nc" id="L165">					channel.sleep(100);</span>
+				}
+<span class="nc" id="L167">				maxTry--;</span>
+<span class="nc" id="L168">			}</span>
+		}
+<span class="nc" id="L170">	}</span>
+
+<span class="nc" id="L172">	public FoundElement(List&lt;AtsElement&gt; desktops) {</span>
+
+<span class="nc" id="L174">		final AtsElement desktop = desktops.get(0);</span>
+		
+<span class="nc" id="L176">		this.type = DESKTOP;</span>
+<span class="nc" id="L177">		this.visible = true;</span>
+<span class="nc" id="L178">		this.id = desktop.getId();</span>
+
+<span class="nc" id="L180">		this.password = false;</span>
+
+<span class="nc" id="L182">		this.tag = desktop.getTag();</span>
+<span class="nc" id="L183">		this.width = desktop.getWidth();</span>
+<span class="nc" id="L184">		this.height = desktop.getHeight();</span>
+
+<span class="nc" id="L186">		this.clickable = true;</span>
+				
+<span class="nc" id="L188">		this.active = true;</span>
+
+<span class="nc" id="L190">		this.screenX = desktop.getX();</span>
+<span class="nc" id="L191">		this.screenY = desktop.getY();</span>
+
+<span class="nc" id="L193">		this.x = this.screenX;</span>
+<span class="nc" id="L194">		this.y = this.screenY;</span>
+<span class="nc" id="L195">	}</span>
+	
+<span class="nc" id="L197">	public FoundElement(AtsElement element, TestBound channelDimension) {</span>
+
+<span class="nc" id="L199">		this.type = DESKTOP;</span>
+<span class="nc" id="L200">		this.visible = element.isVisible();</span>
+<span class="nc" id="L201">		this.id = element.getId();</span>
+
+<span class="nc" id="L203">		this.password = element.isPassword();</span>
+
+<span class="nc" id="L205">		this.tag = element.getTag();</span>
+<span class="nc" id="L206">		this.width = element.getWidth();</span>
+<span class="nc" id="L207">		this.height = element.getHeight();</span>
+
+<span class="nc" id="L209">		this.clickable = element.isClickable();</span>
+				
+<span class="nc bnc" id="L211" title="All 4 branches missed.">		this.active = this.clickable &amp;&amp; this.visible;</span>
+
+<span class="nc" id="L213">		this.screenX = element.getX();</span>
+<span class="nc" id="L214">		this.screenY = element.getY();</span>
+
+<span class="nc" id="L216">		this.x = this.screenX - channelDimension.getX();</span>
+<span class="nc" id="L217">		this.y = this.screenY - channelDimension.getY();</span>
+		
+<span class="nc bnc" id="L219" title="All 2 branches missed.">		if(element.getChildren() != null) {</span>
+<span class="nc" id="L220">			this.children = element.getChildren().stream().map(e -&gt; new FoundElement(e, channelDimension)).collect(Collectors.toCollection(ArrayList::new));</span>
+		}
+		
+<span class="nc" id="L223">		this.attributes = element.attributes;</span>
+<span class="nc" id="L224">	}</span>
+
+<span class="nc" id="L226">	public FoundElement(AtsMobileElement element) {</span>
+
+<span class="nc" id="L228">		this.type = MOBILE;</span>
+<span class="nc" id="L229">		this.visible = true;</span>
+<span class="nc" id="L230">		this.id = element.getId();</span>
+
+<span class="nc" id="L232">		this.tag = element.getTag();</span>
+<span class="nc" id="L233">		this.width = element.getWidth();</span>
+<span class="nc" id="L234">		this.height = element.getHeight();</span>
+
+<span class="nc" id="L236">		this.screenX = element.getX();</span>
+<span class="nc" id="L237">		this.screenY = element.getY();</span>
+
+<span class="nc" id="L239">		this.x = this.screenX;</span>
+<span class="nc" id="L240">		this.y = this.screenY;</span>
+<span class="nc" id="L241">	}</span>
+
+<span class="nc" id="L243">	public FoundElement(AtsApiElement element) {</span>
+<span class="nc" id="L244">		this.type = API;</span>
+<span class="nc" id="L245">		this.visible = true;</span>
+<span class="nc" id="L246">		this.id = element.getId();</span>
+<span class="nc" id="L247">		this.tag = element.getTag();</span>
+<span class="nc" id="L248">		this.clickable = false;</span>
+<span class="nc" id="L249">	}</span>
+
+	public FoundElement(Channel channel, ArrayList&lt;AtsElement&gt; iframes, ArrayList&lt;AtsElement&gt; elements, Double initElementX, Double initElementY) {
+<span class="nc" id="L252">		this(elements.remove(0), iframes, channel, initElementX, initElementY);</span>
+<span class="nc bnc" id="L253" title="All 2 branches missed.">		if(elements.size() &gt; 0) {</span>
+<span class="nc" id="L254">			setParent(new FoundElement(channel, iframes, elements, initElementX, initElementY));</span>
+<span class="nc bnc" id="L255" title="All 2 branches missed.">		}else if(iframes.size() &gt; 0) {</span>
+<span class="nc" id="L256">			elements.addAll(iframes);</span>
+<span class="nc" id="L257">			iframes.clear();</span>
+<span class="nc" id="L258">			setParent(new FoundElement(channel, iframes, elements, initElementX, initElementY));</span>
+		}
+<span class="nc" id="L260">	}</span>
+
+<span class="nc" id="L262">	public FoundElement(Channel channel, TestElement parent, Rectangle rect) {</span>
+<span class="nc" id="L263">		this.setRemoteWebElement((RemoteWebElement) channel.getRootElement());</span>
+<span class="nc" id="L264">		this.tag = SearchedElement.IMAGE_TAG;</span>
+<span class="nc" id="L265">		this.width = rect.getWidth();</span>
+<span class="nc" id="L266">		this.height = rect.getHeight();</span>
+
+<span class="nc" id="L268">		final int cw = (int)(this.width/2);</span>
+<span class="nc" id="L269">		final int ch = (int)(this.height/2);</span>
+
+<span class="nc" id="L271">		this.centerWidth = cw;</span>
+<span class="nc" id="L272">		this.centerHeight = ch;</span>
+
+<span class="nc" id="L274">		this.x = rect.getX();</span>
+<span class="nc" id="L275">		this.y = rect.getY();</span>
+
+<span class="nc bnc" id="L277" title="All 2 branches missed.">		if(parent != null) {</span>
+<span class="nc" id="L278">			this.x += parent.getFoundElement().getX();</span>
+<span class="nc" id="L279">			this.y += parent.getFoundElement().getY();</span>
+		}
+
+<span class="nc" id="L282">		this.boundX = this.x - channel.getSubDimension().getX() + cw;</span>
+<span class="nc" id="L283">		this.boundY = this.y - channel.getSubDimension().getY() + ch;</span>
+
+<span class="nc" id="L285">		this.screenX = this.x + channel.getDimension().getX() + cw;</span>
+<span class="nc" id="L286">		this.screenY = this.y + channel.getDimension().getY() + ch;</span>
+		
+<span class="nc" id="L288">		this.innerX = this.boundX - (channel.getSubDimension().getWidth()/2);</span>
+<span class="nc" id="L289">		this.innerY = this.boundY - (channel.getSubDimension().getHeight()/2);</span>
+<span class="nc" id="L290">	}</span>
+
+	//------------------------------------------------------------------------------------------------------------------------------
+	// end of contructors
+	//------------------------------------------------------------------------------------------------------------------------------
+
+	public String[] getItemAttribute() {
+<span class="nc bnc" id="L297" title="All 4 branches missed.">		if(attributes != null &amp;&amp; attributes.size() == 2) {</span>
+<span class="nc" id="L298">			return new String[] {attributes.get(&quot;value&quot;), attributes.get(&quot;text&quot;)};</span>
+		}
+<span class="nc" id="L300">		return new String[0];</span>
+	}
+	
+	public int getCenterWidth() {
+<span class="nc" id="L304">		return this.centerWidth;</span>
+	}
+
+	public int getCenterHeight() {
+<span class="nc" id="L308">		return this.centerHeight;</span>
+	}
+
+	public boolean isDesktop() {
+<span class="nc" id="L312">		return DESKTOP.equals(type);</span>
+	}
+
+	public boolean isMobile() {
+<span class="nc" id="L316">		return MOBILE.equals(type);</span>
+	}
+
+	public ArrayList&lt;AtsElement&gt; getIframes(){
+<span class="nc" id="L320">		return iframes;</span>
+	}
+
+	public void dispose() {
+<span class="nc bnc" id="L324" title="All 2 branches missed.">		if(parent != null) {</span>
+<span class="nc" id="L325">			parent.dispose();</span>
+<span class="nc" id="L326">			parent = null;</span>
+		}
+<span class="nc" id="L328">		value = null;</span>
+<span class="nc" id="L329">	}</span>
+
+	public void updatePosition(Double x, Double y, Channel channel, Double offsetX, Double offsetY) {
+<span class="nc" id="L332">		this.x = x + channel.getSubDimension().getX() + offsetX;</span>
+<span class="nc" id="L333">		this.y = y + channel.getSubDimension().getY() + offsetY;</span>
+<span class="nc" id="L334">	}</span>
+
+	private void setRemoteWebElement(RemoteWebElement rwe){
+<span class="nc" id="L337">		this.value = rwe;</span>
+<span class="nc bnc" id="L338" title="All 2 branches missed.">		if(rwe != null) {</span>
+<span class="nc" id="L339">			this.id = rwe.getId();</span>
+		}
+<span class="nc" id="L341">	}</span>
+
+	public boolean isIframe(){
+<span class="nc" id="L344">		return AtsElement.checkIframe(this.tag);</span>
+	}
+
+	public WebElement getValue(){
+<span class="nc" id="L348">		return value;</span>
+	}
+
+	public void activate(RemoteWebDriver remoteWebDriver) {
+<span class="nc" id="L352">		value = new RemoteWebElement();</span>
+<span class="nc" id="L353">		value.setParent(remoteWebDriver);</span>
+<span class="nc" id="L354">		value.setId(id);</span>
+<span class="nc" id="L355">	}</span>
+
+	public Rectangle getRectangle(){
+<span class="nc" id="L358">		return new Rectangle(x.intValue(), y.intValue(), width.intValue(), height.intValue());</span>
+	}
+
+	public Double getScreenX() {
+<span class="nc" id="L362">		return screenX;</span>
+	}
+
+	public Double getScreenY() {
+<span class="nc" id="L366">		return screenY;</span>
+	}
+
+	public boolean isNumeric() {
+<span class="nc" id="L370">		return numeric;</span>
+	}
+
+	public boolean isPassword() {
+<span class="nc" id="L374">		return password;</span>
+	}
+
+	public boolean isActive() {
+<span class="nc" id="L378">		return active;</span>
+	}
+	
+	public ArrayList&lt;FoundElement&gt; getChildren(){
+<span class="nc" id="L382">		return children;</span>
+	}
+	
+	//----------------------------------------------------------------------------------------------------------------------
+	// Get image recognition screen position
+	//----------------------------------------------------------------------------------------------------------------------
+
+	public int getInnerX() {
+<span class="nc" id="L390">		return innerX.intValue();</span>
+	}
+	
+	public int getInnerY() {
+<span class="nc" id="L394">		return innerY.intValue();</span>
+	}
+
+	//----------------------------------------------------------------------------------------------------------------------
+	// Getter and setter for serialization
+	//----------------------------------------------------------------------------------------------------------------------
+
+	public boolean isClickable() {
+<span class="nc" id="L402">		return clickable;</span>
+	}
+
+	public void setClickable(boolean value){
+<span class="nc" id="L406">		this.clickable = value;</span>
+<span class="nc" id="L407">	}</span>
+
+	public boolean isVisible() {
+<span class="nc" id="L410">		return visible;</span>
+	}
+
+	public void setVisible(boolean value){
+<span class="nc" id="L414">		this.visible = value;</span>
+<span class="nc" id="L415">	}</span>
+
+	public String getType() {
+<span class="nc" id="L418">		return type;</span>
+	}
+
+	public void setType(String type) {
+<span class="nc" id="L422">		this.type = type;</span>
+<span class="nc" id="L423">	}</span>
+
+	public FoundElement getParent() {
+<span class="nc" id="L426">		return parent;</span>
+	}
+
+	public void setParent(FoundElement parent) {
+<span class="nc" id="L430">		this.parent = parent;</span>
+<span class="nc" id="L431">	}</span>
+
+	public String getId() {
+<span class="nc" id="L434">		return id;</span>
+	}
+
+	public void setId(String id) {
+<span class="nc" id="L438">		this.id = id;</span>
+<span class="nc" id="L439">	}</span>
+
+	public Double getX() {
+<span class="nc" id="L442">		return x;</span>
+	}
+
+	public void setX(Double x) {
+<span class="nc" id="L446">		this.x = x;</span>
+<span class="nc" id="L447">	}</span>
+
+	public Double getY() {
+<span class="nc" id="L450">		return y;</span>
+	}
+
+	public void setY(Double y) {
+<span class="nc" id="L454">		this.y = y;</span>
+<span class="nc" id="L455">	}</span>
+
+	public Double getWidth() {
+<span class="nc" id="L458">		return width;</span>
+	}
+
+	public void setWidth(Double width) {
+<span class="nc" id="L462">		this.width = width;</span>
+<span class="nc" id="L463">	}</span>
+
+	public Double getHeight() {
+<span class="nc" id="L466">		return height;</span>
+	}
+
+	public void setHeight(Double height) {
+<span class="nc" id="L470">		this.height = height;</span>
+<span class="nc" id="L471">	}</span>
+
+	public String getTag() {
+<span class="nc" id="L474">		return tag;</span>
+	}
+
+	public void setTag(String tag) {
+<span class="nc" id="L478">		this.tag = tag;</span>
+<span class="nc" id="L479">	}</span>
+
+	public Double getBoundX() {
+<span class="nc" id="L482">		return boundX;</span>
+	}
+
+	public void setBoundX(Double boundX) {
+<span class="nc" id="L486">		this.boundX = boundX;</span>
+<span class="nc" id="L487">	}</span>
+
+	public Double getBoundY() {
+<span class="nc" id="L490">		return boundY;</span>
+	}
+
+	public void setBoundY(Double boundY) {
+<span class="nc" id="L494">		this.boundY = boundY;</span>
+<span class="nc" id="L495">	}</span>
+
+	//----------------------------------------------------------------------------------------------------------------------
+	// Remote element
+	//----------------------------------------------------------------------------------------------------------------------
+
+	public RemoteWebElement getRemoteWebElement(RemoteWebDriver driver) {
+<span class="nc" id="L502">		final RemoteWebElement element = new RemoteWebElement();</span>
+
+<span class="nc" id="L504">		element.setParent(driver);</span>
+<span class="nc" id="L505">		element.setId(id);</span>
+
+<span class="nc" id="L507">		return element;</span>
+	}
+
+	public TestBound getTestBound() {
+<span class="nc" id="L511">		return new TestBound(x, y, width, height);</span>
+	}
+
+	public TestBound getTestScreenBound() {
+<span class="nc" id="L515">		return new TestBound(screenX, screenY, width, height);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

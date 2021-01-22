@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FirefoxDriverEngine.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.executor.drivers.engines.browsers</a> &gt; <span class="el_source">FirefoxDriverEngine.java</span></div><h1>FirefoxDriverEngine.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.executor.drivers.engines.browsers;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.remote.DesiredCapabilities;
+
+import com.ats.driver.ApplicationProperties;
+import com.ats.element.FoundElement;
+import com.ats.element.TestElement;
+import com.ats.executor.ActionStatus;
+import com.ats.executor.SendKeyData;
+import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.DriverProcess;
+import com.ats.executor.drivers.desktop.DesktopDriver;
+import com.ats.executor.drivers.engines.WebDriverEngine;
+import com.ats.generator.objects.MouseDirection;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
+import okhttp3.OkHttpClient;
+import okhttp3.OkHttpClient.Builder;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
+public class FirefoxDriverEngine extends WebDriverEngine {
+
+	private final static int DEFAULT_WAIT = 250;
+	private final static int DEFAULT_PROPERTY_WAIT = 250;
+
+	private OkHttpClient client;
+
+	private static final String BINARY = &quot;firefox_binary&quot;;
+
+	public FirefoxDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
+<span class="nc" id="L61">		super(channel, driverProcess, windowsDriver, props, DEFAULT_WAIT, DEFAULT_PROPERTY_WAIT);</span>
+
+<span class="nc" id="L63">		final DesiredCapabilities capabilities = DesiredCapabilities.firefox();</span>
+<span class="nc" id="L64">		capabilities.setCapability(&quot;acceptSslCerts &quot;, true);</span>
+<span class="nc" id="L65">		capabilities.setCapability(&quot;acceptInsecureCerts &quot;, true);</span>
+<span class="nc" id="L66">		capabilities.setCapability(&quot;security.fileuri.strict_origin_policy&quot;, false);</span>
+<span class="nc" id="L67">		capabilities.setCapability(&quot;app.update.disabledForTesting&quot;, true);</span>
+		//options.setCapability(&quot;marionnette &quot;, true);
+		//options.setCapability(&quot;nativeEvents&quot;, false);
+
+<span class="nc bnc" id="L71" title="All 2 branches missed.">		if(applicationPath != null) {</span>
+<span class="nc" id="L72">			capabilities.setCapability(BINARY, applicationPath);</span>
+		}
+
+<span class="nc bnc" id="L75" title="All 2 branches missed.">		if(props.getUserDataDir() != null) {</span>
+<span class="nc" id="L76">			final FirefoxProfile profile = new FirefoxProfile(new File(props.getUserDataDir()));</span>
+<span class="nc" id="L77">			capabilities.setCapability(FirefoxDriver.PROFILE, profile);</span>
+		}
+		
+<span class="nc bnc" id="L80" title="All 2 branches missed.">		if(props.getOptions() != null) {</span>
+			//TODO
+		}
+
+<span class="nc" id="L84">		final Builder builder = new Builder()</span>
+<span class="nc" id="L85">				.connectTimeout(20, TimeUnit.SECONDS)</span>
+<span class="nc" id="L86">				.writeTimeout(20, TimeUnit.SECONDS)</span>
+<span class="nc" id="L87">				.readTimeout(20, TimeUnit.SECONDS)</span>
+<span class="nc" id="L88">				.cache(null);</span>
+
+<span class="nc" id="L90">		client = builder.build();</span>
+
+<span class="nc" id="L92">		launchDriver(status, capabilities, props.getUserDataDir());</span>
+<span class="nc" id="L93">	}</span>
+	
+	@Override
+	protected CharSequence getSequenceData(SendKeyData seq) {
+<span class="nc" id="L97">		return seq.getSequenceWeb(false);</span>
+	}
+
+	@Override
+	public void close(boolean keepRunning) {
+<span class="nc bnc" id="L102" title="All 2 branches missed.">		if(!keepRunning) {</span>
+<span class="nc" id="L103">			getDesktopDriver().closeWindows(channel.getProcessId());</span>
+		}
+<span class="nc" id="L105">		getDriverProcess().close(keepRunning);</span>
+		/*if(driver != null){
+			driver.quit();
+
+		}*/
+
+		//super.close();
+<span class="nc" id="L112">	}</span>
+
+	@Override
+	protected boolean switchToWindowHandle(String handle) {
+<span class="nc bnc" id="L116" title="All 2 branches missed.">		if(super.switchToWindowHandle(handle)) {</span>
+<span class="nc" id="L117">			actionWait();</span>
+<span class="nc" id="L118">			return true;</span>
+		}
+<span class="nc" id="L120">		return false;</span>
+	}
+
+	@Override
+	protected void switchToFrame(WebElement we) {
+<span class="nc" id="L125">		super.switchToFrame(we);</span>
+<span class="nc" id="L126">		actionWait();</span>
+<span class="nc" id="L127">	}</span>
+
+	@Override
+	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {
+<span class="nc" id="L131">		middleClickSimulation(status, position, element);</span>
+<span class="nc" id="L132">	}</span>
+
+	@Override
+	protected void move(FoundElement element, int offsetX, int offsetY) {
+
+		//-----------------------------------------------------------------------------------------------------
+		// I don't know why, but we have to do that to make click action reliable with Firefox and geckodriver
+		//-----------------------------------------------------------------------------------------------------
+
+<span class="nc" id="L141">		element.getValue().getTagName();</span>
+<span class="nc" id="L142">		element.getValue().getRect();</span>
+
+		//--------------------------------------------------------------------------------------------
+
+<span class="nc" id="L146">		final JsonArray actionList = new JsonArray();</span>
+
+<span class="nc" id="L148">		actionList.add(getMoveAction(getElementOrigin(element.getId()), offsetX, offsetY));</span>
+<span class="nc" id="L149">		executeRequestActions(getElementAction(actionList));</span>
+<span class="nc" id="L150">	}</span>
+
+	@Override
+	protected void click(FoundElement element, int offsetX, int offsetY) {
+
+<span class="nc" id="L155">		move(element, offsetX, offsetY);</span>
+<span class="nc" id="L156">		channel.sleep(30);</span>
+
+<span class="nc" id="L158">		final JsonObject origin = getElementOrigin(element.getId());</span>
+
+<span class="nc" id="L160">		final JsonArray actionList = new JsonArray();</span>
+<span class="nc" id="L161">		actionList.add(getMouseClickAction(origin, &quot;pointerDown&quot;));</span>
+<span class="nc" id="L162">		actionList.add(getMouseClickAction(origin, &quot;pointerUp&quot;));</span>
+
+<span class="nc" id="L164">		executeRequestActions(getElementAction(actionList));</span>
+<span class="nc" id="L165">	}</span>
+
+	@Override
+	public void doubleClick() {
+<span class="nc" id="L169">		final JsonArray actionList = new JsonArray();</span>
+<span class="nc" id="L170">		actionList.add(getMouseClickAction(&quot;pointerDown&quot;));</span>
+<span class="nc" id="L171">		actionList.add(getMouseClickAction(&quot;pointerUp&quot;));</span>
+<span class="nc" id="L172">		actionList.add(getMouseClickAction(&quot;pointerDown&quot;));</span>
+<span class="nc" id="L173">		actionList.add(getMouseClickAction(&quot;pointerUp&quot;));	</span>
+<span class="nc" id="L174">		executeRequestActions(getElementAction(actionList));</span>
+<span class="nc" id="L175">	}</span>
+
+	@Override
+	protected void loadUrl(String url) {
+<span class="nc" id="L179">		final JsonObject parameters = new JsonObject();</span>
+<span class="nc" id="L180">		parameters.addProperty(&quot;url&quot;, url);</span>
+
+<span class="nc" id="L182">		executeRequest(parameters, &quot;url&quot;);</span>
+<span class="nc" id="L183">	}</span>
+
+	private JsonObject getMouseClickAction(JsonObject origin, String type) {
+<span class="nc" id="L186">		final JsonObject action = new JsonObject();</span>
+<span class="nc" id="L187">		action.addProperty(&quot;duration&quot;, 20);</span>
+<span class="nc" id="L188">		action.addProperty(&quot;type&quot;, type);</span>
+<span class="nc" id="L189">		action.addProperty(&quot;button&quot;, 0);</span>
+<span class="nc" id="L190">		action.add(&quot;origin&quot;, origin);</span>
+<span class="nc" id="L191">		return action;</span>
+	}
+
+	private JsonObject getMouseClickAction(String type) {
+<span class="nc" id="L195">		final JsonObject action = new JsonObject();</span>
+<span class="nc" id="L196">		action.addProperty(&quot;duration&quot;, 20);</span>
+<span class="nc" id="L197">		action.addProperty(&quot;type&quot;, type);</span>
+<span class="nc" id="L198">		action.addProperty(&quot;button&quot;, 0);</span>
+<span class="nc" id="L199">		return action;</span>
+	}
+
+	private JsonObject getMoveAction(JsonObject origin, int offsetX, int offsetY) {
+<span class="nc" id="L203">		final JsonObject action = new JsonObject();</span>
+<span class="nc" id="L204">		action.addProperty(&quot;duration&quot;, 150);</span>
+<span class="nc" id="L205">		action.addProperty(&quot;x&quot;, offsetX);</span>
+<span class="nc" id="L206">		action.addProperty(&quot;y&quot;, offsetY);</span>
+<span class="nc" id="L207">		action.addProperty(&quot;type&quot;, &quot;pointerMove&quot;);</span>
+<span class="nc" id="L208">		action.add(&quot;origin&quot;, origin);</span>
+<span class="nc" id="L209">		return action;</span>
+	}
+
+	private JsonObject getElementOrigin(String elemId) {
+<span class="nc" id="L213">		final JsonObject origin = new JsonObject();</span>
+<span class="nc" id="L214">		origin.addProperty(&quot;ELEMENT&quot;, elemId);</span>
+<span class="nc" id="L215">		origin.addProperty(WEB_ELEMENT_REF, elemId);</span>
+<span class="nc" id="L216">		return origin;</span>
+	}
+
+	private JsonObject getElementAction(JsonArray actionList) {
+
+<span class="nc" id="L221">		final JsonObject parameters = new JsonObject();</span>
+<span class="nc" id="L222">		parameters.addProperty(&quot;pointerType&quot;, &quot;mouse&quot;);</span>
+
+<span class="nc" id="L224">		final JsonObject actions = new JsonObject();</span>
+
+<span class="nc" id="L226">		actions.addProperty(&quot;id&quot;, &quot;default mouse&quot;);</span>
+<span class="nc" id="L227">		actions.addProperty(&quot;type&quot;, &quot;pointer&quot;);</span>
+
+<span class="nc" id="L229">		actions.add(&quot;parameters&quot;, parameters);</span>
+<span class="nc" id="L230">		actions.add(&quot;actions&quot;, actionList);</span>
+
+<span class="nc" id="L232">		final JsonArray chainedAction = new JsonArray();</span>
+<span class="nc" id="L233">		chainedAction.add(actions);</span>
+
+<span class="nc" id="L235">		final JsonObject postData = new JsonObject();</span>
+<span class="nc" id="L236">		postData.add(&quot;actions&quot;, chainedAction);</span>
+
+<span class="nc" id="L238">		return postData;</span>
+	}
+
+	private void executeRequestActions(JsonObject action) {
+<span class="nc" id="L242">		executeRequest(action, &quot;actions&quot;);</span>
+<span class="nc" id="L243">	}</span>
+
+	private void executeRequest(JsonObject action, String type) {
+
+<span class="nc" id="L247">		final Request request = new Request.Builder()</span>
+<span class="nc" id="L248">				.url(driverSession + &quot;/&quot; + type)</span>
+<span class="nc" id="L249">				.addHeader(&quot;Content-Type&quot;, &quot;application/json&quot;)</span>
+<span class="nc" id="L250">				.post(RequestBody.create(null, action.toString()))</span>
+<span class="nc" id="L251">				.build();</span>
+
+		try {
+<span class="nc" id="L254">			final Response response = client.newCall(request).execute();</span>
+<span class="nc" id="L255">			response.close();</span>
+<span class="nc" id="L256">		} catch (IOException e) {</span>
+<span class="nc" id="L257">			throw new WebDriverException(&quot;Geckodriver hangup issue after mouse move action (try to raise up 'actionWait' value in ATS properties for firefox)&quot;);</span>
+<span class="nc" id="L258">		}</span>
+<span class="nc" id="L259">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

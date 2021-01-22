@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ParameterDataFile.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.generator.variables.parameter</a> &gt; <span class="el_source">ParameterDataFile.java</span></div><h1>ParameterDataFile.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.generator.variables.parameter;
+
+import com.google.common.io.CharStreams;
+import com.google.common.io.Closeables;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
+public class ParameterDataFile{
+
+	public static final String CSV_TYPE = &quot;csv&quot;;
+	public static final String JSON_TYPE = &quot;json&quot;;
+	public static final String JSON_SIMPLE_TYPE = &quot;jsonSimple&quot;;
+	public static final String JSON_COMPLEX_TYPE = &quot;jsonComplex&quot;;
+
+<span class="nc" id="L49">	private String dataType = CSV_TYPE;</span>
+<span class="nc" id="L50">	private ArrayList&lt;ParameterList&gt; data = new ArrayList&lt;ParameterList&gt;();</span>
+
+<span class="nc" id="L52">	private String error = &quot;&quot;;</span>
+<span class="nc" id="L53">	private boolean editable = true;</span>
+<span class="nc" id="L54">	private int maxCols = 0;</span>
+
+<span class="nc" id="L56">	public ParameterDataFile() {}</span>
+
+<span class="nc" id="L58">	public ParameterDataFile(URL url) {</span>
+
+<span class="nc bnc" id="L60" title="All 2 branches missed.">		this.editable = !url.getProtocol().startsWith(&quot;http&quot;);</span>
+
+<span class="nc" id="L62">		String content = null;</span>
+		try {
+<span class="nc" id="L64">			final InputStreamReader stream = new InputStreamReader(url.openStream(), StandardCharsets.UTF_8);</span>
+<span class="nc" id="L65">			content = CharStreams.toString(stream);</span>
+<span class="nc" id="L66">			Closeables.closeQuietly(stream);</span>
+<span class="nc" id="L67">		} catch (IOException e1) {</span>
+<span class="nc" id="L68">			error = e1.getMessage();</span>
+<span class="nc" id="L69">			return;</span>
+<span class="nc" id="L70">		}</span>
+
+<span class="nc bnc" id="L72" title="All 2 branches missed.">		if(url.getPath().endsWith(&quot;.csv&quot;)) {</span>
+<span class="nc" id="L73">			readCsvData(content);</span>
+		}else {
+
+<span class="nc" id="L76">			final JsonElement jsonElement = getJsonElement(content);</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">			if(jsonElement != null) {</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">				if(jsonElement.isJsonArray()) {</span>
+<span class="nc" id="L79">					this.dataType = JSON_COMPLEX_TYPE;</span>
+
+<span class="nc" id="L81">					final JsonArray jsonArray = jsonElement.getAsJsonArray();</span>
+
+<span class="nc" id="L83">					int iteration = 0;</span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">					for (JsonElement line : jsonArray) {</span>
+
+<span class="nc bnc" id="L86" title="All 2 branches missed.">						if(line.isJsonObject()) {</span>
+<span class="nc" id="L87">							final ParameterList newLine = new ParameterList(iteration);</span>
+<span class="nc" id="L88">							final AtomicInteger colIndex = new AtomicInteger(0);</span>
+<span class="nc" id="L89">							line.getAsJsonObject().entrySet().forEach(e -&gt; newLine.addParameter(new Parameter(colIndex.getAndIncrement(), e.getKey(), e.getValue().getAsString())));</span>
+<span class="nc" id="L90">							data.add(newLine);</span>
+						}
+<span class="nc" id="L92">						iteration++;</span>
+<span class="nc" id="L93">					}</span>
+
+<span class="nc bnc" id="L95" title="All 2 branches missed.">				}else if(jsonElement.isJsonObject()) {</span>
+
+<span class="nc" id="L97">					this.dataType = JSON_TYPE;</span>
+
+<span class="nc" id="L99">					final JsonObject jsonObject = jsonElement.getAsJsonObject();</span>
+
+<span class="nc bnc" id="L101" title="All 6 branches missed.">					if(jsonObject.has(&quot;paramNames&quot;) &amp;&amp; jsonObject.has(&quot;paramValues&quot;) &amp;&amp; jsonObject.size() == 2) {</span>
+
+						try {
+<span class="nc" id="L104">							final JsonArray paramNames = jsonObject.get(&quot;paramNames&quot;).getAsJsonArray();</span>
+<span class="nc" id="L105">							final JsonArray paramValues = jsonObject.get(&quot;paramValues&quot;).getAsJsonArray();</span>
+
+<span class="nc bnc" id="L107" title="All 2 branches missed.">							if(paramNames.size() == paramValues.size()) {</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">								for (int i = 0; i&lt;paramValues.size(); i++){</span>
+<span class="nc" id="L109">									final JsonArray iterations = paramValues.get(i).getAsJsonArray();</span>
+
+<span class="nc bnc" id="L111" title="All 2 branches missed.">									for (int j = 0; j&lt;iterations.size(); j++){</span>
+
+<span class="nc" id="L113">										String paramName = &quot;&quot;;</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">										if(i &lt; paramNames.size()) {</span>
+<span class="nc" id="L115">											paramName = paramNames.get(i).getAsString();</span>
+										}
+
+<span class="nc bnc" id="L118" title="All 2 branches missed.">										if(data.size() &lt; j+1) {</span>
+<span class="nc" id="L119">											data.add(new ParameterList(j));</span>
+										}
+<span class="nc" id="L121">										final ParameterList row = data.get(j);</span>
+<span class="nc" id="L122">										row.addParameter(new Parameter(j, paramName, iterations.get(j).getAsString()));</span>
+									}
+								}
+
+<span class="nc" id="L126">								return;</span>
+							}
+<span class="nc" id="L128">						}catch(IllegalStateException e) {}</span>
+					}
+
+<span class="nc" id="L131">					this.dataType = JSON_SIMPLE_TYPE;</span>
+<span class="nc" id="L132">					parseJsonObject(jsonObject);</span>
+<span class="nc" id="L133">				}</span>
+
+			}else {
+<span class="nc" id="L136">				readCsvData(content);</span>
+			}
+		}
+<span class="nc" id="L139">	}</span>
+
+	private void readCsvData(String content) {
+<span class="nc" id="L142">		final CSVReader reader = new CSVReader(new StringReader(content));</span>
+		try {
+<span class="nc" id="L144">			final List&lt;String[]&gt; csvList = reader.readAll();</span>
+<span class="nc" id="L145">			reader.close();</span>
+
+<span class="nc" id="L147">			setMaxCols(data.size());</span>
+<span class="nc" id="L148">			csvList.forEach(l -&gt; addCsvLine(data, l));</span>
+<span class="nc" id="L149">		} catch (IOException | CsvException e) {</span>
+<span class="nc" id="L150">			error = e.getMessage();</span>
+<span class="nc" id="L151">		}</span>
+<span class="nc" id="L152">	}</span>
+
+	private void parseJsonObject(JsonObject jsonObject) {
+<span class="nc" id="L155">		final AtomicInteger colIndex = new AtomicInteger(0);</span>
+<span class="nc" id="L156">		jsonObject.keySet().forEach(c -&gt; addCol(data, jsonObject, c, colIndex.getAndIncrement()));</span>
+<span class="nc" id="L157">	}</span>
+
+	public boolean noError() {
+<span class="nc bnc" id="L160" title="All 4 branches missed.">		return error == null || error.isEmpty();</span>
+	}
+
+	private static void addCol(ArrayList&lt;ParameterList&gt; list, JsonObject obj, String colName, int colIndex) {
+
+<span class="nc" id="L165">		final JsonArray data = obj.get(colName).getAsJsonArray();</span>
+<span class="nc" id="L166">		final AtomicInteger line = new AtomicInteger(0);</span>
+
+<span class="nc" id="L168">		data.forEach(e -&gt; addLine(list, e, line.getAndIncrement(), data, colName, colIndex));</span>
+<span class="nc" id="L169">	}</span>
+
+	private static void addLine(ArrayList&lt;ParameterList&gt; list, JsonElement elem, int line, JsonArray data, String colName, int colIndex) {
+<span class="nc bnc" id="L172" title="All 4 branches missed.">		if(elem != null &amp;&amp; elem.isJsonPrimitive()) {</span>
+<span class="nc bnc" id="L173" title="All 2 branches missed.">			if(list.size() &lt; line + 1){</span>
+<span class="nc" id="L174">				list.add(new ParameterList(line));</span>
+			}
+<span class="nc" id="L176">			final ParameterList currentLine = list.get(line);</span>
+<span class="nc" id="L177">			currentLine.addParameter(new Parameter(colIndex, colName, data.get(line).getAsString()));</span>
+		}
+<span class="nc" id="L179">	}</span>
+
+	private static void addCsvLine(ArrayList&lt;ParameterList&gt; result, String[] line) {
+<span class="nc" id="L182">		final AtomicInteger col = new AtomicInteger(0);</span>
+<span class="nc" id="L183">		result.add(new ParameterList(result.size(), Arrays.stream(line).map(l -&gt; new Parameter(col.getAndIncrement(), l)).collect(Collectors.toList())));</span>
+<span class="nc" id="L184">	}</span>
+
+	private static JsonElement getJsonElement(String content) {
+		try {
+<span class="nc" id="L188">			return JsonParser.parseString(content);</span>
+<span class="nc" id="L189">		} catch(com.google.gson.JsonSyntaxException ex) { </span>
+<span class="nc" id="L190">			return null;</span>
+		}
+	}
+
+	public int getSize() {
+<span class="nc" id="L195">		return data.size();</span>
+	}
+
+	public ParameterList getData(int index) {
+<span class="nc bnc" id="L199" title="All 2 branches missed.">		if(getSize() &gt; index) {</span>
+<span class="nc" id="L200">			return data.get(index);</span>
+<span class="nc bnc" id="L201" title="All 2 branches missed.">		}else if(getSize() &gt; 0) {</span>
+<span class="nc" id="L202">			return data.get(0);</span>
+		}
+<span class="nc" id="L204">		return null;</span>
+	}
+
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------
+
+	public String getDataType() {
+<span class="nc" id="L212">		return dataType;</span>
+	}
+
+	public void setDataType(String type) {
+<span class="nc" id="L216">		this.dataType = type;</span>
+<span class="nc" id="L217">	}</span>
+
+	public ArrayList&lt;ParameterList&gt; getData() {
+<span class="nc" id="L220">		return data;</span>
+	}
+
+	public void setData(ArrayList&lt;ParameterList&gt; list) {
+<span class="nc" id="L224">		this.data = list;</span>
+<span class="nc" id="L225">	}</span>
+
+	public String getError() {
+<span class="nc" id="L228">		return error;</span>
+	}
+
+	public void setError(String error) {
+<span class="nc" id="L232">		this.error = error;</span>
+<span class="nc" id="L233">	}</span>
+
+	public boolean isEditable() {
+<span class="nc" id="L236">		return editable;</span>
+	}
+
+	public void setEditable(boolean editable) {
+<span class="nc" id="L240">		this.editable = editable;</span>
+<span class="nc" id="L241">	}</span>
+
+	public int getMaxCols() {
+<span class="nc" id="L244">		return maxCols;</span>
+	}
+
+	public void setMaxCols(int maxCols) {
+<span class="nc bnc" id="L248" title="All 2 branches missed.">		if(maxCols &gt; this.maxCols) {</span>
+<span class="nc" id="L249">			this.maxCols = maxCols;</span>
+		}
+<span class="nc" id="L251">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

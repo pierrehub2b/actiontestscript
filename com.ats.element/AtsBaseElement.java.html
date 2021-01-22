@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AtsBaseElement.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.element</a> &gt; <span class="el_source">AtsBaseElement.java</span></div><h1>AtsBaseElement.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+*/
+
+package com.ats.element;
+
+import java.util.Map;
+
+<span class="nc" id="L24">public class AtsBaseElement {</span>
+	
+	protected String id;
+	protected String tag;
+<span class="nc" id="L28">	protected Double width = 0D;</span>
+<span class="nc" id="L29">	protected Double height = 0D;</span>
+<span class="nc" id="L30">	protected Double x = 0D;</span>
+<span class="nc" id="L31">	protected Double y = 0D;</span>
+	protected Map&lt;String, String&gt; attributes;
+	
+	public String getId() {
+<span class="nc" id="L35">		return id;</span>
+	}
+
+	public void setId(String id) {
+<span class="nc" id="L39">		this.id = id;</span>
+<span class="nc" id="L40">	}</span>
+
+	public String getTag() {
+<span class="nc" id="L43">		return tag;</span>
+	}
+
+	public void setTag(String tag) {
+<span class="nc" id="L47">		this.tag = tag;</span>
+<span class="nc" id="L48">	}</span>
+
+	public Double getX() {
+<span class="nc" id="L51">		return x;</span>
+	}
+
+	public void setX(Double x) {
+<span class="nc" id="L55">		this.x = x;</span>
+<span class="nc" id="L56">	}</span>
+
+	public Double getY() {
+<span class="nc" id="L59">		return y;</span>
+	}
+
+	public void setY(Double y) {
+<span class="nc" id="L63">		this.y = y;</span>
+<span class="nc" id="L64">	}</span>
+
+	public Double getWidth() {
+<span class="nc" id="L67">		return width;</span>
+	}
+
+	public void setWidth(Double width) {
+<span class="nc" id="L71">		this.width = width;</span>
+<span class="nc" id="L72">	}</span>
+
+	public Double getHeight() {
+<span class="nc" id="L75">		return height;</span>
+	}
+
+	public void setHeight(Double height) {
+<span class="nc" id="L79">		this.height = height;</span>
+<span class="nc" id="L80">	}</span>
+	
+	//----------------------------------------------------------------------------------------
+	// Predicate search
+	//----------------------------------------------------------------------------------------
+
+	public String getAttribute(String key) {
+<span class="nc" id="L87">		return attributes.get(key);</span>
+	}
+	
+	public Map&lt;String, String&gt; getAttributesMap() {
+<span class="nc" id="L91">		return attributes;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

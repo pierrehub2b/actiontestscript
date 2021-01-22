@@ -1,0 +1,790 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AtsManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.driver</a> &gt; <span class="el_source">AtsManager.java</span></div><h1>AtsManager.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.driver;
+
+import com.ats.executor.ActionTestScript;
+import com.ats.executor.TestBound;
+import com.ats.generator.ATS;
+import com.ats.tools.AtsClassLoader;
+import com.ats.tools.Utils;
+import com.ats.tools.performance.external.OctoperfApi;
+import com.ats.tools.wait.IWaitGuiReady;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
+public class AtsManager {
+
+	public static final String ATS_FOLDER = &quot;.actiontestscript&quot;;
+
+	private static final String DRIVERS_FOLDER = &quot;drivers&quot;;
+	private static final String ATS_PROPERTIES_FILE = &quot;.atsProperties&quot;;
+
+<span class="fc" id="L54">	private static final Double APPLICATION_WIDTH = 1280.00;</span>
+<span class="fc" id="L55">	private static final Double APPLICATION_HEIGHT = 960.00;</span>
+
+<span class="fc" id="L57">	private static final Double APPLICATION_X = 10.00;</span>
+<span class="fc" id="L58">	private static final Double APPLICATION_Y = 10.00;</span>
+
+	private static final int SCRIPT_TIMEOUT = 60;
+	private static final int PAGELOAD_TIMEOUT = 120;
+	private static final int WATCHDOG_TIMEOUT = 200;
+	private static final int WEBSERVICE_TIMEOUT = 20;
+
+	private static final int MAX_TRY_SEARCH = 15;
+	private static final int MAX_TRY_PROPERTY = 10;
+	private static final int MAX_TRY_WEBSERVICE = 1;
+	private static final int MAX_TRY_IMAGE_RECOGNITION = 20;
+
+	private static final int MAX_TRY_MOBILE = 5;
+
+	private static final int SCROLL_UNIT = 120;
+	private static final int MAX_STALE_OR_JAVASCRIPT_ERROR = 20;
+
+	private static final int CAPTURE_PROXY_TRAFFIC_IDLE = 3;
+
+	//-----------------------------------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------------------------
+
+	private Path driversFolderPath;
+	private Properties properties;
+
+<span class="fc" id="L83">	private double applicationWidth = APPLICATION_WIDTH;</span>
+<span class="fc" id="L84">	private double applicationHeight = APPLICATION_HEIGHT;</span>
+
+<span class="fc" id="L86">	private double applicationX = APPLICATION_X;</span>
+<span class="fc" id="L87">	private double applicationY = APPLICATION_Y;</span>
+
+<span class="fc" id="L89">	private int scriptTimeOut = SCRIPT_TIMEOUT;</span>
+<span class="fc" id="L90">	private int pageloadTimeOut = PAGELOAD_TIMEOUT;</span>
+<span class="fc" id="L91">	private int watchDogTimeOut = WATCHDOG_TIMEOUT;</span>
+
+<span class="fc" id="L93">	private int webServiceTimeOut = WEBSERVICE_TIMEOUT;</span>
+
+<span class="fc" id="L95">	private int maxTrySearch = MAX_TRY_SEARCH;</span>
+<span class="fc" id="L96">	private int maxTryProperty = MAX_TRY_PROPERTY;</span>
+<span class="fc" id="L97">	private int maxTryWebservice = MAX_TRY_WEBSERVICE;</span>
+<span class="fc" id="L98">	private int maxTryMobile = MAX_TRY_MOBILE;</span>
+<span class="fc" id="L99">	private int maxTryImageRecognition = MAX_TRY_IMAGE_RECOGNITION;</span>
+
+	private AtsProxy proxy;
+	private AtsProxy neoloadProxy;
+
+	private String neoloadDesignApi;
+
+	private OctoperfApi octoperf;
+	private ArrayList&lt;String&gt; blackListServers;
+<span class="fc" id="L108">	private int trafficIdle = CAPTURE_PROXY_TRAFFIC_IDLE;</span>
+
+<span class="fc" id="L110">	private List&lt;ApplicationProperties&gt; applicationsList = new ArrayList&lt;ApplicationProperties&gt;();</span>
+
+	private String error;
+
+	public static int getScrollUnit() {
+<span class="fc" id="L115">		return SCROLL_UNIT;</span>
+	}
+
+	public static int getMaxStaleOrJavaScriptError() {
+<span class="nc" id="L119">		return MAX_STALE_OR_JAVASCRIPT_ERROR;</span>
+	}
+
+	private static String getElementText(Node node) {
+<span class="nc" id="L123">		return getElementText((Element)node);</span>
+	}
+
+	private static String getElementText(Element elem) {
+<span class="nc bnc" id="L127" title="All 2 branches missed.">		if(elem != null) {</span>
+<span class="nc" id="L128">			final String textContent = elem.getTextContent();</span>
+<span class="nc bnc" id="L129" title="All 4 branches missed.">			if(textContent != null &amp;&amp; textContent.length() &gt; 0) {</span>
+<span class="nc" id="L130">				return textContent.replaceAll(&quot;\n&quot;, &quot;&quot;).replaceAll(&quot;\r&quot;, &quot;&quot;).trim();</span>
+			}
+		}
+<span class="nc" id="L133">		return null;</span>
+	}
+
+	private static double getElementDouble(Element elem) {
+<span class="nc" id="L137">		final String value = elem.getTextContent().replaceAll(&quot;\n&quot;, &quot;&quot;).replaceAll(&quot;\r&quot;, &quot;&quot;).trim();</span>
+		try {
+<span class="nc" id="L139">			return Double.parseDouble(value);</span>
+<span class="nc" id="L140">		}catch(NumberFormatException e){}</span>
+<span class="nc" id="L141">		return 0D;</span>
+	}
+
+	private static int getElementInt(Element elem) {
+<span class="nc" id="L145">		final String value = elem.getTextContent().replaceAll(&quot;\n&quot;, &quot;&quot;).replaceAll(&quot;\r&quot;, &quot;&quot;).trim();</span>
+		try {
+<span class="nc" id="L147">			return Integer.parseInt(value);</span>
+<span class="nc" id="L148">		}catch(NumberFormatException e){}</span>
+<span class="nc" id="L149">		return 0;</span>
+	}
+
+	//-----------------------------------------------------------------------------------------------
+	// Singleton management
+	//-----------------------------------------------------------------------------------------------
+
+	private static volatile AtsManager singleInstance;
+
+	public static AtsManager getInstance() {
+<span class="fc bfc" id="L159" title="All 2 branches covered.">		if (singleInstance == null) {</span>
+<span class="fc" id="L160">			synchronized (AtsManager.class) {</span>
+<span class="pc bpc" id="L161" title="1 of 2 branches missed.">				if (singleInstance == null) {</span>
+<span class="fc" id="L162">					singleInstance = new AtsManager();</span>
+<span class="fc" id="L163">					singleInstance.init();</span>
+				}
+<span class="fc" id="L165">			}</span>
+		}
+<span class="fc" id="L167">		return singleInstance;</span>
+	}
+
+<span class="fc" id="L170">	private AtsManager(){</span>
+<span class="pc bpc" id="L171" title="1 of 2 branches missed.">		if (singleInstance != null){</span>
+<span class="nc" id="L172">			throw new RuntimeException(&quot;Use getInstance() method to get the single instance of this class.&quot;);</span>
+		}
+<span class="fc" id="L174">	}</span>
+
+	public static String getAtsHomeFolder() {
+<span class="fc" id="L177">		String atsHome = System.getProperty(&quot;ats.home&quot;);</span>
+<span class="pc bpc" id="L178" title="3 of 4 branches missed.">		if(atsHome == null || atsHome.length() == 0) {</span>
+<span class="fc" id="L179">			atsHome = System.getenv(&quot;ATS_HOME&quot;);</span>
+<span class="pc bpc" id="L180" title="3 of 4 branches missed.">			if(atsHome == null || atsHome.length() == 0) {</span>
+<span class="fc" id="L181">				atsHome = System.getProperty(&quot;user.home&quot;) + File.separator + ATS_FOLDER;</span>
+			}
+		}
+<span class="fc" id="L184">		return atsHome;</span>
+	}
+
+	//-----------------------------------------------------------------------------------------------
+	// Instance management
+	//-----------------------------------------------------------------------------------------------
+
+	private AtsClassLoader atsClassLoader;
+
+	public void init() {
+
+<span class="fc" id="L195">		final String atsHome = getAtsHomeFolder();</span>
+
+<span class="fc" id="L197">		final Path atsFolderPath = Paths.get(atsHome);</span>
+<span class="pc bpc" id="L198" title="1 of 2 branches missed.">		if(atsFolderPath.toFile().exists()) {</span>
+<span class="nc" id="L199">			properties = loadProperties(atsFolderPath.resolve(ATS_PROPERTIES_FILE));</span>
+<span class="nc" id="L200">			driversFolderPath = atsFolderPath.resolve(DRIVERS_FOLDER);</span>
+		}else {
+<span class="fc" id="L202">			driversFolderPath = Paths.get(&quot;&quot;);</span>
+<span class="fc" id="L203">			ATS.logWarn(&quot;ATS driver folder not found -&gt; &quot; + atsHome);</span>
+		}
+
+<span class="pc bpc" id="L206" title="1 of 2 branches missed.">		if(proxy == null) {</span>
+<span class="fc" id="L207">			proxy = new AtsProxy(AtsProxy.SYSTEM);</span>
+		}
+
+<span class="fc" id="L210">		atsClassLoader = new AtsClassLoader();</span>
+<span class="fc" id="L211">	}</span>
+
+	public IWaitGuiReady getWaitGuiReady() {
+<span class="fc" id="L214">		return atsClassLoader.getWaitGuiReady();</span>
+	}
+
+	public Class&lt;ActionTestScript&gt; loadTestScriptClass(String name) {
+<span class="nc" id="L218">		return atsClassLoader.loadTestScriptClass(name);</span>
+	}
+
+	//-----------------------------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------------------
+
+	private Properties loadProperties(Path propertiesPath) {
+
+<span class="nc" id="L226">		final File xmlFile = propertiesPath.toFile();</span>
+<span class="nc bnc" id="L227" title="All 2 branches missed.">		if(xmlFile.exists()) {</span>
+
+			try {
+<span class="nc" id="L230">				final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();</span>
+				try {
+<span class="nc" id="L232">					final DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();</span>
+<span class="nc" id="L233">					final Document doc = dBuilder.parse(xmlFile);</span>
+
+<span class="nc" id="L235">					doc.getDocumentElement().normalize();</span>
+
+<span class="nc" id="L237">					final NodeList executeChildren = ((Element) doc.getChildNodes().item(0)).getChildNodes();</span>
+<span class="nc bnc" id="L238" title="All 2 branches missed.">					for (int i = 0; i &lt; executeChildren.getLength(); i++) {</span>
+<span class="nc bnc" id="L239" title="All 2 branches missed.">						if (executeChildren.item(i) instanceof Element) {</span>
+
+<span class="nc" id="L241">							final Element type = (Element) executeChildren.item(i);</span>
+<span class="nc" id="L242">							String url = null;</span>
+
+<span class="nc bnc" id="L244" title="All 11 branches missed.">							switch (type.getNodeName().toLowerCase()) {</span>
+
+								case &quot;performance&quot;:
+<span class="nc" id="L247">									final NodeList perfChildren = type.getChildNodes();</span>
+<span class="nc bnc" id="L248" title="All 2 branches missed.">									for (int j = 0; j &lt; perfChildren.getLength(); j++) {</span>
+<span class="nc bnc" id="L249" title="All 2 branches missed.">										if (perfChildren.item(j) instanceof Element) {</span>
+
+<span class="nc" id="L251">											final Element perfElement = (Element) perfChildren.item(j);</span>
+<span class="nc bnc" id="L252" title="All 4 branches missed.">											switch(perfElement.getNodeName().toLowerCase()) {</span>
+
+												case &quot;idle&quot;:
+<span class="nc" id="L255">													trafficIdle = getElementInt(perfElement);</span>
+<span class="nc" id="L256">													break;</span>
+												case &quot;octoperf&quot;:
+
+<span class="nc" id="L259">													String host = null;</span>
+<span class="nc" id="L260">													String apiKey = null;</span>
+<span class="nc" id="L261">													String workspaceName = null;</span>
+<span class="nc" id="L262">													String projectName = null;</span>
+
+<span class="nc" id="L264">													NodeList nl = perfElement.getElementsByTagName(&quot;host&quot;);</span>
+<span class="nc bnc" id="L265" title="All 2 branches missed.">													if(nl != null) {</span>
+<span class="nc" id="L266">														host = getElementText(nl.item(0));</span>
+													}
+
+<span class="nc" id="L269">													nl = perfElement.getElementsByTagName(&quot;apiKey&quot;);</span>
+<span class="nc bnc" id="L270" title="All 2 branches missed.">													if(nl != null) {</span>
+<span class="nc" id="L271">														apiKey = getElementText(nl.item(0));</span>
+													}
+
+<span class="nc" id="L274">													nl = perfElement.getElementsByTagName(&quot;workspaceName&quot;);</span>
+<span class="nc bnc" id="L275" title="All 2 branches missed.">													if(nl != null) {</span>
+<span class="nc" id="L276">														workspaceName = getElementText(nl.item(0));</span>
+													}
+
+<span class="nc" id="L279">													nl = perfElement.getElementsByTagName(&quot;projectName&quot;);</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">													if(nl != null) {</span>
+<span class="nc" id="L281">														projectName = getElementText(nl.item(0));</span>
+													}
+
+<span class="nc bnc" id="L284" title="All 4 branches missed.">													if(host != null &amp;&amp; apiKey != null) {</span>
+<span class="nc" id="L285">														octoperf = new OctoperfApi(host, apiKey, workspaceName, projectName);</span>
+													}
+
+													break;
+
+												case &quot;blacklist&quot;:
+<span class="nc" id="L291">													blackListServers = new ArrayList&lt;String&gt;();</span>
+<span class="nc" id="L292">													final NodeList blackList = perfElement.getElementsByTagName(&quot;url&quot;);</span>
+<span class="nc bnc" id="L293" title="All 2 branches missed.">													for (int k = 0; k &lt; blackList.getLength(); k++) {</span>
+<span class="nc bnc" id="L294" title="All 2 branches missed.">														if (blackList.item(k) instanceof Element) {</span>
+<span class="nc" id="L295">															blackListServers.add(getElementText(blackList.item(k)));</span>
+														}
+													}
+													break;
+											}
+										}
+									}
+<span class="nc" id="L302">									break;</span>
+
+								case &quot;neoload&quot;:
+<span class="nc" id="L305">									final NodeList neoloadChildren = type.getChildNodes();</span>
+<span class="nc bnc" id="L306" title="All 2 branches missed.">									for (int j = 0; j &lt; neoloadChildren.getLength(); j++) {</span>
+<span class="nc bnc" id="L307" title="All 2 branches missed.">										if (neoloadChildren.item(j) instanceof Element) {</span>
+<span class="nc" id="L308">											final Element neoloadElement = (Element) neoloadChildren.item(j);</span>
+
+<span class="nc" id="L310">											String host = null;</span>
+<span class="nc" id="L311">											String port = null;</span>
+<span class="nc" id="L312">											String api = null;</span>
+<span class="nc" id="L313">											String apiPort = null;</span>
+
+<span class="nc bnc" id="L315" title="All 2 branches missed.">											if(neoloadElement.getTagName().equals(&quot;recorder&quot;)) {</span>
+<span class="nc" id="L316">												final NodeList recorderChildren = neoloadElement.getChildNodes();</span>
+<span class="nc bnc" id="L317" title="All 2 branches missed.">												for (int k = 0; k &lt; recorderChildren.getLength(); k++) {</span>
+<span class="nc bnc" id="L318" title="All 2 branches missed.">													if (recorderChildren.item(k) instanceof Element) {</span>
+<span class="nc" id="L319">														final Element recorderElement = (Element) recorderChildren.item(k);</span>
+<span class="nc bnc" id="L320" title="All 2 branches missed.">														if(recorderElement.getNodeName().equals(&quot;host&quot;)) {</span>
+<span class="nc" id="L321">															host = getElementText(recorderElement);</span>
+<span class="nc bnc" id="L322" title="All 2 branches missed.">														}else if(recorderElement.getNodeName().equals(&quot;port&quot;)){</span>
+<span class="nc" id="L323">															port = getElementText(recorderElement);</span>
+														}
+													}
+												}
+<span class="nc bnc" id="L327" title="All 2 branches missed.">											}else if(neoloadElement.getTagName().equals(&quot;design&quot;)) {</span>
+<span class="nc" id="L328">												final NodeList designChildren = neoloadElement.getChildNodes();</span>
+<span class="nc bnc" id="L329" title="All 2 branches missed.">												for (int k = 0; k &lt; designChildren.getLength(); k++) {</span>
+<span class="nc bnc" id="L330" title="All 2 branches missed.">													if (designChildren.item(k) instanceof Element) {</span>
+<span class="nc" id="L331">														final Element designElement = (Element) designChildren.item(k);</span>
+<span class="nc bnc" id="L332" title="All 2 branches missed.">														if(designElement.getNodeName().equals(&quot;api&quot;)) {</span>
+<span class="nc" id="L333">															api = getElementText(designElement);</span>
+<span class="nc bnc" id="L334" title="All 2 branches missed.">														}else if(designElement.getNodeName().equals(&quot;port&quot;)){</span>
+<span class="nc" id="L335">															apiPort = getElementText(designElement);</span>
+														}
+													}
+												}
+											}
+
+<span class="nc bnc" id="L341" title="All 4 branches missed.">											if(host != null &amp;&amp; port != null) {</span>
+<span class="nc" id="L342">												neoloadProxy = new AtsProxy(host, Utils.string2Int(port, 8080));</span>
+
+<span class="nc bnc" id="L344" title="All 4 branches missed.">												if(api != null &amp;&amp; apiPort != null) {</span>
+
+<span class="nc bnc" id="L346" title="All 2 branches missed.">													if(!api.startsWith(&quot;/&quot;)) {</span>
+<span class="nc" id="L347">														api = &quot;/&quot; + api;</span>
+													}
+<span class="nc bnc" id="L349" title="All 2 branches missed.">													if(!api.endsWith(&quot;/&quot;)) {</span>
+<span class="nc" id="L350">														api = api + &quot;/&quot;;</span>
+													}
+
+<span class="nc" id="L353">													neoloadDesignApi = &quot;http://&quot; + neoloadProxy.getHost() + &quot;:&quot; + apiPort + api;</span>
+												}
+											}
+										}
+									}
+
+<span class="nc" id="L359">									break;</span>
+
+								case &quot;proxy&quot;:
+
+<span class="nc" id="L363">									final NodeList proxyChildren = type.getChildNodes();</span>
+
+<span class="nc" id="L365">									String proxyType = null;</span>
+<span class="nc" id="L366">									String host = null;</span>
+<span class="nc" id="L367">									int port = 0;</span>
+
+<span class="nc bnc" id="L369" title="All 2 branches missed.">									for (int j = 0; j &lt; proxyChildren.getLength(); j++) {</span>
+<span class="nc bnc" id="L370" title="All 2 branches missed.">										if (proxyChildren.item(j) instanceof Element) {</span>
+<span class="nc" id="L371">											final Element proxyElement = (Element) proxyChildren.item(j);</span>
+<span class="nc bnc" id="L372" title="All 5 branches missed.">											switch (proxyElement.getNodeName().toLowerCase()) {</span>
+												case &quot;type&quot;:
+<span class="nc" id="L374">													proxyType = getElementText(proxyElement);</span>
+<span class="nc" id="L375">													break;</span>
+												case &quot;host&quot;:
+<span class="nc" id="L377">													host = getElementText(proxyElement);</span>
+<span class="nc" id="L378">													break;</span>
+												case &quot;url&quot;:
+<span class="nc" id="L380">													url = getElementText(proxyElement);</span>
+<span class="nc" id="L381">													break;</span>
+												case &quot;port&quot;:
+<span class="nc" id="L383">													port = getElementInt(proxyElement);</span>
+													break;
+											}
+										}
+									}
+
+<span class="nc bnc" id="L389" title="All 2 branches missed.">									if(AtsProxy.AUTO.equals(proxyType)) {</span>
+<span class="nc" id="L390">										proxy = new AtsProxy(AtsProxy.AUTO);</span>
+<span class="nc bnc" id="L391" title="All 2 branches missed.">									}else if(AtsProxy.DIRECT.equals(proxyType)) {</span>
+<span class="nc" id="L392">										proxy = new AtsProxy(AtsProxy.DIRECT);</span>
+<span class="nc bnc" id="L393" title="All 2 branches missed.">									}else if(AtsProxy.PAC.equals(proxyType)) {</span>
+<span class="nc" id="L394">										proxy = new AtsProxy(AtsProxy.PAC, url);</span>
+<span class="nc bnc" id="L395" title="All 6 branches missed.">									}else if(AtsProxy.MANUAL.equals(proxyType) &amp;&amp; host != null &amp;&amp; port &gt; 0) {</span>
+<span class="nc" id="L396">										proxy = new AtsProxy(AtsProxy.MANUAL, host, port);</span>
+									}else {
+<span class="nc" id="L398">										proxy = new AtsProxy(AtsProxy.SYSTEM);</span>
+									}
+<span class="nc" id="L400">									break;</span>
+
+								case &quot;appbounding&quot;:
+<span class="nc" id="L403">									final NodeList boundingChildren = type.getChildNodes();</span>
+<span class="nc bnc" id="L404" title="All 2 branches missed.">									for (int j = 0; j &lt; boundingChildren.getLength(); j++) {</span>
+<span class="nc bnc" id="L405" title="All 2 branches missed.">										if (boundingChildren.item(j) instanceof Element) {</span>
+<span class="nc" id="L406">											final Element boundingElement = (Element) boundingChildren.item(j);</span>
+
+<span class="nc bnc" id="L408" title="All 5 branches missed.">											switch(boundingElement.getTagName()) {</span>
+												case &quot;x&quot;:
+<span class="nc" id="L410">													applicationX = getElementDouble(boundingElement);</span>
+<span class="nc" id="L411">													break;</span>
+												case &quot;y&quot;:
+<span class="nc" id="L413">													applicationY = getElementDouble(boundingElement);</span>
+<span class="nc" id="L414">													break;</span>
+												case &quot;width&quot;:
+<span class="nc" id="L416">													applicationWidth = getElementDouble(boundingElement);</span>
+<span class="nc" id="L417">													break;</span>
+												case &quot;height&quot;:
+<span class="nc" id="L419">													applicationHeight = getElementDouble(boundingElement);</span>
+													break;
+											}
+										}
+									}
+<span class="nc" id="L424">									break;</span>
+
+								case &quot;maxtry&quot;:
+<span class="nc" id="L427">									final NodeList maxtryChildren = type.getChildNodes();</span>
+<span class="nc bnc" id="L428" title="All 2 branches missed.">									for (int j = 0; j &lt; maxtryChildren.getLength(); j++) {</span>
+<span class="nc bnc" id="L429" title="All 2 branches missed.">										if (maxtryChildren.item(j) instanceof Element) {</span>
+<span class="nc" id="L430">											final Element maxtryElement = (Element) maxtryChildren.item(j);</span>
+
+<span class="nc bnc" id="L432" title="All 5 branches missed.">											switch(maxtryElement.getTagName().toLowerCase()) {</span>
+												case &quot;searchelement&quot;:
+<span class="nc" id="L434">													maxTrySearch = getElementInt(maxtryElement);</span>
+<span class="nc" id="L435">													break;</span>
+												case &quot;getproperty&quot;:
+<span class="nc" id="L437">													maxTryProperty = getElementInt(maxtryElement);</span>
+<span class="nc" id="L438">													break;</span>
+												case &quot;webservice&quot;:
+<span class="nc" id="L440">													maxTryWebservice = getElementInt(maxtryElement);</span>
+<span class="nc" id="L441">													break;</span>
+												case &quot;searchimage&quot;:
+<span class="nc" id="L443">													maxTryImageRecognition = getElementInt(maxtryElement);</span>
+													break;
+											}
+										}
+									}
+<span class="nc" id="L448">									break;</span>
+
+								case &quot;timeout&quot;:
+<span class="nc" id="L451">									final NodeList timeoutChildren = type.getChildNodes();</span>
+<span class="nc bnc" id="L452" title="All 2 branches missed.">									for (int j = 0; j &lt; timeoutChildren.getLength(); j++) {</span>
+<span class="nc bnc" id="L453" title="All 2 branches missed.">										if (timeoutChildren.item(j) instanceof Element) {</span>
+<span class="nc" id="L454">											final Element timeoutElement = (Element) timeoutChildren.item(j);</span>
+
+<span class="nc bnc" id="L456" title="All 5 branches missed.">											switch(timeoutElement.getTagName().toLowerCase()) {</span>
+												case &quot;script&quot;:
+<span class="nc" id="L458">													scriptTimeOut = getElementInt(timeoutElement);</span>
+<span class="nc" id="L459">													break;</span>
+												case &quot;pageload&quot;:
+<span class="nc" id="L461">													pageloadTimeOut = getElementInt(timeoutElement);</span>
+<span class="nc" id="L462">													break;</span>
+												case &quot;watchdog&quot;:
+<span class="nc" id="L464">													watchDogTimeOut = getElementInt(timeoutElement);</span>
+<span class="nc" id="L465">													break;</span>
+												case &quot;webservice&quot;:
+<span class="nc" id="L467">													webServiceTimeOut = getElementInt(timeoutElement);</span>
+													break;
+											}
+										}
+									}
+<span class="nc" id="L472">									break;</span>
+
+								case &quot;browsers&quot;:
+<span class="nc" id="L475">									final NodeList browsers = type.getElementsByTagName(&quot;browser&quot;);</span>
+<span class="nc bnc" id="L476" title="All 2 branches missed.">									for (int j = 0; j &lt; browsers.getLength(); j++) {</span>
+
+<span class="nc" id="L478">										String name = null;</span>
+<span class="nc" id="L479">										String waitAction = null;</span>
+<span class="nc" id="L480">										String path = null;</span>
+<span class="nc" id="L481">										String driver = null;</span>
+<span class="nc" id="L482">										String dataDir = null;</span>
+<span class="nc" id="L483">										String check = null;</span>
+<span class="nc" id="L484">										String lang = null;</span>
+
+<span class="nc" id="L486">										String[] options = null;</span>
+
+<span class="nc" id="L488">										String title = &quot;&quot;;</span>
+
+<span class="nc bnc" id="L490" title="All 2 branches missed.">										if (browsers.item(j) instanceof Element) {</span>
+<span class="nc" id="L491">											final Element browser = (Element) browsers.item(j);</span>
+<span class="nc" id="L492">											final NodeList browserAttributes = browser.getChildNodes();</span>
+<span class="nc bnc" id="L493" title="All 2 branches missed.">											for (int k = 0; k &lt; browserAttributes.getLength(); k++) {</span>
+<span class="nc bnc" id="L494" title="All 2 branches missed.">												if (browserAttributes.item(k) instanceof Element) {</span>
+<span class="nc" id="L495">													final Element browserElement = (Element) browserAttributes.item(k);</span>
+
+<span class="nc bnc" id="L497" title="All 11 branches missed.">													switch (browserElement.getNodeName().toLowerCase()) {</span>
+														case &quot;name&quot;:
+<span class="nc" id="L499">															name = getElementText(browserElement);</span>
+<span class="nc" id="L500">															break;</span>
+														case &quot;waitaction&quot;:
+<span class="nc" id="L502">															waitAction = getElementText(browserElement);</span>
+<span class="nc" id="L503">															break;</span>
+														case &quot;title&quot;:
+<span class="nc" id="L505">															title = getElementText(browserElement);</span>
+<span class="nc" id="L506">															break;</span>
+														case &quot;driver&quot;:
+<span class="nc" id="L508">															driver = getElementText(browserElement);</span>
+<span class="nc" id="L509">															break;</span>
+														case &quot;path&quot;:
+<span class="nc" id="L511">															path = getElementText(browserElement);</span>
+<span class="nc" id="L512">															break;</span>
+														case &quot;userdatadir&quot;:
+<span class="nc" id="L514">															dataDir = getElementText(browserElement);</span>
+<span class="nc" id="L515">															break;</span>
+														case &quot;profiledir&quot;:
+<span class="nc" id="L517">															dataDir = getElementText(browserElement);</span>
+<span class="nc" id="L518">															break;</span>
+														case &quot;waitproperty&quot;:
+<span class="nc" id="L520">															check = getElementText(browserElement);</span>
+<span class="nc" id="L521">															break;</span>
+														case &quot;lang&quot;:
+<span class="nc" id="L523">															lang = getElementText(browserElement);</span>
+<span class="nc" id="L524">															break;</span>
+														case &quot;options&quot;:
+<span class="nc" id="L526">															final NodeList optionsList = browserElement.getElementsByTagName(&quot;option&quot;);</span>
+<span class="nc" id="L527">															final int optionsLen = optionsList.getLength();</span>
+<span class="nc bnc" id="L528" title="All 2 branches missed.">															if(optionsLen &gt; 0) {</span>
+<span class="nc" id="L529">																options = new String[optionsLen];</span>
+<span class="nc bnc" id="L530" title="All 2 branches missed.">																for( int l = 0; l &lt; optionsLen; l++ ){</span>
+<span class="nc" id="L531">																	options[l] = optionsList.item(l).getTextContent();</span>
+																}
+															}
+															break;
+													}
+												}
+											}
+
+<span class="nc bnc" id="L539" title="All 2 branches missed.">											if(name != null) {</span>
+<span class="nc" id="L540">												String userDataDir = null;</span>
+<span class="nc bnc" id="L541" title="All 4 branches missed.">												if(dataDir != null &amp;&amp; dataDir.length() &gt; 0) {</span>
+<span class="nc" id="L542">													final Path userDataPath = Paths.get(dataDir);</span>
+<span class="nc bnc" id="L543" title="All 2 branches missed.">													if(userDataPath.isAbsolute()) {</span>
+<span class="nc" id="L544">														final File f = userDataPath.toFile();</span>
+<span class="nc" id="L545">														userDataDir = f.getAbsolutePath();</span>
+
+<span class="nc bnc" id="L547" title="All 2 branches missed.">														if(f.exists()) {</span>
+<span class="nc bnc" id="L548" title="All 2 branches missed.">															if(!f.isDirectory()) {</span>
+<span class="nc" id="L549">																userDataDir = null;</span>
+															}
+														}else {
+<span class="nc" id="L552">															f.mkdirs();</span>
+														}
+													}
+												}
+<span class="nc" id="L556">												addApplicationProperties(ApplicationProperties.BROWSER_TYPE, name, driver, path, waitAction, check, lang, userDataDir, title, options);</span>
+											}
+										}
+									}
+<span class="nc" id="L560">									break;</span>
+
+								case &quot;applications&quot;:
+<span class="nc" id="L563">									final NodeList applications = type.getElementsByTagName(&quot;application&quot;);</span>
+<span class="nc bnc" id="L564" title="All 2 branches missed.">									for (int j = 0; j &lt; applications.getLength(); j++) {</span>
+
+<span class="nc" id="L566">										String name = null;</span>
+<span class="nc" id="L567">										String waitAction = null;</span>
+<span class="nc" id="L568">										String path = null;</span>
+
+<span class="nc bnc" id="L570" title="All 2 branches missed.">										if (applications.item(j) instanceof Element) {</span>
+<span class="nc" id="L571">											final Element application = (Element) applications.item(j);</span>
+<span class="nc" id="L572">											final NodeList applicationAttributes = application.getChildNodes();</span>
+<span class="nc bnc" id="L573" title="All 2 branches missed.">											for (int k = 0; k &lt; applicationAttributes.getLength(); k++) {</span>
+<span class="nc bnc" id="L574" title="All 2 branches missed.">												if (applicationAttributes.item(k) instanceof Element) {</span>
+<span class="nc" id="L575">													final Element applicationElement = (Element) applicationAttributes.item(k);</span>
+
+<span class="nc bnc" id="L577" title="All 4 branches missed.">													switch (applicationElement.getNodeName().toLowerCase()) {</span>
+														case &quot;name&quot;:
+<span class="nc" id="L579">															name = getElementText(applicationElement);</span>
+<span class="nc" id="L580">															break;</span>
+														case &quot;waitaction&quot;:
+<span class="nc" id="L582">															waitAction = getElementText(applicationElement);</span>
+<span class="nc" id="L583">															break;</span>
+														case &quot;path&quot;:
+<span class="nc" id="L585">															path = getElementText(applicationElement);</span>
+															break;
+													}
+												}
+											}
+
+<span class="nc bnc" id="L591" title="All 4 branches missed.">											if(name != null &amp;&amp; path != null) {</span>
+<span class="nc" id="L592">												addApplicationProperties(ApplicationProperties.DESKTOP_TYPE, name, path, waitAction, &quot;&quot;, null, null, null);</span>
+											}
+										}
+									}
+
+<span class="nc" id="L597">									break;</span>
+
+								case &quot;mobiles&quot;:
+<span class="nc" id="L600">									final NodeList mobiles = type.getElementsByTagName(&quot;mobile&quot;);</span>
+<span class="nc bnc" id="L601" title="All 2 branches missed.">									for (int j = 0; j &lt; mobiles.getLength(); j++) {</span>
+
+<span class="nc" id="L603">										String name = null;</span>
+<span class="nc" id="L604">										String waitAction = null;</span>
+<span class="nc" id="L605">										String endpoint = null;</span>
+<span class="nc" id="L606">										String packageName = null;</span>
+
+<span class="nc bnc" id="L608" title="All 2 branches missed.">										if (mobiles.item(j) instanceof Element) {</span>
+<span class="nc" id="L609">											final Element mobile = (Element) mobiles.item(j);</span>
+<span class="nc" id="L610">											final NodeList mobileAttributes = mobile.getChildNodes();</span>
+<span class="nc bnc" id="L611" title="All 2 branches missed.">											for (int k = 0; k &lt; mobileAttributes.getLength(); k++) {</span>
+<span class="nc bnc" id="L612" title="All 2 branches missed.">												if (mobileAttributes.item(k) instanceof Element) {</span>
+<span class="nc" id="L613">													final Element mobileElement = (Element) mobileAttributes.item(k);</span>
+
+<span class="nc bnc" id="L615" title="All 5 branches missed.">													switch (mobileElement.getNodeName().toLowerCase()) {</span>
+														case &quot;name&quot;:
+<span class="nc" id="L617">															name = getElementText(mobileElement);</span>
+<span class="nc" id="L618">															break;</span>
+														case &quot;waitaction&quot;:
+<span class="nc" id="L620">															waitAction = getElementText(mobileElement);</span>
+<span class="nc" id="L621">															break;</span>
+														case &quot;endpoint&quot;:
+<span class="nc" id="L623">															endpoint = getElementText(mobileElement);</span>
+<span class="nc" id="L624">															break;</span>
+														case &quot;package&quot;:
+<span class="nc" id="L626">															packageName = getElementText(mobileElement);</span>
+															break;
+													}
+												}
+											}
+
+<span class="nc bnc" id="L632" title="All 6 branches missed.">											if(name != null &amp;&amp; endpoint != null &amp;&amp; packageName != null) {</span>
+<span class="nc" id="L633">												addApplicationProperties(ApplicationProperties.MOBILE_TYPE, name, endpoint + &quot;/&quot; + packageName, waitAction, &quot;&quot;, null, null, null);</span>
+											}
+										}
+									}
+<span class="nc" id="L637">									break;</span>
+
+								case &quot;apis&quot;:
+<span class="nc" id="L640">									final NodeList apis = type.getElementsByTagName(&quot;api&quot;);</span>
+<span class="nc bnc" id="L641" title="All 2 branches missed.">									for (int j = 0; j &lt; apis.getLength(); j++) {</span>
+
+<span class="nc" id="L643">										String name = null;</span>
+<span class="nc" id="L644">										String waitAction = null;</span>
+
+<span class="nc bnc" id="L646" title="All 2 branches missed.">										if (apis.item(j) instanceof Element) {</span>
+<span class="nc" id="L647">											final Element api = (Element) apis.item(j);</span>
+<span class="nc" id="L648">											final NodeList apiAttributes = api.getChildNodes();</span>
+<span class="nc bnc" id="L649" title="All 2 branches missed.">											for (int k = 0; k &lt; apiAttributes.getLength(); k++) {</span>
+<span class="nc bnc" id="L650" title="All 2 branches missed.">												if (apiAttributes.item(k) instanceof Element) {</span>
+<span class="nc" id="L651">													final Element apiElement = (Element) apiAttributes.item(k);</span>
+
+<span class="nc bnc" id="L653" title="All 4 branches missed.">													switch (apiElement.getNodeName().toLowerCase()) {</span>
+														case &quot;name&quot;:
+<span class="nc" id="L655">															name = getElementText(apiElement);</span>
+<span class="nc" id="L656">															break;</span>
+														case &quot;waitaction&quot;:
+<span class="nc" id="L658">															waitAction = getElementText(apiElement);</span>
+<span class="nc" id="L659">															break;</span>
+														case &quot;url&quot;:
+<span class="nc" id="L661">															url = getElementText(apiElement);</span>
+															break;
+													}
+												}
+											}
+
+<span class="nc bnc" id="L667" title="All 4 branches missed.">											if(name != null &amp;&amp; url != null) {</span>
+<span class="nc" id="L668">												addApplicationProperties(ApplicationProperties.API_TYPE, name, url, waitAction, &quot;&quot;, null, null, null);</span>
+											}
+										}
+									}
+									break;
+							}
+						}
+					}
+
+<span class="nc" id="L677">				} catch (ParserConfigurationException e) {</span>
+<span class="nc" id="L678">					error = e.getMessage();</span>
+<span class="nc" id="L679">				} catch (SAXException e) {</span>
+<span class="nc" id="L680">					error = e.getMessage();</span>
+<span class="nc" id="L681">				}</span>
+
+<span class="nc" id="L683">			} catch (IOException e) {</span>
+<span class="nc" id="L684">				error = e.getMessage();</span>
+<span class="nc" id="L685">			}</span>
+		}
+
+<span class="nc" id="L688">		return new Properties();</span>
+	}
+
+	private void addApplicationProperties(int type, String name, String path, String wait, String check, String lang, String userDataDir, String title) {
+<span class="nc" id="L692">		addApplicationProperties(type, name, null, path, wait, check, lang, userDataDir, title, null);</span>
+<span class="nc" id="L693">	}</span>
+
+	private void addApplicationProperties(int type, String name, String driver, String path, String wait, String check, String lang, String userDataDir, String title, String[] options) {
+<span class="nc" id="L696">		applicationsList.add(new ApplicationProperties(type, name, driver, path, Utils.string2Int(wait, -1), Utils.string2Int(check, -1), lang, userDataDir, title, options));</span>
+<span class="nc" id="L697">	}</span>
+
+	//------------------------------------------------------------------------------------------------------------------
+	// Getters
+	//------------------------------------------------------------------------------------------------------------------
+
+	public String getError() {
+<span class="fc" id="L704">		return error;</span>
+	}
+
+	public ApplicationProperties getApplicationProperties(String name) {
+<span class="nc bnc" id="L708" title="All 2 branches missed.">		for (int i=0; i &lt; this.applicationsList.size(); i++) {</span>
+<span class="nc" id="L709">			final ApplicationProperties properties = this.applicationsList.get(i);</span>
+<span class="nc bnc" id="L710" title="All 2 branches missed.">			if (name.equals(properties.getName())){</span>
+<span class="nc" id="L711">				return properties;</span>
+			}
+		}
+<span class="nc" id="L714">		return new ApplicationProperties(name);</span>
+	}
+
+	public int getScriptTimeOut() {
+<span class="nc" id="L718">		return scriptTimeOut;</span>
+	}
+
+	public int getPageloadTimeOut() {
+<span class="nc" id="L722">		return pageloadTimeOut;</span>
+	}
+
+	public int getWatchDogTimeOut() {
+<span class="nc" id="L726">		return watchDogTimeOut;</span>
+	}
+
+	public int getWebServiceTimeOut() {
+<span class="nc" id="L730">		return webServiceTimeOut;</span>
+	}
+
+	public TestBound getApplicationBound() {
+<span class="fc" id="L734">		return new TestBound(applicationX, applicationY, applicationWidth, applicationHeight);</span>
+	}
+
+	public String getPropertyString(String key) {
+<span class="nc" id="L738">		return properties.getProperty(key);</span>
+	}
+
+	public Path getDriversFolderPath() {
+<span class="fc" id="L742">		return driversFolderPath;</span>
+	}
+
+	public int getMaxTrySearch() {
+<span class="nc" id="L746">		return maxTrySearch;</span>
+	}
+
+<span class="nc" id="L749">	public int getMaxTryImageRecognition() { return maxTryImageRecognition; }</span>
+
+	public int getMaxTryProperty() {
+<span class="nc" id="L752">		return maxTryProperty;</span>
+	}
+
+	public int getMaxTryMobile() {
+<span class="nc" id="L756">		return maxTryMobile;</span>
+	}
+
+	public int getMaxTryWebservice() {
+<span class="nc" id="L760">		return maxTryWebservice;</span>
+	}
+
+	public String getNeoloadDesignApi() {
+<span class="nc" id="L764">		return neoloadDesignApi;</span>
+	}
+
+	public AtsProxy getNeoloadProxy() {
+<span class="nc bnc" id="L768" title="All 2 branches missed.">		if(neoloadProxy != null) {</span>
+<span class="nc" id="L769">			return neoloadProxy;</span>
+		}
+<span class="nc" id="L771">		return getProxy();</span>
+	}
+
+	public AtsProxy getProxy() {
+<span class="nc" id="L775">		return proxy;</span>
+	}
+
+	public ArrayList&lt;String&gt; getBlackListServers() {
+<span class="nc" id="L779">		return blackListServers;</span>
+	}
+
+	public OctoperfApi getOctoperf() {
+<span class="nc" id="L783">		return octoperf;</span>
+	}
+
+	public int getTrafficIdle() {
+<span class="nc" id="L787">		return trafficIdle;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

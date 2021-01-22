@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TimeTransformer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.generator.variables.transform</a> &gt; <span class="el_source">TimeTransformer.java</span></div><h1>TimeTransformer.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+*/
+
+package com.ats.generator.variables.transform;
+
+import com.ats.executor.ActionTestScript;
+
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.StringJoiner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class TimeTransformer extends Transformer {
+
+<span class="fc" id="L33">	private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern(&quot;HH:mm:ss&quot;);</span>
+<span class="fc" id="L34">	private static final Pattern PATTERN_HOUR_TRANSFORM = Pattern.compile(&quot;(-?\\d+)([hms])&quot;);</span>
+
+<span class="nc" id="L36">	private int hour = 0;</span>
+<span class="nc" id="L37">	private int minute = 0;</span>
+<span class="nc" id="L38">	private int second = 0;</span>
+	
+<span class="nc" id="L40">	public TimeTransformer() {} // Needed for serialization</span>
+
+<span class="nc" id="L42">	public TimeTransformer(String ... data) {</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">		if(data.length &gt; 0){</span>
+			Matcher dataMatcher;
+<span class="nc bnc" id="L45" title="All 2 branches missed.">			for(String item : data){</span>
+<span class="nc" id="L46">				dataMatcher = PATTERN_HOUR_TRANSFORM.matcher(item);</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">				if(dataMatcher.find()){</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">					if(&quot;h&quot;.equals(dataMatcher.group(2))){</span>
+<span class="nc" id="L49">						setHour(getInt(dataMatcher.group(1)));</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">					}else if(&quot;m&quot;.equals(dataMatcher.group(2))){</span>
+<span class="nc" id="L51">						setMinute(getInt(dataMatcher.group(1)));</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">					}else if(&quot;s&quot;.equals(dataMatcher.group(2))){</span>
+<span class="nc" id="L53">						setSecond(getInt(dataMatcher.group(1)));</span>
+					}
+				}
+			}
+		}
+<span class="nc" id="L58">	}</span>
+	
+	public static String getNowValue() {
+<span class="fc" id="L61">		final LocalTime time = LocalTime.now();</span>
+<span class="fc" id="L62">		return time.format(TIME_FORMATTER);</span>
+	}
+
+	@Override
+	public String getJavaCode() {
+		
+<span class="nc" id="L68">		StringJoiner joiner = new StringJoiner(&quot;, &quot;);</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">		if(hour != 0) {</span>
+<span class="nc" id="L70">			joiner.add(&quot;\&quot;&quot; + hour + &quot;h\&quot;&quot;);</span>
+		}
+		
+<span class="nc bnc" id="L73" title="All 2 branches missed.">		if(minute != 0) {</span>
+<span class="nc" id="L74">			joiner.add(&quot;\&quot;&quot; + minute + &quot;m\&quot;&quot;);</span>
+		}
+		
+<span class="nc bnc" id="L77" title="All 2 branches missed.">		if(second != 0) {</span>
+<span class="nc" id="L78">			joiner.add(&quot;\&quot;&quot; + second + &quot;s\&quot;&quot;);</span>
+		}
+		
+<span class="nc" id="L81">		return ActionTestScript.JAVA_TIME_FUNCTION_NAME + &quot;(&quot; + joiner.toString() + &quot;)&quot;;</span>
+	}
+	
+	@Override
+	public String format(String data) {
+		
+		try {
+<span class="nc" id="L88">			LocalTime time = LocalTime.parse(data, TIME_FORMATTER);</span>
+<span class="nc" id="L89">			time = time.plusHours(hour).plusMinutes(minute).plusSeconds(second);</span>
+<span class="nc" id="L90">			return time.toString();</span>
+			
+<span class="nc" id="L92">		} catch (DateTimeParseException e) {}</span>
+		
+<span class="nc" id="L94">		return &quot;&quot;;</span>
+	}
+	
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------
+
+	public int getHour() {
+<span class="nc" id="L102">		return hour;</span>
+	}
+
+	public void setHour(int hour) {
+<span class="nc" id="L106">		this.hour = hour;</span>
+<span class="nc" id="L107">	}</span>
+
+	public int getMinute() {
+<span class="nc" id="L110">		return minute;</span>
+	}
+
+	public void setMinute(int minute) {
+<span class="nc" id="L114">		this.minute = minute;</span>
+<span class="nc" id="L115">	}</span>
+
+	public int getSecond() {
+<span class="nc" id="L118">		return second;</span>
+	}
+
+	public void setSecond(int second) {
+<span class="nc" id="L122">		this.second = second;</span>
+<span class="nc" id="L123">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

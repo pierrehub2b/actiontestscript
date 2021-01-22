@@ -1,0 +1,1295 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WebDriverEngine.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.executor.drivers.engines</a> &gt; <span class="el_source">WebDriverEngine.java</span></div><h1>WebDriverEngine.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.executor.drivers.engines;
+
+import java.awt.Rectangle;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.ElementNotVisibleException;
+import org.openqa.selenium.JavascriptException;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.MutableCapabilities;
+import org.openqa.selenium.NoSuchWindowException;
+import org.openqa.selenium.PageLoadStrategy;
+import org.openqa.selenium.Point;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.interactions.MoveTargetOutOfBoundsException;
+import org.openqa.selenium.remote.CapabilityType;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.RemoteWebElement;
+import org.openqa.selenium.support.ui.Select;
+
+import com.ats.driver.ApplicationProperties;
+import com.ats.driver.AtsManager;
+import com.ats.element.AtsBaseElement;
+import com.ats.element.AtsElement;
+import com.ats.element.DialogBox;
+import com.ats.element.FoundElement;
+import com.ats.element.TestElement;
+import com.ats.executor.ActionStatus;
+import com.ats.executor.SendKeyData;
+import com.ats.executor.TestBound;
+import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.DriverProcess;
+import com.ats.executor.drivers.desktop.DesktopDriver;
+import com.ats.executor.drivers.desktop.DesktopWindow;
+import com.ats.generator.objects.Cartesian;
+import com.ats.generator.objects.MouseDirection;
+import com.ats.generator.objects.MouseDirectionData;
+import com.ats.generator.variables.CalculatedProperty;
+import com.ats.script.actions.ActionApi;
+import com.ats.script.actions.ActionChannelStart;
+import com.ats.script.actions.ActionGotoUrl;
+import com.ats.script.actions.ActionSelect;
+import com.ats.script.actions.ActionWindowState;
+import com.ats.tools.ResourceContent;
+import com.ats.tools.Utils;
+
+@SuppressWarnings(&quot;unchecked&quot;)
+public class WebDriverEngine extends DriverEngine implements IDriverEngine {
+
+	protected static final String WEB_ELEMENT_REF = &quot;element-6066-11e4-a52e-4f735466cecf&quot;;
+
+	private final static int DEFAULT_WAIT = 150;
+	private final static int DEFAULT_PROPERTY_WAIT = 200;
+
+	private final static String OPTION = &quot;option&quot;;
+	private final static String ANGULAR_OPTION = &quot;mat-option&quot;;
+	
+	//-----------------------------------------------------------------------------------------------------------------------------
+	// Javascript static code
+	//-----------------------------------------------------------------------------------------------------------------------------
+
+	//protected static final String JS_AUTO_SCROLL = &quot;var e=arguments[0];e.scrollIntoView();var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]&quot;;
+	//protected static final String JS_AUTO_SCROLL_CALC = &quot;var e=arguments[0];var r=e.getBoundingClientRect();var top=r.top + window.pageYOffset;window.scrollTo(0, top-(window.innerHeight / 2));r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]&quot;;
+	//protected static final String JS_AUTO_SCROLL_MOZ = &quot;var e=arguments[0];e.scrollIntoView({behavior:'auto',block:'center',inline:'center'});var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]&quot;;
+	//protected String JS_SCROLL_IF_NEEDED = &quot;var e=arguments[0], result=[], r=e.getBoundingClientRect(), top0=r.top, left0=r.left;if(r.top &lt; 0 || r.left &lt; 0 || r.bottom &gt; (window.innerHeight || document.documentElement.clientHeight) || r.right &gt; (window.innerWidth || document.documentElement.clientWidth)) {e.scrollIntoView({behavior:'instant',block:'center',inline:'nearest'});r=e.getBoundingClientRect();result=[r.left+0.0001, r.top+0.0001, left0+0.0001, top0+0.0001];}&quot;;
+	
+<span class="nc" id="L108">	protected String JS_SCROLL_IF_NEEDED = &quot;var e=arguments[0], result=[], r=e.getBoundingClientRect(), top0=r.top, left0=r.left; e.scrollIntoView({behavior:'instant',block:'center',inline:'nearest'});r=e.getBoundingClientRect();if(r.left!=left0 || r.top!=top0) {result=[r.left+0.0001, r.top+0.0001];}&quot;;</span>
+
+	protected static final String JS_ELEMENT_SCROLL = &quot;var e=arguments[0];var d=arguments[1];e.scrollTop += d;var r=e.getBoundingClientRect();var result=[r.left+0.0001, r.top+0.0001]&quot;;
+	protected static final String JS_WINDOW_SCROLL = &quot;window.scrollBy(0,arguments[0]);var result=[0.0001, 0.0001]&quot;;
+	protected static final String JS_ELEMENT_FROM_POINT = &quot;var result=null;var e=document.elementFromPoint(arguments[0],arguments[1]);if(e){var r=e.getBoundingClientRect();result=[e, e.tagName, e.getAttribute('inputmode')=='numeric', e.getAttribute('type')=='password', r.x+0.0001, r.y+0.0001, r.width+0.0001, r.height+0.0001, r.left+0.0001, r.top+0.0001, 0.0001, 0.0001, {}];};&quot;;
+	protected static final String JS_ELEMENT_FROM_RECT = &quot;let x1=arguments[0],y1=arguments[1],w=arguments[2],h=arguments[3];let x2=x1+w,y2=y1+h;var e=document.elementFromPoint(x1+(w/2), y1+(h/2)),result=null;while(e != null){var r=e.getBoundingClientRect();if(x1 &gt;= r.x &amp;&amp; x2 &lt;= r.x+r.width &amp;&amp; y1 &gt;= r.y &amp;&amp; y2 &lt;= r.y+r.height){result=[e,e.tagName,e.getAttribute('inputmode')=='numeric',e.getAttribute('type')=='password',r.x+0.0001,r.y+0.0001,r.width+0.0001,r.height+0.0001,r.left+0.0001,r.top+0.0001,0.0001,0.0001,{}];e=null;}else{e=e.parentElement;}};&quot;;
+	protected static final String JS_ELEMENT_BOUNDING = &quot;var rect=arguments[0].getBoundingClientRect();var result=[rect.left+0.0001, rect.top+0.0001];&quot;;
+	protected static final String JS_MIDDLE_CLICK = &quot;var evt=new MouseEvent('click', {bubbles: true,cancelable: true,view: window, button: 1}),result={};arguments[0].dispatchEvent(evt);&quot;;
+	protected static final String JS_ELEMENT_CSS = &quot;var result={};var o=getComputedStyle(arguments[0]);for(var i=0, len=o.length; i &lt; len; i++){result[o[i]]=o.getPropertyValue(o[i]);};&quot;;
+
+<span class="nc" id="L118">	protected static final String JS_SEARCH_ELEMENT = ResourceContent.getSearchElementsJavaScript();</span>
+<span class="nc" id="L119">	protected static final String JS_ELEMENT_AUTOSCROLL = ResourceContent.getScrollElementJavaScript();</span>
+<span class="nc" id="L120">	protected static final String JS_ELEMENT_ATTRIBUTES = ResourceContent.getElementAttributesJavaScript();</span>
+<span class="nc" id="L121">	protected static final String JS_ELEMENT_PARENTS = ResourceContent.getParentElementJavaScript();</span>
+<span class="nc" id="L122">	protected static final String JS_DOCUMENT_SIZE = ResourceContent.getDocumentSizeJavaScript();</span>
+
+	//-----------------------------------------------------------------------------------------------------------------------------
+
+<span class="nc" id="L126">	protected Double initElementX = 0.0;</span>
+<span class="nc" id="L127">	protected Double initElementY = 0.0;</span>
+
+	protected DriverProcess driverProcess;
+<span class="nc" id="L130">	private String browserName = &quot;&quot;;</span>
+
+	protected Actions actions;
+
+	protected java.net.URI driverSession;
+
+<span class="nc" id="L136">	protected String searchElementScript = JS_SEARCH_ELEMENT;</span>
+
+	public WebDriverEngine(
+			Channel channel, 
+			DriverProcess driverProcess, 
+			DesktopDriver desktopDriver,
+			ApplicationProperties props,
+			int defaultWait,
+			int defaultPropertyWait) {
+
+<span class="nc" id="L146">		super(channel, desktopDriver, props, defaultWait, defaultPropertyWait);</span>
+<span class="nc" id="L147">		this.driverProcess = driverProcess;</span>
+<span class="nc" id="L148">	}</span>
+
+	public WebDriverEngine(
+			Channel channel, 
+			String browser, 
+			DriverProcess driverProcess, 
+			DesktopDriver desktopDriver,
+			ApplicationProperties props) {
+
+<span class="nc" id="L157">		this(channel, driverProcess, desktopDriver, props, DEFAULT_WAIT, DEFAULT_PROPERTY_WAIT);</span>
+<span class="nc" id="L158">		this.browserName = browser;</span>
+<span class="nc" id="L159">	}</span>
+
+	public WebDriverEngine(Channel channel, DesktopDriver desktopDriver, String application, ApplicationProperties props, int defaultWait, int defaultCheck) {
+<span class="nc" id="L162">		super(channel, desktopDriver, props, defaultWait, defaultCheck);</span>
+<span class="nc" id="L163">	}</span>
+
+	protected DriverProcess getDriverProcess() {
+<span class="nc" id="L166">		return driverProcess;</span>
+	}
+
+	public void setDriverProcess(DriverProcess driverProcess) {
+<span class="nc" id="L170">		this.driverProcess = driverProcess;</span>
+<span class="nc" id="L171">	}</span>
+
+	protected void launchDriver(ActionStatus status, MutableCapabilities cap, String profilePath) {
+
+<span class="nc" id="L175">		final int maxTrySearch = AtsManager.getInstance().getMaxTrySearch();</span>
+<span class="nc" id="L176">		final int maxTryProperty = AtsManager.getInstance().getMaxTryProperty();</span>
+
+<span class="nc" id="L178">		final int scriptTimeout = AtsManager.getInstance().getScriptTimeOut();</span>
+<span class="nc" id="L179">		final int pageLoadTimeout = AtsManager.getInstance().getPageloadTimeOut();</span>
+<span class="nc" id="L180">		final int watchdog = AtsManager.getInstance().getWatchDogTimeOut();		</span>
+
+<span class="nc bnc" id="L182" title="All 2 branches missed.">		if(channel.getPerformance() == ActionChannelStart.PERF) {</span>
+<span class="nc" id="L183">			cap.setCapability(CapabilityType.PROXY, channel.startAtsProxy(AtsManager.getInstance()));</span>
+		}else {
+<span class="nc bnc" id="L185" title="All 2 branches missed.">			if(channel.getPerformance() == ActionChannelStart.NEOLOAD) {</span>
+<span class="nc" id="L186">				channel.setNeoloadDesignApi(AtsManager.getInstance().getNeoloadDesignApi());</span>
+<span class="nc" id="L187">				cap.setCapability(CapabilityType.PROXY, AtsManager.getInstance().getNeoloadProxy().getValue());</span>
+			}else {
+<span class="nc" id="L189">				cap.setCapability(CapabilityType.PROXY, AtsManager.getInstance().getProxy().getValue());</span>
+			}
+		}
+
+<span class="nc" id="L193">		cap.setCapability(CapabilityType.SUPPORTS_FINDING_BY_CSS, false);</span>
+<span class="nc" id="L194">		cap.setCapability(CapabilityType.TAKES_SCREENSHOT, false);</span>
+<span class="nc" id="L195">		cap.setCapability(CapabilityType.HAS_NATIVE_EVENTS, true);</span>
+<span class="nc" id="L196">		cap.setCapability(CapabilityType.PAGE_LOAD_STRATEGY, PageLoadStrategy.NONE);</span>
+
+		try{
+<span class="nc" id="L199">			driver = new RemoteWebDriver(driverProcess.getDriverServerUrl(), cap);</span>
+<span class="nc" id="L200">		}catch(Exception ex){</span>
+<span class="nc" id="L201">			status.setTechnicalError(ActionStatus.CHANNEL_START_ERROR, ex.getMessage());</span>
+<span class="nc" id="L202">			driverProcess.close(false);</span>
+<span class="nc" id="L203">			driver = null;</span>
+<span class="nc" id="L204">		}</span>
+		
+<span class="nc bnc" id="L206" title="All 2 branches missed.">		if(driver == null) {</span>
+			try{
+<span class="nc" id="L208">				driver = new RemoteWebDriver(driverProcess.getDriverLoopback(), cap);</span>
+<span class="nc" id="L209">			}catch(Exception ex){</span>
+<span class="nc" id="L210">				status.setTechnicalError(ActionStatus.CHANNEL_START_ERROR, ex.getMessage());</span>
+<span class="nc" id="L211">				driverProcess.close(false);</span>
+<span class="nc" id="L212">				driver = null;</span>
+<span class="nc" id="L213">				return;</span>
+<span class="nc" id="L214">			}</span>
+		}
+
+<span class="nc" id="L217">		status.setPassed(true);</span>
+
+<span class="nc" id="L219">		actions = new Actions(driver);</span>
+
+<span class="nc" id="L221">		driver.manage().timeouts().setScriptTimeout(scriptTimeout, TimeUnit.SECONDS);</span>
+<span class="nc" id="L222">		driver.manage().timeouts().pageLoadTimeout(pageLoadTimeout, TimeUnit.SECONDS);</span>
+
+		try{
+<span class="nc" id="L225">			driver.manage().window().setSize(channel.getDimension().getSize());</span>
+<span class="nc" id="L226">			driver.manage().window().setPosition(channel.getDimension().getPoint());</span>
+<span class="nc" id="L227">		}catch(Exception ex){</span>
+<span class="nc" id="L228">			System.err.println(ex.getMessage());</span>
+<span class="nc" id="L229">		}</span>
+
+<span class="nc" id="L231">		String applicationVersion = null;</span>
+<span class="nc" id="L232">		String driverVersion = null;</span>
+
+<span class="nc" id="L234">		Map&lt;String, ?&gt; infos = driver.getCapabilities().asMap();</span>
+<span class="nc bnc" id="L235" title="All 2 branches missed.">		for (Map.Entry&lt;String, ?&gt; entry : infos.entrySet()){</span>
+<span class="nc bnc" id="L236" title="All 4 branches missed.">			if(&quot;browserVersion&quot;.equals(entry.getKey()) || &quot;version&quot;.equals(entry.getKey())){</span>
+<span class="nc" id="L237">				applicationVersion = entry.getValue().toString();</span>
+<span class="nc bnc" id="L238" title="All 2 branches missed.">			}else if(&quot;chrome&quot;.equals(entry.getKey())) {</span>
+<span class="nc" id="L239">				Map&lt;String, String&gt; chromeData = (Map&lt;String, String&gt;) entry.getValue();</span>
+<span class="nc" id="L240">				driverVersion = chromeData.get(&quot;chromedriverVersion&quot;);</span>
+<span class="nc bnc" id="L241" title="All 2 branches missed.">				if(driverVersion != null) {</span>
+<span class="nc" id="L242">					driverVersion = driverVersion.replaceFirst(&quot;\\(.*\\)&quot;, &quot;&quot;).trim();</span>
+				}
+<span class="nc bnc" id="L244" title="All 2 branches missed.">			}else if(&quot;msedge&quot;.equals(entry.getKey())) {</span>
+<span class="nc" id="L245">				Map&lt;String, String&gt; msedgeData = (Map&lt;String, String&gt;) entry.getValue();</span>
+<span class="nc" id="L246">				driverVersion = msedgeData.get(&quot;msedgedriverVersion&quot;);</span>
+<span class="nc bnc" id="L247" title="All 2 branches missed.">				if(driverVersion != null) {</span>
+<span class="nc" id="L248">					driverVersion = driverVersion.replaceFirst(&quot;\\(.*\\)&quot;, &quot;&quot;).trim();</span>
+				}
+<span class="nc bnc" id="L250" title="All 2 branches missed.">			}else if(&quot;moz:geckodriverVersion&quot;.equals(entry.getKey())) {</span>
+<span class="nc" id="L251">				driverVersion = entry.getValue().toString();</span>
+			}
+<span class="nc" id="L253">		}</span>
+
+<span class="nc" id="L255">		final String titleUid = UUID.randomUUID().toString();</span>
+		try {
+
+<span class="nc" id="L258">			final File startAtsPage = new File(System.getProperty(&quot;user.home&quot;) + File.separator + &quot;ats_start_page.html&quot;);</span>
+<span class="nc" id="L259">			startAtsPage.deleteOnExit();</span>
+
+<span class="nc" id="L261">			Files.write(</span>
+<span class="nc" id="L262">					startAtsPage.toPath(),</span>
+<span class="nc" id="L263">					Utils.getAtsBrowserContent(</span>
+							titleUid, 
+<span class="nc" id="L265">							channel.getApplication(), </span>
+							applicationPath, 
+							applicationVersion, 
+							driverVersion, 
+<span class="nc" id="L269">							channel.getDimension(), </span>
+<span class="nc" id="L270">							getActionWait(), </span>
+<span class="nc" id="L271">							getPropertyWait(), </span>
+							maxTrySearch, 
+							maxTryProperty, 
+							scriptTimeout, 
+							pageLoadTimeout, 
+							watchdog,
+<span class="nc" id="L277">							getDesktopDriver(), </span>
+							profilePath),
+					StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+
+<span class="nc" id="L281">			driver.get(startAtsPage.toURI().toString());</span>
+
+<span class="nc" id="L283">		} catch (IOException e) {</span>
+<span class="nc" id="L284">			status.setTechnicalError(ActionStatus.CHANNEL_START_ERROR, e.getMessage());</span>
+<span class="nc" id="L285">			driverProcess.close(false);</span>
+<span class="nc" id="L286">			return;</span>
+<span class="nc" id="L287">		}</span>
+
+<span class="nc" id="L289">		final String osVersion = getDesktopDriver().getOsName() + &quot; (&quot; + getDesktopDriver().getOsVersion() +&quot;)&quot;;</span>
+
+<span class="nc" id="L291">		int maxTry = 10;</span>
+<span class="nc bnc" id="L292" title="All 2 branches missed.">		while(maxTry &gt; 0) {</span>
+<span class="nc" id="L293">			final DesktopWindow window = desktopDriver.getWindowByTitle(titleUid, browserName);</span>
+<span class="nc bnc" id="L294" title="All 2 branches missed.">			if(window != null) {</span>
+<span class="nc" id="L295">				desktopDriver.setEngine(new DesktopDriverEngine(channel, window));</span>
+<span class="nc" id="L296">				channel.setApplicationData(</span>
+						osVersion,
+						applicationVersion,
+						driverVersion,
+<span class="nc" id="L300">						window.getPid());</span>
+<span class="nc" id="L301">				maxTry = 0;</span>
+			}else {
+<span class="nc" id="L303">				channel.sleep(300);</span>
+<span class="nc" id="L304">				maxTry--;</span>
+			}
+<span class="nc" id="L306">		}</span>
+
+		try {
+<span class="nc" id="L309">			driverSession = new URI(driverProcess.getDriverServerUrl() + &quot;/session/&quot; + driver.getSessionId().toString());</span>
+<span class="nc" id="L310">		} catch (URISyntaxException e) {}</span>
+<span class="nc" id="L311">	}</span>
+
+	@Override
+	public DesktopDriver getDesktopDriver() {
+<span class="nc" id="L315">		return desktopDriver;</span>
+	}
+
+	protected Channel getChannel() {
+<span class="nc" id="L319">		return channel;</span>
+	}
+
+	@Override
+	public void waitAfterAction(ActionStatus status) {
+<span class="nc" id="L324">		actionWait();</span>
+<span class="nc" id="L325">	}</span>
+
+	protected String[] getWindowsHandle(int index, int tries) {
+<span class="nc" id="L328">		Set&lt;String&gt; list = getDriverWindowsList();</span>
+<span class="nc" id="L329">		int maxTry = 1 + tries;</span>
+<span class="nc bnc" id="L330" title="All 4 branches missed.">		while(index &gt;= list.size() &amp;&amp; maxTry &gt; 0) {</span>
+<span class="nc" id="L331">			channel.sleep(1000);</span>
+<span class="nc" id="L332">			list = getDriverWindowsList();</span>
+<span class="nc" id="L333">			maxTry--;</span>
+		}
+<span class="nc" id="L335">		return list.toArray(new String[list.size()]);</span>
+	}
+
+	protected Set&lt;String&gt; getDriverWindowsList(){
+		try {
+<span class="nc" id="L340">			return driver.getWindowHandles();</span>
+<span class="nc" id="L341">		}catch (WebDriverException e) {</span>
+<span class="nc" id="L342">			return Collections.&lt;String&gt;emptySet();</span>
+		}
+	}
+
+	//---------------------------------------------------------------------------------------------------------------------
+	// 
+	//---------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public void scroll(int delta) {
+<span class="nc" id="L352">		runJavaScript(JS_WINDOW_SCROLL, delta);</span>
+<span class="nc" id="L353">	}</span>
+
+	@Override
+	public void scroll(FoundElement element, int delta) {
+<span class="nc bnc" id="L357" title="All 2 branches missed.">		if(delta == 0) {</span>
+<span class="nc" id="L358">			scroll(element);</span>
+		}else {
+<span class="nc" id="L360">			final ArrayList&lt;Double&gt; newPosition =  (ArrayList&lt;Double&gt;) runJavaScript(JS_ELEMENT_SCROLL, element.getValue(), delta);</span>
+<span class="nc" id="L361">			updatePosition(newPosition, element);</span>
+		}
+<span class="nc" id="L363">	}</span>
+
+	@Override
+	public void scroll(FoundElement element) {
+<span class="nc" id="L367">		updatePosition((ArrayList&lt;Double&gt;) runJavaScript(JS_SCROLL_IF_NEEDED, element.getValue()), element);</span>
+<span class="nc" id="L368">	}</span>
+
+	//---------------------------------------------------------------------------------------------------------------------
+	// 
+	//---------------------------------------------------------------------------------------------------------------------
+
+	private void updatePosition(ArrayList&lt;Double&gt; position, FoundElement element) {
+<span class="nc bnc" id="L375" title="All 4 branches missed.">		if(position != null &amp;&amp; position.size() &gt; 1) {</span>
+<span class="nc" id="L376">			element.updatePosition(position.get(0), position.get(1), channel, 0.0, 0.0);</span>
+<span class="nc" id="L377">			channel.sleep(500);</span>
+		}
+<span class="nc" id="L379">	}</span>
+
+	@Override
+	public FoundElement getElementFromPoint(Boolean syscomp, Double x, Double y){
+
+<span class="nc bnc" id="L384" title="All 2 branches missed.">		if(syscomp) {</span>
+<span class="nc" id="L385">			return desktopDriver.getElementFromPoint(x, y);</span>
+		}else {
+
+<span class="nc" id="L388">			switchToDefaultContent();</span>
+
+<span class="nc" id="L390">			x -= channel.getSubDimension().getX();</span>
+<span class="nc" id="L391">			y -= channel.getSubDimension().getY();</span>
+
+<span class="nc" id="L393">			return loadElement(new ArrayList&lt;AtsElement&gt;(), x, y, initElementX, initElementY);</span>
+		}
+	}
+
+	private FoundElement loadElement(ArrayList&lt;AtsElement&gt; iframes, Double x, Double y, Double offsetX, Double offsetY) {
+
+<span class="nc" id="L399">		final ArrayList&lt;Object&gt; objectData = (ArrayList&lt;Object&gt;)runJavaScript(JS_ELEMENT_FROM_POINT, x - offsetX, y - offsetY);</span>
+
+<span class="nc bnc" id="L401" title="All 2 branches missed.">		if(objectData != null){</span>
+
+<span class="nc" id="L403">			final AtsElement element = new AtsElement(objectData);</span>
+
+<span class="nc bnc" id="L405" title="All 2 branches missed.">			if(element.isIframe()){</span>
+
+<span class="nc" id="L407">				iframes.add(0, element);</span>
+
+<span class="nc" id="L409">				FoundElement frm = new FoundElement(element);</span>
+
+<span class="nc" id="L411">				switchToFrame(frm.getValue());</span>
+
+<span class="nc" id="L413">				offsetX += element.getX();</span>
+<span class="nc" id="L414">				offsetY += element.getY();</span>
+
+<span class="nc" id="L416">				return loadElement(iframes, x, y, offsetX, offsetY);</span>
+
+			} else {
+<span class="nc" id="L419">				return new FoundElement(element, iframes, channel, offsetX, offsetY);</span>
+			}
+
+		} else {
+<span class="nc" id="L423">			return null;</span>
+		}
+	}
+
+	@Override
+	public FoundElement getElementFromRect(Boolean syscomp, Double x, Double y, Double w, Double h){
+
+<span class="nc bnc" id="L430" title="All 2 branches missed.">		if(syscomp) {</span>
+<span class="nc" id="L431">			return desktopDriver.getElementFromRect(x, y, w, y);</span>
+		}else {
+
+<span class="nc" id="L434">			switchToDefaultContent();</span>
+
+<span class="nc" id="L436">			x = x - channel.getSubDimension().getX() - channel.getDimension().getX();</span>
+<span class="nc" id="L437">			y = y - channel.getSubDimension().getY() - channel.getDimension().getY();</span>
+
+<span class="nc" id="L439">			return loadElement(new ArrayList&lt;AtsElement&gt;(), x, y, w, h, initElementX, initElementY);</span>
+		}
+	}
+
+	private FoundElement loadElement(ArrayList&lt;AtsElement&gt; iframes, Double x, Double y, Double w, Double h, Double offsetX, Double offsetY) {
+
+<span class="nc" id="L445">		final ArrayList&lt;Object&gt; objectData = (ArrayList&lt;Object&gt;)runJavaScript(JS_ELEMENT_FROM_RECT, x - offsetX, y - offsetY, w, h);</span>
+
+<span class="nc bnc" id="L447" title="All 2 branches missed.">		if(objectData != null){</span>
+
+<span class="nc" id="L449">			final AtsElement element = new AtsElement(objectData);</span>
+
+<span class="nc bnc" id="L451" title="All 2 branches missed.">			if(element.isIframe()){</span>
+
+<span class="nc" id="L453">				iframes.add(0, element);</span>
+
+<span class="nc" id="L455">				FoundElement frm = new FoundElement(element);</span>
+
+<span class="nc" id="L457">				switchToFrame(frm.getValue());</span>
+
+<span class="nc" id="L459">				offsetX += element.getX();</span>
+<span class="nc" id="L460">				offsetY += element.getY();</span>
+
+<span class="nc" id="L462">				return loadElement(iframes, x, y, w, h, offsetX, offsetY);</span>
+
+			} else {
+<span class="nc" id="L465">				return new FoundElement(element, iframes, channel, offsetX, offsetY);</span>
+			}
+
+		} else {
+<span class="nc" id="L469">			return null;</span>
+		}
+	}
+
+	@Override
+	public void loadParents(FoundElement hoverElement){
+<span class="nc bnc" id="L475" title="All 2 branches missed.">		if(hoverElement.isDesktop()){</span>
+<span class="nc" id="L476">			hoverElement.setParent(desktopDriver.getTestElementParent(hoverElement.getId(), channel));</span>
+		}else{
+<span class="nc" id="L478">			hoverElement.setParent(getTestElementParent(hoverElement));</span>
+		}
+<span class="nc" id="L480">	}</span>
+
+	//---------------------------------------------------------------------------------------------------------------------
+	// 
+	//---------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public WebElement getRootElement(Channel cnl) {
+
+<span class="nc" id="L489">		int maxTry = 20;</span>
+<span class="nc" id="L490">		WebElement body = getHtmlView();</span>
+
+<span class="nc bnc" id="L492" title="All 4 branches missed.">		while(body == null &amp;&amp; maxTry &gt; 0) {</span>
+<span class="nc" id="L493">			cnl.sleep(200);</span>
+<span class="nc" id="L494">			body = getHtmlView();</span>
+<span class="nc" id="L495">			maxTry--;</span>
+		}
+
+<span class="nc" id="L498">		return body;</span>
+	}
+
+	@Override
+	public String getTitle() {
+<span class="nc" id="L503">		return driver.getTitle();</span>
+	}
+
+	private WebElement getHtmlView() {
+<span class="nc" id="L507">		return (WebElement)driver.executeScript(&quot;return window.document.getElementsByTagName(\&quot;html\&quot;)[0];&quot;);</span>
+	}
+
+	private RemoteWebElement getWebElement(FoundElement element) {
+<span class="nc" id="L511">		return element.getRemoteWebElement(driver);</span>
+	}
+
+	@Override
+	public String getAttribute(ActionStatus status, FoundElement element, String attributeName, int maxTry) {
+<span class="nc" id="L516">		int tryLoop = maxTry;</span>
+<span class="nc bnc" id="L517" title="All 2 branches missed.">		while (tryLoop &gt; 0){</span>
+<span class="nc" id="L518">			String result = getAttribute(status, element, attributeName);</span>
+<span class="nc bnc" id="L519" title="All 4 branches missed.">			if(result != null &amp;&amp; doubleCheckAttribute(status, result, element, attributeName)) {</span>
+<span class="nc" id="L520">				return result;</span>
+			}
+<span class="nc" id="L522">			channel.sendWarningLog(&quot;Property not found&quot;, tryLoop + &quot;&quot;);</span>
+<span class="nc" id="L523">			channel.sleep(getPropertyWait());</span>
+<span class="nc" id="L524">			tryLoop--;</span>
+<span class="nc" id="L525">		}</span>
+<span class="nc" id="L526">		return null;</span>
+	}
+
+	@Override
+	public List&lt;String[]&gt; loadSelectOptions(TestElement element) {
+<span class="nc" id="L531">		final ArrayList&lt;String[]&gt; result = new ArrayList&lt;String[]&gt;();</span>
+
+<span class="nc bnc" id="L533" title="All 2 branches missed.">		if(element.isAngularSelect()) {</span>
+<span class="nc" id="L534">			element.getWebElement().sendKeys(Keys.TAB);</span>
+<span class="nc" id="L535">			element.click(channel.newActionStatus(), new MouseDirection());</span>
+
+<span class="nc" id="L537">			final List&lt;FoundElement&gt; options = findMatSelectOptions(element);</span>
+<span class="nc bnc" id="L538" title="All 4 branches missed.">			if(options != null &amp;&amp; options.size() &gt; 0) {</span>
+<span class="nc" id="L539">				options.stream().forEachOrdered(e -&gt; result.add(new String[]{e.getValue().getText(), e.getValue().getText()}));</span>
+			}
+
+<span class="nc" id="L542">		}else {</span>
+<span class="nc" id="L543">			final List&lt;FoundElement&gt; options = findSelectOptions(null, element);</span>
+<span class="nc bnc" id="L544" title="All 4 branches missed.">			if(options != null &amp;&amp; options.size() &gt; 0) {</span>
+<span class="nc" id="L545">				options.stream().forEachOrdered(e -&gt; result.add(new String[]{e.getValue().getAttribute(&quot;value&quot;), e.getValue().getAttribute(&quot;text&quot;)}));</span>
+			}
+		}
+<span class="nc" id="L548">		return result;</span>
+	}
+
+	@Override
+	public List&lt;FoundElement&gt; findSelectOptions(TestBound dimension, TestElement element) {
+<span class="nc" id="L553">		switchToDefaultContent();</span>
+<span class="nc" id="L554">		return findElements(false, element, OPTION, new String[0], new String[0], Objects::nonNull, element.getWebElement(), false);</span>
+	}
+
+	public List&lt;FoundElement&gt; findMatSelectOptions(TestElement element) {
+<span class="nc" id="L558">		switchToDefaultContent();</span>
+<span class="nc" id="L559">		return findElements(false, element, ANGULAR_OPTION, new String[0], new String[0], Objects::nonNull, null, true);</span>
+	}
+
+	@Override
+	public void selectOptionsItem(ActionStatus status, TestElement element, CalculatedProperty selectProperty) {
+
+<span class="nc bnc" id="L565" title="All 2 branches missed.">		if(element.isAngularSelect()) {</span>
+
+<span class="nc" id="L567">			element.getWebElement().sendKeys(Keys.TAB);</span>
+<span class="nc" id="L568">			element.click(status, new MouseDirection());</span>
+
+<span class="nc" id="L570">			final List&lt;FoundElement&gt; items = findMatSelectOptions(element);</span>
+
+<span class="nc bnc" id="L572" title="All 4 branches missed.">			if(items != null &amp;&amp; items.size() &gt; 0) {</span>
+<span class="nc bnc" id="L573" title="All 2 branches missed.">				if(ActionSelect.SELECT_INDEX.equals(selectProperty.getName())){</span>
+<span class="nc" id="L574">					final int index = Utils.string2Int(selectProperty.getValue().getCalculated());</span>
+<span class="nc bnc" id="L575" title="All 2 branches missed.">					if(items.size() &gt; index) {</span>
+						try {
+<span class="nc" id="L577">							items.get(index).getValue().click();</span>
+<span class="nc" id="L578">						}catch (Exception e) {</span>
+<span class="nc" id="L579">							status.setError(ActionStatus.OBJECT_NOT_INTERACTABLE, e.getMessage());</span>
+<span class="nc" id="L580">						}</span>
+					}else {
+<span class="nc" id="L582">						status.setError(ActionStatus.OBJECT_NOT_INTERACTABLE, &quot;index not found, max length options : &quot; + items.size());</span>
+					}
+<span class="nc" id="L584">				}else {</span>
+<span class="nc" id="L585">					final String searchedValue = selectProperty.getValue().getCalculated();</span>
+					try {
+<span class="nc bnc" id="L587" title="All 2 branches missed.">						if(selectProperty.isRegexp()) {</span>
+<span class="nc" id="L588">							items.stream().filter(e -&gt; e.getValue().getText().matches(searchedValue)).findFirst().get().getValue().click();</span>
+						}else {
+<span class="nc" id="L590">							items.stream().filter(e -&gt; e.getValue().getText().equals(searchedValue)).findFirst().get().getValue().click();</span>
+						}
+<span class="nc" id="L592">					}catch (NoSuchElementException e) {</span>
+<span class="nc" id="L593">						status.setError(ActionStatus.OBJECT_NOT_INTERACTABLE, &quot;mat-option not found : &quot; + searchedValue);</span>
+<span class="nc" id="L594">					}</span>
+				}
+			}
+
+<span class="nc" id="L598">		}else {</span>
+<span class="nc" id="L599">			final List&lt;FoundElement&gt; items = findSelectOptions(null, element);</span>
+
+<span class="nc bnc" id="L601" title="All 4 branches missed.">			if(items != null &amp;&amp; items.size() &gt; 0) {</span>
+
+<span class="nc" id="L603">				element.click(status, new MouseDirection());</span>
+
+<span class="nc bnc" id="L605" title="All 2 branches missed.">				if(ActionSelect.SELECT_INDEX.equals(selectProperty.getName())){</span>
+
+<span class="nc" id="L607">					final int index = Utils.string2Int(selectProperty.getValue().getCalculated());</span>
+<span class="nc bnc" id="L608" title="All 2 branches missed.">					if(items.size() &gt; index) {</span>
+						try {
+<span class="nc" id="L610">							items.get(index).getValue().click();</span>
+<span class="nc" id="L611">						}catch (Exception e) {</span>
+<span class="nc" id="L612">							new Select(items.get(index).getValue()).selectByIndex(index);</span>
+<span class="nc" id="L613">						}</span>
+					}else {
+<span class="nc" id="L615">						status.setError(ActionStatus.OBJECT_NOT_INTERACTABLE, &quot;index not found, max length options : &quot; + items.size());</span>
+					}
+
+<span class="nc" id="L618">				}else{</span>
+
+<span class="nc" id="L620">					final String attribute = selectProperty.getName();</span>
+<span class="nc" id="L621">					final String searchedValue = selectProperty.getValue().getCalculated();</span>
+<span class="nc" id="L622">					Optional&lt;FoundElement&gt; foundOption = null;</span>
+
+<span class="nc bnc" id="L624" title="All 2 branches missed.">					if(selectProperty.isRegexp()) {</span>
+<span class="nc" id="L625">						foundOption = items.stream().filter(e -&gt; e.getValue().getAttribute(attribute).matches(searchedValue)).findFirst();</span>
+					}else {
+<span class="nc" id="L627">						foundOption = items.stream().filter(e -&gt; e.getValue().getAttribute(attribute).equals(searchedValue)).findFirst();</span>
+					}
+
+					try {
+<span class="nc" id="L631">						foundOption.get().getValue().click();</span>
+<span class="nc" id="L632">					}catch (NoSuchElementException e) {</span>
+<span class="nc" id="L633">						status.setError(ActionStatus.OBJECT_NOT_INTERACTABLE, &quot;option not found : &quot; + searchedValue);</span>
+<span class="nc" id="L634">					}</span>
+				}
+
+				try {
+<span class="nc" id="L638">					driver.executeScript(&quot;arguments[0].blur();&quot;, element.getWebElement());</span>
+<span class="nc" id="L639">				}catch(Exception e) {}</span>
+			}
+		}
+<span class="nc" id="L642">	}</span>
+
+	private boolean doubleCheckAttribute(ActionStatus status, String verify, FoundElement element, String attributeName) {
+<span class="nc" id="L645">		channel.sleep(getPropertyWait());</span>
+
+<span class="nc" id="L647">		final String current = getAttribute(status, element, attributeName);</span>
+<span class="nc bnc" id="L648" title="All 4 branches missed.">		return current != null &amp;&amp; current.equals(verify);</span>
+	}
+
+	@Override
+<span class="nc" id="L652">	public void setSysProperty(String propertyName, String propertyValue) { }</span>
+
+	private String getAttribute(ActionStatus status, FoundElement element, String attributeName) {
+
+<span class="nc" id="L656">		final RemoteWebElement elem = getWebElement(element);</span>
+<span class="nc" id="L657">		String result = elem.getAttribute(attributeName);</span>
+
+<span class="nc bnc" id="L659" title="All 2 branches missed.">		if(result == null) {</span>
+
+<span class="nc bnc" id="L661" title="All 2 branches missed.">			for (CalculatedProperty calc : getAttributes(element, false)) {</span>
+<span class="nc bnc" id="L662" title="All 2 branches missed.">				if(attributeName.equals(calc.getName())) {</span>
+<span class="nc" id="L663">					return calc.getValue().getCalculated();</span>
+				}
+			}
+<span class="nc" id="L666">			result = getCssAttributeValueByName(element, attributeName);</span>
+
+<span class="nc bnc" id="L668" title="All 2 branches missed.">			if(result == null) {</span>
+<span class="nc" id="L669">				final Object obj = executeJavaScript(status, attributeName, true);</span>
+<span class="nc bnc" id="L670" title="All 2 branches missed.">				if(obj != null) {</span>
+<span class="nc" id="L671">					result = obj.toString();</span>
+				}
+			}
+		}
+<span class="nc" id="L675">		return result;</span>
+	}
+
+	private String getCssAttributeValueByName(FoundElement element, String name) {
+<span class="nc" id="L679">		return foundAttributeValue(name, getCssAttributes(element));</span>
+	}
+
+	private String foundAttributeValue(String name, CalculatedProperty[] properties) {
+<span class="nc" id="L683">		final Stream&lt;CalculatedProperty&gt; stream = Arrays.stream(properties);</span>
+<span class="nc" id="L684">		final Optional&lt;CalculatedProperty&gt; calc = stream.parallel().filter(c -&gt; c.getName().equals(name)).findFirst();</span>
+<span class="nc bnc" id="L685" title="All 2 branches missed.">		if(calc.isPresent()) {</span>
+<span class="nc" id="L686">			return calc.get().getValue().getCalculated();</span>
+		}
+<span class="nc" id="L688">		return null;</span>
+	}
+
+	@Override
+	public CalculatedProperty[] getAttributes(FoundElement element, boolean reload){
+<span class="nc bnc" id="L693" title="All 2 branches missed.">		if(element.isDesktop()){</span>
+<span class="nc" id="L694">			return desktopDriver.getElementAttributes(element.getId());</span>
+		}else {
+<span class="nc" id="L696">			return getAttributes(getWebElement(element));</span>
+		}
+	}
+
+	@Override
+	public CalculatedProperty[] getCssAttributes(FoundElement element){
+<span class="nc" id="L702">		return getCssAttributes(getWebElement(element));</span>
+	}
+
+	private CalculatedProperty[] getCssAttributes(RemoteWebElement element){
+<span class="nc" id="L706">		return getAttributesList(element, JS_ELEMENT_CSS);</span>
+	}
+
+	private CalculatedProperty[] getAttributes(RemoteWebElement element){
+<span class="nc" id="L710">		return getAttributesList(element, JS_ELEMENT_ATTRIBUTES);</span>
+	}
+
+	private CalculatedProperty[] getAttributesList(RemoteWebElement element, String script) {
+<span class="nc" id="L714">		final Object result = runJavaScript(script, element);</span>
+<span class="nc bnc" id="L715" title="All 4 branches missed.">		if(result != null &amp;&amp; result instanceof Map){</span>
+<span class="nc bnc" id="L716" title="All 2 branches missed.">			return ((Map&lt;String, Object&gt;)result).entrySet().stream().parallel().filter(e -&gt; !(e.getValue() instanceof Map)).map(e -&gt; new CalculatedProperty(e.getKey(), e.getValue().toString())).toArray(c -&gt; new CalculatedProperty[c]);</span>
+		}
+<span class="nc" id="L718">		return new CalculatedProperty[0];</span>
+	}
+
+	public FoundElement getTestElementParent(FoundElement element){
+<span class="nc" id="L722">		final ArrayList&lt;ArrayList&lt;Object&gt;&gt; listElements = (ArrayList&lt;ArrayList&lt;Object&gt;&gt;) runJavaScript(JS_ELEMENT_PARENTS, element.getValue());</span>
+<span class="nc bnc" id="L723" title="All 4 branches missed.">		if(listElements != null &amp;&amp; listElements.size() &gt; 0){</span>
+<span class="nc" id="L724">			return new FoundElement(</span>
+					channel,
+<span class="nc" id="L726">					element.getIframes(),</span>
+<span class="nc" id="L727">					listElements.stream().map(e -&gt; new AtsElement(e)).collect(Collectors.toCollection(ArrayList::new)),</span>
+					initElementX,
+					initElementY);
+		}
+<span class="nc" id="L731">		return null;</span>
+	}
+
+	//---------------------------------------------------------------------------------------------------------------------
+	// 
+	//---------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public void updateDimensions() {
+<span class="nc" id="L740">		final ArrayList&lt;Double&gt; response = (ArrayList&lt;Double&gt;) runJavaScript(JS_DOCUMENT_SIZE);</span>
+<span class="nc bnc" id="L741" title="All 4 branches missed.">		if(response != null &amp;&amp; response.size() == 8) {</span>
+<span class="nc" id="L742">			channel.getDimension().update(response.get(0), response.get(1), response.get(2), response.get(3));</span>
+<span class="nc" id="L743">			channel.getSubDimension().update(response.get(4), response.get(5), response.get(6), response.get(7));</span>
+		}
+<span class="nc" id="L745">	}</span>
+
+	@Override
+	public synchronized void close(boolean keepRunning) {
+<span class="nc bnc" id="L749" title="All 2 branches missed.">		if(driver != null){</span>
+<span class="nc" id="L750">			Arrays.asList(getWindowsHandle(0, 0)).stream().sorted(Collections.reverseOrder()).forEach(s -&gt; closeWindowHandler(s));</span>
+<span class="nc" id="L751">			driver.quit();</span>
+<span class="nc" id="L752">			driver = null;</span>
+		}
+<span class="nc" id="L754">		getDriverProcess().close(keepRunning);</span>
+<span class="nc" id="L755">	}</span>
+
+	//-----------------------------------------------------------------------------------------------------------------------------------
+	// Mouse position by browser
+	//-----------------------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	protected int getCartesianOffset(int value, MouseDirectionData direction, Cartesian cart1, Cartesian cart2,	Cartesian cart3) {
+<span class="nc" id="L763">		return super.getCartesianOffset(value, direction, cart1, cart2, cart3) - value/2;</span>
+	}
+
+	@Override
+	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean withDesktop, int offsetX, int offsetY) {
+
+<span class="nc" id="L769">		channel.waitBeforeMouseMoveToElement(this);</span>
+
+<span class="nc bnc" id="L771" title="All 2 branches missed.">		if(withDesktop) {</span>
+<span class="nc" id="L772">			desktopMoveToElement(foundElement, position,offsetX ,offsetY);</span>
+		}else {
+<span class="nc" id="L774">			int maxTry = 10;</span>
+<span class="nc bnc" id="L775" title="All 2 branches missed.">			while(maxTry &gt; 0) {</span>
+<span class="nc" id="L776">				status.setNoError();</span>
+				try {
+<span class="nc" id="L778">					scrollAndMove(foundElement, position, offsetX, offsetY);</span>
+<span class="nc" id="L779">					maxTry = 0;</span>
+<span class="nc" id="L780">				}catch(StaleElementReferenceException e0) {</span>
+<span class="nc" id="L781">					throw e0;</span>
+<span class="nc" id="L782">				}catch(JavascriptException e1) {</span>
+<span class="nc" id="L783">					switchToDefaultContent();</span>
+<span class="nc" id="L784">					status.setException(ActionStatus.JAVASCRIPT_ERROR, e1);</span>
+<span class="nc" id="L785">					throw e1;</span>
+<span class="nc" id="L786">				}catch(MoveTargetOutOfBoundsException e2) {</span>
+<span class="nc" id="L787">					driver.executeScript(&quot;arguments[0].scrollIntoView();&quot;, foundElement.getValue());</span>
+<span class="nc" id="L788">					maxTry = 0;</span>
+<span class="nc" id="L789">				}catch(WebDriverException e3) {</span>
+<span class="nc" id="L790">					status.setException(ActionStatus.WEB_DRIVER_ERROR, e3);</span>
+<span class="nc" id="L791">					channel.sleep(500);</span>
+<span class="nc" id="L792">					maxTry--;</span>
+<span class="nc" id="L793">				}</span>
+			}
+		}
+<span class="nc" id="L796">	}</span>
+
+	private void scrollAndMove(FoundElement element, MouseDirection position, int offsetX, int offsetY) {
+<span class="nc" id="L799">		scroll(element);</span>
+<span class="nc" id="L800">		channel.sleep(100);</span>
+
+<span class="nc" id="L802">		final Rectangle rect = element.getRectangle();</span>
+<span class="nc" id="L803">		move(element, getOffsetX(rect, position) + offsetX, getOffsetY(rect, position) + offsetY);</span>
+<span class="nc" id="L804">	}</span>
+
+	protected void move(FoundElement element, int offsetX, int offsetY) {
+		try {
+<span class="nc" id="L808">			actions.moveToElement(element.getValue(), offsetX, offsetY).perform();</span>
+<span class="nc" id="L809">		}catch (JavascriptException e) {</span>
+<span class="nc bnc" id="L810" title="All 2 branches missed.">			if(!e.getMessage().contains(&quot;elementsFromPoint&quot;)){</span>
+<span class="nc" id="L811">				throw e;</span>
+			}
+<span class="nc" id="L813">		}</span>
+<span class="nc" id="L814">	}</span>
+
+	@Override
+	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {
+<span class="nc" id="L818">		final Rectangle rect = element.getRectangle();</span>
+		try {
+<span class="nc" id="L820">			click(element, getOffsetX(rect, position) + offsetX, getOffsetY(rect, position) + offsetY);</span>
+<span class="nc" id="L821">			status.setPassed(true);</span>
+<span class="nc" id="L822">		}catch(StaleElementReferenceException e1) {</span>
+<span class="nc" id="L823">			throw e1;</span>
+<span class="nc" id="L824">		}catch(ElementNotVisibleException e0) {	</span>
+<span class="nc" id="L825">			status.setError(ActionStatus.OBJECT_NOT_VISIBLE, &quot;element is not visible&quot;);</span>
+<span class="nc" id="L826">		}catch(MoveTargetOutOfBoundsException e) {</span>
+<span class="nc" id="L827">			driver.executeScript(&quot;arguments[0].click();&quot;, element.getValue());</span>
+<span class="nc" id="L828">		}catch (Exception e) {</span>
+<span class="nc" id="L829">			status.setException(ActionStatus.OBJECT_NOT_INTERACTABLE, e);</span>
+<span class="nc" id="L830">		}</span>
+<span class="nc" id="L831">	}</span>
+
+	protected void click(FoundElement element, int offsetX, int offsetY) {
+<span class="nc" id="L834">		actions.moveToElement(element.getValue(), offsetX, offsetY)</span>
+<span class="nc" id="L835">		.click()</span>
+<span class="nc" id="L836">		.build()</span>
+<span class="nc" id="L837">		.perform();</span>
+<span class="nc" id="L838">	}</span>
+
+	@Override
+	public void drag(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {
+
+<span class="nc" id="L843">		final Rectangle rect = element.getRectangle();</span>
+
+		try {
+
+<span class="nc" id="L847">			actions.moveToElement(element.getValue(), getOffsetX(rect, position) + offsetX, getOffsetY(rect, position) + offsetY)</span>
+<span class="nc" id="L848">			.clickAndHold(element.getValue())</span>
+<span class="nc" id="L849">			.build()</span>
+<span class="nc" id="L850">			.perform();</span>
+
+<span class="nc" id="L852">			status.setPassed(true);</span>
+
+<span class="nc" id="L854">		}catch(StaleElementReferenceException e1) {</span>
+<span class="nc" id="L855">			throw e1;</span>
+<span class="nc" id="L856">		}catch(ElementNotVisibleException e0) {	</span>
+<span class="nc" id="L857">			status.setError(ActionStatus.OBJECT_NOT_VISIBLE, &quot;element is not visible&quot;);</span>
+<span class="nc" id="L858">		}catch (Exception e) {</span>
+<span class="nc" id="L859">			status.setException(ActionStatus.OBJECT_NOT_INTERACTABLE, e);</span>
+<span class="nc" id="L860">		}</span>
+<span class="nc" id="L861">	}</span>
+
+	@Override
+	public void keyDown(Keys key) {
+<span class="nc" id="L865">		actions.keyDown(key).perform();</span>
+<span class="nc" id="L866">	}</span>
+
+	@Override
+	public void keyUp(Keys key) {
+<span class="nc" id="L870">		actions.keyUp(key).perform();</span>
+<span class="nc" id="L871">	}</span>
+
+	@Override
+	public void drop(MouseDirection md, boolean desktopDragDrop) {
+<span class="nc bnc" id="L875" title="All 2 branches missed.">		if(desktopDragDrop) {</span>
+<span class="nc" id="L876">			getDesktopDriver().mouseRelease();</span>
+		}else {
+<span class="nc" id="L878">			actions.release().perform();</span>
+		}
+<span class="nc" id="L880">	}</span>
+
+	@Override
+	public void moveByOffset(int hDirection, int vDirection) {
+<span class="nc" id="L884">		actions.moveByOffset(hDirection, vDirection).perform();</span>
+<span class="nc" id="L885">	}</span>
+
+	@Override
+	public void doubleClick() {
+<span class="nc" id="L889">		actions.doubleClick().perform();</span>
+<span class="nc" id="L890">	}	</span>
+
+	@Override
+	public void rightClick() {
+<span class="nc" id="L894">		actions.contextClick().perform();</span>
+<span class="nc" id="L895">	}</span>
+
+	//-----------------------------------------------------------------------------------------------------------------------------------
+	// Iframes management
+	//-----------------------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public boolean switchToDefaultContent() {
+		try {
+<span class="nc" id="L904">			driver.switchTo().defaultContent();</span>
+<span class="nc" id="L905">			return true;</span>
+<span class="nc" id="L906">		}catch (WebDriverException e) {</span>
+<span class="nc" id="L907">			return false;</span>
+		}
+	}
+
+	@Override
+	public void switchToFrameId(String id) {
+<span class="nc" id="L913">		final RemoteWebElement rwe = new RemoteWebElement();</span>
+<span class="nc" id="L914">		rwe.setId(id);</span>
+<span class="nc" id="L915">		rwe.setParent(driver);</span>
+<span class="nc" id="L916">		switchToFrame(rwe);</span>
+<span class="nc" id="L917">	}</span>
+
+	protected void switchToFrame(WebElement we) {
+<span class="nc" id="L920">		driver.switchTo().frame(we);</span>
+<span class="nc" id="L921">	}</span>
+
+	//-----------------------------------------------------------------------------------------------------------------------------------
+	// Window management
+	//-----------------------------------------------------------------------------------------------------------------------------------
+
+	protected boolean switchToWindowHandle(String handle) {
+		try {
+<span class="nc" id="L929">			driver.switchTo().window(handle);</span>
+<span class="nc" id="L930">			channel.sleep(1000);</span>
+<span class="nc" id="L931">			return switchToDefaultContent();</span>
+<span class="nc" id="L932">		}catch(NoSuchWindowException ex) {</span>
+<span class="nc" id="L933">			return false;</span>
+		}	
+	}
+
+	protected void switchToWindowIndex(String[] wins, int index) {
+
+<span class="nc" id="L939">		int maxTry = 10;</span>
+<span class="nc" id="L940">		boolean switched = switchToWindowHandle(wins[index]);</span>
+
+<span class="nc bnc" id="L942" title="All 4 branches missed.">		while(!switched &amp;&amp; maxTry &gt; 0) {</span>
+<span class="nc" id="L943">			channel.sleep(1000);</span>
+<span class="nc" id="L944">			wins = getWindowsHandle(index, 0);</span>
+<span class="nc" id="L945">			switched = switchToWindowHandle(wins[index]);</span>
+		}
+
+<span class="nc bnc" id="L948" title="All 2 branches missed.">		if(switched) {</span>
+<span class="nc" id="L949">			currentWindow = index;</span>
+		}
+<span class="nc" id="L951">	}</span>
+
+	@Override
+	public void setWindowToFront() {
+<span class="nc" id="L955">		channel.toFront();</span>
+<span class="nc" id="L956">		final String[] wins = getWindowsHandle(0, 0);</span>
+<span class="nc bnc" id="L957" title="All 2 branches missed.">		if(wins.length&gt; currentWindow) {</span>
+<span class="nc" id="L958">			driver.switchTo().window(wins[currentWindow]);</span>
+		}
+<span class="nc" id="L960">	}</span>
+
+	@Override
+	public void switchWindow(ActionStatus status, int index, int tries) {
+<span class="nc" id="L964">		channel.waitBeforeSwitchWindow(this);</span>
+<span class="nc bnc" id="L965" title="All 2 branches missed.">		if(index &gt;= 0) {</span>
+<span class="nc" id="L966">			final String[] wins = getWindowsHandle(index, tries);</span>
+<span class="nc bnc" id="L967" title="All 2 branches missed.">			if(wins.length &gt; index) {</span>
+<span class="nc" id="L968">				switchToWindowIndex(wins, index);</span>
+<span class="nc" id="L969">				channel.cleanHandle();</span>
+<span class="nc" id="L970">				getDesktopDriver().updateWindowHandle(channel);</span>
+			}else {
+<span class="nc" id="L972">				status.setError(ActionStatus.WINDOW_NOT_FOUND, &quot;cannot switch to window index '&quot; + index + &quot;', only &quot; + wins.length + &quot; window(s) found&quot;);</span>
+			}
+		}
+<span class="nc" id="L975">	}</span>
+
+	@Override
+	protected void setPosition(Point pt) {
+<span class="nc" id="L979">		channel.sleep(500);</span>
+<span class="nc" id="L980">		driver.manage().window().setPosition(pt);</span>
+<span class="nc" id="L981">	}</span>
+
+	@Override
+	protected void setSize(Dimension dim) {
+<span class="nc" id="L985">		channel.sleep(500);</span>
+<span class="nc" id="L986">		driver.manage().window().setSize(dim);</span>
+<span class="nc" id="L987">	}</span>
+
+	protected void closeWindowHandler(String windowHandle) {
+<span class="nc" id="L990">		switchToWindowHandle(windowHandle);</span>
+<span class="nc" id="L991">		closeCurrentWindow();</span>
+<span class="nc" id="L992">	}</span>
+
+	protected void closeCurrentWindow() {
+<span class="nc" id="L995">		driver.close();</span>
+<span class="nc" id="L996">		channel.sleep(300);</span>
+<span class="nc" id="L997">	}</span>
+
+	@Override
+	public void closeWindow(ActionStatus status) {
+<span class="nc" id="L1001">		final String[] list = getWindowsHandle(0, 0);</span>
+<span class="nc bnc" id="L1002" title="All 2 branches missed.">		if(list.length &gt; 1) {</span>
+<span class="nc bnc" id="L1003" title="All 2 branches missed.">			if(currentWindow &lt; list.length) {</span>
+<span class="nc" id="L1004">				closeWindowHandler(list[currentWindow]);</span>
+<span class="nc" id="L1005">				currentWindow = 0;</span>
+			}
+<span class="nc" id="L1007">			switchToWindowHandle(list[0]);</span>
+		}
+<span class="nc" id="L1009">	}</span>
+
+	//-----------------------------------------------------------------------------------------------------------------------------------
+	//
+	//-----------------------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public Object executeScript(ActionStatus status, String javaScript, Object... params) {
+<span class="nc" id="L1017">		final Object result = runJavaScript(status, &quot;var result={};&quot; + javaScript + &quot;;&quot;, params);</span>
+<span class="nc bnc" id="L1018" title="All 4 branches missed.">		if(status.isPassed() &amp;&amp; result != null) {</span>
+<span class="nc" id="L1019">			status.setMessage(result.toString());</span>
+		}
+<span class="nc" id="L1021">		return result;</span>
+	}
+
+	@Override
+	public Object executeJavaScript(ActionStatus status, String javaScript, boolean returnValue) {
+		try {
+<span class="nc bnc" id="L1027" title="All 2 branches missed.">			if(returnValue) {</span>
+<span class="nc" id="L1028">				final Object result = driver.executeAsyncScript(&quot;var callback=arguments[arguments.length-1];var result=&quot; + javaScript + &quot;;callback(result);&quot;);</span>
+<span class="nc" id="L1029">				status.setMessage(result.toString());</span>
+<span class="nc" id="L1030">				return result;</span>
+			}else {
+<span class="nc" id="L1032">				driver.executeScript(javaScript);</span>
+			}
+<span class="nc" id="L1034">			status.setPassed(true);</span>
+<span class="nc" id="L1035">		}catch(StaleElementReferenceException e0) {</span>
+<span class="nc" id="L1036">			throw e0;</span>
+<span class="nc" id="L1037">		}catch(Exception e1) {</span>
+<span class="nc" id="L1038">			status.setException(ActionStatus.JAVASCRIPT_ERROR, e1);</span>
+<span class="nc" id="L1039">		}</span>
+<span class="nc" id="L1040">		return null;</span>
+	}
+
+	@Override
+	public Object executeJavaScript(ActionStatus status, String javaScript, TestElement element) {
+<span class="nc" id="L1045">		return executeJavaScript(status, javaScript, element.getWebElement());</span>
+	}
+
+	public Object executeJavaScript(ActionStatus status, String javaScript, WebElement element) {
+<span class="nc" id="L1049">		final Object result = runJavaScript(status, &quot;var e=arguments[0];var result=e.&quot; + javaScript.replaceAll(&quot;this&quot;, &quot;e&quot;) + &quot;;&quot;, element);</span>
+<span class="nc bnc" id="L1050" title="All 4 branches missed.">		if(status.isPassed() &amp;&amp; result != null) {</span>
+<span class="nc" id="L1051">			status.setMessage(result.toString());</span>
+		}
+<span class="nc" id="L1053">		return result;</span>
+	}
+
+	//TODO remove this default method and add actionstatus
+	public Object runJavaScript(String javaScript, Object ... params) {
+<span class="nc" id="L1058">		return runJavaScript(channel.newActionStatus(), javaScript, params);</span>
+	}
+
+	public Object runJavaScriptResult(String javaScript) {
+		try {
+<span class="nc" id="L1063">			return driver.executeAsyncScript(&quot;var result=&quot; + javaScript + &quot;;arguments[arguments.length-1](result);&quot;);</span>
+<span class="nc" id="L1064">		}catch(Exception e) {</span>
+<span class="nc" id="L1065">			return e.getMessage();</span>
+		}
+	}
+
+	protected Object runJavaScript(ActionStatus status, String javaScript, Object ... params) {
+<span class="nc" id="L1070">		status.setPassed(true);</span>
+		try {
+<span class="nc" id="L1072">			return driver.executeAsyncScript(javaScript + &quot;;arguments[arguments.length-1](result);&quot;, params);</span>
+<span class="nc" id="L1073">		}catch(StaleElementReferenceException e0) {</span>
+<span class="nc" id="L1074">			status.setPassed(false);</span>
+<span class="nc" id="L1075">			throw e0;</span>
+<span class="nc" id="L1076">		}catch(Exception e1) {</span>
+<span class="nc" id="L1077">			status.setException(ActionStatus.JAVASCRIPT_ERROR, e1);</span>
+		}
+<span class="nc" id="L1079">		return null;</span>
+	}
+
+	public List&lt;Double&gt; getBoundingClientRect(RemoteWebElement element) {
+		try {
+<span class="nc" id="L1084">			return (List&lt;Double&gt;) driver.executeAsyncScript(&quot;var callback=arguments[arguments.length-1], rect=arguments[0].getBoundingClientRect();var result=[rect.x+0.0001, rect.y+0.0001, rect.width+0.0001, rect.height+0.0001];callback(result);&quot;, element);</span>
+<span class="nc" id="L1085">		}catch (Exception e) {</span>
+<span class="nc" id="L1086">			return List.of(0D, 0D, 1D, 1D);</span>
+		}
+	}
+
+	//---------------------------------------------------------------------------------------------------------------------
+	// 
+	//---------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public void goToUrl(ActionStatus status, String url) {
+
+<span class="nc" id="L1097">		channel.waitBeforeGotoUrl(this);</span>
+
+<span class="nc bnc" id="L1099" title="All 2 branches missed.">		if(ActionGotoUrl.REFRESH.equals(url)) {</span>
+<span class="nc" id="L1100">			driver.navigate().refresh();</span>
+<span class="nc bnc" id="L1101" title="All 2 branches missed.">		}else if(ActionGotoUrl.NEXT.equals(url)) {</span>
+<span class="nc" id="L1102">			driver.navigate().forward();</span>
+<span class="nc bnc" id="L1103" title="All 2 branches missed.">		}else if(ActionGotoUrl.BACK.equals(url)) {</span>
+<span class="nc" id="L1104">			driver.navigate().back();</span>
+		}else {
+<span class="nc" id="L1106">			switchToDefaultContent();</span>
+<span class="nc bnc" id="L1107" title="All 6 branches missed.">			if(!url.startsWith(&quot;https://&quot;) &amp;&amp; !url.startsWith(&quot;http://&quot;) &amp;&amp; !url.startsWith(&quot;file://&quot;) ) {</span>
+<span class="nc" id="L1108">				url = &quot;http://&quot; + url;</span>
+			}
+<span class="nc" id="L1110">			loadUrl(url);</span>
+		}
+
+<span class="nc" id="L1113">		status.setPassed(true);</span>
+<span class="nc" id="L1114">		status.setData(url);</span>
+
+<span class="nc" id="L1116">		actionWait();</span>
+<span class="nc" id="L1117">	}</span>
+
+	protected void loadUrl(String url) {
+<span class="nc" id="L1120">		driver.get(url);</span>
+<span class="nc" id="L1121">	}</span>
+
+<span class="nc" id="L1123">	private WebElement iframe = null;</span>
+<span class="nc" id="L1124">	private double offsetIframeX = 0.0;</span>
+<span class="nc" id="L1125">	private double offsetIframeY = 0.0;</span>
+
+	@Override
+	public List&lt;FoundElement&gt; findElements(boolean sysComp, TestElement testObject, String tagName, String[] attributes, String[] attributesValues, Predicate&lt;AtsBaseElement&gt; predicate, WebElement startElement, boolean waitAnimation) {
+
+<span class="nc bnc" id="L1130" title="All 2 branches missed.">		if(testObject.getParent() != null){</span>
+<span class="nc bnc" id="L1131" title="All 2 branches missed.">			if(testObject.getParent().isIframe()) {</span>
+
+<span class="nc" id="L1133">				iframe = testObject.getParent().getWebElement();</span>
+
+				try {
+
+<span class="nc" id="L1137">					final Point pt = iframe.getLocation();</span>
+
+<span class="nc" id="L1139">					offsetIframeX += pt.getX();</span>
+<span class="nc" id="L1140">					offsetIframeY += pt.getY();</span>
+
+<span class="nc" id="L1142">					switchToFrame(iframe);</span>
+
+<span class="nc" id="L1144">				}catch(WebDriverException e) {</span>
+<span class="nc" id="L1145">					return Collections.&lt;FoundElement&gt;emptyList();</span>
+<span class="nc" id="L1146">				}</span>
+
+<span class="nc bnc" id="L1148" title="All 2 branches missed.">			}else if(startElement == null) {</span>
+<span class="nc" id="L1149">				startElement = testObject.getParent().getWebElement();</span>
+			}
+		}else {
+<span class="nc bnc" id="L1152" title="All 2 branches missed.">			if(iframe != null) {</span>
+<span class="nc" id="L1153">				iframe = null;</span>
+<span class="nc" id="L1154">				offsetIframeX = 0.0;</span>
+<span class="nc" id="L1155">				offsetIframeY = 0.0;</span>
+			}
+
+<span class="nc bnc" id="L1158" title="All 2 branches missed.">			if(!switchToDefaultContent()) {</span>
+<span class="nc" id="L1159">				return Collections.&lt;FoundElement&gt;emptyList();</span>
+			}
+		}
+
+<span class="nc" id="L1163">		channel.waitBeforeSearchElement(this);</span>
+
+<span class="nc" id="L1165">		final List&lt;List&lt;Object&gt;&gt; response = (List&lt;List&lt;Object&gt;&gt;) runJavaScript(searchElementScript, startElement, tagName, attributes, attributes.length);</span>
+<span class="nc bnc" id="L1166" title="All 4 branches missed.">		if(response != null &amp;&amp; response.size() &gt; 0){</span>
+<span class="nc" id="L1167">			final List&lt;AtsElement&gt; elements = response.parallelStream().filter(Objects::nonNull).map(e -&gt; new AtsElement(e)).collect(Collectors.toCollection(ArrayList::new));</span>
+
+<span class="nc" id="L1169">			final Stream&lt;FoundElement&gt; st = elements.parallelStream().</span>
+<span class="nc" id="L1170">					filter(predicate).</span>
+<span class="nc" id="L1171">					map(e -&gt; new FoundElement(this, e, channel, initElementX + offsetIframeX, initElementY + offsetIframeY, waitAnimation));</span>
+
+<span class="nc" id="L1173">			return st.collect(Collectors.toCollection(ArrayList::new));</span>
+		}
+
+<span class="nc" id="L1176">		return Collections.&lt;FoundElement&gt;emptyList();</span>
+	}
+
+	@Override
+	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {
+<span class="nc" id="L1181">		runJavaScript(status, JS_MIDDLE_CLICK, element.getWebElement());</span>
+<span class="nc" id="L1182">	}</span>
+
+	protected void middleClickSimulation(ActionStatus status, MouseDirection position, TestElement element) {
+<span class="nc" id="L1185">		element.click(status, position, Keys.CONTROL);</span>
+<span class="nc" id="L1186">	}</span>
+
+	@Override
+	public DialogBox switchToAlert() {
+<span class="nc" id="L1190">		channel.sleep(500);</span>
+<span class="nc" id="L1191">		return new DialogBox(driver.switchTo().alert());</span>
+	}
+
+	@Override
+	public void clearText(ActionStatus status, TestElement te, MouseDirection md) {
+
+<span class="nc bnc" id="L1197" title="All 2 branches missed.">		if(!te.isPreElement()){</span>
+<span class="nc" id="L1198">			te.click(status, md);</span>
+		}
+
+<span class="nc bnc" id="L1201" title="All 2 branches missed.">		if(status.isPassed()) {</span>
+<span class="nc" id="L1202">			final FoundElement element = te.getFoundElement();</span>
+
+			try {
+<span class="nc" id="L1205">				executeScript(status, &quot;arguments[0].value='';&quot;, element.getValue());</span>
+<span class="nc" id="L1206">				status.setMessage(&quot;&quot;);</span>
+<span class="nc" id="L1207">				return;</span>
+<span class="nc" id="L1208">			}catch (StaleElementReferenceException e) {}</span>
+
+			try {
+<span class="nc" id="L1211">				element.getValue().clear();</span>
+<span class="nc" id="L1212">				status.setMessage(&quot;&quot;);</span>
+<span class="nc" id="L1213">				return;</span>
+<span class="nc" id="L1214">			}catch(Exception e) {}</span>
+
+		}
+
+<span class="nc" id="L1218">		status.setError(ActionStatus.ENTER_TEXT_FAIL, &quot;clear text failed on this element&quot;);</span>
+<span class="nc" id="L1219">	}</span>
+
+	@Override
+	public void sendTextData(ActionStatus status, TestElement element, ArrayList&lt;SendKeyData&gt; textActionList) {
+
+<span class="nc" id="L1224">		channel.waitBeforeEnterText(this);</span>
+
+<span class="nc" id="L1226">		final WebElement we = element.getWebElement();</span>
+		
+<span class="nc bnc" id="L1228" title="All 2 branches missed.">		if(element.isPreElement()){</span>
+<span class="nc" id="L1229">			final StringBuilder seq = new StringBuilder();</span>
+<span class="nc bnc" id="L1230" title="All 2 branches missed.">			for(SendKeyData sequence : textActionList) {</span>
+<span class="nc" id="L1231">				seq.append(getSequenceData(sequence));</span>
+<span class="nc" id="L1232">			}</span>
+<span class="nc" id="L1233">			executeScript(status, &quot;arguments[0].textContent='&quot; + seq.toString() + &quot;';&quot;, we);</span>
+<span class="nc" id="L1234">		}else {</span>
+<span class="nc" id="L1235">			executeScript(status, &quot;result={size:window.getComputedStyle(arguments[0], null).getPropertyValue('font-size'), family:window.getComputedStyle(arguments[0], null).getPropertyValue('font-family'), weight:window.getComputedStyle(arguments[0], null).getPropertyValue('font-weight')};&quot;, we);</span>
+<span class="nc bnc" id="L1236" title="All 2 branches missed.">			for(SendKeyData sequence : textActionList) {</span>
+<span class="nc" id="L1237">				we.sendKeys(getSequenceData(sequence));</span>
+<span class="nc" id="L1238">			}</span>
+		}
+<span class="nc" id="L1240">	}</span>
+
+	protected CharSequence getSequenceData(SendKeyData seq) {
+<span class="nc" id="L1243">		return seq.getSequenceWeb(true);</span>
+	}
+
+	@Override
+	public void refreshElementMapLocation() {
+<span class="nc" id="L1248">		getDesktopDriver().refreshElementMapLocation(channel);</span>
+<span class="nc" id="L1249">	}</span>
+
+	@Override
+	public String getSource() {
+<span class="nc" id="L1253">		return driver.getPageSource();</span>
+	}
+
+	@Override
+<span class="nc" id="L1257">	public void api(ActionStatus status, ActionApi api) {}</span>
+
+	@Override
+<span class="nc" id="L1260">	public void buttonClick(ActionStatus status, String id) {}</span>
+
+	@Override
+<span class="nc" id="L1263">	public void tap(int count, FoundElement element) {}</span>
+
+	@Override
+<span class="nc" id="L1266">	public void press(int duration, ArrayList&lt;String&gt; paths, FoundElement element) {}</span>
+
+	@Override
+	public void windowState(ActionStatus status, Channel channel, String state) {
+<span class="nc bnc" id="L1270" title="All 2 branches missed.">		if(ActionWindowState.MAXIMIZE.equals(state)) {</span>
+
+<span class="nc" id="L1272">			final List&lt;Double&gt; screenSize = (List&lt;Double&gt;) runJavaScript(status, &quot;result=[screen.width+0.0001, screen.height+0.0001];&quot;);</span>
+<span class="nc" id="L1273">			setPosition(new Point(0, 0));</span>
+<span class="nc" id="L1274">			setSize(new Dimension(screenSize.get(0).intValue(), screenSize.get(1).intValue()));</span>
+
+<span class="nc" id="L1276">		}else {</span>
+<span class="nc" id="L1277">			getDesktopDriver().windowState(status, channel, state);</span>
+		}
+<span class="nc" id="L1279">	}</span>
+
+	@Override
+	public int getNumWindows() {
+		try {
+<span class="nc" id="L1284">			return driver.getWindowHandles().size();</span>
+<span class="nc" id="L1285">		}catch (WebDriverException e) {</span>
+<span class="nc" id="L1286">			return 1;</span>
+		}
+	}
+
+	@Override
+	public String getUrl() {
+<span class="nc" id="L1292">		return driver.getCurrentUrl();</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

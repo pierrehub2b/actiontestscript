@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SendKeyData.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.executor</a> &gt; <span class="el_source">SendKeyData.java</span></div><h1>SendKeyData.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.executor;
+
+import org.openqa.selenium.Keys;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
+public class SendKeyData {
+
+	public static final String EMPTY_DATA = &quot;&amp;empty;&quot;;
+
+	private static final String KEY_DOWN_SHIFT = &quot;SHIFT&quot;;
+	private static final String KEY_DOWN_ALT = &quot;ALT&quot;;
+	private static final String KEY_DOWN_CONTROL = &quot;CONTROL&quot;;
+	
+	private static final String KEY_PREFIX = &quot;$KEY-&quot;;
+
+	private String data;
+<span class="pc" id="L38">	private boolean enterKey = false;</span>
+	private Keys downKey;
+	
+	private String specialKeyString;
+	private StringBuffer specialKeys;
+	
+<span class="nc" id="L44">	public SendKeyData(String key, String spare) {</span>
+
+<span class="nc" id="L46">		this.data = spare;</span>
+<span class="nc" id="L47">		this.downKey = null;</span>
+<span class="nc" id="L48">		StringBuffer sequence = new StringBuffer();</span>
+
+<span class="nc bnc" id="L50" title="All 4 branches missed.">		if(spare != null &amp;&amp; spare.length() &gt; 0) {</span>
+
+<span class="nc bnc" id="L52" title="All 2 branches missed.">			if(KEY_DOWN_SHIFT.equals(key)) {</span>
+<span class="nc" id="L53">				sequence.append(Keys.SHIFT);</span>
+<span class="nc" id="L54">				downKey = Keys.SHIFT;</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">			}else if(KEY_DOWN_ALT.equals(key)) {</span>
+<span class="nc" id="L56">				sequence.append(Keys.ALT);</span>
+<span class="nc" id="L57">				downKey = Keys.ALT;</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">			}else if(KEY_DOWN_CONTROL.equals(key)) {</span>
+<span class="nc" id="L59">				sequence.append(Keys.CONTROL);</span>
+<span class="nc" id="L60">				this.enterKey = true;</span>
+<span class="nc" id="L61">				downKey = Keys.CONTROL;</span>
+			}
+<span class="nc" id="L63">			sequence.append(spare.toLowerCase());</span>
+		}else {
+			try {
+<span class="nc" id="L66">				sequence.append(Keys.valueOf(key));</span>
+<span class="nc" id="L67">				specialKeyString = KEY_PREFIX + key;</span>
+<span class="nc" id="L68">			}catch(IllegalArgumentException e) {}</span>
+		}
+		
+<span class="nc bnc" id="L71" title="All 2 branches missed.">		if(sequence.length() &gt; 0) {</span>
+<span class="nc" id="L72">			specialKeys = sequence;</span>
+		}
+<span class="nc" id="L74">	}</span>
+
+<span class="fc" id="L76">	public SendKeyData(String data) {</span>
+<span class="fc" id="L77">		final char[] dataArray = data.toCharArray();</span>
+<span class="fc" id="L78">		StringBuffer sequence = new StringBuffer();</span>
+<span class="fc" id="L79">		this.data = &quot;&quot;;</span>
+<span class="fc bfc" id="L80" title="All 2 branches covered.">		for (char val : dataArray) </span>
+		{ 
+<span class="fc" id="L82">			final Keys k = Keys.getKeyFromUnicode(val);</span>
+			
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">			if(k != null) {</span>
+<span class="nc bnc" id="L85" title="All 4 branches missed.">				switch(k.name())</span>
+				{
+					case &quot;CONTROL&quot;:
+<span class="nc" id="L88">						this.enterKey = true;</span>
+<span class="nc" id="L89">						downKey = Keys.CONTROL;</span>
+<span class="nc" id="L90">						break;</span>
+					case &quot;SHIFT&quot;:
+<span class="nc" id="L92">						downKey = Keys.SHIFT;</span>
+<span class="nc" id="L93">						break;</span>
+					case &quot;ALT&quot;:
+<span class="nc" id="L95">						downKey = Keys.ALT;</span>
+<span class="nc" id="L96">						break;</span>
+				}
+			} else {
+<span class="fc" id="L99">				sequence.append(val);</span>
+<span class="fc" id="L100">				this.data += String.valueOf(val);</span>
+			}
+		}
+<span class="fc" id="L103">	}</span>
+
+	private Keys getNumpad(char d) {
+
+<span class="nc bnc" id="L107" title="All 10 branches missed.">		switch (Character.getNumericValue(d)) {</span>
+		case 1 :
+<span class="nc" id="L109">			return Keys.NUMPAD1;</span>
+		case 2 :
+<span class="nc" id="L111">			return Keys.NUMPAD2;</span>
+		case 3 :
+<span class="nc" id="L113">			return Keys.NUMPAD3;</span>
+		case 4 :
+<span class="nc" id="L115">			return Keys.NUMPAD4;</span>
+		case 5 :
+<span class="nc" id="L117">			return Keys.NUMPAD5;</span>
+		case 6 :
+<span class="nc" id="L119">			return Keys.NUMPAD6;</span>
+		case 7 :
+<span class="nc" id="L121">			return Keys.NUMPAD7;</span>
+		case 8 :
+<span class="nc" id="L123">			return Keys.NUMPAD8;</span>
+		case 9 :
+<span class="nc" id="L125">			return Keys.NUMPAD9;</span>
+		}
+<span class="nc" id="L127">		return Keys.NUMPAD0;</span>
+	}
+
+	public String getData() {
+<span class="fc" id="L131">		return data;</span>
+	}	
+
+	public boolean isEnterKey() {
+<span class="nc" id="L135">		return enterKey;</span>
+	}
+	
+	public Keys getDownKey() {
+<span class="nc" id="L139">		return downKey;</span>
+	}
+
+	//---------------------------------------------------------------------------
+	// get sequence by driver type
+	//---------------------------------------------------------------------------
+
+	public CharSequence getSequenceWeb(boolean withDigit) {
+		
+<span class="nc bnc" id="L148" title="All 2 branches missed.">		if(specialKeys != null) {</span>
+<span class="nc" id="L149">			return specialKeys;</span>
+		}
+		
+<span class="nc" id="L152">		final StringBuffer sequence = new StringBuffer();</span>
+
+<span class="nc bnc" id="L154" title="All 2 branches missed.">		for (int i = 0, n = data.length(); i &lt; n; i++) {</span>
+<span class="nc" id="L155">			final char c = data.charAt(i);</span>
+<span class="nc bnc" id="L156" title="All 4 branches missed.">			if(withDigit &amp;&amp; Character.isDigit(c)) {</span>
+<span class="nc" id="L157">				sequence.append(getNumpad(c));</span>
+			}else {
+<span class="nc" id="L159">				sequence.append(c);</span>
+			}
+		}
+<span class="nc" id="L162">		return sequence;</span>
+	}	
+
+	public String getSequenceDesktop() {
+<span class="nc" id="L166">		String sequenceData = &quot;&quot;;</span>
+<span class="nc bnc" id="L167" title="All 2 branches missed.">		if (specialKeyString != null) {</span>
+<span class="nc" id="L168">			sequenceData = specialKeyString;</span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">		}else if(data.length() &gt; 0){</span>
+<span class="nc" id="L170">			sequenceData = data;</span>
+		}
+<span class="nc" id="L172">		return Base64.getEncoder().encodeToString(sequenceData.getBytes(StandardCharsets.UTF_8));</span>
+	}
+
+	public String getSequenceMobile() {
+<span class="nc bnc" id="L176" title="All 2 branches missed.">		if (specialKeyString != null) {</span>
+<span class="nc" id="L177">			return specialKeyString;</span>
+<span class="nc bnc" id="L178" title="All 2 branches missed.">		} else if(data.length() &gt; 0) {</span>
+<span class="nc" id="L179">			return data;</span>
+		} else {
+<span class="nc" id="L181">			return EMPTY_DATA;</span>
+		}
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,476 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ApiDriverEngine.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.executor.drivers.engines</a> &gt; <span class="el_source">ApiDriverEngine.java</span></div><h1>ApiDriverEngine.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.executor.drivers.engines;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.Point;
+import org.openqa.selenium.WebElement;
+import org.xml.sax.SAXException;
+
+import com.ats.driver.ApplicationProperties;
+import com.ats.driver.AtsManager;
+import com.ats.element.AtsBaseElement;
+import com.ats.element.DialogBox;
+import com.ats.element.FoundElement;
+import com.ats.element.TestElement;
+import com.ats.executor.ActionStatus;
+import com.ats.executor.SendKeyData;
+import com.ats.executor.TestBound;
+import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.desktop.DesktopDriver;
+import com.ats.executor.drivers.engines.webservices.ApiExecutor;
+import com.ats.executor.drivers.engines.webservices.RestApiExecutor;
+import com.ats.executor.drivers.engines.webservices.SoapApiExecutor;
+import com.ats.generator.objects.MouseDirection;
+import com.ats.generator.variables.CalculatedProperty;
+import com.ats.graphic.ImageTemplateMatchingSimple;
+import com.ats.script.Project;
+import com.ats.script.actions.ActionApi;
+import com.ats.script.actions.ActionChannelStart;
+import com.google.common.base.Charsets;
+import com.google.common.io.CharStreams;
+
+import okhttp3.OkHttpClient;
+import okhttp3.OkHttpClient.Builder;
+import okhttp3.Request;
+import okhttp3.Response;
+
+public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
+
+	private final static String API = &quot;API&quot;;
+	private ApiExecutor executor;
+	
+	private PrintStream logStream;
+	
+	public ApiDriverEngine(Channel channel, ActionStatus status, String path, DesktopDriver desktopDriver, ApplicationProperties props) {
+
+<span class="nc" id="L99">		super(channel, desktopDriver, props, 0, 0);</span>
+
+		try {
+			
+<span class="nc" id="L103">			final File logsFolder = new File(Project.TARGET_FOLDER + File.separator + Project.LOGS_FOLDER);</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">			if(!logsFolder.exists()) {</span>
+<span class="nc" id="L105">				logsFolder.mkdirs();</span>
+			}
+			
+<span class="nc" id="L108">			final Path logFile = logsFolder.toPath().resolve(&quot;ws_&quot; + System.currentTimeMillis() + &quot;.log&quot;);</span>
+<span class="nc" id="L109">			logStream = new PrintStream(logFile.toFile());</span>
+<span class="nc" id="L110">			logStream.println(&quot;Start ATS ws channel ...&quot;);</span>
+			
+<span class="nc" id="L112">		} catch (FileNotFoundException e1) {}</span>
+
+<span class="nc" id="L114">		final int maxTry = AtsManager.getInstance().getMaxTryWebservice();</span>
+<span class="nc" id="L115">		final int timeout = AtsManager.getInstance().getWebServiceTimeOut();</span>
+
+<span class="nc" id="L117">		final Builder builder = createHttpBuilder(</span>
+				timeout, 
+				logStream,
+<span class="nc" id="L120">				channel.getTopScriptPackage(),</span>
+<span class="nc" id="L121">				getClass().getClassLoader());</span>
+
+<span class="nc bnc" id="L123" title="All 2 branches missed.">		if(channel.getPerformance() == ActionChannelStart.NEOLOAD) {</span>
+<span class="nc" id="L124">			channel.setNeoloadDesignApi(AtsManager.getInstance().getNeoloadDesignApi());</span>
+<span class="nc" id="L125">			builder.proxy(AtsManager.getInstance().getNeoloadProxy().getHttpProxy());</span>
+		}else {
+<span class="nc" id="L127">			builder.proxy(AtsManager.getInstance().getProxy().getHttpProxy());</span>
+		}
+
+<span class="nc" id="L130">		final OkHttpClient client = builder.build();</span>
+
+<span class="nc bnc" id="L132" title="All 2 branches missed.">		if(applicationPath == null) {</span>
+<span class="nc" id="L133">			applicationPath = path;</span>
+		}
+
+<span class="nc" id="L136">		final Request request = new Request.Builder().url(applicationPath).get().build();</span>
+
+<span class="nc" id="L138">		String wsContent = null;</span>
+		try {
+
+<span class="nc" id="L141">			final Response response = client.newCall(request).execute();</span>
+<span class="nc" id="L142">			wsContent = CharStreams.toString(new InputStreamReader(response.body().byteStream(), Charsets.UTF_8)).trim();</span>
+<span class="nc" id="L143">			response.close();</span>
+
+<span class="nc bnc" id="L145" title="All 2 branches missed.">			if(wsContent.endsWith(&quot;definitions&gt;&quot;)) {</span>
+				try {
+<span class="nc" id="L147">					executor = new SoapApiExecutor(logStream, client, timeout, maxTry, channel, wsContent, applicationPath);</span>
+<span class="nc" id="L148">					channel.setApplicationData(API, ActionApi.SOAP, ((SoapApiExecutor)executor).getOperations());</span>
+<span class="nc" id="L149">				} catch (SAXException | IOException | ParserConfigurationException e) {</span>
+<span class="nc" id="L150">					status.setError(ActionStatus.CHANNEL_START_ERROR, e.getMessage());</span>
+<span class="nc" id="L151">				}</span>
+			}else {
+<span class="nc" id="L153">				channel.setApplicationData(API, ActionApi.REST);</span>
+<span class="nc" id="L154">				executor = new RestApiExecutor(logStream, client, timeout, maxTry, channel, applicationPath);</span>
+			}
+
+<span class="nc" id="L157">		} catch (IOException e) {</span>
+<span class="nc" id="L158">			status.setError(ActionStatus.CHANNEL_START_ERROR, &quot;service is not responding -&gt; &quot; + e.getMessage());</span>
+<span class="nc" id="L159">			e.printStackTrace(logStream);</span>
+<span class="nc" id="L160">		}</span>
+<span class="nc" id="L161">	}</span>
+
+	@Override
+	public void api(ActionStatus status, ActionApi api) {
+<span class="nc" id="L165">		executor.execute(status, api);</span>
+<span class="nc" id="L166">	}</span>
+
+	@Override
+	public String getSource() {
+<span class="nc" id="L170">		return executor.getSource();</span>
+	}
+
+	@Override
+	public List&lt;FoundElement&gt; findElements(boolean sysComp, TestElement testObject, String tagName, String[] attributes, String[] attributesValues, Predicate&lt;AtsBaseElement&gt; searchPredicate, WebElement startElement, boolean waitAnimation) {
+<span class="nc" id="L175">		return executor.findElements(channel, sysComp, testObject, tagName, attributes, searchPredicate);</span>
+	}
+
+	@Override
+	public List&lt;FoundElement&gt; findElements(TestElement parent, ImageTemplateMatchingSimple template) {
+<span class="nc" id="L180">		return null;</span>
+	}
+	
+	@Override
+	public String getAttribute(ActionStatus status, FoundElement element, String attributeName, int maxTry) {
+<span class="nc" id="L185">		return executor.getElementAttribute(element.getId(), attributeName, maxTry);</span>
+	}
+
+	@Override
+	public CalculatedProperty[] getAttributes(FoundElement element, boolean reload) {
+<span class="nc" id="L190">		return executor.getElementAttributes(element.getId());</span>
+	}
+	
+	@Override
+	public void setSysProperty(String propertyName, String propertyValue) {
+	
+<span class="nc" id="L196">	}</span>
+	
+	@Override
+<span class="nc" id="L199">	public void refreshElementMapLocation() {}</span>
+
+	@Override
+	public void setWindowToFront() {
+<span class="nc" id="L203">	}</span>
+
+	@Override
+	public void goToUrl(ActionStatus status, String url) {
+<span class="nc" id="L207">	}</span>
+
+	@Override
+	public void close(boolean keepRunning) {
+<span class="nc" id="L211">		logStream.println(&quot;Close ATS WebService channel&quot;);</span>
+<span class="nc" id="L212">	}</span>
+	
+	@Override
+	public List&lt;FoundElement&gt; findSelectOptions(TestBound dimension, TestElement element) {
+<span class="nc" id="L216">		return Collections.&lt;FoundElement&gt;emptyList();</span>
+	}
+	
+	@Override
+	public void selectOptionsItem(ActionStatus status, TestElement element, CalculatedProperty selectProperty) {
+<span class="nc" id="L221">	}</span>
+
+	@Override
+	public void loadParents(FoundElement hoverElement) {
+<span class="nc" id="L225">	}	</span>
+
+	@Override
+	public WebElement getRootElement(Channel cnl) {
+<span class="nc" id="L229">		return null;</span>
+	}
+
+	//------------------------------------------------------------------------------------------------------------------------------------
+	
+	@Override
+<span class="nc" id="L235">	public void waitAfterAction(ActionStatus status) {}</span>
+
+	@Override
+<span class="nc" id="L238">	public void updateDimensions() {}</span>
+
+	@Override
+	public FoundElement getElementFromPoint(Boolean syscomp, Double x, Double y) {
+<span class="nc" id="L242">		return null;</span>
+	}
+
+	@Override
+	public FoundElement getElementFromRect(Boolean syscomp, Double x, Double y, Double w, Double h) {
+<span class="nc" id="L247">		return null;</span>
+	}
+	
+	@Override
+	public void switchWindow(ActionStatus status, int index, int tries) {
+<span class="nc" id="L252">	}</span>
+
+	@Override
+	public void closeWindow(ActionStatus status) {
+<span class="nc" id="L256">	}</span>
+
+	@Override
+	public Object executeScript(ActionStatus status, String script, Object... params) {
+<span class="nc" id="L260">		return null;</span>
+	}
+
+	@Override
+<span class="nc" id="L264">	public void scroll(FoundElement element) {}</span>
+
+	@Override
+<span class="nc" id="L267">	public void scroll(int value) {}</span>
+
+	@Override
+<span class="nc" id="L270">	public void scroll(FoundElement element, int delta) {}</span>
+
+	@Override
+<span class="nc" id="L273">	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {}</span>
+
+	@Override
+<span class="nc" id="L276">	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {}</span>
+
+	@Override
+<span class="nc" id="L279">	public void sendTextData(ActionStatus status, TestElement element, ArrayList&lt;SendKeyData&gt; textActionList) {}</span>
+
+	@Override
+<span class="nc" id="L282">	public void clearText(ActionStatus status, TestElement testElement, MouseDirection md) {}</span>
+
+	@Override
+<span class="nc" id="L285">	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {}</span>
+
+	@Override
+<span class="nc" id="L288">	public void drag(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {}</span>
+
+	@Override
+<span class="nc" id="L291">	public void keyDown(Keys key) {}</span>
+
+	@Override
+<span class="nc" id="L294">	public void keyUp(Keys key) {}</span>
+
+	@Override
+<span class="nc" id="L297">	public void drop(MouseDirection md, boolean desktopDriver) {}</span>
+
+	@Override
+<span class="nc" id="L300">	public void moveByOffset(int hDirection, int vDirection) {}</span>
+
+	@Override
+<span class="nc" id="L303">	public void doubleClick() {}</span>
+
+	@Override
+<span class="nc" id="L306">	public void rightClick() {}</span>
+
+	@Override
+	public DialogBox switchToAlert() {
+<span class="nc" id="L310">		return null;</span>
+	}
+
+	@Override
+<span class="nc" id="L314">	public boolean switchToDefaultContent() {return true;}</span>
+
+	@Override
+<span class="nc" id="L317">	public void switchToFrameId(String id) {}</span>
+
+	@Override
+<span class="nc" id="L320">	public void buttonClick(ActionStatus status, String id) {}</span>
+
+	@Override
+<span class="nc" id="L323">	public void tap(int count, FoundElement element) {}</span>
+	
+	@Override
+<span class="nc" id="L326">	public void press(int duration, ArrayList&lt;String&gt; paths, FoundElement element) {}</span>
+
+	@Override
+<span class="nc" id="L329">	public void windowState(ActionStatus status, Channel channel, String state) {}</span>
+
+	@Override
+	public Object executeJavaScript(ActionStatus status, String script, TestElement element) {
+<span class="nc" id="L333">		return null;</span>
+	}
+
+	@Override
+	public Object executeJavaScript(ActionStatus status, String script, boolean returnValue) {
+<span class="nc" id="L338">		return null;</span>
+	}
+	
+	@Override
+	public String getTitle() {
+<span class="nc" id="L343">		return &quot;&quot;;</span>
+	}
+
+	//------------------------------------------------------------------------------------------------------------------------------------
+	// init http client
+	//------------------------------------------------------------------------------------------------------------------------------------
+
+	private static Builder createHttpBuilder(int timeout, PrintStream logStream, String packageName, ClassLoader classLoader){
+
+<span class="nc" id="L352">		final Path certsFolderPath = Paths.get(&quot;&quot;).toAbsolutePath().resolve(Project.SRC_FOLDER).resolve(Project.ASSETS_FOLDER).resolve(Project.CERTS_FOLDER);</span>
+		
+<span class="nc" id="L354">		File certsFolder = certsFolderPath.toFile();</span>
+<span class="nc bnc" id="L355" title="All 2 branches missed.">		if(!certsFolder.exists()) {</span>
+<span class="nc" id="L356">			final URL certsFolderUrl = classLoader.getResource(Project.ASSETS_FOLDER + &quot;/&quot; + Project.CERTS_FOLDER);</span>
+<span class="nc bnc" id="L357" title="All 2 branches missed.">			if(certsFolderUrl != null) {</span>
+<span class="nc" id="L358">				certsFolder = new File(certsFolderUrl.getPath());</span>
+			}
+		}
+		
+<span class="nc" id="L362">		File pfxFile = null;</span>
+
+<span class="nc bnc" id="L364" title="All 2 branches missed.">		if(certsFolder.exists()) {</span>
+<span class="nc" id="L365">			File[] pfxFiles = certsFolder.listFiles((dir, name) -&gt; name.toLowerCase().endsWith(&quot;.pfx&quot;));</span>
+<span class="nc bnc" id="L366" title="All 2 branches missed.">			if(pfxFiles.length &gt; 0) {</span>
+<span class="nc" id="L367">				pfxFile = pfxFiles[0];</span>
+<span class="nc" id="L368">				logStream.println(&quot;Using pfx file -&gt; &quot; + pfxFile.getAbsolutePath());</span>
+			}
+		}
+		
+<span class="nc" id="L372">		final Builder builder = new Builder()</span>
+<span class="nc" id="L373">				.connectTimeout(timeout, TimeUnit.SECONDS)</span>
+<span class="nc" id="L374">				.writeTimeout(timeout, TimeUnit.SECONDS)</span>
+<span class="nc" id="L375">				.readTimeout(timeout, TimeUnit.SECONDS)</span>
+<span class="nc" id="L376">				.cache(null)</span>
+<span class="nc" id="L377">				.followRedirects(true)</span>
+<span class="nc" id="L378">				.followSslRedirects(true);</span>
+
+<span class="nc" id="L380">		final TrustManager [] trustManager = getTrustManager ();</span>
+
+		try {
+
+<span class="nc" id="L384">			final SSLSocketFactory sslSocketFactory = getSslSocketFactory(pfxFile, trustManager, logStream);</span>
+
+<span class="nc" id="L386">			builder.sslSocketFactory (sslSocketFactory, (X509TrustManager)trustManager [0]);</span>
+<span class="nc" id="L387">			builder.hostnameVerifier(new HostnameVerifier() {</span>
+				@Override
+				public boolean verify(String hostname, SSLSession session) {
+<span class="nc" id="L390">					return true;</span>
+				}
+			});
+<span class="nc" id="L393">		} catch (NoSuchAlgorithmException | KeyManagementException | CertificateException | IOException e) {</span>
+<span class="nc" id="L394">			e.printStackTrace(logStream);</span>
+<span class="nc" id="L395">		}</span>
+
+<span class="nc" id="L397">		return builder;</span>
+	}
+
+	private static SSLSocketFactory getSslSocketFactory(File pfxFile, TrustManager [] trustManager, PrintStream errorStream) throws KeyManagementException, NoSuchAlgorithmException, CertificateException, IOException {
+<span class="nc" id="L401">		final SSLContext sslContext = SSLContext.getInstance (&quot;SSL&quot;);</span>
+		
+<span class="nc" id="L403">		KeyManager[] keyManager = null;</span>
+		
+<span class="nc bnc" id="L405" title="All 4 branches missed.">		if(pfxFile != null &amp;&amp; pfxFile.exists()) {</span>
+						
+<span class="nc" id="L407">			final String password = &quot;&quot;;</span>
+<span class="nc" id="L408">			final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(&quot;SunX509&quot;);</span>
+			
+			try {
+<span class="nc" id="L411">				final KeyStore keyStore = KeyStore.getInstance(&quot;PKCS12&quot;);</span>
+<span class="nc" id="L412">				final InputStream keyInput = new FileInputStream(pfxFile);</span>
+				
+<span class="nc" id="L414">				keyStore.load(keyInput, password.toCharArray());</span>
+<span class="nc" id="L415">				keyInput.close();</span>
+				
+<span class="nc" id="L417">				keyManagerFactory.init(keyStore, password.toCharArray());</span>
+				
+<span class="nc" id="L419">				keyManager = keyManagerFactory.getKeyManagers();</span>
+				
+<span class="nc" id="L421">			} catch (KeyStoreException | UnrecoverableKeyException e) {</span>
+<span class="nc" id="L422">				e.printStackTrace(errorStream);</span>
+<span class="nc" id="L423">			}</span>
+
+<span class="nc" id="L425">		}else {</span>
+<span class="nc" id="L426">			errorStream.println(&quot;No pfx files found in the project&quot;);</span>
+		}
+		
+<span class="nc" id="L429">		sslContext.init (keyManager, trustManager, new SecureRandom ());</span>
+<span class="nc" id="L430">		return sslContext.getSocketFactory();</span>
+	}
+
+	private static TrustManager[] getTrustManager () {
+<span class="nc" id="L434">		final X509TrustManager manager = new X509TrustManager () {</span>
+
+			@Override
+			public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+<span class="nc" id="L438">			}</span>
+
+			@Override
+			public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+<span class="nc" id="L442">			}</span>
+
+			@Override
+			public X509Certificate[] getAcceptedIssuers() {
+<span class="nc" id="L446">				return new java.security.cert.X509Certificate[]{};</span>
+			}
+		};
+
+<span class="nc" id="L450">		return new TrustManager [] { manager };</span>
+	}
+
+	@Override
+	protected void setPosition(Point pt) {
+<span class="nc" id="L455">	}</span>
+
+	@Override
+	protected void setSize(Dimension dim) {
+<span class="nc" id="L459">	}</span>
+
+	@Override
+	public List&lt;String[]&gt; loadSelectOptions(TestElement element) {
+<span class="nc" id="L463">		return Collections.&lt;String[]&gt;emptyList();</span>
+	}
+
+	@Override
+	public int getNumWindows() {
+<span class="nc" id="L468">		return 0;</span>
+	}
+
+	@Override
+	public String getUrl() {
+<span class="nc" id="L473">		return executor.getCurrentUrl();</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActionExecuteElement.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.script.actions</a> &gt; <span class="el_source">ActionExecuteElement.java</span></div><h1>ActionExecuteElement.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.script.actions;
+
+import com.ats.driver.AtsManager;
+import com.ats.element.*;
+import com.ats.executor.ActionStatus;
+import com.ats.executor.ActionTestScript;
+import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.engines.MobileDriverEngine;
+import com.ats.script.Script;
+import com.ats.tools.Operators;
+import com.ats.tools.logger.MessageCode;
+import com.google.gson.JsonObject;
+import org.openqa.selenium.JavascriptException;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebDriverException;
+
+import java.util.ArrayList;
+import java.util.function.Predicate;
+
+public class ActionExecuteElement extends ActionExecuteElementAbstract {
+
+	private SearchedElement searchElement;
+	private TestElement testElement;
+
+	private boolean async;
+	private int actionMaxTry;
+
+<span class="nc" id="L47">	public ActionExecuteElement() {}</span>
+
+	public ActionExecuteElement(Script script, boolean stop, ArrayList&lt;String&gt; options, ArrayList&lt;String&gt; element) {
+<span class="fc" id="L50">		super(script, stop, options);</span>
+<span class="pc bpc" id="L51" title="2 of 6 branches missed.">		if(element != null &amp;&amp; element.size() &gt; 0 &amp;&amp; !element.get(0).contains(MobileDriverEngine.SYS_BUTTON)){</span>
+<span class="fc" id="L52">			setSearchElement(new SearchedElement(script, element));</span>
+		}
+<span class="fc" id="L54">	}</span>
+
+	public ActionExecuteElement(Script script, boolean stop, int maxTry, int delay, SearchedElement element) {
+<span class="nc" id="L57">		super(script, stop, maxTry, delay);</span>
+<span class="nc" id="L58">		setSearchElement(element);</span>
+<span class="nc" id="L59">	}</span>
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// Code Generator
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public StringBuilder getJavaCode() {
+<span class="fc" id="L67">		final StringBuilder codeBuilder = super.getJavaCode();</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">		if(searchElement == null){</span>
+<span class="fc" id="L69">			codeBuilder.append(&quot;null&quot;);</span>
+		}else {
+<span class="fc" id="L71">			codeBuilder.append(searchElement.getJavaCode());</span>
+		}
+<span class="fc" id="L73">		return codeBuilder;</span>
+	}
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------------------------------------------------
+	
+	@Override
+	public boolean execute(ActionTestScript ts, String testName, int testLine) {
+		
+<span class="nc" id="L82">		int maxTry = AtsManager.getMaxStaleOrJavaScriptError();</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">		while(maxTry &gt; 0) {</span>
+			try {
+<span class="nc" id="L85">				execute(ts, testName, testLine, Operators.GREATER, 0);</span>
+<span class="nc" id="L86">				return true;</span>
+<span class="nc" id="L87">			} catch(JavascriptException e) {</span>
+<span class="nc" id="L88">				ts.getTopScript().sendWarningLog(&quot;Javascript error&quot;, &quot;try again : &quot; + maxTry);</span>
+<span class="nc" id="L89">				status.setException(ActionStatus.JAVASCRIPT_ERROR, e);</span>
+<span class="nc" id="L90">			} catch(StaleElementReferenceException e) {</span>
+<span class="nc" id="L91">				ts.getTopScript().sendWarningLog(&quot;StaleReference error&quot;, &quot;try again : &quot; + maxTry);</span>
+<span class="nc" id="L92">				status.setException(ActionStatus.WEB_DRIVER_ERROR, e);</span>
+<span class="nc" id="L93">			}</span>
+			
+<span class="nc" id="L95">			ts.getCurrentChannel().sleep(500);</span>
+<span class="nc" id="L96">			setTestElement(null);</span>
+<span class="nc" id="L97">			maxTry--;</span>
+		}
+		
+<span class="nc" id="L100">		throw new WebDriverException(&quot;execute element error : &quot; + status.getFailMessage());</span>
+	}
+	
+	public void execute(ActionTestScript ts, String testName, int testLine, String operator, int value) {
+
+<span class="nc" id="L105">		super.execute(ts, testName, testLine);</span>
+		
+<span class="nc bnc" id="L107" title="All 2 branches missed.">		if(status.isPassed()) {</span>
+
+<span class="nc" id="L109">			final Channel channel = getCurrentChannel();</span>
+			
+<span class="nc" id="L111">			final int delay = getDelay();</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">			if(delay &gt; 0) {</span>
+<span class="nc" id="L113">				ts.getTopScript().sendInfoLog(&quot;Delay before action&quot;, delay + &quot;s&quot;);</span>
+<span class="nc" id="L114">				channel.sleep(delay * 1000);</span>
+			}
+			
+<span class="nc" id="L117">			actionMaxTry = ts.getChannelManager().getMaxTry() + getMaxTry();</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">			if (actionMaxTry &lt; 1) {</span>
+<span class="nc" id="L119">				actionMaxTry = 1;</span>
+			}
+
+<span class="nc bnc" id="L122" title="All 2 branches missed.">			if(testElement == null) {</span>
+
+<span class="nc bnc" id="L124" title="All 2 branches missed.">				if(searchElement == null) {</span>
+<span class="nc" id="L125">					setTestElement(new TestElementRoot(channel));</span>
+				}else {
+
+<span class="nc" id="L128">					int trySearch = 0;</span>
+
+<span class="nc" id="L130">					final Predicate&lt;Integer&gt; predicate = getPredicate(operator, value);</span>
+
+<span class="nc bnc" id="L132" title="All 2 branches missed.">					if(searchElement.isDialog()) {</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">						while (trySearch &lt; actionMaxTry) {</span>
+
+<span class="nc" id="L135">							setTestElement(new TestElementDialog(channel, actionMaxTry, searchElement, predicate));</span>
+
+<span class="nc bnc" id="L137" title="All 2 branches missed.">							if(testElement.isValidated()) {</span>
+<span class="nc" id="L138">								trySearch = actionMaxTry;</span>
+							}else {
+<span class="nc" id="L140">								trySearch++;</span>
+<span class="nc" id="L141">								channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, &quot;Searching element&quot;, actionMaxTry - trySearch);</span>
+<span class="nc" id="L142">								channel.progressiveWait(trySearch);</span>
+							}
+						}
+					} else {
+
+<span class="nc bnc" id="L147" title="All 2 branches missed.">						if (searchElement.isSysComp()) {</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">							while (trySearch &lt; actionMaxTry) {</span>
+
+<span class="nc" id="L150">								setTestElement(new TestElementSystem(channel, actionMaxTry, predicate, searchElement));</span>
+
+<span class="nc bnc" id="L152" title="All 2 branches missed.">								if (testElement.isValidated()) {</span>
+<span class="nc" id="L153">									trySearch = actionMaxTry;</span>
+								} else {
+<span class="nc" id="L155">									trySearch++;</span>
+<span class="nc" id="L156">									channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, &quot;Searching element&quot;, actionMaxTry - trySearch);</span>
+<span class="nc" id="L157">									channel.progressiveWait(trySearch);</span>
+								}
+							}
+						} else {
+<span class="nc bnc" id="L161" title="All 2 branches missed.">							while (trySearch &lt; actionMaxTry) {</span>
+
+<span class="nc bnc" id="L163" title="All 2 branches missed.">								if(searchElement.isImageSearch()) {</span>
+<span class="nc" id="L164">									setTestElement(new TestElementImage(channel, actionMaxTry, predicate, searchElement));</span>
+								}else {
+<span class="nc" id="L166">									setTestElement(new TestElement(channel, actionMaxTry, predicate, searchElement));</span>
+								}
+
+<span class="nc bnc" id="L169" title="All 2 branches missed.">								if(testElement.isValidated()) {</span>
+<span class="nc" id="L170">									trySearch = actionMaxTry;</span>
+								}else {
+<span class="nc" id="L172">									trySearch++;</span>
+<span class="nc" id="L173">									channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, &quot;Searching element&quot;, actionMaxTry - trySearch);</span>
+<span class="nc" id="L174">									channel.progressiveWait(trySearch);</span>
+								}
+							}
+						}
+					}
+				}
+
+<span class="nc" id="L181">				status.setElement(testElement);</span>
+<span class="nc" id="L182">				status.setSearchDuration(testElement.getTotalSearchDuration());</span>
+<span class="nc" id="L183">				status.setData(testElement.getCount());</span>
+
+<span class="nc" id="L185">				ts.getCurrentChannel().sleep(getDelay());</span>
+
+<span class="nc" id="L187">				asyncExec(ts);</span>
+
+			}else {
+<span class="nc" id="L190">				terminateExecution(ts);</span>
+			}
+		}
+<span class="nc" id="L193">	}</span>
+	
+	private Predicate&lt;Integer&gt; getPredicate(String operator, int value) {
+<span class="nc bnc" id="L196" title="All 6 branches missed.">		switch (operator) {</span>
+		case Operators.DIFFERENT :
+<span class="nc bnc" id="L198" title="All 2 branches missed.">			return p -&gt; p != value;</span>
+		case Operators.GREATER :
+<span class="nc bnc" id="L200" title="All 2 branches missed.">			return p -&gt; p &gt; value;</span>
+		case Operators.GREATER_EQUAL :
+<span class="nc bnc" id="L202" title="All 2 branches missed.">			return p -&gt; p &gt;= value;</span>
+		case Operators.LOWER :
+<span class="nc bnc" id="L204" title="All 2 branches missed.">			return p -&gt; p &lt; value;</span>
+		case Operators.LOWER_EQUAL :
+<span class="nc bnc" id="L206" title="All 2 branches missed.">			return p -&gt; p &lt;= value;</span>
+		}
+<span class="nc bnc" id="L208" title="All 2 branches missed.">		return p -&gt; p == value;</span>
+	}
+
+	private void asyncExec(ActionTestScript ts) {
+<span class="nc bnc" id="L212" title="All 2 branches missed.">		if(!async) {</span>
+<span class="nc" id="L213">			terminateExecution(ts);</span>
+		}
+<span class="nc" id="L215">	}</span>
+
+	public void terminateExecution(ActionTestScript ts) {
+
+<span class="nc" id="L219">		int error = 0;</span>
+
+<span class="nc bnc" id="L221" title="All 2 branches missed.">		if(testElement.isValidated()) {</span>
+<span class="nc" id="L222">			status.setPassed(true);</span>
+		}else {
+<span class="nc" id="L224">			status.setError(ActionStatus.OBJECT_NOT_FOUND, &quot;element not found&quot;);</span>
+<span class="nc" id="L225">			error = ActionStatus.OBJECT_NOT_FOUND;</span>
+		}
+
+<span class="nc" id="L228">		status.endDuration();</span>
+<span class="nc" id="L229">		testElement.terminateExecution(status, ts, error, status.getDuration());</span>
+<span class="nc" id="L230">	}</span>
+
+
+
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+<span class="nc" id="L236">		data.addProperty(&quot;searchDuration&quot;, status.getSearchDuration());</span>
+<span class="nc" id="L237">		data.addProperty(&quot;delay&quot;, getDelay());</span>
+<span class="nc" id="L238">		data.addProperty(&quot;occurrences&quot;, status.getElement().getCount());</span>
+<span class="nc" id="L239">		return super.getActionLogs(scriptName, scriptLine, data);</span>
+	}
+
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------
+
+	public SearchedElement getSearchElement() {
+<span class="nc" id="L247">		return searchElement;</span>
+	}
+
+	public void setSearchElement(SearchedElement value) {
+<span class="fc" id="L251">		this.searchElement = value;</span>
+<span class="fc" id="L252">	}</span>
+	
+	public TestElement getTestElement() {
+<span class="nc" id="L255">		return testElement;</span>
+	}
+	
+	private void setTestElement(TestElement element) {
+<span class="nc bnc" id="L259" title="All 2 branches missed.">		if (testElement != null) {</span>
+<span class="nc" id="L260">			testElement.dispose();</span>
+		}
+<span class="nc" id="L262">		testElement = element;</span>
+<span class="nc" id="L263">	}</span>
+	
+	public int getActionMaxTry() {
+<span class="nc" id="L266">		return actionMaxTry;</span>
+	}
+	
+	public boolean isAsync() {
+<span class="nc" id="L270">		return async;</span>
+	}
+
+	public void setAsync(boolean value) {
+<span class="nc" id="L274">		this.async = value;</span>
+<span class="nc" id="L275">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

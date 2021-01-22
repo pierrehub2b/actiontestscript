@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AMF0Message.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.exadel.flamingo.flex.amf</a> &gt; <span class="el_source">AMF0Message.java</span></div><h1>AMF0Message.java</h1><pre class="source lang-java linenums">/*
+ * www.openamf.org
+ *
+ * Distributable under LGPL license.
+ * See terms of license at gnu.org.
+ */
+
+package com.exadel.flamingo.flex.amf;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+<span class="nc" id="L15">public class AMF0Message implements Serializable {</span>
+
+    private static final long serialVersionUID = 1L;
+
+    private static final int CURRENT_VERSION = 0;
+
+    /**
+     * version
+     */
+<span class="nc" id="L24">    protected int version = CURRENT_VERSION;</span>
+    /**
+     * The headers
+     */
+<span class="nc" id="L28">    protected final List&lt;AMF0Header&gt; headers = new ArrayList&lt;AMF0Header&gt;();</span>
+
+    /**
+     * The body objects
+     */
+<span class="nc" id="L33">    protected final List&lt;AMF0Body&gt; bodies = new ArrayList&lt;AMF0Body&gt;();</span>
+
+    public void addHeader(String key, boolean required, Object value) {
+<span class="nc" id="L36">        addHeader(new AMF0Header(key, required, value));</span>
+<span class="nc" id="L37">    }</span>
+
+    public void addHeader(AMF0Header header) {
+<span class="nc" id="L40">        headers.add(header);</span>
+<span class="nc" id="L41">    }</span>
+
+    public int getHeaderCount() {
+<span class="nc" id="L44">        return headers.size();</span>
+    }
+
+    public AMF0Header getHeader(int index) {
+<span class="nc" id="L48">        return headers.get(index);</span>
+    }
+
+    public List&lt;AMF0Header&gt; getHeaders() {
+<span class="nc" id="L52">        return headers;</span>
+    }
+
+    public AMF0Body addBody(String target, String response, Object value, byte type) {
+<span class="nc" id="L56">        return addBody(new AMF0Body(target, response, value, type));</span>
+    }
+
+    public AMF0Body addBody(AMF0Body body) {
+<span class="nc" id="L60">        bodies.add(body);</span>
+<span class="nc" id="L61">        return body;</span>
+    }
+
+    public int getBodyCount() {
+<span class="nc" id="L65">        return bodies.size();</span>
+    }
+
+    public AMF0Body getBody(int index) {
+<span class="nc" id="L69">        return bodies.get(index);</span>
+    }
+
+    public Iterator&lt;AMF0Body&gt; getBodies() {
+<span class="nc" id="L73">        return bodies.iterator();</span>
+    }
+    
+    public boolean isFirstMessage() {
+<span class="nc bnc" id="L77" title="All 2 branches missed.">        if (bodies.size() == 1)</span>
+<span class="nc" id="L78">            return bodies.get(0).isFirstBody();</span>
+        
+<span class="nc bnc" id="L80" title="All 2 branches missed.">        for (AMF0Body body : bodies) {</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">            if (body.isFirstBody())</span>
+<span class="nc" id="L82">                return true;</span>
+<span class="nc" id="L83">        }</span>
+        
+<span class="nc" id="L85">        return false;</span>
+    }
+
+    public int getVersion() {
+<span class="nc" id="L89">        return version;</span>
+    }
+
+    public void setVersion(int version) {
+<span class="nc" id="L93">        this.version = version;</span>
+<span class="nc" id="L94">    }</span>
+    
+    public String getBodiesString() {
+<span class="nc" id="L97">        StringBuffer sb = new StringBuffer();</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">        for (int i = 0; i &lt; bodies.size(); i++) {</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">            if (i &gt; 0) {</span>
+<span class="nc" id="L100">                sb.append('\n');</span>
+            }
+<span class="nc" id="L102">            AMF0Body amfBody = bodies.get(i);</span>
+<span class="nc" id="L103">            sb.append(amfBody);</span>
+        }
+<span class="nc" id="L105">        return sb.toString();</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L110">    	return toString(&quot;&quot;);</span>
+    }
+    
+    public String toString(String indent) {
+<span class="nc" id="L114">    	final String innerIndent = indent + &quot;    &quot;;</span>
+    	
+<span class="nc" id="L116">        StringBuilder sb = new StringBuilder(2048);</span>
+<span class="nc" id="L117">        sb.append('\n').append(indent).append(AMF0Message.class.getName()).append(&quot; {&quot;);</span>
+        
+        // Print version.
+<span class="nc" id="L120">        sb.append('\n').append(indent).append(&quot;  version = &quot;).append(version);</span>
+        
+        // Print headers.
+<span class="nc" id="L123">        sb.append('\n').append(indent).append(&quot;  headers = [&quot;);</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">        for (int i = 0; i &lt; headers.size(); i++) {</span>
+<span class="nc" id="L125">            AMF0Header amfHeader = headers.get(i);</span>
+<span class="nc" id="L126">            sb.append(amfHeader.toString(innerIndent));</span>
+        }
+<span class="nc bnc" id="L128" title="All 2 branches missed.">        if (headers.size() &gt; 0)</span>
+<span class="nc" id="L129">        	sb.append('\n').append(indent).append(&quot;  &quot;);</span>
+<span class="nc" id="L130">        sb.append(']');</span>
+        
+        // Print bodies.
+<span class="nc" id="L133">        sb.append('\n').append(indent).append(&quot;  bodies = [&quot;);</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">        for (int i = 0; i &lt; bodies.size(); i++) {</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">        	if (i &gt; 0)</span>
+<span class="nc" id="L136">        		sb.append(',');</span>
+<span class="nc" id="L137">            AMF0Body amfBody = bodies.get(i);</span>
+<span class="nc" id="L138">            sb.append(amfBody.toString(innerIndent));</span>
+        }
+<span class="nc bnc" id="L140" title="All 2 branches missed.">        if (bodies.size() &gt; 0)</span>
+<span class="nc" id="L141">        	sb.append('\n').append(indent).append(&quot;  &quot;);</span>
+<span class="nc" id="L142">        sb.append(']');</span>
+        
+<span class="nc" id="L144">        sb.append('\n').append(indent).append(&quot;}&quot;);</span>
+        
+<span class="nc" id="L146">        return sb.toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

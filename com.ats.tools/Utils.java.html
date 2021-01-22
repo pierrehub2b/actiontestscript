@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Utils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.tools</a> &gt; <span class="el_source">Utils.java</span></div><h1>Utils.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.tools;
+
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageOutputStream;
+import javax.net.ssl.HttpsURLConnection;
+import javax.swing.Icon;
+
+import com.ats.executor.ActionStatus;
+import com.ats.executor.TestBound;
+import com.ats.executor.drivers.desktop.DesktopDriver;
+import com.ats.generator.ATS;
+import com.ats.generator.variables.parameter.ParameterDataFile;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonPrimitive;
+
+<span class="nc" id="L51">public class Utils {</span>
+
+	public static String unescapeAts(String data) {
+<span class="fc" id="L54">		return data.replaceAll(&quot;&amp;sp;&quot;, &quot; &quot;).replaceAll(&quot;&amp;co;&quot;, &quot;,&quot;).replaceAll(&quot;&amp;eq;&quot;, &quot;=&quot;).replaceAll(&quot;&amp;rb;&quot;, &quot;]&quot;).replaceAll(&quot;&amp;lb;&quot;, &quot;[&quot;);</span>
+	}
+
+	public static int string2Int(String value){
+<span class="fc" id="L58">		return string2Int(value, 0);</span>
+	}
+
+	public static int string2Int(String value, int defaultValue){
+		try {
+<span class="fc" id="L63">			return Integer.parseInt(value.replaceAll(&quot;\\s&quot;, &quot;&quot;));</span>
+<span class="nc" id="L64">		} catch (NullPointerException | NumberFormatException e) {</span>
+<span class="nc" id="L65">			return defaultValue;</span>
+		}
+	}
+
+	public static long string2Long(String value){
+		try {
+<span class="nc" id="L71">			return Long.parseLong(value.replaceAll(&quot;\\s&quot;, &quot;&quot;));</span>
+<span class="nc" id="L72">		} catch (NullPointerException | NumberFormatException e) {</span>
+<span class="nc" id="L73">			return 0L;</span>
+		}
+	}
+
+	public static double string2Double(String value){
+		try {
+<span class="nc" id="L79">			return Double.parseDouble(value.replaceAll(&quot;\\s&quot;, &quot;&quot;));</span>
+<span class="nc" id="L80">		} catch (NullPointerException | NumberFormatException e) {</span>
+<span class="nc" id="L81">			return 0D;</span>
+		}
+	}
+
+	public static String truncateString(String value, int length)
+	{
+<span class="nc bnc" id="L87" title="All 4 branches missed.">		if (value != null &amp;&amp; value.length() &gt; length)</span>
+<span class="nc" id="L88">			value = value.substring(0, length);</span>
+<span class="nc" id="L89">		return value;</span>
+	}
+
+	public static JsonArray string2JsonArray(String value){
+<span class="nc" id="L93">		final char[] letters = value.toCharArray();</span>
+<span class="nc" id="L94">		JsonArray array = new JsonArray();</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">		for (final char ch : letters) {</span>
+<span class="nc" id="L96">			array.add(new JsonPrimitive((int)ch));</span>
+		}
+<span class="nc" id="L98">		return array;</span>
+	}
+
+	//-------------------------------------------------------------------------------------------------------------------------------------------
+	//  Files utils
+	//-------------------------------------------------------------------------------------------------------------------------------------------
+
+	public static boolean deleteRecursive(File path) throws FileNotFoundException{
+<span class="nc bnc" id="L106" title="All 2 branches missed.">		if (!path.exists()) throw new FileNotFoundException(path.getAbsolutePath());</span>
+<span class="nc" id="L107">		boolean ret = true;</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">		if (path.isDirectory()){</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">			for (final File f : path.listFiles()){</span>
+<span class="nc bnc" id="L110" title="All 4 branches missed.">				ret = ret &amp;&amp; Utils.deleteRecursive(f);</span>
+			}
+		}
+<span class="nc bnc" id="L113" title="All 4 branches missed.">		return ret &amp;&amp; path.delete();</span>
+	}
+
+	public static void deleteRecursiveFiles(File f) throws FileNotFoundException{
+<span class="nc bnc" id="L117" title="All 2 branches missed.">		if (!f.exists()) throw new FileNotFoundException(f.getAbsolutePath());</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">		if (f.isDirectory()){</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">			for (final File f0 : f.listFiles()){</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">				if(f0.isDirectory()) {</span>
+<span class="nc" id="L121">					deleteRecursiveFiles(f0);</span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">					if(f0.listFiles().length == 0) {</span>
+<span class="nc" id="L123">						f0.delete();</span>
+					}
+<span class="nc bnc" id="L125" title="All 2 branches missed.">				}else if(f0.isFile()) {</span>
+<span class="nc" id="L126">					f0.delete();</span>
+				}
+			}
+		}
+<span class="nc" id="L130">	}	</span>
+
+	public static void deleteRecursiveJavaFiles(File f) throws FileNotFoundException{
+<span class="nc bnc" id="L133" title="All 2 branches missed.">		if (!f.exists()) throw new FileNotFoundException(f.getAbsolutePath());</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">		if (f.isDirectory()){</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">			for (final File f0 : f.listFiles()){</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">				if(f0.isDirectory()) {</span>
+<span class="nc" id="L137">					deleteRecursiveJavaFiles(f0);</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">					if(f0.listFiles().length == 0) {</span>
+<span class="nc" id="L139">						f0.delete();</span>
+					}
+<span class="nc bnc" id="L141" title="All 4 branches missed.">				}else if(f0.isFile() &amp;&amp; f0.getName().toLowerCase().endsWith(&quot;.java&quot;)) {</span>
+<span class="nc" id="L142">					f0.delete();</span>
+				}
+			}
+		}
+<span class="nc" id="L146">	}	</span>
+
+	public static void copyDir(String src, String dest, boolean overwrite) {
+		try {
+<span class="nc" id="L150">			Files.walk(Paths.get(src)).forEach(a -&gt; {</span>
+<span class="nc" id="L151">				Path b = Paths.get(dest, a.toString().substring(src.length()));</span>
+				try {
+<span class="nc bnc" id="L153" title="All 2 branches missed.">					if (!a.toString().equals(src))</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">						Files.copy(a, b, overwrite ? new CopyOption[]{StandardCopyOption.REPLACE_EXISTING} : new CopyOption[]{});</span>
+<span class="nc" id="L155">				} catch (IOException e) {</span>
+<span class="nc" id="L156">					e.printStackTrace();</span>
+<span class="nc" id="L157">				}</span>
+<span class="nc" id="L158">			});</span>
+<span class="nc" id="L159">		} catch (IOException e) {</span>
+<span class="nc" id="L160">			e.printStackTrace();</span>
+<span class="nc" id="L161">		}</span>
+<span class="nc" id="L162">	}</span>
+
+	//-------------------------------------------------------------------------------------------------------------------------------------------
+	//  Files utils
+	//-------------------------------------------------------------------------------------------------------------------------------------------
+
+	public static boolean checkUrl(ActionStatus status, String urlPath){
+
+<span class="nc" id="L170">		URL url = null;</span>
+
+		try {
+<span class="nc" id="L173">			url = new URL(urlPath);</span>
+<span class="nc" id="L174">		}catch(MalformedURLException e) {</span>
+<span class="nc" id="L175">			status.setPassed(false);</span>
+<span class="nc" id="L176">			status.setCode(ActionStatus.MALFORMED_GOTO_URL);</span>
+<span class="nc" id="L177">			status.setData(urlPath);</span>
+<span class="nc" id="L178">			return false;</span>
+<span class="nc" id="L179">		}</span>
+
+		int responseCode;
+		try {
+<span class="nc bnc" id="L183" title="All 2 branches missed.">			if(urlPath.startsWith(&quot;https&quot;)) {</span>
+<span class="nc" id="L184">				HttpsURLConnection con =	(HttpsURLConnection)url.openConnection();</span>
+<span class="nc" id="L185">				con.setRequestMethod(&quot;HEAD&quot;);</span>
+<span class="nc" id="L186">				responseCode = con.getResponseCode();</span>
+<span class="nc" id="L187">			}else {</span>
+<span class="nc" id="L188">				HttpURLConnection con =	(HttpURLConnection)url.openConnection();</span>
+<span class="nc" id="L189">				con.setRequestMethod(&quot;HEAD&quot;);</span>
+<span class="nc" id="L190">				responseCode = con.getResponseCode();</span>
+			}
+<span class="nc" id="L192">		}catch (IOException e) {</span>
+<span class="nc" id="L193">			status.setPassed(false);</span>
+<span class="nc" id="L194">			status.setCode(ActionStatus.UNKNOWN_HOST_GOTO_URL);</span>
+<span class="nc" id="L195">			status.setData(e.getMessage());</span>
+<span class="nc" id="L196">			return false;</span>
+<span class="nc" id="L197">		}</span>
+
+<span class="nc bnc" id="L199" title="All 2 branches missed.">		if(responseCode == HttpURLConnection.HTTP_OK) {</span>
+<span class="nc" id="L200">			return true;</span>
+		}else {
+<span class="nc" id="L202">			status.setPassed(false);</span>
+<span class="nc" id="L203">			status.setCode(ActionStatus.UNREACHABLE_GOTO_URL);</span>
+<span class="nc" id="L204">			status.setData(urlPath);</span>
+<span class="nc" id="L205">			return false;</span>
+		}
+	}
+
+	public static String removeExtension(String s) {
+
+<span class="nc" id="L211">		String separator = System.getProperty(&quot;file.separator&quot;);</span>
+		String filename;
+
+<span class="nc" id="L214">		int lastSeparatorIndex = s.lastIndexOf(separator);</span>
+<span class="nc bnc" id="L215" title="All 2 branches missed.">		if (lastSeparatorIndex == -1) {</span>
+<span class="nc" id="L216">			filename = s;</span>
+		} else {
+<span class="nc" id="L218">			filename = s.substring(lastSeparatorIndex + 1);</span>
+		}
+
+<span class="nc" id="L221">		int extensionIndex = filename.lastIndexOf(&quot;.&quot;);</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">		if (extensionIndex == -1)</span>
+<span class="nc" id="L223">			return filename;</span>
+
+<span class="nc" id="L225">		return filename.substring(0, extensionIndex);</span>
+	}
+
+	//-------------------------------------------------------------------------------------------------------------------------------------------
+	//  Image utils
+	//-------------------------------------------------------------------------------------------------------------------------------------------
+
+	public static byte[] iconToImage(Icon icon) {
+
+<span class="nc" id="L234">		final BufferedImage img = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);</span>
+<span class="nc" id="L235">		final Graphics2D g2d = img.createGraphics();</span>
+
+<span class="nc" id="L237">		icon.paintIcon(null, g2d, 0, 0);</span>
+<span class="nc" id="L238">		g2d.dispose();</span>
+
+<span class="nc" id="L240">		try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {</span>
+<span class="nc" id="L241">			ImageOutputStream ios = ImageIO.createImageOutputStream(baos);</span>
+			try {
+<span class="nc" id="L243">				ImageIO.write(img, &quot;png&quot;, ios);</span>
+			} finally {
+<span class="nc" id="L245">				ios.close();</span>
+			}
+<span class="nc" id="L247">			return baos.toByteArray();</span>
+<span class="nc" id="L248">		} catch (IOException ex) {</span>
+<span class="nc" id="L249">			ex.printStackTrace();</span>
+		}
+
+<span class="nc" id="L252">		return null;</span>
+	}
+
+	public static byte[] loadImage(URL url) {
+
+<span class="nc" id="L257">		ByteArrayOutputStream output = new ByteArrayOutputStream();</span>
+
+<span class="nc" id="L259">		try (InputStream inputStream = url.openStream()) {</span>
+
+<span class="nc" id="L261">			int n = 0;</span>
+<span class="nc" id="L262">			byte [] buffer = new byte[ 1024 ];</span>
+
+<span class="nc bnc" id="L264" title="All 2 branches missed.">			while (-1 != (n = inputStream.read(buffer))) {</span>
+<span class="nc" id="L265">				output.write(buffer, 0, n);</span>
+			}
+
+<span class="nc" id="L268">			return output.toByteArray();</span>
+
+<span class="nc" id="L270">		} catch (IOException e) {</span>
+
+		}
+
+<span class="nc" id="L274">		return null;</span>
+	}
+
+	//-------------------------------------------------------------------------------------------------------------------------------------------
+	//  JSON CSV utils
+	//-------------------------------------------------------------------------------------------------------------------------------------------
+
+	public static ParameterDataFile loadData(String url) throws MalformedURLException{
+<span class="nc" id="L282">		return loadData(new URL(url));</span>
+	}
+
+	public static ParameterDataFile loadData(URL url){
+<span class="nc" id="L286">		return new ParameterDataFile(url);</span>
+	}
+
+	//-------------------------------------------------------------------------------------------------------------------------------------------
+	//  browser start page
+	//-------------------------------------------------------------------------------------------------------------------------------------------
+
+	public static byte[] getAtsBrowserContent(
+			String titleUid,
+			String browserName,
+			String browserPath,
+			String browserVersion, 
+			String driverVersion, 
+			TestBound testBound,
+			int actionWait,
+			int propertyWait,
+			int maxtry,
+			int maxTryProperty,
+			int scriptTimeout,
+			int pageLoadTimeout,
+			int watchdog, 
+			DesktopDriver desktopDriver, 
+			String profilePath) {
+
+<span class="nc bnc" id="L310" title="All 2 branches missed.">		if(driverVersion == null) {</span>
+<span class="nc" id="L311">			driverVersion = &quot;--&quot;;</span>
+		}
+
+<span class="nc bnc" id="L314" title="All 2 branches missed.">		if(browserVersion == null) {</span>
+<span class="nc" id="L315">			browserVersion = &quot;--&quot;;</span>
+		}
+
+<span class="nc" id="L318">		final StringBuilder htmlContent = new StringBuilder();</span>
+<span class="nc" id="L319">		htmlContent.append(&quot;&lt;html&gt;&lt;head&gt;&lt;meta http-equiv=\&quot;Content-Type\&quot; content=\&quot;text/html; charset=UTF-8\&quot;&gt;&quot;);</span>
+
+<span class="nc" id="L321">		htmlContent.append(ResourceContent.getPageStyle());</span>
+
+<span class="nc" id="L323">		htmlContent.append(&quot;&lt;title&gt;&quot;);</span>
+<span class="nc" id="L324">		htmlContent.append(titleUid);</span>
+<span class="nc" id="L325">		htmlContent.append(&quot;&lt;/title&gt;&lt;/head&gt;&lt;body bgcolor=\&quot;#f2f2f2\&quot;&gt;&lt;div&gt;&lt;div id=\&quot;header\&quot;&gt;&lt;div class=\&quot;clearfix\&quot;&gt;&quot;);</span>
+<span class="nc" id="L326">		htmlContent.append(&quot;ActionTestScript (ver. &quot;);</span>
+<span class="nc" id="L327">		htmlContent.append(ATS.VERSION);</span>
+<span class="nc" id="L328">		htmlContent.append(&quot;)&quot;);</span>
+<span class="nc" id="L329">		htmlContent.append(&quot;&lt;/div&gt;&lt;/div&gt;&lt;div id=\&quot;content-wrapper\&quot;&gt;&lt;div class=\&quot;site\&quot;&gt;&lt;div class=\&quot;article js-hide-during-search\&quot;&gt;&lt;a href=\&quot;https://www.actiontestscript.com\&quot;&gt;&lt;img src=\&quot;data:image/png;base64, &quot;);</span>
+
+<span class="nc" id="L331">		htmlContent.append(ResourceContent.getAtsLogo());</span>
+
+<span class="nc" id="L333">		htmlContent.append(&quot;\&quot; alt=\&quot;ActionTestScript\&quot;/&gt;&lt;/a&gt;&lt;div class=\&quot;article-body content-body wikistyle markdown-format\&quot;&gt;&lt;div class=\&quot;intro\&quot; style=\&quot;margin-left:30px\&quot;&gt;&quot;);</span>
+
+<span class="nc" id="L335">		htmlContent.append(&quot;&lt;p&gt;&lt;strong&gt;ActionTestScript version : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L336">		htmlContent.append(ATS.VERSION);</span>
+
+<span class="nc" id="L338">		htmlContent.append(&quot;&lt;br&gt;&lt;strong&gt;Browser driver version : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L339">		htmlContent.append(driverVersion);</span>
+
+<span class="nc" id="L341">		htmlContent.append(&quot;&lt;br&gt;&lt;strong&gt;Desktop driver version : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L342">		htmlContent.append(desktopDriver.getDriverVersion());</span>
+
+<span class="nc" id="L344">		htmlContent.append(&quot;&lt;br&gt;&lt;strong&gt;Search element max try : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L345">		htmlContent.append(maxtry);</span>
+
+<span class="nc" id="L347">		htmlContent.append(&quot;&lt;br&gt;&lt;strong&gt;Get property max try : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L348">		htmlContent.append(maxTryProperty);</span>
+
+<span class="nc" id="L350">		htmlContent.append(&quot;&lt;br&gt;JavaScript execution time out : &quot;);</span>
+<span class="nc" id="L351">		htmlContent.append(scriptTimeout);</span>
+<span class="nc" id="L352">		htmlContent.append(&quot; s&quot;);</span>
+
+<span class="nc" id="L354">		htmlContent.append(&quot;&lt;br&gt;Page load time out : &quot;);</span>
+<span class="nc" id="L355">		htmlContent.append(pageLoadTimeout);</span>
+<span class="nc" id="L356">		htmlContent.append(&quot; s&quot;);</span>
+
+<span class="nc" id="L358">		htmlContent.append(&quot;&lt;br&gt;Action execution watchdog : &quot;);</span>
+<span class="nc" id="L359">		htmlContent.append(watchdog);</span>
+<span class="nc" id="L360">		htmlContent.append(&quot; s&quot;);</span>
+
+<span class="nc" id="L362">		htmlContent.append(&quot;&lt;/p&gt;&lt;/div&gt;&lt;div class=\&quot;alert note\&quot; style=\&quot;margin-left:30px;min-width: 360px;display: inline-block\&quot;&gt;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L363">		htmlContent.append(&quot;&lt;strong&gt;Browser : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L364">		htmlContent.append(&quot;&lt;br&gt;&lt;strong&gt;  - Name : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L365">		htmlContent.append(browserName);</span>
+<span class="nc" id="L366">		htmlContent.append(&quot;&lt;br&gt;&lt;strong&gt;  - Version : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L367">		htmlContent.append(browserVersion);</span>
+
+<span class="nc bnc" id="L369" title="All 2 branches missed.">		if(browserPath != null) {</span>
+<span class="nc" id="L370">			htmlContent.append(&quot;&lt;br&gt;&lt;strong&gt;  - Binary path : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L371">			htmlContent.append(browserPath);</span>
+		}
+
+<span class="nc bnc" id="L374" title="All 2 branches missed.">		if(profilePath != null) {</span>
+<span class="nc" id="L375">			htmlContent.append(&quot;&lt;br&gt;&lt;strong&gt;  - Profile path : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L376">			htmlContent.append(profilePath);</span>
+		}
+
+<span class="nc" id="L379">		htmlContent.append(&quot;&lt;br&gt;&lt;strong&gt;  - Start position : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L380">		htmlContent.append(testBound.getX().intValue());</span>
+<span class="nc" id="L381">		htmlContent.append(&quot; x &quot;);</span>
+<span class="nc" id="L382">		htmlContent.append(testBound.getY().intValue());</span>
+
+<span class="nc" id="L384">		htmlContent.append(&quot;&lt;br&gt;&lt;strong&gt;  - Start size : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L385">		htmlContent.append(testBound.getWidth().intValue());</span>
+<span class="nc" id="L386">		htmlContent.append(&quot; x &quot;);</span>
+<span class="nc" id="L387">		htmlContent.append(testBound.getHeight().intValue());</span>
+
+<span class="nc" id="L389">		htmlContent.append(&quot;&lt;br&gt;&lt;strong&gt;  - Wait after action : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L390">		htmlContent.append(actionWait);</span>
+<span class="nc" id="L391">		htmlContent.append(&quot; ms&quot;);</span>
+
+<span class="nc" id="L393">		htmlContent.append(&quot;&lt;br&gt;&lt;strong&gt;  - Double check property : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L394">		htmlContent.append(propertyWait);</span>
+<span class="nc" id="L395">		htmlContent.append(&quot; ms&quot;);		</span>
+
+<span class="nc" id="L397">		htmlContent.append(&quot;&lt;/p&gt;&lt;/div&gt;&lt;div class=\&quot;alert warning\&quot; style=\&quot;margin-left:30px;min-width: 360px;display: inline-block\&quot;&gt;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L398">		htmlContent.append(&quot;&lt;strong&gt;Operating System : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L399">		htmlContent.append(&quot;&lt;br&gt;&lt;strong&gt;  - Machine name : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L400">		htmlContent.append(desktopDriver.getMachineName());</span>
+<span class="nc" id="L401">		htmlContent.append(&quot;&lt;br&gt;&lt;strong&gt;  - System name : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L402">		htmlContent.append(desktopDriver.getOsName());</span>
+<span class="nc" id="L403">		htmlContent.append(&quot;&lt;br&gt;&lt;strong&gt;  - System version : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L404">		htmlContent.append(desktopDriver.getOsVersion());</span>
+<span class="nc" id="L405">		htmlContent.append(&quot;&lt;br&gt;&lt;strong&gt;  - Build version : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L406">		htmlContent.append(desktopDriver.getOsBuildVersion());</span>
+<span class="nc" id="L407">		htmlContent.append(&quot;&lt;br&gt;&lt;strong&gt;  - Country code : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L408">		htmlContent.append(desktopDriver.getCountryCode());</span>
+<span class="nc" id="L409">		htmlContent.append(&quot;&lt;br&gt;&lt;strong&gt;  - DotNET version : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L410">		htmlContent.append(desktopDriver.getDotNetVersion());</span>
+
+<span class="nc" id="L412">		htmlContent.append(&quot;&lt;br&gt;&lt;strong&gt;  - Resolution : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L413">		htmlContent.append(desktopDriver.getScreenResolution());</span>
+
+<span class="nc" id="L415">		htmlContent.append(&quot;&lt;br&gt;&lt;strong&gt;  - Processor name : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L416">		htmlContent.append(desktopDriver.getCpuName());</span>
+<span class="nc" id="L417">		htmlContent.append(&quot;&lt;br&gt;&lt;strong&gt;  - Processor socket : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L418">		htmlContent.append(desktopDriver.getCpuSocket());</span>
+<span class="nc" id="L419">		htmlContent.append(&quot;&lt;br&gt;&lt;strong&gt;  - Processor architecture : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L420">		htmlContent.append(desktopDriver.getCpuArchitecture());</span>
+<span class="nc" id="L421">		htmlContent.append(&quot;&lt;br&gt;&lt;strong&gt;  - Processor max speed : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L422">		htmlContent.append(desktopDriver.getCpuMaxClock());</span>
+<span class="nc" id="L423">		htmlContent.append(&quot;&lt;br&gt;&lt;strong&gt;  - Processor cores : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L424">		htmlContent.append(desktopDriver.getCpuCores());</span>
+
+<span class="nc" id="L426">		htmlContent.append(&quot;&lt;br&gt;&lt;strong&gt;  - Current drive letter : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L427">		htmlContent.append(desktopDriver.getDriveLetter());</span>
+
+<span class="nc" id="L429">		htmlContent.append(&quot;&lt;br&gt;&lt;strong&gt;  - Disk total size : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L430">		htmlContent.append(desktopDriver.getDiskTotalSize());</span>
+
+<span class="nc" id="L432">		htmlContent.append(&quot;&lt;br&gt;&lt;strong&gt;  - Disk free space : &lt;/strong&gt;&quot;);</span>
+<span class="nc" id="L433">		htmlContent.append(desktopDriver.getDiskFreeSpace());		</span>
+
+<span class="nc" id="L435">		htmlContent.append(&quot;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;/body&gt;&lt;/html&gt;&quot;);</span>
+
+<span class="nc" id="L437">		return htmlContent.toString().getBytes();</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

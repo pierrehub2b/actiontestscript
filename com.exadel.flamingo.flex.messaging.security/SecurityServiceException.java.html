@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SecurityServiceException.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.exadel.flamingo.flex.messaging.security</a> &gt; <span class="el_source">SecurityServiceException.java</span></div><h1>SecurityServiceException.java</h1><pre class="source lang-java linenums">/*
+  GRANITE DATA SERVICES
+  Copyright (C) 2007 ADEQUATE SYSTEMS SARL
+
+  This file is part of Granite Data Services.
+
+  Granite Data Services is free software; you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or (at your
+  option) any later version.
+ 
+  Granite Data Services is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+  for more details.
+ 
+  You should have received a copy of the GNU Lesser General Public License
+  along with this library; if not, see &lt;http://www.gnu.org/licenses/&gt;.
+*/
+
+package com.exadel.flamingo.flex.messaging.security;
+
+/**
+ * @author Franck WOLFF
+ */
+public class SecurityServiceException extends ServiceException {
+
+    private static final long serialVersionUID = 1L;
+    
+    /** Code for invalid credentails (wrong username or password) */
+<span class="nc" id="L31">    public static String CODE_INVALID_CREDENTIALS = &quot;Server.Security.InvalidCredentials&quot;;</span>
+    /** Code for illegal access to a service or method that requires authentication */
+<span class="nc" id="L33">    public static String CODE_NOT_LOGGED_IN = &quot;Server.Security.NotLoggedIn&quot;;</span>
+    /** Code for user session timeout */
+<span class="nc" id="L35">    public static String CODE_SESSION_EXPIRED = &quot;Server.Security.SessionExpired&quot;;</span>
+    /** Code for illegal access to a service or method that requires special role or profile */
+<span class="nc" id="L37">    public static String CODE_ACCESS_DENIED = &quot;Server.Security.AccessDenied&quot;;</span>
+    
+    
+    public static SecurityServiceException newInvalidCredentialsException() {
+<span class="nc" id="L41">        return new SecurityServiceException(CODE_INVALID_CREDENTIALS);</span>
+    }
+    public static SecurityServiceException newInvalidCredentialsException(String message) {
+<span class="nc" id="L44">        return new SecurityServiceException(CODE_INVALID_CREDENTIALS, message);</span>
+    }
+    public static SecurityServiceException newInvalidCredentialsException(String message, String details) {
+<span class="nc" id="L47">        return new SecurityServiceException(CODE_INVALID_CREDENTIALS, message, details);</span>
+    }
+    
+    public static SecurityServiceException newNotLoggedInException() {
+<span class="nc" id="L51">        return new SecurityServiceException(CODE_NOT_LOGGED_IN);</span>
+    }
+    public static SecurityServiceException newNotLoggedInException(String message) {
+<span class="nc" id="L54">        return new SecurityServiceException(CODE_NOT_LOGGED_IN, message);</span>
+    }
+    public static SecurityServiceException newNotLoggedInException(String message, String details) {
+<span class="nc" id="L57">        return new SecurityServiceException(CODE_NOT_LOGGED_IN, message, details);</span>
+    }
+    
+    public static SecurityServiceException newSessionExpiredException() {
+<span class="nc" id="L61">        return new SecurityServiceException(CODE_SESSION_EXPIRED);</span>
+    }
+    public static SecurityServiceException newSessionExpiredException(String message) {
+<span class="nc" id="L64">        return new SecurityServiceException(CODE_SESSION_EXPIRED, message);</span>
+    }
+    public static SecurityServiceException newSessionExpiredException(String message, String details) {
+<span class="nc" id="L67">        return new SecurityServiceException(CODE_SESSION_EXPIRED, message, details);</span>
+    }
+    
+    public static SecurityServiceException newAccessDeniedException() {
+<span class="nc" id="L71">        return new SecurityServiceException(CODE_ACCESS_DENIED);</span>
+    }
+    public static SecurityServiceException newAccessDeniedException(String message) {
+<span class="nc" id="L74">        return new SecurityServiceException(CODE_ACCESS_DENIED, message);</span>
+    }
+    public static SecurityServiceException newAccessDeniedException(String message, String details) {
+<span class="nc" id="L77">        return new SecurityServiceException(CODE_ACCESS_DENIED, message, details);</span>
+    }
+
+    
+    public SecurityServiceException(String code) {
+<span class="nc" id="L82">        this(code, null, null);</span>
+<span class="nc" id="L83">    }</span>
+    public SecurityServiceException(String code, String message) {
+<span class="nc" id="L85">        this(code, message, null);</span>
+<span class="nc" id="L86">    }</span>
+    public SecurityServiceException(String code, String message, String details) {
+<span class="nc" id="L88">        super(code, message, details);</span>
+<span class="nc" id="L89">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

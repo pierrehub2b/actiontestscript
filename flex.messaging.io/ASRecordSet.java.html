@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ASRecordSet.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">flex.messaging.io</a> &gt; <span class="el_source">ASRecordSet.java</span></div><h1>ASRecordSet.java</h1><pre class="source lang-java linenums">/*
+ * www.openamf.org
+ *
+ * Distributable under LGPL license.
+ * See terms of license at gnu.org.
+ */
+
+package flex.messaging.io;
+
+import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.beans.PropertyDescriptor;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.*;
+
+
+/**
+ * @author Jason Calabrese jasonc@missionvi.com
+ * @version $Revision: 1.29 $, $Date: 2006/03/25 22:17:44 $
+ */
+public class ASRecordSet extends ASObject {
+
+    private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L32">    private static final Log log = LogFactory.getLog(ASRecordSet.class);</span>
+
+    public static final String SERVICE_NAME = &quot;OpenAMFPageableRecordSet&quot;;
+
+    private static final String SI = &quot;serverInfo&quot;;
+    private static final String SI_ID = &quot;id&quot;;
+    private static final String SI_TOTAL_COUNT = &quot;totalCount&quot;;
+    private static final String SI_INITIAL_DATA = &quot;initialData&quot;;
+    //private static final String SI_ROWS = &quot;rows&quot;;
+    private static final String SI_CURSOR = &quot;cursor&quot;;
+    private static final String SI_SERVICE_NAME = &quot;serviceName&quot;;
+    private static final String SI_COLUMN_NAMES = &quot;columnNames&quot;;
+    private static final String SI_VERSION = &quot;version&quot;;
+
+<span class="nc" id="L46">    private static int count = 0;</span>
+    
+    private Map&lt;String, Object&gt; serverInfo;
+    private List&lt;List&lt;Object&gt;&gt; rows;
+    private int initialRowCount;
+
+    public ASRecordSet() {
+<span class="nc" id="L53">        super(&quot;RecordSet&quot;);</span>
+<span class="nc" id="L54">        serverInfo = new HashMap&lt;String, Object&gt;();</span>
+<span class="nc" id="L55">        put(SI, serverInfo);</span>
+        
+<span class="nc" id="L57">        synchronized (ASRecordSet.class)</span>
+        {
+<span class="nc" id="L59">            count++;</span>
+<span class="nc" id="L60">            setId(&quot;RS&quot; + count);</span>
+<span class="nc" id="L61">        }</span>
+        
+<span class="nc" id="L63">        setInitialData(new ArrayList&lt;Object&gt;());</span>
+<span class="nc" id="L64">        setServiceName(SERVICE_NAME);</span>
+<span class="nc" id="L65">        setCursor(1);</span>
+<span class="nc" id="L66">        setVersion(1);</span>
+<span class="nc" id="L67">        rows = new ArrayList&lt;List&lt;Object&gt;&gt;();</span>
+<span class="nc" id="L68">        initialRowCount = 0;</span>
+<span class="nc" id="L69">    }</span>
+
+    public String getId() {
+<span class="nc" id="L72">        return (String) serverInfo.get(SI_ID);</span>
+    }
+    public void setId(String id) {
+<span class="nc" id="L75">        serverInfo.put(SI_ID, id);</span>
+<span class="nc" id="L76">    }</span>
+
+    public int getTotalCount() {
+<span class="nc" id="L79">        Object value = serverInfo.get(SI_TOTAL_COUNT);</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">        if (value != null)</span>
+<span class="nc" id="L81">            return ((Integer) value).intValue();</span>
+<span class="nc" id="L82">        return 0;</span>
+    }
+    public void setTotalCount(int totalCount) {
+<span class="nc" id="L85">        serverInfo.put(SI_TOTAL_COUNT, Integer.valueOf(totalCount));</span>
+<span class="nc" id="L86">    }</span>
+
+    public List&lt;?&gt; getInitialData() {
+<span class="nc" id="L89">        return (List&lt;?&gt;)serverInfo.get(SI_INITIAL_DATA);</span>
+    }
+    public void setInitialData(List&lt;?&gt; initialData) {
+<span class="nc" id="L92">        serverInfo.put(SI_INITIAL_DATA, initialData);</span>
+<span class="nc" id="L93">    }</span>
+
+    public Map&lt;String, Object&gt; getRecords(int from, int count) {
+        
+<span class="nc" id="L97">        List&lt;List&lt;Object&gt;&gt; page = rows.subList(from - 1, from - 1 + count);</span>
+        
+<span class="nc" id="L99">        Map&lt;String, Object&gt; records = new HashMap&lt;String, Object&gt;();</span>
+<span class="nc" id="L100">        records.put(&quot;Page&quot;, page);</span>
+<span class="nc" id="L101">        records.put(&quot;Cursor&quot;, Integer.valueOf(from + 1));</span>
+        
+<span class="nc" id="L103">        return records;</span>
+        
+    }
+
+    public int getCursor() {
+<span class="nc" id="L108">        Object value = serverInfo.get(SI_CURSOR);</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">        if (value != null)</span>
+<span class="nc" id="L110">            return ((Integer) value).intValue();</span>
+<span class="nc" id="L111">        return 0;</span>
+    }
+    public void setCursor(int cursor) {
+<span class="nc" id="L114">        serverInfo.put(SI_CURSOR, Integer.valueOf(cursor));</span>
+<span class="nc" id="L115">    }</span>
+
+    public String getServiceName() {
+<span class="nc" id="L118">        return (String) serverInfo.get(SI_SERVICE_NAME);</span>
+    }
+    public void setServiceName(String serviceName) {
+<span class="nc" id="L121">        serverInfo.put(SI_SERVICE_NAME, serviceName);</span>
+<span class="nc" id="L122">    }</span>
+
+    public String[] getColumnNames() {
+<span class="nc" id="L125">        return (String[]) serverInfo.get(SI_COLUMN_NAMES);</span>
+    }
+    public void setColumnNames(String[] columnNames) {
+<span class="nc" id="L128">        serverInfo.put(SI_COLUMN_NAMES, columnNames);</span>
+<span class="nc" id="L129">    }</span>
+    
+    public double getVersion() {
+<span class="nc" id="L132">        Object value = serverInfo.get(SI_VERSION);</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">        if (value != null)</span>
+<span class="nc" id="L134">            return ((Double) value).doubleValue();</span>
+<span class="nc" id="L135">        return 0;</span>
+    }
+    public void setVersion(double version) {
+<span class="nc" id="L138">        serverInfo.put(SI_VERSION, Double.valueOf(version));</span>
+<span class="nc" id="L139">    }</span>
+
+    public List&lt;List&lt;Object&gt;&gt; rows() {
+<span class="nc" id="L142">        return rows;</span>
+    }
+
+    public void populate(ResultSet rs) throws IOException {
+
+        try {
+<span class="nc" id="L148">            ResultSetMetaData rsmd = rs.getMetaData();</span>
+<span class="nc" id="L149">            int columnCount = rsmd.getColumnCount();</span>
+<span class="nc" id="L150">            String[] columnNames = new String[columnCount];</span>
+
+<span class="nc" id="L152">            int rowIndex = 0;</span>
+<span class="nc" id="L153">            List&lt;List&lt;Object&gt;&gt; initialData = new ArrayList&lt;List&lt;Object&gt;&gt;();</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">            while (rs.next()) {</span>
+<span class="nc" id="L155">                rowIndex++;</span>
+<span class="nc" id="L156">                List&lt;Object&gt; row = new ArrayList&lt;Object&gt;();</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">                for (int column = 0; column &lt; columnCount; column++) {</span>
+<span class="nc bnc" id="L158" title="All 2 branches missed.">                    if (rowIndex == 1) {</span>
+<span class="nc" id="L159">                        columnNames[column] = rsmd.getColumnName(column + 1);</span>
+                    }
+<span class="nc" id="L161">                    row.add(rs.getObject(column + 1));</span>
+                }
+<span class="nc bnc" id="L163" title="All 2 branches missed.">                if (rowIndex == 1) {</span>
+<span class="nc" id="L164">                    setColumnNames(columnNames);</span>
+                }
+<span class="nc" id="L166">                rows.add(row);</span>
+<span class="nc bnc" id="L167" title="All 2 branches missed.">                if (rowIndex &lt;= initialRowCount) {</span>
+<span class="nc" id="L168">                    initialData.add(row);</span>
+                }
+<span class="nc" id="L170">            }</span>
+<span class="nc" id="L171">            setTotalCount(rowIndex);</span>
+<span class="nc" id="L172">            setInitialData(initialData);</span>
+<span class="nc" id="L173">            setColumnNames(columnNames);</span>
+<span class="nc" id="L174">        } catch (SQLException e) {</span>
+<span class="nc" id="L175">            throw new IOException(e.getMessage());</span>
+<span class="nc" id="L176">        }</span>
+
+<span class="nc" id="L178">    }</span>
+
+    public void populate(String[] columnNames, List&lt;List&lt;Object&gt;&gt; rows) {
+<span class="nc" id="L181">        this.rows = rows;</span>
+
+<span class="nc" id="L183">        List&lt;List&lt;Object&gt;&gt; initialData =</span>
+<span class="nc" id="L184">            rows.subList(</span>
+                0,
+<span class="nc bnc" id="L186" title="All 2 branches missed.">                (initialRowCount &gt; rows.size()</span>
+<span class="nc" id="L187">                    ? rows.size()</span>
+<span class="nc" id="L188">                    : initialRowCount)); // NOTE: sublist semantics are [fromIndex, toIndex]</span>
+<span class="nc" id="L189">        setInitialData(initialData);</span>
+<span class="nc" id="L190">        setTotalCount(rows.size());</span>
+<span class="nc" id="L191">        setColumnNames(columnNames);</span>
+<span class="nc" id="L192">    }</span>
+
+    public void populate(List&lt;?&gt; list, String[] ignoreProperties)
+        throws
+            IllegalArgumentException,
+            IllegalAccessException,
+            InvocationTargetException {
+
+<span class="nc" id="L200">        List&lt;String&gt; names = new ArrayList&lt;String&gt; ();</span>
+<span class="nc" id="L201">        Object firstBean = list.get(0);</span>
+<span class="nc" id="L202">        PropertyDescriptor[] properties =</span>
+<span class="nc" id="L203">            PropertyUtils.getPropertyDescriptors(firstBean);</span>
+<span class="nc bnc" id="L204" title="All 2 branches missed.">        for (int i = 0; i &lt; properties.length; i++) {</span>
+<span class="nc" id="L205">            PropertyDescriptor descriptor = properties[i];</span>
+<span class="nc bnc" id="L206" title="All 2 branches missed.">            if (!ignoreProperty(descriptor, ignoreProperties)) {</span>
+<span class="nc" id="L207">                names.add(descriptor.getDisplayName());</span>
+            }
+        }
+<span class="nc" id="L210">        String[] columnNames = new String[names.size()];</span>
+<span class="nc" id="L211">        columnNames = names.toArray(columnNames);</span>
+<span class="nc" id="L212">        setColumnNames(columnNames);</span>
+
+<span class="nc" id="L214">        int rowIndex = 0;</span>
+<span class="nc" id="L215">        List&lt;List&lt;Object&gt;&gt; initialData = new ArrayList&lt;List&lt;Object&gt;&gt;();</span>
+<span class="nc" id="L216">        Iterator&lt;?&gt; iterator = list.iterator();</span>
+<span class="nc bnc" id="L217" title="All 2 branches missed.">        while (iterator.hasNext()) {</span>
+<span class="nc" id="L218">            rowIndex++;</span>
+<span class="nc" id="L219">            Object bean = iterator.next();</span>
+<span class="nc" id="L220">            List&lt;Object&gt; row = new ArrayList&lt;Object&gt;();</span>
+<span class="nc bnc" id="L221" title="All 2 branches missed.">            for (int i = 0; i &lt; properties.length; i++) {</span>
+<span class="nc" id="L222">                PropertyDescriptor descriptor = properties[i];</span>
+<span class="nc bnc" id="L223" title="All 2 branches missed.">                if (!ignoreProperty(descriptor, ignoreProperties)) {</span>
+<span class="nc" id="L224">                    Object value = null;</span>
+<span class="nc" id="L225">                    Method readMethod = descriptor.getReadMethod();</span>
+<span class="nc bnc" id="L226" title="All 2 branches missed.">                    if (readMethod != null) {</span>
+<span class="nc" id="L227">                        value = readMethod.invoke(bean, new Object[0]);</span>
+                    }
+<span class="nc" id="L229">                    row.add(value);</span>
+                }
+            }
+<span class="nc" id="L232">            rows.add(row);</span>
+<span class="nc bnc" id="L233" title="All 2 branches missed.">            if (rowIndex &lt;= initialRowCount) {</span>
+<span class="nc" id="L234">                initialData.add(row);</span>
+            }
+<span class="nc" id="L236">        }</span>
+<span class="nc" id="L237">        setInitialData(initialData);</span>
+<span class="nc" id="L238">        setTotalCount(rows.size());</span>
+<span class="nc" id="L239">        log.debug(this);</span>
+<span class="nc" id="L240">    }</span>
+
+    private boolean ignoreProperty(
+        PropertyDescriptor descriptor,
+        String[] ignoreProperties) {
+
+<span class="nc" id="L246">        boolean ignore = false;</span>
+<span class="nc bnc" id="L247" title="All 2 branches missed.">        if (descriptor.getName().equals(&quot;class&quot;)) {</span>
+<span class="nc" id="L248">            ignore = true;</span>
+        } else {
+<span class="nc bnc" id="L250" title="All 2 branches missed.">            for (int i = 0; i &lt; ignoreProperties.length; i++) {</span>
+<span class="nc" id="L251">                String ignoreProp = ignoreProperties[i];</span>
+<span class="nc bnc" id="L252" title="All 2 branches missed.">                if (ignoreProp.equals(descriptor.getName())) {</span>
+<span class="nc" id="L253">                    log.debug(&quot;Ignoring &quot; + descriptor.getName());</span>
+<span class="nc" id="L254">                    ignore = true;</span>
+<span class="nc" id="L255">                    break;</span>
+                }
+            }
+        }
+<span class="nc" id="L259">        return ignore;</span>
+    }
+
+    @Override
+    public String toString() {
+
+<span class="nc" id="L265">        StringBuffer info = new StringBuffer();</span>
+<span class="nc" id="L266">        addInfo(info, SI_ID, getId());</span>
+<span class="nc" id="L267">        addInfo(info, SI_TOTAL_COUNT, getTotalCount());</span>
+<span class="nc" id="L268">        addInfo(info, SI_CURSOR, getCursor());</span>
+<span class="nc" id="L269">        addInfo(info, SI_SERVICE_NAME, getServiceName());</span>
+<span class="nc" id="L270">        addInfo(info, SI_VERSION, getVersion());</span>
+<span class="nc" id="L271">        StringBuffer names = new StringBuffer();</span>
+<span class="nc" id="L272">        String[] columnNames = getColumnNames();</span>
+<span class="nc bnc" id="L273" title="All 2 branches missed.">        if (columnNames != null) {</span>
+<span class="nc bnc" id="L274" title="All 2 branches missed.">            for (int i = 0; i &lt; columnNames.length; i++) {</span>
+<span class="nc" id="L275">                String name = columnNames[i];</span>
+<span class="nc bnc" id="L276" title="All 2 branches missed.">                if (i &gt; 0) {</span>
+<span class="nc" id="L277">                    names.append(&quot;, &quot;);</span>
+                }
+<span class="nc" id="L279">                names.append(name);</span>
+            }
+        }
+<span class="nc" id="L282">        addInfo(info, SI_COLUMN_NAMES, names);</span>
+<span class="nc" id="L283">        addInfo(info, SI_INITIAL_DATA, getInitialData().toString());</span>
+<span class="nc" id="L284">        return info.toString();</span>
+    }
+
+    private void addInfo(StringBuffer info, String name, int value) {
+<span class="nc" id="L288">        addInfo(info, name, Integer.valueOf(value));</span>
+<span class="nc" id="L289">    }</span>
+
+    private void addInfo(StringBuffer info, String name, double value) {
+<span class="nc" id="L292">        addInfo(info, name, Double.valueOf(value));</span>
+<span class="nc" id="L293">    }</span>
+
+    private void addInfo(StringBuffer info, String name, Object value) {
+<span class="nc" id="L296">        info.append(name);</span>
+<span class="nc" id="L297">        info.append(&quot; = &quot;);</span>
+<span class="nc" id="L298">        info.append(value);</span>
+<span class="nc" id="L299">        info.append('\n');</span>
+<span class="nc" id="L300">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

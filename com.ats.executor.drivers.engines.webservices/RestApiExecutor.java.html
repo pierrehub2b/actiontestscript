@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RestApiExecutor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.executor.drivers.engines.webservices</a> &gt; <span class="el_source">RestApiExecutor.java</span></div><h1>RestApiExecutor.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.executor.drivers.engines.webservices;
+
+import com.ats.executor.ActionStatus;
+import com.ats.executor.channels.Channel;
+import com.ats.script.actions.ActionApi;
+import okhttp3.OkHttpClient;
+import okhttp3.Request.Builder;
+import okhttp3.RequestBody;
+
+import java.io.PrintStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Map.Entry;
+
+public class RestApiExecutor extends ApiExecutor {
+
+	private static final String contentTypeHeader = &quot;Content-Type&quot;;
+
+	public RestApiExecutor(PrintStream logStream, OkHttpClient client, int timeout, int maxTry, Channel channel, String wsUrl) {
+
+<span class="nc" id="L40">		super(logStream, client, timeout, maxTry, channel);</span>
+
+<span class="nc bnc" id="L42" title="All 2 branches missed.">		if(!wsUrl.endsWith(&quot;/&quot;)) {</span>
+<span class="nc" id="L43">			wsUrl += &quot;/&quot;;</span>
+		}
+<span class="nc" id="L45">		this.setUri(wsUrl);</span>
+<span class="nc" id="L46">	}</span>
+
+	private String getContentType(String value) {
+<span class="nc" id="L49">		value = value.trim();</span>
+<span class="nc bnc" id="L50" title="All 8 branches missed.">		if((value.startsWith(&quot;[&quot;) &amp;&amp; value.endsWith(&quot;]&quot;)) || (value.startsWith(&quot;{&quot;) &amp;&amp; value.endsWith(&quot;}&quot;))){</span>
+<span class="nc" id="L51">			return &quot;application/json&quot;;</span>
+<span class="nc bnc" id="L52" title="All 4 branches missed.">		}else if(value.startsWith(&quot;&lt;&quot;) &amp;&amp; value.endsWith(&quot;&gt;&quot;)){</span>
+<span class="nc" id="L53">			return &quot;application/xml&quot;;</span>
+		}
+<span class="nc" id="L55">		return &quot;application/x-www-form-urlencoded&quot;;</span>
+	}
+
+	@Override
+	public void execute(ActionStatus status, final ActionApi api) {
+
+<span class="nc" id="L61">		super.execute(status, api);</span>
+
+<span class="nc" id="L63">		final String fullUri = getMethodUri().toString();</span>
+
+<span class="nc" id="L65">		String parameters = &quot;&quot;;</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">		if(api.getData() != null) {</span>
+<span class="nc" id="L67">			parameters = api.getData().getCalculated();</span>
+		}
+
+<span class="nc" id="L70">		boolean addContentType = true;</span>
+<span class="nc" id="L71">		final Builder requestBuilder = new Builder();</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">		for (Entry&lt;String,String&gt; header : headerProperties.entrySet()) {</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">			if(contentTypeHeader.equals(header.getKey())) {</span>
+<span class="nc" id="L74">				addContentType = false;</span>
+			}
+<span class="nc" id="L76">			requestBuilder.addHeader(header.getKey(), header.getValue());</span>
+<span class="nc" id="L77">		}</span>
+
+<span class="nc" id="L79">		final String apiType = api.getType().toUpperCase();</span>
+<span class="nc bnc" id="L80" title="All 4 branches missed.">		if(ActionApi.GET.equals(apiType) || ActionApi.DELETE.equals(apiType)) {</span>
+
+<span class="nc bnc" id="L82" title="All 2 branches missed.">			if(parameters.length() &gt; 0) {</span>
+<span class="nc" id="L83">				parameters = &quot;/&quot; + URLEncoder.encode(parameters, StandardCharsets.UTF_8);</span>
+			}
+
+<span class="nc" id="L86">			requestBuilder.url(fullUri + parameters);</span>
+
+<span class="nc bnc" id="L88" title="All 2 branches missed.">			if(ActionApi.GET.equals(apiType)) {</span>
+<span class="nc" id="L89">				requestBuilder.get();</span>
+			}else {
+<span class="nc" id="L91">				requestBuilder.delete();</span>
+			}
+
+		}else {
+
+<span class="nc" id="L96">			requestBuilder.url(fullUri);</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">			if(addContentType) {</span>
+<span class="nc" id="L98">				requestBuilder.addHeader(contentTypeHeader, getContentType(parameters));</span>
+			}
+
+<span class="nc" id="L101">			final RequestBody body = RequestBody.create(null, parameters);</span>
+
+<span class="nc bnc" id="L103" title="All 2 branches missed.">			if(ActionApi.PATCH.equals(apiType)) {</span>
+<span class="nc" id="L104">				requestBuilder.patch(body);</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">			}else if(ActionApi.PUT.equals(apiType)) {</span>
+<span class="nc" id="L106">				requestBuilder.put(body);</span>
+			}else {
+<span class="nc" id="L108">				requestBuilder.post(body);</span>
+			}
+		}
+
+<span class="nc" id="L112">		executeRequest(status, requestBuilder.build());</span>
+<span class="nc" id="L113">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

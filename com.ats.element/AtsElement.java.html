@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AtsElement.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.element</a> &gt; <span class="el_source">AtsElement.java</span></div><h1>AtsElement.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+*/
+
+package com.ats.element;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.openqa.selenium.remote.RemoteWebElement;
+
+import com.ats.executor.drivers.desktop.DesktopData;
+
+@SuppressWarnings(&quot;unchecked&quot;)
+public class AtsElement extends AtsBaseElement {
+
+	private static final String IFRAME = &quot;IFRAME&quot;;
+	private static final String FRAME = &quot;FRAME&quot;;
+
+	private RemoteWebElement element;
+<span class="nc" id="L39">	protected boolean numeric = false;</span>
+<span class="nc" id="L40">	protected boolean password = false;</span>
+<span class="nc" id="L41">	protected int numChildren = 0;</span>
+
+<span class="nc" id="L43">	private Double screenX = 0D;</span>
+<span class="nc" id="L44">	private Double screenY = 0D;</span>
+	
+<span class="nc" id="L46">	private Double boundX = 0D;</span>
+<span class="nc" id="L47">	private Double boundY = 0D;</span>
+
+<span class="nc" id="L49">	private boolean visible = true;</span>
+<span class="nc" id="L50">	private boolean clickable = true;</span>
+
+	public static boolean checkIframe(String value) {
+<span class="nc" id="L53">		value = value.toUpperCase();</span>
+<span class="nc bnc" id="L54" title="All 4 branches missed.">		return IFRAME.equals(value) || FRAME.equals(value);</span>
+	}
+
+<span class="nc" id="L57">	public AtsElement() {}</span>
+
+<span class="nc" id="L59">	public AtsElement(List&lt;Object&gt; data) {</span>
+
+<span class="nc" id="L61">		this.element = (RemoteWebElement) data.get(0);</span>
+<span class="nc" id="L62">		this.tag = data.get(1).toString();</span>
+<span class="nc" id="L63">		this.numeric = (boolean) data.get(2);</span>
+<span class="nc" id="L64">		this.password = (boolean) data.get(3);</span>
+<span class="nc" id="L65">		this.boundX = getDataValue(data.get(4));</span>
+<span class="nc" id="L66">		this.boundY = getDataValue(data.get(5));</span>
+<span class="nc" id="L67">		this.width = getDataValue(data.get(6));</span>
+<span class="nc" id="L68">		this.height = getDataValue(data.get(7));</span>
+<span class="nc" id="L69">		this.x = getDataValue(data.get(8));</span>
+<span class="nc" id="L70">		this.y = getDataValue(data.get(9));</span>
+<span class="nc" id="L71">		this.screenX = getDataValue(data.get(10));</span>
+<span class="nc" id="L72">		this.screenY = getDataValue(data.get(11));</span>
+<span class="nc" id="L73">		this.attributes = (Map&lt;String, String&gt;) data.get(12);</span>
+<span class="nc" id="L74">	}</span>
+	
+	private static Double getDataValue(Object data) {
+<span class="nc bnc" id="L77" title="All 2 branches missed.">		if(data == null) {</span>
+<span class="nc" id="L78">			return 0D;</span>
+		}
+<span class="nc" id="L80">		return (Double)data;</span>
+	}
+
+	public RemoteWebElement getElement() {
+<span class="nc" id="L84">		return element;</span>
+	}
+
+	public Double getScreenX() {
+<span class="nc" id="L88">		return screenX;</span>
+	}
+
+	public Double getScreenY() {
+<span class="nc" id="L92">		return screenY;</span>
+	}
+
+	public boolean isVisible() {
+<span class="nc" id="L96">		return visible;</span>
+	}
+
+	public void setVisible(boolean visible) {
+<span class="nc" id="L100">		this.visible = visible;</span>
+<span class="nc" id="L101">	}</span>
+	
+	public boolean isNumeric() {
+<span class="nc" id="L104">		return numeric;</span>
+	}
+		
+	public Double getBoundX() {
+<span class="nc" id="L108">		return boundX;</span>
+	}
+
+	public void setBoundX(Double boundX) {
+<span class="nc" id="L112">		this.boundX = boundX;</span>
+<span class="nc" id="L113">	}</span>
+
+	public Double getBoundY() {
+<span class="nc" id="L116">		return boundY;</span>
+	}
+
+	public void setBoundY(Double boundY) {
+<span class="nc" id="L120">		this.boundY = boundY;</span>
+<span class="nc" id="L121">	}</span>
+	
+	//----------------------------------------------------------------------------------------
+	// Specifique attribute
+	//----------------------------------------------------------------------------------------
+	
+	@Override
+	public String getAttribute(String key) {
+<span class="nc" id="L129">		final Object attr = attributes.get(key);</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">		if(attr instanceof ArrayList&lt;?&gt;) {</span>
+<span class="nc" id="L131">			return Arrays.toString(((ArrayList&lt;String&gt;) attr).toArray());</span>
+		}else {
+<span class="nc" id="L133">			return (String)attr;</span>
+		}
+	}
+
+	//----------------------------------------------------------------------------------------
+	// Desktop serialization
+	//----------------------------------------------------------------------------------------
+
+	public boolean isPassword() {
+<span class="nc" id="L142">		return password;</span>
+	}
+	
+	public void setPassword(boolean value) {
+<span class="nc" id="L146">		this.password = value;</span>
+<span class="nc" id="L147">	}</span>
+	
+	public ArrayList&lt;DesktopData&gt; getAttributes() {
+<span class="nc" id="L150">		return null;</span>
+	}
+
+	private ArrayList&lt;AtsElement&gt; children;
+	public void setChildren(ArrayList&lt;AtsElement&gt; value) {
+<span class="nc" id="L155">		this.children = value;</span>
+<span class="nc" id="L156">	}</span>
+	
+	public ArrayList&lt;AtsElement&gt; getChildren() {
+<span class="nc" id="L159">		return children;</span>
+	}
+
+	public void setAttributes(ArrayList&lt;DesktopData&gt; value) {
+<span class="nc" id="L163">		this.attributes = value.parallelStream().collect(Collectors.toMap(s -&gt; s.getName(), s -&gt; s.getValue()));</span>
+<span class="nc" id="L164">	}</span>
+	
+	public boolean isClickable() {
+<span class="nc" id="L167">		return clickable;</span>
+	}
+
+	public void setClickable(boolean clickable) {
+<span class="nc" id="L171">		this.clickable = clickable;</span>
+<span class="nc" id="L172">	}</span>
+	
+	public int getNumChildren() {
+<span class="nc" id="L175">		return numChildren;</span>
+	}
+
+	public void setNumChildren(int value) {
+<span class="nc" id="L179">		this.numChildren = value;</span>
+<span class="nc" id="L180">	}</span>
+
+	//----------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------------
+
+	public boolean isIframe() {
+<span class="nc" id="L186">		return checkIframe(tag);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

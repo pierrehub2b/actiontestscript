@@ -1,0 +1,531 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AMF3Serializer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.exadel.flamingo.flex.messaging.amf.io</a> &gt; <span class="el_source">AMF3Serializer.java</span></div><h1>AMF3Serializer.java</h1><pre class="source lang-java linenums">/*
+  GRANITE DATA SERVICES
+  Copyright (C) 2007 ADEQUATE SYSTEMS SARL
+
+  This file is part of Granite Data Services.
+
+  Granite Data Services is free software; you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or (at your
+  option) any later version.
+ 
+  Granite Data Services is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+  for more details.
+ 
+  You should have received a copy of the GNU Lesser General Public License
+  along with this library; if not, see &lt;http://www.gnu.org/licenses/&gt;.
+*/
+
+package com.exadel.flamingo.flex.messaging.amf.io;
+
+import com.exadel.flamingo.flex.amf.AMF3Constants;
+import com.exadel.flamingo.flex.messaging.amf.io.util.*;
+import com.exadel.flamingo.flex.messaging.amf.io.util.externalizer.Externalizer;
+import com.exadel.flamingo.flex.messaging.util.StringUtil;
+import com.exadel.flamingo.flex.messaging.util.XMLUtil;
+import flex.messaging.io.ArrayCollection;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Document;
+
+import java.io.*;
+import java.lang.reflect.Array;
+import java.util.*;
+
+/**
+ * @author Franck WOLFF
+ */
+public class AMF3Serializer extends DataOutputStream implements ObjectOutput, AMF3Constants {
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Fields.
+
+<span class="nc" id="L45">	protected static final Log log = LogFactory.getLog(AMF3Serializer.class);</span>
+<span class="nc" id="L46">	protected static final Log logMore = LogFactory.getLog(AMF3Serializer.class.getName() + &quot;.MORE&quot;);</span>
+
+	protected final boolean debug;
+	protected final boolean debugMore;
+
+<span class="nc" id="L51">    protected final Map&lt;String, Integer&gt; storedStrings = new HashMap&lt;String, Integer&gt;();</span>
+<span class="nc" id="L52">    protected final Map&lt;Object, Integer&gt; storedObjects = new IdentityHashMap&lt;Object, Integer&gt;();</span>
+<span class="nc" id="L53">    protected final Map&lt;String, IndexedJavaClassDescriptor&gt; storedClassDescriptors = new HashMap&lt;String, IndexedJavaClassDescriptor&gt;();</span>
+
+<span class="nc" id="L55">    protected final Converter converter = new DefaultConverter();</span>
+
+<span class="nc" id="L57">    protected final XMLUtil xmlUtil = new XMLUtil();</span>
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Constructor.
+
+    public AMF3Serializer(OutputStream out) {
+<span class="nc" id="L63">        super(out);</span>
+
+<span class="nc" id="L65">        this.debug = log.isDebugEnabled();</span>
+<span class="nc" id="L66">        this.debugMore = logMore.isDebugEnabled();</span>
+
+<span class="nc bnc" id="L68" title="All 2 branches missed.">        if (debugMore) debug(&quot;new AMF3Serializer(out=&quot;, out, &quot;)&quot;);</span>
+<span class="nc" id="L69">    }</span>
+
+    ///////////////////////////////////////////////////////////////////////////
+    // ObjectOutput implementation.
+
+    public void writeObject(Object o) throws IOException {
+<span class="nc bnc" id="L75" title="All 2 branches missed.">    	if (debugMore) debug(&quot;writeObject(o=&quot;, o, &quot;)&quot;);</span>
+
+<span class="nc bnc" id="L77" title="All 2 branches missed.">    	if (o == null)</span>
+<span class="nc" id="L78">            write(AMF3_NULL);</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">        else if (!(o instanceof Externalizable)) {</span>
+
+<span class="nc" id="L81">            o = converter.convertForSerialization(o);</span>
+
+<span class="nc bnc" id="L83" title="All 4 branches missed.">            if (o instanceof String || o instanceof Character)</span>
+<span class="nc" id="L84">                writeAMF3String(o.toString());</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">            else if (o instanceof Boolean)</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">                write(((Boolean)o).booleanValue() ? AMF3_BOOLEAN_TRUE : AMF3_BOOLEAN_FALSE);</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">            else if (o instanceof Number) {</span>
+<span class="nc bnc" id="L88" title="All 6 branches missed.">                if (o instanceof Integer || o instanceof Short || o instanceof Byte)</span>
+<span class="nc" id="L89">                    writeAMF3Integer(((Number)o).intValue());</span>
+                else
+<span class="nc" id="L91">                    writeAMF3Number(((Number)o).doubleValue());</span>
+            }
+<span class="nc bnc" id="L93" title="All 2 branches missed.">            else if (o instanceof Date)</span>
+<span class="nc" id="L94">                writeAMF3Date((Date)o);</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">            else if (o instanceof Calendar)</span>
+<span class="nc" id="L96">                writeAMF3Date(((Calendar)o).getTime());</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">            else if (o instanceof Document)</span>
+<span class="nc" id="L98">                writeAMF3Xml((Document)o);</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">            else if (o instanceof Collection)</span>
+<span class="nc" id="L100">                writeAMF3Collection((Collection&lt;?&gt;)o);</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">            else if (o.getClass().isArray()) {</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">                if (o.getClass().getComponentType() == Byte.TYPE)</span>
+<span class="nc" id="L103">                    writeAMF3ByteArray((byte[])o);</span>
+                else
+<span class="nc" id="L105">                    writeAMF3Array(o);</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">            } else if (o instanceof Map) {</span>
+<span class="nc" id="L107">                writeAMF3AssociativeArray((Map&lt;?, ?&gt;)o);</span>
+            }
+            else
+<span class="nc" id="L110">                writeAMF3Object(o);</span>
+        } else
+<span class="nc" id="L112">            writeAMF3Object(o);</span>
+<span class="nc" id="L113">    }</span>
+
+    ///////////////////////////////////////////////////////////////////////////
+    // AMF3 serialization.
+
+    protected void writeAMF3Integer(int i) throws IOException {
+<span class="nc bnc" id="L119" title="All 2 branches missed.">    	if (debugMore) debug(&quot;writeAMF3Integer(i=&quot;, String.valueOf(i), &quot;)&quot;);</span>
+
+<span class="nc bnc" id="L121" title="All 4 branches missed.">    	if (i &lt; AMF3_INTEGER_MIN || i &gt; AMF3_INTEGER_MAX) {</span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">    		if (debugMore) debug(</span>
+<span class="nc" id="L123">    			&quot;writeAMF3Integer() - &quot;, Integer.valueOf(i),</span>
+    			&quot; is out of AMF3 int range, writing it as a Number&quot;
+    		);
+<span class="nc" id="L126">            writeAMF3Number(i);</span>
+    	} else {
+<span class="nc" id="L128">            write(AMF3_INTEGER);</span>
+<span class="nc" id="L129">            writeAMF3IntegerData(i);</span>
+        }
+<span class="nc" id="L131">    }</span>
+
+    protected void writeAMF3IntegerData(int i) throws IOException {
+<span class="nc bnc" id="L134" title="All 2 branches missed.">    	if (debugMore) debug(&quot;writeAMF3IntegerData(i=&quot;, String.valueOf(i), &quot;)&quot;);</span>
+
+<span class="nc bnc" id="L136" title="All 4 branches missed.">        if (i &lt; AMF3_INTEGER_MIN || i &gt; AMF3_INTEGER_MAX)</span>
+<span class="nc" id="L137">            throw new IllegalArgumentException(&quot;Integer out of range: &quot; + i);</span>
+
+<span class="nc bnc" id="L139" title="All 4 branches missed.">        if (i &lt; 0 || i &gt;= 0x200000) {</span>
+<span class="nc" id="L140">            write(((i &gt;&gt; 22) &amp; 0x7F) | 0x80);</span>
+<span class="nc" id="L141">            write(((i &gt;&gt; 15) &amp; 0x7F) | 0x80);</span>
+<span class="nc" id="L142">            write(((i &gt;&gt; 8) &amp; 0x7F) | 0x80);</span>
+<span class="nc" id="L143">            write(i &amp; 0xFF);</span>
+        } else {
+<span class="nc bnc" id="L145" title="All 2 branches missed.">            if (i &gt;= 0x4000)</span>
+<span class="nc" id="L146">                write(((i &gt;&gt; 14) &amp; 0x7F) | 0x80);</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">            if (i &gt;= 0x80)</span>
+<span class="nc" id="L148">                write(((i &gt;&gt; 7) &amp; 0x7F) | 0x80);</span>
+<span class="nc" id="L149">            write(i &amp; 0x7F);</span>
+        }
+<span class="nc" id="L151">    }</span>
+
+    protected void writeAMF3Number(double d) throws IOException {
+<span class="nc bnc" id="L154" title="All 2 branches missed.">    	if (debugMore) debug(&quot;writeAMF3Number(d=&quot;, Double.valueOf(d), &quot;)&quot;);</span>
+
+<span class="nc" id="L156">    	write(AMF3_NUMBER);</span>
+<span class="nc" id="L157">        writeDouble(d);</span>
+<span class="nc" id="L158">    }</span>
+
+    protected void writeAMF3String(String s) throws IOException {
+<span class="nc bnc" id="L161" title="All 2 branches missed.">    	if (debugMore) debug(&quot;writeAMF3String(s=&quot;, StringUtil.toString(s), &quot;)&quot;);</span>
+
+<span class="nc" id="L163">        write(AMF3_STRING);</span>
+<span class="nc" id="L164">        writeAMF3StringData(s);</span>
+<span class="nc" id="L165">    }</span>
+
+    protected void writeAMF3StringData(String s) throws IOException {
+<span class="nc bnc" id="L168" title="All 2 branches missed.">    	if (debugMore) debug(&quot;writeAMF3StringData(s=&quot;, StringUtil.toString(s), &quot;)&quot;);</span>
+
+<span class="nc bnc" id="L170" title="All 2 branches missed.">    	if (s.length() == 0) {</span>
+<span class="nc" id="L171">            write(0x01);</span>
+<span class="nc" id="L172">            return;</span>
+        }
+
+<span class="nc" id="L175">        int index = indexOfStoredStrings(s);</span>
+
+<span class="nc bnc" id="L177" title="All 2 branches missed.">        if (index &gt;= 0)</span>
+<span class="nc" id="L178">            writeAMF3IntegerData(index &lt;&lt; 1);</span>
+        else {
+<span class="nc" id="L180">            addToStoredStrings(s);</span>
+
+<span class="nc" id="L182">            final int sLength = s.length();</span>
+
+            // Compute and write modified UTF-8 string length.
+<span class="nc" id="L185">            int uLength = 0;</span>
+<span class="nc bnc" id="L186" title="All 2 branches missed.">            for (int i = 0; i &lt; sLength; i++) {</span>
+<span class="nc" id="L187">                int c = s.charAt(i);</span>
+<span class="nc bnc" id="L188" title="All 4 branches missed.">                if ((c &gt;= 0x0001) &amp;&amp; (c &lt;= 0x007F))</span>
+<span class="nc" id="L189">                    uLength++;</span>
+<span class="nc bnc" id="L190" title="All 2 branches missed.">                else if (c &gt; 0x07FF)</span>
+<span class="nc" id="L191">                    uLength += 3;</span>
+                else
+<span class="nc" id="L193">                    uLength += 2;</span>
+            }
+<span class="nc" id="L195">            writeAMF3IntegerData((uLength &lt;&lt; 1) | 0x01);</span>
+
+            // Write modified UTF-8 bytes.
+<span class="nc bnc" id="L198" title="All 2 branches missed.">            for (int i = 0; i &lt; sLength; i++) {</span>
+<span class="nc" id="L199">                int c = s.charAt(i);</span>
+<span class="nc bnc" id="L200" title="All 4 branches missed.">                if ((c &gt;= 0x0001) &amp;&amp; (c &lt;= 0x007F)) {</span>
+<span class="nc" id="L201">                    write(c);</span>
+<span class="nc bnc" id="L202" title="All 2 branches missed.">                } else if (c &gt; 0x07FF) {</span>
+<span class="nc" id="L203">                    write(0xE0 | ((c &gt;&gt; 12) &amp; 0x0F));</span>
+<span class="nc" id="L204">                    write(0x80 | ((c &gt;&gt;  6) &amp; 0x3F));</span>
+<span class="nc" id="L205">                    write(0x80 | ((c &gt;&gt;  0) &amp; 0x3F));</span>
+                } else {
+<span class="nc" id="L207">                    write(0xC0 | ((c &gt;&gt;  6) &amp; 0x1F));</span>
+<span class="nc" id="L208">                    write(0x80 | ((c &gt;&gt;  0) &amp; 0x3F));</span>
+                }
+            }
+        }
+<span class="nc" id="L212">    }</span>
+
+    protected void writeAMF3Xml(Document doc) throws IOException {
+<span class="nc bnc" id="L215" title="All 2 branches missed.">    	if (debugMore) debug(&quot;writeAMF3Xml(doc=&quot;, doc, &quot;)&quot;);</span>
+
+<span class="nc" id="L217">        write(AMF3_XML);</span>
+
+<span class="nc" id="L219">        int index = indexOfStoredObjects(doc);</span>
+<span class="nc bnc" id="L220" title="All 2 branches missed.">        if (index &gt;= 0)</span>
+<span class="nc" id="L221">            writeAMF3IntegerData(index &lt;&lt; 1);</span>
+        else {
+<span class="nc" id="L223">            addToStoredObjects(doc);</span>
+
+<span class="nc" id="L225">            byte[] bytes = xmlUtil.toString(doc).getBytes(&quot;UTF-8&quot;);</span>
+<span class="nc" id="L226">            writeAMF3IntegerData((bytes.length &lt;&lt; 1) | 0x01);</span>
+<span class="nc" id="L227">            write(bytes);</span>
+        }
+<span class="nc" id="L229">    }</span>
+
+    protected void writeAMF3Date(Date date) throws IOException {
+<span class="nc bnc" id="L232" title="All 2 branches missed.">    	if (debugMore) debug(&quot;writeAMF3Date(date=&quot;, date, &quot;)&quot;);</span>
+
+<span class="nc" id="L234">    	write(AMF3_DATE);</span>
+
+<span class="nc" id="L236">        int index = indexOfStoredObjects(date);</span>
+<span class="nc bnc" id="L237" title="All 2 branches missed.">        if (index &gt;= 0)</span>
+<span class="nc" id="L238">            writeAMF3IntegerData(index &lt;&lt; 1);</span>
+        else {
+<span class="nc" id="L240">            addToStoredObjects(date);</span>
+<span class="nc" id="L241">            writeAMF3IntegerData(0x01);</span>
+<span class="nc" id="L242">            writeDouble(date.getTime());</span>
+        }
+<span class="nc" id="L244">    }</span>
+
+    protected void writeAMF3Array(Object array) throws IOException {
+<span class="nc bnc" id="L247" title="All 2 branches missed.">    	if (debugMore) debug(&quot;writeAMF3Array(array=&quot;, array, &quot;)&quot;);</span>
+
+<span class="nc" id="L249">        write(AMF3_ARRAY);</span>
+
+<span class="nc" id="L251">        int index = indexOfStoredObjects(array);</span>
+<span class="nc bnc" id="L252" title="All 2 branches missed.">        if (index &gt;= 0)</span>
+<span class="nc" id="L253">            writeAMF3IntegerData(index &lt;&lt; 1);</span>
+        else {
+<span class="nc" id="L255">            addToStoredObjects(array);</span>
+
+<span class="nc" id="L257">            int length = Array.getLength(array);</span>
+<span class="nc" id="L258">            writeAMF3IntegerData(length &lt;&lt; 1 | 0x01);</span>
+<span class="nc" id="L259">            write(0x01);</span>
+<span class="nc bnc" id="L260" title="All 2 branches missed.">            for (int i = 0; i &lt; length; i++)</span>
+<span class="nc" id="L261">                writeObject(Array.get(array, i));</span>
+        }
+<span class="nc" id="L263">    }</span>
+
+    protected void writeAMF3AssociativeArray(Map&lt;?, ?&gt; map) throws IOException {
+<span class="nc bnc" id="L266" title="All 2 branches missed.">        if (debugMore) debug(&quot;writeAMF3AssociativeArray(array=&quot;, map, &quot;)&quot;);</span>
+
+<span class="nc" id="L268">        write(AMF3_ARRAY);</span>
+
+<span class="nc" id="L270">        int index = indexOfStoredObjects(map);</span>
+<span class="nc bnc" id="L271" title="All 2 branches missed.">        if (index &gt;= 0) {</span>
+<span class="nc" id="L272">            writeAMF3IntegerData(index &lt;&lt; 1);</span>
+        } else {
+<span class="nc" id="L274">            addToStoredObjects(map);</span>
+
+<span class="nc" id="L276">            write(0x01);</span>
+
+<span class="nc bnc" id="L278" title="All 2 branches missed.">            for (Object key : map.keySet()) {</span>
+<span class="nc" id="L279">                writeAMF3StringData(key.toString());</span>
+<span class="nc" id="L280">                writeObject(map.get(key));</span>
+<span class="nc" id="L281">            }</span>
+<span class="nc" id="L282">            writeAMF3StringData(&quot;&quot;);</span>
+        }
+<span class="nc" id="L284">    }</span>
+
+    protected void writeAMF3ByteArray(byte[] bytes) throws IOException {
+<span class="nc bnc" id="L287" title="All 2 branches missed.">    	if (debugMore) debug(&quot;writeAMF3ByteArray(bytes=&quot;, bytes, &quot;)&quot;);</span>
+
+<span class="nc" id="L289">        write(AMF3_BYTEARRAY);</span>
+
+<span class="nc" id="L291">        int index = indexOfStoredObjects(bytes);</span>
+<span class="nc bnc" id="L292" title="All 2 branches missed.">        if (index &gt;= 0)</span>
+<span class="nc" id="L293">            writeAMF3IntegerData(index &lt;&lt; 1);</span>
+        else {
+<span class="nc" id="L295">            addToStoredObjects(bytes);</span>
+
+<span class="nc" id="L297">            writeAMF3IntegerData(bytes.length &lt;&lt; 1 | 0x01);</span>
+<span class="nc" id="L298">            write(bytes);</span>
+        }
+<span class="nc" id="L300">    }</span>
+
+    protected void writeAMF3Collection(Collection&lt;?&gt; c) throws IOException {
+<span class="nc bnc" id="L303" title="All 2 branches missed.">    	if (debugMore) debug(&quot;writeAMF3Collection(c=&quot;, c, &quot;)&quot;);</span>
+
+<span class="nc bnc" id="L305" title="All 2 branches missed.">        ArrayCollection ac = (c instanceof ArrayCollection ? (ArrayCollection)c : new ArrayCollection(c));</span>
+<span class="nc" id="L306">        writeAMF3Object(ac);</span>
+<span class="nc" id="L307">    }</span>
+
+    protected void writeAMF3Object(Object o) throws IOException {
+<span class="nc bnc" id="L310" title="All 2 branches missed.">    	if (debug) debug(&quot;writeAMF3Object(o=&quot;, o, &quot;)...&quot;);</span>
+
+<span class="nc" id="L312">        write(AMF3_OBJECT);</span>
+
+<span class="nc" id="L314">        int index = indexOfStoredObjects(o);</span>
+<span class="nc bnc" id="L315" title="All 2 branches missed.">        if (index &gt;= 0)</span>
+<span class="nc" id="L316">            writeAMF3IntegerData(index &lt;&lt; 1);</span>
+        else {
+<span class="nc" id="L318">            addToStoredObjects(o);</span>
+
+            //ClassGetter classGetter = context.getGraniteConfig().getClassGetter();
+<span class="nc" id="L321">            ClassGetter classGetter = new DefaultClassGetter();</span>
+
+<span class="nc bnc" id="L323" title="All 2 branches missed.">            if (debug) debug(&quot;writeAMF3Object() - classGetter=&quot;, classGetter);</span>
+
+<span class="nc" id="L325">            Class&lt;?&gt; oClass = classGetter.getClass(o);</span>
+<span class="nc bnc" id="L326" title="All 2 branches missed.">            if (debug) debug(&quot;writeAMF3Object() - oClass=&quot;, oClass);</span>
+
+<span class="nc" id="L328">            JavaClassDescriptor desc = null;</span>
+
+            // write class description.
+<span class="nc" id="L331">            IndexedJavaClassDescriptor iDesc = getFromStoredClassDescriptors(oClass);</span>
+<span class="nc bnc" id="L332" title="All 2 branches missed.">            if (iDesc != null) {</span>
+<span class="nc" id="L333">                desc = iDesc.getDescriptor();</span>
+<span class="nc" id="L334">                writeAMF3IntegerData(iDesc.getIndex() &lt;&lt; 2 | 0x01);</span>
+            }
+            else {
+<span class="nc" id="L337">            	iDesc = addToStoredClassDescriptors(oClass);</span>
+<span class="nc" id="L338">                desc = iDesc.getDescriptor();</span>
+                
+<span class="nc" id="L340">                LazyUtil.removeLazyFields(desc, o);</span>
+
+<span class="nc" id="L342">                writeAMF3IntegerData((desc.getPropertiesCount() &lt;&lt; 4) | (desc.getEncoding() &lt;&lt; 2) | 0x03);</span>
+<span class="nc" id="L343">                writeAMF3StringData(desc.getName());</span>
+
+<span class="nc bnc" id="L345" title="All 2 branches missed.">                for (int i = 0; i &lt; desc.getPropertiesCount(); i++)</span>
+<span class="nc" id="L346">                    writeAMF3StringData(desc.getPropertyName(i));</span>
+            }
+<span class="nc bnc" id="L348" title="All 2 branches missed.">            if (debug) debug(&quot;writeAMF3Object() - desc=&quot;, desc);</span>
+
+            // write object content.
+<span class="nc bnc" id="L351" title="All 2 branches missed.">            if (desc.isExternalizable()) {</span>
+<span class="nc" id="L352">                Externalizer externalizer = desc.getExternalizer();</span>
+
+<span class="nc bnc" id="L354" title="All 2 branches missed.">                if (externalizer != null) {</span>
+<span class="nc bnc" id="L355" title="All 2 branches missed.">                    if (debug) debug(&quot;writeAMF3Object() - using externalizer=&quot;, externalizer);</span>
+                    try {
+<span class="nc" id="L357">                        externalizer.writeExternal(o, this);</span>
+<span class="nc" id="L358">                    } catch (IOException e) {</span>
+<span class="nc" id="L359">                        throw e;</span>
+<span class="nc" id="L360">                    } catch (Exception e) {</span>
+<span class="nc" id="L361">                        throw new RuntimeException(&quot;Could not externalize object: &quot; + o, e);</span>
+<span class="nc" id="L362">                    }</span>
+                }
+                else {
+<span class="nc bnc" id="L365" title="All 2 branches missed.">                    if (debug) debug(&quot;writeAMF3Object() - legacy Externalizable=&quot;, o);</span>
+<span class="nc" id="L366">                    ((Externalizable)o).writeExternal(this);</span>
+                }
+<span class="nc" id="L368">            }</span>
+            else {
+<span class="nc bnc" id="L370" title="All 2 branches missed.">            	if (debug) debug(&quot;writeAMF3Object() - writing defined properties...&quot;);</span>
+<span class="nc bnc" id="L371" title="All 2 branches missed.">                for (int i = 0; i &lt; desc.getPropertiesCount(); i++) {</span>
+<span class="nc" id="L372">                    Object obj = desc.getPropertyValue(i, o);</span>
+                    /*if (debug) debug(
+                    	&quot;writeAMF3Object() - writing defined property: &quot;, desc.getPropertyName(i),
+                    	&quot;=&quot;, obj
+                    );*/
+                    
+<span class="nc bnc" id="L378" title="All 2 branches missed.">                    if (LazyUtil.isProxy(obj)) {</span>
+<span class="nc" id="L379">                    	writeObject(null);</span>
+<span class="nc" id="L380">                    	continue;</span>
+                    } 
+<span class="nc" id="L382">                    LazyUtil.removeLazyFields(desc, o);</span>
+                    
+<span class="nc" id="L384">                    writeObject(obj);</span>
+                }
+
+<span class="nc bnc" id="L387" title="All 2 branches missed.">                if (desc.isDynamic()) {</span>
+<span class="nc bnc" id="L388" title="All 2 branches missed.">                	if (debug) debug(&quot;writeAMF3Object() - writing dynamic properties...&quot;);</span>
+<span class="nc" id="L389">                    Map&lt;?, ?&gt; oMap = (Map&lt;?, ?&gt;)o;</span>
+<span class="nc bnc" id="L390" title="All 2 branches missed.">                    for (Map.Entry&lt;?, ?&gt; entry : oMap.entrySet()) {</span>
+<span class="nc" id="L391">                        Object key = entry.getKey();</span>
+<span class="nc bnc" id="L392" title="All 2 branches missed.">                        if (key != null) {</span>
+<span class="nc" id="L393">                            String propertyName = key.toString();</span>
+<span class="nc bnc" id="L394" title="All 2 branches missed.">                            if (propertyName.length() &gt; 0) {</span>
+<span class="nc bnc" id="L395" title="All 2 branches missed.">                            	if (debug) debug(</span>
+                            		&quot;writeAMF3Object() - writing dynamic property: &quot;, propertyName,
+<span class="nc" id="L397">                            		&quot;=&quot;, entry.getValue()</span>
+                            	);
+<span class="nc" id="L399">                                writeAMF3StringData(propertyName);</span>
+<span class="nc" id="L400">                                writeObject(entry.getValue());</span>
+                            }
+                        }
+<span class="nc" id="L403">                    }</span>
+<span class="nc" id="L404">                    writeAMF3StringData(&quot;&quot;);</span>
+                }
+            }
+        }
+
+<span class="nc bnc" id="L409" title="All 2 branches missed.">        if (debug) debug(&quot;writeAMF3Object(o=&quot;, o, &quot;) - Done.&quot;);</span>
+<span class="nc" id="L410">    }</span>
+    
+    ///////////////////////////////////////////////////////////////////////////
+    // Cached objects methods.
+
+    protected void addToStoredStrings(String s) {
+<span class="nc bnc" id="L416" title="All 2 branches missed.">        if (!storedStrings.containsKey(s)) {</span>
+<span class="nc" id="L417">        	Integer index = Integer.valueOf(storedStrings.size());</span>
+<span class="nc bnc" id="L418" title="All 2 branches missed.">        	if (debug) debug(</span>
+<span class="nc" id="L419">        		&quot;addToStoredStrings(s=&quot;, StringUtil.toString(s), &quot;) at index=&quot;, index.toString()</span>
+        	);
+<span class="nc" id="L421">            storedStrings.put(s, index);</span>
+        }
+<span class="nc" id="L423">    }</span>
+
+    protected int indexOfStoredStrings(String s) {
+<span class="nc" id="L426">        Integer index = storedStrings.get(s);</span>
+<span class="nc bnc" id="L427" title="All 2 branches missed.">        if (debug) debug(</span>
+<span class="nc" id="L428">        	&quot;indexOfStoredStrings(s=&quot;, StringUtil.toString(s), &quot;) -&gt; &quot;,</span>
+<span class="nc bnc" id="L429" title="All 2 branches missed.">        	String.valueOf((index != null ? index.intValue() : -1))</span>
+        );
+<span class="nc bnc" id="L431" title="All 2 branches missed.">        return (index != null ? index.intValue() : -1);</span>
+    }
+
+    protected void addToStoredObjects(Object o) {
+<span class="nc bnc" id="L435" title="All 4 branches missed.">        if (o != null &amp;&amp; !storedObjects.containsKey(o)) {</span>
+<span class="nc" id="L436">        	Integer index = Integer.valueOf(storedObjects.size());</span>
+<span class="nc bnc" id="L437" title="All 2 branches missed.">        	if (debug) debug(&quot;addToStoredObjects(o=&quot;, o, &quot;) at index=&quot;, index.toString());</span>
+<span class="nc" id="L438">            storedObjects.put(o, index);</span>
+        }
+<span class="nc" id="L440">    }</span>
+
+    protected int indexOfStoredObjects(Object o) {
+<span class="nc" id="L443">        Integer index = storedObjects.get(o);</span>
+<span class="nc bnc" id="L444" title="All 2 branches missed.">        if (debug) debug(</span>
+        	&quot;indexOfStoredObjects(o=&quot;, o, &quot;) -&gt; &quot;,
+<span class="nc bnc" id="L446" title="All 2 branches missed.">        	String.valueOf((index != null ? index.intValue() : -1))</span>
+        );
+<span class="nc bnc" id="L448" title="All 2 branches missed.">        return (index != null ? index.intValue() : -1);</span>
+    }
+
+    protected IndexedJavaClassDescriptor addToStoredClassDescriptors(Class&lt;?&gt; clazz) {
+<span class="nc" id="L452">        final String name = JavaClassDescriptor.getClassName(clazz);</span>
+
+<span class="nc bnc" id="L454" title="All 2 branches missed.">        if (debug) debug(&quot;addToStoredClassDescriptors(clazz=&quot;, clazz, &quot;)&quot;);</span>
+
+<span class="nc bnc" id="L456" title="All 2 branches missed.">        if (storedClassDescriptors.containsKey(name))</span>
+<span class="nc" id="L457">            throw new RuntimeException(</span>
+            	&quot;Descriptor of \&quot;&quot; + name + &quot;\&quot; is already stored at index: &quot; +
+<span class="nc" id="L459">            	getFromStoredClassDescriptors(clazz).getIndex()</span>
+            );
+
+        // find custom class descriptor and instantiate if any
+<span class="nc" id="L463">        JavaClassDescriptor desc = null;</span>
+
+/*
+        Class&lt;? extends JavaClassDescriptor&gt; descriptorType
+        	= context.getGraniteConfig().getJavaDescriptor(clazz.getName());
+        if (descriptorType != null) {
+            Class&lt;?&gt;[] argsDef = new Class[]{Class.class};
+            Object[] argsVal = new Object[]{clazz};
+            try {
+                desc = ClassUtil.newInstance(descriptorType, argsDef, argsVal);
+            } catch (Exception e) {
+                throw new RuntimeException(&quot;Could not instantiate Java descriptor: &quot; + descriptorType);
+            }
+        }
+*/
+
+<span class="nc bnc" id="L479" title="All 2 branches missed.">        if (desc == null)</span>
+<span class="nc" id="L480">            desc = new DefaultJavaClassDescriptor(clazz);</span>
+
+<span class="nc" id="L482">        IndexedJavaClassDescriptor iDesc = new IndexedJavaClassDescriptor(storedClassDescriptors.size(), desc);</span>
+
+<span class="nc bnc" id="L484" title="All 2 branches missed.">        if (debug) debug(&quot;addToStoredClassDescriptors() - putting: name=&quot;, name, &quot;, iDesc=&quot;, iDesc);</span>
+
+<span class="nc" id="L486">        storedClassDescriptors.put(name, iDesc);</span>
+
+<span class="nc" id="L488">        return iDesc;</span>
+    }
+
+    protected IndexedJavaClassDescriptor getFromStoredClassDescriptors(Class&lt;?&gt; clazz) {
+<span class="nc bnc" id="L492" title="All 2 branches missed.">    	if (debug) debug(&quot;getFromStoredClassDescriptors(clazz=&quot;, clazz, &quot;)&quot;);</span>
+
+<span class="nc" id="L494">    	String name = JavaClassDescriptor.getClassName(clazz);</span>
+<span class="nc" id="L495">    	IndexedJavaClassDescriptor iDesc = storedClassDescriptors.get(name);</span>
+
+<span class="nc bnc" id="L497" title="All 2 branches missed.">    	if (debug) debug(&quot;getFromStoredClassDescriptors() -&gt; &quot;, iDesc);</span>
+
+<span class="nc" id="L499">    	return iDesc;</span>
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Utilities.
+
+    protected void debug(Object... msgs) {
+<span class="nc" id="L506">    	debug(null, msgs);</span>
+<span class="nc" id="L507">    }</span>
+
+    protected void debug(Throwable t, Object... msgs) {
+<span class="nc" id="L510">		String message = &quot;&quot;;</span>
+<span class="nc bnc" id="L511" title="All 4 branches missed.">		if (msgs != null &amp;&amp; msgs.length &gt; 0) {</span>
+<span class="nc bnc" id="L512" title="All 2 branches missed.">			if (msgs.length == 1)</span>
+<span class="nc" id="L513">				message = String.valueOf(msgs[0]);</span>
+			else {
+<span class="nc" id="L515">	    		StringBuilder sb = new StringBuilder();</span>
+<span class="nc bnc" id="L516" title="All 2 branches missed.">	    		for (Object o : msgs) {</span>
+<span class="nc bnc" id="L517" title="All 2 branches missed.">	    			if (o instanceof String)</span>
+<span class="nc" id="L518">	    				sb.append(o);</span>
+	    			else
+<span class="nc" id="L520">	    				sb.append(StringUtil.toString(o));</span>
+	    		}
+<span class="nc" id="L522">	    		message = sb.toString();</span>
+			}
+		}
+<span class="nc bnc" id="L525" title="All 2 branches missed.">		if (t != null)</span>
+<span class="nc" id="L526">			log.debug(message, t);</span>
+		else
+<span class="nc" id="L528">			log.debug(message);</span>
+<span class="nc" id="L529">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

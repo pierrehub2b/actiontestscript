@@ -1,0 +1,950 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DesktopDriver.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.executor.drivers.desktop</a> &gt; <span class="el_source">DesktopDriver.java</span></div><h1>DesktopDriver.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.executor.drivers.desktop;
+
+import java.awt.Rectangle;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Point;
+import org.openqa.selenium.remote.RemoteWebDriver;
+
+import com.ats.element.AtsBaseElement;
+import com.ats.element.FoundElement;
+import com.ats.element.TestElement;
+import com.ats.executor.ActionStatus;
+import com.ats.executor.ScriptStatus;
+import com.ats.executor.TestBound;
+import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.DriverManager;
+import com.ats.executor.drivers.DriverProcess;
+import com.ats.executor.drivers.engines.DesktopDriverEngine;
+import com.ats.generator.objects.MouseDirectionData;
+import com.ats.generator.variables.CalculatedProperty;
+import com.ats.recorder.ReportSummary;
+import com.ats.script.ScriptHeader;
+import com.ats.tools.logger.ExecutionLogger;
+import com.exadel.flamingo.flex.messaging.amf.io.AMF3Deserializer;
+import com.google.gson.Gson;
+
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.OkHttpClient.Builder;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
+public class DesktopDriver extends RemoteWebDriver {
+
+	private static final int TIME_OUT = 60;
+
+	private List&lt;FoundElement&gt; elementMapLocation;
+
+	private String driverHost;
+	private int driverPort;
+
+	private DesktopDriverEngine engine;
+
+	private String driverUrl;
+
+	private OkHttpClient client;
+
+	private String driverVersion;
+
+	private String osName;
+	private String osVersion;
+	private String osBuildVersion;
+
+	private String countryCode;
+	private String machineName;
+	private String screenWidth;
+	private String screenHeight;
+	private String driveLetter;
+
+	private String diskTotalSize;
+	private String diskFreeSpace;
+
+	private String cpuArchitecture;
+	private String cpuCores;
+	private String cpuName;
+	private String cpuSocket;
+	private String cpuMaxClock;
+
+	private String dotNetVersion;
+
+<span class="nc" id="L103">	private final static Comparator&lt;FoundElement&gt; compareElementBySize = Comparator</span>
+<span class="nc" id="L104">			.comparing(FoundElement::getWidth)</span>
+<span class="nc" id="L105">			.thenComparing(FoundElement::getHeight);</span>
+
+<span class="nc" id="L107">	public DesktopDriver() {}</span>
+
+<span class="nc" id="L109">	public DesktopDriver(ActionStatus status, DriverManager driverManager) {</span>
+
+<span class="nc" id="L111">		final DriverProcess desktopDriverProcess = driverManager.getDesktopDriver(status);</span>
+
+<span class="nc bnc" id="L113" title="All 2 branches missed.">		if(status.isPassed()) {</span>
+
+<span class="nc" id="L115">			this.driverHost = desktopDriverProcess.getDriverServerUrl().getHost();</span>
+<span class="nc" id="L116">			this.driverPort = desktopDriverProcess.getDriverServerUrl().getPort();</span>
+<span class="nc" id="L117">			this.driverUrl = &quot;http://&quot; + getDriverHost() + &quot;:&quot; + getDriverPort();</span>
+
+<span class="nc" id="L119">			this.client = new Builder().</span>
+<span class="nc" id="L120">					cache(null)</span>
+<span class="nc" id="L121">					.connectTimeout(TIME_OUT, TimeUnit.SECONDS)</span>
+<span class="nc" id="L122">					.writeTimeout(TIME_OUT, TimeUnit.SECONDS)</span>
+<span class="nc" id="L123">					.readTimeout(TIME_OUT, TimeUnit.SECONDS)</span>
+<span class="nc" id="L124">					.build();</span>
+
+<span class="nc" id="L126">			int maxTry = 10;</span>
+<span class="nc" id="L127">			DesktopResponse resp = sendRequestCommand(CommandType.Driver, DriverType.Capabilities);</span>
+<span class="nc bnc" id="L128" title="All 6 branches missed.">			while (maxTry &gt; 0 &amp;&amp; (resp == null || resp.errorCode == -999)) {</span>
+				try {
+<span class="nc" id="L130">					Thread.sleep(500);</span>
+<span class="nc" id="L131">				} catch (InterruptedException e) {}</span>
+
+<span class="nc" id="L133">				maxTry--;</span>
+<span class="nc" id="L134">				resp = sendRequestCommand(CommandType.Driver, DriverType.Capabilities);</span>
+			}
+
+<span class="nc bnc" id="L137" title="All 2 branches missed.">			if(resp.errorCode != -999) {</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">				for (DesktopData data : resp.data) {</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">					if(&quot;BuildNumber&quot;.equals(data.getName())) {</span>
+<span class="nc" id="L140">						this.osBuildVersion = data.getValue();</span>
+<span class="nc bnc" id="L141" title="All 2 branches missed.">					}else if(&quot;Name&quot;.equals(data.getName())) {</span>
+<span class="nc" id="L142">						this.osName = data.getValue();</span>
+<span class="nc bnc" id="L143" title="All 2 branches missed.">					}else if(&quot;Version&quot;.equals(data.getName())) {</span>
+<span class="nc" id="L144">						this.osVersion = data.getValue();</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">					}else if(&quot;DriverVersion&quot;.equals(data.getName())) {</span>
+<span class="nc" id="L146">						this.driverVersion = data.getValue();</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">					}else if(&quot;CountryCode&quot;.equals(data.getName())) {</span>
+<span class="nc" id="L148">						this.countryCode = data.getValue();</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">					}else if(&quot;MachineName&quot;.equals(data.getName())) {</span>
+<span class="nc" id="L150">						this.machineName = data.getValue();</span>
+<span class="nc bnc" id="L151" title="All 2 branches missed.">					}else if(&quot;ScreenWidth&quot;.equals(data.getName())) {</span>
+<span class="nc" id="L152">						this.screenWidth = data.getValue();</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">					}else if(&quot;ScreenHeight&quot;.equals(data.getName())) {</span>
+<span class="nc" id="L154">						this.screenHeight= data.getValue();</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">					}else if(&quot;DriveLetter&quot;.equals(data.getName())) {</span>
+<span class="nc" id="L156">						this.driveLetter = data.getValue();</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">					}else if(&quot;DiskTotalSize&quot;.equals(data.getName())) {</span>
+<span class="nc" id="L158">						this.diskTotalSize = data.getValue();</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">					}else if(&quot;DiskFreeSpace&quot;.equals(data.getName())) {</span>
+<span class="nc" id="L160">						this.diskFreeSpace = data.getValue();</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">					}else if(&quot;CpuSocket&quot;.equals(data.getName())) {</span>
+<span class="nc" id="L162">						this.cpuSocket = data.getValue();</span>
+<span class="nc bnc" id="L163" title="All 2 branches missed.">					}else if(&quot;CpuName&quot;.equals(data.getName())) {</span>
+<span class="nc" id="L164">						this.cpuName = data.getValue();</span>
+<span class="nc bnc" id="L165" title="All 2 branches missed.">					}else if(&quot;CpuArchitecture&quot;.equals(data.getName())) {</span>
+<span class="nc" id="L166">						this.cpuArchitecture = data.getValue();</span>
+<span class="nc bnc" id="L167" title="All 2 branches missed.">					}else if(&quot;CpuMaxClockSpeed&quot;.equals(data.getName())) {</span>
+<span class="nc" id="L168">						this.cpuMaxClock = data.getValue();</span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">					}else if(&quot;CpuCores&quot;.equals(data.getName())) {</span>
+<span class="nc" id="L170">						this.cpuCores = data.getValue();</span>
+<span class="nc bnc" id="L171" title="All 2 branches missed.">					}else if(&quot;DotNetVersion&quot;.equals(data.getName())) {</span>
+<span class="nc" id="L172">						this.dotNetVersion = data.getValue();</span>
+					}
+<span class="nc" id="L174">				}</span>
+<span class="nc" id="L175">				status.setPassed(true);</span>
+			}else {
+<span class="nc" id="L177">				status.setError(ActionStatus.CHANNEL_START_ERROR, &quot;unable to connect to desktop driver, check DotNET and OS version ...&quot;);</span>
+			}
+		}
+<span class="nc" id="L180">	}</span>
+
+	public Double getScreenWidth() {
+		try {
+<span class="nc" id="L184">			return Double.parseDouble(screenWidth);</span>
+<span class="nc" id="L185">		}catch(NumberFormatException e) {}</span>
+<span class="nc" id="L186">		return 0D;</span>
+	}
+
+	public Double getScreenHeight() {
+		try {
+<span class="nc" id="L191">			return Double.parseDouble(screenHeight);</span>
+<span class="nc" id="L192">		}catch(NumberFormatException e) {}</span>
+<span class="nc" id="L193">		return 0D;</span>
+	}
+
+	public TestBound getScreenBound() {
+<span class="nc" id="L197">		return new TestBound(0D, 0D, getScreenWidth(), getScreenHeight());</span>
+	}
+
+	public void setEngine(DesktopDriverEngine engine) {
+<span class="nc" id="L201">		this.engine = engine;</span>
+<span class="nc" id="L202">		engine.setDriver(this);</span>
+<span class="nc" id="L203">	}</span>
+
+	public DesktopDriverEngine getEngine() {
+<span class="nc" id="L206">		return engine;</span>
+	}
+
+	public String getDriverVersion() {
+<span class="nc" id="L210">		return driverVersion;</span>
+	}
+
+	public String getOsBuildVersion() {
+<span class="nc" id="L214">		return osBuildVersion;</span>
+	}
+
+	public String getOsName() {
+<span class="nc" id="L218">		return osName;</span>
+	}
+
+	public String getOsVersion() {
+<span class="nc" id="L222">		return osVersion;</span>
+	}
+
+	public String getCountryCode() {
+<span class="nc" id="L226">		return countryCode;</span>
+	}
+
+	public String getMachineName() {
+<span class="nc" id="L230">		return machineName;</span>
+	}
+
+	public String getScreenResolution() {
+<span class="nc" id="L234">		return screenWidth + &quot; x &quot; + screenHeight;</span>
+	}
+
+	public String getDriveLetter() {
+<span class="nc" id="L238">		return driveLetter;</span>
+	}
+
+	public String getDiskTotalSize() {
+<span class="nc" id="L242">		return diskTotalSize;</span>
+	}
+
+	public String getDiskFreeSpace() {
+<span class="nc" id="L246">		return diskFreeSpace;</span>
+	}
+
+	public String getCpuArchitecture() {
+<span class="nc" id="L250">		return cpuArchitecture;</span>
+	}
+
+	public String getCpuCores() {
+<span class="nc" id="L254">		return cpuCores;</span>
+	}
+
+	public String getCpuName() {
+<span class="nc" id="L258">		return cpuName;</span>
+	}
+
+	public String getCpuSocket() {
+<span class="nc" id="L262">		return cpuSocket;</span>
+	}
+
+	public String getCpuMaxClock() {
+<span class="nc" id="L266">		return cpuMaxClock;</span>
+	}	
+
+	public String getDotNetVersion() {
+<span class="nc" id="L270">		return dotNetVersion;</span>
+	}
+
+	//------------------------------------------------------------------------------------------------------------
+	// Enum types
+	//------------------------------------------------------------------------------------------------------------
+
+<span class="nc" id="L277">	private enum CommandType</span>
+	{
+<span class="nc" id="L279">		Driver (0),</span>
+<span class="nc" id="L280">		Record (1),</span>
+<span class="nc" id="L281">		Window (2),</span>
+<span class="nc" id="L282">		Element (3),</span>
+<span class="nc" id="L283">		Keyboard (4),</span>
+<span class="nc" id="L284">		Mouse (5);</span>
+
+		private final int type;
+<span class="nc" id="L287">		CommandType(int value){</span>
+<span class="nc" id="L288">			this.type = value;</span>
+<span class="nc" id="L289">		}</span>
+
+		@Override
+<span class="nc" id="L292">		public String toString(){ return this.type + &quot;&quot;; }</span>
+	};
+
+<span class="nc" id="L295">	private enum DriverType</span>
+	{
+<span class="nc" id="L297">		Capabilities (0),</span>
+<span class="nc" id="L298">		Application (1),</span>
+<span class="nc" id="L299">		CloseWindows (2),</span>
+<span class="nc" id="L300">		Close (3);</span>
+
+		private final int type;
+<span class="nc" id="L303">		DriverType(int value){</span>
+<span class="nc" id="L304">			this.type = value;</span>
+<span class="nc" id="L305">		}</span>
+
+		@Override
+<span class="nc" id="L308">		public String toString(){ return this.type + &quot;&quot;; }</span>
+	};
+
+<span class="nc" id="L311">	private enum MouseType</span>
+	{
+<span class="nc" id="L313">		Move (0),</span>
+<span class="nc" id="L314">		Click (1),</span>
+<span class="nc" id="L315">		RightClick (2),</span>
+<span class="nc" id="L316">		MiddleClick (3),</span>
+<span class="nc" id="L317">		DoubleClick (4),</span>
+<span class="nc" id="L318">		Down (5),</span>
+<span class="nc" id="L319">		Release (6),</span>
+<span class="nc" id="L320">		Wheel (7),</span>
+<span class="nc" id="L321">		Drag (8);</span>
+
+		private final int type;
+<span class="nc" id="L324">		MouseType(int value){</span>
+<span class="nc" id="L325">			this.type = value;</span>
+<span class="nc" id="L326">		}</span>
+
+		@Override
+<span class="nc" id="L329">		public String toString(){ return this.type + &quot;&quot;; }</span>
+	};
+
+<span class="nc" id="L332">	private enum KeyType</span>
+	{
+<span class="nc" id="L334">		Clear (0),</span>
+<span class="nc" id="L335">		Enter (1),</span>
+<span class="nc" id="L336">		Down (2),</span>
+<span class="nc" id="L337">		Release (3);</span>
+
+		private final int type;
+<span class="nc" id="L340">		KeyType(int value){</span>
+<span class="nc" id="L341">			this.type = value;</span>
+<span class="nc" id="L342">		}</span>
+
+		@Override
+<span class="nc" id="L345">		public String toString(){ return this.type + &quot;&quot;; }</span>
+	};
+
+<span class="nc" id="L348">	private enum WindowType</span>
+	{
+<span class="nc" id="L350">		Title (0),</span>
+<span class="nc" id="L351">		Handle(1),</span>
+<span class="nc" id="L352">		List (2),</span>
+<span class="nc" id="L353">		Move (3),</span>
+<span class="nc" id="L354">		Resize (4),</span>
+<span class="nc" id="L355">		ToFront (5),</span>
+<span class="nc" id="L356">		Switch (6),</span>
+<span class="nc" id="L357">		Close (7),</span>
+<span class="nc" id="L358">		Url (8),</span>
+<span class="nc" id="L359">		Keys(9),</span>
+<span class="nc" id="L360">		State(10);</span>
+
+		private final int type;
+<span class="nc" id="L363">		WindowType(int value){</span>
+<span class="nc" id="L364">			this.type = value;</span>
+<span class="nc" id="L365">		}</span>
+
+		@Override
+<span class="nc" id="L368">		public String toString(){ return this.type + &quot;&quot;; }</span>
+	};
+
+<span class="nc" id="L371">	private enum ElementType</span>
+	{
+<span class="nc" id="L373">		Childs (0),</span>
+<span class="nc" id="L374">		Parents (1),</span>
+<span class="nc" id="L375">		Find (2),</span>
+<span class="nc" id="L376">		Attributes (3),</span>
+<span class="nc" id="L377">		Select (4),</span>
+<span class="nc" id="L378">		FromPoint(5),</span>
+<span class="nc" id="L379">		Script(6),</span>
+<span class="nc" id="L380">		Root(7),</span>
+<span class="nc" id="L381">		LoadTree(8),</span>
+<span class="nc" id="L382">		ListItems(9), </span>
+<span class="nc" id="L383">		DialogBox(10),</span>
+<span class="nc" id="L384">		SetValue(11);</span>
+
+		private final int type;
+<span class="nc" id="L387">		ElementType(int value){</span>
+<span class="nc" id="L388">			this.type = value;</span>
+<span class="nc" id="L389">		}</span>
+
+		@Override
+<span class="nc" id="L392">		public String toString(){ return this.type + &quot;&quot;; }</span>
+	};
+
+<span class="nc" id="L395">	private enum RecordType</span>
+	{
+<span class="nc" id="L397">		Stop (0),</span>
+<span class="nc" id="L398">		Screenshot (1),</span>
+<span class="nc" id="L399">		Start (2),</span>
+<span class="nc" id="L400">		Create (3),</span>
+<span class="nc" id="L401">		Image (4),</span>
+<span class="nc" id="L402">		Value (5),</span>
+<span class="nc" id="L403">		Data(6),</span>
+<span class="nc" id="L404">		Status(7),</span>
+<span class="nc" id="L405">		Element(8),</span>
+<span class="nc" id="L406">		Position(9),</span>
+<span class="nc" id="L407">		Download(10),</span>
+<span class="nc" id="L408">		ImageMobile(11),</span>
+<span class="nc" id="L409">		CreateMobile(12),</span>
+<span class="nc" id="L410">		ScreenshotMobile(13),</span>
+<span class="nc" id="L411">		Summary(14);</span>
+
+		private final int type;
+<span class="nc" id="L414">		RecordType(int value){</span>
+<span class="nc" id="L415">			this.type = value;</span>
+<span class="nc" id="L416">		}</span>
+
+		@Override
+<span class="nc" id="L419">		public String toString(){ return this.type + &quot;&quot;; }</span>
+	};
+
+	//------------------------------------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------------------------------------
+
+	public String getDriverHost() {
+<span class="nc" id="L426">		return driverHost;</span>
+	}
+
+	public int getDriverPort() {
+<span class="nc" id="L430">		return driverPort;</span>
+	}
+
+	public void closeDriver() {
+<span class="nc" id="L434">		sendRequestCommand(CommandType.Driver, DriverType.Close);</span>
+<span class="nc" id="L435">	}</span>
+
+	public void closeWindows(long processId) {
+<span class="nc" id="L438">		sendRequestCommand(CommandType.Driver, DriverType.CloseWindows, processId);</span>
+<span class="nc" id="L439">	}</span>
+
+	public void clearText() {
+<span class="nc" id="L442">		sendRequestCommand(CommandType.Keyboard, KeyType.Clear);</span>
+<span class="nc" id="L443">	}</span>
+
+	public void clearText(String elemId) {
+<span class="nc" id="L446">		sendRequestCommand(CommandType.Keyboard, KeyType.Clear, elemId);</span>
+<span class="nc" id="L447">	}</span>
+
+	public void sendKeys(String data, String elemId) {
+<span class="nc" id="L450">		sendRequestCommand(CommandType.Keyboard, KeyType.Enter, data, elemId);</span>
+<span class="nc" id="L451">	}</span>
+
+	public void mouseMove(int x, int y) {
+<span class="nc" id="L454">		sendRequestCommand(CommandType.Mouse, MouseType.Move, x, y);</span>
+<span class="nc" id="L455">	}</span>
+
+	public void mouseClick() {
+<span class="nc" id="L458">		sendRequestCommand(CommandType.Mouse, MouseType.Click);</span>
+<span class="nc" id="L459">	}</span>
+
+	public void mouseMiddleClick() {
+<span class="nc" id="L462">		sendRequestCommand(CommandType.Mouse, MouseType.MiddleClick);</span>
+<span class="nc" id="L463">	}</span>
+
+	public void mouseRightClick() {
+<span class="nc" id="L466">		sendRequestCommand(CommandType.Mouse, MouseType.RightClick);</span>
+<span class="nc" id="L467">	}</span>
+
+	public void mouseClick(int key) {
+<span class="nc" id="L470">		sendRequestCommand(CommandType.Mouse, MouseType.Click, key);</span>
+<span class="nc" id="L471">	}</span>
+
+	public void mouseDown() {
+<span class="nc" id="L474">		sendRequestCommand(CommandType.Mouse, MouseType.Down);</span>
+<span class="nc" id="L475">	}</span>
+
+	public void drag() {
+<span class="nc" id="L478">		sendRequestCommand(CommandType.Mouse, MouseType.Drag);</span>
+<span class="nc" id="L479">	}</span>
+
+	public void mouseRelease() {
+<span class="nc" id="L482">		sendRequestCommand(CommandType.Mouse, MouseType.Release);</span>
+<span class="nc" id="L483">	}</span>
+
+	public void mouseWheel(int delta) {
+<span class="nc" id="L486">		sendRequestCommand(CommandType.Mouse, MouseType.Wheel, delta);</span>
+<span class="nc" id="L487">	}</span>
+
+	public void doubleClick() {
+<span class="nc" id="L490">		sendRequestCommand(CommandType.Mouse, MouseType.DoubleClick);</span>
+<span class="nc" id="L491">	}</span>
+
+	public void keyDown(int codePoint) {
+<span class="nc" id="L494">		sendRequestCommand(CommandType.Keyboard, KeyType.Down, codePoint);</span>
+<span class="nc" id="L495">	}</span>
+
+	public void keyUp(int codePoint) {
+<span class="nc" id="L498">		sendRequestCommand(CommandType.Keyboard, KeyType.Release, codePoint);</span>
+<span class="nc" id="L499">	}</span>
+
+	//---------------------------------------------------------------------------------------------------------------------------
+	// get elements
+	//---------------------------------------------------------------------------------------------------------------------------
+
+	public List&lt;FoundElement&gt; getWebElementsListByHandle(TestBound channelDimension, int handle) {
+<span class="nc" id="L506">		return sendRequestCommand(CommandType.Element, ElementType.LoadTree, handle).getFoundElements(channelDimension);</span>
+	}
+
+	public void defineRoot(TestBound channelDimension, String id) {
+<span class="nc" id="L510">		setElementMapLocation(sendRequestCommand(CommandType.Element, ElementType.Root, id).getFoundElements(channelDimension));</span>
+<span class="nc" id="L511">	}</span>
+
+	public void refreshElementMapLocation(Channel channel) {
+<span class="nc" id="L514">		new Thread(new LoadMapElement(channel, this)).start();</span>
+<span class="nc" id="L515">	}</span>
+
+	public void refreshElementMap(Channel channel) {
+<span class="nc" id="L518">		setElementMapLocation(getWebElementsListByHandle(channel.getDimension(), channel.getHandle(this)));</span>
+<span class="nc" id="L519">	}</span>
+
+	public void setElementMapLocation(List&lt;FoundElement&gt; list) {
+<span class="nc" id="L522">		this.elementMapLocation = list;</span>
+<span class="nc" id="L523">	}</span>
+
+	public FoundElement getElementFromPoint(final Double x, final Double y) {
+
+<span class="nc" id="L527">		final double xPos = x;</span>
+<span class="nc" id="L528">		final double yPos = y - 10;</span>
+
+<span class="nc bnc" id="L530" title="All 4 branches missed.">		if (elementMapLocation != null &amp;&amp; elementMapLocation.size() &gt; 0) {</span>
+<span class="nc bnc" id="L531" title="All 4 branches missed.">			final Optional&lt;FoundElement&gt; fe = elementMapLocation.stream().filter(e -&gt; e.isActive() &amp;&amp; e.getRectangle().contains(xPos, yPos)).findFirst();</span>
+<span class="nc bnc" id="L532" title="All 2 branches missed.">			if(fe.isPresent()) {</span>
+<span class="nc" id="L533">				return getHoverChild(fe.get(), xPos, yPos);</span>
+			}
+		}
+<span class="nc" id="L536">		return null;</span>
+	}
+
+	private FoundElement getHoverChild(final FoundElement elem, final double xPos, final double yPos) {
+<span class="nc bnc" id="L540" title="All 4 branches missed.">		if(elem.getChildren() != null &amp;&amp; elem.getChildren().size() &gt; 0) {</span>
+<span class="nc bnc" id="L541" title="All 4 branches missed.">			final Optional&lt;FoundElement&gt; child = elem.getChildren().stream().parallel().filter(e -&gt; e.isActive() &amp;&amp; e.getRectangle().contains(xPos, yPos)).parallel().sorted(compareElementBySize).findFirst();</span>
+<span class="nc bnc" id="L542" title="All 2 branches missed.">			if(child.isPresent()) {</span>
+<span class="nc" id="L543">				return getHoverChild(child.get(), xPos, yPos);</span>
+			}
+		}
+<span class="nc" id="L546">		return elem;</span>
+	}
+
+	public FoundElement getElementFromRect(Double x, Double y, Double w, Double h) {
+<span class="nc" id="L550">		FoundElement hoverElement = null;</span>
+<span class="nc bnc" id="L551" title="All 2 branches missed.">		if (elementMapLocation != null) {</span>
+<span class="nc bnc" id="L552" title="All 2 branches missed.">			for (FoundElement testElement : elementMapLocation) {</span>
+<span class="nc bnc" id="L553" title="All 4 branches missed.">				if(testElement != null &amp;&amp; testElement.isVisible()){</span>
+<span class="nc bnc" id="L554" title="All 2 branches missed.">					if (hoverElement == null) {</span>
+<span class="nc" id="L555">						hoverElement = testElement;</span>
+<span class="nc" id="L556">						continue;</span>
+					}
+
+<span class="nc" id="L559">					final Rectangle rect = testElement.getRectangle();</span>
+
+<span class="nc bnc" id="L561" title="All 2 branches missed.">					if (!rect.contains(x, y)</span>
+<span class="nc bnc" id="L562" title="All 4 branches missed.">							|| rect.getWidth() &gt; w || rect.getHeight() &gt; h</span>
+<span class="nc bnc" id="L563" title="All 2 branches missed.">							|| hoverElement.getWidth() &lt;= testElement.getWidth() </span>
+<span class="nc bnc" id="L564" title="All 2 branches missed.">							&amp;&amp; hoverElement.getHeight() &lt;= testElement.getHeight()) continue;</span>
+<span class="nc" id="L565">					hoverElement = testElement;</span>
+				}
+<span class="nc" id="L567">			}</span>
+		}
+<span class="nc" id="L569">		return hoverElement;</span>
+	}
+
+	public FoundElement getRootElement(Channel channel) {
+<span class="nc" id="L573">		return getRootElement(channel.getHandle(this));</span>
+	}
+
+	public FoundElement getRootElement(int handle) {
+<span class="nc" id="L577">		return new FoundElement(sendRequestCommand(CommandType.Window, WindowType.Handle, handle).getWindow());</span>
+	}
+
+	public List&lt;DesktopData&gt; getVersion(String appPath) {
+<span class="nc" id="L581">		return sendRequestCommand(CommandType.Driver, DriverType.Application, appPath).getData();</span>
+	}
+
+	public List&lt;DesktopWindow&gt; getWindowsByPid(Long pid) {
+<span class="nc" id="L585">		return sendRequestCommand(CommandType.Window, WindowType.List, pid).getWindows();</span>
+	}
+
+	public void updateWindowHandle(Channel channel) {
+<span class="nc" id="L589">		int handle = channel.getHandle(this);</span>
+<span class="nc bnc" id="L590" title="All 2 branches missed.">		if(handle &gt; 0) {</span>
+<span class="nc" id="L591">			getEngine().setWindow(sendRequestCommand(CommandType.Window, WindowType.Handle, handle).getWindow());</span>
+		}
+<span class="nc" id="L593">	}</span>
+
+	public DesktopWindow getWindowByHandle(int handle) {
+<span class="nc" id="L596">		return sendRequestCommand(CommandType.Window, WindowType.Handle, handle).getWindow();</span>
+	}
+
+	public DesktopWindow getWindowByTitle(String title, String name) {
+<span class="nc" id="L600">		return sendRequestCommand(CommandType.Window, WindowType.Title, title, name).getWindow();</span>
+	}
+
+	public void setChannelToFront(int handle, long pid) {
+<span class="nc" id="L604">		sendRequestCommand(CommandType.Window, WindowType.ToFront, handle, pid);</span>
+<span class="nc" id="L605">	}</span>
+
+	public void setWindowToFront(Long pid) {
+<span class="nc" id="L608">		sendRequestCommand(CommandType.Window, WindowType.ToFront, pid);</span>
+<span class="nc" id="L609">	}</span>
+
+	public void rootKeys(int handle, String keys) {
+<span class="nc" id="L612">		sendRequestCommand(CommandType.Window, WindowType.Keys, handle, keys);</span>
+<span class="nc" id="L613">	}</span>
+
+	public void moveWindow(Channel channel, Point point) {
+<span class="nc" id="L616">		sendRequestCommand(CommandType.Window, WindowType.Move, channel.getHandle(this), point.x, point.y);</span>
+<span class="nc" id="L617">	}</span>
+
+	public void resizeWindow(Channel channel, Dimension size) {
+<span class="nc" id="L620">		sendRequestCommand(CommandType.Window, WindowType.Resize, channel.getHandle(this), size.width, size.height);</span>
+<span class="nc" id="L621">	}</span>
+
+	public void switchTo(Channel channel, int index) {
+<span class="nc" id="L624">		sendRequestCommand(CommandType.Window, WindowType.Switch, channel.getHandle(this, index));</span>
+<span class="nc" id="L625">	}</span>
+
+	public DesktopResponse switchTo(Long processId, int index) {
+<span class="nc" id="L628">		return sendRequestCommand(CommandType.Window, WindowType.Switch, processId, index);</span>
+	}
+
+	public void closeWindow(Channel channel) {
+<span class="nc" id="L632">		closeWindow(channel.getHandle(this));</span>
+<span class="nc" id="L633">	}</span>
+
+	public void closeWindow(int handle) {
+<span class="nc" id="L636">		sendRequestCommand(CommandType.Window, WindowType.Close, handle);</span>
+<span class="nc" id="L637">	}</span>
+
+	public void windowState(ActionStatus status, Channel channel, String state) {
+<span class="nc" id="L640">		sendRequestCommand(CommandType.Window, WindowType.State, channel.getHandle(this), state);</span>
+<span class="nc" id="L641">	}</span>
+
+	public void gotoUrl(ActionStatus status, int handle, String url) {
+
+<span class="nc" id="L645">		status.setData(url);</span>
+
+<span class="nc" id="L647">		final DesktopResponse resp = sendRequestCommand(CommandType.Window, WindowType.Url, handle, url);</span>
+<span class="nc bnc" id="L648" title="All 2 branches missed.">		if(resp.errorCode &lt; 0) {</span>
+<span class="nc" id="L649">			status.setError(resp.errorCode, resp.errorMessage);</span>
+		}else {
+<span class="nc" id="L651">			status.setPassed(true);</span>
+		}
+<span class="nc" id="L653">	}</span>
+
+	public FoundElement getTestElementParent(String elementId, Channel channel){
+<span class="nc" id="L656">		return sendRequestCommand(CommandType.Element, ElementType.Parents, elementId).getParentsElement(channel.getDimension());</span>
+	}
+
+	public CalculatedProperty[] getElementAttributes(String elementId) {
+<span class="nc" id="L660">		return sendRequestCommand(CommandType.Element, ElementType.Attributes, elementId).getAttributes();</span>
+	}
+
+	public List&lt;DesktopData&gt; executeScript(ActionStatus status, String script, FoundElement element) {
+<span class="nc" id="L664">		return sendRequestCommand(CommandType.Element, ElementType.Script, element.getId(), script).getData();</span>
+	}
+
+	public List&lt;FoundElement&gt; findElements(Channel channel, TestElement testElement, String tag, String[] attributes, Predicate&lt;AtsBaseElement&gt; predicate) {
+
+<span class="nc" id="L669">		DesktopResponse response = null;</span>
+
+<span class="nc" id="L671">		final String[] firstData = new String[2];</span>
+<span class="nc" id="L672">		firstData[1] = tag;</span>
+
+<span class="nc" id="L674">		final Object[] data = Stream.concat(Stream.of(firstData), Stream.of(attributes)).toArray(String[]::new);</span>
+
+<span class="nc bnc" id="L676" title="All 2 branches missed.">		if(testElement.getParent() != null){</span>
+<span class="nc" id="L677">			data[0] = testElement.getParent().getWebElementId();</span>
+<span class="nc" id="L678">			response = sendRequestCommand(CommandType.Element, ElementType.Childs, data);</span>
+		}else{
+<span class="nc" id="L680">			data[0] = channel.getHandle(this) + &quot;&quot;;</span>
+<span class="nc" id="L681">			response = sendRequestCommand(CommandType.Element, ElementType.Find, data);</span>
+		}
+
+<span class="nc" id="L684">		return response.getFoundElements(predicate, channel.getDimension());</span>
+	}
+
+	public List&lt;FoundElement&gt; getListItems(TestBound dimension, String comboId){
+<span class="nc" id="L688">		return sendRequestCommand(CommandType.Element, ElementType.ListItems, new Object[] {comboId}).getFoundElements(dimension);</span>
+	}
+
+	public List&lt;FoundElement&gt; getChildren(TestBound dimension, String comboId, String tag){
+<span class="nc" id="L692">		return sendRequestCommand(CommandType.Element, ElementType.Childs, new Object[] {comboId, tag}).getFoundElements(dimension);</span>
+	}
+
+	public void selectItem(String elementId, String type, String value, boolean regexp) {
+<span class="nc" id="L696">		sendRequestCommand(CommandType.Element, ElementType.Select, elementId, type, value, regexp);</span>
+<span class="nc" id="L697">	}</span>
+
+	public String getElementAttribute(String elementId, String attribute) {
+<span class="nc" id="L700">		final DesktopResponse resp = sendRequestCommand(CommandType.Element, ElementType.Attributes, elementId, attribute);</span>
+<span class="nc" id="L701">		return resp.getFirstAttribute();</span>
+	}
+
+	public List&lt;FoundElement&gt; getDialogBox(TestBound dimension) {
+<span class="nc" id="L705">		final DesktopResponse resp = sendRequestCommand(CommandType.Element, ElementType.DialogBox);</span>
+<span class="nc" id="L706">		return resp.getFoundElements(dimension);</span>
+	}
+
+	private static class LoadMapElement	implements Runnable {
+		final TestBound channelDimension;
+		final int handle;
+		final DesktopDriver driver;
+
+<span class="nc" id="L714">		public LoadMapElement(Channel channel, DesktopDriver driver) {</span>
+<span class="nc" id="L715">			this.channelDimension = channel.getDimension();</span>
+<span class="nc" id="L716">			this.handle = channel.getHandle(driver);</span>
+<span class="nc" id="L717">			this.driver = driver;</span>
+<span class="nc" id="L718">		}</span>
+
+		@Override
+		public void run() {
+<span class="nc" id="L722">			driver.setElementMapLocation(driver.getWebElementsListByHandle(channelDimension, handle));</span>
+<span class="nc" id="L723">		}</span>
+	}
+
+	//---------------------------------------------------------------------------------------
+	//visual actions
+	//---------------------------------------------------------------------------------------
+
+	public void saveSummary(ScriptStatus status, ReportSummary summary) {
+<span class="nc" id="L731">		sendRequestCommand(CommandType.Record, RecordType.Summary, summary.toData(status));</span>
+<span class="nc" id="L732">	}</span>
+
+	public void stopVisualRecord() {
+<span class="nc" id="L735">		sendRequestCommand(CommandType.Record, RecordType.Stop);</span>
+<span class="nc" id="L736">	}</span>
+
+	public byte[] getScreenshotByte(Double x, Double y, Double w, Double h){
+<span class="nc" id="L739">		final DesktopResponse resp = sendRequestCommand(CommandType.Record, RecordType.Screenshot, x.intValue(), y.intValue(), w.intValue(), h.intValue());</span>
+<span class="nc" id="L740">		return resp.image;</span>
+	}
+
+	public void createMobileRecord(boolean stop, String actionType, int scriptLine, String scriptName, long timeline, String channelName, TestBound subDimension, String screenshotPath, boolean sync){
+<span class="nc" id="L744">		sendRequestCommand(</span>
+				CommandType.Record, 
+				RecordType.CreateMobile, 
+				actionType, 
+<span class="nc" id="L748">				scriptLine, </span>
+				scriptName,
+<span class="nc" id="L750">				timeline,</span>
+				channelName, 
+<span class="nc" id="L752">				subDimension.getX().intValue(), </span>
+<span class="nc" id="L753">				subDimension.getY().intValue(), </span>
+<span class="nc" id="L754">				subDimension.getWidth().intValue(), </span>
+<span class="nc" id="L755">				subDimension.getHeight().intValue(), </span>
+				screenshotPath, 
+<span class="nc" id="L757">				sync, </span>
+<span class="nc" id="L758">				stop);</span>
+<span class="nc" id="L759">	}</span>
+
+	public void createVisualAction(Channel channel, boolean stop, String actionType, int scriptLine, String scriptName, long timeline, boolean sync) {
+<span class="nc" id="L762">		sendRequestCommand(</span>
+				CommandType.Record, 
+				RecordType.Create, 
+				actionType, 
+<span class="nc" id="L766">				scriptLine, </span>
+				scriptName,
+<span class="nc" id="L768">				timeline,</span>
+<span class="nc" id="L769">				channel.getName(), </span>
+<span class="nc" id="L770">				channel.getDimension().getX().intValue(), </span>
+<span class="nc" id="L771">				channel.getDimension().getY().intValue(), </span>
+<span class="nc" id="L772">				channel.getDimension().getWidth().intValue(), </span>
+<span class="nc" id="L773">				channel.getDimension().getHeight().intValue(), </span>
+<span class="nc" id="L774">				sync,</span>
+<span class="nc" id="L775">				stop);</span>
+<span class="nc" id="L776">	}</span>
+
+	public byte[] getMobileScreenshotByte(String url){
+<span class="nc" id="L779">		final DesktopResponse resp = sendRequestCommand(CommandType.Record, RecordType.ScreenshotMobile, url);</span>
+<span class="nc" id="L780">		return resp.image;</span>
+	}
+
+	public void updateMobileScreenshot(TestBound bound, boolean isRef,String url){
+<span class="nc" id="L784">		sendRequestCommand(CommandType.Record, RecordType.ImageMobile, 0, 0, bound.getWidth().intValue(), bound.getHeight().intValue(),	isRef, url); </span>
+<span class="nc" id="L785">	}</span>
+
+	public DesktopResponse startVisualRecord(Channel channel, ScriptHeader script, int quality, long started) {
+<span class="nc" id="L788">		return sendRequestCommand(CommandType.Record, RecordType.Start, script.getId(), script.getQualifiedName(), script.getDescription(), script.getAuthor(), script.getJoinedGroups(), script.getPrerequisite(), quality, started);</span>
+	}
+
+	public void updateVisualImage(TestBound dimension, boolean isRef) {
+<span class="nc" id="L792">		sendRequestCommand(CommandType.Record, RecordType.Image, dimension.getX().intValue(), dimension.getY().intValue(), dimension.getWidth().intValue(), dimension.getHeight().intValue(), isRef);</span>
+<span class="nc" id="L793">	}</span>
+
+	public void updateVisualValue(String value) {
+<span class="nc" id="L796">		sendRequestCommand(CommandType.Record, RecordType.Value, value);</span>
+<span class="nc" id="L797">	}</span>
+
+	public void updateVisualData(String value, String data) {
+<span class="nc" id="L800">		sendRequestCommand(CommandType.Record, RecordType.Data, value, data);</span>
+<span class="nc" id="L801">	}</span>
+
+	public void updateVisualStatus(int error, long duration) {
+<span class="nc" id="L804">		sendRequestCommand(CommandType.Record, RecordType.Status, error, duration);</span>
+<span class="nc" id="L805">	}</span>
+
+	public void updateVisualElement(TestElement element) {
+
+<span class="nc" id="L809">		Double x = 0D;</span>
+<span class="nc" id="L810">		Double y = 0D;</span>
+<span class="nc" id="L811">		Double w = 0D;</span>
+<span class="nc" id="L812">		Double h = 0D;</span>
+
+<span class="nc" id="L814">		final int numElements = element.getFoundElements().size();</span>
+
+<span class="nc bnc" id="L816" title="All 2 branches missed.">		if(numElements &gt; 0) {</span>
+<span class="nc bnc" id="L817" title="All 2 branches missed.">			int i = element.getIndex() == 0 ? 0 : element.getIndex() - 1;</span>
+<span class="nc" id="L818">			final TestBound bound = element</span>
+<span class="nc" id="L819">					.getFoundElements()</span>
+<span class="nc" id="L820">					.get(i)</span>
+<span class="nc" id="L821">					.getTestBound();</span>
+
+<span class="nc" id="L823">			x = bound.getX();</span>
+<span class="nc" id="L824">			y = bound.getY();</span>
+
+<span class="nc" id="L826">			w = bound.getWidth();</span>
+<span class="nc" id="L827">			h = bound.getHeight();</span>
+
+<span class="nc bnc" id="L829" title="All 2 branches missed.">			if(element.isSysComp()) {</span>
+<span class="nc" id="L830">				x += 8;</span>
+<span class="nc" id="L831">				y += 8;</span>
+			}
+		}
+
+<span class="nc" id="L835">		String savedCriterias = element.getCriterias();</span>
+<span class="nc bnc" id="L836" title="All 2 branches missed.">		if(savedCriterias.length() &gt; 100) {</span>
+<span class="nc" id="L837">			savedCriterias = savedCriterias.substring(0, 100);</span>
+		}
+
+<span class="nc" id="L840">		sendRequestCommand(CommandType.Record, RecordType.Element, </span>
+<span class="nc" id="L841">				x.intValue(), y.intValue(), w.intValue(), h.intValue(), </span>
+<span class="nc" id="L842">				element.getTotalSearchDuration(), numElements, savedCriterias, element.getSearchedTag());</span>
+<span class="nc" id="L843">	}</span>
+
+	public void updateVisualPosition(String type, MouseDirectionData hdir, MouseDirectionData vdir) {
+
+<span class="nc" id="L847">		String hdirName = &quot;&quot;;</span>
+<span class="nc" id="L848">		int hdirValue = 0;</span>
+
+<span class="nc" id="L850">		String vdirName = &quot;&quot;;</span>
+<span class="nc" id="L851">		int vdirValue = 0;</span>
+
+<span class="nc bnc" id="L853" title="All 2 branches missed.">		if(hdir != null) {</span>
+<span class="nc" id="L854">			hdirName = hdir.getName();</span>
+<span class="nc" id="L855">			hdirValue = hdir.getIntValue();</span>
+		}
+
+<span class="nc bnc" id="L858" title="All 2 branches missed.">		if(vdir != null) {</span>
+<span class="nc" id="L859">			vdirName = vdir.getName();</span>
+<span class="nc" id="L860">			vdirValue = vdir.getIntValue();</span>
+		}
+
+<span class="nc" id="L863">		sendRequestCommand(CommandType.Record, RecordType.Position, hdirName, hdirValue, vdirName, vdirValue);</span>
+<span class="nc" id="L864">	}</span>
+
+	//---------------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------
+
+	private final static String USER_AGENT = &quot;AtsDesktopDriver&quot;;
+<span class="nc" id="L870">	private static final MediaType MEDIA_UTF8 = MediaType.parse(&quot;application/x-www-form-urlencoded; charset=utf-8&quot;);</span>
+
+	private DesktopResponse sendRequestCommand(CommandType type, Enum&lt;?&gt; subType, Object... data) {
+
+<span class="nc" id="L874">		final String url = new StringBuilder(driverUrl)</span>
+<span class="nc" id="L875">				.append(&quot;/&quot;)</span>
+<span class="nc" id="L876">				.append(type)</span>
+<span class="nc" id="L877">				.append(&quot;/&quot;)</span>
+<span class="nc" id="L878">				.append(subType)</span>
+<span class="nc" id="L879">				.toString();</span>
+
+<span class="nc" id="L881">		final Request request = new Request.Builder()</span>
+<span class="nc" id="L882">				.url(url)</span>
+<span class="nc" id="L883">				.addHeader(&quot;User-Agent&quot;, USER_AGENT)</span>
+<span class="nc" id="L884">				.post(RequestBody.create(MEDIA_UTF8, Stream.of(data).map(Object::toString).collect(Collectors.joining(&quot;\n&quot;))))</span>
+<span class="nc" id="L885">				.build();</span>
+
+		try {
+
+<span class="nc" id="L889">			final Response response = client.newCall(request).execute();</span>
+<span class="nc" id="L890">			final AMF3Deserializer amf3 = new AMF3Deserializer(response.body().byteStream());</span>
+<span class="nc" id="L891">			final DesktopResponse desktopResponse = (DesktopResponse) amf3.readObject();</span>
+
+<span class="nc" id="L893">			amf3.close();</span>
+<span class="nc" id="L894">			response.close();</span>
+
+<span class="nc" id="L896">			return desktopResponse;</span>
+
+<span class="nc" id="L898">		} catch (IOException e) {</span>
+<span class="nc" id="L899">			return new DesktopResponse(e.getMessage());</span>
+		}
+	}
+
+	public void saveVisualReportFile(Path path, ExecutionLogger logger) {
+
+<span class="nc" id="L905">		final String url = new StringBuilder(driverUrl)</span>
+<span class="nc" id="L906">				.append(&quot;/&quot;)</span>
+<span class="nc" id="L907">				.append(CommandType.Record)</span>
+<span class="nc" id="L908">				.append(&quot;/&quot;)</span>
+<span class="nc" id="L909">				.append(RecordType.Download)</span>
+<span class="nc" id="L910">				.toString();</span>
+
+<span class="nc" id="L912">		final Request request = new Request.Builder()</span>
+<span class="nc" id="L913">				.url(url)</span>
+<span class="nc" id="L914">				.addHeader(&quot;User-Agent&quot;, USER_AGENT)</span>
+<span class="nc" id="L915">				.get()</span>
+<span class="nc" id="L916">				.build();</span>
+
+		try {
+
+<span class="nc" id="L920">			final Response resp = client.newCall(request).execute();</span>
+<span class="nc bnc" id="L921" title="All 2 branches missed.">			if(resp.code() == 200) {</span>
+
+<span class="nc" id="L923">				BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(path.toFile()));</span>
+<span class="nc" id="L924">				BufferedInputStream bis = new BufferedInputStream(resp.body().byteStream());</span>
+
+				int inByte;
+<span class="nc bnc" id="L927" title="All 2 branches missed.">				while((inByte = bis.read()) != -1) bos.write(inByte);</span>
+
+<span class="nc" id="L929">				bis.close();</span>
+<span class="nc" id="L930">				bos.close();</span>
+
+<span class="nc" id="L932">				logger.sendInfo(&quot;Save ATSV file&quot;, path.toString());</span>
+
+<span class="nc" id="L934">			}else {</span>
+<span class="nc" id="L935">				logger.sendError(&quot;Unable to save ATSV file&quot;, resp.message());</span>
+			}
+
+<span class="nc" id="L938">			resp.close();</span>
+
+<span class="nc" id="L940">		} catch (IOException e) {</span>
+
+<span class="nc" id="L942">		}</span>
+<span class="nc" id="L943">	}</span>
+
+	public String getSource() {
+<span class="nc" id="L946">		final Gson gson = new Gson();</span>
+<span class="nc" id="L947">		return gson.toJson(elementMapLocation);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,578 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TestElement.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.element</a> &gt; <span class="el_source">TestElement.java</span></div><h1>TestElement.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.element;
+
+import java.awt.Rectangle;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
+
+import org.openqa.selenium.ElementNotInteractableException;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebElement;
+
+import com.ats.executor.ActionStatus;
+import com.ats.executor.ActionTestScript;
+import com.ats.executor.SendKeyData;
+import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.engines.IDriverEngine;
+import com.ats.generator.objects.MouseDirection;
+import com.ats.generator.variables.CalculatedProperty;
+import com.ats.generator.variables.CalculatedValue;
+import com.ats.recorder.IVisualRecorder;
+
+public class TestElement{
+
+	public final static String CLIENT_WIDTH = &quot;clientWidth&quot;;
+	public final static String CLIENT_HEIGTH = &quot;clientHeight&quot;;
+
+	public final static String ATS_OCCURRENCES = &quot;-ats-occurences&quot;;
+
+	private final static String MAT_SELECT = &quot;MAT-SELECT&quot;;
+	private final static String PRE = &quot;PRE&quot;;
+
+	protected Channel channel;
+	protected IDriverEngine engine;
+
+	private Predicate&lt;Integer&gt; occurrences;
+
+<span class="nc" id="L60">	private int count = 0;</span>
+
+<span class="nc" id="L62">	private long searchDuration = 0;</span>
+<span class="nc" id="L63">	private long totalSearchDuration = 0;</span>
+
+	protected TestElement parent;
+<span class="nc" id="L66">	private List&lt;FoundElement&gt; foundElements = new ArrayList&lt;FoundElement&gt;();</span>
+
+<span class="nc" id="L68">	private int maxTry = 20;</span>
+	private int index;
+
+<span class="nc" id="L71">	private String criterias = &quot;&quot;;</span>
+<span class="nc" id="L72">	private String searchedTag = &quot;&quot;;</span>
+
+	protected IVisualRecorder recorder;
+
+<span class="nc" id="L76">	private boolean sysComp = false;</span>
+
+<span class="nc" id="L78">	public TestElement() {}</span>
+
+	public TestElement(Channel channel) {
+<span class="nc" id="L81">		this(channel, 1, 0);</span>
+<span class="nc" id="L82">		this.foundElements = new ArrayList&lt;FoundElement&gt;(Arrays.asList(new FoundElement(channel)));</span>
+<span class="nc" id="L83">	}</span>
+
+<span class="nc" id="L85">	public TestElement(Channel channel, int count, int index) {</span>
+<span class="nc" id="L86">		this.channel = channel;</span>
+<span class="nc" id="L87">		this.count = count;</span>
+<span class="nc" id="L88">		this.index = index;</span>
+<span class="nc" id="L89">		this.occurrences = p -&gt; true;</span>
+<span class="nc" id="L90">		this.engine = channel.getDriverEngine();</span>
+<span class="nc" id="L91">	}</span>
+
+<span class="nc" id="L93">	public TestElement(Channel channel, int maxTry) {</span>
+<span class="nc" id="L94">		this.channel = channel;</span>
+<span class="nc" id="L95">		this.maxTry = maxTry;</span>
+<span class="nc" id="L96">	}</span>
+
+	public TestElement(FoundElement element, Channel currentChannel) {
+<span class="nc" id="L99">		this(currentChannel);</span>
+<span class="nc" id="L100">		this.foundElements.add(element);</span>
+<span class="nc" id="L101">		this.count = getElementsCount();</span>
+<span class="nc" id="L102">	}</span>
+
+	public TestElement(Channel channel, int maxTry, Predicate&lt;Integer&gt; occurrences) {
+<span class="nc" id="L105">		this(channel, maxTry);</span>
+<span class="nc" id="L106">		this.occurrences = occurrences;</span>
+<span class="nc" id="L107">	}</span>
+
+	public TestElement(Channel channel, int maxTry, Predicate&lt;Integer&gt; predicate, int index) {
+<span class="nc" id="L110">		this(channel, maxTry, predicate);</span>
+<span class="nc" id="L111">		this.setIndex(index);</span>
+<span class="nc" id="L112">	}</span>
+
+	public TestElement(Channel channel, SearchedElement searchedElement) {
+<span class="nc" id="L115">		this(channel, 1, p -&gt; true, searchedElement);</span>
+<span class="nc" id="L116">	}</span>
+
+	public TestElement(Channel channel, int maxTry, Predicate&lt;Integer&gt; predicate, SearchedElement searchedElement) {
+
+<span class="nc" id="L120">		this(channel, maxTry, predicate, searchedElement.getIndex());</span>
+
+<span class="nc bnc" id="L122" title="All 2 branches missed.">		if(searchedElement.getParent() != null){</span>
+<span class="nc" id="L123">			this.parent = new TestElement(channel, maxTry, predicate, searchedElement.getParent());</span>
+		}
+
+<span class="nc" id="L126">		setEngine(channel.getDriverEngine());</span>
+<span class="nc" id="L127">		startSearch(false, searchedElement);</span>
+<span class="nc" id="L128">	}</span>
+
+	protected void setEngine(IDriverEngine engine) {
+<span class="nc" id="L131">		this.engine = engine;</span>
+<span class="nc" id="L132">	}</span>
+
+	protected void reloadFoundElements() {
+<span class="nc" id="L135">		this.foundElements = new ArrayList&lt;FoundElement&gt;(Arrays.asList(new FoundElement(channel)));</span>
+<span class="nc" id="L136">	}</span>
+
+	public void dispose() {
+<span class="nc" id="L139">		channel = null;</span>
+<span class="nc" id="L140">		engine = null;</span>
+<span class="nc" id="L141">		recorder = null;</span>
+<span class="nc" id="L142">		occurrences = null;</span>
+
+<span class="nc bnc" id="L144" title="All 2 branches missed.">		if(parent != null) {</span>
+<span class="nc" id="L145">			parent.dispose();</span>
+<span class="nc" id="L146">			parent = null;</span>
+		}
+
+<span class="nc bnc" id="L149" title="All 2 branches missed.">		while(foundElements.size() &gt; 0) {</span>
+<span class="nc" id="L150">			foundElements.remove(0).dispose();</span>
+		}
+<span class="nc" id="L152">	}</span>
+
+	public boolean isAngularSelect() {
+<span class="nc" id="L155">		return MAT_SELECT.equalsIgnoreCase(searchedTag);</span>
+	}
+
+	public boolean isPreElement() {
+<span class="nc" id="L159">		return PRE.equalsIgnoreCase(searchedTag);</span>
+	}
+
+	public boolean isSysComp() {
+<span class="nc" id="L163">		return sysComp;</span>
+	}
+
+	protected int getMaxTry() {
+<span class="nc" id="L167">		return maxTry;</span>
+	}
+
+	protected Channel getChannel() {
+<span class="nc" id="L171">		return channel;</span>
+	}
+
+	protected void startSearch(boolean sysComp, SearchedElement searchedElement) {
+
+<span class="nc" id="L176">		this.sysComp = sysComp;</span>
+
+<span class="nc bnc" id="L178" title="All 2 branches missed.">		if(channel != null){</span>
+
+<span class="nc" id="L180">			searchedTag = searchedElement.getTag();</span>
+<span class="nc" id="L181">			criterias = searchedTag;</span>
+
+<span class="nc" id="L183">			searchDuration = System.currentTimeMillis();</span>
+
+<span class="nc bnc" id="L185" title="All 6 branches missed.">			if(parent == null || (parent != null &amp;&amp; parent.getCount() &gt; 0)){</span>
+<span class="nc" id="L186">				foundElements = loadElements(searchedElement);</span>
+			}
+
+<span class="nc" id="L189">			searchDuration = System.currentTimeMillis() - this.searchDuration;</span>
+<span class="nc" id="L190">			totalSearchDuration = getTotalDuration();</span>
+<span class="nc" id="L191">			count = getElementsCount();</span>
+		}
+<span class="nc" id="L193">	}</span>
+
+	protected List&lt;FoundElement&gt; loadElements(SearchedElement searchedElement) {
+
+<span class="nc" id="L197">		final int criteriasCount = searchedElement.getCriterias().size();</span>
+<span class="nc" id="L198">		final String[] attributes = new String[criteriasCount];</span>
+<span class="nc" id="L199">		final String[] attributesValues = new String[criteriasCount];</span>
+
+<span class="nc" id="L201">		Predicate&lt;AtsBaseElement&gt; fullPredicate = Objects::nonNull;</span>
+
+<span class="nc bnc" id="L203" title="All 2 branches missed.">		for (int i=0; i&lt;criteriasCount; i++) {</span>
+<span class="nc" id="L204">			final CalculatedProperty property = searchedElement.getCriterias().get(i);</span>
+
+<span class="nc" id="L206">			criterias += &quot;,&quot; + property.getName() + &quot;:&quot; + property.getValue().getCalculated();</span>
+
+<span class="nc" id="L208">			fullPredicate = property.getPredicate(fullPredicate);</span>
+<span class="nc" id="L209">			attributes[i] = property.getName();</span>
+
+<span class="nc bnc" id="L211" title="All 2 branches missed.">			if(property.isRegexp()) {</span>
+<span class="nc" id="L212">				attributesValues[i] = property.getName();</span>
+			}else {
+<span class="nc" id="L214">				attributesValues[i] = property.getName() + &quot;\t&quot; + property.getValue().getCalculated();</span>
+			}
+		}
+
+		try {
+<span class="nc" id="L219">			return engine.findElements(sysComp, this, searchedTag, attributes, attributesValues, fullPredicate, null, true);</span>
+<span class="nc" id="L220">		}catch (StaleElementReferenceException e) {</span>
+<span class="nc" id="L221">			return Collections.&lt;FoundElement&gt;emptyList();</span>
+		}
+
+	}
+
+	private int getElementsCount() {
+<span class="nc bnc" id="L227" title="All 2 branches missed.">		if(foundElements.size() &gt; getStartOneIndex()){</span>
+<span class="nc" id="L228">			return foundElements.size();</span>
+		}else{
+<span class="nc" id="L230">			return 0;</span>
+		}
+	}
+
+	private Long getTotalDuration(){
+<span class="nc bnc" id="L235" title="All 2 branches missed.">		if(parent != null){</span>
+<span class="nc" id="L236">			return searchDuration + parent.getTotalDuration();</span>
+		}else{
+<span class="nc" id="L238">			return searchDuration;</span>
+		}
+	}
+
+	public FoundElement getFoundElement() {
+<span class="nc" id="L243">		return foundElements.get(getStartOneIndex()); </span>
+	}
+
+	public boolean isPassword() {
+<span class="nc" id="L247">		return getFoundElement().isPassword();</span>
+	}
+
+	public boolean isNumeric() {
+<span class="nc" id="L251">		return getFoundElement().isNumeric();</span>
+	}
+
+	public WebElement getWebElement() {
+<span class="nc" id="L255">		return getFoundElement().getValue();</span>
+	}
+
+	public boolean isBody() {
+<span class="nc" id="L259">		return getFoundElement().getTag().equalsIgnoreCase(&quot;body&quot;);</span>
+	}
+
+	public String getWebElementId() {
+<span class="nc" id="L263">		return getFoundElement().getId();</span>
+	}
+
+	public Rectangle getWebElementRectangle() {
+<span class="nc" id="L267">		return getFoundElement().getRectangle();</span>
+	}
+
+	public boolean isValidated() {
+<span class="nc" id="L271">		return occurrences.test(getElementsCount());</span>
+	}
+
+	public boolean isIframe() {
+<span class="nc bnc" id="L275" title="All 2 branches missed.">		if(foundElements.size() &gt; getStartOneIndex()){</span>
+<span class="nc" id="L276">			return getFoundElement().isIframe();</span>
+		}else{
+<span class="nc" id="L278">			return false;</span>
+		}
+	}
+
+	public String getSearchedTag() {
+<span class="nc" id="L283">		return searchedTag;</span>
+	}
+
+	protected void setDialogBox() {
+<span class="nc" id="L287">		this.searchedTag = &quot;AlertBox&quot;;</span>
+<span class="nc" id="L288">		this.criterias = &quot;&quot;;</span>
+<span class="nc" id="L289">	}</span>
+
+	private int getStartOneIndex() {
+<span class="nc bnc" id="L292" title="All 2 branches missed.">		if(index &gt; 1) {</span>
+<span class="nc" id="L293">			return index-1;</span>
+		}
+<span class="nc" id="L295">		return 0;</span>
+	}
+
+	//----------------------------------------------------------------------------------------------------------------------
+	// Getter and setter for serialization
+	//----------------------------------------------------------------------------------------------------------------------
+
+	public TestElement getParent() {
+<span class="nc" id="L303">		return parent;</span>
+	}
+
+	public void setParent(TestElement parent) {
+<span class="nc" id="L307">		this.parent = parent;</span>
+<span class="nc" id="L308">	}</span>
+
+	public long getSearchDuration() {
+<span class="nc" id="L311">		return searchDuration;</span>
+	}
+
+	public void setSearchDuration(long searchDuration) {
+<span class="nc" id="L315">		this.searchDuration = searchDuration;</span>
+<span class="nc" id="L316">	}</span>
+
+	public long getTotalSearchDuration() {
+<span class="nc" id="L319">		return totalSearchDuration;</span>
+	}
+
+	public void setTotalSearchDuration(long totalSearchDuration) {
+<span class="nc" id="L323">		this.totalSearchDuration = totalSearchDuration;</span>
+<span class="nc" id="L324">	}</span>
+
+	public List&lt;FoundElement&gt; getFoundElements() {
+<span class="nc" id="L327">		return foundElements;</span>
+	}
+
+	public void setFoundElements(ArrayList&lt;FoundElement&gt; data) {
+<span class="nc" id="L331">		this.foundElements = data;</span>
+<span class="nc" id="L332">	}</span>
+
+	public String getCriterias() {
+<span class="nc" id="L335">		return criterias;</span>
+	}
+
+	public void setCriterias(String criterias) {
+<span class="nc" id="L339">		this.criterias = criterias;</span>
+<span class="nc" id="L340">	}</span>
+
+	public int getCount() {
+<span class="nc" id="L343">		return count;</span>
+	}
+
+	public void setCount(int count) {
+<span class="nc" id="L347">		this.count = count;</span>
+<span class="nc" id="L348">	}</span>
+
+	public int getIndex() {
+<span class="nc" id="L351">		return index;</span>
+	}
+
+	public void setIndex(int index) {
+<span class="nc" id="L355">		this.index = index;</span>
+<span class="nc" id="L356">	}</span>
+
+	//-------------------------------------------------------------------------------------------------------------------
+	// Assertion ...
+	//-------------------------------------------------------------------------------------------------------------------
+
+	public void checkOccurrences(ActionTestScript ts, ActionStatus status, String operator, int expected) {
+
+<span class="nc" id="L364">		int error = 0;</span>
+
+<span class="nc bnc" id="L366" title="All 2 branches missed.">		if(isValidated()) {</span>
+<span class="nc" id="L367">			status.setNoError();</span>
+		}else {
+<span class="nc" id="L369">			status.setError(ActionStatus.OCCURRENCES_ERROR, &quot;[&quot; + expected + &quot;] expected occurence(s) but [&quot; + count + &quot;] occurence(s) found&quot;, count);</span>
+<span class="nc" id="L370">			error = ActionStatus.OCCURRENCES_ERROR;</span>
+		}
+
+<span class="nc" id="L373">		status.endDuration();</span>
+<span class="nc" id="L374">		ts.getRecorder().updateScreen(0, status.getDuration());</span>
+<span class="nc" id="L375">		terminateExecution(status, ts, error, status.getDuration(), count + &quot;&quot;, operator + &quot; &quot; + expected);</span>
+<span class="nc" id="L376">	}</span>
+
+	//-------------------------------------------------------------------------------------------------------------------
+	// Text ...
+	//-------------------------------------------------------------------------------------------------------------------
+
+	public void clearText(ActionStatus status, MouseDirection md) {
+<span class="nc" id="L383">		engine.clearText(status, this, md);</span>
+<span class="nc" id="L384">	}</span>
+
+	public String enterText(ActionStatus status, CalculatedValue text, ActionTestScript script) {
+<span class="nc" id="L387">		final MouseDirection md = new MouseDirection();</span>
+<span class="nc" id="L388">		over(status, md, false, 0, 0);</span>
+<span class="nc" id="L389">		return finalizeEnterText(status, text, md, script);</span>
+	}
+
+	protected String finalizeEnterText(ActionStatus status, CalculatedValue text, MouseDirection md, ActionTestScript script) {
+<span class="nc bnc" id="L393" title="All 2 branches missed.">		if(status.isPassed()) {</span>
+
+<span class="nc" id="L395">			recorder.updateScreen(false);</span>
+
+<span class="nc bnc" id="L397" title="All 2 branches missed.">			if(!text.getCalculated().startsWith(&quot;$key&quot;)) {</span>
+<span class="nc" id="L398">				clearText(status, md);</span>
+			}
+
+<span class="nc" id="L401">			final String enteredText = sendText(script, status, text);</span>
+<span class="nc bnc" id="L402" title="All 4 branches missed.">			if(isPassword() || text.isCrypted()) {</span>
+<span class="nc" id="L403">				return &quot;########&quot;;</span>
+			}else {
+<span class="nc" id="L405">				return enteredText;</span>
+			}
+		}
+<span class="nc" id="L408">		return &quot;&quot;;</span>
+	}
+
+	public String sendText(ActionTestScript script, ActionStatus status, CalculatedValue text) {
+<span class="nc" id="L412">		final ArrayList&lt;SendKeyData&gt; textData = text.getCalculatedText(script);</span>
+<span class="nc" id="L413">		int max = maxTry;</span>
+<span class="nc bnc" id="L414" title="All 4 branches missed.">		while(!trySendText(status, textData) &amp;&amp; max &gt; 0) {</span>
+<span class="nc" id="L415">			channel.sleep(100);</span>
+<span class="nc" id="L416">			max--;</span>
+		}
+<span class="nc" id="L418">		channel.actionTerminated(status);</span>
+<span class="nc" id="L419">		return text.getCalculated();</span>
+	}
+
+	private boolean trySendText(ActionStatus status, ArrayList&lt;SendKeyData&gt; text) {
+		try {
+<span class="nc" id="L424">			engine.sendTextData(status, this, text);</span>
+<span class="nc" id="L425">			status.setNoError();</span>
+<span class="nc" id="L426">			return true;</span>
+<span class="nc" id="L427">		}catch (ElementNotInteractableException e) {</span>
+<span class="nc" id="L428">			status.setError(ActionStatus.OBJECT_NOT_INTERACTABLE, &quot;element is not interactable&quot;);</span>
+<span class="nc" id="L429">			return false;</span>
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------------------------
+	// Select ...
+	//-------------------------------------------------------------------------------------------------------------------
+
+	public void select(ActionStatus status, CalculatedProperty selectProperty) {
+<span class="nc bnc" id="L438" title="All 2 branches missed.">		if(isValidated()){</span>
+<span class="nc" id="L439">			engine.selectOptionsItem(status, this, selectProperty);</span>
+		}
+<span class="nc" id="L441">	}</span>
+
+	//-------------------------------------------------------------------------------------------------------------------
+	// Mouse ...
+	//-------------------------------------------------------------------------------------------------------------------
+
+	public void over(ActionStatus status, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {
+<span class="nc" id="L448">		engine.mouseMoveToElement(status, getFoundElement(), position, desktopDragDrop, offsetX, offsetY);</span>
+<span class="nc" id="L449">	}</span>
+
+	public void click(ActionStatus status, MouseDirection position, Keys key) {
+<span class="nc" id="L452">		engine.keyDown(key);</span>
+<span class="nc" id="L453">		click(status, position);</span>
+<span class="nc" id="L454">		engine.keyUp(key);</span>
+<span class="nc" id="L455">	}	</span>
+
+	public void click(ActionStatus status, MouseDirection position) {
+
+<span class="nc" id="L459">		int tryLoop = maxTry;</span>
+<span class="nc" id="L460">		mouseClick(status, position, 0, 0);</span>
+
+<span class="nc bnc" id="L462" title="All 4 branches missed.">		while(tryLoop &gt; 0 &amp;&amp; !status.isPassed()) {</span>
+<span class="nc" id="L463">			channel.progressiveWait(tryLoop);</span>
+<span class="nc" id="L464">			mouseClick(status, position, 0, 0);</span>
+<span class="nc" id="L465">			tryLoop--;</span>
+		}
+<span class="nc" id="L467">	}</span>
+
+	protected void mouseClick(ActionStatus status, MouseDirection position, int offsetX, int offsetY) {
+<span class="nc" id="L470">		engine.mouseClick(status, getFoundElement(), position, offsetX, offsetY);</span>
+<span class="nc" id="L471">		channel.actionTerminated(status);</span>
+<span class="nc" id="L472">	}</span>
+
+	public void drag(ActionStatus status, MouseDirection md, int offsetX, int offsetY) {
+<span class="nc" id="L475">		engine.drag(status, getFoundElement(), md, offsetX, offsetY);</span>
+<span class="nc" id="L476">		channel.actionTerminated(status);</span>
+<span class="nc" id="L477">	}</span>
+
+	public void drop(ActionStatus status, MouseDirection md, boolean desktopDragDrop) {
+<span class="nc" id="L480">		engine.drop(md, desktopDragDrop);</span>
+<span class="nc" id="L481">		status.setPassed(true);</span>
+<span class="nc" id="L482">	}</span>
+
+	public void swipe(ActionStatus status, MouseDirection position, MouseDirection direction) {
+<span class="nc" id="L485">		drag(status, position, 0, 0);</span>
+<span class="nc" id="L486">		engine.moveByOffset(direction.getHorizontalDirection(), direction.getVerticalDirection());</span>
+<span class="nc" id="L487">		drop(status, null, false);</span>
+<span class="nc" id="L488">	}</span>
+
+	public void mouseWheel(int delta) {
+<span class="nc" id="L491">		engine.scroll(getFoundElement(), delta);</span>
+<span class="nc" id="L492">	}</span>
+
+	public void wheelClick(ActionStatus status, MouseDirection position) {
+<span class="nc" id="L495">		engine.middleClick(status, position, this);</span>
+<span class="nc" id="L496">	}</span>
+
+	public void doubleClick() {
+<span class="nc" id="L499">		engine.doubleClick();</span>
+<span class="nc" id="L500">	}</span>
+
+	public void rightClick() {
+<span class="nc" id="L503">		engine.rightClick();</span>
+<span class="nc" id="L504">	}</span>
+
+	public void tap(int count) {
+<span class="nc" id="L507">		engine.tap(count, getFoundElement());</span>
+<span class="nc" id="L508">	}</span>
+
+	public void press(int duration, ArrayList&lt;String&gt; paths) {
+<span class="nc" id="L511">		engine.press(duration, paths, getFoundElement());</span>
+<span class="nc" id="L512">	}</span>
+
+	//-------------------------------------------------------------------------------------------------------------------
+	// Attributes
+	//-------------------------------------------------------------------------------------------------------------------
+
+	protected CalculatedProperty getOccurrencesProperty() {
+<span class="nc" id="L519">		return new CalculatedProperty(false, ATS_OCCURRENCES, new CalculatedValue(count));</span>
+	}
+
+	public String getAttribute(ActionStatus status, String name){
+<span class="nc bnc" id="L523" title="All 2 branches missed.">		if(ATS_OCCURRENCES.equals(name)) {</span>
+<span class="nc" id="L524">			return String.valueOf(count);</span>
+<span class="nc bnc" id="L525" title="All 2 branches missed.">		}else if(isValidated()){</span>
+<span class="nc" id="L526">			return engine.getAttribute(status, getFoundElement(), name, maxTry);</span>
+		}
+<span class="nc" id="L528">		return null;</span>
+	}
+
+	public CalculatedProperty[] getAttributes(boolean reload) {
+
+<span class="nc" id="L533">		final CalculatedProperty[] props = engine.getAttributes(getFoundElement(), reload);</span>
+
+<span class="nc" id="L535">		final CalculatedProperty[] result = new CalculatedProperty[props.length + 1];</span>
+<span class="nc" id="L536">		result[0] = getOccurrencesProperty();</span>
+		
+<span class="nc" id="L538">		int pos = 1;</span>
+<span class="nc bnc" id="L539" title="All 2 branches missed.">		for (CalculatedProperty prop : props) {</span>
+<span class="nc" id="L540">            result[pos] = prop;</span>
+<span class="nc" id="L541">            pos++;</span>
+        }
+
+<span class="nc" id="L544">		return result;</span>
+	}
+
+	public CalculatedProperty[] getCssAttributes() {
+<span class="nc" id="L548">		return engine.getCssAttributes(getFoundElement());</span>
+	}
+
+	public Object executeScript(ActionStatus status, String script, boolean returnValue) {
+<span class="nc bnc" id="L552" title="All 2 branches missed.">		if(isValidated()){</span>
+<span class="nc" id="L553">			return engine.executeJavaScript(status, script, this);</span>
+		}else{
+<span class="nc" id="L555">			status.setPassed(false);</span>
+<span class="nc" id="L556">			status.setCode(ActionStatus.OBJECT_NOT_FOUND);</span>
+<span class="nc" id="L557">			status.setMessage(&quot;Element not found, cannot execute script action !&quot;);</span>
+		}
+<span class="nc" id="L559">		return null;</span>
+	}
+
+	public void terminateExecution(ActionStatus status, ActionTestScript script, int error, Long duration) {
+<span class="nc" id="L563">		recorder = script.getRecorder();</span>
+<span class="nc" id="L564">		recorder.update(error, duration, this);</span>
+<span class="nc" id="L565">		channel.actionTerminated(status);</span>
+<span class="nc" id="L566">	}</span>
+
+	public void terminateExecution(ActionStatus status, ActionTestScript script, int error, Long duration, String value, String data) {
+<span class="nc" id="L569">		recorder = script.getRecorder();</span>
+<span class="nc" id="L570">		recorder.update(error, duration, value, data, this);</span>
+<span class="nc" id="L571">		channel.actionTerminated(status);</span>
+<span class="nc" id="L572">	}</span>
+
+	public void updateScreen() {
+<span class="nc" id="L575">		recorder.updateScreen(this);</span>
+<span class="nc" id="L576">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VisualImage.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.recorder</a> &gt; <span class="el_source">VisualImage.java</span></div><h1>VisualImage.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+*/
+
+package com.ats.recorder;
+
+import com.ats.executor.TestBound;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Path;
+
+public class VisualImage {
+
+	private byte[] data;
+	private String type;
+
+<span class="nc" id="L38">	private boolean drawBound = false;</span>
+	private int x;
+	private int y;
+	private int w;
+	private int h;
+
+	private File file;
+
+<span class="nc" id="L46">	public VisualImage(Path folder, String name, String type, byte[] data) {</span>
+<span class="nc" id="L47">		this.type = type;</span>
+<span class="nc" id="L48">		this.data = data;</span>
+<span class="nc" id="L49">		this.file = folder.resolve(name).toFile();</span>
+<span class="nc" id="L50">	}</span>
+
+	public VisualImage(Path folder, String name, String type, byte[] data, TestBound bound) {
+<span class="nc" id="L53">		this(folder, name, type, data);</span>
+<span class="nc" id="L54">		this.drawBound = true;</span>
+<span class="nc" id="L55">		this.x = bound.getX().intValue() -6;</span>
+<span class="nc" id="L56">		this.y = bound.getY().intValue() -7;</span>
+<span class="nc" id="L57">		this.w = bound.getWidth().intValue();</span>
+<span class="nc" id="L58">		this.h = bound.getHeight().intValue();</span>
+<span class="nc" id="L59">	}</span>
+
+	public void save() {
+<span class="nc bnc" id="L62" title="All 4 branches missed.">		if(data != null &amp;&amp; data.length &gt; 0) {</span>
+			try {
+<span class="nc bnc" id="L64" title="All 2 branches missed.">				if(drawBound) {</span>
+
+<span class="nc" id="L66">					final BufferedImage buffImage = ImageIO.read(new ByteArrayInputStream(data));</span>
+<span class="nc" id="L67">					final Graphics2D g2d = buffImage.createGraphics();</span>
+
+<span class="nc" id="L69">					g2d.setColor(Color.MAGENTA);</span>
+<span class="nc" id="L70">					g2d.setStroke(new BasicStroke(3));</span>
+<span class="nc" id="L71">					g2d.drawRect(x, y, w, h);</span>
+<span class="nc" id="L72">					g2d.dispose();</span>
+
+<span class="nc" id="L74">					ImageIO.write(buffImage, type, file);</span>
+
+<span class="nc" id="L76">				}else {</span>
+<span class="nc" id="L77">					FileOutputStream fos = new FileOutputStream(file);</span>
+<span class="nc" id="L78">					fos.write(data);</span>
+<span class="nc" id="L79">					fos.close();</span>
+				}
+
+<span class="nc" id="L82">			} catch (IOException e1) {</span>
+<span class="nc" id="L83">				e1.printStackTrace();</span>
+<span class="nc" id="L84">			}</span>
+		}
+<span class="nc" id="L86">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VisualRecorder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.recorder</a> &gt; <span class="el_source">VisualRecorder.java</span></div><h1>VisualRecorder.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+*/
+
+package com.ats.recorder;
+
+import com.ats.element.TestElement;
+import com.ats.executor.ActionTestScript;
+import com.ats.executor.channels.Channel;
+import com.ats.executor.channels.EmptyChannel;
+import com.ats.executor.drivers.desktop.DesktopResponse;
+import com.ats.generator.objects.MouseDirection;
+import com.ats.script.Project;
+import com.ats.script.Script;
+import com.ats.script.ScriptHeader;
+import com.ats.script.actions.*;
+import com.ats.tools.logger.ExecutionLogger;
+import com.ats.tools.report.XmlReport;
+
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+public class VisualRecorder implements IVisualRecorder {
+
+	private Channel channel;
+	private String outputPath;
+	private ScriptHeader scriptHeader;
+
+<span class="nc" id="L45">	private int visualQuality = 3;</span>
+<span class="nc" id="L46">	private boolean xml = false;</span>
+	
+	private long started;
+<span class="nc" id="L49">	private boolean recording = false;</span>
+	
+<span class="nc" id="L51">	private ReportSummary summary = new ReportSummary();</span>
+	private ActionTestScript topScript;
+	
+	private ExecutionLogger logger;
+
+<span class="nc" id="L56">	public VisualRecorder(ActionTestScript topScript, ScriptHeader header, Project project, boolean xml, int quality) {</span>
+
+<span class="nc" id="L58">		this.topScript = topScript;</span>
+<span class="nc" id="L59">		this.logger = new ExecutionLogger();</span>
+		
+<span class="nc" id="L61">		final Path output = project.getReportFolder().resolve(header.getPackagePath());</span>
+<span class="nc" id="L62">		output.toFile().mkdirs();</span>
+
+<span class="nc" id="L64">		initAndStart(output, header, xml, quality);</span>
+<span class="nc" id="L65">	}</span>
+
+<span class="nc" id="L67">	public VisualRecorder(ActionTestScript topScript, File outputFolder, ScriptHeader header, boolean xml, int quality, ExecutionLogger logger) {</span>
+		
+<span class="nc" id="L69">		this.topScript = topScript;</span>
+<span class="nc" id="L70">		this.logger = logger;</span>
+		
+<span class="nc" id="L72">		final Path output = outputFolder.toPath();</span>
+<span class="nc" id="L73">		initAndStart(output, header, xml, quality);</span>
+<span class="nc" id="L74">	}</span>
+
+	//--------------------------------------------------------------------------------------------
+	//--------------------------------------------------------------------------------------------
+
+	private void initAndStart(Path output, ScriptHeader header, boolean xml, int quality) {
+<span class="nc" id="L80">		this.outputPath = output.toFile().getAbsolutePath();</span>
+<span class="nc" id="L81">		this.scriptHeader = header;</span>
+<span class="nc" id="L82">		this.xml = xml;</span>
+
+<span class="nc bnc" id="L84" title="All 2 branches missed.">		if(quality &gt; 0) {</span>
+<span class="nc" id="L85">			this.visualQuality = quality;</span>
+		}
+		
+<span class="nc" id="L88">		this.started = System.currentTimeMillis();</span>
+<span class="nc" id="L89">	}</span>
+	
+	@Override
+	public void updateSummary(String testName, int testLine, String data) {
+<span class="nc" id="L93">		summary.appendData(data);</span>
+<span class="nc" id="L94">	}</span>
+	
+	@Override
+	public void updateSummaryFail(String testName, int testLine, String app, String errorMessage) {
+<span class="nc" id="L98">		summary.setFailData(testName, testLine, errorMessage);</span>
+<span class="nc" id="L99">	}</span>
+	
+	//--------------------------------------------------------------------------------------------
+	//--------------------------------------------------------------------------------------------
+	
+	@Override
+	public void terminate() {
+<span class="nc bnc" id="L106" title="All 2 branches missed.">		if(channel != null) {</span>
+<span class="nc" id="L107">			final Path path = Paths.get(outputPath);</span>
+			
+<span class="nc" id="L109">			logger.sendInfo(&quot;Stop visual recording&quot;, scriptHeader.getQualifiedName());</span>
+<span class="nc" id="L110">			channel.stopVisualRecord(topScript.getStatus(), summary);</span>
+<span class="nc" id="L111">			channel.saveVisualReportFile(path, scriptHeader.getQualifiedName() + Script.ATS_VISUAL_FILE_EXTENSION, logger);</span>
+			
+<span class="nc bnc" id="L113" title="All 2 branches missed.">			if(xml) {</span>
+<span class="nc" id="L114">				XmlReport.createReport(path, scriptHeader.getQualifiedName(), logger);</span>
+			}
+		}
+<span class="nc" id="L117">	}</span>
+	
+	private void setChannel(Channel channel) {
+<span class="nc bnc" id="L120" title="All 6 branches missed.">		if(!recording &amp;&amp; channel != null &amp;&amp; !(channel instanceof EmptyChannel)) {</span>
+<span class="nc" id="L121">			recording = true;</span>
+<span class="nc" id="L122">			final DesktopResponse resp = channel.startVisualRecord(scriptHeader, visualQuality, started);</span>
+<span class="nc bnc" id="L123" title="All 4 branches missed.">			if(resp != null &amp;&amp; resp.errorCode &lt; 0) {</span>
+<span class="nc" id="L124">				channel.sendLog(resp.errorCode, &quot;Unable to start visual recording&quot;, resp.errorMessage);</span>
+			}
+		}
+<span class="nc" id="L127">		this.channel = channel;</span>
+<span class="nc" id="L128">	}</span>
+	
+	private boolean isSyncAction(String actionName) {
+<span class="nc bnc" id="L131" title="All 10 branches missed.">		if(actionName == ActionMouse.class.getName() || actionName == ActionGotoUrl.class.getName() || actionName == ActionMouseKey.class.getName() ||  actionName == ActionMouseScroll.class.getName() || actionName == ActionText.class.getName()</span>
+<span class="nc bnc" id="L132" title="All 10 branches missed.">			|| actionName == ActionScripting.class.getName() || actionName == ActionWindowState.class.getName() || actionName == ActionWindowSwitch.class.getName() || actionName == ActionMouseDragDrop.class.getName() || actionName == ActionMouseSwipe.class.getName()</span>
+<span class="nc bnc" id="L133" title="All 4 branches missed.">			|| actionName == ActionChannelSwitch.class.getName() || actionName == ActionWindowResize.class.getName()</span>
+		) {
+<span class="nc" id="L135">			return true;</span>
+		}
+<span class="nc" id="L137">		return false;</span>
+	}
+	
+	@Override
+	public void createVisualStartChannelAction(ActionChannelStart action, long duration, String scriptName, int scriptLine) {
+<span class="nc" id="L142">		setChannel(action.getStatus().getChannel());</span>
+		
+<span class="nc" id="L144">		channel.createVisualAction(</span>
+				true,
+<span class="nc" id="L146">				action.getClass().getName(), </span>
+				scriptLine, 
+				scriptName, 
+<span class="nc" id="L149">				System.currentTimeMillis() - started - duration,</span>
+<span class="nc" id="L150">				isSyncAction(action.getClass().getName()));</span>
+		
+<span class="nc" id="L152">		channel.sleep(100);</span>
+<span class="nc" id="L153">		update(0, duration, action.getName(), action.getActionLogsData().toString());</span>
+<span class="nc" id="L154">	}</span>
+	
+	@Override
+	public void createVisualAction(Action action, String scriptName, int scriptLine) {
+<span class="nc" id="L158">		setChannel(action.getStatus().getChannel());</span>
+		
+<span class="nc bnc" id="L160" title="All 2 branches missed.">		channel.createVisualAction(</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">				(action instanceof  ActionExecute) &amp;&amp; ((ActionExecute)action).isStop(), </span>
+<span class="nc" id="L162">				action.getClass().getName(), </span>
+				scriptLine, 
+				scriptName, 
+<span class="nc" id="L165">				System.currentTimeMillis() - started, </span>
+<span class="nc" id="L166">				isSyncAction(action.getClass().getName()));</span>
+<span class="nc" id="L167">	}</span>
+	
+	@Override
+	public void update(int error, long duration, String value, String data) {
+<span class="nc" id="L171">		channel.updateVisualAction(error, duration, value, data);</span>
+<span class="nc" id="L172">	}</span>
+
+	@Override
+	public void update(int error, long duration, String value) {
+<span class="nc" id="L176">		channel.updateVisualAction(error, duration, value);</span>
+<span class="nc" id="L177">	}</span>
+	
+	@Override
+	public void updateScreen(boolean ref) {
+<span class="nc" id="L181">		channel.sleep(100);</span>
+<span class="nc" id="L182">		channel.updateVisualAction(ref);</span>
+<span class="nc" id="L183">	}</span>
+
+	@Override
+	public void update(String value) {
+<span class="nc" id="L187">		channel.updateVisualAction(value);</span>
+<span class="nc" id="L188">	}</span>
+
+	@Override
+	public void update(String value, String data) {
+<span class="nc" id="L192">		channel.updateVisualAction(value, data);</span>
+<span class="nc" id="L193">	}</span>
+
+	@Override
+	public void update(String type, MouseDirection position) {
+<span class="nc" id="L197">		channel.updateVisualAction(type, position.getHorizontalPos(), position.getVerticalPos());</span>
+<span class="nc" id="L198">	}</span>
+
+	@Override
+	public void update(int error, long duration) {
+<span class="nc" id="L202">		channel.updateVisualAction(error, duration);</span>
+<span class="nc" id="L203">	}</span>
+
+	@Override
+	public void update(TestElement element) {
+<span class="nc" id="L207">		channel.updateVisualAction(element);</span>
+<span class="nc" id="L208">	}</span>
+
+	@Override
+	public void updateScreen(TestElement element) {
+<span class="nc" id="L212">		channel.mouseMoveToElement(channel.newActionStatus(), element.getFoundElement(), new MouseDirection());</span>
+<span class="nc" id="L213">		channel.updateVisualAction(element);</span>
+<span class="nc" id="L214">	}</span>
+	
+	//-----------------------------------------------------------------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------------------------------------------------------
+	
+	@Override
+	public void updateScreen(int error, long duration) {
+<span class="nc" id="L221">		update(error, duration);</span>
+		//updateScreen(false);
+<span class="nc" id="L223">	}</span>
+	
+	@Override
+	public void updateScreen(int error, long duration, String value) {
+<span class="nc" id="L227">		update(error, duration, value);</span>
+		//updateScreen(false);
+<span class="nc" id="L229">	}</span>
+	
+	@Override
+	public void updateTextScreen(int error, long duration, String value, String data) {
+<span class="nc" id="L233">		update(error, duration, value, data);</span>
+		//updateScreen(false);
+<span class="nc" id="L235">	}</span>
+	
+	@Override
+	public void updateScreen(int error, long duration, String type, MouseDirection position) {
+<span class="nc" id="L239">		update(error, duration);</span>
+<span class="nc" id="L240">		update(type, position);</span>
+		//updateScreen(false);
+<span class="nc" id="L242">	}</span>
+	
+	//-----------------------------------------------------------------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------------------------------------------------------
+	
+	@Override
+	public void update(int error, long duration, TestElement element) {
+<span class="nc" id="L249">		update(error, duration);</span>
+<span class="nc" id="L250">		update(element);</span>
+<span class="nc" id="L251">	}</span>
+	
+	@Override
+	public void update(int error, long duration, String value, String data, TestElement element) {
+<span class="nc" id="L255">		update(error, duration, value, data);</span>
+<span class="nc" id="L256">		update(element);</span>
+<span class="nc" id="L257">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

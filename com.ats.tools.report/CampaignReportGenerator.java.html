@@ -1,0 +1,548 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CampaignReportGenerator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.tools.report</a> &gt; <span class="el_source">CampaignReportGenerator.java</span></div><h1>CampaignReportGenerator.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.tools.report;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+
+import org.apache.tools.ant.DefaultLogger;
+import org.apache.tools.ant.Project;
+import org.apache.tools.ant.ProjectHelper;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import com.ats.tools.ResourceContent;
+import com.ats.tools.Utils;
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
+
+public class CampaignReportGenerator {
+
+<span class="nc" id="L72">	public static String ATS_JSON_SUITES = &quot;ats-suites.json&quot;;</span>
+	public static final String ATS_REPORT = &quot;ats-report&quot;;
+
+	private final static String xmlSourceName = ATS_REPORT + &quot;.xml&quot;;
+	private final static String xmlSourceRoot = &quot;ats-report&quot;;
+
+	public static void main(String[] args) {
+
+<span class="nc" id="L80">		String output = null;</span>
+<span class="nc" id="L81">		String details = null;</span>
+<span class="nc" id="L82">		String jasper = null;</span>
+
+<span class="nc bnc" id="L84" title="All 2 branches missed.">		for (int i = 0; i &lt; args.length; i++) {</span>
+<span class="nc" id="L85">			String string = args[i];</span>
+<span class="nc bnc" id="L86" title="All 4 branches missed.">			if (string.startsWith(&quot;--&quot;) &amp;&amp; i + 1 &lt; args.length) {</span>
+<span class="nc bnc" id="L87" title="All 4 branches missed.">				switch (string.substring(2)) {</span>
+				case &quot;outputFolder&quot;:
+				case &quot;output&quot;:
+				case &quot;reportFolder&quot;:
+<span class="nc" id="L91">					output = args[i + 1].replaceAll(&quot;\&quot;&quot;, &quot;&quot;);</span>
+<span class="nc" id="L92">					break;</span>
+				case &quot;jasper&quot;:
+<span class="nc" id="L94">					jasper = args[i + 1].replaceAll(&quot;\&quot;&quot;, &quot;&quot;);</span>
+<span class="nc" id="L95">					break;</span>
+				case &quot;details&quot;:
+<span class="nc" id="L97">					details = args[i + 1];</span>
+					break;
+				}
+			}
+		}
+
+<span class="nc bnc" id="L103" title="All 2 branches missed.">		if (output == null) {</span>
+<span class="nc" id="L104">			System.out.println(&quot;Error, output folder not defined !&quot;);</span>
+<span class="nc" id="L105">			return;</span>
+		}
+
+<span class="nc" id="L108">		final Path outputFolderPath = Paths.get(output).toAbsolutePath();</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">		if (!outputFolderPath.toFile().exists()) {</span>
+<span class="nc" id="L110">			System.out.println(&quot;Error, output folder path not found : &quot; + output);</span>
+<span class="nc" id="L111">			return;</span>
+		}
+
+<span class="nc" id="L114">		final File jsonSuiteFilesFile = outputFolderPath.resolve(ATS_JSON_SUITES).toFile();</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">		if (jsonSuiteFilesFile.exists()) {</span>
+
+			try {
+<span class="nc" id="L118">				new CampaignReportGenerator(outputFolderPath, jsonSuiteFilesFile, details, jasper);</span>
+<span class="nc" id="L119">			} catch (IOException | TransformerException | ParserConfigurationException | SAXException e) {</span>
+<span class="nc" id="L120">				e.printStackTrace();</span>
+<span class="nc" id="L121">			}</span>
+
+		} else {
+<span class="nc" id="L124">			System.out.println(&quot;Suites file not found : &quot; + ATS_JSON_SUITES);</span>
+		}
+<span class="nc" id="L126">	}</span>
+
+	private void copyReportsTemplate(Path path, Path toPath) {
+<span class="nc bnc" id="L129" title="All 2 branches missed.">		if(Files.exists(path)) {</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">			for(File f : path.toFile().listFiles()) {</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">				if(f.isFile()) {</span>
+					try {
+<span class="nc" id="L133">						Files.copy(f.toPath(), toPath.resolve(f.getName()), StandardCopyOption.REPLACE_EXISTING);</span>
+<span class="nc" id="L134">					} catch (IOException e) {}</span>
+				}
+			}
+		}
+<span class="nc" id="L138">	}</span>
+
+	public CampaignReportGenerator(Path outputFolderPath, File jsonSuiteFilesFile, String reportLevel, String jasper)
+<span class="nc" id="L141">			throws IOException, TransformerException, ParserConfigurationException, SAXException {</span>
+
+<span class="nc" id="L143">		final int detailsValue = Utils.string2Int(reportLevel, 0);</span>
+
+<span class="nc bnc" id="L145" title="All 2 branches missed.">		if(detailsValue &gt; 0) {</span>
+
+<span class="nc" id="L147">			final Path reportPath = Paths.get(&quot;src&quot;, &quot;assets&quot;, &quot;resources&quot;, &quot;reports&quot;);</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">			if(Files.exists(reportPath)) {</span>
+<span class="nc" id="L149">				copyReportsTemplate(reportPath.resolve(&quot;templates&quot;), outputFolderPath);</span>
+<span class="nc" id="L150">				copyReportsTemplate(reportPath.resolve(&quot;images&quot;), outputFolderPath);</span>
+			}
+
+<span class="nc" id="L153">			SuitesReport suiteReport = null;</span>
+			try {
+
+<span class="nc" id="L156">				final JsonReader reader = new JsonReader(new FileReader(jsonSuiteFilesFile));</span>
+<span class="nc" id="L157">				suiteReport = new Gson().fromJson(reader, SuitesReport.class);</span>
+<span class="nc" id="L158">				reader.close();</span>
+
+<span class="nc" id="L160">			} catch (IOException e) {</span>
+<span class="nc" id="L161">			}</span>
+
+<span class="nc bnc" id="L163" title="All 2 branches missed.">			if (suiteReport == null) {</span>
+<span class="nc" id="L164">				System.out.println(&quot;No suites found, nothing to do !&quot;);</span>
+<span class="nc" id="L165">				return;</span>
+			}
+
+<span class="nc" id="L168">			DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();</span>
+<span class="nc" id="L169">			Document writeXmlDocument = builder.newDocument();</span>
+
+<span class="nc" id="L171">			final Element report = writeXmlDocument.createElement(&quot;ats-report&quot;);</span>
+<span class="nc" id="L172">			report.setAttribute(&quot;details&quot;, String.valueOf(detailsValue));</span>
+<span class="nc" id="L173">			report.setAttribute(&quot;projectId&quot;, suiteReport.projectId);</span>
+<span class="nc" id="L174">			report.setAttribute(&quot;projectDescription&quot;, suiteReport.projectDescription);</span>
+<span class="nc" id="L175">			writeXmlDocument.appendChild(report);</span>
+
+<span class="nc" id="L177">			final Element picsList = writeXmlDocument.createElement(&quot;pics&quot;);</span>
+
+<span class="nc" id="L179">			final String[] defaultImages = new String[] { &quot;logo.png&quot;, &quot;true.png&quot;, &quot;false.png&quot;, &quot;warning.png&quot;, &quot;noStop.png&quot;, &quot;pdf.png&quot; };</span>
+<span class="nc bnc" id="L180" title="All 2 branches missed.">			for (String img : defaultImages) {</span>
+<span class="nc" id="L181">				final Element pic = writeXmlDocument.createElement(&quot;pic&quot;);</span>
+<span class="nc" id="L182">				pic.setAttribute(&quot;name&quot;, img.replace(&quot;.png&quot;, &quot;&quot;));</span>
+
+<span class="nc" id="L184">				byte[] imgBytes = null;</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">				if(Files.exists(outputFolderPath.resolve(img))){</span>
+<span class="nc" id="L186">					imgBytes = Files.readAllBytes(outputFolderPath.resolve(img));</span>
+				}else {
+<span class="nc" id="L188">					imgBytes = ResourceContent.class.getResourceAsStream(&quot;/reports/images/&quot; + img).readAllBytes();</span>
+				}
+
+<span class="nc" id="L191">				pic.setTextContent(&quot;data:image/png;base64,&quot; + getBase64DefaultImages(imgBytes));</span>
+<span class="nc" id="L192">				picsList.appendChild(pic);</span>
+			}
+<span class="nc" id="L194">			report.appendChild(picsList);</span>
+
+<span class="nc" id="L196">			report.setAttribute(&quot;suitesCount&quot;, String.valueOf(suiteReport.suites.length));</span>
+<span class="nc" id="L197">			int totalTests = 0;</span>
+<span class="nc" id="L198">			int totalTestsPassed = 0;</span>
+<span class="nc" id="L199">			int totalSuitesPassed = 0;</span>
+<span class="nc" id="L200">			int totalActions = 0;</span>
+<span class="nc" id="L201">			int totalDuration = 0;</span>
+
+<span class="nc bnc" id="L203" title="All 2 branches missed.">			for (SuitesReportItem info : suiteReport.suites) {</span>
+
+<span class="nc" id="L205">				boolean suitePassed = true;</span>
+<span class="nc" id="L206">				final Element suite = writeXmlDocument.createElement(&quot;suite&quot;);</span>
+
+<span class="nc" id="L208">				suite.setAttribute(&quot;name&quot;, info.name);</span>
+<span class="nc" id="L209">				suite.setAttribute(&quot;description&quot;, info.description);</span>
+
+<span class="nc" id="L211">				final Element parameters = writeXmlDocument.createElement(&quot;parameters&quot;);</span>
+<span class="nc" id="L212">				suite.appendChild(parameters);</span>
+
+<span class="nc bnc" id="L214" title="All 2 branches missed.">				for (Map.Entry&lt;String, String&gt; entry : info.parameters.entrySet()) {</span>
+<span class="nc" id="L215">					final Element parameter = writeXmlDocument.createElement(&quot;parameter&quot;);</span>
+<span class="nc" id="L216">					parameter.setAttribute(&quot;name&quot;, entry.getKey());</span>
+<span class="nc" id="L217">					parameter.setAttribute(&quot;value&quot;, entry.getValue());</span>
+
+<span class="nc" id="L219">					parameters.appendChild(parameter);</span>
+<span class="nc" id="L220">				}</span>
+
+<span class="nc" id="L222">				final Element tests = writeXmlDocument.createElement(&quot;tests&quot;);</span>
+<span class="nc" id="L223">				suite.appendChild(tests);</span>
+
+<span class="nc" id="L225">				int testsPassed = 0;</span>
+<span class="nc" id="L226">				int actionsExecuted = 0;</span>
+<span class="nc" id="L227">				int suiteDuration = 0;</span>
+
+<span class="nc" id="L229">				suite.setAttribute(&quot;testsCount&quot;, String.valueOf(info.tests.length));</span>
+
+<span class="nc bnc" id="L231" title="All 2 branches missed.">				for (String className : info.tests) {</span>
+
+<span class="nc" id="L233">					final File xmlDataFile = outputFolderPath.resolve(info.name).resolve(className + &quot;_xml&quot;).resolve(XmlReport.REPORT_FILE).toFile();</span>
+
+<span class="nc bnc" id="L235" title="All 2 branches missed.">					if (xmlDataFile.exists()) {</span>
+
+<span class="nc" id="L237">						totalTests++;</span>
+<span class="nc" id="L238">						int testDuration = 0;</span>
+
+<span class="nc" id="L240">						final Element atsTest = builder.parse(xmlDataFile).getDocumentElement();</span>
+<span class="nc" id="L241">						final NodeList summary = atsTest.getElementsByTagName(&quot;summary&quot;);</span>
+
+<span class="nc bnc" id="L243" title="All 2 branches missed.">						if (summary.getLength() &gt; 0) {</span>
+<span class="nc bnc" id="L244" title="All 2 branches missed.">							if (&quot;1&quot;.equals(summary.item(0).getAttributes().getNamedItem(&quot;status&quot;).getNodeValue())) {</span>
+<span class="nc" id="L245">								testsPassed++;</span>
+<span class="nc" id="L246">								totalTestsPassed++;</span>
+							} else {
+<span class="nc" id="L248">								suitePassed = false;</span>
+							}
+						}
+
+<span class="nc" id="L252">						final NodeList actionsList = atsTest.getElementsByTagName(&quot;action&quot;);</span>
+<span class="nc" id="L253">						actionsExecuted += actionsList.getLength();</span>
+
+<span class="nc bnc" id="L255" title="All 2 branches missed.">						for (int i = 0; i &lt; actionsList.getLength(); i++) {</span>
+<span class="nc" id="L256">							final Node action = actionsList.item(i);</span>
+
+<span class="nc bnc" id="L258" title="All 2 branches missed.">							for (int j = 0; j &lt; action.getChildNodes().getLength(); j++) {</span>
+<span class="nc" id="L259">								final Node actionNode = action.getChildNodes().item(j);</span>
+<span class="nc bnc" id="L260" title="All 2 branches missed.">								if (&quot;duration&quot;.equals(actionNode.getNodeName())) {</span>
+<span class="nc" id="L261">									testDuration += Utils.string2Int(actionNode.getTextContent());</span>
+<span class="nc" id="L262">									break;</span>
+								}
+							}
+						}
+
+<span class="nc" id="L267">						atsTest.setAttribute(&quot;duration&quot;, String.valueOf(testDuration));</span>
+
+<span class="nc" id="L269">						suiteDuration += testDuration;</span>
+
+<span class="nc" id="L271">						tests.appendChild(writeXmlDocument.importNode(atsTest, true));</span>
+					}
+				}
+
+<span class="nc" id="L275">				totalActions += actionsExecuted;</span>
+<span class="nc" id="L276">				totalDuration += suiteDuration;</span>
+
+<span class="nc bnc" id="L278" title="All 2 branches missed.">				if (suitePassed) {</span>
+<span class="nc" id="L279">					totalSuitesPassed++;</span>
+				}
+<span class="nc" id="L281">				suite.setAttribute(&quot;passed&quot;, String.valueOf(suitePassed));</span>
+<span class="nc" id="L282">				suite.setAttribute(&quot;duration&quot;, String.valueOf(suiteDuration));</span>
+<span class="nc" id="L283">				suite.setAttribute(&quot;actions&quot;, String.valueOf(actionsExecuted));</span>
+<span class="nc" id="L284">				suite.setAttribute(&quot;testsPassed&quot;, String.valueOf(testsPassed));</span>
+<span class="nc" id="L285">				report.appendChild(suite);</span>
+			}
+
+<span class="nc" id="L288">			report.setAttribute(&quot;duration&quot;, String.valueOf(totalDuration));</span>
+<span class="nc" id="L289">			report.setAttribute(&quot;tests&quot;, String.valueOf(totalTests));</span>
+<span class="nc" id="L290">			report.setAttribute(&quot;testsPassed&quot;, String.valueOf(totalTestsPassed));</span>
+<span class="nc" id="L291">			report.setAttribute(&quot;suitesPassed&quot;, String.valueOf(totalSuitesPassed));</span>
+<span class="nc" id="L292">			report.setAttribute(&quot;actions&quot;, String.valueOf(totalActions));</span>
+
+<span class="nc" id="L294">			Transformer transformer = TransformerFactory.newInstance().newTransformer();</span>
+<span class="nc" id="L295">			transformer.transform(new DOMSource(writeXmlDocument),</span>
+					new StreamResult(new OutputStreamWriter(
+<span class="nc" id="L297">							new FileOutputStream(outputFolderPath.resolve(xmlSourceName).toFile()),</span>
+							StandardCharsets.UTF_8)));
+
+
+<span class="nc" id="L301">			File htmlTemplateFile = copyResource(&quot;suites_html.xml&quot;, outputFolderPath);</span>
+
+			// HTML reports
+
+<span class="nc" id="L305">			final Path atsXmlDataPath = outputFolderPath.resolve(xmlSourceName);</span>
+<span class="nc" id="L306">			final MinifyWriter filteredWriter = new MinifyWriter(</span>
+<span class="nc" id="L307">					Files.newBufferedWriter(outputFolderPath.resolve(ATS_REPORT + &quot;.html&quot;), StandardCharsets.UTF_8));</span>
+<span class="nc" id="L308">			final Transformer htmlTransformer = TransformerFactory.newInstance().newTransformer(new StreamSource(htmlTemplateFile));</span>
+
+<span class="nc" id="L310">			htmlTransformer.setOutputProperty(OutputKeys.ENCODING, &quot;UTF-8&quot;);</span>
+<span class="nc" id="L311">			htmlTransformer.transform(</span>
+<span class="nc" id="L312">					new DOMSource(builder.parse(new InputSource(</span>
+<span class="nc" id="L313">							new InputStreamReader(Files.newInputStream(atsXmlDataPath), StandardCharsets.UTF_8)))),</span>
+					new StreamResult(filteredWriter));
+
+<span class="nc" id="L316">			filteredWriter.close();</span>
+
+<span class="nc bnc" id="L318" title="All 2 branches missed.">			if (jasper != null) {</span>
+<span class="nc" id="L319">				final File jasperFolder = new File(jasper);</span>
+<span class="nc bnc" id="L320" title="All 2 branches missed.">				if (jasperFolder.exists()) {</span>
+
+<span class="nc" id="L322">					final String jasperFolderPath = jasperFolder.getAbsolutePath();</span>
+<span class="nc" id="L323">					System.out.println(&quot;[ATS-SCRIPT] Jasper folder -&gt; &quot; + jasperFolderPath);</span>
+
+<span class="nc" id="L325">					copyResource(&quot;summary.jrxml&quot;, outputFolderPath);</span>
+<span class="nc" id="L326">					copyResource(&quot;suite.jrxml&quot;, outputFolderPath);</span>
+<span class="nc" id="L327">					copyResource(&quot;test.jrxml&quot;, outputFolderPath);</span>
+
+<span class="nc" id="L329">					final String outputPath = outputFolderPath.toAbsolutePath().toString();</span>
+<span class="nc" id="L330">					final String reportName = &quot;summary&quot;;</span>
+
+					//-----------------------------------------------------------------------------------------------------
+					// Clean files
+					//-----------------------------------------------------------------------------------------------------	
+
+<span class="nc" id="L336">					File [] filesToDelete = outputFolderPath.toFile().listFiles(new FilenameFilter() {</span>
+						@Override
+						public boolean accept(File dir, String name) {
+<span class="nc bnc" id="L339" title="All 6 branches missed.">							return name.endsWith(&quot;.jrprint&quot;) || name.endsWith(&quot;.jasper&quot;) || name.equals(reportName + &quot;.pdf&quot;);</span>
+						}
+					});
+
+<span class="nc" id="L343">					System.out.println(&quot;Delete files.&quot;);</span>
+<span class="nc bnc" id="L344" title="All 2 branches missed.">					for (File f : filesToDelete) {</span>
+						try {
+<span class="nc" id="L346">							f.delete();</span>
+<span class="nc" id="L347">							System.out.println(&quot;File : &quot; + f.getAbsolutePath());</span>
+<span class="nc" id="L348">						}catch(Exception e) {}</span>
+					}
+
+					//-----------------------------------------------------------------------------------------------------
+					// Build Jasper reports
+					//-----------------------------------------------------------------------------------------------------	
+
+<span class="nc" id="L355">					builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();</span>
+<span class="nc" id="L356">					writeXmlDocument = builder.newDocument();</span>
+
+<span class="nc" id="L358">					final Element project = writeXmlDocument.createElement(&quot;project&quot;);</span>
+<span class="nc" id="L359">					project.setAttribute(&quot;default&quot;, &quot;run&quot;);</span>
+<span class="nc" id="L360">					project.setAttribute(&quot;basedir&quot;, outputPath);</span>
+
+<span class="nc" id="L362">					final Element path = writeXmlDocument.createElement(&quot;path&quot;);</span>
+<span class="nc" id="L363">					path.setAttribute(&quot;id&quot;, &quot;classpath&quot;);</span>
+
+<span class="nc" id="L365">					final Element fileset = writeXmlDocument.createElement(&quot;fileset&quot;);</span>
+<span class="nc" id="L366">					fileset.setAttribute(&quot;dir&quot;, jasperFolderPath);</span>
+
+<span class="nc" id="L368">					final Element include = writeXmlDocument.createElement(&quot;include&quot;);</span>
+<span class="nc" id="L369">					include.setAttribute(&quot;name&quot;, &quot;**/*.jar&quot;);</span>
+
+<span class="nc" id="L371">					fileset.appendChild(include);</span>
+<span class="nc" id="L372">					path.appendChild(fileset);</span>
+<span class="nc" id="L373">					project.appendChild(path);</span>
+
+<span class="nc" id="L375">					final Element taskdef = writeXmlDocument.createElement(&quot;taskdef&quot;);</span>
+<span class="nc" id="L376">					taskdef.setAttribute(&quot;name&quot;, &quot;jrc&quot;);</span>
+<span class="nc" id="L377">					taskdef.setAttribute(&quot;classname&quot;, &quot;net.sf.jasperreports.ant.JRAntCompileTask&quot;);</span>
+
+<span class="nc" id="L379">					final Element classpath = writeXmlDocument.createElement(&quot;classpath&quot;);</span>
+<span class="nc" id="L380">					classpath.setAttribute(&quot;refid&quot;, &quot;classpath&quot;);</span>
+<span class="nc" id="L381">					taskdef.appendChild(classpath);</span>
+<span class="nc" id="L382">					project.appendChild(taskdef);</span>
+
+<span class="nc" id="L384">					final Element target = writeXmlDocument.createElement(&quot;target&quot;);</span>
+<span class="nc" id="L385">					target.setAttribute(&quot;name&quot;, &quot;run&quot;);</span>
+
+<span class="nc" id="L387">					final Element jrc = writeXmlDocument.createElement(&quot;jrc&quot;);</span>
+<span class="nc" id="L388">					jrc.setAttribute(&quot;destdir&quot;, outputPath);</span>
+<span class="nc" id="L389">					jrc.setAttribute(&quot;xmlvalidation&quot;, &quot;false&quot;);</span>
+
+<span class="nc" id="L391">					final Element src = writeXmlDocument.createElement(&quot;src&quot;);</span>
+<span class="nc" id="L392">					final Element fileset7 = writeXmlDocument.createElement(&quot;fileset&quot;);</span>
+<span class="nc" id="L393">					fileset7.setAttribute(&quot;dir&quot;, outputPath);</span>
+
+<span class="nc" id="L395">					final Element include2 = writeXmlDocument.createElement(&quot;include&quot;);</span>
+<span class="nc" id="L396">					include2.setAttribute(&quot;name&quot;, &quot;**/*.jrxml&quot;);</span>
+<span class="nc" id="L397">					fileset7.appendChild(include2);</span>
+<span class="nc" id="L398">					src.appendChild(fileset7);</span>
+
+<span class="nc" id="L400">					jrc.appendChild(src);</span>
+
+<span class="nc" id="L402">					final Element classpath2 = writeXmlDocument.createElement(&quot;classpath&quot;);</span>
+<span class="nc" id="L403">					classpath2.setAttribute(&quot;refid&quot;, &quot;classpath&quot;);</span>
+<span class="nc" id="L404">					jrc.appendChild(classpath2);</span>
+
+<span class="nc" id="L406">					target.appendChild(jrc);</span>
+
+<span class="nc" id="L408">					project.appendChild(target);</span>
+
+<span class="nc" id="L410">					final File buildFile = outputFolderPath.resolve(&quot;build-report.xml&quot;).toFile();</span>
+
+<span class="nc" id="L412">					transformer = TransformerFactory.newInstance().newTransformer();</span>
+<span class="nc" id="L413">					transformer = TransformerFactory.newInstance().newTransformer();</span>
+<span class="nc" id="L414">					transformer.transform(new DOMSource(project),</span>
+							new StreamResult(new OutputStreamWriter(
+									new FileOutputStream(buildFile),
+									StandardCharsets.UTF_8)));
+
+
+					//-----------------------------------------------------------------------------------------------------
+					// Launch Ant task to build reports
+					//-----------------------------------------------------------------------------------------------------	
+
+<span class="nc" id="L424">					final Project p = new Project();</span>
+
+<span class="nc" id="L426">					p.setUserProperty(&quot;ant.file&quot;, buildFile.getAbsolutePath());</span>
+
+
+					//				File outputFolder = outputFolderPath.toFile();
+					//				p.setDefault(&quot;run&quot;);
+					//				p.setBaseDir(outputFolder);
+					//				
+					//				Reference ref = new Reference(p, &quot;classpath&quot;);
+					//				org.apache.tools.ant.types.Path ap = new org.apache.tools.ant.types.Path(p);
+					//				ap.setRefid(ref);
+					//				
+					//				FileSet afs = new FileSet();
+					//				afs.setDir(jasperFolder);
+					//				FilenameSelector afsSelector = new FilenameSelector();
+					//				afsSelector.setRegex(&quot;.*\\.jar&quot;);
+					//				afs.add(afsSelector);
+					//				ap.addFileset(afs);
+					//				
+					//				Taskdef tsk = new Taskdef();
+					//				tsk.setClassname(&quot;net.sf.jasperreports.ant.JRAntCompileTask&quot;);
+					//				tsk.setName(&quot;jrc&quot;);
+					//				tsk.setTaskName(&quot;jrc&quot;);
+					//				org.apache.tools.ant.types.Path ap2 = new org.apache.tools.ant.types.Path(p);
+					//				ap2.setRefid(ref);
+					//				
+					//				tsk.setProject(p);
+					//				
+					//				Target t = new Target();
+					//				t.setName(&quot;run&quot;);
+					//				
+					//				t.addTask(tsk);
+					//				
+					//				p.addTarget(t);
+
+<span class="nc" id="L460">					p.init();</span>
+
+<span class="nc" id="L462">					final ProjectHelper helper = ProjectHelper.getProjectHelper();</span>
+<span class="nc" id="L463">					p.addReference(&quot;ant.projectHelper&quot;, helper);</span>
+<span class="nc" id="L464">					helper.parse(p, buildFile);</span>
+
+<span class="nc" id="L466">					final DefaultLogger consoleLogger = new DefaultLogger();</span>
+<span class="nc" id="L467">					consoleLogger.setErrorPrintStream(System.err);</span>
+<span class="nc" id="L468">					consoleLogger.setOutputPrintStream(System.out);</span>
+<span class="nc" id="L469">					consoleLogger.setEmacsMode(false);</span>
+<span class="nc" id="L470">					consoleLogger.setMessageOutputLevel(Project.MSG_INFO);</span>
+
+<span class="nc" id="L472">					p.addBuildListener(consoleLogger);</span>
+<span class="nc" id="L473">					p.executeTarget(p.getDefaultTarget());</span>
+
+					//-----------------------------------------------------------------------------------------------------
+					// Generate pdf report
+					//-----------------------------------------------------------------------------------------------------		
+
+<span class="nc" id="L479">					System.out.println(&quot;Generate reports.&quot;);</span>
+
+					try {
+<span class="nc" id="L482">						generatePdf(reportName, outputPath, jasperFolder);</span>
+<span class="nc" id="L483">					}catch(ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {</span>
+<span class="nc" id="L484">						e.printStackTrace();</span>
+<span class="nc" id="L485">					}</span>
+				}
+			}
+		}
+<span class="nc" id="L489">	}</span>
+
+	@SuppressWarnings({ &quot;unchecked&quot;, &quot;rawtypes&quot; })
+	private static void generatePdf(String reportName, String outputPath, File jasperFolder) throws ClassNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException {
+
+<span class="nc" id="L494">		outputPath += File.separator;</span>
+<span class="nc" id="L495">		final String reportFullName = outputPath + reportName + &quot;.pdf&quot;;</span>
+<span class="nc" id="L496">		System.out.print(&quot;File : &quot; + reportFullName + &quot; ... &quot;);</span>
+
+<span class="nc" id="L498">		int len = jasperFolder.listFiles().length;</span>
+<span class="nc" id="L499">		final URL[] urls = new URL[len];</span>
+
+<span class="nc bnc" id="L501" title="All 2 branches missed.">		for (int i=0; i &lt; len; i++) {</span>
+<span class="nc" id="L502">			urls[i] = jasperFolder.listFiles()[i].toURI().toURL();</span>
+		}
+
+<span class="nc" id="L505">		final URLClassLoader loader = new URLClassLoader(urls); </span>
+
+<span class="nc" id="L507">		Class clazz = loader.loadClass(&quot;net.sf.jasperreports.engine.JasperFillManager&quot;);</span>
+
+<span class="nc" id="L509">		final Map&lt;String, Object&gt; parameters = new HashMap&lt;String, Object&gt;();</span>
+<span class="nc" id="L510">		parameters.put(&quot;workingDir&quot;, outputPath);</span>
+<span class="nc" id="L511">		parameters.put(&quot;xmlSource&quot;, xmlSourceName);</span>
+<span class="nc" id="L512">		parameters.put(&quot;xmlSourceRoot&quot;, xmlSourceRoot);</span>
+
+<span class="nc" id="L514">		Method method = clazz.getMethod(&quot;fillReportToFile&quot;, String.class, Map.class);</span>
+
+<span class="nc" id="L516">		final Object fileName = method.invoke(null, outputPath + reportName + &quot;.jasper&quot;, parameters);</span>
+
+<span class="nc" id="L518">		clazz = loader.loadClass(&quot;net.sf.jasperreports.engine.JasperExportManager&quot;);</span>
+<span class="nc" id="L519">		method = clazz.getMethod(&quot;exportReportToPdfFile&quot;, String.class, String.class);</span>
+
+<span class="nc" id="L521">		method.invoke(null, fileName.toString(), reportFullName);</span>
+<span class="nc" id="L522">		System.out.println(&quot;OK&quot;);</span>
+<span class="nc" id="L523">		System.out.flush();</span>
+
+<span class="nc" id="L525">		loader.close();</span>
+<span class="nc" id="L526">	}</span>
+
+	private static File copyResource(String resName, Path dest) throws IOException {
+<span class="nc" id="L529">		Path filePath = dest.resolve(resName);</span>
+<span class="nc bnc" id="L530" title="All 2 branches missed.">		if(!Files.exists(filePath)) {</span>
+<span class="nc" id="L531">			InputStream is = ResourceContent.class.getResourceAsStream(&quot;/reports/templates/&quot; + resName);</span>
+
+<span class="nc" id="L533">			byte[] buffer = new byte[is.available()];</span>
+<span class="nc" id="L534">			is.read(buffer);</span>
+
+<span class="nc" id="L536">			File targetFile = dest.resolve(resName).toFile();</span>
+<span class="nc" id="L537">			OutputStream outStream = new FileOutputStream(targetFile);</span>
+<span class="nc" id="L538">			outStream.write(buffer);</span>
+<span class="nc" id="L539">			outStream.close();</span>
+		}
+<span class="nc" id="L541">		return filePath.toFile();</span>
+	}
+
+	private static String getBase64DefaultImages(byte[] b) throws IOException {
+<span class="nc" id="L545">		return Base64.getEncoder().encodeToString(b);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

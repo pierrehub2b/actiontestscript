@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VisualElement.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.recorder</a> &gt; <span class="el_source">VisualElement.java</span></div><h1>VisualElement.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+*/
+
+package com.ats.recorder;
+
+import com.ats.executor.TestBound;
+
+public class VisualElement {
+	
+	private TestBound bound;
+	private int foundElements;
+	private Long searchDuration;
+	private String tag;
+	private String criterias;
+	
+	private String hpos;
+	private int hposValue;
+	
+	private String vpos;
+	private int vposValue;
+	
+<span class="nc" id="L38">	public VisualElement() {}</span>
+	
+	public TestBound getBound() {
+<span class="nc" id="L41">		return bound;</span>
+	}
+
+	public void setBound(TestBound bound) {
+<span class="nc" id="L45">		this.bound = bound;</span>
+<span class="nc" id="L46">	}</span>
+
+	public int getFoundElements() {
+<span class="nc" id="L49">		return foundElements;</span>
+	}
+
+	public void setFoundElements(int foundElements) {
+<span class="nc" id="L53">		this.foundElements = foundElements;</span>
+<span class="nc" id="L54">	}</span>
+
+	public Long getSearchDuration() {
+<span class="nc" id="L57">		return searchDuration;</span>
+	}
+
+	public void setSearchDuration(Long searchDuration) {
+<span class="nc" id="L61">		this.searchDuration = searchDuration;</span>
+<span class="nc" id="L62">	}</span>
+
+	public String getTag() {
+<span class="nc" id="L65">		return tag;</span>
+	}
+
+	public void setTag(String tag) {
+<span class="nc" id="L69">		this.tag = tag;</span>
+<span class="nc" id="L70">	}</span>
+
+	public String getCriterias() {
+<span class="nc" id="L73">		return criterias;</span>
+	}
+
+	public void setCriterias(String criterias) {
+<span class="nc" id="L77">		this.criterias = criterias;</span>
+<span class="nc" id="L78">	}</span>
+	
+	public String getHpos() {
+<span class="nc" id="L81">		return hpos;</span>
+	}
+
+	public void setHpos(String hpos) {
+<span class="nc" id="L85">		this.hpos = hpos;</span>
+<span class="nc" id="L86">	}</span>
+
+	public int getHposValue() {
+<span class="nc" id="L89">		return hposValue;</span>
+	}
+
+	public void setHposValue(int hposValue) {
+<span class="nc" id="L93">		this.hposValue = hposValue;</span>
+<span class="nc" id="L94">	}</span>
+
+	public String getVpos() {
+<span class="nc" id="L97">		return vpos;</span>
+	}
+
+	public void setVpos(String vpos) {
+<span class="nc" id="L101">		this.vpos = vpos;</span>
+<span class="nc" id="L102">	}</span>
+
+	public int getVposValue() {
+<span class="nc" id="L105">		return vposValue;</span>
+	}
+
+	public void setVposValue(int vposValue) {
+<span class="nc" id="L109">		this.vposValue = vposValue;</span>
+<span class="nc" id="L110">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LocaleInstanciator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.exadel.flamingo.flex.messaging.amf.io.util.instanciator</a> &gt; <span class="el_source">LocaleInstanciator.java</span></div><h1>LocaleInstanciator.java</h1><pre class="source lang-java linenums">/*
+  GRANITE DATA SERVICES
+  Copyright (C) 2007 ADEQUATE SYSTEMS SARL
+
+  This file is part of Granite Data Services.
+
+  Granite Data Services is free software; you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or (at your
+  option) any later version.
+ 
+  Granite Data Services is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+  for more details.
+ 
+  You should have received a copy of the GNU Lesser General Public License
+  along with this library; if not, see &lt;http://www.gnu.org/licenses/&gt;.
+*/
+
+package com.exadel.flamingo.flex.messaging.amf.io.util.instanciator;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+
+/**
+ * @author Franck WOLFF
+ */
+public class LocaleInstanciator extends AbstractInstanciator&lt;Locale&gt; {
+
+    private static final long serialVersionUID = 1L;
+    
+    private static final List&lt;String&gt; orderedFields;
+    static {
+<span class="nc" id="L37">        List&lt;String&gt; of = new ArrayList&lt;String&gt;(3);</span>
+<span class="nc" id="L38">        of.add(&quot;country&quot;);</span>
+<span class="nc" id="L39">        of.add(&quot;language&quot;);</span>
+<span class="nc" id="L40">        of.add(&quot;variant&quot;);</span>
+<span class="nc" id="L41">        orderedFields = Collections.unmodifiableList(of);</span>
+        
+<span class="nc" id="L43">    }</span>
+
+    public LocaleInstanciator() {
+<span class="nc" id="L46">        super();</span>
+<span class="nc" id="L47">    }</span>
+    
+    @Override
+    public Locale newInstance() {
+<span class="nc" id="L51">        String language = noNull((String)get(&quot;language&quot;));</span>
+<span class="nc" id="L52">        String country = noNull((String)get(&quot;country&quot;));</span>
+<span class="nc" id="L53">        String variant = noNull((String)get(&quot;variant&quot;));</span>
+
+<span class="nc" id="L55">        return new Locale(language, country, variant);</span>
+    }
+    
+    @Override
+    public List&lt;String&gt; getOrderedFieldNames() {
+<span class="nc" id="L60">        return orderedFields;</span>
+    }
+
+    private static String noNull(String s) {
+<span class="nc bnc" id="L64" title="All 2 branches missed.">        return s != null ? s : &quot;&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

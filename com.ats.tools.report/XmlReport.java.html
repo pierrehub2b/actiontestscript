@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>XmlReport.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.tools.report</a> &gt; <span class="el_source">XmlReport.java</span></div><h1>XmlReport.java</h1><pre class="source lang-java linenums">package com.ats.tools.report;
+
+import com.ats.recorder.VisualAction;
+import com.ats.recorder.VisualImage;
+import com.ats.recorder.VisualReport;
+import com.ats.recorder.ReportSummary;
+import com.ats.tools.Utils;
+import com.ats.tools.logger.ExecutionLogger;
+import com.exadel.flamingo.flex.messaging.amf.io.AMF3Deserializer;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Date;
+
+<span class="nc" id="L30">public class XmlReport {</span>
+
+<span class="nc" id="L32">	public static String REPORT_FILE = &quot;actions.xml&quot;;</span>
+
+	public static void createReport(Path output, String qualifiedName, ExecutionLogger logger) {
+
+<span class="nc" id="L36">		final File atsvFile = output.resolve(qualifiedName + &quot;.atsv&quot;).toFile();</span>
+
+<span class="nc bnc" id="L38" title="All 2 branches missed.">		if(atsvFile.exists()) {</span>
+
+<span class="nc" id="L40">			final File xmlFolder = output.resolve(qualifiedName + &quot;_xml&quot;).toFile();</span>
+<span class="nc" id="L41">			logger.sendInfo(&quot;Create XML report&quot;, xmlFolder.getAbsolutePath());</span>
+
+<span class="nc" id="L43">			final ArrayList&lt;VisualImage&gt; imagesList = new ArrayList&lt;VisualImage&gt;();</span>
+<span class="nc" id="L44">			final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();</span>
+
+			try {
+<span class="nc" id="L47">				Utils.deleteRecursive(xmlFolder);</span>
+<span class="nc" id="L48">			} catch (FileNotFoundException e) {}</span>
+
+<span class="nc" id="L50">			xmlFolder.mkdirs();</span>
+<span class="nc" id="L51">			final Path xmlFolerPath = xmlFolder.toPath();</span>
+
+			try {
+
+<span class="nc" id="L55">				final DocumentBuilder builder = factory.newDocumentBuilder();</span>
+<span class="nc" id="L56">				final Document document = builder.newDocument();</span>
+
+<span class="nc" id="L58">				FileInputStream fis = null;</span>
+<span class="nc" id="L59">				AMF3Deserializer amf3 = null;</span>
+
+				try {
+
+<span class="nc" id="L63">					fis = new FileInputStream(atsvFile);</span>
+<span class="nc" id="L64">					amf3 = new AMF3Deserializer(fis);</span>
+
+<span class="nc" id="L66">					final Element atsRoot = document.createElement(&quot;ats&quot;);</span>
+<span class="nc" id="L67">					document.appendChild(atsRoot);</span>
+
+					//------------------------------------------------------------------------------------------------------
+					// script header
+					//------------------------------------------------------------------------------------------------------
+
+<span class="nc" id="L73">					final VisualReport report = (VisualReport) amf3.readObject();</span>
+<span class="nc" id="L74">					final Element script = document.createElement(&quot;script&quot;);</span>
+
+<span class="nc" id="L76">					atsRoot.appendChild(script);</span>
+
+<span class="nc" id="L78">					script.setAttribute(&quot;testId&quot;, report.getId());					</span>
+<span class="nc" id="L79">					script.setAttribute(&quot;testName&quot;, report.getName());</span>
+
+<span class="nc" id="L81">					script.setAttribute(&quot;cpuSpeed&quot;, String.valueOf(report.getCpuSpeed()));</span>
+<span class="nc" id="L82">					script.setAttribute(&quot;cpuCount&quot;, String.valueOf(report.getCpuCount()));</span>
+<span class="nc" id="L83">					script.setAttribute(&quot;totalMemory&quot;, String.valueOf(report.getTotalMemory()));		</span>
+<span class="nc" id="L84">					script.setAttribute(&quot;osInfo&quot;, report.getOsInfo());	</span>
+
+<span class="nc" id="L86">					Element description = document.createElement(&quot;description&quot;);</span>
+<span class="nc" id="L87">					description.setTextContent(report.getDescription());</span>
+<span class="nc" id="L88">					script.appendChild(description);</span>
+
+<span class="nc" id="L90">					Element author = document.createElement(&quot;author&quot;);</span>
+<span class="nc" id="L91">					author.setTextContent(report.getAuthor());</span>
+<span class="nc" id="L92">					script.appendChild(author);</span>
+
+<span class="nc" id="L94">					Element prerequisite = document.createElement(&quot;prerequisite&quot;);</span>
+<span class="nc" id="L95">					prerequisite.setTextContent(report.getPrerequisite());</span>
+<span class="nc" id="L96">					script.appendChild(prerequisite);</span>
+
+<span class="nc" id="L98">					Element started = document.createElement(&quot;started&quot;);</span>
+<span class="nc" id="L99">					started.setTextContent(report.getStarted());</span>
+<span class="nc" id="L100">					script.appendChild(started);</span>
+
+<span class="nc" id="L102">					Element groups = document.createElement(&quot;groups&quot;);</span>
+<span class="nc" id="L103">					groups.setTextContent(report.getGroups());</span>
+<span class="nc" id="L104">					script.appendChild(groups);</span>
+
+<span class="nc" id="L106">					Element quality = document.createElement(&quot;quality&quot;);</span>
+<span class="nc" id="L107">					quality.setTextContent(String.valueOf(report.getQuality()));</span>
+<span class="nc" id="L108">					script.appendChild(quality);</span>
+
+					//------------------------------------------------------------------------------------------------------
+					//------------------------------------------------------------------------------------------------------
+
+<span class="nc" id="L113">					Element actions = document.createElement(&quot;actions&quot;);</span>
+<span class="nc" id="L114">					atsRoot.appendChild(actions);</span>
+
+<span class="nc bnc" id="L116" title="All 2 branches missed.">					while(amf3.available() &gt; 0) {</span>
+
+<span class="nc" id="L118">						final Object obj = amf3.readObject();</span>
+
+<span class="nc bnc" id="L120" title="All 2 branches missed.">						if(obj instanceof VisualAction) {</span>
+
+<span class="nc" id="L122">							final VisualAction va = (VisualAction) obj;</span>
+
+<span class="nc" id="L124">							final Element action = document.createElement(&quot;action&quot;);</span>
+<span class="nc" id="L125">							action.setAttribute(&quot;index&quot;, String.valueOf(va.getIndex()));</span>
+<span class="nc" id="L126">							action.setAttribute(&quot;type&quot;, va.getType());</span>
+
+<span class="nc" id="L128">							action.appendChild(document.createElement(&quot;line&quot;)).setTextContent(String.valueOf(va.getLine()));</span>
+<span class="nc" id="L129">							action.appendChild(document.createElement(&quot;script&quot;)).setTextContent(va.getScript());</span>
+<span class="nc" id="L130">							action.appendChild(document.createElement(&quot;timeLine&quot;)).setTextContent(String.valueOf(va.getTimeLine()));</span>
+<span class="nc" id="L131">							action.appendChild(document.createElement(&quot;error&quot;)).setTextContent(String.valueOf(va.getError()));</span>
+<span class="nc" id="L132">							action.appendChild(document.createElement(&quot;stop&quot;)).setTextContent(String.valueOf(va.isStop()));</span>
+<span class="nc" id="L133">							action.appendChild(document.createElement(&quot;duration&quot;)).setTextContent(String.valueOf(va.getDuration()));</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">							action.appendChild(document.createElement(&quot;passed&quot;)).setTextContent((String.valueOf(va.getError() == 0)));</span>
+<span class="nc" id="L135">							action.appendChild(document.createElement(&quot;value&quot;)).setTextContent(va.getValue());</span>
+<span class="nc" id="L136">							action.appendChild(document.createElement(&quot;data&quot;)).setTextContent(va.getData());</span>
+
+<span class="nc" id="L138">							Element elem = document.createElement(&quot;img&quot;);</span>
+<span class="nc" id="L139">							elem.setAttribute(&quot;src&quot;, va.getImageFileName());</span>
+<span class="nc" id="L140">							elem.setAttribute(&quot;width&quot;, String.valueOf(va.getChannelBound().getWidth().intValue()));</span>
+<span class="nc" id="L141">							elem.setAttribute(&quot;height&quot;, String.valueOf(va.getChannelBound().getHeight().intValue()));</span>
+<span class="nc" id="L142">							action.appendChild(elem);</span>
+
+<span class="nc" id="L144">							Element channel = document.createElement(&quot;channel&quot;);</span>
+<span class="nc" id="L145">							channel.setAttribute(&quot;name&quot;, va.getChannelName());</span>
+
+<span class="nc" id="L147">							Element channelBound = document.createElement(&quot;bound&quot;);</span>
+<span class="nc" id="L148">							Element channelX = document.createElement(&quot;x&quot;);</span>
+<span class="nc" id="L149">							channelX.setTextContent(String.valueOf(va.getChannelBound().getX().intValue()));</span>
+<span class="nc" id="L150">							channelBound.appendChild(channelX);</span>
+
+<span class="nc" id="L152">							Element channelY = document.createElement(&quot;y&quot;);</span>
+<span class="nc" id="L153">							channelY.setTextContent(String.valueOf(va.getChannelBound().getY().intValue()));</span>
+<span class="nc" id="L154">							channelBound.appendChild(channelY);</span>
+
+<span class="nc" id="L156">							Element channelWidth = document.createElement(&quot;width&quot;);</span>
+<span class="nc" id="L157">							channelWidth.setTextContent(String.valueOf(va.getChannelBound().getWidth().intValue()));</span>
+<span class="nc" id="L158">							channelBound.appendChild(channelWidth);</span>
+
+<span class="nc" id="L160">							Element channelHeight = document.createElement(&quot;height&quot;);</span>
+<span class="nc" id="L161">							channelHeight.setTextContent(String.valueOf(va.getChannelBound().getHeight().intValue()));</span>
+<span class="nc" id="L162">							channelBound.appendChild(channelHeight);</span>
+
+<span class="nc" id="L164">							channel.appendChild(channelBound);</span>
+<span class="nc" id="L165">							action.appendChild(channel);</span>
+
+<span class="nc bnc" id="L167" title="All 2 branches missed.">							if(va.getElement() != null) {</span>
+
+<span class="nc" id="L169">								Element element = document.createElement(&quot;element&quot;);</span>
+<span class="nc" id="L170">								element.setAttribute(&quot;tag&quot;, va.getElement().getTag());</span>
+
+<span class="nc" id="L172">								Element criterias = document.createElement(&quot;criterias&quot;);</span>
+<span class="nc" id="L173">								criterias.setTextContent(va.getElement().getCriterias());</span>
+<span class="nc" id="L174">								element.appendChild(criterias);</span>
+
+<span class="nc" id="L176">								Element foundElements = document.createElement(&quot;foundElements&quot;);</span>
+<span class="nc" id="L177">								foundElements.setTextContent(String.valueOf(va.getElement().getFoundElements()));</span>
+<span class="nc" id="L178">								element.appendChild(foundElements);</span>
+
+<span class="nc" id="L180">								Element searchDuration = document.createElement(&quot;searchDuration&quot;);</span>
+<span class="nc" id="L181">								searchDuration.setTextContent(String.valueOf(va.getElement().getSearchDuration()));</span>
+<span class="nc" id="L182">								element.appendChild(searchDuration);</span>
+
+<span class="nc" id="L184">								Element elementBound = document.createElement(&quot;bound&quot;);</span>
+<span class="nc" id="L185">								Element elementX = document.createElement(&quot;x&quot;);</span>
+<span class="nc" id="L186">								elementX.setTextContent(String.valueOf(va.getElement().getBound().getX().intValue()));</span>
+<span class="nc" id="L187">								elementBound.appendChild(elementX);</span>
+
+<span class="nc" id="L189">								Element elementY = document.createElement(&quot;y&quot;);</span>
+<span class="nc" id="L190">								elementY.setTextContent(String.valueOf(va.getElement().getBound().getY().intValue()));</span>
+<span class="nc" id="L191">								elementBound.appendChild(elementY);</span>
+
+<span class="nc" id="L193">								Element elementWidth = document.createElement(&quot;width&quot;);</span>
+<span class="nc" id="L194">								elementWidth.setTextContent(String.valueOf(va.getElement().getBound().getWidth().intValue()));</span>
+<span class="nc" id="L195">								elementBound.appendChild(elementWidth);</span>
+
+<span class="nc" id="L197">								Element elementHeight = document.createElement(&quot;height&quot;);</span>
+<span class="nc" id="L198">								elementHeight.setTextContent(String.valueOf(va.getElement().getBound().getHeight().intValue()));</span>
+<span class="nc" id="L199">								elementBound.appendChild(elementHeight);</span>
+
+<span class="nc" id="L201">								element.appendChild(elementBound);</span>
+<span class="nc" id="L202">								action.appendChild(element);</span>
+							}
+
+<span class="nc" id="L205">							actions.appendChild(action);</span>
+
+<span class="nc" id="L207">							va.addImage(xmlFolerPath, imagesList);</span>
+
+<span class="nc bnc" id="L209" title="All 2 branches missed.">						} else if(obj instanceof ReportSummary){</span>
+							
+<span class="nc" id="L211">							final ReportSummary reportSummary = (ReportSummary)obj;</span>
+							
+<span class="nc" id="L213">							final Element summary = document.createElement(&quot;summary&quot;);</span>
+							
+<span class="nc" id="L215">							summary.setAttribute(&quot;actions&quot;, String.valueOf(reportSummary.getActions()));</span>
+<span class="nc" id="L216">							summary.setAttribute(&quot;suiteName&quot;, reportSummary.getSuiteName());</span>
+<span class="nc" id="L217">							summary.setAttribute(&quot;testName&quot;, reportSummary.getTestName());</span>
+<span class="nc" id="L218">							summary.setAttribute(&quot;status&quot;, String.valueOf(reportSummary.getStatus()));</span>
+							
+<span class="nc" id="L220">							final Element data = document.createElement(&quot;data&quot;);</span>
+<span class="nc bnc" id="L221" title="All 2 branches missed.">							if(!ReportSummary.EMPTY_VALUE.equals(reportSummary.getData())) {</span>
+<span class="nc" id="L222">								data.setTextContent(reportSummary.getData());</span>
+							}
+<span class="nc" id="L224">							summary.appendChild(data);</span>
+							
+<span class="nc bnc" id="L226" title="All 4 branches missed.">							if(reportSummary.getStatus() == 0 &amp;&amp; reportSummary.getError() != null) {</span>
+<span class="nc" id="L227">								final Element error = document.createElement(&quot;error&quot;);</span>
+<span class="nc" id="L228">								error.setAttribute(&quot;script&quot;, reportSummary.getError().getScriptName());</span>
+<span class="nc" id="L229">								error.setAttribute(&quot;line&quot;, String.valueOf(reportSummary.getError().getLine()));</span>
+<span class="nc" id="L230">								error.setTextContent(reportSummary.getError().getMessage());</span>
+<span class="nc" id="L231">								summary.appendChild(error);</span>
+							}							
+
+<span class="nc" id="L234">							script.appendChild(summary);</span>
+						}
+<span class="nc" id="L236">					}</span>
+
+<span class="nc" id="L238">				} catch (FileNotFoundException e0) {</span>
+<span class="nc" id="L239">					logger.sendError(&quot;XML report stream error -&gt;&quot;, e0.getMessage());</span>
+<span class="nc" id="L240">				} catch (IOException e1) {</span>
+<span class="nc" id="L241">					logger.sendError(&quot;XML report file error -&gt;&quot;, e1.getMessage());</span>
+<span class="nc" id="L242">				} catch (Exception e2) {</span>
+<span class="nc" id="L243">					logger.sendError(&quot;XML report exception -&gt;&quot;, e2.getMessage());</span>
+				}finally {
+					try {
+<span class="nc bnc" id="L246" title="All 2 branches missed.">						if(fis != null) {</span>
+<span class="nc" id="L247">							fis.close();</span>
+						}
+<span class="nc" id="L249">					} catch (IOException e) {</span>
+<span class="nc" id="L250">						logger.sendError(&quot;XML report close stream error -&gt;&quot;, e.getMessage());</span>
+<span class="nc" id="L251">					}</span>
+				}
+
+<span class="nc" id="L254">				imagesList.parallelStream().forEach(im -&gt; im.save());</span>
+
+				try {
+
+<span class="nc" id="L258">					final BufferedWriter writer = Files.newBufferedWriter(xmlFolder.toPath().resolve(REPORT_FILE), StandardCharsets.UTF_8);</span>
+<span class="nc" id="L259">					final Transformer transformer = TransformerFactory.newInstance().newTransformer();</span>
+<span class="nc" id="L260">					transformer.setOutputProperty(OutputKeys.ENCODING, &quot;UTF-8&quot;);</span>
+					
+<span class="nc" id="L262">					transformer.transform(new DOMSource(document), new StreamResult(writer));</span>
+
+<span class="nc" id="L264">				} catch (TransformerConfigurationException e2) {</span>
+<span class="nc" id="L265">					logger.sendError(&quot;XML report config error -&gt;&quot;, e2.getMessage());</span>
+<span class="nc" id="L266">				} catch (TransformerException e3) {</span>
+<span class="nc" id="L267">					logger.sendError(&quot;XML report transform error -&gt;&quot;, e3.getMessage());</span>
+<span class="nc" id="L268">				} catch (FileNotFoundException e4) {</span>
+<span class="nc" id="L269">					logger.sendError(&quot;XML report write file error -&gt;&quot;, e4.getMessage());</span>
+<span class="nc" id="L270">				} catch (IOException e5) {</span>
+<span class="nc" id="L271">					logger.sendError(&quot;XML report IO write file error -&gt;&quot;, e5.getMessage());</span>
+<span class="nc" id="L272">				}</span>
+
+<span class="nc" id="L274">			} catch (ParserConfigurationException e4) {</span>
+<span class="nc" id="L275">				logger.sendError(&quot;XML report parser error -&gt;&quot;, e4.getMessage());</span>
+<span class="nc" id="L276">			}</span>
+
+<span class="nc" id="L278">			logger.sendInfo(&quot;XML report generated&quot;, xmlFolder.getAbsolutePath());</span>
+<span class="nc" id="L279">		} else {</span>
+			///TODO Create empty xml
+<span class="nc" id="L281">			final File xmlFolder = output.resolve(qualifiedName + &quot;_xml&quot;).toFile();</span>
+<span class="nc" id="L282">			logger.sendInfo(&quot;Create empty XML report because no ATSV file founded&quot;, xmlFolder.getAbsolutePath());</span>
+			
+<span class="nc" id="L284">			final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();</span>
+			
+			try {
+<span class="nc" id="L287">				Utils.deleteRecursive(xmlFolder);</span>
+<span class="nc" id="L288">			} catch (FileNotFoundException e) {}</span>
+
+<span class="nc" id="L290">			xmlFolder.mkdirs();</span>
+			
+			try {
+
+<span class="nc" id="L294">				final DocumentBuilder builder = factory.newDocumentBuilder();</span>
+<span class="nc" id="L295">				final Document document= builder.newDocument();</span>
+
+				try {
+
+<span class="nc" id="L299">					final Element atsRoot = document.createElement(&quot;ats&quot;);</span>
+<span class="nc" id="L300">					document.appendChild(atsRoot);</span>
+
+					//------------------------------------------------------------------------------------------------------
+					// script header
+					//------------------------------------------------------------------------------------------------------
+<span class="nc" id="L305">					final Element script = document.createElement(&quot;script&quot;);</span>
+
+<span class="nc" id="L307">					atsRoot.appendChild(script);</span>
+
+<span class="nc" id="L309">					script.setAttribute(&quot;testId&quot;, &quot;&quot;);					</span>
+<span class="nc" id="L310">					script.setAttribute(&quot;testName&quot;, qualifiedName);</span>
+
+<span class="nc" id="L312">					script.setAttribute(&quot;cpuSpeed&quot;, &quot;&quot;);</span>
+<span class="nc" id="L313">					script.setAttribute(&quot;cpuCount&quot;, &quot;&quot;);</span>
+<span class="nc" id="L314">					script.setAttribute(&quot;totalMemory&quot;, &quot;&quot;);		</span>
+<span class="nc" id="L315">					script.setAttribute(&quot;osInfo&quot;, &quot;&quot;);	</span>
+
+<span class="nc" id="L317">					Element description = document.createElement(&quot;description&quot;);</span>
+<span class="nc" id="L318">					description.setTextContent(&quot;This script is empty&quot;);</span>
+<span class="nc" id="L319">					script.appendChild(description);</span>
+
+<span class="nc" id="L321">					Element author = document.createElement(&quot;author&quot;);</span>
+<span class="nc" id="L322">					author.setTextContent(&quot;&quot;);</span>
+<span class="nc" id="L323">					script.appendChild(author);</span>
+
+<span class="nc" id="L325">					Element prerequisite = document.createElement(&quot;prerequisite&quot;);</span>
+<span class="nc" id="L326">					prerequisite.setTextContent(&quot;&quot;);</span>
+<span class="nc" id="L327">					script.appendChild(prerequisite);</span>
+
+<span class="nc" id="L329">					Element started = document.createElement(&quot;started&quot;);</span>
+<span class="nc" id="L330">					started.setTextContent(String.valueOf(new Date().getTime()));</span>
+<span class="nc" id="L331">					script.appendChild(started);</span>
+
+<span class="nc" id="L333">					Element groups = document.createElement(&quot;groups&quot;);</span>
+<span class="nc" id="L334">					groups.setTextContent(&quot;&quot;);</span>
+<span class="nc" id="L335">					script.appendChild(groups);</span>
+
+<span class="nc" id="L337">					Element quality = document.createElement(&quot;quality&quot;);</span>
+<span class="nc" id="L338">					quality.setTextContent(&quot;&quot;);</span>
+<span class="nc" id="L339">					script.appendChild(quality);</span>
+
+					//------------------------------------------------------------------------------------------------------
+					//------------------------------------------------------------------------------------------------------
+
+<span class="nc" id="L344">					Element actions = document.createElement(&quot;actions&quot;);</span>
+<span class="nc" id="L345">					atsRoot.appendChild(actions);</span>
+<span class="nc" id="L346">				} catch (Exception e2) {</span>
+<span class="nc" id="L347">					logger.sendError(&quot;XML report exception&quot;, e2.getMessage());</span>
+<span class="nc" id="L348">				}finally {</span>
+<span class="nc" id="L349">				}</span>
+
+				try {
+
+<span class="nc" id="L353">					final Transformer transformer = TransformerFactory.newInstance().newTransformer();</span>
+<span class="nc" id="L354">					transformer.transform(</span>
+							new DOMSource(document), 
+							new StreamResult(
+									new OutputStreamWriter(
+											new FileOutputStream(
+<span class="nc" id="L359">													xmlFolder.toPath().resolve(REPORT_FILE).toFile()), </span>
+											StandardCharsets.UTF_8)));
+
+<span class="nc" id="L362">				} catch (TransformerConfigurationException e2) {</span>
+<span class="nc" id="L363">					logger.sendError(&quot;XML report config error&quot;, e2.getMessage());</span>
+<span class="nc" id="L364">				} catch (TransformerException e3) {</span>
+<span class="nc" id="L365">					logger.sendError(&quot;XML report transform error&quot;, e3.getMessage());</span>
+<span class="nc" id="L366">				} catch (FileNotFoundException e4) {</span>
+<span class="nc" id="L367">					logger.sendError(&quot;XML report write file error&quot;, e4.getMessage());</span>
+<span class="nc" id="L368">				}</span>
+
+<span class="nc" id="L370">			} catch (ParserConfigurationException e4) {</span>
+<span class="nc" id="L371">				logger.sendError(&quot;XML report parser error&quot;, e4.getMessage());</span>
+<span class="nc" id="L372">			}</span>
+
+<span class="nc" id="L374">			logger.sendInfo(&quot;XML report generated&quot;, xmlFolder.getAbsolutePath());</span>
+			
+		}
+<span class="nc" id="L377">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

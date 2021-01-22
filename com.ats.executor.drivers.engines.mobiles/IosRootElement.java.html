@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IosRootElement.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.executor.drivers.engines.mobiles</a> &gt; <span class="el_source">IosRootElement.java</span></div><h1>IosRootElement.java</h1><pre class="source lang-java linenums">package com.ats.executor.drivers.engines.mobiles;
+
+import com.ats.element.AtsMobileElement;
+import com.ats.element.FoundElement;
+import com.ats.element.MobileTestElement;
+import com.ats.element.StructDebugDescription;
+import com.ats.executor.ActionStatus;
+import com.ats.executor.drivers.engines.MobileDriverEngine;
+import com.ats.generator.objects.MouseDirection;
+import com.google.gson.JsonObject;
+
+import javax.annotation.Nonnull;
+import java.awt.*;
+import java.util.*;
+
+public class IosRootElement extends RootElement {
+
+<span class="nc" id="L18">	private final String regexSpaces = &quot;^\\s+&quot;;</span>
+<span class="nc" id="L19">	private final String regexBraces = &quot;[{},]+&quot;;</span>
+	
+<span class="nc" id="L21">	private Double deviceWidth = 0.0;</span>
+<span class="nc" id="L22">	private Double deviceHeight = 0.0;</span>
+
+<span class="nc" id="L24">	private Double ratioWidth = 1.0;</span>
+<span class="nc" id="L25">	private Double ratioHeight = 1.0;</span>
+
+	public IosRootElement(MobileDriverEngine driver) {
+<span class="nc" id="L28">		super(driver);</span>
+<span class="nc" id="L29">	}</span>
+
+	@Override
+	public MobileTestElement getCurrentElement(FoundElement element, MouseDirection position) {
+<span class="nc" id="L33">		final Rectangle rect = element.getRectangle();</span>
+<span class="nc" id="L34">		String coordinates = element.getX() + &quot;;&quot; + element.getY() + &quot;;&quot; + element.getWidth() + &quot;;&quot; + element.getHeight() + &quot;;&quot; + getRatioWidth() + &quot;;&quot; + getRatioHeight();</span>
+<span class="nc" id="L35">		return new MobileTestElement(element.getId(), (driver.getOffsetX(rect, position)), (driver.getOffsetY(rect, position)), coordinates);</span>
+	}
+
+	@Override
+	public void tap(ActionStatus status, FoundElement element, MouseDirection position) {
+<span class="nc" id="L40">		final Rectangle rect = element.getRectangle();</span>
+<span class="nc" id="L41">		String coordinates = element.getX() + &quot;;&quot; + element.getY() + &quot;;&quot; + element.getWidth() + &quot;;&quot; + element.getHeight() + &quot;;&quot; + getRatioWidth() + &quot;;&quot; + getRatioHeight();</span>
+<span class="nc" id="L42">		driver.executeRequest(</span>
+				MobileDriverEngine.ELEMENT,
+<span class="nc" id="L44">				element.getId(),</span>
+				MobileDriverEngine.TAP,
+<span class="nc" id="L46">				(driver.getOffsetX(rect, position)) + &quot;&quot;,</span>
+<span class="nc" id="L47">				(driver.getOffsetY(rect, position)) + &quot;&quot;,</span>
+				coordinates
+		);
+<span class="nc" id="L50">	}</span>
+	
+	@Override
+	public void tap(FoundElement element, int count) {
+<span class="nc bnc" id="L54" title="All 2 branches missed.">		if (element.getParent() != null) {</span>
+<span class="nc" id="L55">			driver.executeRequest(MobileDriverEngine.ELEMENT, element.getId(), MobileDriverEngine.TAP, String.valueOf(count));</span>
+		}
+<span class="nc" id="L57">	}</span>
+	
+	@Override
+	public void press(FoundElement element, ArrayList&lt;String&gt; paths, int duration) {
+<span class="nc" id="L61">		driver.executeRequest(MobileDriverEngine.ELEMENT, element.getId(), MobileDriverEngine.TAP, String.valueOf(paths), String.valueOf(duration));</span>
+<span class="nc" id="L62">	}</span>
+	
+	@Override
+	public void swipe(MobileTestElement testElement, int hDirection, int vDirection) {
+<span class="nc" id="L66">		driver.executeRequest(MobileDriverEngine.ELEMENT, testElement.getId(), MobileDriverEngine.SWIPE, testElement.getOffsetX() + &quot;&quot;, testElement.getOffsetY() + &quot;&quot;, hDirection + &quot;&quot;, +vDirection + &quot;&quot;, testElement.getCoordinates());</span>
+<span class="nc" id="L67">	}</span>
+
+	@Override
+	public Object scripting(String script, FoundElement element) {
+<span class="nc" id="L71">		String coordinates = element.getX() + &quot;;&quot; + element.getY() + &quot;;&quot; + element.getWidth() + &quot;;&quot; + element.getHeight() + &quot;;&quot; + getRatioWidth() + &quot;;&quot; + getRatioHeight();</span>
+<span class="nc" id="L72">		return driver.executeRequest(MobileDriverEngine.ELEMENT, element.getId(), MobileDriverEngine.SCRIPTING, &quot;0&quot;, &quot;0&quot;, coordinates, script);</span>
+	}
+
+	@Override
+	public Object scripting(String script) {
+<span class="nc" id="L77">		return scripting(script, getValue().getFoundElement());</span>
+	}
+
+	@Override
+	public void refresh(@Nonnull JsonObject jsonObject) {
+<span class="nc" id="L82">		this.deviceHeight = jsonObject.get(&quot;deviceHeight&quot;).getAsDouble();</span>
+<span class="nc" id="L83">		this.deviceWidth = jsonObject.get(&quot;deviceWidth&quot;).getAsDouble();</span>
+
+<span class="nc" id="L85">		final String debugDescription = jsonObject.get(&quot;root&quot;).getAsString();</span>
+<span class="nc" id="L86">		final String[] debugDescriptionArray = debugDescription.split(&quot;\n&quot;);</span>
+
+<span class="nc" id="L88">		Double width = 0.0;</span>
+<span class="nc" id="L89">		Double height = 0.0;</span>
+
+<span class="nc" id="L91">		final ArrayList&lt;StructDebugDescription&gt; elementInfoArray = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">		for (String item : debugDescriptionArray) {</span>
+<span class="nc" id="L93">			int level = countSpaces(item);</span>
+<span class="nc bnc" id="L94" title="All 4 branches missed.">			if (level &gt;= 4 &amp;&amp; !item.contains(&quot;Application, pid:&quot;)) {</span>
+<span class="nc" id="L95">				String trimmedLine = item.replaceAll(regexSpaces, &quot;&quot;);</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">				if (trimmedLine.startsWith(&quot;Window (Main)&quot;)) {</span>
+<span class="nc" id="L97">					String regexBracesAndSpaces = &quot;[\\s{},]+&quot;;</span>
+<span class="nc" id="L98">					final String[] arraySize = trimmedLine.split(regexBracesAndSpaces);</span>
+<span class="nc" id="L99">					width = Double.parseDouble(arraySize[arraySize.length - 2]);</span>
+<span class="nc" id="L100">					height = Double.parseDouble(arraySize[arraySize.length - 1]);</span>
+				}
+<span class="nc" id="L102">				elementInfoArray.add(new StructDebugDescription((level / 2) - 1, trimmedLine));</span>
+			}
+		}
+
+		// calculate ratio
+<span class="nc bnc" id="L107" title="All 4 branches missed.">		if (!height.equals(deviceHeight) || !width.equals(deviceWidth)) {</span>
+<span class="nc" id="L108">			ratioHeight = deviceHeight / height;</span>
+<span class="nc" id="L109">			ratioWidth = deviceWidth / width;</span>
+<span class="nc" id="L110">			width = width * ratioWidth;</span>
+<span class="nc" id="L111">			height = height * ratioHeight;</span>
+		}
+
+<span class="nc" id="L114">		final AtsMobileElement rootElement = new AtsMobileElement(</span>
+<span class="nc" id="L115">				UUID.randomUUID().toString(),</span>
+				&quot;root&quot;,
+				width,
+				height,
+<span class="nc" id="L119">				0.0,</span>
+<span class="nc" id="L120">				0.0,</span>
+<span class="nc" id="L121">				false,</span>
+				new HashMap&lt;&gt;()
+		);
+		
+<span class="nc" id="L125">		int currentElementIndex = 0;</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">		for (StructDebugDescription elementInfo : elementInfoArray) {</span>
+<span class="nc" id="L127">			System.out.println(&quot;Current element index : &quot; + currentElementIndex);</span>
+<span class="nc" id="L128">			final String[] arraySize = elementInfo.getContent().split(regexBraces);</span>
+<span class="nc" id="L129">			final String tag = arraySize[0].replaceAll(regexSpaces, &quot;&quot;);</span>
+
+<span class="nc" id="L131">			final ArrayList&lt;String&gt; stringArray = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L132" title="All 2 branches missed.">			for (String s : arraySize) {</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">				if (!s.replaceAll(regexSpaces, &quot;&quot;).equals(&quot;&quot;)) {</span>
+<span class="nc" id="L134">					stringArray.add(s);</span>
+				}
+			}
+
+<span class="nc" id="L138">			int firstSizeIndex = 2;</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">			if (elementInfo.getContent().contains(&quot;pid:&quot;)) {</span>
+<span class="nc" id="L140">				firstSizeIndex++;</span>
+			}
+
+<span class="nc" id="L143">			final double currentX = Double.parseDouble(stringArray.get(firstSizeIndex)) * ratioWidth;</span>
+<span class="nc" id="L144">			final double currentY = Double.parseDouble(stringArray.get(firstSizeIndex + 1)) * ratioHeight;</span>
+<span class="nc" id="L145">			final double currentWidth = Double.parseDouble(stringArray.get(firstSizeIndex + 2)) * ratioWidth;</span>
+<span class="nc" id="L146">			final double currentHeight = Double.parseDouble(stringArray.get(firstSizeIndex + 3)) * ratioHeight;</span>
+
+			/* if (currentX &lt; 0.0 || currentX &gt; height) {
+				continue;
+			} */
+
+<span class="nc" id="L152">			final AtsMobileElement element = new AtsMobileElement(</span>
+<span class="nc" id="L153">					elementInfo.getUuid().toString(),</span>
+					tag,
+<span class="nc" id="L155">					currentWidth,</span>
+<span class="nc" id="L156">					currentHeight,</span>
+<span class="nc" id="L157">					currentX,</span>
+<span class="nc" id="L158">					currentY,</span>
+<span class="nc" id="L159">					true,</span>
+<span class="nc" id="L160">					getAttributes(elementInfo.getContent())</span>
+			);
+			
+<span class="nc bnc" id="L163" title="All 2 branches missed.">			if (elementInfo.getLevel() == 1) {</span>
+<span class="nc" id="L164">				rootElement.addChildren(element);</span>
+			} else {
+				
+				// get parentLevel
+<span class="nc" id="L168">				int i = currentElementIndex;</span>
+<span class="nc" id="L169">				UUID uuidParent = null;</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">				while ((i - 1) &gt; -1) {</span>
+<span class="nc bnc" id="L171" title="All 2 branches missed.">					if (elementInfoArray.get(i - 1).getLevel() + 1 == elementInfo.getLevel()) {</span>
+<span class="nc" id="L172">						uuidParent = elementInfoArray.get(i - 1).getUuid();</span>
+<span class="nc" id="L173">						break;</span>
+					}
+<span class="nc" id="L175">					i--;</span>
+				}
+
+<span class="nc bnc" id="L178" title="All 2 branches missed.">				if (uuidParent != null) {</span>
+<span class="nc" id="L179">					searchAndAdd(uuidParent.toString(), rootElement, element);</span>
+				}
+
+			}
+<span class="nc" id="L183">			currentElementIndex++;</span>
+<span class="nc" id="L184">		}</span>
+
+		// Many Windows
+<span class="nc" id="L187">		final AtsMobileElement[] rootElementChildren = rootElement.getChildren();</span>
+<span class="nc bnc" id="L188" title="All 4 branches missed.">		if (rootElementChildren != null &amp;&amp; rootElementChildren.length &gt; 0) {</span>
+			// Window children
+<span class="nc" id="L190">			final AtsMobileElement[] frontElements = rootElementChildren[0].getChildren();</span>
+<span class="nc bnc" id="L191" title="All 4 branches missed.">			if (frontElements != null &amp;&amp; frontElements.length &gt; 1) {</span>
+<span class="nc" id="L192">				final AtsMobileElement lastElement = frontElements[frontElements.length - 1];</span>
+<span class="nc" id="L193">				final boolean containsElements = checkConsistency(lastElement.getChildren(), false);</span>
+
+<span class="nc bnc" id="L195" title="All 2 branches missed.">				if (containsElements) {</span>
+<span class="nc" id="L196">					rootElement.getChildren()[0].setChildren(lastElement.getChildren());</span>
+				} else {
+<span class="nc" id="L198">					rootElement.getChildren()[0].setChildren(frontElements[0].getChildren());</span>
+				}
+			}
+		}
+		// domStructure.getChildren()[0].setChildren(fixErrorsInDOM(domStructure.getChildren()[0]));
+<span class="nc" id="L203">		this.value = rootElement;</span>
+<span class="nc" id="L204">	}</span>
+
+	public boolean checkConsistency(AtsMobileElement[] child, boolean val) {
+<span class="nc bnc" id="L207" title="All 2 branches missed.">		for (AtsMobileElement atsMobileElement : child) {</span>
+<span class="nc bnc" id="L208" title="All 4 branches missed.">			if (atsMobileElement != null &amp;&amp; atsMobileElement.getChildren().length &gt; 0) {</span>
+<span class="nc" id="L209">				val = checkConsistency(atsMobileElement.getChildren(), val);</span>
+			} else {
+<span class="nc bnc" id="L211" title="All 4 branches missed.">				if (atsMobileElement != null &amp;&amp; !atsMobileElement.getTag().equalsIgnoreCase(&quot;other&quot;)) {</span>
+<span class="nc" id="L212">					val = true;</span>
+				}
+			}
+		}
+<span class="nc" id="L216">		return val;</span>
+	}
+
+	public AtsMobileElement[] fixErrorsInDOM(AtsMobileElement domStructure) {
+
+<span class="nc" id="L221">		AtsMobileElement[] childrens = domStructure.getChildren();</span>
+
+<span class="nc bnc" id="L223" title="All 2 branches missed.">		for (int i = 0; i &lt; childrens.length; i++) {</span>
+<span class="nc bnc" id="L224" title="All 4 branches missed.">			if (childrens[i] != null &amp;&amp; childrens[i].getChildren().length &gt; 0) {</span>
+<span class="nc" id="L225">				childrens[i].setChildren(fixErrorsInDOM(childrens[i]));</span>
+<span class="nc bnc" id="L226" title="All 4 branches missed.">				if (childrens[i].getChildren().length == 0 &amp;&amp; childrens[i].getTag().equalsIgnoreCase(&quot;other&quot;)) {</span>
+<span class="nc" id="L227">					childrens = removeTheElement(childrens, i);</span>
+<span class="nc" id="L228">					i--;</span>
+				}
+			} else {
+<span class="nc bnc" id="L231" title="All 4 branches missed.">				if (childrens[i] != null &amp;&amp; childrens[i].getTag().equalsIgnoreCase(&quot;other&quot;)</span>
+<span class="nc bnc" id="L232" title="All 2 branches missed.">						&amp;&amp; childrens[i].getChildren().length == 0) {</span>
+<span class="nc" id="L233">					childrens = removeTheElement(childrens, i);</span>
+<span class="nc" id="L234">					i--;</span>
+				}
+			}
+		}
+
+<span class="nc bnc" id="L239" title="All 2 branches missed.">		if (childrens.length == 0) {</span>
+<span class="nc" id="L240">			return null;</span>
+		}
+<span class="nc" id="L242">		return childrens;</span>
+	}
+
+	// Function to remove the element
+	public static AtsMobileElement[] removeTheElement(AtsMobileElement[] arr, int index) {
+
+		// If the array is empty
+		// or the index is not in array range
+		// return the original array
+<span class="nc bnc" id="L251" title="All 6 branches missed.">		if (arr == null || index &lt; 0 || index &gt;= arr.length) {</span>
+
+<span class="nc" id="L253">			return arr;</span>
+		}
+
+		// Create another array of size one less
+<span class="nc" id="L257">		AtsMobileElement[] anotherArray = new AtsMobileElement[arr.length - 1];</span>
+
+		// Copy the elements except the index
+		// from original array to the other array
+<span class="nc bnc" id="L261" title="All 2 branches missed.">		for (int i = 0, k = 0; i &lt; arr.length; i++) {</span>
+
+			// if the index is
+			// the removal element index
+<span class="nc bnc" id="L265" title="All 2 branches missed.">			if (i == index) {</span>
+<span class="nc" id="L266">				continue;</span>
+			}
+
+			// if the index is not
+			// the removal element index
+<span class="nc" id="L271">			anotherArray[k++] = arr[i];</span>
+		}
+
+		// return the resultant array
+<span class="nc" id="L275">		return anotherArray;</span>
+	}
+
+	public Double getDeviceWidth() {
+<span class="nc" id="L279">		return this.deviceWidth;</span>
+	}
+
+	public Double getDeviceHeight() {
+<span class="nc" id="L283">		return this.deviceHeight;</span>
+	}
+
+	public Double getRatioWidth() {
+<span class="nc" id="L287">		return this.ratioWidth;</span>
+	}
+
+	public Double getRatioHeight() {
+<span class="nc" id="L291">		return this.ratioHeight;</span>
+	}
+
+	private Map&lt;String, String&gt; getAttributes(String str) {
+<span class="nc" id="L295">		TreeMap&lt;String, String&gt; result = new TreeMap&lt;&gt;();</span>
+<span class="nc" id="L296">		String[] arraySize = str.split(regexBraces);</span>
+
+<span class="nc bnc" id="L298" title="All 2 branches missed.">		if (arraySize[0].contains(&quot;checkbox&quot;)) {</span>
+<span class="nc" id="L299">			result.put(&quot;checkable&quot;, &quot;true&quot;);</span>
+		} else {
+<span class="nc" id="L301">			result.put(&quot;checkable&quot;, &quot;false&quot;);</span>
+		}
+
+<span class="nc bnc" id="L304" title="All 2 branches missed.">		for (String s : arraySize) {</span>
+<span class="nc" id="L305">			final String cleanString = cleanAttribute(s);</span>
+<span class="nc bnc" id="L306" title="All 2 branches missed.">			if (s.contains(&quot;label&quot;)) {</span>
+<span class="nc" id="L307">				result.put(&quot;text&quot;, cleanString);</span>
+			}
+<span class="nc bnc" id="L309" title="All 2 branches missed.">			if (s.contains(&quot;placeholderValue&quot;)) {</span>
+<span class="nc" id="L310">				result.put(&quot;description&quot;, cleanString);</span>
+			}
+<span class="nc bnc" id="L312" title="All 2 branches missed.">			if (s.contains(&quot;identifier&quot;)) {</span>
+<span class="nc" id="L313">				result.put(&quot;identifier&quot;, cleanString);</span>
+			}
+<span class="nc bnc" id="L315" title="All 2 branches missed.">			if (s.contains(&quot;value&quot;)) {</span>
+<span class="nc" id="L316">				result.put(&quot;value&quot;, cleanString);</span>
+			}
+<span class="nc bnc" id="L318" title="All 2 branches missed.">			if (s.contains(&quot;Disabled&quot;)) {</span>
+<span class="nc" id="L319">				result.put(&quot;enabled&quot;, &quot;false&quot;);</span>
+<span class="nc" id="L320">				result.put(&quot;editable&quot;, &quot;false&quot;);</span>
+			}
+<span class="nc bnc" id="L322" title="All 2 branches missed.">			if (s.contains(&quot;Selected&quot;)) {</span>
+<span class="nc" id="L323">				result.put(&quot;selected&quot;, &quot;true&quot;);</span>
+			}
+		}
+
+<span class="nc bnc" id="L327" title="All 2 branches missed.">		if (!result.containsKey(&quot;text&quot;)) {</span>
+<span class="nc" id="L328">			result.put(&quot;text&quot;, &quot;&quot;);</span>
+		}
+<span class="nc bnc" id="L330" title="All 2 branches missed.">		if (!result.containsKey(&quot;description&quot;)) {</span>
+<span class="nc" id="L331">			result.put(&quot;description&quot;, &quot;&quot;);</span>
+		}
+<span class="nc bnc" id="L333" title="All 2 branches missed.">		if (!result.containsKey(&quot;identifier&quot;)) {</span>
+<span class="nc" id="L334">			result.put(&quot;identifier&quot;, &quot;&quot;);</span>
+		}
+<span class="nc bnc" id="L336" title="All 2 branches missed.">		if (!result.containsKey(&quot;value&quot;)) {</span>
+<span class="nc" id="L337">			result.put(&quot;value&quot;, &quot;&quot;);</span>
+		}
+<span class="nc bnc" id="L339" title="All 2 branches missed.">		if (!result.containsKey(&quot;enabled&quot;)) {</span>
+<span class="nc" id="L340">			result.put(&quot;enabled&quot;, &quot;true&quot;);</span>
+<span class="nc" id="L341">			result.put(&quot;editable&quot;, &quot;true&quot;);</span>
+		}
+<span class="nc bnc" id="L343" title="All 2 branches missed.">		if (!result.containsKey(&quot;selected&quot;)) {</span>
+<span class="nc" id="L344">			result.put(&quot;selected&quot;, &quot;false&quot;);</span>
+		}
+<span class="nc bnc" id="L346" title="All 2 branches missed.">		if (!result.containsKey(&quot;numeric&quot;)) {</span>
+<span class="nc" id="L347">			result.put(&quot;numeric&quot;, &quot;false&quot;);</span>
+		}
+
+<span class="nc" id="L350">		return result;</span>
+	}
+
+	private String cleanAttribute(String str) {
+<span class="nc" id="L354">		return str.split(&quot;:&quot;)[str.split(&quot;:&quot;).length - 1].replace(&quot;'&quot;, &quot;&quot;).replaceAll(regexSpaces, &quot;&quot;);</span>
+	}
+
+	private int countSpaces(String str) {
+<span class="nc" id="L358">		int count = 0;</span>
+
+<span class="nc bnc" id="L360" title="All 2 branches missed.">		for (int i = 0; i &lt; str.length(); i++) {</span>
+<span class="nc bnc" id="L361" title="All 2 branches missed.">			if (str.charAt(i) == ' ') {</span>
+<span class="nc" id="L362">				count++;</span>
+			} else {
+				break;
+			}
+		}
+
+<span class="nc" id="L368">		return count;</span>
+	}
+
+	private void searchAndAdd(String uuid, AtsMobileElement node, AtsMobileElement elementToAdd) {
+<span class="nc bnc" id="L372" title="All 2 branches missed.">		if (node.getId().equals(uuid)) {</span>
+<span class="nc" id="L373">			node.addChildren(elementToAdd);</span>
+		} else {
+<span class="nc" id="L375">			final AtsMobileElement[] childs = node.getChildren();</span>
+<span class="nc bnc" id="L376" title="All 2 branches missed.">			if (childs != null) {</span>
+<span class="nc bnc" id="L377" title="All 2 branches missed.">				for (int i = 0; i &lt; node.getChildren().length; i++) {</span>
+<span class="nc" id="L378">					searchAndAdd(uuid, node.getChildren()[i], elementToAdd);</span>
+				}
+			}
+		}
+<span class="nc" id="L382">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

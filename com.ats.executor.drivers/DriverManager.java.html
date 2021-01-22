@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DriverManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.executor.drivers</a> &gt; <span class="el_source">DriverManager.java</span></div><h1>DriverManager.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.executor.drivers;
+
+import java.util.ArrayList;
+
+import com.ats.driver.ApplicationProperties;
+import com.ats.driver.AtsManager;
+import com.ats.executor.ActionStatus;
+import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.desktop.DesktopDriver;
+import com.ats.executor.drivers.engines.ApiDriverEngine;
+import com.ats.executor.drivers.engines.DesktopDriverEngine;
+import com.ats.executor.drivers.engines.IDriverEngine;
+import com.ats.executor.drivers.engines.MobileDriverEngine;
+import com.ats.executor.drivers.engines.browsers.ChromeDriverEngine;
+import com.ats.executor.drivers.engines.browsers.ChromiumDriverEngine;
+import com.ats.executor.drivers.engines.browsers.EdgeDriverEngine;
+import com.ats.executor.drivers.engines.browsers.FirefoxDriverEngine;
+import com.ats.executor.drivers.engines.browsers.IEDriverEngine;
+import com.ats.executor.drivers.engines.browsers.JxDriverEngine;
+import com.ats.executor.drivers.engines.browsers.MsEdgeDriverEngine;
+import com.ats.executor.drivers.engines.browsers.OperaDriverEngine;
+import com.ats.executor.drivers.engines.desktop.ExplorerDriverEngine;
+
+<span class="fc" id="L43">public class DriverManager {</span>
+
+	public static final String CHROME_BROWSER = &quot;chrome&quot;;
+	public static final String CHROMIUM_BROWSER = &quot;chromium&quot;;
+	public static final String JX_BROWSER = &quot;jx&quot;;
+	public static final String FIREFOX_BROWSER = &quot;firefox&quot;;
+	public static final String IE_BROWSER = &quot;ie&quot;;
+	public static final String EDGE_BROWSER = &quot;edge&quot;;
+	public static final String MSEDGE_BROWSER = &quot;msedge&quot;;
+	public static final String OPERA_BROWSER = &quot;opera&quot;;
+	public static final String SAFARI_BROWSER = &quot;safari&quot;;
+
+	public static final String DESKTOP_DRIVER_FILE_NAME = &quot;windowsdriver&quot;;
+	public static final String CHROME_DRIVER_FILE_NAME = &quot;chromedriver&quot;;
+	public static final String CHROMIUM_DRIVER_FILE_NAME = &quot;chromiumdriver&quot;;
+	public static final String IE_DRIVER_FILE_NAME = &quot;IEDriverServer&quot;;
+	public static final String MSEDGE_DRIVER_FILE_NAME = &quot;msedgedriver&quot;;
+	public static final String OPERA_DRIVER_FILE_NAME = &quot;operadriver&quot;;
+	public static final String FIREFOX_DRIVER_FILE_NAME = &quot;geckodriver&quot;;
+
+	public static final String DESKTOP_EXPLORER = &quot;explorer&quot;;
+	public static final String DESKTOP = &quot;desktop&quot;;
+	public static final String MOBILE = &quot;mobile&quot;;
+	public static final String HTTP = &quot;http&quot;;
+	public static final String HTTPS = &quot;https&quot;;
+
+<span class="fc" id="L69">	private ArrayList&lt;DriverProcess&gt; driversProcess = new ArrayList&lt;DriverProcess&gt;();</span>
+<span class="fc" id="L70">	private ArrayList&lt;MobileDriverEngine&gt; mobileDrivers = new ArrayList&lt;MobileDriverEngine&gt;();</span>
+
+	private DriverProcess desktopDriver;
+	// private MobileDriverEngine mobileDriverEngine;
+
+	//--------------------------------------------------------------------------------------------------------------
+
+	public static void killAllDrivers() {
+		/*Predicate&lt;ProcessHandle&gt; fullPredicate = p -&gt; p.info().command().isPresent();
+		Predicate&lt;ProcessHandle&gt; desktop  =  p -&gt; p.info().command().get().contains(DESKTOP_DRIVER_FILE_NAME);
+		Predicate&lt;ProcessHandle&gt; chrome  = p -&gt; p.info().command().get().contains(CHROME_DRIVER_FILE_NAME);
+		Predicate&lt;ProcessHandle&gt; opera  =  p -&gt; p.info().command().get().contains(OPERA_DRIVER_FILE_NAME);
+		Predicate&lt;ProcessHandle&gt; edge  =  p -&gt; p.info().command().get().contains(EDGE_DRIVER_FILE_NAME);
+		Predicate&lt;ProcessHandle&gt; firefox  =  p -&gt; p.info().command().get().contains(FIREFOX_DRIVER_FILE_NAME);
+		Predicate&lt;ProcessHandle&gt; ie  =  p -&gt; p.info().command().get().contains(IE_DRIVER_FILE_NAME);
+
+		try {
+			ProcessHandle
+			.allProcesses()
+			.parallel()
+			.filter(fullPredicate)
+			.filter(chrome.or(edge).or(firefox).or(opera).or(ie).or(desktop))
+			.forEach(p2 -&gt; {
+				p2.children().parallel().forEach(p3 -&gt; p3.destroy());
+				p2.destroy();
+			});
+		}catch (Exception e) {}*/
+<span class="nc" id="L97">	}</span>
+
+	//--------------------------------------------------------------------------------------------------------------
+
+	public DriverProcess getDesktopDriver(ActionStatus status) {
+<span class="nc bnc" id="L102" title="All 2 branches missed.">		if(desktopDriver == null) {</span>
+<span class="nc" id="L103">			desktopDriver = getDriverProcess(status, DESKTOP, null, DESKTOP_DRIVER_FILE_NAME);</span>
+		}
+<span class="nc" id="L105">		return desktopDriver;</span>
+	}
+
+	public void processTerminated(DriverProcess dp) {
+<span class="nc" id="L109">		driversProcess.remove(dp);</span>
+<span class="nc" id="L110">	}</span>
+
+	public IDriverEngine getDriverEngine(Channel channel, ActionStatus status, DesktopDriver desktopDriver) {
+
+<span class="nc" id="L114">		final String application = channel.getApplication();</span>
+<span class="nc" id="L115">		final ApplicationProperties props = AtsManager.getInstance().getApplicationProperties(application);</span>
+
+<span class="nc" id="L117">		final String appName = props.getName().toLowerCase();</span>
+<span class="nc" id="L118">		final String driverName = props.getDriver();</span>
+		
+<span class="nc" id="L120">		DriverProcess driverProcess = null;</span>
+
+<span class="nc bnc" id="L122" title="All 2 branches missed.">		if(CHROME_BROWSER.equals(appName)) {</span>
+<span class="nc" id="L123">			driverProcess = getDriverProcess(status, appName, driverName, CHROME_DRIVER_FILE_NAME);</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">			if(status.isPassed()) {</span>
+<span class="nc" id="L125">				return new ChromeDriverEngine(</span>
+						channel, 
+						status, 
+						driverProcess, 
+						desktopDriver, 
+						props);	
+			}else {
+<span class="nc" id="L132">				return null;</span>
+			}
+<span class="nc bnc" id="L134" title="All 2 branches missed.">		}else if(MSEDGE_BROWSER.equals(appName)) {</span>
+<span class="nc" id="L135">			driverProcess = getDriverProcess(status, appName, driverName, MSEDGE_DRIVER_FILE_NAME);</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">			if(status.isPassed()) {</span>
+<span class="nc" id="L137">				return new MsEdgeDriverEngine(</span>
+						channel, 
+						status,
+						driverProcess, 
+						desktopDriver, 
+						props);	
+			}else {
+<span class="nc" id="L144">				return null;</span>
+			}
+<span class="nc bnc" id="L146" title="All 2 branches missed.">		}else if(EDGE_BROWSER.equals(appName)) {</span>
+<span class="nc" id="L147">			driverProcess = getDriverProcess(status, appName, driverName, props.getDriver());</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">			if(status.isPassed()) {</span>
+<span class="nc" id="L149">				return new EdgeDriverEngine(</span>
+						channel, 
+						status,
+						driverProcess, 
+						desktopDriver, 
+						props);	
+			}else {
+<span class="nc" id="L156">				return null;</span>
+			}
+<span class="nc bnc" id="L158" title="All 2 branches missed.">		}else if(OPERA_BROWSER.equals(appName)) {</span>
+<span class="nc" id="L159">			driverProcess = getDriverProcess(status, appName, driverName, OPERA_DRIVER_FILE_NAME);</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">			if(status.isPassed()) {</span>
+<span class="nc" id="L161">				return new OperaDriverEngine(</span>
+						channel, 
+						status, 
+						driverProcess, 
+						desktopDriver, 
+						props);	
+			}else {
+<span class="nc" id="L168">				return null;</span>
+			}
+<span class="nc bnc" id="L170" title="All 2 branches missed.">		}else if(FIREFOX_BROWSER.equals(appName)) {</span>
+<span class="nc" id="L171">			driverProcess = getDriverProcess(status, appName, driverName, FIREFOX_DRIVER_FILE_NAME);</span>
+<span class="nc bnc" id="L172" title="All 2 branches missed.">			if(status.isPassed()) {</span>
+<span class="nc" id="L173">				return new FirefoxDriverEngine(</span>
+						channel, 
+						status, 
+						driverProcess, 
+						desktopDriver, 
+						props);	
+			}else {
+<span class="nc" id="L180">				return null;</span>
+			}
+<span class="nc bnc" id="L182" title="All 2 branches missed.">		}else if(IE_BROWSER.equals(appName)) {</span>
+<span class="nc" id="L183">			driverProcess = getDriverProcess(status, appName, driverName, IE_DRIVER_FILE_NAME);</span>
+<span class="nc bnc" id="L184" title="All 2 branches missed.">			if(status.isPassed()) {</span>
+<span class="nc" id="L185">				return new IEDriverEngine(</span>
+						channel, 
+						status, 
+						driverProcess, 
+						desktopDriver, 
+						props);	
+			}else {
+<span class="nc" id="L192">				return null;</span>
+			}
+<span class="nc bnc" id="L194" title="All 2 branches missed.">		}else if(CHROMIUM_BROWSER.equals(appName)) {</span>
+<span class="nc bnc" id="L195" title="All 4 branches missed.">			if(driverName != null &amp;&amp; props.getUri() != null) {</span>
+<span class="nc" id="L196">				driverProcess = getDriverProcess(status, appName, driverName, null);</span>
+<span class="nc bnc" id="L197" title="All 2 branches missed.">				if(status.isPassed()) {</span>
+<span class="nc" id="L198">					return new ChromiumDriverEngine(</span>
+							channel, 
+							status, 
+<span class="nc" id="L201">							props.getName(), </span>
+							driverProcess, 
+							desktopDriver, 
+							props);
+				}else {
+<span class="nc" id="L206">					return null;</span>
+				}
+			}else {
+<span class="nc" id="L209">				status.setError(ActionStatus.CHANNEL_START_ERROR, &quot;missing Chromium properties ('path' and 'driver') in .atsProperties file&quot;);</span>
+<span class="nc" id="L210">				return null;</span>
+			}
+<span class="nc bnc" id="L212" title="All 4 branches missed.">		}else if(JX_BROWSER.equals(appName) || (JX_BROWSER + &quot;browser&quot;).equals(appName)) {</span>
+<span class="nc bnc" id="L213" title="All 4 branches missed.">			if(driverName != null &amp;&amp; props.getUri() != null) {</span>
+
+<span class="nc" id="L215">				final JxDriverEngine jxEngine = new JxDriverEngine(this, AtsManager.getInstance().getDriversFolderPath(), driverName, channel, status, desktopDriver, props);</span>
+<span class="nc bnc" id="L216" title="All 2 branches missed.">				if(status.isPassed()) {</span>
+<span class="nc" id="L217">					return jxEngine;</span>
+				}
+
+<span class="nc" id="L220">				jxEngine.close(false);</span>
+<span class="nc" id="L221">				return null;</span>
+
+			}else {
+<span class="nc" id="L224">				status.setError(ActionStatus.CHANNEL_START_ERROR, &quot;missing JxBrowser properties ('path' and 'driver') in .atsProperties file&quot;);</span>
+<span class="nc" id="L225">				return null;</span>
+			}
+
+<span class="nc bnc" id="L228" title="All 4 branches missed.">		} else if (props.isMobile() || application.startsWith(MOBILE + &quot;://&quot;)) {</span>
+<span class="nc" id="L229">			final String token = getChannelToken(application);</span>
+<span class="nc" id="L230">			final MobileDriverEngine mobileDriverEngine = new MobileDriverEngine(channel, status, application, desktopDriver, props, token);</span>
+<span class="nc" id="L231">			mobileDrivers.add(mobileDriverEngine);</span>
+<span class="nc" id="L232">			return mobileDriverEngine;			</span>
+<span class="nc bnc" id="L233" title="All 6 branches missed.">		} else if (props.isApi() || application.startsWith(HTTP + &quot;://&quot;) || application.startsWith(HTTPS + &quot;://&quot;)) {</span>
+<span class="nc" id="L234">			return new ApiDriverEngine(channel, status, application, desktopDriver, props);</span>
+<span class="nc bnc" id="L235" title="All 2 branches missed.">		} else if (DESKTOP_EXPLORER.equals(appName)) {</span>
+<span class="nc" id="L236">			return new ExplorerDriverEngine(channel, status, desktopDriver, props);</span>
+		}
+
+<span class="nc" id="L239">		return new DesktopDriverEngine(channel, status, application, desktopDriver, props);</span>
+	}
+
+	private String getChannelToken(String applicationPath) {
+<span class="nc" id="L243">		final int start = applicationPath.indexOf(&quot;://&quot;);</span>
+<span class="nc bnc" id="L244" title="All 2 branches missed.">		if(start &gt; -1) {</span>
+<span class="nc" id="L245">			applicationPath = applicationPath.substring(start + 3);</span>
+		}
+
+<span class="nc" id="L248">		final String[] appData = applicationPath.split(&quot;/&quot;);</span>
+<span class="nc" id="L249">		final String endPoint = appData[0];</span>
+
+<span class="nc bnc" id="L251" title="All 2 branches missed.">		for (MobileDriverEngine engine: mobileDrivers)</span>
+		{
+<span class="nc bnc" id="L253" title="All 2 branches missed.">			if (engine.getEndPoint().equals(endPoint)) {</span>
+<span class="nc" id="L254">				mobileDrivers.remove(engine);</span>
+<span class="nc" id="L255">				return engine.getToken();</span>
+			}
+<span class="nc" id="L257">		}</span>
+
+<span class="nc" id="L259">		return null;</span>
+	}
+
+	private String getDriverName(String driverName, String defaultName) {
+<span class="nc bnc" id="L263" title="All 2 branches missed.">		if(driverName == null) {</span>
+<span class="nc" id="L264">			driverName = defaultName;</span>
+		}
+<span class="nc" id="L266">		return driverName + &quot;.exe&quot;;</span>
+	}
+
+	public DriverProcess getDriverProcess(ActionStatus status, String name, String driverName, String defaultDriverName) {
+
+<span class="nc" id="L271">		driverName = getDriverName(driverName, defaultDriverName);</span>
+
+<span class="nc bnc" id="L273" title="All 2 branches missed.">		for (DriverProcess proc : driversProcess) {</span>
+<span class="nc bnc" id="L274" title="All 2 branches missed.">			if(proc.getName().equals(name)) {</span>
+<span class="nc" id="L275">				return proc;</span>
+			}
+<span class="nc" id="L277">		}</span>
+
+<span class="nc" id="L279">		final DriverProcess proc = new DriverProcess(status, name, this, AtsManager.getInstance().getDriversFolderPath(), driverName, null);</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">		if(status.isPassed()) {</span>
+<span class="nc" id="L281">			driversProcess.add(proc);</span>
+<span class="nc" id="L282">			return proc;</span>
+		}
+
+<span class="nc" id="L285">		return null;</span>
+	}
+
+	public void tearDown(){
+
+		//while(driversProcess.size() &gt; 0) {
+		//	driversProcess.remove(0).close();
+		//}
+		
+<span class="nc bnc" id="L294" title="All 2 branches missed.">		if(desktopDriver != null) {</span>
+<span class="nc" id="L295">			desktopDriver.close(false);</span>
+<span class="nc" id="L296">			desktopDriver = null;</span>
+		}
+
+<span class="nc bnc" id="L299" title="All 2 branches missed.">		while(mobileDrivers.size() &gt; 0) {</span>
+<span class="nc" id="L300">			mobileDrivers.remove(0).tearDown();</span>
+		}
+
+		/* if(mobileDriverEngine != null){
+			mobileDriverEngine.tearDown();
+			mobileDriverEngine = null;
+		} */
+<span class="nc" id="L307">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,523 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AMF3Deserializer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.exadel.flamingo.flex.messaging.amf.io</a> &gt; <span class="el_source">AMF3Deserializer.java</span></div><h1>AMF3Deserializer.java</h1><pre class="source lang-java linenums">/*
+  GRANITE DATA SERVICES
+  Copyright (C) 2007 ADEQUATE SYSTEMS SARL
+
+  This file is part of Granite Data Services.
+
+  Granite Data Services is free software; you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or (at your
+  option) any later version.
+ 
+  Granite Data Services is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+  for more details.
+ 
+  You should have received a copy of the GNU Lesser General Public License
+  along with this library; if not, see &lt;http://www.gnu.org/licenses/&gt;.
+*/
+
+package com.exadel.flamingo.flex.messaging.amf.io;
+
+import com.exadel.flamingo.flex.amf.AMF3Constants;
+import com.exadel.flamingo.flex.messaging.amf.io.util.ActionScriptClassDescriptor;
+import com.exadel.flamingo.flex.messaging.amf.io.util.DefaultActionScriptClassDescriptor;
+import com.exadel.flamingo.flex.messaging.amf.io.util.externalizer.Externalizer;
+import com.exadel.flamingo.flex.messaging.amf.io.util.instanciator.AbstractInstanciator;
+import com.exadel.flamingo.flex.messaging.util.StringUtil;
+import com.exadel.flamingo.flex.messaging.util.XMLUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Document;
+
+import java.io.*;
+import java.util.*;
+
+/**
+ * @author Franck WOLFF
+ */
+public class AMF3Deserializer extends DataInputStream implements ObjectInput, AMF3Constants {
+    
+    ///////////////////////////////////////////////////////////////////////////
+    // Fields.
+
+<span class="nc" id="L45">	protected static final Log log = LogFactory.getLog(AMF3Deserializer.class);</span>
+<span class="nc" id="L46">	protected static final Log logMore = LogFactory.getLog(AMF3Deserializer.class.getName() + &quot;.MORE&quot;);</span>
+	
+	protected final boolean debug;
+	protected final boolean debugMore;
+	
+<span class="nc" id="L51">    protected final List&lt;String&gt; storedStrings = new ArrayList&lt;String&gt;();</span>
+<span class="nc" id="L52">    protected final List&lt;Object&gt; storedObjects = new ArrayList&lt;Object&gt;();</span>
+<span class="nc" id="L53">    protected final List&lt;ActionScriptClassDescriptor&gt; storedClassDescriptors = new ArrayList&lt;ActionScriptClassDescriptor&gt;();</span>
+    
+<span class="nc" id="L55">    protected final XMLUtil xmlUtil = new XMLUtil();</span>
+    
+    ///////////////////////////////////////////////////////////////////////////
+    // Constructor.
+    
+    public AMF3Deserializer(InputStream in) {
+<span class="nc" id="L61">        super(in);</span>
+        
+<span class="nc" id="L63">        this.debug = log.isDebugEnabled();</span>
+<span class="nc" id="L64">        this.debugMore = logMore.isDebugEnabled();</span>
+        
+<span class="nc bnc" id="L66" title="All 2 branches missed.">        if (debugMore) debug(&quot;new AMF3Deserializer(in=&quot;, in, &quot;)&quot;);</span>
+<span class="nc" id="L67">    }</span>
+    
+    ///////////////////////////////////////////////////////////////////////////
+    // ObjectInput implementation.
+    
+    public Object readObject() throws IOException {
+<span class="nc bnc" id="L73" title="All 2 branches missed.">        if (debugMore) debug(&quot;readObject()...&quot;);</span>
+<span class="nc" id="L74">        int type = readAMF3Integer();</span>
+<span class="nc" id="L75">        return readObject(type);</span>
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // AMF3 deserialization.
+    
+    protected Object readObject(int type) throws IOException {
+        
+<span class="nc bnc" id="L83" title="All 2 branches missed.">    	if (debugMore) debug(&quot;readObject(type=&quot;, Integer.valueOf(type), &quot;)&quot;);</span>
+        
+<span class="nc bnc" id="L85" title="All 13 branches missed.">        switch (type) {</span>
+        case AMF3_UNDEFINED: // 0x00;
+        case AMF3_NULL: // 0x01;
+<span class="nc" id="L88">            return null;</span>
+        case AMF3_BOOLEAN_FALSE: // 0x02;
+<span class="nc" id="L90">            return Boolean.FALSE;</span>
+        case AMF3_BOOLEAN_TRUE: // 0x03;
+<span class="nc" id="L92">            return Boolean.TRUE;</span>
+        case AMF3_INTEGER: // 0x04;
+<span class="nc" id="L94">            return Integer.valueOf(readAMF3Integer());</span>
+        case AMF3_NUMBER: // 0x05;
+<span class="nc" id="L96">            return readAMF3Double();</span>
+        case AMF3_STRING: // 0x06;
+<span class="nc" id="L98">            return readAMF3String();</span>
+        case AMF3_XML: // 0x07;
+<span class="nc" id="L100">            return readAMF3Xml();</span>
+        case AMF3_DATE: // 0x08;
+<span class="nc" id="L102">            return readAMF3Date();</span>
+        case AMF3_ARRAY: // 0x09;
+<span class="nc" id="L104">            return readAMF3Array();</span>
+        case AMF3_OBJECT: // 0x0A;
+<span class="nc" id="L106">            return readAMF3Object();</span>
+        case AMF3_XMLSTRING: // 0x0B;
+<span class="nc" id="L108">            return readAMF3XmlString();</span>
+        case AMF3_BYTEARRAY: // 0x0C;
+<span class="nc" id="L110">            return readAMF3ByteArray();</span>
+        default:
+<span class="nc" id="L112">            throw new IllegalArgumentException(&quot;Unknown type: &quot; + type);</span>
+        }
+    }
+    
+    protected int readAMF3Integer() throws IOException {
+<span class="nc" id="L117">        int result = 0;</span>
+        
+<span class="nc" id="L119">        int n = 0;</span>
+<span class="nc" id="L120">        int b = readUnsignedByte();</span>
+<span class="nc bnc" id="L121" title="All 4 branches missed.">        while ((b &amp; 0x80) != 0 &amp;&amp; n &lt; 3) {</span>
+<span class="nc" id="L122">            result &lt;&lt;= 7;</span>
+<span class="nc" id="L123">            result |= (b &amp; 0x7f);</span>
+<span class="nc" id="L124">            b = readUnsignedByte();</span>
+<span class="nc" id="L125">            n++;</span>
+        }
+<span class="nc bnc" id="L127" title="All 2 branches missed.">        if (n &lt; 3) {</span>
+<span class="nc" id="L128">            result &lt;&lt;= 7;</span>
+<span class="nc" id="L129">            result |= b;</span>
+        } else {
+<span class="nc" id="L131">            result &lt;&lt;= 8;</span>
+<span class="nc" id="L132">            result |= b;</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">            if ((result &amp; 0x10000000) != 0)</span>
+<span class="nc" id="L134">                result |= 0xe0000000;</span>
+        }
+
+<span class="nc bnc" id="L137" title="All 2 branches missed.">        if (debugMore) debug(&quot;readAMF3Integer() -&gt; &quot;, Integer.valueOf(result));</span>
+
+<span class="nc" id="L139">        return result;</span>
+    }
+    
+    protected Double readAMF3Double() throws IOException {
+<span class="nc" id="L143">        double d = readDouble();</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">        Double result = (Double.isNaN(d) ? null : Double.valueOf(d));</span>
+
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        if (debugMore) debug(&quot;readAMF3Double() -&gt; &quot;, result);</span>
+
+<span class="nc" id="L148">        return result;</span>
+    }
+    
+    protected String readAMF3String() throws IOException {
+<span class="nc" id="L152">        String result = null;</span>
+        
+<span class="nc bnc" id="L154" title="All 2 branches missed.">        if (debugMore) debug(&quot;readAMF3String()...&quot;);</span>
+        
+<span class="nc" id="L156">        int type = readAMF3Integer();</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">        if ((type &amp; 0x01) == 0) // stored string</span>
+<span class="nc" id="L158">            result = getFromStoredStrings(type &gt;&gt; 1);</span>
+        else {
+<span class="nc" id="L160">            int length = type &gt;&gt; 1;            </span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">            if (debugMore) debug(&quot;readAMF3String() - length=&quot;, String.valueOf(length));</span>
+            
+<span class="nc bnc" id="L163" title="All 2 branches missed.">            if (length &gt; 0) {</span>
+                
+<span class="nc" id="L165">                byte[] utfBytes = new byte[length];</span>
+<span class="nc" id="L166">                char[] utfChars = new char[length];</span>
+                
+<span class="nc" id="L168">                readFully(utfBytes);</span>
+                
+<span class="nc" id="L170">                int c, c2, c3, iBytes = 0, iChars = 0;</span>
+<span class="nc bnc" id="L171" title="All 2 branches missed.">                while (iBytes &lt; length) {</span>
+<span class="nc" id="L172">                    c = utfBytes[iBytes++] &amp; 0xFF;</span>
+<span class="nc bnc" id="L173" title="All 2 branches missed.">                    if (c &lt;= 0x7F)</span>
+<span class="nc" id="L174">                        utfChars[iChars++] = (char)c;</span>
+                    else {
+<span class="nc bnc" id="L176" title="All 3 branches missed.">                        switch (c &gt;&gt; 4) {</span>
+                        case 12: case 13:
+<span class="nc" id="L178">                            c2 = utfBytes[iBytes++];</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">                            if ((c2 &amp; 0xC0) != 0x80)</span>
+<span class="nc" id="L180">                                throw new UTFDataFormatException(&quot;Malformed input around byte &quot; + (iBytes-2)); </span>
+<span class="nc" id="L181">                            utfChars[iChars++] = (char)(((c &amp; 0x1F) &lt;&lt; 6) | (c2 &amp; 0x3F));  </span>
+<span class="nc" id="L182">                            break;</span>
+                        case 14:
+<span class="nc" id="L184">                            c2 = utfBytes[iBytes++];</span>
+<span class="nc" id="L185">                            c3 = utfBytes[iBytes++];</span>
+<span class="nc bnc" id="L186" title="All 4 branches missed.">                            if (((c2 &amp; 0xC0) != 0x80) || ((c3 &amp; 0xC0) != 0x80))</span>
+<span class="nc" id="L187">                                throw new UTFDataFormatException(&quot;Malformed input around byte &quot; + (iBytes-3));</span>
+<span class="nc" id="L188">                            utfChars[iChars++] = (char)(((c &amp; 0x0F) &lt;&lt; 12) | ((c2 &amp; 0x3F) &lt;&lt; 6) | ((c3 &amp; 0x3F) &lt;&lt; 0));</span>
+<span class="nc" id="L189">                            break;</span>
+                        default:
+<span class="nc" id="L191">                            throw new UTFDataFormatException(&quot;Malformed input around byte &quot; + (iBytes-1));</span>
+                        }
+                    }
+                }
+<span class="nc" id="L195">                result = new String(utfChars, 0, iChars);</span>
+
+<span class="nc bnc" id="L197" title="All 2 branches missed.">                if (debugMore) debug(&quot;readAMF3String() - result=&quot;, StringUtil.toString(result));</span>
+                
+<span class="nc" id="L199">                addToStoredStrings(result);</span>
+<span class="nc" id="L200">            } else</span>
+<span class="nc" id="L201">                result = &quot;&quot;;</span>
+        }
+
+<span class="nc bnc" id="L204" title="All 2 branches missed.">        if (debugMore) debug(&quot;readAMF3String() -&gt; &quot;, StringUtil.toString(result));</span>
+        
+<span class="nc" id="L206">        return result;</span>
+    }
+
+    
+    protected Date readAMF3Date() throws IOException {
+<span class="nc" id="L211">        Date result = null;</span>
+        
+<span class="nc" id="L213">        int type = readAMF3Integer();</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">        if ((type &amp; 0x01) == 0) // stored Date</span>
+<span class="nc" id="L215">            result = (Date)getFromStoredObjects(type &gt;&gt; 1);</span>
+        else {
+<span class="nc" id="L217">            result = new Date((long)readDouble());</span>
+<span class="nc" id="L218">            addToStoredObjects(result);</span>
+        }
+
+<span class="nc bnc" id="L221" title="All 2 branches missed.">        if (debugMore) debug(&quot;readAMF3Date() -&gt; &quot;, result);</span>
+        
+<span class="nc" id="L223">        return result;</span>
+    }
+    
+    protected Object readAMF3Array() throws IOException {
+<span class="nc" id="L227">        Object result = null;</span>
+        
+<span class="nc" id="L229">        int type = readAMF3Integer();</span>
+<span class="nc bnc" id="L230" title="All 2 branches missed.">        if ((type &amp; 0x01) == 0) // stored array.</span>
+<span class="nc" id="L231">            result = getFromStoredObjects(type &gt;&gt; 1);</span>
+        else {
+<span class="nc" id="L233">            final int size = type &gt;&gt; 1;</span>
+            
+<span class="nc" id="L235">            String key = readAMF3String();</span>
+<span class="nc bnc" id="L236" title="All 2 branches missed.">            if (key.length() == 0) {</span>
+<span class="nc" id="L237">                Object[] objects = new Object[size];</span>
+<span class="nc" id="L238">                addToStoredObjects(objects);</span>
+
+<span class="nc bnc" id="L240" title="All 2 branches missed.">                for (int i = 0; i &lt; size; i++)</span>
+<span class="nc" id="L241">                    objects[i] = readObject();</span>
+
+<span class="nc" id="L243">                result = objects;</span>
+<span class="nc" id="L244">            }</span>
+            else {
+<span class="nc" id="L246">                Map&lt;Object, Object&gt; map = new LinkedHashMap&lt;Object, Object&gt;();</span>
+<span class="nc" id="L247">                addToStoredObjects(map);</span>
+
+<span class="nc bnc" id="L249" title="All 2 branches missed.">                while(key.length() &gt; 0) {</span>
+<span class="nc" id="L250">                    map.put(key, readObject());</span>
+<span class="nc" id="L251">                    key = readAMF3String();</span>
+                }
+<span class="nc bnc" id="L253" title="All 2 branches missed.">                for (int i = 0; i &lt; size; i++)</span>
+<span class="nc" id="L254">                    map.put(Integer.valueOf(i), readObject());</span>
+                
+<span class="nc" id="L256">                result = map;</span>
+            }
+        }
+        
+<span class="nc bnc" id="L260" title="All 2 branches missed.">        if (debugMore) debug(&quot;readAMF3Array() -&gt; &quot;, result);</span>
+        
+<span class="nc" id="L262">        return result;</span>
+    }
+    
+    protected Object readAMF3Object() throws IOException {
+<span class="nc bnc" id="L266" title="All 2 branches missed.">    	if (debug) debug(&quot;readAMF3Object()...&quot;);</span>
+
+<span class="nc" id="L268">        Object result = null;</span>
+        
+<span class="nc" id="L270">        int type = readAMF3Integer();</span>
+<span class="nc bnc" id="L271" title="All 2 branches missed.">        if (debug) debug(&quot;readAMF3Object() - type=&quot;, Integer.valueOf(type));</span>
+        
+<span class="nc bnc" id="L273" title="All 2 branches missed.">        if ((type &amp; 0x01) == 0) // stored object.</span>
+<span class="nc" id="L274">            result = getFromStoredObjects(type &gt;&gt; 1);</span>
+        else {
+<span class="nc bnc" id="L276" title="All 2 branches missed.">            boolean inlineClassDef = (((type &gt;&gt; 1) &amp; 0x01) != 0);</span>
+<span class="nc bnc" id="L277" title="All 2 branches missed.">            if (debug) debug(&quot;readAMF3Object() - inlineClassDef=&quot;, String.valueOf(inlineClassDef));</span>
+            
+            // read class decriptor.
+<span class="nc" id="L280">            ActionScriptClassDescriptor desc = null;</span>
+<span class="nc bnc" id="L281" title="All 2 branches missed.">            if (inlineClassDef) {</span>
+<span class="nc" id="L282">                int propertiesCount = type &gt;&gt; 4;</span>
+<span class="nc bnc" id="L283" title="All 2 branches missed.">            	if (debug) debug(&quot;readAMF3Object() - propertiesCount=&quot;, String.valueOf(propertiesCount));</span>
+                
+<span class="nc" id="L285">            	byte encoding = (byte)((type &gt;&gt; 2) &amp; 0x03);</span>
+<span class="nc bnc" id="L286" title="All 2 branches missed.">            	if (debug) debug(&quot;readAMF3Object() - encoding=&quot;, Byte.valueOf(encoding));</span>
+                
+<span class="nc" id="L288">            	String className = readAMF3String();</span>
+<span class="nc bnc" id="L289" title="All 2 branches missed.">            	if (debug) debug(&quot;readAMF3Object() - className=&quot;, StringUtil.toString(className));</span>
+                
+<span class="nc" id="L291">                desc = new DefaultActionScriptClassDescriptor(className, encoding);</span>
+<span class="nc" id="L292">                addToStoredClassDescriptors(desc);</span>
+
+<span class="nc bnc" id="L294" title="All 2 branches missed.">                if (debug) debug(&quot;readAMF3Object() - defining &quot;, String.valueOf(propertiesCount), &quot; properties...&quot;);</span>
+<span class="nc bnc" id="L295" title="All 2 branches missed.">                for (int i = 0; i &lt; propertiesCount; i++) {</span>
+<span class="nc" id="L296">                    String name = readAMF3String();</span>
+<span class="nc bnc" id="L297" title="All 2 branches missed.">                    if (debug) debug(&quot;readAMF3Object() - defining property name=&quot;, name);</span>
+<span class="nc" id="L298">                    desc.defineProperty(name);</span>
+                }
+<span class="nc" id="L300">            } else</span>
+<span class="nc" id="L301">                desc = getFromStoredClassDescriptors(type &gt;&gt; 2);</span>
+
+<span class="nc bnc" id="L303" title="All 2 branches missed.">            if (debug) debug(&quot;readAMF3Object() - actionScriptClassDescriptor=&quot;, desc);</span>
+
+<span class="nc" id="L305">            int objectEncoding = desc.getEncoding();</span>
+            
+            // Find externalizer and create Java instance.
+<span class="nc" id="L308">            Externalizer externalizer = desc.getExternalizer();</span>
+<span class="nc bnc" id="L309" title="All 2 branches missed.">            if (externalizer != null) {</span>
+                try {
+<span class="nc" id="L311">                    result = externalizer.newInstance(desc.getType(), this);</span>
+<span class="nc" id="L312">                } catch (Exception e) {</span>
+<span class="nc" id="L313">                    throw new RuntimeException(&quot;Could not instantiate type: &quot; + desc.getType(), e);</span>
+<span class="nc" id="L314">                }</span>
+            } else
+<span class="nc" id="L316">                result = desc.newJavaInstance();</span>
+            
+<span class="nc" id="L318">            int index = addToStoredObjects(result);</span>
+            
+            // read object content...
+<span class="nc bnc" id="L321" title="All 2 branches missed.">            if ((objectEncoding &amp; 0x01) != 0) {</span>
+                // externalizer.
+<span class="nc bnc" id="L323" title="All 2 branches missed.">                if (externalizer != null) {</span>
+<span class="nc bnc" id="L324" title="All 2 branches missed.">                    if (debug) debug(&quot;readAMF3Object() - using externalizer=&quot;, externalizer);</span>
+                    try {
+<span class="nc" id="L326">                        externalizer.readExternal(result, this);</span>
+<span class="nc" id="L327">                    } catch (IOException e) {</span>
+<span class="nc" id="L328">                        throw e;</span>
+<span class="nc" id="L329">                    } catch (Exception e) {</span>
+<span class="nc" id="L330">                        throw new RuntimeException(&quot;Could not read externalized object: &quot; + result, e);</span>
+<span class="nc" id="L331">                    }</span>
+                }
+                // legacy externalizable.
+                else {
+<span class="nc bnc" id="L335" title="All 2 branches missed.">                    if (debug) debug(&quot;readAMF3Object() - legacy Externalizable=&quot;, result.getClass());</span>
+                    try {
+<span class="nc" id="L337">                        ((Externalizable)result).readExternal(this);</span>
+<span class="nc" id="L338">                    } catch (IOException e) {</span>
+<span class="nc" id="L339">                        throw e;</span>
+<span class="nc" id="L340">                    } catch (Exception e) {</span>
+<span class="nc" id="L341">                        throw new RuntimeException(&quot;Could not read externalizable object: &quot; + result, e);</span>
+<span class="nc" id="L342">                    }</span>
+                }
+            }
+            else {
+	            // defined values...
+<span class="nc bnc" id="L347" title="All 2 branches missed.">	            if (desc.getPropertiesCount() &gt; 0) {</span>
+<span class="nc bnc" id="L348" title="All 2 branches missed.">	                if (debug) debug(&quot;readAMF3Object() - reading defined properties...&quot;);</span>
+<span class="nc bnc" id="L349" title="All 2 branches missed.">		            for (int i = 0; i &lt; desc.getPropertiesCount(); i++) {</span>
+<span class="nc" id="L350">		                byte vType = readByte();</span>
+<span class="nc" id="L351">		                Object value = readObject(vType);</span>
+<span class="nc bnc" id="L352" title="All 2 branches missed.">		                if (debug) debug(</span>
+<span class="nc" id="L353">		                	&quot;readAMF3Object() - setting defined property: &quot;, desc.getPropertyName(i),</span>
+<span class="nc" id="L354">		                	&quot;=&quot;, StringUtil.toString(value)</span>
+		                );
+<span class="nc" id="L356">		                desc.setPropertyValue(i, result, value);</span>
+		            }
+	            }
+	            
+	            // dynamic values...
+<span class="nc bnc" id="L361" title="All 2 branches missed.">	            if (objectEncoding == 0x02) {</span>
+<span class="nc bnc" id="L362" title="All 2 branches missed.">	            	if (debug) debug(&quot;readAMF3Object() - reading dynamic properties...&quot;);</span>
+	                while (true) {
+<span class="nc" id="L364">	                    String name = readAMF3String();</span>
+<span class="nc bnc" id="L365" title="All 2 branches missed.">	                    if (name.length() == 0)</span>
+<span class="nc" id="L366">	                        break;</span>
+<span class="nc" id="L367">	                    byte vType = readByte();</span>
+<span class="nc" id="L368">	                    Object value = readObject(vType);</span>
+<span class="nc bnc" id="L369" title="All 2 branches missed.">	                    if (debug) debug(</span>
+	                    	&quot;readAMF3Object() - setting dynamic property: &quot;, name,
+<span class="nc" id="L371">	                    	&quot;=&quot;, StringUtil.toString(value)</span>
+	                    );
+<span class="nc" id="L373">	                    desc.setPropertyValue(name, result, value);</span>
+<span class="nc" id="L374">	                }</span>
+	            }
+            }
+            
+<span class="nc bnc" id="L378" title="All 2 branches missed.">            if (result instanceof AbstractInstanciator) {</span>
+<span class="nc bnc" id="L379" title="All 2 branches missed.">            	if (debug) debug(&quot;readAMF3Object() - resolving instanciator...&quot;);</span>
+            	try {
+<span class="nc" id="L381">            		result = ((AbstractInstanciator&lt;?&gt;)result).resolve();</span>
+<span class="nc" id="L382">            	} catch (Exception e) {</span>
+<span class="nc" id="L383">            		throw new RuntimeException(&quot;Could not instantiate object: &quot; + result, e);</span>
+<span class="nc" id="L384">            	}</span>
+<span class="nc" id="L385">                setStoredObject(index, result);</span>
+            }
+        }
+        
+<span class="nc bnc" id="L389" title="All 2 branches missed.">        if (debug) debug(&quot;readAMF3Object() -&gt; &quot;, result);</span>
+
+<span class="nc" id="L391">        return result;</span>
+    }
+    
+    protected Document readAMF3Xml() throws IOException {
+<span class="nc" id="L395">        String xml = readAMF3XmlString();</span>
+<span class="nc" id="L396">        Document result = xmlUtil.buildDocument(xml);</span>
+        
+<span class="nc bnc" id="L398" title="All 2 branches missed.">        if (debugMore) debug(&quot;readAMF3Xml() -&gt; &quot;, result);</span>
+        
+<span class="nc" id="L400">        return result;</span>
+    }
+    
+    protected String readAMF3XmlString() throws IOException {
+<span class="nc" id="L404">        String result = null;</span>
+        
+<span class="nc" id="L406">        int type = readAMF3Integer();</span>
+<span class="nc bnc" id="L407" title="All 2 branches missed.">        if ((type &amp; 0x01) == 0) // stored String</span>
+<span class="nc" id="L408">            result = getFromStoredStrings(type &gt;&gt; 1);</span>
+        else {
+<span class="nc" id="L410">            byte[] bytes = readBytes(type &gt;&gt; 1);</span>
+<span class="nc" id="L411">            result = new String(bytes, &quot;UTF-8&quot;);</span>
+<span class="nc" id="L412">            addToStoredStrings(result);</span>
+        }
+
+<span class="nc bnc" id="L415" title="All 2 branches missed.">        if (debugMore) debug(&quot;readAMF3XmlString() -&gt; &quot;, StringUtil.toString(result));</span>
+
+<span class="nc" id="L417">        return result;</span>
+    }
+    
+    protected byte[] readAMF3ByteArray() throws IOException {
+<span class="nc" id="L421">        byte[] result = null;</span>
+        
+<span class="nc" id="L423">        int type = readAMF3Integer();</span>
+<span class="nc bnc" id="L424" title="All 2 branches missed.">        if ((type &amp; 0x01) == 0) // stored object.</span>
+<span class="nc" id="L425">            result = (byte[])getFromStoredObjects(type &gt;&gt; 1);</span>
+        else {
+<span class="nc" id="L427">            result = readBytes(type &gt;&gt; 1);</span>
+<span class="nc" id="L428">        	addToStoredObjects(result);</span>
+        }
+
+<span class="nc bnc" id="L431" title="All 2 branches missed.">        if (debugMore) debug(&quot;readAMF3ByteArray() -&gt; &quot;, result);</span>
+        
+<span class="nc" id="L433">        return result;</span>
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Cached objects methods.
+    
+    protected void addToStoredStrings(String s) {
+<span class="nc bnc" id="L440" title="All 2 branches missed.">    	if (debug) debug(</span>
+<span class="nc" id="L441">    		&quot;addToStoredStrings(s=&quot;, StringUtil.toString(s), &quot;) at index=&quot;,</span>
+<span class="nc" id="L442">    		String.valueOf(storedStrings.size())</span>
+    	);
+<span class="nc" id="L444">        storedStrings.add(s);</span>
+<span class="nc" id="L445">    }</span>
+    
+    protected String getFromStoredStrings(int index) {
+<span class="nc bnc" id="L448" title="All 2 branches missed.">    	if (debug) debug(&quot;getFromStoredStrings(index=&quot;, String.valueOf(index), &quot;)&quot;);</span>
+<span class="nc" id="L449">    	String s = storedStrings.get(index);</span>
+<span class="nc bnc" id="L450" title="All 2 branches missed.">    	if (debug) debug(&quot;getFromStoredStrings() -&gt; &quot;, StringUtil.toString(s));</span>
+<span class="nc" id="L451">    	return s;</span>
+    }
+    
+    protected int addToStoredObjects(Object o) {
+<span class="nc" id="L455">    	int index = storedObjects.size();</span>
+<span class="nc bnc" id="L456" title="All 2 branches missed.">    	if (debug) debug(&quot;addToStoredObjects(o=&quot;, o, &quot;) at index=&quot;, String.valueOf(index));</span>
+<span class="nc" id="L457">        storedObjects.add(o);</span>
+<span class="nc" id="L458">        return index;</span>
+    }
+    
+    protected void setStoredObject(int index, Object o) {
+<span class="nc bnc" id="L462" title="All 2 branches missed.">    	if (debug) debug(&quot;setStoredObject(index=&quot;, String.valueOf(index), &quot;, o=&quot;, o, &quot;)&quot;);</span>
+<span class="nc" id="L463">        storedObjects.set(index, o);</span>
+<span class="nc" id="L464">    }</span>
+    
+    protected Object getFromStoredObjects(int index) {
+<span class="nc bnc" id="L467" title="All 2 branches missed.">    	if (debug) debug(&quot;getFromStoredObjects(index=&quot;, String.valueOf(index), &quot;)&quot;);</span>
+<span class="nc" id="L468">        Object o = storedObjects.get(index);</span>
+<span class="nc bnc" id="L469" title="All 2 branches missed.">        if (debug) debug(&quot;getFromStoredObjects() -&gt; &quot;, o);</span>
+<span class="nc" id="L470">        return o;</span>
+    }
+    
+    protected void addToStoredClassDescriptors(ActionScriptClassDescriptor desc) {
+<span class="nc bnc" id="L474" title="All 2 branches missed.">    	if (debug) debug(</span>
+    		&quot;addToStoredClassDescriptors(desc=&quot;, desc, &quot;) at index=&quot;,
+<span class="nc" id="L476">    		String.valueOf(storedClassDescriptors.size())</span>
+    	);
+<span class="nc" id="L478">        storedClassDescriptors.add(desc);</span>
+<span class="nc" id="L479">    }</span>
+    
+    protected ActionScriptClassDescriptor getFromStoredClassDescriptors(int index) {
+<span class="nc bnc" id="L482" title="All 2 branches missed.">    	if (debug) debug(&quot;getFromStoredClassDescriptors(index=&quot;, String.valueOf(index), &quot;)&quot;);</span>
+<span class="nc" id="L483">    	ActionScriptClassDescriptor desc = storedClassDescriptors.get(index);</span>
+<span class="nc bnc" id="L484" title="All 2 branches missed.">        if (debug) debug(&quot;getFromStoredClassDescriptors() -&gt; &quot;, desc);</span>
+<span class="nc" id="L485">    	return desc;</span>
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Utilities.
+    
+    protected byte[] readBytes(int count) throws IOException {
+<span class="nc" id="L492">        byte[] bytes = new byte[count];</span>
+<span class="nc" id="L493">        readFully(bytes);</span>
+<span class="nc" id="L494">        return bytes;</span>
+    }
+    
+    protected void debug(Object... msgs) {
+<span class="nc" id="L498">    	debug(null, msgs);</span>
+<span class="nc" id="L499">    }</span>
+    
+    protected void debug(Throwable t, Object... msgs) {
+<span class="nc" id="L502">		String message = &quot;&quot;;</span>
+<span class="nc bnc" id="L503" title="All 4 branches missed.">		if (msgs != null &amp;&amp; msgs.length &gt; 0) {</span>
+<span class="nc bnc" id="L504" title="All 2 branches missed.">			if (msgs.length == 1)</span>
+<span class="nc" id="L505">				message = String.valueOf(msgs[0]);</span>
+			else {
+<span class="nc" id="L507">	    		StringBuilder sb = new StringBuilder();</span>
+<span class="nc bnc" id="L508" title="All 2 branches missed.">	    		for (Object o : msgs) {</span>
+<span class="nc bnc" id="L509" title="All 2 branches missed.">	    			if (o instanceof String)</span>
+<span class="nc" id="L510">	    				sb.append(o);</span>
+	    			else
+<span class="nc" id="L512">	    				sb.append(StringUtil.toString(o));</span>
+	    		}
+<span class="nc" id="L514">	    		message = sb.toString();</span>
+			}
+		}
+<span class="nc bnc" id="L517" title="All 2 branches missed.">		if (t != null)</span>
+<span class="nc" id="L518">			log.debug(message, t);</span>
+		else
+<span class="nc" id="L520">			log.debug(message);</span>
+<span class="nc" id="L521">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

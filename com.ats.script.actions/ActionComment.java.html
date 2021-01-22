@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActionComment.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.script.actions</a> &gt; <span class="el_source">ActionComment.java</span></div><h1>ActionComment.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.script.actions;
+
+import com.ats.executor.ActionTestScript;
+import com.ats.generator.variables.CalculatedValue;
+import com.ats.script.Script;
+import com.ats.script.ScriptLoader;
+import com.google.gson.JsonObject;
+
+import java.util.ArrayList;
+
+public class ActionComment extends Action {
+
+	public static final String SCRIPT_LABEL = &quot;comment&quot;;
+
+	private static final String STEP_TYPE = &quot;step&quot;;
+	private static final String LOG_TYPE = &quot;log&quot;;
+	private static final String SCRIPT_TYPE = &quot;script&quot;;
+	private static final String SUMMARY_TYPE = &quot;summary&quot;;
+
+	private CalculatedValue comment;
+<span class="pc" id="L40">	private String type = SCRIPT_TYPE;</span>
+
+<span class="nc" id="L42">	public ActionComment() {}</span>
+
+	public ActionComment(ScriptLoader script, String type, ArrayList&lt;String&gt; dataArray) {
+<span class="fc" id="L45">		super(script);</span>
+
+<span class="fc bfc" id="L47" title="All 2 branches covered.">		if(!SCRIPT_LABEL.equals(type)) {</span>
+<span class="fc" id="L48">			int minusPos = type.indexOf(&quot;-&quot;);</span>
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">			if(minusPos &gt; -1) {</span>
+<span class="fc" id="L50">				setType(type.substring(minusPos+1));</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">			}else if(dataArray.size() &gt; 0){</span>
+<span class="nc" id="L52">				setType(dataArray.remove(0).trim());</span>
+			}
+		}
+		
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">		if(dataArray.size() &gt; 0){</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">			if(dataArray.size() &gt; 1){</span>
+<span class="fc" id="L58">				setType(dataArray.remove(0).trim());</span>
+			}
+<span class="fc" id="L60">			setComment(new CalculatedValue(script, dataArray.remove(0).trim()));</span>
+		}else {
+<span class="nc" id="L62">			setComment(new CalculatedValue(script));</span>
+		}
+<span class="fc" id="L64">	}</span>
+
+	public ActionComment(ScriptLoader script, String data) {
+<span class="nc" id="L67">		super(script);</span>
+<span class="nc" id="L68">		setType(SCRIPT_TYPE);</span>
+<span class="nc" id="L69">		setComment(new CalculatedValue(script, data));</span>
+<span class="nc" id="L70">	}</span>
+
+	public ActionComment(Script script, String type, CalculatedValue value) {
+<span class="nc" id="L73">		super(script);</span>
+<span class="nc" id="L74">		setType(type);</span>
+<span class="nc" id="L75">		setComment(value);</span>
+<span class="nc" id="L76">	}</span>
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// Code Generator
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+<span class="nc" id="L84">		data.addProperty(&quot;type&quot;, type);</span>
+<span class="nc" id="L85">		data.addProperty(&quot;value&quot;, comment.getCalculated());</span>
+<span class="nc" id="L86">		return super.getActionLogs(scriptName, scriptLine, data);</span>
+	}
+
+	@Override
+	public StringBuilder getJavaCode() {
+<span class="fc" id="L91">		StringBuilder codeBuilder = super.getJavaCode();</span>
+<span class="fc" id="L92">		codeBuilder.append(&quot;\&quot;&quot;).append(getType()).append(&quot;\&quot;, &quot;).append(comment.getJavaCode()).append(&quot;)&quot;);</span>
+<span class="fc" id="L93">		return codeBuilder;</span>
+	}
+
+	@Override
+	public boolean isScriptComment() {
+<span class="nc" id="L98">		return SCRIPT_TYPE.equals(type);</span>
+	}
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public boolean execute(ActionTestScript ts, String testName, int testLine) {
+<span class="nc bnc" id="L106" title="All 2 branches missed.">		if (STEP_TYPE.equals(type)) {</span>
+<span class="nc" id="L107">			super.execute(ts, testName, testLine);</span>
+<span class="nc" id="L108">			status.endDuration();</span>
+<span class="nc" id="L109">			ts.getRecorder().update(type, comment.getCalculated());</span>
+<span class="nc" id="L110">			return true;</span>
+		} else {
+<span class="nc" id="L112">			status = ts.getCurrentChannel().newActionStatus(testName, testLine);</span>
+<span class="nc" id="L113">			status.endDuration();</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">			if(LOG_TYPE.equals(type)) {</span>
+<span class="nc" id="L115">				ts.getTopScript().sendCommentLog(comment.getCalculated());</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">			}else if(SUMMARY_TYPE.equals(type)) {</span>
+<span class="nc" id="L117">				ts.getRecorder().updateSummary(testName, testLine, comment.getCalculated());</span>
+			}
+<span class="nc" id="L119">			return false;</span>
+		}
+	}
+
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------
+
+	public CalculatedValue getComment() {
+<span class="nc" id="L128">		return comment;</span>
+	}
+
+	public void setComment(CalculatedValue comment) {
+<span class="fc" id="L132">		this.comment = comment;</span>
+<span class="fc" id="L133">	}</span>
+
+	public String getType() {
+<span class="fc" id="L136">		return type;</span>
+	}
+
+	public void setType(String value) {
+<span class="pc bpc" id="L140" title="2 of 6 branches missed.">		if(LOG_TYPE.equals(value) || STEP_TYPE.equals(value) || SUMMARY_TYPE.equals(value)){</span>
+<span class="fc" id="L141">			this.type = value;</span>
+		}else {
+<span class="fc" id="L143">			this.type = SCRIPT_TYPE;</span>
+		}
+<span class="fc" id="L145">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

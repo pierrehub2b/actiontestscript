@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DefaultExternalizer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.exadel.flamingo.flex.messaging.amf.io.util.externalizer</a> &gt; <span class="el_source">DefaultExternalizer.java</span></div><h1>DefaultExternalizer.java</h1><pre class="source lang-java linenums">/*
+  GRANITE DATA SERVICES
+  Copyright (C) 2007 ADEQUATE SYSTEMS SARL
+
+  This file is part of Granite Data Services.
+
+  Granite Data Services is free software; you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or (at your
+  option) any later version.
+ 
+  Granite Data Services is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+  for more details.
+ 
+  You should have received a copy of the GNU Lesser General Public License
+  along with this library; if not, see &lt;http://www.gnu.org/licenses/&gt;.
+*/
+
+package com.exadel.flamingo.flex.messaging.amf.io.util.externalizer;
+
+import com.exadel.flamingo.flex.collections.BasicMap;
+import com.exadel.flamingo.flex.messaging.amf.io.util.Converter;
+import com.exadel.flamingo.flex.messaging.amf.io.util.DefaultConverter;
+import com.exadel.flamingo.flex.messaging.amf.io.util.instanciator.AbstractInstanciator;
+import com.exadel.flamingo.flex.messaging.util.ClassUtil;
+
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.lang.reflect.*;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
+
+/**
+ * @author Franck WOLFF
+ */
+<span class="nc" id="L40">public class DefaultExternalizer implements Externalizer {</span>
+
+<span class="nc" id="L42">    private static final Object[] ZERO_ARGS = new Object[0];</span>
+
+<span class="nc" id="L44">    private final ReentrantLock lock = new ReentrantLock();</span>
+<span class="nc" id="L45">    private final ConcurrentHashMap&lt;Class&lt;?&gt;, List&lt;Field&gt;&gt; orderedFields =</span>
+        new ConcurrentHashMap&lt;Class&lt;?&gt;, List&lt;Field&gt;&gt;();
+<span class="nc" id="L47">    private final ConcurrentHashMap&lt;String, Constructor&lt;?&gt;&gt; constructors =</span>
+        new ConcurrentHashMap&lt;String, Constructor&lt;?&gt;&gt;();
+
+    public Object newInstance(final String type, ObjectInput in)
+        throws IOException, ClassNotFoundException, InstantiationException,
+        InvocationTargetException, IllegalAccessException {
+
+<span class="nc" id="L54">        Constructor&lt;?&gt; constructor = constructors.get(type);</span>
+
+<span class="nc bnc" id="L56" title="All 2 branches missed.">        if (constructor == null) {</span>
+<span class="nc" id="L57">            Class&lt;?&gt; clazz = ClassUtil.forName(type);</span>
+<span class="nc" id="L58">            constructor = findDefaultConstructor(clazz);</span>
+<span class="nc" id="L59">            Constructor&lt;?&gt; previousConstructor = constructors.putIfAbsent(type, constructor);</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">            if (previousConstructor != null)</span>
+<span class="nc" id="L61">                constructor = previousConstructor; // Should be the same instance, anyway...</span>
+        }
+
+<span class="nc" id="L64">        return constructor.newInstance(ZERO_ARGS);</span>
+    }
+
+    public void readExternal(Object o, ObjectInput in)
+        throws IOException, ClassNotFoundException, IllegalAccessException {
+
+<span class="nc bnc" id="L70" title="All 2 branches missed.">        if (o instanceof AbstractInstanciator) {</span>
+<span class="nc" id="L71">            AbstractInstanciator&lt;?&gt; instanciator = (AbstractInstanciator&lt;?&gt;) o;</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">            for (String fieldName : instanciator.getOrderedFieldNames())</span>
+<span class="nc" id="L73">                instanciator.put(fieldName, in.readObject());</span>
+<span class="nc" id="L74">        } else {</span>
+<span class="nc" id="L75">            Converter converter = new DefaultConverter();</span>
+
+<span class="nc" id="L77">            List&lt;Field&gt; fields = findOrderedFields(o.getClass());</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">            for (Field field : fields) {</span>
+<span class="nc" id="L79">                field.setAccessible(true);</span>
+<span class="nc" id="L80">                Object value = converter.convertForDeserialization(in.readObject(), field.getType());</span>
+<span class="nc" id="L81">                field.set(o, value);</span>
+<span class="nc" id="L82">            }</span>
+        }
+<span class="nc" id="L84">    }</span>
+
+    public void writeExternal(Object o, ObjectOutput out)
+        throws IOException, IllegalAccessException {
+
+<span class="nc" id="L89">        String instanciatorType = null; //TODO getInstanciator(o.getClass().getName());</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">        if (instanciatorType != null) {</span>
+            try {
+<span class="nc" id="L92">                AbstractInstanciator&lt;?&gt; instanciator =</span>
+<span class="nc" id="L93">                    (AbstractInstanciator&lt;?&gt;) ClassUtil.newInstance(instanciatorType);</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">                for (String fieldName : instanciator.getOrderedFieldNames()) {</span>
+<span class="nc" id="L95">                    Field field = o.getClass().getDeclaredField(fieldName);</span>
+<span class="nc" id="L96">                    field.setAccessible(true);</span>
+<span class="nc" id="L97">                    Object value = field.get(o);</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">                    if (value instanceof Map)</span>
+<span class="nc" id="L99">                        value = BasicMap.newInstance((Map&lt;?, ?&gt;) value);</span>
+<span class="nc" id="L100">                    out.writeObject(value);</span>
+<span class="nc" id="L101">                }</span>
+<span class="nc" id="L102">            } catch (Exception e) {</span>
+<span class="nc" id="L103">                throw new RuntimeException(&quot;&quot;, e);</span>
+<span class="nc" id="L104">            }</span>
+        } else {
+<span class="nc" id="L106">            List&lt;Field&gt; fields = findOrderedFields(o.getClass());</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">            for (Field field : fields) {</span>
+<span class="nc" id="L108">                field.setAccessible(true);</span>
+<span class="nc" id="L109">                out.writeObject(field.get(o));</span>
+<span class="nc" id="L110">            }</span>
+        }
+<span class="nc" id="L112">    }</span>
+
+    public List&lt;Field&gt; findOrderedFields(final Class&lt;?&gt; clazz) {
+<span class="nc" id="L115">        List&lt;Field&gt; fields = orderedFields.get(clazz);</span>
+
+<span class="nc bnc" id="L117" title="All 2 branches missed.">        if (fields == null) {</span>
+<span class="nc" id="L118">            fields = new ArrayList&lt;Field&gt;();</span>
+
+<span class="nc" id="L120">            Set&lt;String&gt; allFieldNames = new HashSet&lt;String&gt;();</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">            for (Class&lt;?&gt; c = clazz; c != null; c = c.getSuperclass()) {</span>
+
+<span class="nc" id="L123">                List&lt;Field&gt; newFields = new ArrayList&lt;Field&gt;();</span>
+
+<span class="nc bnc" id="L125" title="All 2 branches missed.">                for (Field field : c.getDeclaredFields()) {</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">                    if (!allFieldNames.contains(field.getName()) &amp;&amp;</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">                        !Modifier.isTransient(field.getModifiers()) &amp;&amp;</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">                        !Modifier.isStatic(field.getModifiers()))</span>
+<span class="nc" id="L129">                        newFields.add(field);</span>
+<span class="nc" id="L130">                    allFieldNames.add(field.getName());</span>
+                }
+
+<span class="nc" id="L133">                Collections.sort(newFields, new Comparator&lt;Field&gt;() {</span>
+                    public int compare(Field o1, Field o2) {
+<span class="nc" id="L135">                        return o1.getName().compareTo(o2.getName());</span>
+                    }
+                });
+
+<span class="nc" id="L139">                fields.addAll(0, newFields);</span>
+            }
+
+<span class="nc" id="L142">            List&lt;Field&gt; previousFields = orderedFields.putIfAbsent(clazz, fields);</span>
+<span class="nc bnc" id="L143" title="All 2 branches missed.">            if (previousFields != null)</span>
+<span class="nc" id="L144">                fields = previousFields;</span>
+        }
+
+<span class="nc" id="L147">        return fields;</span>
+    }
+
+    protected &lt;T&gt; Constructor&lt;T&gt; findDefaultConstructor(Class&lt;T&gt; clazz) {
+<span class="nc" id="L151">        Constructor&lt;T&gt; constructor = null;</span>
+
+<span class="nc" id="L153">        String instanciator = null; //TODO getInstanciator(clazz.getName());</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">        if (instanciator != null) {</span>
+            try {
+<span class="nc" id="L156">                Class&lt;T&gt; instanciatorClass = ClassUtil.forName(instanciator, clazz);</span>
+<span class="nc" id="L157">                constructor = instanciatorClass.getConstructor(new Class[0]);</span>
+<span class="nc" id="L158">            } catch (ClassNotFoundException e) {</span>
+<span class="nc" id="L159">                throw new RuntimeException(</span>
+<span class="nc" id="L160">                    &quot;Could not load instanciator class: &quot; + instanciator + &quot; for: &quot; + clazz.getName(), e</span>
+                );
+<span class="nc" id="L162">            } catch (NoSuchMethodException e) {</span>
+<span class="nc" id="L163">                throw new RuntimeException(</span>
+                    &quot;Could not find default constructor in instanciator class: &quot; + instanciator, e
+                );
+<span class="nc" id="L166">            }</span>
+        } else {
+            try {
+<span class="nc" id="L169">                constructor = clazz.getConstructor(new Class[0]);</span>
+<span class="nc" id="L170">            } catch (NoSuchMethodException e) {</span>
+                // fall down...
+<span class="nc" id="L172">            }</span>
+
+<span class="nc bnc" id="L174" title="All 2 branches missed.">            if (constructor == null) {</span>
+<span class="nc" id="L175">                String key = DefaultConstructorFactory.class.getName();</span>
+<span class="nc" id="L176">                DefaultConstructorFactory factory = getDefaultConstructorFactory();</span>
+<span class="nc" id="L177">                constructor = factory.findDefaultConstructor(clazz);</span>
+            }
+        }
+
+<span class="nc" id="L181">        return constructor;</span>
+    }
+
+    private DefaultConstructorFactory getDefaultConstructorFactory() {
+
+<span class="nc" id="L186">        lock.lock();</span>
+        try {
+<span class="nc" id="L188">            DefaultConstructorFactory factory = null;</span>
+            try {
+<span class="nc" id="L190">                factory = new SunDefaultConstructorFactory();</span>
+<span class="nc" id="L191">            } catch (Exception e) {</span>
+                // fall down...
+<span class="nc" id="L193">            }</span>
+<span class="nc bnc" id="L194" title="All 2 branches missed.">            if (factory == null)</span>
+<span class="nc" id="L195">                factory = new NoDefaultConstructorFactory();</span>
+<span class="nc" id="L196">            return factory;</span>
+        } finally {
+<span class="nc" id="L198">            lock.unlock();</span>
+        }
+    }
+}
+
+interface DefaultConstructorFactory {
+    public &lt;T&gt; Constructor&lt;T&gt; findDefaultConstructor(Class&lt;T&gt; clazz);
+}
+
+<span class="nc" id="L207">class NoDefaultConstructorFactory implements DefaultConstructorFactory {</span>
+
+    public &lt;T&gt; Constructor&lt;T&gt; findDefaultConstructor(Class&lt;T&gt; clazz) {
+<span class="nc" id="L210">        throw new RuntimeException(&quot;Could not find default constructor in class: &quot; + clazz);</span>
+    }
+}
+
+class SunDefaultConstructorFactory implements DefaultConstructorFactory {
+
+    private final Object reflectionFactory;
+    private final Method newConstructorForSerialization;
+
+<span class="nc" id="L219">    public SunDefaultConstructorFactory() {</span>
+        try {
+<span class="nc" id="L221">            Class&lt;?&gt; factoryClass = ClassUtil.forName(&quot;sun.reflect.ReflectionFactory&quot;);</span>
+<span class="nc" id="L222">            Method getReflectionFactory = factoryClass.getDeclaredMethod(</span>
+                &quot;getReflectionFactory&quot;,
+                new Class[0]
+            );
+<span class="nc" id="L226">            reflectionFactory = getReflectionFactory.invoke(null, new Object[0]);</span>
+<span class="nc" id="L227">            newConstructorForSerialization = factoryClass.getDeclaredMethod(</span>
+                &quot;newConstructorForSerialization&quot;,
+                new Class[]{Class.class, Constructor.class}
+            );
+<span class="nc" id="L231">        } catch (Exception e) {</span>
+<span class="nc" id="L232">            throw new RuntimeException(&quot;Could not create Sun Factory&quot;, e);</span>
+<span class="nc" id="L233">        }</span>
+<span class="nc" id="L234">    }</span>
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public &lt;T&gt; Constructor&lt;T&gt; findDefaultConstructor(Class&lt;T&gt; clazz) {
+        try {
+<span class="nc" id="L239">            Constructor&lt;?&gt; constructor = Object.class.getDeclaredConstructor(new Class[0]);</span>
+<span class="nc" id="L240">            constructor = (Constructor&lt;?&gt;) newConstructorForSerialization.invoke(</span>
+                reflectionFactory,
+                new Object[]{clazz, constructor}
+            );
+<span class="nc" id="L244">            constructor.setAccessible(true);</span>
+<span class="nc" id="L245">            return (Constructor&lt;T&gt;) constructor;</span>
+<span class="nc" id="L246">        } catch (Exception e) {</span>
+<span class="nc" id="L247">            throw new RuntimeException(e);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

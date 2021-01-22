@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RandomStringValue.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.generator.variables</a> &gt; <span class="el_source">RandomStringValue.java</span></div><h1>RandomStringValue.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+*/
+
+package com.ats.generator.variables;
+
+import java.util.Random;
+import java.util.regex.Matcher;
+
+import com.ats.tools.Utils;
+
+public class RandomStringValue extends BaseValue {
+	
+	private static final String UPP_KEY = &quot;upp&quot;;
+	private static final String LOW_KEY = &quot;low&quot;;
+	private static final String NUM_KEY = &quot;num&quot;;
+	
+	public RandomStringValue(Matcher m) {
+<span class="fc" id="L34">		super(m);</span>
+<span class="fc" id="L35">	}</span>
+
+	public RandomStringValue(int len, String type) {
+<span class="nc" id="L38">		super(len + &quot;&quot;, type);</span>
+<span class="nc" id="L39">	}</span>
+
+	public int getValue() {
+<span class="nc" id="L42">		return Utils.string2Int(value, 10);</span>
+	}
+	
+	public String exec() {
+		
+<span class="fc" id="L47">		final int len = Utils.string2Int(value, 10);</span>
+<span class="fc" id="L48">		String baseChars = &quot;ABCDEFGHIJKLMNOPQRSTUVWXYZ&quot;;</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">		if(!UPP_KEY.equals(defaultValue)){</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">			if(NUM_KEY.equals(defaultValue)){</span>
+<span class="fc" id="L51">				baseChars = &quot;0123456789&quot;;</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">			}else if(LOW_KEY.equals(defaultValue)){</span>
+<span class="fc" id="L53">				baseChars = baseChars.toLowerCase();</span>
+<span class="pc bpc" id="L54" title="1 of 4 branches missed.">			}else if(defaultValue != null &amp;&amp; defaultValue.length() &gt; 0){</span>
+<span class="fc" id="L55">				baseChars = defaultValue;</span>
+			}else{
+<span class="fc" id="L57">				baseChars += baseChars.toLowerCase();</span>
+			}
+		}
+		
+<span class="fc" id="L61">		final StringBuilder result = new StringBuilder();</span>
+<span class="fc" id="L62">        final Random rnd = new Random();</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        while (result.length() &lt; len) { // length of the random string.</span>
+<span class="fc" id="L64">            int index = (int) (rnd.nextFloat() * baseChars.length());</span>
+<span class="fc" id="L65">            result.append(baseChars.charAt(index));</span>
+<span class="fc" id="L66">        }</span>
+<span class="fc" id="L67">        return result.toString();</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

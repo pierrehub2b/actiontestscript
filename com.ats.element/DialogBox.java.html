@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DialogBox.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.element</a> &gt; <span class="el_source">DialogBox.java</span></div><h1>DialogBox.java</h1><pre class="source lang-java linenums">package com.ats.element;
+
+import com.ats.executor.ActionStatus;
+import com.ats.executor.TestBound;
+import com.ats.executor.drivers.engines.DesktopDriverEngine;
+import com.ats.generator.variables.CalculatedProperty;
+import org.openqa.selenium.Alert;
+
+public class DialogBox {
+	
+	private Alert alert;
+	
+<span class="nc" id="L13">	protected int waitBox = 500;</span>
+	
+<span class="nc" id="L15">	public DialogBox(Alert alert) {</span>
+<span class="nc" id="L16">		this.alert = alert;</span>
+<span class="nc" id="L17">	}</span>
+	
+<span class="nc" id="L19">	public DialogBox(DesktopDriverEngine engine, TestBound dimension) {</span>
+
+<span class="nc" id="L21">	}</span>
+	
+	public int getWaitBox() {
+<span class="nc" id="L24">		return waitBox;</span>
+	}
+	
+	public String getTitle() {
+<span class="nc" id="L28">		return getText();</span>
+	}
+	
+	public String getText() {
+<span class="nc" id="L32">		return alert.getText();</span>
+	}
+	
+	public void dismiss(ActionStatus status) {
+<span class="nc" id="L36">		alert.dismiss();</span>
+<span class="nc" id="L37">	}</span>
+
+	public void accept(ActionStatus status) {
+<span class="nc" id="L40">		alert.accept();</span>
+<span class="nc" id="L41">	}</span>
+	
+	public void defaultButton(ActionStatus status) {
+<span class="nc" id="L44">		alert.accept();</span>
+<span class="nc" id="L45">	}</span>
+	
+	public void sendKeys(String txt) {
+<span class="nc" id="L48">		alert.sendKeys(txt);</span>
+<span class="nc" id="L49">	}</span>
+
+	public CalculatedProperty[] getAttributes() {
+<span class="nc" id="L52">		return new CalculatedProperty[] {new CalculatedProperty(&quot;text&quot;, alert.getText())};</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

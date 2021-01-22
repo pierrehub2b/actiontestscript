@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Project.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.script</a> &gt; <span class="el_source">Project.java</span></div><h1>Project.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.script;
+
+import com.ats.executor.ActionTestScript;
+import com.ats.generator.GeneratorReport;
+import com.ats.generator.parsers.Lexer;
+import com.ats.generator.parsers.ScriptParser;
+import com.ats.tools.Utils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public class Project {
+
+<span class="nc" id="L48">	private static final DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();</span>
+
+	public static final String TARGET_FOLDER = &quot;target&quot;;
+	public static final String LOGS_FOLDER = &quot;logs&quot;;
+	private static final String TARGET_FOLDER_REPORT = &quot;report&quot;;
+
+	public static final String TARGET_FOLDER_GENERATED = &quot;generated&quot;;
+	public static final String TARGET_FOLDER_CLASSES = &quot;classes&quot;;
+
+	public static final String SRC_FOLDER = &quot;src&quot;;
+	public static final String ASSETS_FOLDER = &quot;assets&quot;;
+	public static final String CERTS_FOLDER = &quot;certs&quot;;
+	public static final String RESOURCES_FOLDER = &quot;resources&quot;;
+	public static final String IMAGES_FOLDER = &quot;images&quot;;
+
+	private static final String SRC_FOLDER_MAIN = &quot;main&quot;;
+	private static final String SRC_FOLDER_ATS = &quot;ats&quot;;
+	private static final String SRC_FOLDER_SUBSCRIPTS = &quot;subscripts&quot;;
+	private static final String SRC_FOLDER_JAVA = &quot;java&quot;;
+
+<span class="nc" id="L68">	private String name = &quot;&quot;;</span>
+<span class="nc" id="L69">	private String domain = &quot;&quot;;</span>
+<span class="nc" id="L70">	private String description = &quot;&quot;;</span>
+<span class="nc" id="L71">	private String version = &quot;&quot;;</span>
+<span class="nc" id="L72">	private String folderPath = &quot;&quot;;</span>
+<span class="nc" id="L73">	private boolean useProjectDomain = false;</span>
+
+	private File folder;
+
+	private Path javaDestinationFolderPath;
+	private Path reportDestinationFolderPath;
+	
+	public static Project getProjectData(File sourceFolder, File destinationFolder, File reportFolder) {
+<span class="nc" id="L81">		final File xmlDataFile = checkAtsProjectFolder(sourceFolder);</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">		if(xmlDataFile != null) {</span>
+<span class="nc" id="L83">			return new Project(xmlDataFile, destinationFolder, reportFolder);</span>
+		}else {
+<span class="nc" id="L85">			return new Project(sourceFolder);</span>
+		}
+	}
+
+	public static String getAssetsJavaCode(String path) {
+<span class="nc" id="L90">		final StringBuilder pathBuilder = new StringBuilder(&quot;\&quot;, &quot;);</span>
+<span class="nc" id="L91">		pathBuilder.append(ActionTestScript.JAVA_EMBEDED_FUNCTION_NAME).append(&quot;(\&quot;&quot;).append(ASSETS_FOLDER).append(&quot;/&quot;).append(path).append(&quot;\&quot;), \&quot;&quot;);</span>
+<span class="nc" id="L92">		return pathBuilder.toString();</span>
+	}
+
+	public static String getAssetsImageJavaCode(String path) {
+<span class="nc" id="L96">		final StringBuilder pathBuilder = new StringBuilder(RESOURCES_FOLDER);</span>
+<span class="nc" id="L97">		pathBuilder.append(&quot;/&quot;).append(IMAGES_FOLDER).append(&quot;/&quot;).append(path);</span>
+<span class="nc" id="L98">		return getAssetsJavaCode(pathBuilder.toString());</span>
+	}
+
+	private static File checkAtsProjectFolder(File f){
+<span class="nc bnc" id="L102" title="All 2 branches missed.">		if(f != null){</span>
+<span class="nc" id="L103">			final File xmlPropertiesFile = f.toPath().resolve(ScriptParser.ATS_PROPERTIES_FILE).toFile();</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">			if(xmlPropertiesFile.exists()){</span>
+<span class="nc" id="L105">				return xmlPropertiesFile;</span>
+			}else{
+<span class="nc" id="L107">				return checkAtsProjectFolder(f.getParentFile());</span>
+			}
+		}
+<span class="nc" id="L110">		return null;</span>
+	}
+
+<span class="nc" id="L113">	public Project() {}</span>
+
+	//create project from current source folder
+<span class="nc" id="L116">	public Project(File f) {</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">		if(f.exists()) {</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">			if(f.isDirectory()) {</span>
+<span class="nc" id="L119">				folder = f;</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">			}else if(f.isFile()) {</span>
+<span class="nc" id="L121">				folder = f.getParentFile();</span>
+			}
+<span class="nc" id="L123">			folderPath = folder.getPath();</span>
+
+<span class="nc" id="L125">			setJavaDestinationFolderPath(getTargetFolderPath().resolve(TARGET_FOLDER_GENERATED));</span>
+<span class="nc" id="L126">			setReportDestinationFolderPath(getTargetFolderPath().resolve(TARGET_FOLDER_REPORT));</span>
+		}
+<span class="nc" id="L128">	}</span>
+
+<span class="nc" id="L130">	public Project(File xmlPropertiesFile, File generatedJavaFolder, File reportFolder) {</span>
+
+<span class="nc" id="L132">		folder = xmlPropertiesFile.getParentFile();</span>
+<span class="nc" id="L133">		folderPath = xmlPropertiesFile.getParent();</span>
+
+<span class="nc" id="L135">		parseXmlFile(xmlPropertiesFile);</span>
+
+<span class="nc bnc" id="L137" title="All 2 branches missed.">		if(generatedJavaFolder != null) {</span>
+<span class="nc" id="L138">			setJavaDestinationFolderPath(generatedJavaFolder.toPath());</span>
+		}else {
+<span class="nc" id="L140">			setJavaDestinationFolderPath(getTargetFolderPath().resolve(TARGET_FOLDER_GENERATED));</span>
+		}
+
+<span class="nc bnc" id="L143" title="All 2 branches missed.">		if(reportFolder != null) {</span>
+<span class="nc" id="L144">			setReportDestinationFolderPath(reportFolder.toPath());</span>
+		}else {
+<span class="nc" id="L146">			setReportDestinationFolderPath(getTargetFolderPath().resolve(TARGET_FOLDER_REPORT));</span>
+		}
+<span class="nc" id="L148">	}</span>
+
+	public boolean isValidated() {
+<span class="nc bnc" id="L151" title="All 2 branches missed.">		return folder != null;</span>
+	}
+
+	private void setJavaDestinationFolderPath(Path p) {
+<span class="nc" id="L155">		javaDestinationFolderPath = p;</span>
+<span class="nc" id="L156">		javaDestinationFolderPath.toFile().mkdirs();</span>
+<span class="nc" id="L157">	}</span>
+
+	public String getDomainPath() {
+<span class="nc bnc" id="L160" title="All 2 branches missed.">		if(useProjectDomain) {</span>
+<span class="nc" id="L161">			return getDomainPackage().replace(&quot;.&quot;, &quot;/&quot;);</span>
+		}
+<span class="nc" id="L163">		return &quot;&quot;;</span>
+	}
+
+	public String getDomainPackage() {
+<span class="nc bnc" id="L167" title="All 2 branches missed.">		if(useProjectDomain) {</span>
+<span class="nc" id="L168">			return domain + &quot;.&quot; + name;</span>
+		}
+<span class="nc" id="L170">		return name;</span>
+	}
+
+	private void setReportDestinationFolderPath(Path p) {
+<span class="nc" id="L174">		reportDestinationFolderPath = p;</span>
+<span class="nc" id="L175">		reportDestinationFolderPath.toFile().mkdirs();</span>
+<span class="nc" id="L176">	}</span>
+
+	public void synchronize() {
+
+<span class="nc" id="L180">		folder = new File(folderPath);</span>
+
+<span class="nc" id="L182">		final Path targetFolderPath = getTargetFolderPath();</span>
+
+<span class="nc" id="L184">		setJavaDestinationFolderPath(targetFolderPath.resolve(TARGET_FOLDER_GENERATED));</span>
+<span class="nc" id="L185">		setReportDestinationFolderPath(targetFolderPath.resolve(TARGET_FOLDER_REPORT));</span>
+<span class="nc" id="L186">	}</span>
+
+	public void initFolders() {
+<span class="nc" id="L189">		final File javaFolder = javaDestinationFolderPath.toFile();</span>
+		try {
+<span class="nc" id="L191">			Utils.deleteRecursiveJavaFiles(javaFolder);</span>
+<span class="nc" id="L192">			javaFolder.mkdirs();</span>
+<span class="nc" id="L193">		} catch (FileNotFoundException e1) {}</span>
+<span class="nc" id="L194">	}</span>
+
+	private void parseXmlFile(File xmlPropertiesFile) {
+		try {
+<span class="nc" id="L198">			final DocumentBuilder dBuilder = docFactory.newDocumentBuilder();</span>
+<span class="nc" id="L199">			final Document doc = dBuilder.parse(xmlPropertiesFile);</span>
+
+<span class="nc" id="L201">			Node xmlNode = doc.getElementsByTagName(&quot;domain&quot;).item(0);</span>
+<span class="nc bnc" id="L202" title="All 2 branches missed.">			if(xmlNode != null){</span>
+<span class="nc" id="L203">				setDomain(xmlNode.getTextContent());</span>
+			}
+
+<span class="nc" id="L206">			xmlNode = doc.getElementsByTagName(&quot;name&quot;).item(0);</span>
+<span class="nc bnc" id="L207" title="All 2 branches missed.">			if(xmlNode != null){</span>
+<span class="nc" id="L208">				setName(xmlNode.getTextContent());</span>
+			}
+
+<span class="nc" id="L211">			xmlNode = doc.getElementsByTagName(&quot;description&quot;).item(0);</span>
+<span class="nc bnc" id="L212" title="All 2 branches missed.">			if(xmlNode != null){</span>
+<span class="nc" id="L213">				setDescription(xmlNode.getTextContent());</span>
+			}
+
+<span class="nc" id="L216">			xmlNode = doc.getElementsByTagName(&quot;version&quot;).item(0);</span>
+<span class="nc bnc" id="L217" title="All 2 branches missed.">			if(xmlNode != null){</span>
+<span class="nc" id="L218">				setVersion(xmlNode.getTextContent());</span>
+			}
+
+<span class="nc" id="L221">			xmlNode = doc.getElementsByTagName(&quot;useProjectDomain&quot;).item(0);</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">			if(xmlNode != null){</span>
+<span class="nc" id="L223">				setUseProjectDomain(&quot;true&quot;.equalsIgnoreCase(xmlNode.getTextContent()));</span>
+			}
+
+<span class="nc" id="L226">		} catch (ParserConfigurationException e) {</span>
+<span class="nc" id="L227">			System.err.println(e.getMessage());</span>
+<span class="nc" id="L228">		} catch (SAXException e) {</span>
+<span class="nc" id="L229">			System.err.println(e.getMessage());</span>
+<span class="nc" id="L230">		} catch (IOException e) {</span>
+<span class="nc" id="L231">			System.err.println(e.getMessage());</span>
+<span class="nc" id="L232">		}</span>
+<span class="nc" id="L233">	}</span>
+
+	public Path getTargetFolderPath() {
+<span class="nc" id="L236">		return folder.toPath().resolve(TARGET_FOLDER);</span>
+	}
+
+	public Path getAssetsFolderPath() {
+<span class="nc" id="L240">		return getSourceFolderPath().resolve(ASSETS_FOLDER);</span>
+	}
+
+	private Path getSourceFolderPath() {
+<span class="nc" id="L244">		return folder.toPath().resolve(SRC_FOLDER);</span>
+	}
+
+	private Path getSourceMainFolderPath() {
+<span class="nc" id="L248">		return getSourceFolderPath().resolve(SRC_FOLDER_MAIN);</span>
+	}
+
+	public Path getAtsSourceFolder() {
+<span class="nc" id="L252">		return getSourceMainFolderPath().resolve(SRC_FOLDER_ATS);</span>
+	}
+
+	public Path getJavaSourceFolder() {
+<span class="nc" id="L256">		return getSourceMainFolderPath().resolve(SRC_FOLDER_JAVA);</span>
+	}
+
+	public Path getJavaDestinationFolder() {
+<span class="nc" id="L260">		return javaDestinationFolderPath;</span>
+	}
+
+	public Path getReportFolder() {
+<span class="nc" id="L264">		return reportDestinationFolderPath;</span>
+	}
+
+	public File getJavaFile(String qualifiedPath) {
+<span class="nc" id="L268">		return getJavaDestinationFolder().resolve(qualifiedPath).toFile();</span>
+	}
+
+	public String getGav() {
+<span class="nc" id="L272">		return domain + &quot;.&quot; + name + &quot;(&quot; + version + &quot;)&quot;;</span>
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	//  load scripts
+	//-------------------------------------------------------------------------------------------------
+
+	public ArrayList&lt;File&gt; getAtsScripts() {
+<span class="nc" id="L280">		return getAtsScripts(getAtsSourceFolder().toFile());</span>
+	}
+
+	public ArrayList&lt;File&gt; getAtsScripts(File startFolder) {
+
+<span class="nc" id="L285">		final FileFilter atsFilefilter = new FileFilter() {</span>
+			@Override
+			public boolean accept(File file) {
+<span class="nc bnc" id="L288" title="All 4 branches missed.">				if (file.getName().toLowerCase().endsWith(Script.ATS_FILE_EXTENSION) || file.isDirectory()) {</span>
+<span class="nc" id="L289">					return true;</span>
+				}
+<span class="nc" id="L291">				return false;</span>
+			}
+		};
+
+<span class="nc" id="L295">		final ArrayList&lt;File&gt; result = new ArrayList&lt;File&gt;();</span>
+<span class="nc" id="L296">		walk(result, startFolder, atsFilefilter);</span>
+
+<span class="nc" id="L298">		return result;</span>
+	}
+
+	public List&lt;ScriptInfo&gt; loadScriptsHeader() {
+
+<span class="nc" id="L303">		final ArrayList&lt;File&gt; files = getAtsScriptsWithoutSubscripts();</span>
+<span class="nc" id="L304">		final Lexer lexer = new Lexer(this, new GeneratorReport(), Script.DEFAULT_CHARSET);</span>
+
+<span class="nc" id="L306">		final Stream&lt;File&gt; stream = files.parallelStream();</span>
+<span class="nc" id="L307">		List&lt;ScriptInfo&gt; result = stream.map(s -&gt; new ScriptInfo(lexer, s)).collect(Collectors.toList());</span>
+<span class="nc" id="L308">		stream.close();</span>
+
+<span class="nc" id="L310">		return result;</span>
+	}
+
+	public List&lt;ScriptInfo&gt; loadScriptsHeader(File atsFolder) {
+
+<span class="nc" id="L315">		final ArrayList&lt;File&gt; files = getAtsScripts(atsFolder);</span>
+<span class="nc" id="L316">		final Lexer lexer = new Lexer(this, new GeneratorReport(), Script.DEFAULT_CHARSET);</span>
+
+<span class="nc" id="L318">		final Stream&lt;File&gt; stream = files.parallelStream();</span>
+<span class="nc" id="L319">		final List&lt;ScriptInfo&gt; result = stream.map(s -&gt; new ScriptInfo(lexer, s)).collect(Collectors.toList());</span>
+<span class="nc" id="L320">		stream.close();</span>
+
+<span class="nc" id="L322">		return result;</span>
+	}
+
+	private ArrayList&lt;File&gt; getAtsScriptsWithoutSubscripts() {
+
+<span class="nc" id="L327">		final File subscriptsFolder = getAtsSourceFolder().resolve(SRC_FOLDER_SUBSCRIPTS).toFile();</span>
+<span class="nc" id="L328">		final FileFilter atsFilefilter = new FileFilter() {</span>
+			@Override
+			public boolean accept(File file) {
+<span class="nc bnc" id="L331" title="All 2 branches missed.">				if(file.isDirectory()) {</span>
+<span class="nc bnc" id="L332" title="All 2 branches missed.">					if(subscriptsFolder.compareTo(file) != 0) {</span>
+<span class="nc" id="L333">						return true;</span>
+					}
+<span class="nc bnc" id="L335" title="All 2 branches missed.">				}else if(file.getName().toLowerCase().endsWith(Script.ATS_FILE_EXTENSION)) {</span>
+<span class="nc" id="L336">					return true;</span>
+				}
+<span class="nc" id="L338">				return false;</span>
+			}
+		};
+
+<span class="nc" id="L342">		final ArrayList&lt;File&gt; result = new ArrayList&lt;File&gt;();</span>
+<span class="nc" id="L343">		sortedWalk(result, getAtsSourceFolder().toFile(), atsFilefilter);</span>
+
+<span class="nc" id="L345">		return result;</span>
+	}
+
+	private void walk(ArrayList&lt;File&gt; list, File dir, FileFilter filter) {
+<span class="nc" id="L349">		final File[] files = dir.listFiles(filter);</span>
+<span class="nc bnc" id="L350" title="All 2 branches missed.">		for (File f : files) {</span>
+<span class="nc bnc" id="L351" title="All 2 branches missed.">			if(f.isDirectory()) {</span>
+<span class="nc" id="L352">				walk(list, f, filter);</span>
+			}else {
+<span class="nc" id="L354">				list.add(f);</span>
+			}
+		}
+<span class="nc" id="L357">	}</span>
+
+	private void sortedWalk(ArrayList&lt;File&gt; list, File dir, FileFilter filter) {
+<span class="nc" id="L360">		final File[] files = dir.listFiles(filter);</span>
+<span class="nc" id="L361">		Arrays.sort(files, new DirectoryBeforeFileComparator());</span>
+
+<span class="nc bnc" id="L363" title="All 2 branches missed.">		for (File f : files) {</span>
+<span class="nc bnc" id="L364" title="All 2 branches missed.">			if(f.isDirectory()) {</span>
+<span class="nc" id="L365">				walk(list, f, filter);</span>
+			}else {
+<span class="nc" id="L367">				list.add(f);</span>
+			}
+		}
+<span class="nc" id="L370">	}</span>
+
+<span class="nc" id="L372">	public final static class DirectoryBeforeFileComparator implements Comparator&lt;File&gt; {</span>
+		@Override
+		public int compare(File o1, File o2) {
+<span class="nc bnc" id="L375" title="All 4 branches missed.">			if (o1.isDirectory() &amp;&amp; !o2.isDirectory()) {</span>
+<span class="nc" id="L376">				return 1;</span>
+			}
+<span class="nc bnc" id="L378" title="All 4 branches missed.">			if (!o1.isDirectory() &amp;&amp; o2.isDirectory()) {</span>
+<span class="nc" id="L379">				return -1;</span>
+			}
+<span class="nc" id="L381">			return o1.compareTo(o2);</span>
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	//  getters and setters for serialization
+	//-------------------------------------------------------------------------------------------------
+
+	public String getDomain() {
+<span class="nc" id="L390">		return domain;</span>
+	}
+
+	public void setDomain(String value) {
+<span class="nc" id="L394">		this.domain = value;</span>
+<span class="nc" id="L395">	}</span>
+
+	public String getName() {
+<span class="nc" id="L398">		return name;</span>
+	}
+
+	public void setName(String value) {
+<span class="nc" id="L402">		this.name = value;</span>
+<span class="nc" id="L403">	}</span>
+
+	public String getDescription() {
+<span class="nc" id="L406">		return description;</span>
+	}
+
+	public void setDescription(String value) {
+<span class="nc" id="L410">		this.description = value;</span>
+<span class="nc" id="L411">	}</span>
+
+	public String getVersion() {
+<span class="nc" id="L414">		return version;</span>
+	}
+
+	public void setVersion(String value) {
+<span class="nc" id="L418">		this.version = value;</span>
+<span class="nc" id="L419">	}</span>
+
+	public String getFolderPath() {
+<span class="nc" id="L422">		return folderPath;</span>
+	}
+
+	public void setFolderPath(String value) {
+<span class="nc" id="L426">		this.folderPath = value;</span>
+<span class="nc" id="L427">	}</span>
+
+	public boolean isUseProjectDomain() {
+<span class="nc" id="L430">		return useProjectDomain;</span>
+	}
+
+	public void setUseProjectDomain(boolean useProjectDomain) {
+<span class="nc" id="L434">		this.useProjectDomain = useProjectDomain;</span>
+<span class="nc" id="L435">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

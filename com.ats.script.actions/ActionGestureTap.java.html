@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActionGestureTap.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.script.actions</a> &gt; <span class="el_source">ActionGestureTap.java</span></div><h1>ActionGestureTap.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+*/
+
+package com.ats.script.actions;
+
+import com.ats.element.SearchedElement;
+import com.ats.executor.ActionTestScript;
+import com.ats.script.Script;
+
+import java.util.ArrayList;
+
+public class ActionGestureTap extends ActionExecuteElement {
+	
+	public static final String SCRIPT_LABEL = &quot;tap&quot;;
+	
+	private int count;
+	
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// Constructors
+	//---------------------------------------------------------------------------------------------------------------------------------
+	
+	public ActionGestureTap(Script script, String count, boolean stop, ArrayList&lt;String&gt; options, ArrayList&lt;String&gt; element) {
+<span class="nc" id="L39">		super(script, stop, options, element);</span>
+<span class="nc" id="L40">		setCount(Integer.parseInt(count));</span>
+<span class="nc" id="L41">	}</span>
+	
+	public ActionGestureTap(Script script, boolean stop, int maxTry, int delay, SearchedElement element, int count) {
+<span class="nc" id="L44">		super(script, stop, maxTry, delay, element);</span>
+<span class="nc" id="L45">		setCount(count);</span>
+<span class="nc" id="L46">	}</span>
+	
+	//---------------------------------------------------------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------------------------------------------------
+	
+	@Override
+	public void terminateExecution(ActionTestScript ts) {
+<span class="nc" id="L53">		super.terminateExecution(ts);</span>
+		
+<span class="nc bnc" id="L55" title="All 2 branches missed.">		if (status.isPassed()) {</span>
+<span class="nc" id="L56">			ts.getRecorder().updateScreen(true);</span>
+			
+<span class="nc" id="L58">			getTestElement().tap(count);</span>
+			
+<span class="nc" id="L60">			status.endAction();</span>
+<span class="nc" id="L61">			ts.getRecorder().updateScreen(0, status.getDuration());</span>
+		}
+<span class="nc" id="L63">	}</span>
+	
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// Code Generator
+	//---------------------------------------------------------------------------------------------------------------------------------
+	
+	@Override
+	public StringBuilder getJavaCode() {
+<span class="nc" id="L71">		StringBuilder codeBuilder = super.getJavaCode();</span>
+<span class="nc" id="L72">		codeBuilder.append(&quot;, &quot;) .append(count).append(&quot;)&quot;);</span>
+<span class="nc" id="L73">		return codeBuilder;</span>
+	}
+	
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------
+	
+<span class="nc" id="L80">	public int getCount() { return count; }</span>
+<span class="nc" id="L81">	public void setCount(int count) { this.count = count; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

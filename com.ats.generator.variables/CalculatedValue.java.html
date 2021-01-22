@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CalculatedValue.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.generator.variables</a> &gt; <span class="el_source">CalculatedValue.java</span></div><h1>CalculatedValue.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.generator.variables;
+
+import com.ats.crypto.Password;
+import com.ats.executor.ActionTestScript;
+import com.ats.executor.SendKeyData;
+import com.ats.generator.variables.transform.DateTransformer;
+import com.ats.generator.variables.transform.TimeTransformer;
+import com.ats.script.Project;
+import com.ats.script.Script;
+import com.ats.tools.Utils;
+import org.apache.commons.text.StringEscapeUtils;
+
+import java.util.ArrayList;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class CalculatedValue{
+
+<span class="fc" id="L39">	private static final Pattern TODAY_PATTERN = Pattern.compile(&quot;\\$today&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L40">	private static final Pattern NOW_PATTERN = Pattern.compile(&quot;\\$now&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L41">	private static final Pattern UUID_PATTERN = Pattern.compile(&quot;\\$uuid&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L42">	private static final Pattern PGAV_PATTERN = Pattern.compile(&quot;\\$pgav&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L43">	private static final Pattern ITERATION_PATTERN = Pattern.compile(&quot;\\$iteration&quot;, Pattern.CASE_INSENSITIVE);</span>
+
+<span class="fc" id="L45">	public static final Pattern KEY_REGEXP = Pattern.compile(&quot;\\$key\\s?\\((\\w+)\\-?([^\\)]*)?\\)&quot;);</span>
+
+<span class="fc" id="L47">	public static final Pattern ASSET_PATTERN = Pattern.compile(&quot;\\$asset\\s*?\\(([^\\)]*)\\)&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L48">	public static final Pattern IMAGE_PATTERN = Pattern.compile(&quot;\\$image\\s*?\\(([^\\)]*)\\)&quot;, Pattern.CASE_INSENSITIVE);</span>
+
+<span class="fc" id="L50">	private static final Pattern PASSWORD_DATA = Pattern.compile(&quot;\\$pass\\s*?\\(([^\\)]*)\\)&quot;, Pattern.CASE_INSENSITIVE);</span>
+	
+<span class="fc" id="L52">	private static final Pattern SYS_PATTERN = Pattern.compile(&quot;\\$sys\\s*?\\(([^\\)]*)\\)&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L53">	public static final Pattern PARAMETER_PATTERN = Pattern.compile(&quot;\\$param\\s*?\\((\\w+),?(\\s*?[^\\)]*)?\\)&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L54">	public static final Pattern ENV_PATTERN = Pattern.compile(&quot;\\$env\\s*?\\(([\\w.]+),?(\\s*?[^\\)]*)?\\)&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L55">	private static final Pattern RND_PATTERN = Pattern.compile(&quot;\\$rnd(?:string)?\\s*?\\((\\d+),?(\\w{0,3}?[^\\)]*)?\\)&quot;, Pattern.CASE_INSENSITIVE);</span>
+
+<span class="fc" id="L57">	private static final Pattern VARIABLE_PATTERN = Pattern.compile(&quot;\\$var\\s*?\\(([^\\)\\.]*)\\)&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L58">	private static final Pattern GLOBAL_VARIABLE_PATTERN = Pattern.compile(&quot;\\$var\\s*?\\(([^\\)]*)\\)&quot;, Pattern.CASE_INSENSITIVE);</span>
+	
+	//-----------------------------------------------------------------------------------------------------
+	// variable and parameter management
+	//-----------------------------------------------------------------------------------------------------
+
+<span class="fc" id="L64">	private static final Pattern unnecessaryStartQuotes = Pattern.compile(&quot;^\&quot;\&quot;, ?&quot;);</span>
+<span class="fc" id="L65">	private static final Pattern unnecessaryMiddleQuotes = Pattern.compile(&quot; \&quot;\&quot;,&quot;);</span>
+<span class="fc" id="L66">	private static final Pattern unnecessaryEndQuotes = Pattern.compile(&quot;, \&quot;\&quot;$&quot;);</span>
+
+	//-----------------------------------------------------------------------------------------------------
+	// instance data
+	//-----------------------------------------------------------------------------------------------------
+
+	private Script script;
+<span class="pc" id="L73">	private String data = &quot;&quot;;</span>
+	private String calculated;
+
+<span class="pc" id="L76">	private String rawJavaCode = &quot;&quot;;</span>
+	private Object[] dataList;
+
+<span class="pc" id="L79">	private boolean crypted = false;</span>
+
+<span class="nc" id="L81">	public CalculatedValue() {}</span>
+
+<span class="nc" id="L83">	public CalculatedValue(String value) {</span>
+<span class="nc" id="L84">		setData(value);</span>
+<span class="nc" id="L85">	}</span>
+
+	public CalculatedValue(int value) {
+<span class="nc" id="L88">		this(value + &quot;&quot;);</span>
+<span class="nc" id="L89">	}</span>
+
+<span class="nc" id="L91">	public CalculatedValue(ActionTestScript actionTestScript, Object[] data) {</span>
+<span class="nc" id="L92">		dataList = data;</span>
+<span class="nc" id="L93">	}</span>
+
+<span class="nc" id="L95">	public CalculatedValue(Script script) {</span>
+<span class="nc" id="L96">		setScript(script);</span>
+<span class="nc" id="L97">		setCalculated(&quot;&quot;);</span>
+<span class="nc" id="L98">	}</span>
+	
+<span class="fc" id="L100">	public CalculatedValue(Script script, String dataValue) {</span>
+<span class="fc" id="L101">		setScript(script);</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">		if(dataValue.length() &gt; 0){</span>
+<span class="fc" id="L103">			dataValue = Utils.unescapeAts(dataValue);</span>
+<span class="fc" id="L104">			setData(dataValue);</span>
+<span class="fc" id="L105">			setCalculated(initCalculated(dataValue));</span>
+		}
+<span class="fc" id="L107">	}</span>
+
+	private String initCalculated(String dataValue) {
+
+<span class="fc" id="L111">		rawJavaCode = StringEscapeUtils.escapeJava(dataValue);</span>
+
+<span class="fc" id="L113">		Matcher mv = VARIABLE_PATTERN.matcher(dataValue);</span>
+<span class="fc bfc" id="L114" title="All 2 branches covered.">		while (mv.find()) {</span>
+			
+<span class="fc" id="L116">			final String replace = mv.group(0);</span>
+<span class="fc" id="L117">			final String variableName = mv.group(1);</span>
+			
+<span class="fc" id="L119">			dataValue = dataValue.replace(replace, script.getVariableValue(variableName));</span>
+<span class="fc" id="L120">			rawJavaCode = rawJavaCode.replace(replace, &quot;\&quot;, &quot; + variableName + &quot;, \&quot;&quot;);</span>
+<span class="fc" id="L121">		}</span>
+		
+<span class="fc" id="L123">		mv = GLOBAL_VARIABLE_PATTERN.matcher(dataValue);</span>
+<span class="pc bpc" id="L124" title="1 of 2 branches missed.">		while (mv.find()) {</span>
+			
+<span class="nc" id="L126">			final String replace = mv.group(0);</span>
+<span class="nc" id="L127">			final String variableName = mv.group(1);</span>
+			
+<span class="nc" id="L129">			dataValue = script.getGlobalVariableValue(variableName);</span>
+<span class="nc" id="L130">			rawJavaCode = rawJavaCode.replace(replace, &quot;\&quot;, &quot; + ActionTestScript.JAVA_GLOBAL_VAR_FUNCTION_NAME + &quot;(\&quot;&quot; + variableName + &quot;\&quot;), \&quot;&quot;);</span>
+<span class="nc" id="L131">		}</span>
+
+<span class="fc" id="L133">		mv = SYS_PATTERN.matcher(dataValue);</span>
+<span class="pc bpc" id="L134" title="1 of 2 branches missed.">		while (mv.find()) {</span>
+<span class="nc" id="L135">			final String replace = mv.group(0);</span>
+<span class="nc" id="L136">			final String value = StringEscapeUtils.escapeJava(mv.group(1).trim());</span>
+<span class="nc" id="L137">			dataValue = dataValue.replace(replace, script.getSystemValue(value));</span>
+<span class="nc" id="L138">			rawJavaCode = rawJavaCode.replace(replace, &quot;\&quot;,&quot; + ActionTestScript.JAVA_SYSTEM_FUNCTION_NAME + &quot;(\&quot;&quot; + value + &quot;\&quot;), \&quot;&quot;);</span>
+<span class="nc" id="L139">		}</span>
+
+<span class="fc" id="L141">		mv = PARAMETER_PATTERN.matcher(dataValue);</span>
+<span class="pc bpc" id="L142" title="1 of 2 branches missed.">		while (mv.find()) {</span>
+<span class="nc" id="L143">			final ParameterValue sp = new ParameterValue(mv);</span>
+<span class="nc" id="L144">			dataValue = dataValue.replace(sp.getReplace(), script.getParameterValue(sp.getValue(), sp.getDefaultValue()));</span>
+<span class="nc" id="L145">			rawJavaCode = rawJavaCode.replace(sp.getReplace(), &quot;\&quot;, &quot; + ActionTestScript.JAVA_PARAM_FUNCTION_NAME + sp.getCode() + &quot;, \&quot;&quot;);</span>
+<span class="nc" id="L146">		}</span>
+
+<span class="fc" id="L148">		mv = ENV_PATTERN.matcher(dataValue);</span>
+<span class="pc bpc" id="L149" title="1 of 2 branches missed.">		while (mv.find()) {</span>
+<span class="nc" id="L150">			final EnvironmentValue sp = new EnvironmentValue(mv);</span>
+<span class="nc" id="L151">			dataValue = dataValue.replace(sp.getReplace(), script.getEnvironmentValue(sp.getValue(), sp.getDefaultValue()));</span>
+<span class="nc" id="L152">			rawJavaCode = rawJavaCode.replace(sp.getReplace(), &quot;\&quot;, &quot; + ActionTestScript.JAVA_ENV_FUNCTION_NAME + sp.getCode() + &quot;, \&quot;&quot;);</span>
+<span class="nc" id="L153">		}</span>
+
+<span class="fc" id="L155">		mv = TODAY_PATTERN.matcher(dataValue);</span>
+<span class="fc bfc" id="L156" title="All 2 branches covered.">		while (mv.find()) {</span>
+<span class="fc" id="L157">			final String replace = mv.group(0);</span>
+<span class="fc" id="L158">			dataValue = dataValue.replace(replace, DateTransformer.getTodayValue());</span>
+<span class="fc" id="L159">			rawJavaCode = rawJavaCode.replace(replace, &quot;\&quot;, &quot; + ActionTestScript.JAVA_TODAY_FUNCTION_NAME + &quot;(), \&quot;&quot;);</span>
+<span class="fc" id="L160">		}</span>
+
+<span class="fc" id="L162">		mv = NOW_PATTERN.matcher(dataValue);</span>
+<span class="fc bfc" id="L163" title="All 2 branches covered.">		while (mv.find()) {</span>
+<span class="fc" id="L164">			final String replace = mv.group(0);</span>
+<span class="fc" id="L165">			dataValue = dataValue.replace(replace, TimeTransformer.getNowValue());</span>
+<span class="fc" id="L166">			rawJavaCode = rawJavaCode.replace(replace, &quot;\&quot;, &quot; + ActionTestScript.JAVA_NOW_FUNCTION_NAME + &quot;(), \&quot;&quot;);</span>
+<span class="fc" id="L167">		}</span>
+
+<span class="fc" id="L169">		mv = UUID_PATTERN.matcher(dataValue);</span>
+<span class="pc bpc" id="L170" title="1 of 2 branches missed.">		while (mv.find()) {</span>
+<span class="nc" id="L171">			final String replace = mv.group(0);</span>
+<span class="nc" id="L172">			dataValue = dataValue.replace(replace, UUID.randomUUID().toString());</span>
+<span class="nc" id="L173">			rawJavaCode = rawJavaCode.replace(replace, &quot;\&quot;, &quot; + ActionTestScript.JAVA_UUID_FUNCTION_NAME + &quot;(), \&quot;&quot;);</span>
+<span class="nc" id="L174">		}</span>
+
+<span class="fc" id="L176">		mv = RND_PATTERN.matcher(dataValue);</span>
+<span class="fc bfc" id="L177" title="All 2 branches covered.">		while (mv.find()) {</span>
+<span class="fc" id="L178">			final RandomStringValue rds = new RandomStringValue(mv);</span>
+<span class="fc" id="L179">			dataValue = dataValue.replace(rds.getReplace(), rds.exec());</span>
+<span class="fc" id="L180">			rawJavaCode = rawJavaCode.replace(rds.getReplace(), &quot;\&quot;, &quot; + ActionTestScript.JAVA_RNDSTRING_FUNCTION_NAME + rds.getCode() + &quot;, \&quot;&quot;);</span>
+<span class="fc" id="L181">		}</span>
+
+<span class="fc" id="L183">		mv = PGAV_PATTERN.matcher(dataValue);</span>
+<span class="pc bpc" id="L184" title="1 of 2 branches missed.">		while (mv.find()) {</span>
+<span class="nc" id="L185">			rawJavaCode = rawJavaCode.replace(mv.group(0), &quot;\&quot;, &quot; + ActionTestScript.JAVA_GAV_FUNCTION_NAME + &quot;(), \&quot;&quot;);</span>
+		}
+
+<span class="fc" id="L188">		mv = ITERATION_PATTERN.matcher(dataValue);</span>
+<span class="pc bpc" id="L189" title="1 of 2 branches missed.">		while (mv.find()) {</span>
+<span class="nc" id="L190">			rawJavaCode = rawJavaCode.replace(mv.group(0), &quot;\&quot;, &quot; + ActionTestScript.JAVA_ITERATION_FUNCTION_NAME + &quot;(), \&quot;&quot;);</span>
+		}
+
+<span class="fc" id="L193">		mv = IMAGE_PATTERN.matcher(dataValue);</span>
+<span class="pc bpc" id="L194" title="1 of 2 branches missed.">		while (mv.find()) {</span>
+<span class="nc" id="L195">			rawJavaCode = rawJavaCode.replace(mv.group(0), Project.getAssetsImageJavaCode(mv.group(1)));</span>
+		}
+
+<span class="fc" id="L198">		mv = ASSET_PATTERN.matcher(dataValue);</span>
+<span class="pc bpc" id="L199" title="1 of 2 branches missed.">		while (mv.find()) {</span>
+<span class="nc" id="L200">			rawJavaCode = rawJavaCode.replace(mv.group(0), Project.getAssetsJavaCode(mv.group(1)));</span>
+		}
+
+<span class="fc" id="L203">		mv = PASSWORD_DATA.matcher(dataValue);</span>
+<span class="fc bfc" id="L204" title="All 2 branches covered.">		while (mv.find()) {</span>
+<span class="fc" id="L205">			crypted = true;</span>
+<span class="fc" id="L206">			rawJavaCode = rawJavaCode.replace(mv.group(0), &quot;\&quot;, new &quot; + Password.class.getCanonicalName() + &quot;(this, \&quot;&quot; + mv.group(1) + &quot;\&quot;), \&quot;&quot;);</span>
+		}
+
+<span class="fc" id="L209">		return dataValue;</span>
+	}
+
+	public boolean isCrypted() {
+<span class="nc" id="L213">		return crypted;</span>
+	}
+
+	public void dispose() {
+<span class="nc" id="L217">		script = null;</span>
+<span class="nc" id="L218">		dataList = null;</span>
+<span class="nc" id="L219">	}</span>
+
+	//-----------------------------------------------------------------------------------------------------
+	// java code
+	//-----------------------------------------------------------------------------------------------------
+
+	public String getJavaCode(){
+
+<span class="fc" id="L227">		String value = &quot;\&quot;&quot; + rawJavaCode + &quot;\&quot;&quot;;</span>
+
+<span class="fc" id="L229">		value = unnecessaryStartQuotes.matcher(value).replaceFirst(&quot;&quot;);</span>
+<span class="fc" id="L230">		value = unnecessaryEndQuotes.matcher(value).replaceFirst(&quot;&quot;);</span>
+<span class="fc" id="L231">		value = unnecessaryMiddleQuotes.matcher(value).replaceAll(&quot;&quot;);</span>
+
+<span class="fc" id="L233">		return ActionTestScript.JAVA_VALUE_FUNCTION_NAME + &quot;(&quot; + value + &quot;)&quot;;</span>
+	}
+
+	//-----------------------------------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------------------------
+
+	private String uncrypt(ActionTestScript script, String value) {
+<span class="fc" id="L240">		final Matcher mv = PASSWORD_DATA.matcher(value);</span>
+<span class="fc bfc" id="L241" title="All 2 branches covered.">		while (mv.find()) {</span>
+<span class="fc" id="L242">			crypted = true;</span>
+<span class="fc" id="L243">			value = value.replace(mv.group(0), script.getPassword(mv.group(1)));</span>
+		}
+<span class="fc" id="L245">		return value;</span>
+	}	
+
+	private void addTextChain(ActionTestScript script, ArrayList&lt;SendKeyData&gt; list, String value) {
+<span class="fc" id="L249">		list.add(new SendKeyData(uncrypt(script, value)));</span>
+<span class="fc" id="L250">	}</span>
+
+	private void addTextChain(ArrayList&lt;SendKeyData&gt; list, String value1, String value2) {
+<span class="nc" id="L253">		list.add(new SendKeyData(value1, value2));</span>
+<span class="nc" id="L254">	}</span>
+
+	public ArrayList&lt;SendKeyData&gt; getCalculatedText(ActionTestScript script){
+
+<span class="fc" id="L258">		final ArrayList&lt;SendKeyData&gt; chainKeys = new ArrayList&lt;SendKeyData&gt;();</span>
+		
+<span class="fc" id="L260">		final String calc = getCalculated();</span>
+		
+<span class="fc" id="L262">		int start = 0;		</span>
+
+<span class="fc" id="L264">		final Matcher match = KEY_REGEXP.matcher(calc);</span>
+<span class="pc bpc" id="L265" title="1 of 2 branches missed.">		while(match.find()) {</span>
+
+<span class="nc" id="L267">			int end = match.start();</span>
+<span class="nc bnc" id="L268" title="All 2 branches missed.">			if(end &gt; 0) {</span>
+<span class="nc" id="L269">				addTextChain(script, chainKeys, calc.substring(start, end));</span>
+			}
+
+<span class="nc" id="L272">			start = match.end();</span>
+<span class="nc" id="L273">			addTextChain(chainKeys, match.group(1), match.group(2));</span>
+<span class="nc" id="L274">		}</span>
+
+<span class="pc bpc" id="L276" title="1 of 2 branches missed.">		if(start == 0) {</span>
+<span class="fc" id="L277">			addTextChain(script, chainKeys, calc);</span>
+<span class="nc bnc" id="L278" title="All 2 branches missed.">		}else if(start != calc.length()){</span>
+<span class="nc" id="L279">			addTextChain(script, chainKeys, calc.substring(start));</span>
+		}
+
+<span class="fc" id="L282">		return chainKeys;</span>
+	}
+	
+	public String getDataListItem() {
+<span class="nc bnc" id="L286" title="All 4 branches missed.">		if(dataList != null &amp;&amp; dataList.length &gt; 0) {</span>
+<span class="nc" id="L287">			return dataList[0].toString();</span>
+		}
+<span class="nc" id="L289">		return calculated;</span>
+	}
+
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------
+
+	public String getCalculated() {
+<span class="fc bfc" id="L297" title="All 2 branches covered.">		if(calculated == null){</span>
+<span class="pc bpc" id="L298" title="1 of 2 branches missed.">			if(dataList != null) {</span>
+<span class="nc" id="L299">				final StringBuilder builder = new StringBuilder(&quot;&quot;);</span>
+<span class="nc bnc" id="L300" title="All 2 branches missed.">				for(final Object obj : dataList) {</span>
+<span class="nc bnc" id="L301" title="All 2 branches missed.">					if (obj instanceof Variable) {</span>
+<span class="nc" id="L302">						builder.append(((Variable) obj).getCalculatedValue());</span>
+					}else {
+<span class="nc" id="L304">						builder.append(obj);</span>
+					}
+				}
+<span class="nc" id="L307">				return builder.toString();</span>
+			}else {
+<span class="fc" id="L309">				return data;</span>
+			}
+		}
+<span class="fc" id="L312">		return calculated;</span>
+	}
+
+	public void setCalculated(String value) {
+<span class="fc" id="L316">		this.calculated = value;</span>
+<span class="fc" id="L317">	}</span>
+
+	public String getData() {
+<span class="nc" id="L320">		return data;</span>
+	}
+
+	public void setData(String value) {
+<span class="pc bpc" id="L324" title="1 of 2 branches missed.">		if(value == null){</span>
+<span class="nc" id="L325">			value = &quot;&quot;;</span>
+		}
+<span class="fc" id="L327">		this.data = value;</span>
+<span class="fc" id="L328">	}</span>
+
+	public Script getScript() {
+<span class="nc" id="L331">		return script;</span>
+	}
+
+	public void setScript(Script script) {
+<span class="fc" id="L335">		this.script = script;</span>
+<span class="fc" id="L336">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

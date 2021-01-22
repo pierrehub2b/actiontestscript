@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActionScripting.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.script.actions</a> &gt; <span class="el_source">ActionScripting.java</span></div><h1>ActionScripting.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+*/
+
+package com.ats.script.actions;
+
+import com.ats.element.SearchedElement;
+import com.ats.executor.ActionTestScript;
+import com.ats.generator.variables.CalculatedValue;
+import com.ats.generator.variables.Variable;
+import com.ats.script.Script;
+import com.ats.script.ScriptLoader;
+import com.google.gson.JsonObject;
+
+import java.util.ArrayList;
+
+public class ActionScripting extends ActionReturnVariable {
+
+	public static final String JAVASCRIPT_LABEL = &quot;javascript&quot;;
+	public static final String SCRIPT_LABEL = &quot;scripting&quot;;
+
+	private CalculatedValue jsCode;
+
+<span class="nc" id="L39">	public ActionScripting() {}</span>
+
+	public ActionScripting(ScriptLoader script, boolean stop, ArrayList&lt;String&gt; options, String code, Variable variable, ArrayList&lt;String&gt; objectArray) {
+<span class="fc" id="L42">		super(script, stop, options, objectArray, variable);</span>
+<span class="fc" id="L43">		setJsCode(new CalculatedValue(script, code));</span>
+<span class="fc" id="L44">	}</span>
+
+	public ActionScripting(Script script, boolean stop, int maxTry, int delay, SearchedElement element, CalculatedValue jsCode, Variable variable) {
+<span class="nc" id="L47">		super(script, stop, maxTry, delay, element, variable);</span>
+<span class="nc" id="L48">		setJsCode(jsCode);</span>
+<span class="nc" id="L49">	}</span>
+	
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// Code Generator
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public StringBuilder getJavaCode() {
+<span class="fc" id="L57">		String variableCode = &quot;null&quot;;</span>
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">		if(getVariable() != null) {</span>
+<span class="nc" id="L59">			variableCode = getVariable().getName();</span>
+		}
+		
+<span class="fc" id="L62">		StringBuilder codeBuilder = super.getJavaCode();</span>
+<span class="fc" id="L63">		codeBuilder.append(&quot;, &quot;).append(jsCode.getJavaCode()).append(&quot;, &quot;).append(variableCode).append(&quot;)&quot;);</span>
+<span class="fc" id="L64">		return codeBuilder;</span>
+	}
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------------------------------------------------
+		
+	@Override
+	public void terminateExecution(ActionTestScript ts) {
+		
+<span class="nc" id="L73">		super.terminateExecution(ts);</span>
+
+<span class="nc bnc" id="L75" title="All 2 branches missed.">		if(variable != null) {</span>
+<span class="nc" id="L76">			final Object result = getTestElement().executeScript(status, jsCode.getCalculated(), true);</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">			if(result != null) {</span>
+<span class="nc" id="L78">				updateVariableValue(result.toString());</span>
+			}
+<span class="nc" id="L80">		}else {</span>
+<span class="nc" id="L81">			getTestElement().executeScript(status, jsCode.getCalculated(), false);</span>
+		}
+	
+<span class="nc" id="L84">		status.endAction();</span>
+<span class="nc" id="L85">		ts.getRecorder().updateScreen(0, status.getDuration(), jsCode.getCalculated());</span>
+<span class="nc" id="L86">	}</span>
+	
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+<span class="nc" id="L90">		data.addProperty(&quot;code&quot;, jsCode.getCalculated());</span>
+<span class="nc" id="L91">		return super.getActionLogs(scriptName, scriptLine, data);</span>
+	}
+
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------
+
+	public CalculatedValue getJsCode() {
+<span class="nc" id="L99">		return jsCode;</span>
+	}
+
+	public void setJsCode(CalculatedValue jsCode) {
+<span class="fc" id="L103">		this.jsCode = jsCode;</span>
+<span class="fc" id="L104">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

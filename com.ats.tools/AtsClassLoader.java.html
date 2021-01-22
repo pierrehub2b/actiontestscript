@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AtsClassLoader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.tools</a> &gt; <span class="el_source">AtsClassLoader.java</span></div><h1>AtsClassLoader.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.tools;
+
+import com.ats.executor.ActionTestScript;
+import com.ats.tools.wait.IWaitGuiReady;
+import com.ats.tools.wait.WaitGuiReady;
+import com.ats.tools.wait.WaitGuiReadyInfo;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Enumeration;
+import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
+
+public class AtsClassLoader extends ClassLoader{
+
+	@SuppressWarnings(&quot;unchecked&quot;)
+	public Class&lt;ActionTestScript&gt; loadTestScriptClass(String name) {
+		
+		Class&lt;ActionTestScript&gt; testScriptClass;
+		
+		try {
+<span class="nc" id="L46">			testScriptClass = (Class&lt;ActionTestScript&gt;) loadClass(name);</span>
+<span class="nc" id="L47">		} catch (ClassNotFoundException e) {</span>
+<span class="nc" id="L48">			testScriptClass = (Class&lt;ActionTestScript&gt;) findClass(name);</span>
+<span class="nc" id="L49">		}</span>
+		
+<span class="nc" id="L51">		return testScriptClass;</span>
+	}
+	
+	@Override
+	public Class&lt;?&gt; findClass(String name) {
+<span class="nc" id="L56">		byte[] bt = loadAtsScriptClass(name);</span>
+<span class="nc bnc" id="L57" title="All 2 branches missed.">		if(bt != null) {</span>
+			try {
+<span class="nc" id="L59">				return defineClass(name, bt, 0, bt.length);</span>
+<span class="nc" id="L60">			}catch(NoClassDefFoundError e) {}</span>
+		}
+<span class="nc" id="L62">		return null;</span>
+	}
+
+	private byte[] loadAtsScriptClass(String className) {
+
+<span class="nc" id="L67">		final InputStream is = getClass().getClassLoader().getResourceAsStream(className.replace(&quot;.&quot;, &quot;/&quot;) + &quot;.class&quot;);</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">		if(is != null) {</span>
+<span class="nc" id="L69">			ByteArrayOutputStream bos = new ByteArrayOutputStream();</span>
+<span class="nc" id="L70">			int len = 0;</span>
+			try {
+<span class="nc bnc" id="L72" title="All 2 branches missed.">				while((len = is.read())!=-1){</span>
+<span class="nc" id="L73">					bos.write(len);</span>
+				}
+<span class="nc" id="L75">			} catch (IOException e) {}</span>
+
+<span class="nc" id="L77">			final byte[] data = bos.toByteArray();</span>
+			
+			try {
+<span class="nc" id="L80">				bos.close();</span>
+<span class="nc" id="L81">				is.close();</span>
+<span class="nc" id="L82">			} catch (IOException e) {}</span>
+			
+<span class="nc" id="L84">			return data;</span>
+		}
+		
+<span class="nc" id="L87">		return null;</span>
+	}
+	
+	//------------------------------------------------------------------------------------------------------
+	// Instance management
+	//------------------------------------------------------------------------------------------------------
+		
+	private IWaitGuiReady waitGuiReady;
+	public IWaitGuiReady getWaitGuiReady() {
+<span class="fc" id="L96">		return waitGuiReady;</span>
+	}
+
+<span class="fc" id="L99">	public AtsClassLoader() {</span>
+<span class="fc" id="L100">		final Class&lt;IWaitGuiReady&gt; wait = findCustomWaitClass();</span>
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">		if(wait != null) {</span>
+			try {
+<span class="nc" id="L103">				waitGuiReady = wait.getDeclaredConstructor().newInstance();</span>
+<span class="nc" id="L104">			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException	| InvocationTargetException | NoSuchMethodException | SecurityException e) {}</span>
+		}
+		
+<span class="pc bpc" id="L107" title="1 of 2 branches missed.">		if(waitGuiReady == null) {</span>
+<span class="fc" id="L108">			waitGuiReady = new WaitGuiReady();</span>
+		}
+<span class="fc" id="L110">	}</span>
+
+	private Class&lt;IWaitGuiReady&gt; findCustomWaitClass() {
+
+<span class="fc" id="L114">		final String classpath = System.getProperty(&quot;java.class.path&quot;);</span>
+<span class="fc" id="L115">		final String[] files = classpath.split(System.getProperty(&quot;path.separator&quot;));</span>
+
+<span class="fc bfc" id="L117" title="All 2 branches covered.">		for (String path : files) {</span>
+<span class="fc" id="L118">			final Class&lt;IWaitGuiReady&gt; customWaitClass = findWaitGuiClass(path);</span>
+<span class="pc bpc" id="L119" title="1 of 2 branches missed.">			if(customWaitClass != null) {</span>
+<span class="nc" id="L120">				return customWaitClass;</span>
+			}
+		}
+<span class="fc" id="L123">		return null;</span>
+	}
+
+	private Class&lt;IWaitGuiReady&gt; findWaitGuiClass(String filePath){
+<span class="fc" id="L127">		File f = new File(filePath);</span>
+<span class="pc bpc" id="L128" title="1 of 2 branches missed.">		if(f.exists()) {</span>
+<span class="fc" id="L129">			return findWaitGuiClass(f);</span>
+		}
+<span class="nc" id="L131">		return null;</span>
+	}
+
+	@SuppressWarnings(&quot;unchecked&quot;)
+	private Class&lt;IWaitGuiReady&gt; findWaitGuiClass(File file) {
+<span class="pc bpc" id="L136" title="1 of 2 branches missed.">		if(file.exists()) {</span>
+<span class="fc bfc" id="L137" title="All 2 branches covered.">			if (file.isDirectory()) {</span>
+<span class="pc bpc" id="L138" title="1 of 2 branches missed.">				for (File child : file.listFiles()) {</span>
+<span class="pc" id="L139">					return findWaitGuiClass(child);</span>
+				}
+<span class="fc bfc" id="L141" title="All 2 branches covered.">			} else if (file.getName().toLowerCase().endsWith(&quot;.jar&quot;)) {</span>
+
+<span class="fc" id="L143">				JarFile jar = null;</span>
+
+				try {
+<span class="fc" id="L146">					jar = new JarFile(file);</span>
+<span class="pc" id="L147">				} catch (Exception ex) {}</span>
+
+<span class="pc bpc" id="L149" title="1 of 2 branches missed.">				if (jar != null) {</span>
+
+					try {
+<span class="fc" id="L152">						final Manifest man = jar.getManifest();</span>
+<span class="fc bfc" id="L153" title="All 2 branches covered.">						if(man == null) {</span>
+<span class="fc" id="L154">							return null;</span>
+						}else {
+<span class="fc" id="L156">							Attributes attr = man.getMainAttributes();</span>
+<span class="fc" id="L157">							final String atsType = attr.getValue(&quot;Ats-Type&quot;);</span>
+<span class="pc bpc" id="L158" title="3 of 4 branches missed.">							if(atsType == null || !&quot;WaitGuiReady&quot;.equals(atsType)) {</span>
+<span class="fc" id="L159">								return null;</span>
+							}
+						}
+<span class="nc" id="L162">					} catch (IOException e1) {</span>
+<span class="nc" id="L163">						return null;</span>
+<span class="nc" id="L164">					}</span>
+					
+<span class="nc" id="L166">					final Enumeration&lt;JarEntry&gt; entries = jar.entries();</span>
+<span class="nc bnc" id="L167" title="All 2 branches missed.">					while (entries.hasMoreElements()) {</span>
+
+<span class="nc" id="L169">						final String entryName = entries.nextElement().getName();</span>
+
+<span class="nc bnc" id="L171" title="All 2 branches missed.">						if (entryName.endsWith(&quot;.class&quot;)) {</span>
+<span class="nc" id="L172">							final String className = entryName.replace('/', '.').substring(0, entryName.length() - 6);</span>
+							try
+							{
+<span class="nc" id="L175">								final Class&lt;?&gt; c = loadClass(className);</span>
+<span class="nc bnc" id="L176" title="All 2 branches missed.">								if(c.isAnnotationPresent(WaitGuiReadyInfo.class)) {</span>
+<span class="nc bnc" id="L177" title="All 2 branches missed.">									if(IWaitGuiReady.class.isAssignableFrom(c)) {</span>
+<span class="nc" id="L178">										return (Class&lt;IWaitGuiReady&gt;) c;</span>
+									}
+								}
+<span class="nc" id="L181">							}catch(ClassNotFoundException | NoClassDefFoundError e) {}</span>
+						}
+<span class="nc" id="L183">					}</span>
+				}
+			}
+		}
+<span class="fc" id="L187">		return null;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

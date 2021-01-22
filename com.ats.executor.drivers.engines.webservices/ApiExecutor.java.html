@@ -1,0 +1,508 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ApiExecutor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.executor.drivers.engines.webservices</a> &gt; <span class="el_source">ApiExecutor.java</span></div><h1>ApiExecutor.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.executor.drivers.engines.webservices;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.StringWriter;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import com.ats.element.AtsBaseElement;
+import com.ats.element.FoundElement;
+import com.ats.element.TestElement;
+import com.ats.element.api.AtsApiElement;
+import com.ats.element.api.AtsJsonElement;
+import com.ats.element.api.AtsXmlElement;
+import com.ats.executor.ActionStatus;
+import com.ats.executor.channels.Channel;
+import com.ats.generator.variables.CalculatedProperty;
+import com.ats.script.actions.ActionApi;
+import com.ats.tools.logger.MessageCode;
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
+public abstract class ApiExecutor implements IApiDriverExecutor {
+
+	private final static String TRUNCATED_DATA = &quot;TRUNCATED_DATA&quot;;
+<span class="nc" id="L90">	private final static Pattern xmlPropertyPattern = Pattern.compile(&quot;.*:&quot;);</span>
+
+	private final static short TEXT_TYPE = 0;
+	private final static short JSON_TYPE = 1;
+	private final static short XML_TYPE = 2;
+
+	private final static String ELEMENT = &quot;ELEMENT&quot;;
+	private final static String NODE = &quot;NODE&quot;;
+	private final static String OBJECT = &quot;OBJECT&quot;;
+	private final static String ARRAY = &quot;ARRAY&quot;;	
+	public final static String RESPONSE = &quot;RESPONSE&quot;;
+	public final static String DATA = &quot;DATA&quot;;
+
+	private URI uri;
+	private String source;
+	private short type;
+
+	private ActionApi lastAction;
+
+	private ArrayList&lt;AtsApiElement&gt; atsElements;
+
+	protected Map&lt;String, String&gt; headerProperties;
+
+	protected String authentication;
+	protected String authenticationValue;
+
+	protected int timeout;
+	protected int maxTry;
+
+	protected Channel channel;
+
+	protected OkHttpClient client;
+	private Response response;
+
+	private PrintStream logStream;
+
+<span class="nc" id="L126">	public ApiExecutor(PrintStream logStream, OkHttpClient client, int timeout, int maxTry, Channel channel) {</span>
+<span class="nc" id="L127">		this.logStream = logStream;</span>
+<span class="nc" id="L128">		this.client = client;</span>
+<span class="nc" id="L129">		this.timeout = timeout;</span>
+<span class="nc" id="L130">		this.maxTry = maxTry;</span>
+<span class="nc" id="L131">		this.channel = channel;</span>
+<span class="nc" id="L132">		this.authentication = channel.getAuthentication();</span>
+<span class="nc" id="L133">		this.authenticationValue = channel.getAuthenticationValue();</span>
+<span class="nc" id="L134">	}</span>
+
+	protected void setUri(String value) {
+		try {
+<span class="nc" id="L138">			this.uri = new URI(value);</span>
+<span class="nc" id="L139">		} catch (URISyntaxException e) {}</span>
+<span class="nc" id="L140">	}</span>
+
+	protected URI getUri() {
+<span class="nc bnc" id="L143" title="All 2 branches missed.">		if(lastAction.getPort() &gt; -1) {</span>
+			try {
+<span class="nc" id="L145">				final URL originalURL = uri.toURL();</span>
+<span class="nc" id="L146">				return (new URL(originalURL.getProtocol(), originalURL.getHost(), lastAction.getPort(), originalURL.getFile())).toURI();</span>
+<span class="nc" id="L147">			} catch (MalformedURLException | URISyntaxException e) {}</span>
+		}
+<span class="nc" id="L149">		return uri;</span>
+	}
+
+	protected URI getMethodUri() {
+<span class="nc" id="L153">		return getUri().resolve(lastAction.getMethod().getCalculated());</span>
+	}
+	
+	public String getCurrentUrl() {
+<span class="nc" id="L157">		return getMethodUri().toString();</span>
+	}
+
+	@Override
+	public void execute(ActionStatus status, ActionApi action) {
+<span class="nc" id="L162">		source = &quot;&quot;;</span>
+<span class="nc" id="L163">		type = TEXT_TYPE;</span>
+<span class="nc" id="L164">		lastAction = action;</span>
+
+<span class="nc" id="L166">		status.setMessage(&quot;authentication&quot;);</span>
+
+<span class="nc" id="L168">		headerProperties = new HashMap&lt;String, String&gt;();</span>
+<span class="nc bnc" id="L169" title="All 8 branches missed.">		if(authentication != null &amp;&amp; authenticationValue != null &amp;&amp; authentication.length() &gt; 0 &amp;&amp; authenticationValue.length() &gt; 0) {</span>
+<span class="nc" id="L170">			headerProperties.put(&quot;Authorization&quot;, authentication + &quot; &quot; + authenticationValue);</span>
+<span class="nc" id="L171">			status.setData(authentication);</span>
+		}else {
+<span class="nc" id="L173">			status.setData(&quot;&quot;);</span>
+		}
+
+<span class="nc bnc" id="L176" title="All 2 branches missed.">		for (CalculatedProperty property : action.getHeader()) {</span>
+<span class="nc" id="L177">			headerProperties.put(property.getName(), property.getValue().getCalculated());</span>
+<span class="nc" id="L178">		}</span>
+<span class="nc" id="L179">	}</span>
+
+	protected void addHeader(String key, String value) {
+<span class="nc bnc" id="L182" title="All 2 branches missed.">		if(!headerProperties.containsKey(key)) {</span>
+<span class="nc" id="L183">			headerProperties.put(key, value);</span>
+		}
+<span class="nc" id="L185">	}</span>
+
+	private void refresh(Channel channel) {
+<span class="nc bnc" id="L188" title="All 4 branches missed.">		if(lastAction != null &amp;&amp; !lastAction.isUseCache()) {</span>
+<span class="nc" id="L189">			execute(channel.newActionStatus(), lastAction);</span>
+		}
+<span class="nc" id="L191">	}</span>
+
+	//------------------------------------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------------------------------------
+
+	protected void executeRequest(ActionStatus status, final Request request) {
+
+<span class="nc" id="L198">		logStream.println(&quot;call request -&gt; &quot; + request.url().toString());</span>
+
+<span class="nc" id="L200">		int max = maxTry;</span>
+<span class="nc bnc" id="L201" title="All 4 branches missed.">		while(!clientCall(status, request) &amp;&amp; max &gt; 0) {</span>
+<span class="nc" id="L202">			channel.sendLog(MessageCode.PROPERTY_TRY_ASSERT, &quot;Call webservice failed&quot;, max);</span>
+<span class="nc" id="L203">			channel.sleep(500);</span>
+<span class="nc" id="L204">			max--;</span>
+		}
+
+<span class="nc bnc" id="L207" title="All 2 branches missed.">		if(max == 0) {</span>
+<span class="nc" id="L208">			logStream.println(&quot;call request failed -&gt; &quot; + status.getFailMessage());</span>
+		}
+<span class="nc" id="L210">	}</span>
+
+	private boolean clientCall(ActionStatus status, Request request) {
+
+<span class="nc" id="L214">		String type = &quot;&quot;;</span>
+
+		try {
+
+<span class="nc" id="L218">			response = client.newCall(request).execute();</span>
+<span class="nc" id="L219">			final List&lt;String&gt; contentTypes = response.headers(&quot;Content-Type&quot;);</span>
+
+<span class="nc bnc" id="L221" title="All 4 branches missed.">			if(contentTypes != null &amp;&amp; contentTypes.size() &gt; 0) {</span>
+<span class="nc" id="L222">				type = contentTypes.get(0);</span>
+			}
+
+<span class="nc" id="L225">			File tempFile = Files.createTempFile(&quot;ats-&quot;, &quot;.tmp&quot;).toFile();</span>
+<span class="nc" id="L226">			try (OutputStream output = new FileOutputStream(tempFile)) {</span>
+<span class="nc" id="L227">				response.body().byteStream().transferTo(output);</span>
+<span class="nc" id="L228">			} catch (IOException ioException) {</span>
+
+<span class="nc" id="L230">			}</span>
+
+<span class="nc" id="L232">			source = parseResponse(type, tempFile);</span>
+<span class="nc" id="L233">			tempFile.delete();</span>
+
+<span class="nc" id="L235">			response.close();</span>
+
+<span class="nc" id="L237">			return true;</span>
+
+<span class="nc" id="L239">		} catch (IOException e) {</span>
+<span class="nc" id="L240">			status.setError(ActionStatus.WEB_DRIVER_ERROR, &quot;call Webservice error -&gt; &quot; + e.getMessage());</span>
+		}
+
+<span class="nc" id="L243">		return false;</span>
+	}
+
+	//------------------------------------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------------------------------------
+
+	private String parseResponse(String type, File temp) throws FileNotFoundException {
+
+<span class="nc" id="L251">		final InputStreamReader isr = new InputStreamReader(new FileInputStream(temp), StandardCharsets.UTF_8);</span>
+<span class="nc" id="L252">		initAtsElements();</span>
+
+<span class="nc bnc" id="L254" title="All 2 branches missed.">		if(type.contains(&quot;/xml&quot;)) {</span>
+
+			try {
+<span class="nc" id="L257">				final Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(isr));</span>
+
+<span class="nc" id="L259">				this.type = XML_TYPE;</span>
+				
+<span class="nc" id="L261">				final NodeList streams = doc.getElementsByTagName(&quot;Stream&quot;);</span>
+<span class="nc bnc" id="L262" title="All 4 branches missed.">				if(streams != null &amp;&amp; streams.getLength() &gt; 0) {</span>
+
+<span class="nc bnc" id="L264" title="All 2 branches missed.">					for(int i=0; i&lt;streams.getLength(); i++) {</span>
+
+<span class="nc" id="L266">						final Element stream = (Element)streams.item(i);</span>
+<span class="nc" id="L267">						final int len = stream.getTextContent().length();</span>
+
+<span class="nc bnc" id="L269" title="All 2 branches missed.">						if(len &gt; 100000) {</span>
+<span class="nc" id="L270">							final Node streamParent = stream.getParentNode();</span>
+<span class="nc" id="L271">							streamParent.removeChild(stream);</span>
+
+<span class="nc" id="L273">							final Element newStream = doc.createElement(&quot;Stream&quot;);</span>
+<span class="nc" id="L274">							newStream.setTextContent(&quot;[&quot; + TRUNCATED_DATA + &quot;, size:&quot; + len + &quot;]&quot;);</span>
+<span class="nc" id="L275">							streamParent.appendChild(newStream);</span>
+						}
+					}
+<span class="nc" id="L278">					doc.normalize();</span>
+				}
+
+<span class="nc" id="L281">				loadElementsList(doc.getElementsByTagName(&quot;*&quot;));</span>
+
+<span class="nc" id="L283">				final Transformer transform = TransformerFactory.newInstance().newTransformer();</span>
+<span class="nc" id="L284">				transform.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, &quot;yes&quot;);</span>
+				
+<span class="nc" id="L286">				final StringWriter writer = new StringWriter();</span>
+<span class="nc" id="L287">				transform.transform(new DOMSource(doc), new StreamResult(writer));</span>
+				
+<span class="nc" id="L289">				return &quot;&lt;root&gt;&lt;RESPONSE code=\&quot;&quot; + response.code() + &quot;\&quot;&gt;&lt;data&gt;&quot; + writer.getBuffer().toString() + &quot;&lt;/data&gt;&lt;/RESPONSE&gt;&lt;/root&gt;&quot;;</span>
+
+<span class="nc" id="L291">			}catch(SAXException | IOException | TransformerException | ParserConfigurationException e) {</span>
+
+<span class="nc" id="L293">			}</span>
+
+		}else {
+
+			try {
+<span class="nc" id="L298">				final JsonElement root = JsonParser.parseReader(isr);</span>
+
+<span class="nc" id="L300">				this.type = JSON_TYPE;</span>
+<span class="nc" id="L301">				loadElementsList(root, &quot;root&quot;);</span>
+
+<span class="nc" id="L303">				return &quot;{\&quot;response\&quot;:{\&quot;name\&quot;:\&quot;response\&quot;,\&quot;code\&quot;:&quot; + response.code() + &quot;,\&quot;data\&quot;:&quot; + root.toString() + &quot;}}&quot;; </span>
+
+<span class="nc" id="L305">			}catch(JsonIOException | JsonSyntaxException e) {</span>
+
+			}
+		}
+		
+<span class="nc" id="L310">		this.type = TEXT_TYPE;</span>
+		
+<span class="nc" id="L312">		final String content = new BufferedReader(isr).lines().collect(Collectors.joining(&quot;\n&quot;));</span>
+<span class="nc" id="L313">		atsElements.add(new AtsApiElement(DATA, ImmutableMap.of(&quot;value&quot;, content)));</span>
+
+<span class="nc" id="L315">		return &quot;&lt;ats_response&gt;&lt;code&gt;&quot; + response.code() + &quot;&lt;/code&gt;&lt;data&gt;&lt;![CDATA[&quot; + content + &quot;]]&gt;&lt;/data&gt;&lt;/ats_response&gt;&quot;;</span>
+	}
+
+	private void initAtsElements(){
+<span class="nc" id="L319">		this.atsElements = new ArrayList&lt;AtsApiElement&gt;();</span>
+<span class="nc" id="L320">		atsElements.add(new AtsApiElement(RESPONSE, ImmutableMap.of(&quot;name&quot;, &quot;response&quot;, &quot;code&quot;, response.code() + &quot;&quot;)));</span>
+<span class="nc" id="L321">	}</span>
+
+	public String getSource() {
+<span class="nc" id="L324">		return source;</span>
+	}
+
+	public ArrayList&lt;FoundElement&gt; findElements(Channel channel, boolean sysComp, TestElement testObject, String tagName, String[] attributes, Predicate&lt;AtsBaseElement&gt; predicate) {
+
+<span class="nc" id="L329">		final String searchedTag = tagName.toUpperCase();</span>
+<span class="nc" id="L330">		final ArrayList&lt;FoundElement&gt; result = new ArrayList&lt;FoundElement&gt;();</span>
+
+<span class="nc bnc" id="L332" title="All 2 branches missed.">		if(testObject.getParent() == null){</span>
+<span class="nc" id="L333">			refresh(channel);</span>
+		}else {
+<span class="nc" id="L335">			final Optional&lt;AtsApiElement&gt; parentElement = atsElements.stream().filter(e -&gt; e.getId().equals(testObject.getParent().getFoundElement().getId())).findFirst();</span>
+<span class="nc bnc" id="L336" title="All 2 branches missed.">			if(parentElement.isPresent()) {</span>
+<span class="nc bnc" id="L337" title="All 2 branches missed.">				if(!parentElement.get().isResponse()) {</span>
+<span class="nc bnc" id="L338" title="All 2 branches missed.">					if(type == XML_TYPE) {</span>
+<span class="nc" id="L339">						final Element elem = ((AtsXmlElement)parentElement.get()).getElement();</span>
+<span class="nc bnc" id="L340" title="All 2 branches missed.">						if(elem != null) {</span>
+<span class="nc" id="L341">							initAtsElements();</span>
+<span class="nc" id="L342">							loadElementsList(elem.getElementsByTagName(&quot;*&quot;));</span>
+						}
+<span class="nc bnc" id="L344" title="All 2 branches missed.">					}else if(type == JSON_TYPE) {</span>
+<span class="nc" id="L345">						final AtsJsonElement elem = (AtsJsonElement)parentElement.get();</span>
+<span class="nc bnc" id="L346" title="All 2 branches missed.">						if(elem != null) {</span>
+<span class="nc" id="L347">							initAtsElements();</span>
+<span class="nc" id="L348">							loadElementsList(elem.getElement(), elem.getAttribute(&quot;name&quot;));</span>
+						}
+					}
+				}
+			}
+		}
+
+<span class="nc bnc" id="L355" title="All 2 branches missed.">		if(&quot;*&quot;.equals(tagName)) {</span>
+<span class="nc" id="L356">			atsElements.stream().filter(predicate).forEach(e -&gt; result.add(new FoundElement(e)));</span>
+		}else {
+<span class="nc" id="L358">			atsElements.stream().filter(e -&gt; e.getTag().equals(searchedTag)).filter(predicate).forEach(e -&gt; result.add(new FoundElement(e)));</span>
+		}
+
+<span class="nc" id="L361">		return result;</span>
+	}
+
+
+	//-------------------------------------------------------------------------------------------------------------------------------------------------------
+	// Json
+	//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+	private void loadElementsList(JsonElement json, String name) {
+
+<span class="nc" id="L371">		final HashMap&lt;String, String&gt; attributes = new HashMap&lt;String, String&gt;(Map.of(&quot;name&quot;, name));</span>
+
+<span class="nc bnc" id="L373" title="All 2 branches missed.">		if(json.isJsonArray()) {</span>
+
+<span class="nc" id="L375">			final JsonArray array = json.getAsJsonArray();</span>
+<span class="nc" id="L376">			attributes.put(&quot;size&quot;, array.size() + &quot;&quot;);</span>
+
+<span class="nc" id="L378">			atsElements.add(new AtsJsonElement(json, ARRAY, attributes));</span>
+
+<span class="nc" id="L380">			int index = 0;</span>
+<span class="nc bnc" id="L381" title="All 2 branches missed.">			for (JsonElement el : array) {</span>
+<span class="nc bnc" id="L382" title="All 2 branches missed.">				if(el.isJsonPrimitive()) {</span>
+<span class="nc" id="L383">					loadArrayList(el, &quot;index&quot; + index, el.getAsString());</span>
+				}else {
+<span class="nc" id="L385">					loadElementsList(el, &quot;index&quot; + index);</span>
+				}
+
+<span class="nc" id="L388">				index++;</span>
+<span class="nc" id="L389">			}</span>
+
+<span class="nc bnc" id="L391" title="All 2 branches missed.">		}else if(json.isJsonObject()) {</span>
+
+<span class="nc bnc" id="L393" title="All 2 branches missed.">			for (Entry&lt;String, JsonElement&gt; entry : json.getAsJsonObject().entrySet()) {</span>
+<span class="nc" id="L394">				final String attributeName = entry.getKey();</span>
+<span class="nc" id="L395">				final JsonElement attributeValue = entry.getValue();</span>
+
+<span class="nc bnc" id="L397" title="All 2 branches missed.">				if(attributeValue.isJsonPrimitive()) {</span>
+<span class="nc bnc" id="L398" title="All 2 branches missed.">					if(attributes.containsKey(attributeName)) {</span>
+<span class="nc" id="L399">						attributes.replace(attributeName, attributeValue.getAsJsonPrimitive().getAsString());</span>
+					}else {
+<span class="nc" id="L401">						attributes.put(attributeName, attributeValue.getAsJsonPrimitive().getAsString());</span>
+					}
+				}else {
+<span class="nc" id="L404">					loadElementsList(attributeValue, attributeName);</span>
+				}
+<span class="nc" id="L406">			}</span>
+
+<span class="nc" id="L408">			atsElements.add(new AtsJsonElement(json, OBJECT, attributes));</span>
+		}
+<span class="nc" id="L410">	}</span>
+
+	private void loadArrayList(JsonElement el, String item, String value) {
+<span class="nc" id="L413">		atsElements.add(new AtsJsonElement(el, ELEMENT, ImmutableMap.of(&quot;name&quot;, item, &quot;value&quot;, value)));</span>
+<span class="nc" id="L414">	}</span>
+
+	//-------------------------------------------------------------------------------------------------------------------------------------------------------
+	// Xml
+	//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+	private void loadElementsList(NodeList nodeList) {
+
+<span class="nc bnc" id="L422" title="All 2 branches missed.">		for (int i = 0; i &lt; nodeList.getLength(); i++) {</span>
+
+<span class="nc" id="L424">			final Node node = nodeList.item(i);</span>
+<span class="nc" id="L425">			final String nodeName = node.getNodeName();</span>
+
+<span class="nc" id="L427">			final Map&lt;String, String&gt; foundAttributes = new HashMap&lt;String, String&gt;();</span>
+<span class="nc" id="L428">			final NamedNodeMap nodeAttributes = node.getAttributes();</span>
+
+<span class="nc bnc" id="L430" title="All 2 branches missed.">			if(nodeName != null) {</span>
+<span class="nc" id="L431">				foundAttributes.put(&quot;name&quot;, xmlPropertyPattern.matcher(nodeName).replaceFirst(&quot;&quot;));</span>
+			}
+
+<span class="nc bnc" id="L434" title="All 2 branches missed.">			for(int j=0; j&lt;nodeAttributes.getLength(); j++) {</span>
+<span class="nc" id="L435">				final Node attribute = nodeAttributes.item(j);</span>
+<span class="nc" id="L436">				addAttribute(foundAttributes, xmlPropertyPattern.matcher(attribute.getNodeName()).replaceFirst(&quot;&quot;), attribute.getNodeValue());</span>
+			}
+
+<span class="nc" id="L439">			boolean hasChild = false;</span>
+<span class="nc" id="L440">			final NodeList nodeChild = node.getChildNodes();</span>
+<span class="nc bnc" id="L441" title="All 2 branches missed.">			for(int j=0; j&lt;nodeChild.getLength(); j++) {</span>
+<span class="nc" id="L442">				Node nodeChildElement = nodeChild.item(j);</span>
+<span class="nc bnc" id="L443" title="All 2 branches missed.">				if(nodeChildElement.getNodeType() == Node.ELEMENT_NODE) {</span>
+<span class="nc" id="L444">					hasChild = true;</span>
+				}else {
+
+<span class="nc" id="L447">					String nodeChildValue = nodeChildElement.getNodeValue();</span>
+<span class="nc bnc" id="L448" title="All 2 branches missed.">					if(nodeChildValue != null) {</span>
+<span class="nc" id="L449">						nodeChildValue = nodeChildValue.trim();</span>
+<span class="nc bnc" id="L450" title="All 2 branches missed.">						if(nodeChildValue.length() &gt; 0) {</span>
+<span class="nc bnc" id="L451" title="All 2 branches missed.">							if(nodeChildElement.getNodeType() == Node.TEXT_NODE) {</span>
+<span class="nc" id="L452">								foundAttributes.put(&quot;text&quot;, nodeChildValue);</span>
+<span class="nc bnc" id="L453" title="All 2 branches missed.">							}else if(nodeChildElement.getNodeType() == Node.COMMENT_NODE) {</span>
+<span class="nc" id="L454">								foundAttributes.put(&quot;comment&quot;, nodeChildValue);</span>
+							}
+						}
+					}
+				}
+			}
+
+<span class="nc bnc" id="L461" title="All 2 branches missed.">			if(hasChild) {//Node</span>
+<span class="nc" id="L462">				atsElements.add(new AtsXmlElement(node, NODE, foundAttributes));</span>
+			}else{//Element
+<span class="nc" id="L464">				final NodeList properties = node.getChildNodes();</span>
+<span class="nc bnc" id="L465" title="All 2 branches missed.">				for(int j=0; j&lt;properties.getLength(); j++) {</span>
+<span class="nc" id="L466">					Node property = properties.item(j);</span>
+<span class="nc" id="L467">					String propertyValue = property.getNodeValue();</span>
+<span class="nc bnc" id="L468" title="All 2 branches missed.">					if(propertyValue != null) {</span>
+<span class="nc" id="L469">						propertyValue = propertyValue.trim();</span>
+<span class="nc bnc" id="L470" title="All 2 branches missed.">						if(propertyValue.length() &gt; 0) {</span>
+<span class="nc" id="L471">							String propertyName = property.getNodeName();</span>
+<span class="nc bnc" id="L472" title="All 2 branches missed.">							if(&quot;#text&quot;.equals(propertyName)) {</span>
+<span class="nc" id="L473">								propertyName = &quot;value&quot;;</span>
+							}else {
+<span class="nc" id="L475">								xmlPropertyPattern.matcher(propertyName).replaceFirst(&quot;&quot;);</span>
+							}
+<span class="nc" id="L477">							addAttribute(foundAttributes, propertyName, propertyValue);</span>
+						}
+					}
+				}
+<span class="nc" id="L481">				atsElements.add(new AtsXmlElement(node, ELEMENT, foundAttributes));</span>
+			}
+		}
+<span class="nc" id="L484">	}</span>
+
+	private void addAttribute(Map&lt;String, String&gt; map, String propertyName, String propertyValue) {
+<span class="nc bnc" id="L487" title="All 4 branches missed.">		if(!&quot;xsd&quot;.equals(propertyName) &amp;&amp; !&quot;xsi&quot;.equals(propertyName)) {</span>
+<span class="nc" id="L488">			map.put(propertyName, propertyValue);</span>
+		}
+<span class="nc" id="L490">	}</span>
+
+	public String getElementAttribute(String id, String attributeName, int maxTry) {
+<span class="nc" id="L493">		final Optional&lt;AtsApiElement&gt; elem = atsElements.stream().filter(e -&gt; e.getId().equals(id)).findFirst();</span>
+<span class="nc bnc" id="L494" title="All 2 branches missed.">		if(elem.isPresent()) {</span>
+<span class="nc" id="L495">			return elem.get().getAttribute(attributeName);</span>
+		}
+<span class="nc" id="L497">		return null;</span>
+	}
+
+	public CalculatedProperty[] getElementAttributes(String id) {
+<span class="nc" id="L501">		final Optional&lt;AtsApiElement&gt; elem = atsElements.stream().filter(e -&gt; e.getId().equals(id)).findFirst();</span>
+<span class="nc bnc" id="L502" title="All 2 branches missed.">		if(elem.isPresent()) {</span>
+<span class="nc" id="L503">			return elem.get().getAttributesMap().entrySet().stream().parallel().map(e -&gt; new CalculatedProperty(e.getKey(), e.getValue())).toArray(c -&gt; new CalculatedProperty[c]);</span>
+		}
+<span class="nc" id="L505">		return null;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

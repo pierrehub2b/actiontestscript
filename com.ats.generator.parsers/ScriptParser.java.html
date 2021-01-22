@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ScriptParser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.generator.parsers</a> &gt; <span class="el_source">ScriptParser.java</span></div><h1>ScriptParser.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+*/
+
+package com.ats.generator.parsers;
+
+import com.ats.generator.variables.CalculatedValue;
+import com.ats.generator.variables.Variable;
+import com.ats.generator.variables.transform.Transformer;
+import com.ats.script.ScriptHeader;
+import com.ats.script.ScriptLoader;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.regex.Matcher;
+
+public class ScriptParser {
+
+	public static final String ATS_SEPARATOR = &quot;-&gt;&quot;;
+<span class="fc" id="L37">	public static final int ATS_SEPARATOR_SIZE = ATS_SEPARATOR.length();</span>
+	public static final String ATS_ASSIGN_SEPARATOR = &quot;=&gt;&quot;;
+	public static final String ATS_PROPERTIES_FILE = &quot;.atsProjectProperties&quot;;
+
+	public static final String SCRIPT_ID = &quot;id&quot;;
+	public static final String SCRIPT_GROUPS_LABEL = &quot;groups&quot;;
+	public static final String SCRIPT_DESCRIPTION_LABEL = &quot;description&quot;;
+	public static final String SCRIPT_DATE_CREATED_LABEL = &quot;created&quot;;
+	public static final String SCRIPT_RETURN_LABEL = &quot;return&quot;;
+
+	public static final String SCRIPT_AUTHOR_LABEL = &quot;author&quot;;
+	public static final String SCRIPT_PREREQUISITE_LABEL = &quot;prerequisite&quot;;
+	
+	public static final String SCRIPT_ID_JIRA = &quot;jira&quot;;
+	public static final String SCRIPT_ID_SQUASH = &quot;squash&quot;;
+	
+<span class="fc" id="L53">	public static final int SCRIPT_ID_LENGTH = SCRIPT_ID.length();</span>
+<span class="fc" id="L54">	public static final int SCRIPT_GROUPS_LABEL_LENGTH = SCRIPT_GROUPS_LABEL.length();</span>
+<span class="fc" id="L55">	public static final int SCRIPT_DESCRIPTION_LABEL_LENGTH = SCRIPT_DESCRIPTION_LABEL.length();</span>
+<span class="fc" id="L56">	public static final int SCRIPT_DATE_CREATED_LABEL_LENGTH = SCRIPT_DATE_CREATED_LABEL.length();</span>
+<span class="fc" id="L57">	public static final int SCRIPT_RETURN_LABEL_LENGTH = SCRIPT_RETURN_LABEL.length();</span>
+
+<span class="fc" id="L59">	public static final int SCRIPT_AUTHOR_LABEL_LENGTH = SCRIPT_AUTHOR_LABEL.length();</span>
+<span class="fc" id="L60">	public static final int SCRIPT_PREREQUISITE_LABEL_LENGTH = SCRIPT_PREREQUISITE_LABEL.length();</span>
+	
+<span class="fc" id="L62">	public static final int SCRIPT_ID_JIRA_LENGTH = SCRIPT_ID_JIRA.length();</span>
+<span class="fc" id="L63">	public static final int SCRIPT_ID_SQUASH_LENGTH = SCRIPT_ID_SQUASH.length();</span>
+
+<span class="fc" id="L65">	private static final DateFormat dateFormat = new SimpleDateFormat(&quot;yyyy-MM-dd 'at' HH:mm:ss&quot;);</span>
+
+	private Lexer lexer;
+
+<span class="fc" id="L69">	public ScriptParser(Lexer lexer) {</span>
+<span class="fc" id="L70">		this.lexer = lexer;</span>
+<span class="fc" id="L71">	}</span>
+
+	public Lexer getLexer() {
+<span class="nc" id="L74">		return lexer;</span>
+	}	
+
+	public boolean isGenerator() {
+<span class="nc" id="L78">		return lexer.isGenerator();</span>
+	}
+
+	public void addScript(){
+<span class="fc" id="L82">		lexer.addScript();</span>
+<span class="fc" id="L83">	}</span>
+
+	private String getDataGroup(Matcher m, int index){
+<span class="nc bnc" id="L86" title="All 4 branches missed.">		if(m.groupCount() &gt; index -1 &amp;&amp; m.group(index) != null){</span>
+<span class="nc" id="L87">			return m.group(index).trim();</span>
+		}
+<span class="nc" id="L89">		return &quot;&quot;;</span>
+	}
+	
+	private String getHeaderData(String data) {
+<span class="nc" id="L93">		return data.substring(data.indexOf(ATS_SEPARATOR) + ATS_SEPARATOR_SIZE).trim();</span>
+	}
+
+	public void parse(ScriptLoader script, ScriptHeader header, String data){
+
+<span class="nc bnc" id="L98" title="All 2 branches missed.">		if(data.regionMatches(true, 0, SCRIPT_GROUPS_LABEL, 0, SCRIPT_GROUPS_LABEL_LENGTH)){</span>
+
+<span class="nc" id="L100">			header.parseGroups(getHeaderData(data));</span>
+
+<span class="nc bnc" id="L102" title="All 2 branches missed.">		}else if(data.regionMatches(true, 0, SCRIPT_DESCRIPTION_LABEL, 0, SCRIPT_DESCRIPTION_LABEL_LENGTH)){</span>
+
+<span class="nc" id="L104">			header.setDescription(getHeaderData(data));</span>
+
+<span class="nc bnc" id="L106" title="All 2 branches missed.">		}else if(data.regionMatches(true, 0, SCRIPT_ID, 0, SCRIPT_ID_LENGTH)){</span>
+
+<span class="nc" id="L108">			header.setId(getHeaderData(data));</span>
+			
+<span class="nc bnc" id="L110" title="All 2 branches missed.">		}else if(data.regionMatches(true, 0, SCRIPT_ID_SQUASH, 0, SCRIPT_ID_SQUASH_LENGTH)){</span>
+
+<span class="nc" id="L112">			header.setSquashId(getHeaderData(data));</span>
+			
+<span class="nc bnc" id="L114" title="All 2 branches missed.">		}else if(data.regionMatches(true, 0, SCRIPT_ID_JIRA, 0, SCRIPT_ID_JIRA_LENGTH)){</span>
+
+<span class="nc" id="L116">			header.setJiraId(getHeaderData(data));</span>
+			
+<span class="nc bnc" id="L118" title="All 2 branches missed.">		}else if(data.regionMatches(true, 0, SCRIPT_DATE_CREATED_LABEL, 0, SCRIPT_DATE_CREATED_LABEL_LENGTH)){</span>
+
+<span class="nc" id="L120">			final String dateString = getHeaderData(data);</span>
+			try {
+<span class="nc" id="L122">				header.setCreatedAt(dateFormat.parse(dateString));</span>
+<span class="nc" id="L123">			}catch (Exception e) {}</span>
+
+<span class="nc bnc" id="L125" title="All 2 branches missed.">		}else if(data.regionMatches(true, 0, SCRIPT_AUTHOR_LABEL, 0, SCRIPT_AUTHOR_LABEL_LENGTH)){</span>
+
+<span class="nc" id="L127">			header.setAuthor(getHeaderData(data));</span>
+
+<span class="nc bnc" id="L129" title="All 2 branches missed.">		}else if(data.regionMatches(true, 0, SCRIPT_PREREQUISITE_LABEL, 0, SCRIPT_PREREQUISITE_LABEL_LENGTH)){</span>
+
+<span class="nc" id="L131">			header.setPrerequisite(getHeaderData(data));</span>
+
+<span class="nc bnc" id="L133" title="All 2 branches missed.">		}else if(data.regionMatches(true, 0, Variable.SCRIPT_LABEL, 0, Variable.SCRIPT_LABEL_LENGTH)){</span>
+
+<span class="nc" id="L135">			final ArrayList&lt;String&gt; dataArray = new ArrayList&lt;String&gt;(Arrays.asList(getHeaderData(data).split(ScriptParser.ATS_SEPARATOR)));</span>
+
+<span class="nc bnc" id="L137" title="All 2 branches missed.">			if(dataArray.size() &gt; 0){</span>
+
+<span class="nc" id="L139">				final String name = dataArray.remove(0).trim();</span>
+				
+<span class="nc" id="L141">				String value = &quot;&quot;;</span>
+<span class="nc" id="L142">				Transformer transformer = null;</span>
+
+<span class="nc bnc" id="L144" title="All 2 branches missed.">				if(dataArray.size() &gt; 0) {</span>
+
+<span class="nc" id="L146">					final String nextData = dataArray.remove(0).trim();</span>
+<span class="nc" id="L147">					final Matcher m = Transformer.TRANSFORM_PATTERN.matcher(nextData);</span>
+					
+<span class="nc bnc" id="L149" title="All 4 branches missed.">					if(m != null &amp;&amp; m.find()){</span>
+
+<span class="nc" id="L151">						transformer = Transformer.createTransformer(getDataGroup(m, 1), getDataGroup(m, 2));</span>
+
+<span class="nc bnc" id="L153" title="All 2 branches missed.">						if(dataArray.size() &gt; 0){</span>
+<span class="nc" id="L154">							value = dataArray.remove(0).trim();</span>
+						}
+
+					}else {
+<span class="nc" id="L158">						value = nextData;</span>
+					}
+				}
+
+<span class="nc" id="L162">				script.addVariable(name, new CalculatedValue(script, value), transformer);</span>
+			}
+
+<span class="nc bnc" id="L165" title="All 2 branches missed.">		}else if(data.regionMatches(true, 0, SCRIPT_RETURN_LABEL, 0, SCRIPT_RETURN_LABEL.length())){</span>
+
+<span class="nc" id="L167">			final String[] returnsData = getHeaderData(data).split(ATS_SEPARATOR);</span>
+<span class="nc" id="L168">			CalculatedValue[] returns = new CalculatedValue[returnsData.length];</span>
+
+<span class="nc bnc" id="L170" title="All 2 branches missed.">			for(int i=0; i &lt; returnsData.length; i++){</span>
+<span class="nc" id="L171">				returns[i] = new CalculatedValue(script, returnsData[i].trim());</span>
+			}
+<span class="nc" id="L173">			script.setReturns(returns);</span>
+
+<span class="nc" id="L175">		}else{</span>
+
+<span class="nc" id="L177">			boolean actionDisabled = false;</span>
+<span class="nc bnc" id="L178" title="All 2 branches missed.">			if(data.startsWith(&quot;//&quot;)){</span>
+<span class="nc" id="L179">				data = data.substring(2);</span>
+<span class="nc" id="L180">				actionDisabled = true;</span>
+			}
+<span class="nc" id="L182">			lexer.createAction(script, data, actionDisabled);</span>
+		}
+<span class="nc" id="L184">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

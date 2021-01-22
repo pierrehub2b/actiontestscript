@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActionStatus.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.executor</a> &gt; <span class="el_source">ActionStatus.java</span></div><h1>ActionStatus.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+*/
+
+package com.ats.executor;
+
+import com.ats.element.TestElement;
+import com.ats.executor.channels.Channel;
+
+public class ActionStatus {
+
+	public static final int OBJECT_NOT_FOUND = -1;
+	public static final int OBJECT_NOT_VISIBLE = -2;
+	public static final int OBJECT_NOT_INTERACTABLE = -3;
+	public static final int ENTER_TEXT_FAIL = -4;
+	public static final int ATTRIBUTE_NOT_SET = -5;
+	public static final int ATTRIBUTE_CHECK_FAIL = -6;
+	public static final int VALUES_COMPARE_FAIL = -7;
+	public static final int OCCURRENCES_ERROR = -8;
+	public static final int CHANNEL_NOT_FOUND = -9;	
+	public static final int MALFORMED_GOTO_URL = -10;	
+	public static final int UNREACHABLE_GOTO_URL = -11;
+	public static final int UNKNOWN_HOST_GOTO_URL = -12;
+	public static final int JAVASCRIPT_ERROR = -13;
+	public static final int WINDOW_NOT_FOUND = -14;
+	public static final int WINDOW_INDEX_OUT = -15;
+	public static final int WEB_DRIVER_ERROR = -16;
+	public static final int DRIVER_NOT_REACHABLE = -17;
+	public static final int JAVA_EXCEPTION = -18;
+	public static final int CHANNEL_START_ERROR = -19;
+	public static final int FILE_NOT_FOUND = -20;
+	public static final int PERF_NOT_STARTED = -21;
+	public static final int PERF_NOT_RECORDING = -22;
+	
+	public static final int OCTOPERF_FILE_ERROR = -30;
+	
+	public static final int NEOLOAD_POST_ERROR = -50;
+	
+	public static final int SYS_BUTTON_ERROR = -60;
+	
+	private static final String ATS_TECHNICAL_ERROR = &quot;AtsTechnicalError&quot;;
+	private static final String ATS_FUNCTIONAL_ERROR = &quot;AtsFunctionalError&quot;;
+
+	private Channel channel;
+
+<span class="nc" id="L61">	private long startedAt = 0;</span>
+<span class="nc" id="L62">	private long duration = 0;</span>
+<span class="nc" id="L63">	private long cpuUsage = 0;</span>
+
+<span class="nc" id="L65">	private long searchDuration = 0;</span>
+<span class="nc" id="L66">	private int occurences = 0;</span>
+
+<span class="nc" id="L68">	private boolean passed = true;</span>
+<span class="nc" id="L69">	private int code = 0;</span>
+<span class="nc" id="L70">	private String message = &quot;&quot;;</span>
+<span class="nc" id="L71">	private TestElement element = null;</span>
+<span class="nc" id="L72">	private Object data = null;</span>
+	
+	private String testLine;
+			
+<span class="nc" id="L76">	private String errorType = ATS_FUNCTIONAL_ERROR;</span>
+
+<span class="nc" id="L78">	public ActionStatus(Channel channel, String testName, int testLine) {</span>
+<span class="nc" id="L79">		this.channel = channel;</span>
+<span class="nc" id="L80">		this.startedAt = System.currentTimeMillis();</span>
+<span class="nc" id="L81">		this.testLine = testName + &quot;:&quot; + testLine;</span>
+<span class="nc" id="L82">	}</span>
+	
+	public String getTestLine() {
+<span class="nc" id="L85">		return testLine;</span>
+	}
+
+	public void updateDuration(long currentTime) {
+<span class="nc" id="L89">		duration += System.currentTimeMillis() - currentTime;</span>
+<span class="nc" id="L90">	}</span>
+
+	public void startDuration() {
+<span class="nc" id="L93">		duration = System.currentTimeMillis();</span>
+<span class="nc" id="L94">	}</span>
+	
+	public void endDuration() {
+<span class="nc" id="L97">		duration = System.currentTimeMillis() - startedAt;</span>
+<span class="nc" id="L98">	}	</span>
+	
+	public void endAction() {
+<span class="nc" id="L101">		channel.endHarAction();</span>
+<span class="nc" id="L102">		endDuration();</span>
+<span class="nc" id="L103">	}</span>
+		
+	public void setException(int code, Exception ex) {
+<span class="nc" id="L106">		this.code = code;</span>
+<span class="nc" id="L107">		this.passed = false;</span>
+<span class="nc" id="L108">		this.errorType = ex.getClass().getName();</span>
+<span class="nc" id="L109">		this.message = ex.getMessage();</span>
+<span class="nc" id="L110">	}</span>
+
+	public void setTechnicalError(int code, String message) {
+<span class="nc" id="L113">		this.passed = false;</span>
+<span class="nc" id="L114">		this.code = code;</span>
+<span class="nc" id="L115">		this.errorType = ATS_TECHNICAL_ERROR;</span>
+<span class="nc" id="L116">		this.message = message;</span>
+<span class="nc" id="L117">	}</span>
+	
+	public String getErrorType() {
+<span class="nc" id="L120">		return errorType;</span>
+	}
+	
+	public void setNoError() {
+<span class="nc" id="L124">		setPassed(true);</span>
+<span class="nc" id="L125">		setCode(0);</span>
+<span class="nc" id="L126">		setMessage(&quot;&quot;);</span>
+<span class="nc" id="L127">	}</span>
+	
+	public void setNoError(String message) {
+<span class="nc" id="L130">		setPassed(true);</span>
+<span class="nc" id="L131">		setCode(0);</span>
+<span class="nc" id="L132">		setMessage(message);</span>
+<span class="nc" id="L133">		setData(null);</span>
+<span class="nc" id="L134">	}</span>
+	
+	public void setError(int code, String message) {
+<span class="nc" id="L137">		setPassed(false);</span>
+<span class="nc" id="L138">		setCode(code);</span>
+<span class="nc" id="L139">		setMessage(message);</span>
+<span class="nc" id="L140">	}</span>
+	
+	public void setError(int code, String message, Object data) {
+<span class="nc" id="L143">		setError(code, message);</span>
+<span class="nc" id="L144">		setData(data);</span>
+<span class="nc" id="L145">	}</span>
+			
+	//--------------------------------------------------------------------------------------------------------
+	//--------------------------------------------------------------------------------------------------------
+	
+	public String getFailMessage() {
+<span class="nc" id="L151">		return message + &quot; after &quot; + duration + &quot; ms&quot;;</span>
+	}
+	
+	public String getChannelApplication() {
+<span class="nc bnc" id="L155" title="All 2 branches missed.">		if(channel == null) {</span>
+<span class="nc" id="L156">			return &quot;&quot;;</span>
+		}
+<span class="nc" id="L158">		return channel.getApplication();</span>
+	}
+
+	//----------------------------------------------------------------------------------------------------------------------
+	// Getter and setter for serialization
+	//----------------------------------------------------------------------------------------------------------------------
+
+	public boolean isPassed() {
+<span class="nc" id="L166">		return passed;</span>
+	}
+
+	public void setPassed(boolean passed) {
+<span class="nc" id="L170">		this.passed = passed;</span>
+<span class="nc" id="L171">	}</span>
+
+	public int getCode() {
+<span class="nc" id="L174">		return code;</span>
+	}
+
+	public void setCode(int code) {
+<span class="nc" id="L178">		this.code = code;</span>
+<span class="nc" id="L179">	}</span>
+
+	public String getMessage() {
+<span class="nc" id="L182">		return message;</span>
+	}
+
+	public void setMessage(String message) {
+<span class="nc" id="L186">		this.message = message;</span>
+<span class="nc" id="L187">	}</span>
+
+	public TestElement getElement() {
+<span class="nc" id="L190">		return element;</span>
+	}
+
+	public void setElement(TestElement element) {
+<span class="nc" id="L194">		this.element = element;</span>
+<span class="nc" id="L195">	}</span>
+
+	public Object getData() {
+<span class="nc" id="L198">		return data;</span>
+	}
+	public void setData(Object data) {
+<span class="nc" id="L201">		this.data = data;</span>
+<span class="nc" id="L202">	}</span>
+
+	public long getStartedAt() {
+<span class="nc" id="L205">		return startedAt;</span>
+	}
+
+	public void setStartedAt(long startedAt) {
+<span class="nc" id="L209">		this.startedAt = startedAt;</span>
+<span class="nc" id="L210">	}</span>
+
+	public long getDuration() {
+<span class="nc" id="L213">		return duration;</span>
+	}
+
+	public void setDuration(long duration) {
+<span class="nc" id="L217">		this.duration = duration;</span>
+<span class="nc" id="L218">	}</span>
+
+	public long getSearchDuration() {
+<span class="nc" id="L221">		return searchDuration;</span>
+	}
+
+	public void setSearchDuration(long searchDuration) {
+<span class="nc" id="L225">		this.searchDuration = searchDuration;</span>
+<span class="nc" id="L226">	}</span>
+
+	public int getOccurences() {
+<span class="nc" id="L229">		return occurences;</span>
+	}
+
+	public void setOccurences(int value) {
+<span class="nc" id="L233">		this.occurences = value;</span>
+<span class="nc" id="L234">	}</span>
+
+	public Channel getChannel() {
+<span class="nc" id="L237">		return channel;</span>
+	}
+
+	public void setChannel(Channel channel) {
+<span class="nc" id="L241">		this.channel = channel;</span>
+<span class="nc" id="L242">	}</span>
+
+	public long getCpuUsage() {
+<span class="nc" id="L245">		return cpuUsage;</span>
+	}
+
+	public void setCpuUsage(long cpuUsage) {
+<span class="nc" id="L249">		this.cpuUsage = cpuUsage;</span>
+<span class="nc" id="L250">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

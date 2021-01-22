@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AcknowledgeMessage.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">flex.messaging.messages</a> &gt; <span class="el_source">AcknowledgeMessage.java</span></div><h1>AcknowledgeMessage.java</h1><pre class="source lang-java linenums">/*
+  GRANITE DATA SERVICES
+  Copyright (C) 2007 ADEQUATE SYSTEMS SARL
+
+  This file is part of Granite Data Services.
+
+  Granite Data Services is free software; you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or (at your
+  option) any later version.
+ 
+  Granite Data Services is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+  for more details.
+ 
+  You should have received a copy of the GNU Lesser General Public License
+  along with this library; if not, see &lt;http://www.gnu.org/licenses/&gt;.
+*/
+
+package flex.messaging.messages;
+
+/**
+ * @author Franck WOLFF
+ */
+public class AcknowledgeMessage extends AsyncMessage {
+
+    private static final long serialVersionUID = 1L;
+
+    public AcknowledgeMessage() {
+<span class="nc" id="L31">        super();</span>
+<span class="nc" id="L32">    }</span>
+    
+    public AcknowledgeMessage(Message request) {
+<span class="nc" id="L35">        super(request);</span>
+<span class="nc" id="L36">    }</span>
+
+    @Override
+    public String toString() {
+<span class="nc" id="L40">    	return toString(&quot;&quot;);</span>
+    }
+    
+    public String toString(String indent) {
+<span class="nc" id="L44">        StringBuilder sb = new StringBuilder(512);</span>
+<span class="nc" id="L45">        sb.append(getClass().getName()).append(&quot; {&quot;);</span>
+<span class="nc" id="L46">        super.toString(sb, indent, null);</span>
+<span class="nc" id="L47">        sb.append('\n').append(indent).append('}');</span>
+<span class="nc" id="L48">        return sb.toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

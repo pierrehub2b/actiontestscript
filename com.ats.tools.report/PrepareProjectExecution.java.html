@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PrepareProjectExecution.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.tools.report</a> &gt; <span class="el_source">PrepareProjectExecution.java</span></div><h1>PrepareProjectExecution.java</h1><pre class="source lang-java linenums">package com.ats.tools.report;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.StringReader;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import com.ats.driver.AtsManager;
+import com.ats.tools.Utils;
+
+<span class="nc" id="L25">public class PrepareProjectExecution {</span>
+
+	public static void main(String[] args) throws URISyntaxException {
+
+<span class="nc" id="L29">		String targetFolder = &quot;target&quot;;</span>
+<span class="nc bnc" id="L30" title="All 2 branches missed.">		if(args.length &gt; 0) {</span>
+<span class="nc" id="L31">			targetFolder = args[0];</span>
+		}
+
+<span class="nc" id="L34">		final Path pomFilePath = Paths.get(&quot;pom.xml&quot;);</span>
+
+<span class="nc bnc" id="L36" title="All 2 branches missed.">		if(pomFilePath.toAbsolutePath().toFile().exists()) {</span>
+			try {
+<span class="nc" id="L38">				final String content = new String(Files.readAllBytes(pomFilePath), StandardCharsets.UTF_8);</span>
+
+<span class="nc" id="L40">				final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();</span>
+<span class="nc" id="L41">				final Document doc = builder.parse(new InputSource(new StringReader(content)));</span>
+
+<span class="nc" id="L43">				final NodeList suites = doc.getElementsByTagName(&quot;suiteXmlFile&quot;);</span>
+
+<span class="nc" id="L45">				final Path targetPath = Paths.get(targetFolder);</span>
+<span class="nc" id="L46">				final File targetFile = targetPath.toFile();</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">				if(targetFile.exists()) {</span>
+					try {
+<span class="nc" id="L49">						Utils.deleteRecursiveFiles(targetFile);</span>
+<span class="nc" id="L50">					}catch(Exception e) {}</span>
+<span class="nc" id="L51">					targetFile.mkdir();</span>
+				}
+
+<span class="nc" id="L54">				final File suiteFile = targetPath.resolve(&quot;suites.xml&quot;).toFile();</span>
+
+<span class="nc" id="L56">				suiteFile.getParentFile().mkdirs();</span>
+<span class="nc" id="L57">				suiteFile.createNewFile();</span>
+
+<span class="nc" id="L59">				FileWriter fw = new FileWriter(suiteFile);</span>
+<span class="nc" id="L60">				fw.write(&quot;&lt;!DOCTYPE suite SYSTEM \&quot;https://testng.org/testng-1.0.dtd\&quot;&gt;&quot;);</span>
+<span class="nc" id="L61">				fw.write(&quot;&lt;suite name=\&quot;allSuites\&quot;&gt;&quot;);</span>
+<span class="nc" id="L62">				fw.write(&quot;&lt;suite-files&gt;&quot;);</span>
+
+<span class="nc bnc" id="L64" title="All 2 branches missed.">				for (int i=0; i&lt;suites.getLength(); i++) {</span>
+<span class="nc" id="L65">					fw.write(&quot;&lt;suite-file path=\&quot;&quot; + (suites.item(i).getTextContent()) + &quot;\&quot;/&gt;&quot;);</span>
+				}
+
+<span class="nc" id="L68">				fw.write(&quot;&lt;/suite-files&gt;&quot;);</span>
+<span class="nc" id="L69">				fw.write(&quot;&lt;/suite&gt;&quot;);</span>
+
+<span class="nc" id="L71">				fw.close();</span>
+
+<span class="nc" id="L73">				final File buildFile = targetPath.resolve(&quot;build.xml&quot;).toFile();</span>
+<span class="nc" id="L74">				fw = new FileWriter(buildFile);</span>
+<span class="nc" id="L75">				fw.write(&quot;&lt;project basedir=\&quot;.\&quot; default=\&quot;compile\&quot;&gt;&quot;);</span>
+<span class="nc" id="L76">				fw.write(&quot;&lt;copy todir=\&quot;classes\&quot;&gt; &quot;);</span>
+<span class="nc" id="L77">				fw.write(&quot;&lt;fileset dir=\&quot;..\\src\&quot; includes='assets/**'/&gt;&quot;);</span>
+<span class="nc" id="L78">				fw.write(&quot;&lt;/copy&gt;&quot;);</span>
+<span class="nc" id="L79">				fw.write(&quot;&lt;property name=\&quot;lib.dir\&quot; value=\&quot;lib\&quot;/&gt;&quot;);</span>
+<span class="nc" id="L80">				fw.write(&quot;&lt;path id=\&quot;classpath\&quot;&gt;&quot;);</span>
+<span class="nc" id="L81">				fw.write(&quot;&lt;fileset dir=\&quot;&quot; + AtsManager.getAtsHomeFolder() + &quot;\\libs\&quot; includes=\&quot;**/*.jar\&quot;/&gt;&quot;);</span>
+<span class="nc" id="L82">				fw.write(&quot;&lt;/path&gt;&quot;);</span>
+<span class="nc" id="L83">				fw.write(&quot;&lt;target name=\&quot;compile\&quot;&gt;&quot;);</span>
+<span class="nc" id="L84">				fw.write(&quot;&lt;mkdir dir=\&quot;classes\&quot;/&gt;&quot;);</span>
+<span class="nc" id="L85">				fw.write(&quot;&lt;javac srcdir=\&quot;generated\&quot; destdir=\&quot;classes\&quot; classpathref=\&quot;classpath\&quot;/&gt;&quot;);</span>
+<span class="nc" id="L86">				fw.write(&quot;&lt;/target&gt;&quot;);</span>
+<span class="nc" id="L87">				fw.write(&quot;&lt;/project&gt;&quot;);</span>
+
+<span class="nc" id="L89">				fw.close();</span>
+
+<span class="nc" id="L91">			} catch (IOException e) {</span>
+<span class="nc" id="L92">				e.printStackTrace();</span>
+<span class="nc" id="L93">			} catch (SAXException e) {</span>
+<span class="nc" id="L94">				e.printStackTrace();</span>
+<span class="nc" id="L95">			} catch (ParserConfigurationException e) {</span>
+<span class="nc" id="L96">				e.printStackTrace();</span>
+<span class="nc" id="L97">			}</span>
+		}
+<span class="nc" id="L99">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

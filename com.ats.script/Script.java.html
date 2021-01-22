@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Script.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.script</a> &gt; <span class="el_source">Script.java</span></div><h1>Script.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.script;
+
+import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.regex.Pattern;
+
+import com.ats.crypto.Passwords;
+import com.ats.executor.ActionTestScript;
+import com.ats.executor.channels.Channel;
+import com.ats.executor.channels.ChannelManager;
+import com.ats.generator.variables.CalculatedValue;
+import com.ats.generator.variables.ScriptValue;
+import com.ats.generator.variables.Variable;
+import com.ats.generator.variables.parameter.ParameterList;
+import com.ats.generator.variables.transform.DateTransformer;
+import com.ats.generator.variables.transform.TimeTransformer;
+import com.ats.generator.variables.transform.Transformer;
+import com.ats.script.actions.Action;
+import com.ats.tools.logger.ExecutionLogger;
+import com.ats.tools.logger.levels.AtsLogger;
+
+public class Script {
+
+<span class="fc" id="L53">	public static final Pattern OBJECT_PATTERN = Pattern.compile(&quot;(.*)\\[(.*)\\]&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L54">	public final static Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;</span>
+
+	public final static String ATS_EXTENSION = &quot;ats&quot;;
+	public final static String ATS_FILE_EXTENSION = &quot;.&quot; + ATS_EXTENSION;
+	public final static String ATS_VISUAL_EXTENSION = &quot;atsv&quot;;
+	public final static String ATS_VISUAL_FILE_EXTENSION = &quot;.&quot; + ATS_VISUAL_EXTENSION;
+
+	public final static String ATS_VISUAL_FOLDER = &quot;visual&quot;;
+
+	public final static String SCRIPT_LOG = &quot;SCRIPT&quot;;
+	public final static String COMMENT_LOG = &quot;COMMENT&quot;;
+
+	//-------------------------------------------------------------------------------------
+	// instances
+	//-------------------------------------------------------------------------------------
+
+	private ParameterList parameterList;
+<span class="fc" id="L71">	private List&lt;Variable&gt; variables = new ArrayList&lt;Variable&gt;();</span>
+	private ArrayList&lt;CalculatedValue&gt; returns;
+
+	protected List&lt;ActionTestScript&gt; scriptCallTree;
+
+	protected File csvFile;
+<span class="fc" id="L77">	protected int iteration = 0;</span>
+
+	protected ChannelManager channelManager;
+
+	private Map&lt;String, String&gt; testExecutionVariables;
+<span class="fc" id="L82">	protected ExecutionLogger logger = new ExecutionLogger();</span>
+	protected Passwords passwords;
+
+<span class="fc" id="L85">	public Script() {}</span>
+
+<span class="fc" id="L87">	public Script(ExecutionLogger logger) {</span>
+<span class="fc" id="L88">		setLogger(logger);</span>
+<span class="fc" id="L89">	}</span>
+
+	public String getPassword(String name) {
+<span class="fc" id="L92">		return passwords.getPassword(name);</span>
+	}
+
+	//-------------------------------------------------------------------------------------
+
+	public void sendLog(int code, String message) {
+<span class="nc" id="L98">		logger.sendLog(code, message, &quot;&quot;);</span>
+<span class="nc" id="L99">	}</span>
+
+	public void sendLog(int code, String message, String value) {
+<span class="nc" id="L102">		logger.sendLog(code, message, value);</span>
+<span class="nc" id="L103">	}</span>
+
+	public void sendLog(int code, String message, Object value) {
+<span class="nc" id="L106">		logger.sendLog(code, message, value);</span>
+<span class="nc" id="L107">	}</span>
+
+	public void sendInfoLog(String message, String value) {
+<span class="fc" id="L110">		logger.sendInfo(message, value);</span>
+<span class="fc" id="L111">	}</span>
+
+	public void sendActionLog(Action action, String testName, int line) {
+<span class="nc" id="L114">		logger.sendAction(action, testName, line); </span>
+<span class="nc" id="L115">	}</span>
+
+	public void sendWarningLog(String message, String value) {
+<span class="nc" id="L118">		logger.sendWarning(message, value); </span>
+<span class="nc" id="L119">	}</span>
+
+	public void sendErrorLog(String message, String value) {
+<span class="nc" id="L122">		logger.sendError(message, value); </span>
+<span class="nc" id="L123">	}</span>
+
+	public void sendCommentLog(String calculated) {
+<span class="nc" id="L126">		logger.sendExecLog(COMMENT_LOG, calculated);</span>
+<span class="nc" id="L127">	}</span>
+
+	public void sendScriptInfo(String value) {
+<span class="nc" id="L130">		logger.sendExecLog(SCRIPT_LOG, value); </span>
+<span class="nc" id="L131">	}</span>
+
+	public void sendScriptFail(String value) {
+<span class="nc bnc" id="L134" title="All 2 branches missed.">		if(value != null) {</span>
+<span class="nc" id="L135">			logger.sendExecLog(AtsLogger.FAILED, value); </span>
+		}
+<span class="nc" id="L137">	}</span>
+
+	//---------------------------------------------------------------------------------------------------
+
+	public void setLogger(ExecutionLogger logger) {
+<span class="pc bpc" id="L142" title="1 of 2 branches missed.">		if(logger != null) {</span>
+<span class="nc" id="L143">			this.logger = logger;</span>
+		}
+<span class="fc" id="L145">	}</span>
+
+	public void sleep(int ms) {
+		try {
+<span class="nc" id="L149">			Thread.sleep(ms);</span>
+<span class="nc" id="L150">		} catch (InterruptedException e) {}</span>
+<span class="nc" id="L151">	}</span>
+
+	protected void setTestExecutionVariables(Map&lt;String, String&gt; params) {
+<span class="nc" id="L154">		this.testExecutionVariables = params;</span>
+<span class="nc" id="L155">	}</span>
+
+	protected Map&lt;String, String&gt; getTestExecutionVariables() {
+<span class="nc" id="L158">		return testExecutionVariables;</span>
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	//  getters and setters for serialization
+	//-------------------------------------------------------------------------------------------------
+
+	public List&lt;Variable&gt; getVariables() {
+<span class="nc" id="L166">		return variables;</span>
+	}
+
+	public void setVariables(List&lt;Variable&gt; data) {
+<span class="nc" id="L170">		this.variables = data;</span>
+<span class="nc" id="L171">	}</span>
+
+	public ParameterList getParameterList() {
+<span class="nc" id="L174">		return parameterList;</span>
+	}
+
+	public void setParameterList(ParameterList data) {
+<span class="nc" id="L178">		this.parameterList = data;</span>
+<span class="nc" id="L179">	}</span>
+
+	public CalculatedValue[] getReturns() {
+<span class="nc bnc" id="L182" title="All 2 branches missed.">		if(returns != null) {</span>
+<span class="nc" id="L183">			return returns.toArray(new CalculatedValue[returns.size()]);</span>
+		}
+<span class="nc" id="L185">		return null;</span>
+	}
+
+	public void setReturns(CalculatedValue[] data) {
+<span class="nc" id="L189">		this.returns = new ArrayList&lt;CalculatedValue&gt;(Arrays.asList(data));</span>
+<span class="nc" id="L190">	}</span>
+
+	//-------------------------------------------------------------------------------------------------
+	// variables
+	//-------------------------------------------------------------------------------------------------
+
+	protected void addToScriptCallTree(ActionTestScript sc, String name) {
+<span class="nc bnc" id="L197" title="All 4 branches missed.">		if(scriptCallTree != null &amp;&amp; !scriptCallTree.stream().filter(a -&gt; a.getTestName().equals(name)).findFirst().isPresent()) {</span>
+<span class="nc" id="L198">			scriptCallTree.add(sc);</span>
+		}
+<span class="nc" id="L200">	}</span>
+
+	public String getGlobalVariableValue(String varPath) {
+<span class="nc bnc" id="L203" title="All 2 branches missed.">		if(scriptCallTree != null) {</span>
+<span class="nc" id="L204">			final int lastDot = varPath.lastIndexOf(&quot;.&quot;);</span>
+<span class="nc bnc" id="L205" title="All 2 branches missed.">			if(lastDot &gt; -1) {</span>
+<span class="nc" id="L206">				final String scriptPath = varPath.substring(0, lastDot);</span>
+<span class="nc" id="L207">				final Optional&lt;ActionTestScript&gt; sc = scriptCallTree.stream().filter(a -&gt; a.getTestName().equals(scriptPath)).findFirst();</span>
+<span class="nc bnc" id="L208" title="All 2 branches missed.">				if(sc.isPresent()) {</span>
+<span class="nc" id="L209">					final Variable scVar = sc.get().getVariable(varPath.substring(lastDot+1));</span>
+<span class="nc bnc" id="L210" title="All 2 branches missed.">					if(scVar != null) {</span>
+<span class="nc" id="L211">						return scVar.getCalculatedValue();</span>
+					}
+				}
+			}
+<span class="nc" id="L215">			sendWarningLog(&quot;Unable to find global variable&quot;, varPath);</span>
+		}
+<span class="nc" id="L217">		return &quot;&quot;;</span>
+	}
+
+	public boolean checkVariableExists(String name){
+<span class="nc bnc" id="L221" title="All 2 branches missed.">		for(Variable variable : getVariables()){</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">			if(variable.getName().equals(name)){</span>
+<span class="nc" id="L223">				return true;</span>
+			}
+<span class="nc" id="L225">		}</span>
+<span class="nc" id="L226">		return false;</span>
+	}
+
+	public Variable getVariable(String name, boolean noCalculation){
+
+<span class="fc" id="L231">		Variable foundVar = getVariable(name);</span>
+
+<span class="fc bfc" id="L233" title="All 2 branches covered.">		if(foundVar == null) {</span>
+<span class="fc" id="L234">			foundVar = createVariable(name, new CalculatedValue(this, &quot;&quot;), null);</span>
+		}
+
+<span class="fc bfc" id="L237" title="All 2 branches covered.">		if(noCalculation) {</span>
+<span class="fc" id="L238">			foundVar.getValue().setData(&quot;&quot;);</span>
+<span class="fc" id="L239">			foundVar.setCalculation(false);</span>
+		}
+
+<span class="fc" id="L242">		return foundVar;</span>
+	}
+
+	public Variable getVariable(String name) {
+<span class="fc" id="L246">		final Optional&lt;Variable&gt; opt = (variables.stream().filter(p -&gt; p.getName().equals(name))).findFirst();</span>
+<span class="pc bpc" id="L247" title="1 of 4 branches missed.">		if(opt != null &amp;&amp; opt.isPresent()){</span>
+<span class="fc" id="L248">			return opt.get();</span>
+		}
+<span class="fc" id="L250">		return null;</span>
+	}
+
+	public Variable addVariable(String name, CalculatedValue value, Transformer transformer){
+<span class="nc" id="L254">		Variable foundVar = getVariable(name);</span>
+<span class="nc bnc" id="L255" title="All 2 branches missed.">		if(foundVar == null) {</span>
+<span class="nc" id="L256">			foundVar = createVariable(name, value, transformer);</span>
+		}else {
+<span class="nc" id="L258">			foundVar.setValue(value);</span>
+<span class="nc" id="L259">			foundVar.setTransformation(transformer);</span>
+		}
+<span class="nc" id="L261">		return foundVar;</span>
+	}
+
+	public Variable createVariable(String name, CalculatedValue value, Transformer transformer){
+<span class="fc" id="L265">		final Variable newVar = new Variable(name, value, transformer);</span>
+<span class="fc" id="L266">		variables.add(newVar);</span>
+<span class="fc" id="L267">		return newVar;</span>
+	}
+
+	public String getVariableValue(String variableName) {
+<span class="fc" id="L271">		return getVariable(variableName, false).getValue().getCalculated();</span>
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	// parameters
+	//-------------------------------------------------------------------------------------------------
+
+	public String[] getParameters() {
+<span class="nc bnc" id="L279" title="All 2 branches missed.">		if(parameterList == null) {</span>
+<span class="nc" id="L280">			return new String[0];</span>
+		}
+<span class="nc" id="L282">		return parameterList.getParameters();</span>
+	}
+
+	public ScriptValue getParameter(String name) {
+<span class="nc" id="L286">		return new ScriptValue(getParameterValue(name, &quot;&quot;));</span>
+	}
+
+	public ScriptValue getParameter(int index) {
+<span class="nc" id="L290">		return new ScriptValue(getParameterValue(index, &quot;&quot;));</span>
+	}
+
+	public String getParameterValue(String name) {
+<span class="nc" id="L294">		return getParameterValue(name, &quot;&quot;);</span>
+	}
+
+	public String getParameterValue(String name, String defaultValue) {
+
+<span class="nc bnc" id="L299" title="All 2 branches missed.">		if(parameterList == null) {</span>
+<span class="nc" id="L300">			return defaultValue;</span>
+		}
+
+		try {
+<span class="nc" id="L304">			int index = Integer.parseInt(name);</span>
+<span class="nc" id="L305">			return getParameterValue(index, defaultValue);</span>
+<span class="nc" id="L306">		}catch (NumberFormatException e) {}</span>
+
+<span class="nc" id="L308">		return parameterList.getParameterValue(name, defaultValue);</span>
+	}
+
+	public String getParameterValue(int index) {
+<span class="nc" id="L312">		return getParameterValue(index, &quot;&quot;);</span>
+	}
+
+	public String getParameterValue(int index, String defaultValue) {
+<span class="nc bnc" id="L316" title="All 2 branches missed.">		if(parameterList == null) {</span>
+<span class="nc" id="L317">			return defaultValue;</span>
+		}
+<span class="nc" id="L319">		return parameterList.getParameterValue(index, defaultValue);</span>
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
+
+	public String getSystemValue(String name){
+<span class="nc bnc" id="L326" title="All 2 branches missed.">		if(channelManager != null) {</span>
+<span class="nc" id="L327">			final Channel cnl = channelManager.getCurrentChannel();</span>
+<span class="nc bnc" id="L328" title="All 2 branches missed.">			if(cnl != null) {</span>
+<span class="nc" id="L329">				return cnl.getSystemValue(name);</span>
+			}
+		}
+<span class="nc" id="L332">		return &quot;&quot;;</span>
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
+
+	public String getEnvironmentValue(String name, String defaultValue) {
+
+<span class="nc" id="L340">		String value = System.getProperty(name);</span>
+<span class="nc bnc" id="L341" title="All 2 branches missed.">		if(value != null) {</span>
+<span class="nc" id="L342">			return value;</span>
+		}
+
+<span class="nc bnc" id="L345" title="All 2 branches missed.">		if(testExecutionVariables != null) {</span>
+<span class="nc" id="L346">			value = testExecutionVariables.get(name);</span>
+<span class="nc bnc" id="L347" title="All 2 branches missed.">			if(value != null) {</span>
+<span class="nc" id="L348">				return value;</span>
+			}
+		}
+
+<span class="nc" id="L352">		value = System.getenv(name);</span>
+<span class="nc bnc" id="L353" title="All 2 branches missed.">		if(value != null) {</span>
+<span class="nc" id="L354">			return value;</span>
+		}
+
+<span class="nc" id="L357">		return defaultValue;</span>
+	}
+
+	public String getUuidValue() {
+<span class="nc" id="L361">		return UUID.randomUUID().toString();</span>
+	}	
+
+	public String getTodayValue() {
+<span class="nc" id="L365">		return DateTransformer.getTodayValue();</span>
+	}	
+
+	public String getNowValue() {
+<span class="nc" id="L369">		return TimeTransformer.getNowValue();</span>
+	}
+
+	public int getIteration() {
+<span class="nc" id="L373">		return iteration;</span>
+	}
+
+	public String getCsvFilePath() {
+<span class="nc bnc" id="L377" title="All 2 branches missed.">		if(csvFile == null) {</span>
+<span class="nc" id="L378">			return &quot;&quot;;</span>
+		}
+<span class="nc" id="L380">		return csvFile.getAbsolutePath();</span>
+	}
+
+	public File getCsvFile() {
+<span class="nc" id="L384">		return csvFile;</span>
+	}
+
+	public File getAssetsFile(String relativePath) {
+<span class="nc bnc" id="L388" title="All 2 branches missed.">		if(!relativePath.startsWith(&quot;/&quot;)) {</span>
+<span class="nc" id="L389">			relativePath = &quot;/&quot; + relativePath;</span>
+		}
+<span class="nc" id="L391">		relativePath = Project.ASSETS_FOLDER + relativePath;</span>
+
+<span class="nc" id="L393">		final URL url = getClass().getClassLoader().getResource(relativePath);</span>
+<span class="nc bnc" id="L394" title="All 2 branches missed.">		if(url != null) {</span>
+			try {
+<span class="nc" id="L396">				return Paths.get(url.toURI()).toFile();</span>
+<span class="nc" id="L397">			} catch (URISyntaxException e) {}</span>
+		}
+<span class="nc" id="L399">		return null;</span>
+	}
+
+	public String getAssetsUrl(String relativePath) {
+<span class="nc" id="L403">		final URL url = getClass().getClassLoader().getResource(relativePath);</span>
+<span class="nc bnc" id="L404" title="All 2 branches missed.">		if(url != null) {</span>
+<span class="nc" id="L405">			return &quot;file://&quot; + url.getPath();</span>
+		}
+<span class="nc" id="L407">		return &quot;&quot;;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

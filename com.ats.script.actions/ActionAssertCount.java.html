@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActionAssertCount.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.script.actions</a> &gt; <span class="el_source">ActionAssertCount.java</span></div><h1>ActionAssertCount.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.script.actions;
+
+import com.ats.element.SearchedElement;
+import com.ats.executor.ActionTestScript;
+import com.ats.script.Script;
+import com.ats.script.ScriptLoader;
+import com.ats.tools.Operators;
+import com.ats.tools.Utils;
+import com.google.gson.JsonObject;
+
+import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class ActionAssertCount extends ActionExecuteElement {
+
+	public static final String SCRIPT_LABEL = &quot;check-count&quot;;
+
+<span class="pc" id="L38">	private final Pattern COUNT_PATTERN = Pattern.compile(&quot;(\\d+) ?(\\-?\\+?=?!?)&quot;);</span>
+
+<span class="pc" id="L40">	private int value = 1;</span>
+<span class="pc" id="L41">	private String operator = Operators.EQUAL;</span>
+
+<span class="nc" id="L43">	public ActionAssertCount() {}</span>
+
+	public ActionAssertCount(ScriptLoader script, boolean stop, ArrayList&lt;String&gt; options, String data, ArrayList&lt;String&gt; objectArray) {
+<span class="fc" id="L46">		super(script, stop, options, objectArray);</span>
+		
+<span class="fc" id="L48">		final Matcher m = COUNT_PATTERN.matcher(data);</span>
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">		if(m.matches()) {</span>
+			
+<span class="fc" id="L51">			setValue(Utils.string2Int(m.group(1).trim(), 1));</span>
+
+<span class="pc bpc" id="L53" title="1 of 2 branches missed.">			if(m.groupCount() &gt; 1) {</span>
+<span class="pc bpc" id="L54" title="3 of 4 branches missed.">				switch (m.group(2).trim()) {</span>
+				case &quot;+&quot;:
+<span class="nc" id="L56">					setOperator(Operators.GREATER_EQUAL);</span>
+<span class="nc" id="L57">					break;</span>
+				case &quot;-&quot;:
+<span class="nc" id="L59">					setOperator(Operators.LOWER_EQUAL);</span>
+<span class="nc" id="L60">					break;</span>
+				case &quot;!&quot;:
+<span class="nc" id="L62">					setOperator(Operators.DIFFERENT);</span>
+					break;
+				}
+			}
+		}
+<span class="fc" id="L67">	}</span>
+
+	public ActionAssertCount(Script script, boolean stop, int maxTry, int delay, SearchedElement element, String operator, int value) {
+<span class="nc" id="L70">		super(script, stop, maxTry, delay, element);</span>
+<span class="nc" id="L71">		setOperator(operator);</span>
+<span class="nc" id="L72">		setValue(value);</span>
+<span class="nc" id="L73">	}</span>
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// Code Generator
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public StringBuilder getJavaCode() {
+<span class="fc" id="L81">		StringBuilder codeBuilder = super.getJavaCode();</span>
+<span class="fc" id="L82">		codeBuilder.append(&quot;, &quot;)</span>
+<span class="fc" id="L83">		.append(Operators.getJavaCode(operator))</span>
+<span class="fc" id="L84">		.append(&quot;, &quot;)</span>
+<span class="fc" id="L85">		.append(value)</span>
+<span class="fc" id="L86">		.append(&quot;)&quot;);</span>
+<span class="fc" id="L87">		return codeBuilder;</span>
+	}
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public boolean execute(ActionTestScript ts, String testName, int testLine) {
+<span class="nc" id="L95">		super.execute(ts, testName, testLine, operator, value);</span>
+<span class="nc" id="L96">		return true;</span>
+	}
+
+	@Override
+	public void terminateExecution(ActionTestScript ts) {
+<span class="nc" id="L101">		getTestElement().checkOccurrences(ts, status, operator, value);</span>
+<span class="nc" id="L102">		status.getElement().setFoundElements(null);</span>
+<span class="nc" id="L103">	}</span>
+
+	@Override
+	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
+<span class="nc" id="L107">		data.addProperty(&quot;operator&quot;, operator);</span>
+<span class="nc" id="L108">		data.addProperty(&quot;occurrences&quot;, value);</span>
+<span class="nc" id="L109">		return super.getActionLogs(scriptName, scriptLine, data);</span>
+	}
+	
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------
+
+	public int getValue() {
+<span class="nc" id="L117">		return value;</span>
+	}
+
+	public void setValue(int value) {
+<span class="fc" id="L121">		this.value = value;</span>
+<span class="fc" id="L122">	}</span>
+
+	public String getOperator() {
+<span class="nc" id="L125">		return operator;</span>
+	}
+
+	public void setOperator(String operator) {
+<span class="nc" id="L129">		this.operator = operator;</span>
+<span class="nc" id="L130">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

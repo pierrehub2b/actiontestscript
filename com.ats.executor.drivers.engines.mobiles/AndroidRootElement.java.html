@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AndroidRootElement.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.executor.drivers.engines.mobiles</a> &gt; <span class="el_source">AndroidRootElement.java</span></div><h1>AndroidRootElement.java</h1><pre class="source lang-java linenums">package com.ats.executor.drivers.engines.mobiles;
+
+import com.ats.element.AtsMobileElement;
+import com.ats.element.FoundElement;
+import com.ats.element.MobileTestElement;
+import com.ats.executor.ActionStatus;
+import com.ats.executor.drivers.engines.MobileDriverEngine;
+import com.ats.generator.objects.MouseDirection;
+import com.google.gson.JsonObject;
+
+import java.awt.*;
+import java.util.ArrayList;
+
+public class AndroidRootElement extends RootElement {
+
+	public AndroidRootElement(MobileDriverEngine driver) {
+<span class="nc" id="L17">		super(driver);</span>
+<span class="nc" id="L18">	}</span>
+	
+	@Override
+	public void refresh(JsonObject jsonObject) {
+<span class="nc" id="L22">		this.value = gson.fromJson(jsonObject, AtsMobileElement.class);</span>
+<span class="nc" id="L23">	}</span>
+
+	@Override
+	public void tap(ActionStatus status, FoundElement element, MouseDirection position) {
+<span class="nc" id="L27">		final Rectangle rect = element.getRectangle();</span>
+<span class="nc" id="L28">		driver.executeRequest(MobileDriverEngine.ELEMENT, element.getId(), MobileDriverEngine.TAP, (int)(element.getBoundX() + driver.getOffsetX(rect, position)) + &quot;&quot;, (int)(element.getBoundY() + driver.getOffsetY(rect, position)) + &quot;&quot;);	</span>
+<span class="nc" id="L29">	}</span>
+	
+	@Override
+	public void tap(FoundElement element, int count) {
+<span class="nc" id="L33">		driver.executeRequest(MobileDriverEngine.ELEMENT, element.getId(), MobileDriverEngine.TAP, String.valueOf(count));</span>
+<span class="nc" id="L34">	}</span>
+	
+	@Override
+	public void press(FoundElement element, ArrayList&lt;String&gt; paths, int duration) {
+<span class="nc" id="L38">		driver.executeRequest(MobileDriverEngine.ELEMENT, element.getId(), MobileDriverEngine.PRESS, String.join(&quot;:&quot;, paths));</span>
+<span class="nc" id="L39">	}</span>
+	
+	@Override
+	public void swipe(MobileTestElement testElement, int hDirection, int vDirection) {
+<span class="nc" id="L43">		driver.executeRequest(MobileDriverEngine.ELEMENT, testElement.getId(), MobileDriverEngine.SWIPE, testElement.getOffsetX() + &quot;&quot;, testElement.getOffsetY() + &quot;&quot;, hDirection + &quot;&quot;, + vDirection + &quot;&quot;);</span>
+<span class="nc" id="L44">	}</span>
+
+	@Override
+	public Object scripting(String script, FoundElement element) {
+<span class="nc" id="L48">		return driver.executeRequest(MobileDriverEngine.ELEMENT, element.getId(), MobileDriverEngine.SCRIPTING, script);</span>
+	}
+
+	@Override
+	public Object scripting(String script) {
+<span class="nc" id="L53">		return scripting(script, getValue().getFoundElement());</span>
+	}
+	
+	@Override
+	public MobileTestElement getCurrentElement(FoundElement element, MouseDirection position) {
+<span class="nc" id="L58">		final Rectangle rect = element.getRectangle();</span>
+<span class="nc" id="L59">		return new MobileTestElement(element.getId(), (driver.getOffsetX(rect, position)), (driver.getOffsetY(rect, position)));</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

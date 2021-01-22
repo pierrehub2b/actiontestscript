@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IEDriverEngine.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.executor.drivers.engines.browsers</a> &gt; <span class="el_source">IEDriverEngine.java</span></div><h1>IEDriverEngine.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.executor.drivers.engines.browsers;
+
+import com.ats.driver.ApplicationProperties;
+import com.ats.element.FoundElement;
+import com.ats.element.TestElement;
+import com.ats.executor.ActionStatus;
+import com.ats.executor.SendKeyData;
+import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.DriverManager;
+import com.ats.executor.drivers.DriverProcess;
+import com.ats.executor.drivers.desktop.DesktopDriver;
+import com.ats.executor.drivers.engines.WebDriverEngine;
+import com.ats.generator.objects.MouseDirection;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.ie.InternetExplorerOptions;
+import org.testng.collections.Sets;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Set;
+
+public class IEDriverEngine extends WebDriverEngine {
+	
+<span class="nc" id="L43">	private final Set&lt;String&gt; windows = Sets.newLinkedHashSet();</span>
+
+	public IEDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
+<span class="nc" id="L46">		super(channel, DriverManager.IE_BROWSER, driverProcess, windowsDriver, props);</span>
+
+<span class="nc" id="L48">		JS_SCROLL_IF_NEEDED = &quot;var e=arguments[0], bo=arguments[1], result=[];var r=e.getBoundingClientRect();if(r.top &lt; 0 || r.left &lt; 0 || r.bottom &gt; (window.innerHeight || document.documentElement.clientHeight) || r.right &gt; (window.innerWidth || document.documentElement.clientWidth)) {e.scrollIntoView(true);r=e.getBoundingClientRect();result=[r.left+0.0001, r.top+0.0001];}&quot;;</span>
+
+<span class="nc" id="L50">		final InternetExplorerOptions ieOptions = new InternetExplorerOptions();</span>
+<span class="nc" id="L51">		ieOptions.introduceFlakinessByIgnoringSecurityDomains();</span>
+<span class="nc" id="L52">		ieOptions.enablePersistentHovering();</span>
+
+<span class="nc" id="L54">		launchDriver(status, ieOptions, null);</span>
+
+<span class="nc bnc" id="L56" title="All 4 branches missed.">		if(status.isPassed() &amp;&amp; !&quot;11&quot;.equals(channel.getApplicationVersion())) {</span>
+<span class="nc" id="L57">			status.setError(ActionStatus.CHANNEL_START_ERROR, &quot;cannot start channel with IE&quot; + channel.getApplicationVersion() + &quot; (Only IE11 is supported by ATS)&quot;);</span>
+		}
+		
+<span class="nc" id="L60">		executeToFront();</span>
+<span class="nc" id="L61">	}</span>
+	
+	@Override
+	public void setWindowToFront() {
+<span class="nc" id="L65">		super.setWindowToFront();</span>
+<span class="nc" id="L66">		executeToFront();</span>
+<span class="nc" id="L67">	}</span>
+	
+	private void executeToFront() {
+		try {
+<span class="nc" id="L71">			driver.executeAsyncScript(&quot;var callback=arguments[arguments.length-1];var result=setTimeout(function(){window.focus();},1000);callback(result);&quot;);</span>
+<span class="nc" id="L72">		}catch (Exception e) {}</span>
+<span class="nc" id="L73">	}</span>
+
+	@Override
+	public void scroll(FoundElement element) {
+		try {
+<span class="nc" id="L78">			super.scroll(element);</span>
+<span class="nc" id="L79">		}catch(Exception e) {}</span>
+<span class="nc" id="L80">	}</span>
+
+	@Override
+	public void drag(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY) {
+<span class="nc" id="L84">		desktopMoveToElement(element, position, (int)(element.getWidth()/2), (int)(element.getHeight()/2) - 8);</span>
+<span class="nc" id="L85">		getDesktopDriver().mouseDown();</span>
+<span class="nc" id="L86">	}</span>
+
+	@Override
+	public void drop(MouseDirection md, boolean desktopDriver) {
+<span class="nc" id="L90">		getDesktopDriver().mouseRelease();</span>
+<span class="nc" id="L91">	}</span>
+
+	@Override
+	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {
+<span class="nc" id="L95">		getDesktopDriver().mouseMiddleClick();</span>
+<span class="nc" id="L96">	}</span>
+
+	@Override
+	public void doubleClick() {
+<span class="nc" id="L100">		getDesktopDriver().doubleClick();</span>
+<span class="nc" id="L101">	}</span>
+
+	@Override
+	public void sendTextData(ActionStatus status, TestElement element, ArrayList&lt;SendKeyData&gt; textActionList) {
+<span class="nc bnc" id="L105" title="All 2 branches missed.">		if(element.isNumeric()) {</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">			for(SendKeyData sequence : textActionList) {</span>
+<span class="nc" id="L107">				element.executeScript(status, &quot;value='&quot; + sequence.getData() + &quot;'&quot;, true);</span>
+<span class="nc" id="L108">			}</span>
+		}else {
+			try {
+<span class="nc bnc" id="L111" title="All 2 branches missed.">				for(SendKeyData sequence : textActionList) {</span>
+<span class="nc" id="L112">					element.getWebElement().sendKeys(sequence.getSequenceWeb(true));</span>
+<span class="nc" id="L113">				}</span>
+<span class="nc" id="L114">			}catch(Exception e) {</span>
+<span class="nc" id="L115">				status.setError(ActionStatus.ENTER_TEXT_FAIL, e.getMessage());</span>
+<span class="nc" id="L116">			}</span>
+		}
+<span class="nc" id="L118">	}	</span>
+
+	@Override
+	public void switchWindow(ActionStatus status, int index, int tries) {
+<span class="nc" id="L122">		super.switchWindow(status, index, tries);</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">		if(status.isPassed()) {</span>
+<span class="nc" id="L124">			executeJavaScript(status, &quot;setTimeout(function(){window.focus();},1000);&quot;, true);</span>
+<span class="nc" id="L125">			channel.setWindowToFront();</span>
+<span class="nc" id="L126">			executeToFront();</span>
+<span class="nc" id="L127">			channel.sleep(2000);</span>
+			
+<span class="nc" id="L129">			getDesktopDriver().updateWindowHandle(channel);</span>
+		}
+<span class="nc" id="L131">	}</span>
+
+	@Override
+	protected Set&lt;String&gt; getDriverWindowsList() {
+<span class="nc" id="L135">		final Set&lt;String&gt; driverList = super.getDriverWindowsList();</span>
+<span class="nc" id="L136">		driverList.parallelStream().forEach(s -&gt; windows.add(s));</span>
+
+<span class="nc bnc" id="L138" title="All 2 branches missed.">		for (Iterator&lt;String&gt; iterator = windows.iterator(); iterator.hasNext();) {</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">		    if(!driverList.contains(iterator.next())) {</span>
+<span class="nc" id="L140">		    	iterator.remove();</span>
+		    }
+		}
+<span class="nc" id="L143">		return windows;</span>
+	}
+
+	@Override
+	protected Object runJavaScript(ActionStatus status, String javaScript, Object... params) {
+<span class="nc" id="L148">		status.setPassed(true);</span>
+		try {
+<span class="nc" id="L150">			return driver.executeScript(javaScript + &quot;;return result;&quot;, params);</span>
+<span class="nc" id="L151">		}catch(StaleElementReferenceException e0) {</span>
+<span class="nc" id="L152">			status.setPassed(false);</span>
+<span class="nc" id="L153">			throw e0;</span>
+<span class="nc" id="L154">		}catch(Exception e1) {</span>
+<span class="nc" id="L155">			status.setException(ActionStatus.JAVASCRIPT_ERROR, e1);</span>
+		}
+<span class="nc" id="L157">		return null;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

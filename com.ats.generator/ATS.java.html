@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ATS.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.generator</a> &gt; <span class="el_source">ATS.java</span></div><h1>ATS.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.generator;
+
+import org.apache.commons.cli.*;
+
+import java.io.File;
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Properties;
+
+public class ATS {
+
+	public static void logError(String msg) {
+<span class="nc" id="L33">		print(&quot;ERROR&quot;, msg);</span>
+<span class="nc" id="L34">	}</span>
+
+	public static void logInfo(String msg) {
+<span class="nc" id="L37">		print(&quot;INFO&quot;, msg);</span>
+<span class="nc" id="L38">	}</span>
+
+	public static void logWarn(String msg) {
+<span class="fc" id="L41">		print(&quot;WARN&quot;, msg);</span>
+<span class="fc" id="L42">	}</span>
+	
+	private static void print(String type, String msg) {
+<span class="fc" id="L45">		System.out.println(&quot;[&quot; + type + &quot;] &quot; + msg);</span>
+<span class="fc" id="L46">	}</span>
+	
+	private static String getAtsVersion() {
+<span class="fc" id="L49">		InputStream resourceAsStream = ATS.class.getResourceAsStream(&quot;/version.properties&quot;);</span>
+<span class="fc" id="L50">		Properties prop = new Properties();</span>
+		try{
+<span class="fc" id="L52">			prop.load( resourceAsStream );</span>
+<span class="fc" id="L53">			return prop.getProperty(&quot;version&quot;);</span>
+<span class="nc" id="L54">		}catch(Exception e) {}</span>
+
+<span class="nc" id="L56">		return &quot;&quot;;</span>
+	}
+	
+<span class="fc" id="L59">	public static String VERSION = getAtsVersion();</span>
+
+<span class="nc" id="L61">	private String[] args = null;</span>
+<span class="nc" id="L62">	private Options options = new Options();</span>
+
+<span class="nc" id="L64">	private File projectFolder = null;</span>
+<span class="nc" id="L65">	private File destinationFolder = null;</span>
+<span class="nc" id="L66">	private File reportFolder = null;</span>
+<span class="nc" id="L67">	private File outputFolder = null;</span>
+<span class="nc" id="L68">	private String[] suites = null;</span>
+
+<span class="nc" id="L70">	private boolean compile = false;</span>
+
+<span class="nc" id="L72">	public ATS(String[] args) {</span>
+
+<span class="nc" id="L74">		this.args = args;</span>
+
+<span class="nc" id="L76">		options.addOption(&quot;h&quot;, &quot;help&quot;, false, &quot;Show help&quot;);</span>
+<span class="nc" id="L77">		options.addOption(&quot;f&quot;, &quot;force&quot;, false, &quot;Force Java files generation if files or folder exists&quot;);</span>
+<span class="nc" id="L78">		options.addOption(&quot;comp&quot;, &quot;compile&quot;, false, &quot;Compile generated java files&quot;);</span>
+<span class="nc" id="L79">		options.addOption(&quot;prj&quot;, &quot;project&quot;, true, &quot;ATS project folder&quot;);</span>
+<span class="nc" id="L80">		options.addOption(&quot;dest&quot;, &quot;destination&quot;, true, &quot;Generated Java files destination folder&quot;);</span>
+<span class="nc" id="L81">		options.addOption(&quot;rep&quot;, &quot;report&quot;, true, &quot;Execution report Java files destination folder&quot;);</span>
+<span class="nc" id="L82">		options.addOption(&quot;suites&quot;, &quot;suiteXmlFiles&quot;, true, &quot;Execution suites to launch&quot;);</span>
+		
+<span class="nc" id="L84">	}</span>
+
+	public void parse() {
+
+<span class="nc" id="L88">		final CommandLineParser parser = new DefaultParser();</span>
+<span class="nc" id="L89">		CommandLine cmd = null;</span>
+
+		try {
+<span class="nc" id="L92">			cmd = parser.parse(options, args);</span>
+<span class="nc" id="L93">		} catch (ParseException e) {</span>
+<span class="nc" id="L94">			ATS.logError(&quot;Cannot parse command line : &quot; + e.getMessage());</span>
+<span class="nc" id="L95">		}</span>
+
+<span class="nc bnc" id="L97" title="All 2 branches missed.">		if (cmd.hasOption(&quot;h&quot;)) {</span>
+<span class="nc" id="L98">			help();</span>
+		}else {
+
+<span class="nc" id="L101">			final boolean force = cmd.hasOption(&quot;f&quot;);</span>
+<span class="nc" id="L102">			compile = cmd.hasOption(&quot;comp&quot;);</span>
+			
+<span class="nc bnc" id="L104" title="All 2 branches missed.">			if (cmd.hasOption(&quot;suites&quot;)) {</span>
+<span class="nc" id="L105">				suites = cmd.getOptionValue(&quot;suites&quot;).split(&quot;,&quot;);</span>
+			}
+
+<span class="nc" id="L108">			String prjFolder = &quot;.&quot;;</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">			if (cmd.hasOption(&quot;prj&quot;)) {</span>
+<span class="nc" id="L110">				prjFolder = cmd.getOptionValue(&quot;prj&quot;);</span>
+			}
+
+<span class="nc" id="L113">			File file = new File(prjFolder);</span>
+
+<span class="nc bnc" id="L115" title="All 2 branches missed.">			if(file.exists()) {</span>
+<span class="nc" id="L116">				projectFolder = new File(file.getAbsolutePath());</span>
+			}else {
+<span class="nc" id="L118">				Path projectPath = Paths.get(prjFolder);</span>
+<span class="nc" id="L119">				projectFolder = projectPath.toFile();</span>
+			}
+
+<span class="nc bnc" id="L122" title="All 2 branches missed.">			if(projectFolder.exists()) {</span>
+<span class="nc" id="L123">				ATS.logInfo(&quot;Using ATS project folder -&gt; &quot; + projectFolder.getAbsolutePath());</span>
+			}else {
+<span class="nc" id="L125">				ATS.logError(&quot;Project folder does not exists -&gt; &quot; + projectFolder.getAbsolutePath());</span>
+			}
+
+<span class="nc bnc" id="L128" title="All 2 branches missed.">			if (cmd.hasOption(&quot;dest&quot;)) {</span>
+<span class="nc" id="L129">				destinationFolder = new File(cmd.getOptionValue(&quot;dest&quot;));</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">				if(destinationFolder.exists()) {</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">					if(force) {</span>
+<span class="nc" id="L132">						ATS.logWarn(&quot;Destination folder exists ! (java files will be deleted)&quot;);</span>
+					}else {
+<span class="nc" id="L134">						ATS.logError(&quot;Destination folder exists, please delete folder or use '-force' option&quot;);</span>
+					}
+				}
+<span class="nc" id="L137">				ATS.logInfo(&quot;Using destination folder -&gt; &quot; + destinationFolder.getAbsolutePath());</span>
+			}
+
+<span class="nc bnc" id="L140" title="All 2 branches missed.">			if (cmd.hasOption(&quot;rep&quot;)) {</span>
+<span class="nc" id="L141">				reportFolder = new File(cmd.getOptionValue(&quot;rep&quot;));</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">				if(reportFolder.exists()) {</span>
+<span class="nc bnc" id="L143" title="All 2 branches missed.">					if(force) {</span>
+<span class="nc" id="L144">						ATS.logWarn(&quot;Execution report folder found, it will be deleted&quot;);</span>
+					}else {
+<span class="nc" id="L146">						ATS.logError(&quot;Execution report folder exists, please delete folder or use '-force' option&quot;);</span>
+					}
+				}
+<span class="nc" id="L149">				ATS.logInfo(&quot;Using report folder : &quot; + reportFolder.getAbsolutePath());</span>
+			}
+		}
+<span class="nc" id="L152">	}</span>
+
+	private void help() {
+<span class="nc" id="L155">		final HelpFormatter formater = new HelpFormatter();</span>
+<span class="nc" id="L156">		formater.printHelp(&quot;ATS Java Code Generator&quot;, options);</span>
+<span class="nc" id="L157">	}</span>
+
+	//--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+	public boolean isCompile() {
+<span class="nc" id="L162">		return compile;</span>
+	}
+
+	public File getProjectFolder() {
+<span class="nc" id="L166">		return projectFolder;</span>
+	}
+
+	public File getDestinationFolder() {
+<span class="nc" id="L170">		return destinationFolder;</span>
+	}
+
+	public File getReportFolder() {
+<span class="nc" id="L174">		return reportFolder;</span>
+	}
+
+	public File getOutputFolder() {
+<span class="nc" id="L178">		return outputFolder;</span>
+	}
+	
+	public String[] getSuites() {
+<span class="nc" id="L182">		return suites;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

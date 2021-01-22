@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DateTransformer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.generator.variables.transform</a> &gt; <span class="el_source">DateTransformer.java</span></div><h1>DateTransformer.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.generator.variables.transform;
+
+import com.ats.executor.ActionTestScript;
+import org.apache.commons.lang3.StringUtils;
+
+import java.time.DateTimeException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.StringJoiner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class DateTransformer extends Transformer {
+
+<span class="fc" id="L34">	private static final DateTimeFormatter STANDARD_FORMATTER = DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd&quot;);</span>
+
+<span class="fc" id="L36">	private static final Pattern PATTERN_DAY_TRANSFORM = Pattern.compile(&quot;(-?\\d+)([ymd])&quot;);</span>
+
+<span class="nc" id="L38">	private int year = 0;</span>
+<span class="nc" id="L39">	private int month = 0;</span>
+<span class="nc" id="L40">	private int day = 0;</span>
+
+<span class="nc" id="L42">	private String formatter = &quot;&quot;;</span>
+
+<span class="nc" id="L44">	public DateTransformer() {} // Needed for serialization</span>
+
+<span class="nc" id="L46">	public DateTransformer(String ... data) {</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">		for(String item : data){</span>
+<span class="nc" id="L48">			final Matcher dataMatcher = PATTERN_DAY_TRANSFORM.matcher(item);</span>
+<span class="nc bnc" id="L49" title="All 2 branches missed.">			if(dataMatcher.find()){</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">				if(&quot;y&quot;.equals(dataMatcher.group(2))){</span>
+<span class="nc" id="L51">					setYear(getInt(dataMatcher.group(1)));</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">				}else if(&quot;m&quot;.equals(dataMatcher.group(2))){</span>
+<span class="nc" id="L53">					setMonth(getInt(dataMatcher.group(1)));</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">				}else if(&quot;d&quot;.equals(dataMatcher.group(2))){</span>
+<span class="nc" id="L55">					setDay(getInt(dataMatcher.group(1)));</span>
+				}
+<span class="nc bnc" id="L57" title="All 2 branches missed.">			}else if(StringUtils.isNoneEmpty(item)) {</span>
+<span class="nc" id="L58">				setFormatter(item);</span>
+			}
+		}
+<span class="nc" id="L61">	}</span>
+
+	public static String getTodayValue() {
+<span class="fc" id="L64">		return LocalDate.now().format(STANDARD_FORMATTER);</span>
+	}
+
+	@Override
+	public String getJavaCode() {
+
+<span class="nc" id="L70">		final StringJoiner joiner = new StringJoiner(&quot;, &quot;);</span>
+
+<span class="nc bnc" id="L72" title="All 2 branches missed.">		if(StringUtils.isNotEmpty(formatter)) {</span>
+<span class="nc" id="L73">			joiner.add(&quot;\&quot;&quot; + formatter + &quot;\&quot;&quot;);</span>
+		}
+
+<span class="nc bnc" id="L76" title="All 2 branches missed.">		if(year != 0) {</span>
+<span class="nc" id="L77">			joiner.add(&quot;\&quot;&quot; + year + &quot;y\&quot;&quot;);</span>
+		}
+
+<span class="nc bnc" id="L80" title="All 2 branches missed.">		if(month != 0) {</span>
+<span class="nc" id="L81">			joiner.add(&quot;\&quot;&quot; + month + &quot;m\&quot;&quot;);</span>
+		}
+
+<span class="nc bnc" id="L84" title="All 2 branches missed.">		if(day != 0) {</span>
+<span class="nc" id="L85">			joiner.add(&quot;\&quot;&quot; + day + &quot;d\&quot;&quot;);</span>
+		}
+
+<span class="nc" id="L88">		return ActionTestScript.JAVA_DATE_FUNCTION_NAME + &quot;(&quot; + joiner.toString() + &quot;)&quot;;</span>
+	}
+
+	@Override
+	public String format(String data) {
+<span class="nc" id="L93">		final String[] date = data.replaceAll(&quot;/&quot;, &quot;-&quot;).split(&quot;-&quot;);</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">		if(date.length == 3) {</span>
+			try {
+<span class="nc" id="L96">				LocalDate localDate = LocalDate.of(Integer.parseInt(date[0]), Integer.parseInt(date[1]), Integer.parseInt(date[2]));</span>
+<span class="nc" id="L97">				localDate = localDate.plusYears(year).plusMonths(month).plusDays(day);</span>
+
+<span class="nc bnc" id="L99" title="All 2 branches missed.">				if(StringUtils.isNotEmpty(formatter)) {</span>
+<span class="nc" id="L100">					return localDate.format(DateTimeFormatter.ofPattern(formatter));</span>
+				}
+<span class="nc" id="L102">				return localDate.format(STANDARD_FORMATTER);</span>
+
+<span class="nc" id="L104">			} catch (DateTimeException | IllegalArgumentException e) {}</span>
+		}
+<span class="nc" id="L106">		return &quot;#Date parse error : &quot; + data + &quot;#&quot;; </span>
+	}
+
+	//--------------------------------------------------------
+	// getters and setters for serialization
+	//--------------------------------------------------------
+
+	public int getYear() {
+<span class="nc" id="L114">		return year;</span>
+	}
+
+	public void setYear(int year) {
+<span class="nc" id="L118">		this.year = year;</span>
+<span class="nc" id="L119">	}</span>
+
+	public int getMonth() {
+<span class="nc" id="L122">		return month;</span>
+	}
+
+	public void setMonth(int month) {
+<span class="nc" id="L126">		this.month = month;</span>
+<span class="nc" id="L127">	}</span>
+
+	public int getDay() {
+<span class="nc" id="L130">		return day;</span>
+	}
+
+	public void setDay(int day) {
+<span class="nc" id="L134">		this.day = day;</span>
+<span class="nc" id="L135">	}</span>
+
+	public String getFormatter() {
+<span class="nc" id="L138">		return formatter;</span>
+	}
+
+	public void setFormatter(String format) {
+<span class="nc" id="L142">		this.formatter = format;</span>
+<span class="nc" id="L143">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

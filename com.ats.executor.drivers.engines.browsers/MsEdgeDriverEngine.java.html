@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MsEdgeDriverEngine.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.executor.drivers.engines.browsers</a> &gt; <span class="el_source">MsEdgeDriverEngine.java</span></div><h1>MsEdgeDriverEngine.java</h1><pre class="source lang-java linenums">package com.ats.executor.drivers.engines.browsers;
+
+import java.util.Collections;
+
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.CapabilityType;
+
+import com.ats.driver.ApplicationProperties;
+import com.ats.element.SearchedElement;
+import com.ats.element.TestElementSystem;
+import com.ats.executor.ActionStatus;
+import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.DriverManager;
+import com.ats.executor.drivers.DriverProcess;
+import com.ats.executor.drivers.desktop.DesktopDriver;
+import com.ats.generator.variables.CalculatedProperty;
+
+public class MsEdgeDriverEngine extends ChromiumBasedDriverEngine {
+
+	public MsEdgeDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver desktopDriver, ApplicationProperties props) {
+<span class="nc" id="L21">		super(channel, status, DriverManager.MSEDGE_BROWSER, driverProcess, desktopDriver, props);</span>
+		
+<span class="nc" id="L23">		final ChromeOptions options = initOptions(props, DriverManager.MSEDGE_BROWSER);</span>
+<span class="nc" id="L24">		options.setCapability(CapabilityType.BROWSER_NAME, &quot;MicrosoftEdge&quot;);</span>
+<span class="nc" id="L25">		options.setExperimentalOption(&quot;useAutomationExtension&quot;, false);</span>
+<span class="nc" id="L26">		options.setExperimentalOption(&quot;excludeSwitches&quot;, Collections.singletonList(&quot;enable-automation&quot;));</span>
+		
+<span class="nc" id="L28">		launchDriver(status, options, profileFolder);</span>
+<span class="nc" id="L29">	}</span>
+	
+	@Override
+	public void started(ActionStatus status) {
+<span class="nc bnc" id="L33" title="All 2 branches missed.">		final TestElementSystem closInfobarButton = new TestElementSystem(channel, 1, p -&gt; p == 1, new SearchedElement(new SearchedElement(new SearchedElement(0, &quot;syscomp&quot;, new CalculatedProperty[] {}), 0, &quot;Group&quot;, new CalculatedProperty[] {new CalculatedProperty(&quot;ClassName&quot;, &quot;InfoBarContainerView&quot;)}), 0, &quot;Button&quot;, new CalculatedProperty[] {}));</span>
+<span class="nc bnc" id="L34" title="All 2 branches missed.">		if(closInfobarButton.getCount() == 1) {</span>
+<span class="nc" id="L35">			closInfobarButton.executeScript(status, &quot;Invoke()&quot;, false);</span>
+		}
+<span class="nc" id="L37">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

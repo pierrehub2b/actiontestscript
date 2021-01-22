@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TestElementImage.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ats-automated-testing</a> &gt; <a href="index.source.html" class="el_package">com.ats.element</a> &gt; <span class="el_source">TestElementImage.java</span></div><h1>TestElementImage.java</h1><pre class="source lang-java linenums">/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+&quot;License&quot;); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
+package com.ats.element;
+
+import java.util.List;
+import java.util.function.Predicate;
+
+import com.ats.executor.ActionStatus;
+import com.ats.executor.ActionTestScript;
+import com.ats.executor.channels.Channel;
+import com.ats.generator.objects.MouseDirection;
+import com.ats.generator.variables.CalculatedProperty;
+import com.ats.generator.variables.CalculatedValue;
+import com.ats.graphic.ImageTemplateMatchingSimple;
+import com.ats.tools.Utils;
+
+public class TestElementImage extends TestElement {
+	
+	public final static String ATS_X = &quot;-ats-image-x&quot;;
+	public final static String ATS_Y = &quot;-ats-image-y&quot;;
+	public final static String ATS_WIDTH = &quot;-ats-image-width&quot;;
+	public final static String ATS_HEIGHT = &quot;-ats-image-height&quot;;
+
+	public TestElementImage(Channel channel, int maxTry, Predicate&lt;Integer&gt; predicate, SearchedElement searchElement) {
+<span class="nc" id="L42">		super(channel, maxTry,predicate, searchElement);</span>
+<span class="nc" id="L43">	}</span>
+
+	@Override
+	protected List&lt;FoundElement&gt; loadElements(SearchedElement searchedElement) {
+<span class="nc" id="L47">		final ImageTemplateMatchingSimple template = new ImageTemplateMatchingSimple(searchedElement.getImage());</span>
+
+<span class="nc bnc" id="L49" title="All 2 branches missed.">		for (CalculatedProperty property : searchedElement.getCriterias()){</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">			if(&quot;error&quot;.equals(property.getName())){</span>
+<span class="nc" id="L51">				final String value = property.getValue().getCalculated();</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">				if(value.endsWith(&quot;%&quot;)) {</span>
+<span class="nc" id="L53">					template.setPercentError(Utils.string2Double(value.replace(&quot;%&quot;, &quot;&quot;).trim()));</span>
+				}else{
+<span class="nc" id="L55">					template.setError(Utils.string2Int(value.trim()));</span>
+				}
+<span class="nc" id="L57">				break;</span>
+			}
+<span class="nc" id="L59">		}</span>
+<span class="nc" id="L60">		return engine.findElements(parent, template);</span>
+	}
+
+	//-------------------------------------------------------------------------------------------------------------------
+	// Mouse actions ...
+	//-------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public void over(ActionStatus status, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {
+<span class="nc" id="L69">		final FoundElement fe = getFoundElement();</span>
+<span class="nc" id="L70">		super.over(status, position, desktopDragDrop, fe.getInnerX(), fe.getInnerY());</span>
+<span class="nc" id="L71">	}</span>
+
+	@Override
+	protected void mouseClick(ActionStatus status, MouseDirection position, int offsetX, int offsetY) {
+<span class="nc" id="L75">		final FoundElement fe = getFoundElement();</span>
+<span class="nc" id="L76">		super.mouseClick(status, position, fe.getInnerX(), fe.getInnerY());</span>
+<span class="nc" id="L77">	}</span>
+
+	@Override
+	public void mouseWheel(int delta) {
+		// do nothing for the moment
+<span class="nc" id="L82">	}</span>
+
+	//-------------------------------------------------------------------------------------------------------------------
+	// Text ...
+	//-------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public void clearText(ActionStatus status, MouseDirection md) {
+<span class="nc" id="L90">		engine.getDesktopDriver().clearText();</span>
+<span class="nc" id="L91">	}</span>
+
+	@Override
+	public String sendText(ActionTestScript script, ActionStatus status, CalculatedValue text) {
+
+<span class="nc" id="L96">		final String enterText = text.getCalculated();</span>
+<span class="nc" id="L97">		channel.rootKeys(status, enterText);</span>
+<span class="nc" id="L98">		channel.actionTerminated(status);</span>
+		
+<span class="nc" id="L100">		return enterText;</span>
+	}
+
+	@Override
+	public String enterText(ActionStatus status, CalculatedValue text, ActionTestScript script) {
+<span class="nc" id="L105">		final MouseDirection md = new MouseDirection();</span>
+<span class="nc" id="L106">		mouseClick(status, md, 0, 0);</span>
+<span class="nc" id="L107">		return finalizeEnterText(status, text, md, script);</span>
+	}
+
+	//-------------------------------------------------------------------------------------------------------------------
+	// Drag drop ...
+	//-------------------------------------------------------------------------------------------------------------------
+
+	@Override
+	public String getAttribute(ActionStatus status, String name) {
+<span class="nc bnc" id="L116" title="All 2 branches missed.">		if(ATS_OCCURRENCES.equals(name)) {</span>
+<span class="nc" id="L117">			return String.valueOf(getCount());</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">		}else if(ATS_X.equals(name)) {</span>
+<span class="nc" id="L119">			return String.valueOf(getFoundElement().getBoundX().intValue());</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">		}else if(ATS_Y.equals(name)) {</span>
+<span class="nc" id="L121">			return String.valueOf(getFoundElement().getBoundY().intValue());</span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">		}else if(ATS_WIDTH.equals(name)) {</span>
+<span class="nc" id="L123">			return String.valueOf(getFoundElement().getWidth().intValue());</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">		}else if(ATS_HEIGHT.equals(name)) {</span>
+<span class="nc" id="L125">			return String.valueOf(getFoundElement().getHeight().intValue());</span>
+		}
+<span class="nc" id="L127">		return &quot;&quot;;</span>
+	}
+
+	@Override
+	public void drag(ActionStatus status, MouseDirection position, int offsetX, int offsetY) {
+<span class="nc" id="L132">		super.drag(status, position, getFoundElement().getBoundX().intValue(), getFoundElement().getBoundY().intValue());</span>
+<span class="nc" id="L133">	}</span>
+
+	@Override
+	public CalculatedProperty[] getAttributes(boolean reload) {
+<span class="nc" id="L137">		return new CalculatedProperty[] {getOccurrencesProperty(), </span>
+<span class="nc" id="L138">				new CalculatedProperty(ATS_X, String.valueOf(getFoundElement().getBoundX().intValue())),</span>
+<span class="nc" id="L139">				new CalculatedProperty(ATS_Y, String.valueOf(getFoundElement().getBoundY().intValue())),</span>
+<span class="nc" id="L140">				new CalculatedProperty(ATS_WIDTH, String.valueOf(getFoundElement().getWidth().intValue())),</span>
+<span class="nc" id="L141">				new CalculatedProperty(ATS_HEIGHT, String.valueOf(getFoundElement().getHeight().intValue()))};</span>
+	}
+
+	@Override
+	public Object executeScript(ActionStatus status, String script, boolean returnValue) {
+<span class="nc" id="L146">		return null;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
