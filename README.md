@@ -310,7 +310,9 @@ comment : Add comment to script
 
 ## HTML Player component
 ### How to install
-Download the "Release.zip" file available ine the current repository. After, you have two options:
+Download the latest release of the app available at [this link](https://github.com/pierrehub2b/ats_visual_player/releases/latest/download/release.zip).
+
+After, you have two options:
 * you can deploy the application directly on your own WebApp or server
 * for local use, you can run the "player.bar" file. Your default browser will launch automatically
 	
