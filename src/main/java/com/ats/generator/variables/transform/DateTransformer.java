@@ -90,10 +90,15 @@ public class DateTransformer extends Transformer {
 
 	@Override
 	public String format(String data) {
-		final String[] date = data.replaceAll("/", "-").split("-");
-		if(date.length == 3) {
+		
+		String[] datearray = data.split("/");
+		if(datearray.length != 3) {
+			datearray = data.split("-");
+		}
+
+		if(datearray.length == 3) {
 			try {
-				LocalDate localDate = LocalDate.of(Integer.parseInt(date[0]), Integer.parseInt(date[1]), Integer.parseInt(date[2]));
+				LocalDate localDate = LocalDate.of(Integer.parseInt(datearray[0]), Integer.parseInt(datearray[1]), Integer.parseInt(datearray[2]));
 				localDate = localDate.plusYears(year).plusMonths(month).plusDays(day);
 
 				if(StringUtils.isNotEmpty(formatter)) {

@@ -212,6 +212,7 @@ public class Channel {
 
 	public void updateWinHandle(DesktopDriver drv, int index) {
 		winHandle = getHandle(drv, index);
+		getDesktopDriver().updateWindowHandle(this);
 	}
 
 	public int getHandle(DesktopDriver drv) {
