@@ -35,7 +35,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CalculatedValue{
-
+	
 	private static final Pattern TODAY_PATTERN = Pattern.compile("\\$today", Pattern.CASE_INSENSITIVE);
 	private static final Pattern NOW_PATTERN = Pattern.compile("\\$now", Pattern.CASE_INSENSITIVE);
 	private static final Pattern UUID_PATTERN = Pattern.compile("\\$uuid", Pattern.CASE_INSENSITIVE);
@@ -109,6 +109,7 @@ public class CalculatedValue{
 	private String initCalculated(String dataValue) {
 
 		rawJavaCode = StringEscapeUtils.escapeJava(dataValue);
+		String fullValue = dataValue;
 
 		Matcher mv = VARIABLE_PATTERN.matcher(dataValue);
 		while (mv.find()) {
@@ -117,7 +118,7 @@ public class CalculatedValue{
 			final String variableName = mv.group(1);
 			
 			dataValue = dataValue.replace(replace, script.getVariableValue(variableName));
-			rawJavaCode = rawJavaCode.replace(replace, "\", " + variableName + ", \"");
+			rawJavaCode = fullValue.replace(replace, "\", " + variableName + ", \"");
 		}
 		
 		mv = GLOBAL_VARIABLE_PATTERN.matcher(dataValue);
@@ -127,7 +128,7 @@ public class CalculatedValue{
 			final String variableName = mv.group(1);
 			
 			dataValue = script.getGlobalVariableValue(variableName);
-			rawJavaCode = rawJavaCode.replace(replace, "\", " + ActionTestScript.JAVA_GLOBAL_VAR_FUNCTION_NAME + "(\"" + variableName + "\"), \"");
+			rawJavaCode = fullValue.replace(replace, "\", " + ActionTestScript.JAVA_GLOBAL_VAR_FUNCTION_NAME + "(\"" + variableName + "\"), \"");
 		}
 
 		mv = SYS_PATTERN.matcher(dataValue);
@@ -142,14 +143,14 @@ public class CalculatedValue{
 		while (mv.find()) {
 			final ParameterValue sp = new ParameterValue(mv);
 			dataValue = dataValue.replace(sp.getReplace(), script.getParameterValue(sp.getValue(), sp.getDefaultValue()));
-			rawJavaCode = rawJavaCode.replace(sp.getReplace(), "\", " + ActionTestScript.JAVA_PARAM_FUNCTION_NAME + sp.getCode() + ", \"");
+			rawJavaCode = fullValue.replace(sp.getReplace(), "\", " + ActionTestScript.JAVA_PARAM_FUNCTION_NAME + sp.getCode() + ", \"");			
 		}
 
 		mv = ENV_PATTERN.matcher(dataValue);
 		while (mv.find()) {
 			final EnvironmentValue sp = new EnvironmentValue(mv);
 			dataValue = dataValue.replace(sp.getReplace(), script.getEnvironmentValue(sp.getValue(), sp.getDefaultValue()));
-			rawJavaCode = rawJavaCode.replace(sp.getReplace(), "\", " + ActionTestScript.JAVA_ENV_FUNCTION_NAME + sp.getCode() + ", \"");
+			rawJavaCode = fullValue.replace(sp.getReplace(), "\", " + ActionTestScript.JAVA_ENV_FUNCTION_NAME + sp.getCode() + ", \"");
 		}
 
 		mv = TODAY_PATTERN.matcher(dataValue);
