@@ -118,7 +118,7 @@ public class CalculatedValue{
 			final String variableName = mv.group(1);
 			
 			dataValue = dataValue.replace(replace, script.getVariableValue(variableName));
-			rawJavaCode = fullValue.replace(replace, "\", " + variableName + ", \"");
+			rawJavaCode = rawJavaCode.replace(replace, "\", " + variableName + ", \"");
 		}
 		
 		mv = GLOBAL_VARIABLE_PATTERN.matcher(dataValue);
@@ -128,7 +128,7 @@ public class CalculatedValue{
 			final String variableName = mv.group(1);
 			
 			dataValue = script.getGlobalVariableValue(variableName);
-			rawJavaCode = fullValue.replace(replace, "\", " + ActionTestScript.JAVA_GLOBAL_VAR_FUNCTION_NAME + "(\"" + variableName + "\"), \"");
+			rawJavaCode = rawJavaCode.replace(replace, "\", " + ActionTestScript.JAVA_GLOBAL_VAR_FUNCTION_NAME + "(\"" + variableName + "\"), \"");
 		}
 
 		mv = SYS_PATTERN.matcher(dataValue);
