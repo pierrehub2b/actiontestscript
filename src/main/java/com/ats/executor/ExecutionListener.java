@@ -49,18 +49,18 @@ public class ExecutionListener implements IExecutionListener {
 		} catch (Exception e) {
 		}
 
-		System.out.println("[ATS-SCRIPT] ------------------------------------");
+		System.out.println("[ATS-SCRIPT] -------------------------------------");
 		System.out.println("[ATS-SCRIPT]   ATS " + ATS.VERSION + " execution start");
-		System.out.println("[ATS-SCRIPT] ------------------------------------");
+		System.out.println("[ATS-SCRIPT] -------------------------------------");
 	}
 
 	@Override
 	public void onExecutionFinish() {
 		IExecutionListener.super.onExecutionFinish();
 
-		System.out.println("[ATS-SCRIPT] ------------------------------------");
+		System.out.println("[ATS-SCRIPT] ----------------------------------");
 		System.out.println("[ATS-SCRIPT]   ATS execution complete");
-		System.out.println("[ATS-SCRIPT] ------------------------------------");
+		System.out.println("[ATS-SCRIPT] ----------------------------------");
 
 		final String atsReport = System.getProperty(CampaignReportGenerator.ATS_REPORT);
 		if(atsReport != null) {

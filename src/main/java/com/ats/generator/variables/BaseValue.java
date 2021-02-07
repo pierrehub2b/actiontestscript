@@ -33,7 +33,9 @@ public class BaseValue {
 	
 	public BaseValue(Matcher m) {
 		this(StringEscapeUtils.escapeJava(m.group(1).trim()), m.group(2).trim());
-		replace = m.group(0);
+		if(m.group(0) != null) {
+			replace = StringEscapeUtils.escapeJava(m.group(0));
+		}
 	}
 	
 	public BaseValue(String value, String defaultValue) {
