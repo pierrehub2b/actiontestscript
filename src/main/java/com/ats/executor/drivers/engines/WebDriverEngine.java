@@ -550,8 +550,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public List<FoundElement> findSelectOptions(TestBound dimension, TestElement element) {
-		switchToDefaultContent();
-		return findElements(false, element, OPTION, new String[0], new String[0], Objects::nonNull, element.getWebElement(), false);
+		return listElementsFound(runJavaScript(searchElementScript, element.getWebElement(), OPTION, new String[0], 0), Objects::nonNull);
 	}
 
 	public List<FoundElement> findMatSelectOptions(TestElement element) {
@@ -1161,18 +1160,20 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		}
 
 		channel.waitBeforeSearchElement(this);
-
-		final List<List<Object>> response = (List<List<Object>>) runJavaScript(searchElementScript, startElement, tagName, attributes, attributes.length);
-		if(response != null && response.size() > 0){
-			final List<AtsElement> elements = response.parallelStream().filter(Objects::nonNull).map(e -> new AtsElement(e)).collect(Collectors.toCollection(ArrayList::new));
+		return listElementsFound(runJavaScript(searchElementScript, startElement, tagName, attributes, attributes.length), predicate);
+	}
+		
+	private List<FoundElement> listElementsFound(Object maps, Predicate<AtsBaseElement> predicate){
+		final List<List<Object>> objects = (List<List<Object>>) maps;
+		if(objects != null && objects.size() > 0){
+			final List<AtsElement> elements = objects.parallelStream().filter(Objects::nonNull).map(e -> new AtsElement(e)).collect(Collectors.toCollection(ArrayList::new));
 
 			final Stream<FoundElement> st = elements.parallelStream().
 					filter(predicate).
-					map(e -> new FoundElement(this, e, channel, initElementX + offsetIframeX, initElementY + offsetIframeY, waitAnimation));
+					map(e -> new FoundElement(this, e, channel, initElementX + offsetIframeX, initElementY + offsetIframeY, false));
 
 			return st.collect(Collectors.toCollection(ArrayList::new));
 		}
-
 		return Collections.<FoundElement>emptyList();
 	}
 
