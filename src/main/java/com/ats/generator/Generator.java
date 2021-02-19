@@ -243,6 +243,7 @@ public class Generator implements ScriptProcessedEvent{
 							List<String> list = Arrays.asList(values);
 							if (list.contains(calledScript)) {
 								result.add(f.getCanonicalPath());
+								break;
 							}
 						}
 					}
