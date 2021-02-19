@@ -85,7 +85,7 @@ public class CalculatedValue{
 	}
 
 	public CalculatedValue(int value) {
-		this(value + "");
+		this(String.valueOf(value));
 	}
 
 	public CalculatedValue(ActionTestScript actionTestScript, Object[] data) {

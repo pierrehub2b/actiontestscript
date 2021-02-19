@@ -48,6 +48,9 @@ public class TestElement{
 	public final static String CLIENT_HEIGTH = "clientHeight";
 
 	public final static String ATS_OCCURRENCES = "-ats-occurences";
+	public final static String ATS_OCCURRENCES_INDEX = "-ats-occurences-index";
+	public final static String ATS_MAX_TRY = "-ats-max-try";
+	public final static String ATS_SEARCH_DURATION = "-ats-search-duration";
 
 	private final static String MAT_SELECT = "MAT-SELECT";
 	private final static String PRE = "PRE";
@@ -515,13 +518,27 @@ public class TestElement{
 	// Attributes
 	//-------------------------------------------------------------------------------------------------------------------
 
-	protected CalculatedProperty getOccurrencesProperty() {
-		return new CalculatedProperty(false, ATS_OCCURRENCES, new CalculatedValue(count));
+	protected CalculatedProperty getAtsProperty(String name) {
+		return new CalculatedProperty(false, name, new CalculatedValue(getAtsAttribute(name)));
+	}
+	
+	protected String getAtsAttribute(String name) {
+		if(ATS_OCCURRENCES.equals(name)) {
+			return String.valueOf(count);
+		}else if(ATS_OCCURRENCES_INDEX.equals(name)) {
+			return String.valueOf(index);
+		}else if(ATS_MAX_TRY.equals(name)) {
+			return String.valueOf(maxTry);
+		}else if(ATS_SEARCH_DURATION.equals(name)) {
+			return String.valueOf(totalSearchDuration);
+		}
+		return null;
 	}
 
 	public String getAttribute(ActionStatus status, String name){
-		if(ATS_OCCURRENCES.equals(name)) {
-			return String.valueOf(count);
+		final String attr = getAtsAttribute(name);
+		if(attr != null) {
+			return attr;
 		}else if(isValidated()){
 			return engine.getAttribute(status, getFoundElement(), name, maxTry);
 		}
@@ -532,10 +549,13 @@ public class TestElement{
 
 		final CalculatedProperty[] props = engine.getAttributes(getFoundElement(), reload);
 
-		final CalculatedProperty[] result = new CalculatedProperty[props.length + 1];
-		result[0] = getOccurrencesProperty();
+		final CalculatedProperty[] result = new CalculatedProperty[props.length + 4];
+		result[0] = getAtsProperty(ATS_OCCURRENCES);
+		result[1] = getAtsProperty(ATS_OCCURRENCES_INDEX);
+		result[2] = getAtsProperty(ATS_MAX_TRY);
+		result[3] = getAtsProperty(ATS_SEARCH_DURATION);
 		
-		int pos = 1;
+		int pos = 4;
 		for (CalculatedProperty prop : props) {
             result[pos] = prop;
             pos++;
