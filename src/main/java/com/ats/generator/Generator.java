@@ -19,17 +19,16 @@ under the License.
 
 package com.ats.generator;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.*;
 import java.util.stream.Stream;
 
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvValidationException;
 import org.apache.commons.lang3.StringUtils;
 
 import com.ats.generator.events.ScriptProcessedEvent;
@@ -235,18 +234,32 @@ public class Generator implements ScriptProcessedEvent{
 			Files.find(project.getAssetsFolderPath(), 99999, (p, bfa) -> bfa.isRegularFile()).forEach(p -> addDataFile(dataFiles, p.toFile()));
 
 			for(File f : dataFiles) {
-				Scanner scanner = new Scanner(f);
-				while (scanner.hasNext()) {
-					final String line = scanner.next();
-					if(line.equals(calledScript) || line.contains("\"" + calledScript + "\"") || line.contains(calledScript + ",") || line.contains("," + calledScript) || line.contains(calledScript + ";") || line.contains(";" + calledScript)) {
-						result.add(f.getCanonicalPath());
-						break;
+				String[] stringArray = f.getName().split("\\.");
+				String fileExtension = stringArray[stringArray.length-1];
+				if (fileExtension.equalsIgnoreCase("csv")) {
+					try (CSVReader csvReader = new CSVReader(new FileReader(f.getAbsolutePath()))) {
+						String[] values;
+						while ((values = csvReader.readNext()) != null) {
+							List<String> list = Arrays.asList(values);
+							if (list.contains(calledScript)) {
+								result.add(f.getCanonicalPath());
+							}
+						}
 					}
+				} else {
+					Scanner scanner = new Scanner(f);
+					while (scanner.hasNext()) {
+						final String line = scanner.next();
+						if(line.equals(calledScript) || line.contains("\"" + calledScript + "\"")) {
+							result.add(f.getCanonicalPath());
+							break;
+						}
+					}
+					scanner.close();
 				}
-				scanner.close();
 			}
 
-		} catch (IOException e) {
+		} catch (IOException | CsvValidationException e) {
 			e.printStackTrace();
 		}
 
