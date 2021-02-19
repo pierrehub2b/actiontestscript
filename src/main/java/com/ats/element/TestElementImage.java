@@ -115,6 +115,8 @@ public class TestElementImage extends TestElement {
 	public String getAttribute(ActionStatus status, String name) {
 		if(ATS_OCCURRENCES.equals(name)) {
 			return String.valueOf(getCount());
+		}else if(ATS_OCCURRENCES_INDEX.equals(name)) {
+			return String.valueOf(getIndex());
 		}else if(ATS_X.equals(name)) {
 			return String.valueOf(getFoundElement().getBoundX().intValue());
 		}else if(ATS_Y.equals(name)) {
@@ -134,7 +136,9 @@ public class TestElementImage extends TestElement {
 
 	@Override
 	public CalculatedProperty[] getAttributes(boolean reload) {
-		return new CalculatedProperty[] {getOccurrencesProperty(), 
+		return new CalculatedProperty[] {
+				getAtsProperty(ATS_OCCURRENCES), 
+				getAtsProperty(ATS_OCCURRENCES_INDEX),
 				new CalculatedProperty(ATS_X, String.valueOf(getFoundElement().getBoundX().intValue())),
 				new CalculatedProperty(ATS_Y, String.valueOf(getFoundElement().getBoundY().intValue())),
 				new CalculatedProperty(ATS_WIDTH, String.valueOf(getFoundElement().getWidth().intValue())),
