@@ -51,6 +51,7 @@ public class TestElement{
 	public final static String ATS_OCCURRENCES_INDEX = "-ats-occurences-index";
 	public final static String ATS_MAX_TRY = "-ats-max-try";
 	public final static String ATS_SEARCH_DURATION = "-ats-search-duration";
+	public final static String ATS_SEARCH_TAG = "-ats-search-tag";
 
 	private final static String MAT_SELECT = "MAT-SELECT";
 	private final static String PRE = "PRE";
@@ -531,6 +532,8 @@ public class TestElement{
 			return String.valueOf(maxTry);
 		}else if(ATS_SEARCH_DURATION.equals(name)) {
 			return String.valueOf(totalSearchDuration);
+		}else if(ATS_SEARCH_TAG.equals(name)) {
+			return searchedTag;
 		}
 		return null;
 	}
@@ -549,13 +552,14 @@ public class TestElement{
 
 		final CalculatedProperty[] props = engine.getAttributes(getFoundElement(), reload);
 
-		final CalculatedProperty[] result = new CalculatedProperty[props.length + 4];
+		final CalculatedProperty[] result = new CalculatedProperty[props.length + 5];
 		result[0] = getAtsProperty(ATS_OCCURRENCES);
 		result[1] = getAtsProperty(ATS_OCCURRENCES_INDEX);
 		result[2] = getAtsProperty(ATS_MAX_TRY);
 		result[3] = getAtsProperty(ATS_SEARCH_DURATION);
+		result[4] = getAtsProperty(ATS_SEARCH_TAG);
 		
-		int pos = 4;
+		int pos = 5;
 		for (CalculatedProperty prop : props) {
             result[pos] = prop;
             pos++;
