@@ -70,11 +70,10 @@ public class ExecutionListener implements IExecutionListener {
 
 			final File jsonSuiteFile = getJsonSuitesFile();
 			if(jsonSuiteFile != null && jsonSuiteFile.exists()) {
-				
 				String jasperHome = null;
 				for (String s : JASPER_PROPERTY_NAME) {
 					jasperHome = System.getProperty(s);
-					if(jasperHome != null) {
+					if(jasperHome != null && jasperHome.length() > 0) {
 						break;
 					}
 				}
