@@ -39,6 +39,7 @@ import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
 
+import com.ats.executor.drivers.engines.mobiles.MobileAlert;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
@@ -88,6 +89,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	private final static String INPUT = "input";
 	public final static String ELEMENT = "element";
 	public final static String TAP = "tap";
+	public final static String ALERT_TAP = "alert-tap";
 	public final static String PRESS = "press";
 	public final static String SWIPE = "swipe";
 	public final static String SCRIPTING = "scripting";
@@ -427,7 +429,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 		return template.findOccurrences(screenshot).parallelStream().map(r -> new FoundElement(channel, parent, r)).collect(Collectors.toCollection(ArrayList::new));
 	}
 
-	private void loadElementsByTag(AtsMobileElement root, String tag, List<AtsMobileElement> list)
+	public void loadElementsByTag(AtsMobileElement root, String tag, List<AtsMobileElement> list)
 	{
 		if(root == null) return;
 		if(root.checkTag(tag)) {
@@ -610,7 +612,16 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public DialogBox switchToAlert() {
-		return null;
+		return new MobileAlert(this);
+	}
+
+	public List<AtsMobileElement> getDialogBox() {
+		refreshElementMapLocation();
+
+		final List<AtsMobileElement> list = new ArrayList<AtsMobileElement>();
+		loadElementsByTag(rootElement.getValue(), "Alert", list);
+
+		return list;
 	}
 
 	@Override

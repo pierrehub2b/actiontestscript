@@ -3,6 +3,7 @@ package com.ats.element;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.TestBound;
 import com.ats.executor.drivers.engines.DesktopDriverEngine;
+import com.ats.executor.drivers.engines.MobileDriverEngine;
 import com.ats.generator.variables.CalculatedProperty;
 import org.openqa.selenium.Alert;
 
@@ -16,9 +17,9 @@ public class DialogBox {
 		this.alert = alert;
 	}
 	
-	public DialogBox(DesktopDriverEngine engine, TestBound dimension) {
+	public DialogBox(DesktopDriverEngine engine, TestBound dimension) { }
 
-	}
+	public DialogBox(MobileDriverEngine engine) { }
 	
 	public int getWaitBox() {
 		return waitBox;
@@ -43,7 +44,13 @@ public class DialogBox {
 	public void defaultButton(ActionStatus status) {
 		alert.accept();
 	}
-	
+
+	public void clickButtonText(String text, ActionStatus status) { }
+
+	public void clickButtonId(String id, ActionStatus status) { }
+
+	public void clickButtonAtIndex(int index, ActionStatus status) { }
+
 	public void sendKeys(String txt) {
 		alert.sendKeys(txt);
 	}

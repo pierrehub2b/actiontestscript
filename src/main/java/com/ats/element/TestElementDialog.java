@@ -34,11 +34,17 @@ import java.util.function.Predicate;
 
 public class TestElementDialog extends TestElement {
 
+	private static final String ID_CRITERIA = "id";
+	private static final String TEXT_CRITERIA = "text";
+	private static final String TYPE_CRITERIA = "type";
+	private static final String INDEX_CRITERIA = "index";
+
 	private static final String ACCEPT = "accept";
 	private static final String DISMISS = "dismiss";
 
 	private DialogBox alert = null;
 	private String alertAction = null;
+	private String alertCriteria = null;
 
 	public TestElementDialog() {}
 
@@ -70,6 +76,7 @@ public class TestElementDialog extends TestElement {
 
 		if(properties.size() > 0) {
 			alertAction = properties.get(0).getValue().getDataListItem();
+			alertCriteria = properties.get(0).getName();
 		}
 
 		try {
@@ -135,16 +142,29 @@ public class TestElementDialog extends TestElement {
 
 	@Override
 	public void click(ActionStatus status, MouseDirection position) {
-
 		getChannel().sleep(alert.getWaitBox());
-		if(DISMISS.equals(alertAction)) {
-			alert.dismiss(status);
-		}else if(ACCEPT.equals(alertAction)) {
-			alert.accept(status);
-		}else {
-			alert.defaultButton(status);
+
+		switch (alertCriteria) {
+			case INDEX_CRITERIA:
+				alert.clickButtonAtIndex(Integer.parseInt(alertAction), status);
+				break;
+			case ID_CRITERIA:
+				alert.clickButtonId(alertAction, status);
+				break;
+			case TEXT_CRITERIA:
+				alert.clickButtonText(alertAction, status);
+				break;
+			case TYPE_CRITERIA:
+				if(DISMISS.equals(alertAction)) {
+					alert.dismiss(status);
+				} else if(ACCEPT.equals(alertAction)) {
+					alert.accept(status);
+				} else {
+					alert.defaultButton(status);
+				}
+				break;
 		}
-		
+
 		getChannel().sleep(alert.getWaitBox());
 		getChannel().switchToDefaultContent();
 
