@@ -165,12 +165,7 @@ public class Lexer {
 				// Mouse button action
 				//-----------------------
 
-				//TODO remove sysbutton legacy in 01/01/2021 !!!
-				if(dataArray.size() > 0 && dataArray.get(0).contains(MobileDriverEngine.SYS_BUTTON)) {
-					script.addAction(new ActionButton(script, dataArray), disabled);
-				}else {
-					script.addAction(new ActionMouseKey(script, actionType, stopExec, options, dataArray), disabled);
-				}
+				script.addAction(new ActionMouseKey(script, actionType, stopExec, options, dataArray), disabled);
 
 			} else if (ActionChannelClose.SCRIPT_CLOSE_LABEL.equals(actionType)) {
 

@@ -48,7 +48,7 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 
 	public ActionExecuteElement(Script script, boolean stop, ArrayList<String> options, ArrayList<String> element) {
 		super(script, stop, options);
-		if(element != null && element.size() > 0 && !element.get(0).contains(MobileDriverEngine.SYS_BUTTON)){
+		if(element != null && element.size() > 0){
 			setSearchElement(new SearchedElement(script, element));
 		}
 	}
