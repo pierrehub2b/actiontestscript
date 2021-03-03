@@ -19,8 +19,30 @@ under the License.
 
 package com.ats.executor.drivers.engines;
 
+import java.awt.MouseInfo;
+import java.awt.Rectangle;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
+
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.Point;
+import org.openqa.selenium.WebElement;
+
 import com.ats.driver.ApplicationProperties;
-import com.ats.element.*;
+import com.ats.element.AtsBaseElement;
+import com.ats.element.DesktopRootElement;
+import com.ats.element.DialogBox;
+import com.ats.element.FoundElement;
+import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
 import com.ats.executor.StreamGobbler;
@@ -34,27 +56,6 @@ import com.ats.executor.drivers.engines.desktop.DesktopAlert;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.actions.ActionApi;
-import com.ats.tools.UwpApplication;
-
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.Point;
-import org.openqa.selenium.WebElement;
-
-import java.awt.*;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.lang.ProcessHandle.Info;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Predicate;
-import java.util.regex.Pattern;
 
 public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 

@@ -207,7 +207,6 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			try{
 				driver = new RemoteWebDriver(driverProcess.getDriverLoopback(), cap);
 			}catch(Exception ex){
-				status.setTechnicalError(ActionStatus.CHANNEL_START_ERROR, ex.getMessage());
 				driverProcess.close(false);
 				driver = null;
 				return;
