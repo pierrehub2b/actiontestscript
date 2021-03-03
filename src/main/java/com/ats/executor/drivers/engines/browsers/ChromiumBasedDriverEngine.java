@@ -30,7 +30,7 @@ public class ChromiumBasedDriverEngine extends WebDriverEngine {
 		super(channel, browser, driverProcess, desktopDriver, props);
 	}
 
-	protected ChromeOptions initOptions(ApplicationProperties props, String browserName) {
+	protected ChromeOptions initOptions(ApplicationProperties props) {
 
 		final ChromeOptions options = new ChromeOptions();
 		options.addArguments("--no-default-browser-check");

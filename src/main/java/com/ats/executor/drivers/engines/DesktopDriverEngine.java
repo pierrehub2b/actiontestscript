@@ -34,6 +34,8 @@ import com.ats.executor.drivers.engines.desktop.DesktopAlert;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.script.actions.ActionApi;
+import com.ats.tools.UwpApplication;
+
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
@@ -42,9 +44,13 @@ import org.openqa.selenium.WebElement;
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.ProcessHandle.Info;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -53,6 +59,7 @@ import java.util.regex.Pattern;
 public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 
 	private final static String PROCESS_PROTOCOL = "process://";
+	private final static String UWP_PROTOCOL = "uwp://";
 	private final static String DESKTOP_TYPE = "desktop";
 	private final static int DEFAULT_WAIT = 100;
 
@@ -93,14 +100,62 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 				return;
 			}
 
+		}else if(application.startsWith(UWP_PROTOCOL)) {
+
+			String error = "unknown error";
+
+			application = application.substring(UWP_PROTOCOL.length());
+			final int underScorePos = application.indexOf("_");
+			if(underScorePos > -1) {
+
+				final String groupId = application.substring(0, underScorePos);
+				final int slashPos = application.indexOf("/");
+
+				if(slashPos > -1) {
+					String appId = "App";
+					final String publisherId = application.substring(underScorePos + 1, slashPos);
+
+					final int exclamPos = application.indexOf("!");
+					if(exclamPos > -1) {
+						appId = application.substring(exclamPos + 1, slashPos);
+					}
+
+					final String windowName = application.substring(slashPos + 1);
+					if(windowName.length() > 0) {
+						Process proc = null;
+						try {
+							proc = Runtime.getRuntime().exec("explorer.exe shell:AppsFolder\\" + groupId + "_" + publisherId + "!" + appId);
+
+
+							// search window title with windowName
+
+
+
+							return;
+						} catch (IOException e) {
+							error = e.getMessage();
+						}
+					}else {
+						error = "missing window title name";
+					}
+				}else {
+					error = "missing window title data";
+				}
+			}else {
+				error = "missing publisher ID";
+			}
+
+			status.setError(ActionStatus.CHANNEL_START_ERROR, "unable to launch Window Store Application -> " + error);
+			return;
+
 		}else if(application.startsWith(DESKTOP_TYPE)) {
-			
+
 			channel.setApplicationData(desktopDriver.getOsName() + " (" + desktopDriver.getOsVersion() +")", "", desktopDriver.getDriverVersion(), 0L);
 			final FoundElement desktop = desktopDriver.getRootElement(-1);
 			channel.setDimensions(desktop.getTestScreenBound(), desktop.getTestScreenBound());
-			
+
 			return;
-			
+
 		}else {
 
 			URI fileUri = null;
@@ -133,35 +188,35 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 				channel.getArguments().forEach(c -> args.add(c.getCalculated()));
 
 				Runtime rt = Runtime.getRuntime();
-				
+
 				try{
 					String line;
 					boolean alreadyStarted = false; 
 					String programExe = exeFile.getAbsolutePath().substring(exeFile.getAbsolutePath().lastIndexOf("\\")+1);
 					Process p = Runtime.getRuntime().exec
-						    (System.getenv("windir") +"\\system32\\"+"tasklist.exe");
+							(System.getenv("windir") +"\\system32\\"+"tasklist.exe");
 					BufferedReader input =
-				            new BufferedReader(new InputStreamReader(p.getInputStream()));
-				    while ((line = input.readLine()) != null) {
-				    	if(line.startsWith(programExe)) {
-				    		alreadyStarted = true;
-				    		String[] splitted = line.split("\\s+");
-				    		processId = Long.parseLong(splitted[1]);
-				    		break;
-				    	}
-				    }
-				    input.close();
-					
-				    if(!alreadyStarted) {
-				    	final Process proc = rt.exec(args.toArray(new String[args.size()]), null, exeFile.getParentFile());
-				    	final StreamGobbler errorGobbler = new StreamGobbler(proc.getErrorStream(), "ERROR");            
+							new BufferedReader(new InputStreamReader(p.getInputStream()));
+					while ((line = input.readLine()) != null) {
+						if(line.startsWith(programExe)) {
+							alreadyStarted = true;
+							String[] splitted = line.split("\\s+");
+							processId = Long.parseLong(splitted[1]);
+							break;
+						}
+					}
+					input.close();
+
+					if(!alreadyStarted) {
+						final Process proc = rt.exec(args.toArray(new String[args.size()]), null, exeFile.getParentFile());
+						final StreamGobbler errorGobbler = new StreamGobbler(proc.getErrorStream(), "ERROR");            
 						final StreamGobbler outputGobbler = new StreamGobbler(proc.getInputStream(), "OUTPUT");
-						
+
 						errorGobbler.start();
 						outputGobbler.start();
-						
-				    	processId = proc.pid();
-				    }
+
+						processId = proc.pid();
+					}
 
 					status.setNoError();
 
@@ -208,7 +263,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 		desktopDriver.moveWindow(channel, channel.getDimension().getPoint());
 		desktopDriver.resizeWindow(channel, channel.getDimension().getSize());
 	}
-	
+
 	public void setWindow(DesktopWindow window) {
 		this.window = window;
 	}
@@ -251,27 +306,27 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	public CalculatedProperty[] getAttributes(FoundElement element, boolean reload){
 		return getAttributes(element.getId());
 	}
-	
+
 	@Override
 	public void setSysProperty(String propertyName, String propertyValue) {
-	
+
 	}
-	
+
 	public CalculatedProperty[] getAttributes(String elementId){
 		return getDesktopDriver().getElementAttributes(elementId);
 	}
-	
+
 	@Override
 	public List<String[]> loadSelectOptions(TestElement element) {
 		final ArrayList<String[]> result = new ArrayList<String[]>();
 		final List<FoundElement> options = findSelectOptions(channel.getDimension(), element);
-		
+
 		if(options != null && options.size() > 0) {
 			options.stream().forEachOrdered(e -> result.add(e.getItemAttribute()));
 		}
 		return result;
 	}
-	
+
 	@Override
 	public List<FoundElement> findSelectOptions(TestBound dimension, TestElement element) {
 		return getDesktopDriver().getListItems(dimension, element.getFoundElement().getId());
@@ -295,7 +350,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	public FoundElement getElementFromRect(Boolean syscomp, Double x, Double y, Double w, Double h){
 		return getDesktopDriver().getElementFromRect(x, y, w, h);
 	}
-	
+
 	@Override
 	public List<FoundElement> findElements(boolean sysComp, TestElement testElement, String tag, String[] attributes, String[] attributesValues, Predicate<AtsBaseElement> predicate, WebElement startElement, boolean waitAnimation) {
 		if(sysComp) {
@@ -329,7 +384,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void switchWindow(ActionStatus status, int index, int tries) {
-		
+
 		DesktopResponse resp = getDesktopDriver().switchTo(channel.getProcessId(), index);
 		int maxTry = 1 + tries;
 		while(resp.errorCode == ActionStatus.WINDOW_NOT_FOUND && maxTry > 0) {
@@ -337,7 +392,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 			resp = getDesktopDriver().switchTo(channel.getProcessId(), index);
 			maxTry--;
 		}
-		
+
 		if(resp.errorCode == ActionStatus.WINDOW_NOT_FOUND) {
 			status.setError(ActionStatus.WINDOW_NOT_FOUND, "cannot switch to window index '" + index + "'");
 		}else {
@@ -424,12 +479,12 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void clearText(ActionStatus status, TestElement te, MouseDirection md) {
-		
+
 		final FoundElement element = te.getFoundElement();
-		
+
 		mouseMoveToElement(status, element, md, false, 0, 0);
 		mouseClick(status, element, null, 0, 0);
-		
+
 		getDesktopDriver().clearText(te.getWebElementId());
 	}
 
@@ -514,10 +569,10 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void tap(int count, FoundElement element) {}
-	
+
 	@Override
 	public void press(int duration, ArrayList<String> paths, FoundElement element) {}
-	
+
 	@Override
 	public void windowState(ActionStatus status, Channel channel, String state) {
 		getDesktopDriver().windowState(status, channel, state);
@@ -537,7 +592,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	public List<FoundElement> getDialogBox() {
 		return getDesktopDriver().getDialogBox(channel.getDimension());
 	}
-	
+
 	@Override
 	public int getNumWindows() {
 		return getDesktopDriver().getWindowsByPid(channel.getProcessId()).size();

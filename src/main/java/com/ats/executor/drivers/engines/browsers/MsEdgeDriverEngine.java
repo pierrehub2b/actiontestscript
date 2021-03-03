@@ -3,6 +3,7 @@ package com.ats.executor.drivers.engines.browsers;
 import java.util.Collections;
 
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.remote.CapabilityType;
 
 import com.ats.driver.ApplicationProperties;
@@ -20,8 +21,9 @@ public class MsEdgeDriverEngine extends ChromiumBasedDriverEngine {
 	public MsEdgeDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver desktopDriver, ApplicationProperties props) {
 		super(channel, status, DriverManager.MSEDGE_BROWSER, driverProcess, desktopDriver, props);
 		
-		final ChromeOptions options = initOptions(props, DriverManager.MSEDGE_BROWSER);
+		final ChromeOptions options = initOptions(props);
 		options.setCapability(CapabilityType.BROWSER_NAME, "MicrosoftEdge");
+		//final ChromeOptions options = initOptions(props);
 		options.setExperimentalOption("useAutomationExtension", false);
 		options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
 		
