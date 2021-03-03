@@ -86,10 +86,10 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	private final static String STOP = "stop";
 	private final static String SWITCH = "switch";
 	private final static String CAPTURE = "capture";
-	private final static String INPUT = "input";
+	public final static String INPUT = "input";
 	public final static String ELEMENT = "element";
+	public final static String ALERT = "alert";
 	public final static String TAP = "tap";
-	public final static String ALERT_TAP = "alert-tap";
 	public final static String PRESS = "press";
 	public final static String SWIPE = "swipe";
 	public final static String SCRIPTING = "scripting";
