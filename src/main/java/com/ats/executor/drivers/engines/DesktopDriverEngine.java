@@ -114,25 +114,35 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 
 				if(slashPos > -1) {
 					String appId = "App";
-					final String publisherId = application.substring(underScorePos + 1, slashPos);
+					String publisherId = application.substring(underScorePos + 1, slashPos);
 
-					final int exclamPos = application.indexOf("!");
+					final int exclamPos = publisherId.indexOf("!");
 					if(exclamPos > -1) {
-						appId = application.substring(exclamPos + 1, slashPos);
+						appId = publisherId.substring(exclamPos + 1);
+						publisherId = publisherId.substring(0, exclamPos);
 					}
 
 					final String windowName = application.substring(slashPos + 1);
 					if(windowName.length() > 0) {
-						Process proc = null;
+
 						try {
-							proc = Runtime.getRuntime().exec("explorer.exe shell:AppsFolder\\" + groupId + "_" + publisherId + "!" + appId);
+							Runtime.getRuntime().exec("explorer.exe shell:AppsFolder\\" + groupId + "_" + publisherId + "!" + appId);
 
+							int maxTry = 20;
+							while(window == null && maxTry > 0) {
+								channel.sleep(500);
+								window = getDesktopDriver().getWindowByUwpCommand(groupId, publisherId, windowName);
+								maxTry--;
+							}
+							
+							if(maxTry > 0 && window != null) {
+								channel.setApplicationData(desktopDriver.getOsName() + " (" + desktopDriver.getOsVersion() +")", "mycanal", "00000" + " (" + "1111111" + ")", desktopDriver.getDriverVersion(), window.getPid(), window.getHandle());
+								windowIndex = 0;
+								return;
+							}else {
+								error = "window with title name = '" + windowName + "' not found !";
+							}
 
-							// search window title with windowName
-
-
-
-							return;
 						} catch (IOException e) {
 							error = e.getMessage();
 						}
@@ -379,18 +389,20 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void close(boolean keepRunning) {
-		getDesktopDriver().closeWindows(channel.getProcessId());
-		getDesktopDriver().closeDriver();
+		if(getDesktopDriver() != null) {
+			getDesktopDriver().closeWindows(channel.getProcessId(), channel.getHandle());
+			getDesktopDriver().closeDriver();
+		}
 	}
 
 	@Override
 	public void switchWindow(ActionStatus status, int index, int tries) {
 
-		DesktopResponse resp = getDesktopDriver().switchTo(channel.getProcessId(), index);
+		DesktopResponse resp = getDesktopDriver().switchTo(channel.getProcessId(), index, channel.getHandle());
 		int maxTry = 1 + tries;
 		while(resp.errorCode == ActionStatus.WINDOW_NOT_FOUND && maxTry > 0) {
 			channel.sleep(1000);
-			resp = getDesktopDriver().switchTo(channel.getProcessId(), index);
+			resp = getDesktopDriver().switchTo(channel.getProcessId(), index, channel.getHandle());
 			maxTry--;
 		}
 
@@ -406,7 +418,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public void setWindowToFront() {
 		channel.toFront();
-		getDesktopDriver().switchTo(channel.getProcessId(), windowIndex);
+		getDesktopDriver().switchTo(channel.getProcessId(), windowIndex, channel.getHandle());
 	}
 
 	@Override

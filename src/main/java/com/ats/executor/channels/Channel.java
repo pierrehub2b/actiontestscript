@@ -221,6 +221,10 @@ public class Channel {
 		}
 		return winHandle;
 	}
+	
+	public int getHandle() {
+		return winHandle;
+	}
 
 	public int getHandle(DesktopDriver drv, int index) {
 		List<DesktopWindow> processWindows = drv.getWindowsByPid(getProcessId());
@@ -365,6 +369,12 @@ public class Channel {
 
 	public void setApplicationData(String os, String version, String dVersion, long pid) {
 		setApplicationData(os, version, dVersion, pid, new byte[0], "");
+	}
+	
+	public void setApplicationData(String os, String name, String version, String dVersion, long pid, int handle) {
+		setApplicationData(os, version, dVersion, pid, new byte[0], "");
+		systemValues.setApplicationName(name);
+		winHandle = handle;
 	}
 
 	public void setApplicationData(String os, String name, String version, String dVersion, long pid) {

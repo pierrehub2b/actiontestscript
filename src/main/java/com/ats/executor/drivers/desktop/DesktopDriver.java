@@ -357,7 +357,8 @@ public class DesktopDriver extends RemoteWebDriver {
 		Close (7),
 		Url (8),
 		Keys(9),
-		State(10);
+		State(10),
+		Uwp(11);
 
 		private final int type;
 		WindowType(int value){
@@ -434,8 +435,8 @@ public class DesktopDriver extends RemoteWebDriver {
 		sendRequestCommand(CommandType.Driver, DriverType.Close);
 	}
 
-	public void closeWindows(long processId) {
-		sendRequestCommand(CommandType.Driver, DriverType.CloseWindows, processId);
+	public void closeWindows(long processId, int handle) {
+		sendRequestCommand(CommandType.Driver, DriverType.CloseWindows, processId, handle);
 	}
 
 	public void clearText() {
@@ -599,13 +600,17 @@ public class DesktopDriver extends RemoteWebDriver {
 	public DesktopWindow getWindowByTitle(String title, String name) {
 		return sendRequestCommand(CommandType.Window, WindowType.Title, title, name).getWindow();
 	}
+	
+	public DesktopWindow getWindowByUwpCommand(String groupId, String publisherId, String windowName) {
+		return sendRequestCommand(CommandType.Window, WindowType.Uwp, groupId, publisherId, windowName).getWindow();
+	}
 
 	public void setChannelToFront(int handle, long pid) {
 		sendRequestCommand(CommandType.Window, WindowType.ToFront, handle, pid);
 	}
 
-	public void setWindowToFront(Long pid) {
-		sendRequestCommand(CommandType.Window, WindowType.ToFront, pid);
+	public void setWindowToFront(Long pid, int handle) {
+		sendRequestCommand(CommandType.Window, WindowType.ToFront, pid, handle);
 	}
 
 	public void rootKeys(int handle, String keys) {
@@ -624,8 +629,8 @@ public class DesktopDriver extends RemoteWebDriver {
 		sendRequestCommand(CommandType.Window, WindowType.Switch, channel.getHandle(this, index));
 	}
 
-	public DesktopResponse switchTo(Long processId, int index) {
-		return sendRequestCommand(CommandType.Window, WindowType.Switch, processId, index);
+	public DesktopResponse switchTo(Long processId, int index, int handle) {
+		return sendRequestCommand(CommandType.Window, WindowType.Switch, processId, index, handle);
 	}
 
 	public void closeWindow(Channel channel) {
