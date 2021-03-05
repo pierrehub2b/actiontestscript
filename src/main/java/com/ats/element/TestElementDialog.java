@@ -120,14 +120,30 @@ public class TestElementDialog extends TestElement {
 	public String sendText(ActionTestScript script, ActionStatus status, CalculatedValue text) {
 		final String enterText = text.getCalculated();
 		getChannel().sleep(alert.getWaitBox());
-		alert.sendKeys(enterText);
-		
-		if(ACCEPT.equals(alertAction)) {
+
+		if (alertCriteria != null) {
+			switch (alertCriteria) {
+				case INDEX_CRITERIA:
+					alert.sendKeys(enterText, Integer.parseInt(alertAction));
+					break;
+				case ID_CRITERIA:
+					alert.sendKeys(enterText, alertAction);
+					break;
+				case TEXT_CRITERIA:
+				case TYPE_CRITERIA:
+					alert.sendKeys(enterText);
+					break;
+			}
+		} else {
+			alert.sendKeys(enterText);
+		}
+
+		if (ACCEPT.equals(alertAction)) {
 			alert.accept(status);
-		}else if(DISMISS.equals(alertAction)) {
+		} else if(DISMISS.equals(alertAction)) {
 			alert.dismiss(status);
 		}
-		
+
 		return enterText;
 	}
 
@@ -144,26 +160,31 @@ public class TestElementDialog extends TestElement {
 	public void click(ActionStatus status, MouseDirection position) {
 		getChannel().sleep(alert.getWaitBox());
 
-		switch (alertCriteria) {
-			case INDEX_CRITERIA:
-				alert.clickButtonAtIndex(Integer.parseInt(alertAction), status);
-				break;
-			case ID_CRITERIA:
-				alert.clickButtonId(alertAction, status);
-				break;
-			case TEXT_CRITERIA:
-				alert.clickButtonText(alertAction, status);
-				break;
-			case TYPE_CRITERIA:
-				if(DISMISS.equals(alertAction)) {
-					alert.dismiss(status);
-				} else if(ACCEPT.equals(alertAction)) {
-					alert.accept(status);
-				} else {
-					alert.defaultButton(status);
-				}
-				break;
+		if (alertCriteria != null) {
+			switch (alertCriteria) {
+				case INDEX_CRITERIA:
+					alert.clickButtonAtIndex(Integer.parseInt(alertAction), status);
+					break;
+				case ID_CRITERIA:
+					alert.clickButtonId(alertAction, status);
+					break;
+				case TEXT_CRITERIA:
+					alert.clickButtonText(alertAction, status);
+					break;
+				case TYPE_CRITERIA:
+					if(DISMISS.equals(alertAction)) {
+						alert.dismiss(status);
+					} else if(ACCEPT.equals(alertAction)) {
+						alert.accept(status);
+					} else {
+						alert.defaultButton(status);
+					}
+					break;
+			}
+		} else {
+			alert.defaultButton(status);
 		}
+
 
 		getChannel().sleep(alert.getWaitBox());
 		getChannel().switchToDefaultContent();

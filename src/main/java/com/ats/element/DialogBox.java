@@ -55,6 +55,14 @@ public class DialogBox {
 		alert.sendKeys(txt);
 	}
 
+	public void sendKeys(String txt, String identifier) {
+		alert.sendKeys(txt);
+	}
+
+	public void sendKeys(String txt, int index) {
+		alert.sendKeys(txt);
+	}
+
 	public CalculatedProperty[] getAttributes() {
 		return new CalculatedProperty[] {new CalculatedProperty("text", alert.getText())};
 	}

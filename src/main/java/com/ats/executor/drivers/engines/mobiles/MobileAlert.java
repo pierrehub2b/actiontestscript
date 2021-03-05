@@ -26,9 +26,23 @@ public class MobileAlert extends DialogBox {
         }
     }
 
+    public void defaultButton(ActionStatus status) {
+        clickButtonAtIndex(1, status);
+    }
+
+    public void dismiss(ActionStatus status) { }
+
+    public void accept(ActionStatus status) { }
+
     private List<AtsMobileElement> loadButtons() {
         final List<AtsMobileElement> list = new ArrayList<AtsMobileElement>();
         engine.loadElementsByTag(dialog, "Button", list);
+        return list;
+    }
+
+    private List<AtsMobileElement> loadTextFields() {
+        final List<AtsMobileElement> list = new ArrayList<AtsMobileElement>();
+        engine.loadElementsByTag(dialog, "TextField", list);
         return list;
     }
 
@@ -66,8 +80,28 @@ public class MobileAlert extends DialogBox {
         if (buttons.size() > index - 1) {
             final AtsMobileElement button = buttons.get(index - 1);
             executeTapRequest(button);
-        } else {
-        
+        }
+    }
+
+    public void sendKeys(String txt) {
+        sendKeys(txt, 1);
+    }
+    
+    public void sendKeys(String txt, int index) {
+        final List<AtsMobileElement> textFields = loadTextFields();
+        if (textFields.size() > index - 1 && index < 2) {
+            final AtsMobileElement element = textFields.get(index - 1);
+            executeInputRequest(element, txt);
+        }
+    }
+
+    public void sendKeys(String txt, String identifier) {
+        final List<AtsMobileElement> textFields = loadTextFields();
+        for (AtsMobileElement element : textFields) {
+            if (element.getAttribute("identifier").equalsIgnoreCase(identifier)) {
+                executeInputRequest(element, txt);
+                break;
+            }
         }
     }
 
@@ -75,29 +109,11 @@ public class MobileAlert extends DialogBox {
         String coordinates = element.getX() + ";" + element.getY() + ";" + element.getWidth() + ";" + element.getHeight();
         engine.executeRequest(MobileDriverEngine.ALERT,element.getId(), MobileDriverEngine.TAP, "0", "0", coordinates);
     }
-    
-    public void sendKeys(String txt, int index) {
-        final List<AtsMobileElement> list = new ArrayList<AtsMobileElement>();
-        engine.loadElementsByTag(dialog, "TextField", list);
-        
-        // executeTapRequest(element);
-        // engine.executeRequest(MobileDriverEngine.ALERT, element.getId(), MobileDriverEngine.INPUT, txt);
-    }
-    
-    public void sendKeys1(String txt, int index) {
-        final List<AtsMobileElement> list = new ArrayList<AtsMobileElement>();
-        engine.loadElementsByTag(dialog, "TextField", list);
-        
-        // executeTapRequest(element);
-        // engine.executeRequest(MobileDriverEngine.ALERT, element.getId(), MobileDriverEngine.INPUT, txt);
-    }
-    
-    
-    public void sendKeys2(String txt, int index) {
-        final List<AtsMobileElement> list = new ArrayList<AtsMobileElement>();
-        engine.loadElementsByTag(dialog, "TextField", list);
-        
-        // executeTapRequest(element);
-        // engine.executeRequest(MobileDriverEngine.ALERT, element.getId(), MobileDriverEngine.INPUT, txt);
+
+    private void executeInputRequest(AtsMobileElement element, String text) {
+        double x = element.getX() + (element.getWidth() / 2);
+        double y = element.getY() + (element.getHeight() / 2);
+        String coordinates = x + ";" + y;
+        engine.executeRequest(MobileDriverEngine.ALERT, element.getId(), MobileDriverEngine.INPUT, coordinates, text);
     }
 }
