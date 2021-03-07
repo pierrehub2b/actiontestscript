@@ -26,6 +26,28 @@ public class DesktopWindow extends AtsElement {
 	private int pid = -1;
 	private int handle = -1;
 	
+	private String appName = "";
+	private String appVersion = "";
+	private String appBuildVersion = "";
+	private String appPath = "";
+	private byte[] appIcon;
+	
+	public byte[] getAppIcon() {
+		return appIcon;
+	}
+
+	public void setAppIcon(byte[] appIcon) {
+		this.appIcon = appIcon;
+	}
+
+	public String getAppPath() {
+		return appPath;
+	}
+
+	public void setAppPath(String appPath) {
+		this.appPath = appPath;
+	}
+
 	public DesktopWindow() {
 		super();
 	}
@@ -44,5 +66,29 @@ public class DesktopWindow extends AtsElement {
 
 	public void setHandle(int handle) {
 		this.handle = handle;
+	}
+
+	public String getAppName() {
+		return appName;
+	}
+
+	public void setAppName(String appName) {
+		this.appName = appName;
+	}
+
+	public String getAppVersion() {
+		return appVersion;
+	}
+
+	public void setAppVersion(String appVersion) {
+		this.appVersion = appVersion;
+	}
+
+	public String getAppBuildVersion() {
+		return appBuildVersion;
+	}
+
+	public void setAppBuildVersion(String appBuildVersion) {
+		this.appBuildVersion = appBuildVersion;
 	}
 }

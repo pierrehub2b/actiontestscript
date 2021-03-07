@@ -371,8 +371,8 @@ public class Channel {
 		setApplicationData(os, version, dVersion, pid, new byte[0], "");
 	}
 	
-	public void setApplicationData(String os, String name, String version, String dVersion, long pid, int handle) {
-		setApplicationData(os, version, dVersion, pid, new byte[0], "");
+	public void setApplicationData(String os, String name, String version, String dVersion, long pid, int handle, byte[] icon) {
+		setApplicationData(os, version, dVersion, pid, icon, "");
 		systemValues.setApplicationName(name);
 		winHandle = handle;
 	}

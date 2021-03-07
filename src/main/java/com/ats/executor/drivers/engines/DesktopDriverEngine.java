@@ -21,16 +21,10 @@ package com.ats.executor.drivers.engines;
 
 import java.awt.MouseInfo;
 import java.awt.Rectangle;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
 
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
@@ -45,10 +39,8 @@ import com.ats.element.FoundElement;
 import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
-import com.ats.executor.StreamGobbler;
 import com.ats.executor.TestBound;
 import com.ats.executor.channels.Channel;
-import com.ats.executor.drivers.desktop.DesktopData;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.desktop.DesktopResponse;
 import com.ats.executor.drivers.desktop.DesktopWindow;
@@ -59,8 +51,6 @@ import com.ats.script.actions.ActionApi;
 
 public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 
-	private final static String PROCESS_PROTOCOL = "process://";
-	private final static String UWP_PROTOCOL = "uwp://";
 	private final static String DESKTOP_TYPE = "desktop";
 	private final static int DEFAULT_WAIT = 100;
 
@@ -81,212 +71,38 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 
 		this(channel, desktopDriver, props, DEFAULT_WAIT);
 
-		long processId = -1;
-
-		if(application.startsWith(PROCESS_PROTOCOL)) {
-
-			final Pattern procPattern = Pattern.compile(application.substring(PROCESS_PROTOCOL.length()));
-
-			processId = getProcessId(procPattern);
-			int maxTry = 20;
-
-			while (processId < 0 && maxTry > 0) {
-				processId = getProcessId(procPattern);
-				channel.sleep(200);
-				maxTry--;
-			}
-
-			if(processId < 0) {
-				status.setError(ActionStatus.CHANNEL_START_ERROR, "unable to attach process with command like -> " + procPattern.pattern());
-				return;
-			}
-
-		}else if(application.startsWith(UWP_PROTOCOL)) {
-
-			String error = "unknown error";
-
-			application = application.substring(UWP_PROTOCOL.length());
-			final int underScorePos = application.indexOf("_");
-			if(underScorePos > -1) {
-
-				final String groupId = application.substring(0, underScorePos);
-				final int slashPos = application.indexOf("/");
-
-				if(slashPos > -1) {
-					String appId = "App";
-					String publisherId = application.substring(underScorePos + 1, slashPos);
-
-					final int exclamPos = publisherId.indexOf("!");
-					if(exclamPos > -1) {
-						appId = publisherId.substring(exclamPos + 1);
-						publisherId = publisherId.substring(0, exclamPos);
-					}
-
-					final String windowName = application.substring(slashPos + 1);
-					if(windowName.length() > 0) {
-
-						try {
-							Runtime.getRuntime().exec("explorer.exe shell:AppsFolder\\" + groupId + "_" + publisherId + "!" + appId);
-
-							int maxTry = 20;
-							while(window == null && maxTry > 0) {
-								channel.sleep(500);
-								window = getDesktopDriver().getWindowByUwpCommand(groupId, publisherId, windowName);
-								maxTry--;
-							}
-							
-							if(maxTry > 0 && window != null) {
-								channel.setApplicationData(desktopDriver.getOsName() + " (" + desktopDriver.getOsVersion() +")", "mycanal", "00000" + " (" + "1111111" + ")", desktopDriver.getDriverVersion(), window.getPid(), window.getHandle());
-								windowIndex = 0;
-								return;
-							}else {
-								error = "window with title name = '" + windowName + "' not found !";
-							}
-
-						} catch (IOException e) {
-							error = e.getMessage();
-						}
-					}else {
-						error = "missing window title name";
-					}
-				}else {
-					error = "missing window title data";
-				}
-			}else {
-				error = "missing publisher ID";
-			}
-
-			status.setError(ActionStatus.CHANNEL_START_ERROR, "unable to launch Window Store Application -> " + error);
-			return;
-
-		}else if(application.startsWith(DESKTOP_TYPE)) {
+		if(application.startsWith(DESKTOP_TYPE)) {
 
 			channel.setApplicationData(desktopDriver.getOsName() + " (" + desktopDriver.getOsVersion() +")", "", desktopDriver.getDriverVersion(), 0L);
 			final FoundElement desktop = desktopDriver.getRootElement(-1);
 			channel.setDimensions(desktop.getTestScreenBound(), desktop.getTestScreenBound());
-
-			return;
-
+		
 		}else {
-
-			URI fileUri = null;
-			File exeFile = null;
-
-			if(applicationPath != null) {
-				exeFile = new File(applicationPath);
-				if(exeFile.exists() && exeFile.isFile()) {
-					fileUri = exeFile.toURI();
+						
+			final ArrayList<String> args = new ArrayList<String>(Arrays.asList(application));
+			channel.getArguments().forEach(c -> args.add(c.getCalculated()));
+						
+			final DesktopResponse resp = getDesktopDriver().startApplication(args);
+			if(resp.errorCode == 0) {
+				window = resp.getWindow();
+				if(window != null) {
+					channel.setApplicationData(desktopDriver.getOsName() + " (" + desktopDriver.getOsVersion() +")", window.getAppName(), window.getAppVersion() + " (" + window.getAppBuildVersion() + ")", desktopDriver.getDriverVersion(), window.getPid(), window.getHandle(), window.getAppIcon());
+					windowIndex = 0;
+					applicationPath = window.getAppPath();
+										
+					desktopDriver.moveWindow(channel, channel.getDimension().getPoint());
+					desktopDriver.resizeWindow(channel, channel.getDimension().getSize());
+				}else {
+					status.setError(ActionStatus.CHANNEL_START_ERROR, "no window found for this application");
 				}
-			}
-
-			if(fileUri == null) {
-				try {
-					fileUri = new URI(application);
-					exeFile = new File(fileUri);
-				} catch (URISyntaxException | IllegalArgumentException e1) {}
-			}
-
-			if(exeFile == null) {//last chance to find exe file ....
-				exeFile = new File(application);
-			}
-
-			if(exeFile != null && exeFile.exists() && exeFile.isFile()){
-
-				applicationPath = exeFile.getAbsolutePath();
-
-				final ArrayList<String> args = new ArrayList<String>();
-				args.add(applicationPath);
-				channel.getArguments().forEach(c -> args.add(c.getCalculated()));
-
-				Runtime rt = Runtime.getRuntime();
-
-				try{
-					String line;
-					boolean alreadyStarted = false; 
-					String programExe = exeFile.getAbsolutePath().substring(exeFile.getAbsolutePath().lastIndexOf("\\")+1);
-					Process p = Runtime.getRuntime().exec
-							(System.getenv("windir") +"\\system32\\"+"tasklist.exe");
-					BufferedReader input =
-							new BufferedReader(new InputStreamReader(p.getInputStream()));
-					while ((line = input.readLine()) != null) {
-						if(line.startsWith(programExe)) {
-							alreadyStarted = true;
-							String[] splitted = line.split("\\s+");
-							processId = Long.parseLong(splitted[1]);
-							break;
-						}
-					}
-					input.close();
-
-					if(!alreadyStarted) {
-						final Process proc = rt.exec(args.toArray(new String[args.size()]), null, exeFile.getParentFile());
-						final StreamGobbler errorGobbler = new StreamGobbler(proc.getErrorStream(), "ERROR");            
-						final StreamGobbler outputGobbler = new StreamGobbler(proc.getInputStream(), "OUTPUT");
-
-						errorGobbler.start();
-						outputGobbler.start();
-
-						processId = proc.pid();
-					}
-
-					status.setNoError();
-
-				} catch (Exception e) {
-					status.setError(ActionStatus.CHANNEL_START_ERROR, e.getMessage());
-					return;
-				}
-
 			}else {
-				status.setError(ActionStatus.CHANNEL_START_ERROR, "app file path not found -> " + application);
-				return;
+				status.setError(ActionStatus.CHANNEL_START_ERROR, resp.errorMessage);
 			}
 		}
-
-		String appVersion = "N/A";
-		String appBuildVersion = "N/A";
-		String appName = "";
-
-		final List<DesktopData> appInfo = desktopDriver.getVersion(applicationPath);
-		for (DesktopData data : appInfo) {
-			if("ApplicationBuildVersion".equals(data.getName())) {
-				appBuildVersion = data.getValue();
-			}else if("ApplicationVersion".equals(data.getName())) {
-				appVersion = data.getValue();
-			}else if("ApplicationName".equals(data.getName())) {
-				appName = data.getValue();
-			}
-		}
-
-		channel.setApplicationData(desktopDriver.getOsName() + " (" + desktopDriver.getOsVersion() +")", appName, appVersion + " (" + appBuildVersion + ")", desktopDriver.getDriverVersion(), processId);
-
-		int maxTry = 30;
-		while(maxTry > 0){
-			int handle = channel.getHandle(desktopDriver);
-			if(handle > 0) {
-				maxTry = 0;
-				window = desktopDriver.getWindowByHandle(handle);
-			}else {
-				channel.sleep(200);
-				maxTry--;
-			}
-		}
-
-		desktopDriver.moveWindow(channel, channel.getDimension().getPoint());
-		desktopDriver.resizeWindow(channel, channel.getDimension().getSize());
 	}
 
 	public void setWindow(DesktopWindow window) {
 		this.window = window;
-	}
-
-	private long getProcessId(Pattern procPattern) {
-		try {
-			ProcessHandle proc = ProcessHandle.allProcesses().filter(p -> p.info().command().isPresent() && procPattern.matcher(p.info().command().get()).matches()).findFirst().get();
-			applicationPath = proc.info().command().get();
-			return proc.pid();
-		}catch(Exception e) {
-			return -1;
-		}
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------

@@ -25,7 +25,7 @@ import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -100,9 +100,9 @@ public class DesktopDriver extends RemoteWebDriver {
 
 	private String dotNetVersion;
 
-	private final static Comparator<FoundElement> compareElementBySize = Comparator
+	/*private final static Comparator<FoundElement> compareElementBySize = Comparator
 			.comparing(FoundElement::getWidth)
-			.thenComparing(FoundElement::getHeight);
+			.thenComparing(FoundElement::getHeight);*/
 
 	public DesktopDriver() {}
 
@@ -357,8 +357,7 @@ public class DesktopDriver extends RemoteWebDriver {
 		Close (7),
 		Url (8),
 		Keys(9),
-		State(10),
-		Uwp(11);
+		State(10);
 
 		private final int type;
 		WindowType(int value){
@@ -539,7 +538,7 @@ public class DesktopDriver extends RemoteWebDriver {
 
 	private FoundElement getHoverChild(final FoundElement elem, final double xPos, final double yPos) {
 		if(elem.getChildren() != null && elem.getChildren().size() > 0) {
-			final Optional<FoundElement> child = elem.getChildren().stream().parallel().filter(e -> e.isActive() && e.getRectangle().contains(xPos, yPos)).parallel().sorted(compareElementBySize).findFirst();
+			final Optional<FoundElement> child = elem.getChildren().stream().parallel().filter(e -> e.isActive() && e.getRectangle().contains(xPos, yPos)).parallel().sorted((a,b)->-1).findFirst();//.sorted(compareElementBySize)
 			if(child.isPresent()) {
 				return getHoverChild(child.get(), xPos, yPos);
 			}
@@ -577,9 +576,9 @@ public class DesktopDriver extends RemoteWebDriver {
 	public FoundElement getRootElement(int handle) {
 		return new FoundElement(sendRequestCommand(CommandType.Window, WindowType.Handle, handle).getWindow());
 	}
-
-	public List<DesktopData> getVersion(String appPath) {
-		return sendRequestCommand(CommandType.Driver, DriverType.Application, appPath).getData();
+	
+	public DesktopResponse startApplication(ArrayList<String> args) {
+		return sendRequestCommand(CommandType.Driver, DriverType.Application, String.join("\n", args));
 	}
 
 	public List<DesktopWindow> getWindowsByPid(Long pid) {
@@ -599,10 +598,6 @@ public class DesktopDriver extends RemoteWebDriver {
 
 	public DesktopWindow getWindowByTitle(String title, String name) {
 		return sendRequestCommand(CommandType.Window, WindowType.Title, title, name).getWindow();
-	}
-	
-	public DesktopWindow getWindowByUwpCommand(String groupId, String publisherId, String windowName) {
-		return sendRequestCommand(CommandType.Window, WindowType.Uwp, groupId, publisherId, windowName).getWindow();
 	}
 
 	public void setChannelToFront(int handle, long pid) {
@@ -875,6 +870,10 @@ public class DesktopDriver extends RemoteWebDriver {
 	private static final MediaType MEDIA_UTF8 = MediaType.parse("application/x-www-form-urlencoded; charset=utf-8");
 
 	private DesktopResponse sendRequestCommand(CommandType type, Enum<?> subType, Object... data) {
+		return sendRequestCommand(type, subType, Stream.of(data).map(Object::toString).collect(Collectors.joining("\n")));
+	}
+	
+	private DesktopResponse sendRequestCommand(CommandType type, Enum<?> subType, String data) {
 
 		final String url = new StringBuilder(driverUrl)
 				.append("/")
@@ -886,7 +885,7 @@ public class DesktopDriver extends RemoteWebDriver {
 		final Request request = new Request.Builder()
 				.url(url)
 				.addHeader("User-Agent", USER_AGENT)
-				.post(RequestBody.create(MEDIA_UTF8, Stream.of(data).map(Object::toString).collect(Collectors.joining("\n"))))
+				.post(RequestBody.create(MEDIA_UTF8, data))
 				.build();
 
 		try {
