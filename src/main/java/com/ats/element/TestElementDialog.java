@@ -39,8 +39,8 @@ public class TestElementDialog extends TestElement {
 	private static final String TYPE_CRITERIA = "type";
 	private static final String INDEX_CRITERIA = "index";
 
-	private static final String ACCEPT = "accept";
-	private static final String DISMISS = "dismiss";
+	public static final String ACCEPT = "accept";
+	public static final String DISMISS = "dismiss";
 
 	private DialogBox alert = null;
 	private String alertAction = null;
@@ -124,7 +124,9 @@ public class TestElementDialog extends TestElement {
 		if (alertCriteria != null) {
 			switch (alertCriteria) {
 				case INDEX_CRITERIA:
-					alert.sendKeys(enterText, Integer.parseInt(alertAction));
+					try {
+						alert.sendKeys(enterText, Integer.parseInt(alertAction));
+					} catch (NumberFormatException ignored) { }
 					break;
 				case ID_CRITERIA:
 					alert.sendKeys(enterText, alertAction);
@@ -163,7 +165,9 @@ public class TestElementDialog extends TestElement {
 		if (alertCriteria != null) {
 			switch (alertCriteria) {
 				case INDEX_CRITERIA:
-					alert.clickButtonAtIndex(Integer.parseInt(alertAction), status);
+					try {
+						alert.clickButtonAtIndex(Integer.parseInt(alertAction), status);
+					} catch (NumberFormatException ignored) { }
 					break;
 				case ID_CRITERIA:
 					alert.clickButtonId(alertAction, status);
@@ -184,7 +188,6 @@ public class TestElementDialog extends TestElement {
 		} else {
 			alert.defaultButton(status);
 		}
-
 
 		getChannel().sleep(alert.getWaitBox());
 		getChannel().switchToDefaultContent();
