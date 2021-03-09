@@ -124,7 +124,6 @@ public class IosRootElement extends RootElement {
 		
 		int currentElementIndex = 0;
 		for (StructDebugDescription elementInfo : elementInfoArray) {
-			System.out.println("Current element index : " + currentElementIndex);
 			final String[] arraySize = elementInfo.getContent().split(regexBraces);
 			final String tag = arraySize[0].replaceAll(regexSpaces, "");
 
