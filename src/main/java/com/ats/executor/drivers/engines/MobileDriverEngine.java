@@ -181,7 +181,12 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 				application = appData[1];
 				response = executeRequest(APP, START, application);
 			} else {
-				response = executeRequest(APP, START);
+				if (os.equals("android")) {
+					response = executeRequest(APP, START);
+				} else {
+					status.setError(ActionStatus.CHANNEL_START_ERROR, "unable to connect : missing app");
+					return;
+				}
 			}
 
 			if (response == null) {
