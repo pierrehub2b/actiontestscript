@@ -19,24 +19,6 @@ under the License.
 
 package com.ats.generator.parsers;
 
-import com.ats.executor.drivers.engines.MobileDriverEngine;
-import com.ats.generator.GeneratorReport;
-import com.ats.generator.events.ScriptProcessedNotifier;
-import com.ats.generator.objects.mouse.Mouse;
-import com.ats.generator.variables.*;
-import com.ats.script.Project;
-import com.ats.script.Script;
-import com.ats.script.ScriptLoader;
-import com.ats.script.actions.*;
-import com.ats.script.actions.neoload.ActionNeoloadContainer;
-import com.ats.script.actions.neoload.ActionNeoloadRecord;
-import com.ats.script.actions.neoload.ActionNeoloadStart;
-import com.ats.script.actions.neoload.ActionNeoloadStop;
-import com.ats.script.actions.performance.ActionPerformanceRecord;
-import com.ats.script.actions.performance.ActionPerformanceStart;
-import com.ats.script.actions.performance.octoperf.ActionOctoperfVirtualUser;
-import com.ats.tools.Utils;
-
 import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -45,6 +27,53 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.ats.generator.GeneratorReport;
+import com.ats.generator.events.ScriptProcessedNotifier;
+import com.ats.generator.objects.mouse.Mouse;
+import com.ats.generator.variables.CalculatedValue;
+import com.ats.generator.variables.EnvironmentValue;
+import com.ats.generator.variables.ParameterValue;
+import com.ats.generator.variables.Variable;
+import com.ats.script.Project;
+import com.ats.script.Script;
+import com.ats.script.ScriptLoader;
+import com.ats.script.actions.ActionApi;
+import com.ats.script.actions.ActionAssertCount;
+import com.ats.script.actions.ActionAssertProperty;
+import com.ats.script.actions.ActionAssertValue;
+import com.ats.script.actions.ActionButton;
+import com.ats.script.actions.ActionCallscript;
+import com.ats.script.actions.ActionChannelClose;
+import com.ats.script.actions.ActionChannelStart;
+import com.ats.script.actions.ActionChannelSwitch;
+import com.ats.script.actions.ActionComment;
+import com.ats.script.actions.ActionExecute;
+import com.ats.script.actions.ActionGesturePress;
+import com.ats.script.actions.ActionGestureTap;
+import com.ats.script.actions.ActionGotoUrl;
+import com.ats.script.actions.ActionMouse;
+import com.ats.script.actions.ActionMouseDragDrop;
+import com.ats.script.actions.ActionMouseKey;
+import com.ats.script.actions.ActionMouseScroll;
+import com.ats.script.actions.ActionMouseSwipe;
+import com.ats.script.actions.ActionProperty;
+import com.ats.script.actions.ActionPropertySet;
+import com.ats.script.actions.ActionScripting;
+import com.ats.script.actions.ActionSelect;
+import com.ats.script.actions.ActionText;
+import com.ats.script.actions.ActionWindow;
+import com.ats.script.actions.ActionWindowResize;
+import com.ats.script.actions.ActionWindowState;
+import com.ats.script.actions.ActionWindowSwitch;
+import com.ats.script.actions.neoload.ActionNeoloadContainer;
+import com.ats.script.actions.neoload.ActionNeoloadRecord;
+import com.ats.script.actions.neoload.ActionNeoloadStart;
+import com.ats.script.actions.neoload.ActionNeoloadStop;
+import com.ats.script.actions.performance.ActionPerformanceRecord;
+import com.ats.script.actions.performance.ActionPerformanceStart;
+import com.ats.script.actions.performance.octoperf.ActionOctoperfVirtualUser;
+import com.ats.tools.Utils;
 
 public class Lexer {
 
@@ -226,6 +255,18 @@ public class Lexer {
 
 				script.addAction(new ActionComment(script, actionType, dataArray), disabled);
 				
+			} else if(ActionText.SCRIPT_LABEL.equals(actionType)) {
+
+				//-----------------------
+				// Text action
+				//-----------------------
+				
+				String dataText = "";
+				if(dataArray.size() > 0) {
+					dataText = dataArray.remove(0).trim();
+				}
+				script.addAction(new ActionText(script, stopExec, options, dataText, dataArray), disabled);
+				
 			} else if(dataArray.size() > 0) {
 
 				String dataOne = dataArray.remove(0).trim();
@@ -267,14 +308,6 @@ public class Lexer {
 					if (dataArray.size() > 0) {
 						script.addAction(new ActionChannelStart(script, dataOne, options, new CalculatedValue(script, dataArray.remove(0).trim()), dataArray), disabled);
 					}
-
-				} else if(ActionText.SCRIPT_LABEL.equals(actionType)) {
-
-					//-----------------------
-					// Text action
-					//-----------------------
-
-					script.addAction(new ActionText(script, stopExec, options, dataOne, dataArray), disabled);
 
 				} else if(actionType.startsWith(ActionApi.SCRIPT_LABEL)) {
 
