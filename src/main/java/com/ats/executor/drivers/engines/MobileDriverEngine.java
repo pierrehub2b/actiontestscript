@@ -21,6 +21,7 @@ package com.ats.executor.drivers.engines;
 
 import java.awt.Graphics;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -414,7 +415,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public List<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, String[] attributes, String[] attributesValues, Predicate<AtsBaseElement> searchPredicate, WebElement startElement, boolean waitAnimation) {
+	public List<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, String[] attributes, String[] attributesValues, Predicate<AtsBaseElement> searchPredicate, WebElement startElement) {
 
 		final List<AtsMobileElement> list = new ArrayList<AtsMobileElement>();
 
@@ -756,5 +757,10 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public String getUrl() {
 		return applicationPath;
+	}
+
+	@Override
+	public Rectangle getBoundRect(TestElement testElement) {
+		return null;
 	}
 }

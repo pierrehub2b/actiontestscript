@@ -292,7 +292,7 @@ public class FoundElement{
 	//------------------------------------------------------------------------------------------------------------------------------
 	// end of contructors
 	//------------------------------------------------------------------------------------------------------------------------------
-
+	
 	public String[] getItemAttribute() {
 		if(attributes != null && attributes.size() == 2) {
 			return new String[] {attributes.get("value"), attributes.get("text")};
@@ -326,6 +326,12 @@ public class FoundElement{
 			parent = null;
 		}
 		value = null;
+	}
+	
+	public void updateBounding(Double x, Double y, Channel channel, Double width, Double height) {
+		updatePosition(x, y, channel, 0D, 0D);
+		this.width = width;
+		this.height = height;
 	}
 
 	public void updatePosition(Double x, Double y, Channel channel, Double offsetX, Double offsetY) {

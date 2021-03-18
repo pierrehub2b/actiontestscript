@@ -554,7 +554,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	public List<FoundElement> findMatSelectOptions(TestElement element) {
 		switchToDefaultContent();
-		return findElements(false, element, ANGULAR_OPTION, new String[0], new String[0], Objects::nonNull, null, true);
+		return findElements(false, element, ANGULAR_OPTION, new String[0], new String[0], Objects::nonNull, null);
 	}
 
 	@Override
@@ -1123,7 +1123,14 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	private double offsetIframeY = 0.0;
 
 	@Override
-	public List<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, String[] attributes, String[] attributesValues, Predicate<AtsBaseElement> predicate, WebElement startElement, boolean waitAnimation) {
+	public List<FoundElement> findElements(
+			boolean sysComp, 
+			TestElement testObject, 
+			String tagName, 
+			String[] attributes, 
+			String[] attributesValues, 
+			Predicate<AtsBaseElement> predicate, 
+			WebElement startElement) {
 
 		if(testObject.getParent() != null){
 			if(testObject.getParent().isIframe()) {
@@ -1290,5 +1297,12 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public String getUrl() {
 		return driver.getCurrentUrl();
+	}
+	
+
+	@Override
+	public Rectangle getBoundRect(TestElement element) {
+		final org.openqa.selenium.Rectangle rect = element.getWebElement().getRect();
+		return new Rectangle(rect.x, rect.y, rect.width, rect.height);
 	}
 }

@@ -32,6 +32,7 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 
+import com.ats.driver.AtsManager;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.SendKeyData;
@@ -41,6 +42,7 @@ import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.recorder.IVisualRecorder;
+import com.ats.tools.logger.MessageCode;
 
 public class TestElement{
 
@@ -70,6 +72,7 @@ public class TestElement{
 	private List<FoundElement> foundElements = new ArrayList<FoundElement>();
 
 	private int maxTry = 20;
+	private int maxTryInteractable = AtsManager.getInstance().getMaxTryInteractable();
 	private int index;
 
 	private String criterias = "";
@@ -220,7 +223,7 @@ public class TestElement{
 		}
 
 		try {
-			return engine.findElements(sysComp, this, searchedTag, attributes, attributesValues, fullPredicate, null, true);
+			return engine.findElements(sysComp, this, searchedTag, attributes, attributesValues, fullPredicate, null);
 		}catch (StaleElementReferenceException e) {
 			return Collections.<FoundElement>emptyList();
 		}
@@ -435,6 +438,26 @@ public class TestElement{
 	}
 
 	//-------------------------------------------------------------------------------------------------------------------
+	// Wait Animation
+	//-------------------------------------------------------------------------------------------------------------------
+
+	private void waitAnimation(int loop) {
+		if(loop > 0) {
+			final Rectangle rect = engine.getBoundRect(this);
+			if(rect != null) {
+				channel.sleep(100);
+				if(rect.equals(engine.getBoundRect(this))){
+					getFoundElement().updateBounding(rect.getX(), rect.getY(), channel, rect.getWidth(), rect.getHeight());
+				}else {
+					loop--;
+					channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "Element is moving, wait before execute action", loop);
+					waitAnimation(loop);
+				}
+			}
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------------------------
 	// Select ...
 	//-------------------------------------------------------------------------------------------------------------------
 
@@ -449,6 +472,7 @@ public class TestElement{
 	//-------------------------------------------------------------------------------------------------------------------
 
 	public void over(ActionStatus status, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {
+		waitAnimation(maxTryInteractable);
 		engine.mouseMoveToElement(status, getFoundElement(), position, desktopDragDrop, offsetX, offsetY);
 	}
 
@@ -522,7 +546,7 @@ public class TestElement{
 	protected CalculatedProperty getAtsProperty(String name) {
 		return new CalculatedProperty(false, name, new CalculatedValue(getAtsAttribute(name)));
 	}
-	
+
 	protected String getAtsAttribute(String name) {
 		if(ATS_OCCURRENCES.equals(name)) {
 			return String.valueOf(count);
@@ -558,12 +582,12 @@ public class TestElement{
 		result[2] = getAtsProperty(ATS_MAX_TRY);
 		result[3] = getAtsProperty(ATS_SEARCH_DURATION);
 		result[4] = getAtsProperty(ATS_SEARCH_TAG);
-		
+
 		int pos = 5;
 		for (CalculatedProperty prop : props) {
-            result[pos] = prop;
-            pos++;
-        }
+			result[pos] = prop;
+			pos++;
+		}
 
 		return result;
 	}

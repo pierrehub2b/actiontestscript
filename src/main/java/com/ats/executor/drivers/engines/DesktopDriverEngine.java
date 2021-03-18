@@ -179,7 +179,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public List<FoundElement> findElements(boolean sysComp, TestElement testElement, String tag, String[] attributes, String[] attributesValues, Predicate<AtsBaseElement> predicate, WebElement startElement, boolean waitAnimation) {
+	public List<FoundElement> findElements(boolean sysComp, TestElement testElement, String tag, String[] attributes, String[] attributesValues, Predicate<AtsBaseElement> predicate, WebElement startElement) {
 		if(sysComp) {
 			if(SYSCOMP.equals(tag.toUpperCase())) {
 				return new ArrayList<FoundElement>(List.of(new FoundElement(window)));
@@ -430,5 +430,10 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	@Override
 	public String getUrl() {
 		return applicationPath;
+	}
+
+	@Override
+	public Rectangle getBoundRect(TestElement testElement) {
+		return null;
 	}
 }

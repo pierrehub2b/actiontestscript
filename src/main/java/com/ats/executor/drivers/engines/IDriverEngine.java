@@ -19,6 +19,7 @@ under the License.
 
 package com.ats.executor.drivers.engines;
 
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -56,8 +57,10 @@ public interface IDriverEngine{
 	public Object executeJavaScript(ActionStatus status, String script, boolean returnValue);
 	public void goToUrl(ActionStatus status, String url);
 	
-	public List<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, String[] attributes, String[] attributesValues, Predicate<AtsBaseElement> searchPredicate, WebElement startElement, boolean waitAnimation);
+	public List<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, String[] attributes, String[] attributesValues, Predicate<AtsBaseElement> searchPredicate, WebElement startElement);
 	public List<FoundElement> findElements(TestElement parent, ImageTemplateMatchingSimple template);
+	
+	public Rectangle getBoundRect(TestElement testElement);
 	
 	public void waitAfterAction(ActionStatus status);
 	public void updateDimensions();
@@ -115,4 +118,5 @@ public interface IDriverEngine{
 	public String getTitle();
 	public int getNumWindows();
 	public String getUrl();
+
 }

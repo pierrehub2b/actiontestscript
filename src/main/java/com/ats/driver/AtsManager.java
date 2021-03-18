@@ -63,6 +63,7 @@ public class AtsManager {
 	private static final int WEBSERVICE_TIMEOUT = 20;
 
 	private static final int MAX_TRY_SEARCH = 15;
+	private static final int MAX_TRY_INTERACTABLE = 20;
 	private static final int MAX_TRY_PROPERTY = 10;
 	private static final int MAX_TRY_WEBSERVICE = 1;
 	private static final int MAX_TRY_IMAGE_RECOGNITION = 20;
@@ -93,6 +94,7 @@ public class AtsManager {
 	private int webServiceTimeOut = WEBSERVICE_TIMEOUT;
 
 	private int maxTrySearch = MAX_TRY_SEARCH;
+	private int maxTryInteractable = MAX_TRY_INTERACTABLE;
 	private int maxTryProperty = MAX_TRY_PROPERTY;
 	private int maxTryWebservice = MAX_TRY_WEBSERVICE;
 	private int maxTryMobile = MAX_TRY_MOBILE;
@@ -433,6 +435,9 @@ public class AtsManager {
 												case "searchelement":
 													maxTrySearch = getElementInt(maxtryElement);
 													break;
+												case "interactable":
+													maxTryInteractable = getElementInt(maxtryElement);
+													break;
 												case "getproperty":
 													maxTryProperty = getElementInt(maxtryElement);
 													break;
@@ -744,6 +749,10 @@ public class AtsManager {
 
 	public int getMaxTrySearch() {
 		return maxTrySearch;
+	}
+	
+	public int getMaxTryInteractable() {
+		return maxTryInteractable;
 	}
 
 	public int getMaxTryImageRecognition() { return maxTryImageRecognition; }

@@ -19,6 +19,7 @@ under the License.
 
 package com.ats.executor.drivers.engines;
 
+import java.awt.Rectangle;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -171,7 +172,7 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	}
 
 	@Override
-	public List<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, String[] attributes, String[] attributesValues, Predicate<AtsBaseElement> searchPredicate, WebElement startElement, boolean waitAnimation) {
+	public List<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, String[] attributes, String[] attributesValues, Predicate<AtsBaseElement> searchPredicate, WebElement startElement) {
 		return executor.findElements(channel, sysComp, testObject, tagName, attributes, searchPredicate);
 	}
 
@@ -471,5 +472,10 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	@Override
 	public String getUrl() {
 		return executor.getCurrentUrl();
+	}
+
+	@Override
+	public Rectangle getBoundRect(TestElement testElement) {
+		return null;
 	}
 }

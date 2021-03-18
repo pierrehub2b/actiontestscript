@@ -43,6 +43,8 @@ import com.google.gson.JsonObject;
 
 public class ActionExecuteElement extends ActionExecuteElementAbstract {
 
+	private static final String ELEMENT_NOT_FOUND_MESSAGE = "Element not found, wait and try again";
+	
 	private SearchedElement searchElement;
 	private TestElement testElement;
 
@@ -143,7 +145,7 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 								trySearch = actionMaxTry;
 							}else {
 								trySearch++;
-								channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "Searching element", actionMaxTry - trySearch);
+								channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, ELEMENT_NOT_FOUND_MESSAGE, actionMaxTry - trySearch);
 								channel.progressiveWait(trySearch);
 							}
 						}
@@ -158,7 +160,7 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 									trySearch = actionMaxTry;
 								} else {
 									trySearch++;
-									channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "Searching element", actionMaxTry - trySearch);
+									channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, ELEMENT_NOT_FOUND_MESSAGE, actionMaxTry - trySearch);
 									channel.progressiveWait(trySearch);
 								}
 							}
@@ -175,7 +177,7 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 									trySearch = actionMaxTry;
 								}else {
 									trySearch++;
-									channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, "Searching element", actionMaxTry - trySearch);
+									channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, ELEMENT_NOT_FOUND_MESSAGE, actionMaxTry - trySearch);
 									channel.progressiveWait(trySearch);
 								}
 							}
