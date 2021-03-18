@@ -106,7 +106,7 @@ public class SoapApiExecutor extends ApiExecutor {
 
 			executeRequest(status, requestBuilder.build());
 		}else {
-			status.setError(ActionStatus.WEB_DRIVER_ERROR, "call Webservice error -> operation does not exists (" + action + ")");
+			status.setError(ActionStatus.WEB_DRIVER_ERROR, "SOAP operation does not exists ->  " + action);
 		}
 	}
 
