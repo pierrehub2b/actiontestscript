@@ -134,9 +134,11 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 	}
 
 	protected void setUri(String value) {
-		try {
-			this.uri = new URI(value);
-		} catch (URISyntaxException e) {}
+		if(value != null) {
+			try {
+				this.uri = new URI(value);
+			} catch (URISyntaxException e) {}
+		}
 	}
 
 	protected URI getUri() {
@@ -152,7 +154,7 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 	protected URI getMethodUri() {
 		return getUri().resolve(lastAction.getMethod().getCalculated());
 	}
-	
+
 	public String getCurrentUrl() {
 		return getMethodUri().toString();
 	}
@@ -257,7 +259,7 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 				final Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(isr));
 
 				this.type = XML_TYPE;
-				
+
 				final NodeList streams = doc.getElementsByTagName("Stream");
 				if(streams != null && streams.getLength() > 0) {
 
@@ -282,10 +284,10 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 
 				final Transformer transform = TransformerFactory.newInstance().newTransformer();
 				transform.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-				
+
 				final StringWriter writer = new StringWriter();
 				transform.transform(new DOMSource(doc), new StreamResult(writer));
-				
+
 				return "<root><RESPONSE code=\"" + response.code() + "\"><data>" + writer.getBuffer().toString() + "</data></RESPONSE></root>";
 
 			}catch(SAXException | IOException | TransformerException | ParserConfigurationException e) {
@@ -306,9 +308,9 @@ public abstract class ApiExecutor implements IApiDriverExecutor {
 
 			}
 		}
-		
+
 		this.type = TEXT_TYPE;
-		
+
 		final String content = new BufferedReader(isr).lines().collect(Collectors.joining("\n"));
 		atsElements.add(new AtsApiElement(DATA, ImmutableMap.of("value", content)));
 
