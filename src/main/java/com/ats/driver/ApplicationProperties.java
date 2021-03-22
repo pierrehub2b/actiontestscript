@@ -34,6 +34,7 @@ public class ApplicationProperties {
 	private String driver;
 	private String uri;
 	private int wait = -1;
+	private int debugPort = -1;
 	private int check = -1;
 	private String lang;
 	private String userDataDir;
@@ -44,7 +45,7 @@ public class ApplicationProperties {
 		this.name = name;
 	}
 	
-	public ApplicationProperties(int type, String name, String driver, String uri, int wait, int check, String lang, String userDataDir, String title, String[] options) {
+	public ApplicationProperties(int type, String name, String driver, String uri, int wait, int check, String lang, String userDataDir, String title, String[] options, int debugPort) {
 		this.type = type;
 		this.name = name;
 		this.driver = driver;
@@ -55,6 +56,7 @@ public class ApplicationProperties {
 		this.userDataDir = userDataDir;
 		this.title = title;
 		this.options = options;
+		this.debugPort = debugPort;
 	}
 	
 	public boolean isWeb() {
@@ -87,6 +89,10 @@ public class ApplicationProperties {
 	
 	public int getWait() {
 		return wait;
+	}
+	
+	public int getDebugPort() {
+		return debugPort;
 	}
 	
 	public int getCheck() {

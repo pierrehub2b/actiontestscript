@@ -154,7 +154,8 @@ Here is an example of global ATS configuration file (*.atsProperties* file in AT
 	<maxTry>
 		<searchElement>15</searchElement>
 		<getProperty>10</getProperty>
-		<webService>1</webService>		
+		<webService>1</webService>	
+		<interactable>20</interactable>		
 	</maxTry>
 	<timeOut>
 		<script>60</script>
@@ -169,6 +170,10 @@ Here is an example of global ATS configuration file (*.atsProperties* file in AT
 				<option>--disable-web-security</option>
 				<option>--incognito</option>
 			</options>
+		</browser>
+		<browser>
+			<name>msedge</name>
+			<debugPort>998877</debugPort>
 		</browser>
 		<browser>
 			<name>opera</name>
@@ -220,6 +225,7 @@ Proxy types available are *'system'*, *'auto'*, *'direct'* and *'manual'*, if *'
 * **[maxTry -> searchElement]** : action's maxTry to wait element exists or wait element is interactable before execute
 * **[maxTry -> getProperty]** : action's maxTry get property to wait element's property exists and property is not null
 * **[maxTry -> webService]** : api REST or SOAP webservice max try if request fail with timeout
+* **[maxTry -> interactable]** : max try to interact with element (move, disabled, hidden etc..)
 * **[timeOut -> script]** : javascript execution timeout (in sec.) for web application only
 * **[timeOut -> pageLoad]** : page load timeout (in sec.) for web application only
 * **[timeOut -> watchDog]** : action's execution timeout (in sec.) to prevent browser or application infinite hangup
@@ -228,6 +234,7 @@ Proxy types available are *'system'*, *'auto'*, *'direct'* and *'manual'*, if *'
   - **[path]** : the application binary file path
   - **[waitAction]** : wait after each actions (in millisec.)
   - **[waitProperty]** : wait for double check attributes value (in millisec.) 
+  - **[debugPort]** : Chromium only ! define a debug port, can be used to fix 'DevToolsActivePort file doesn't exist' error
 * You can add options to the browsers driver
 * You can define application name and path of installed applications on the host machine
 * You can define a chromium like browser in the available browsers list. In order to use a chromium like browser you have to define *'name'*, *'driver'* and *'path'* attributes of the browser element. The *'driver'* attribute is the driver file *(without extension)* in the ATS drivers folder and the *'path'* attribute is the executable file of the chromium browser :

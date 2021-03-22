@@ -30,24 +30,34 @@ public class ChromiumBasedDriverEngine extends WebDriverEngine {
 		super(channel, browser, driverProcess, desktopDriver, props);
 	}
 
-	protected ChromeOptions initOptions(ApplicationProperties props) {
+	protected ChromeOptions initOptions(ApplicationProperties props, String ... browserOptions) {
 
 		final ChromeOptions options = new ChromeOptions();
-		options.addArguments("--no-default-browser-check");
-		options.addArguments("--test-type");
-		options.addArguments("--allow-file-access-from-files");
-		options.addArguments("--allow-running-insecure-content");
-		options.addArguments("--allow-file-access-from-files");
-		options.addArguments("--allow-cross-origin-auth-prompt");
-		options.addArguments("--allow-file-access");
-		options.addArguments("--ignore-certificate-errors");
-		
-		if(props.getOptions() != null) {
+		if(props.getOptions() != null && props.getOptions().length > 0) {
 			for (String s: props.getOptions()) {
 				if(s.length() > 0) {
 					options.addArguments(s);
 				}
 			}
+		}else {
+			options.addArguments("--no-default-browser-check");
+			options.addArguments("--test-type");
+			options.addArguments("--allow-file-access-from-files");
+			options.addArguments("--allow-running-insecure-content");
+			options.addArguments("--allow-file-access-from-files");
+			options.addArguments("--allow-cross-origin-auth-prompt");
+			options.addArguments("--allow-file-access");
+			options.addArguments("--ignore-certificate-errors");
+		}
+		
+		for (String s: browserOptions) {
+			if(s.length() > 0) {
+				options.addArguments(s);
+			}
+		}
+			
+		if(props.getDebugPort() > 0) {
+			options.addArguments("--remote-debugging-port=" + props.getDebugPort());
 		}
 
 		profileFolder = props.getUserDataDir();

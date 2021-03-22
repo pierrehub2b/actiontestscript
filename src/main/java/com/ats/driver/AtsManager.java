@@ -487,6 +487,7 @@ public class AtsManager {
 										String dataDir = null;
 										String check = null;
 										String lang = null;
+										String debugPort = null;
 
 										String[] options = null;
 
@@ -527,6 +528,9 @@ public class AtsManager {
 														case "lang":
 															lang = getElementText(browserElement);
 															break;
+														case "debugport":
+															debugPort = getElementText(browserElement);
+															break;
 														case "options":
 															final NodeList optionsList = browserElement.getElementsByTagName("option");
 															final int optionsLen = optionsList.getLength();
@@ -558,7 +562,7 @@ public class AtsManager {
 														}
 													}
 												}
-												addApplicationProperties(ApplicationProperties.BROWSER_TYPE, name, driver, path, waitAction, check, lang, userDataDir, title, options);
+												addApplicationProperties(ApplicationProperties.BROWSER_TYPE, name, driver, path, waitAction, check, lang, userDataDir, title, options, debugPort);
 											}
 										}
 									}
@@ -694,11 +698,11 @@ public class AtsManager {
 	}
 
 	private void addApplicationProperties(int type, String name, String path, String wait, String check, String lang, String userDataDir, String title) {
-		addApplicationProperties(type, name, null, path, wait, check, lang, userDataDir, title, null);
+		addApplicationProperties(type, name, null, path, wait, check, lang, userDataDir, title, null, null);
 	}
 
-	private void addApplicationProperties(int type, String name, String driver, String path, String wait, String check, String lang, String userDataDir, String title, String[] options) {
-		applicationsList.add(new ApplicationProperties(type, name, driver, path, Utils.string2Int(wait, -1), Utils.string2Int(check, -1), lang, userDataDir, title, options));
+	private void addApplicationProperties(int type, String name, String driver, String path, String wait, String check, String lang, String userDataDir, String title, String[] options, String debugPort) {
+		applicationsList.add(new ApplicationProperties(type, name, driver, path, Utils.string2Int(wait, -1), Utils.string2Int(check, -1), lang, userDataDir, title, options, Utils.string2Int(debugPort, -1)));
 	}
 
 	//------------------------------------------------------------------------------------------------------------------
