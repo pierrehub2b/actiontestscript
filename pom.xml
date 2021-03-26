@@ -35,17 +35,6 @@
 			<timezone>Europe/Paris</timezone>
 		</developer>
 		<developer>
-			<id>ragelib</id>
-			<name>Gabriel Gil</name>
-			<email>gabriel.gil@outlook.fr</email>
-			<organization>ActionTestScript</organization>
-			<organizationUrl>http://www.actiontestscript.com</organizationUrl>
-			<roles>
-				<role>developer</role>
-			</roles>
-			<timezone>Europe/Paris</timezone>
-		</developer>
-		<developer>
 			<id>antho</id>
 			<name>Anthony D'Hierre</name>
 			<email>anthony.dhierre@agilitest.com</email>
@@ -84,16 +73,16 @@
 		<lib.mxparser.version>4.4.2</lib.mxparser.version>
 		<lib.selenium.version>3.141.59</lib.selenium.version>
 		<lib.testng.version>7.3.0</lib.testng.version>
-		<lib.apache.ant.version>1.10.8</lib.apache.ant.version>
+		<lib.apache.ant.version>1.10.9</lib.apache.ant.version>
 		<lib.apache.cli.version>1.4</lib.apache.cli.version>
 		<lib.gson.version>2.8.6</lib.gson.version>
-		<lib.opencsv.version>5.2</lib.opencsv.version>
+		<lib.opencsv.version>5.4</lib.opencsv.version>
 		<lib.naturalness.version>1.1</lib.naturalness.version>
 		<lib.bcprov.version>1.66</lib.bcprov.version>
-		<lib.netty.version>4.1.52.Final</lib.netty.version>
-		<lib.browserup.version>2.1.1</lib.browserup.version>
-		<lib.browserup.mitm.version>2.1.1</lib.browserup.mitm.version>
-		<lib.jackson.databind>2.11.2</lib.jackson.databind>
+		<lib.netty.version>4.1.60.Final</lib.netty.version>
+		<lib.browserup.version>2.1.2</lib.browserup.version>
+		<lib.browserup.mitm.version>2.1.2</lib.browserup.mitm.version>
+		<lib.jackson.databind>2.12.2</lib.jackson.databind>
 		<jacoco.plugin.version>0.8.5</jacoco.plugin.version>
 	</properties>
 
@@ -168,7 +157,7 @@
 			<artifactId>bcprov-jdk15on</artifactId>
 			<version>${lib.bcprov.version}</version>
 		</dependency>
-		<dependency>
+ 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-all</artifactId>
 			<version>${lib.netty.version}</version>

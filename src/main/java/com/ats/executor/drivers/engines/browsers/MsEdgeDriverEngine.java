@@ -1,8 +1,25 @@
+/*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+ */
+
 package com.ats.executor.drivers.engines.browsers;
 
-import java.util.Collections;
-
-import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.remote.CapabilityType;
 
 import com.ats.driver.ApplicationProperties;
@@ -19,20 +36,22 @@ public class MsEdgeDriverEngine extends ChromiumBasedDriverEngine {
 
 	public MsEdgeDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver desktopDriver, ApplicationProperties props) {
 		super(channel, status, DriverManager.MSEDGE_BROWSER, driverProcess, desktopDriver, props);
-		
-		final ChromeOptions options = initOptions(props);
+
+		final EdgeOptions options = new EdgeOptions().merge(initOptions(props));
 		options.setCapability(CapabilityType.BROWSER_NAME, "MicrosoftEdge");
-		options.setExperimentalOption("useAutomationExtension", false);
-		options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
-		
+		//options.setExperimentalOption("useAutomationExtension", false);
+		//options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
+
 		launchDriver(status, options, profileFolder);
 	}
-	
+
 	@Override
 	public void started(ActionStatus status) {
-		final TestElementSystem closInfobarButton = new TestElementSystem(channel, 1, p -> p == 1, new SearchedElement(new SearchedElement(new SearchedElement(0, "syscomp", new CalculatedProperty[] {}), 0, "Group", new CalculatedProperty[] {new CalculatedProperty("ClassName", "InfoBarContainerView")}), 0, "Button", new CalculatedProperty[] {}));
-		if(closInfobarButton.getCount() == 1) {
-			closInfobarButton.executeScript(status, "Invoke()", false);
+		if(channel.getDesktopDriver() != null) {
+			final TestElementSystem closInfobarButton = new TestElementSystem(channel, 1, p -> p == 1, new SearchedElement(new SearchedElement(new SearchedElement(0, "syscomp", new CalculatedProperty[] {}), 0, "Group", new CalculatedProperty[] {new CalculatedProperty("ClassName", "InfoBarContainerView")}), 0, "Button", new CalculatedProperty[] {}));
+			if(closInfobarButton.getCount() == 1) {
+				closInfobarButton.executeScript(status, "Invoke()", false);
+			}
 		}
 	}
 }

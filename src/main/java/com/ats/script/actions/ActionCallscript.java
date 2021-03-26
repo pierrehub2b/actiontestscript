@@ -262,7 +262,7 @@ public class ActionCallscript extends ActionReturnVariableArray {
 		if(clazz == null) {
 			status.setError(MessageCode.SCRIPT_NOT_FOUND, "ATS script not found : '" + scriptName + "' (maybe a letter case issue ?)\n");
 		}else {
-			
+
 			try {
 
 				final ActionTestScript ats = clazz.getDeclaredConstructor().newInstance();
@@ -356,11 +356,24 @@ public class ActionCallscript extends ActionReturnVariableArray {
 
 		condition = null;
 		status.endDuration();
-		
+
 		return true;
 	}
-	
-	private void callScriptWithParametersFile(Method testMain, ActionTestScript ats, ActionTestScript ts, String testName, int line, ParameterList row, int iteration, int iterationMax, String scriptName, File csvFile) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+
+	private void callScriptWithParametersFile(
+			Method testMain, 
+			ActionTestScript ats, 
+			ActionTestScript ts, 
+			String testName, 
+			int line, 
+			ParameterList row, 
+			int iteration, 
+			int iterationMax, 
+			String scriptName, 
+			File csvFile) 
+
+					throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+
 		row.updateCalculated(ts);
 		ats.initCalledScript(ts, testName, line, row, null, iteration, iterationMax, scriptName, "dataFile", csvFile);
 		testMain.invoke(ats);
@@ -383,7 +396,7 @@ public class ActionCallscript extends ActionReturnVariableArray {
 	public void setName(CalculatedValue name) {
 		this.name = name;
 	}
-	
+
 	public void setVariables(ArrayList<Variable> value) {
 		if (value != null && value.size() > 0) {
 			super.setVariables(value);

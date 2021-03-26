@@ -115,7 +115,7 @@ public class CalculatedValue{
 			
 			final String replace = mv.group(0);
 			final String variableName = mv.group(1);
-			
+
 			dataValue = dataValue.replace(replace, script.getVariableValue(variableName));
 			rawJavaCode = rawJavaCode.replace(replace, "\", " + variableName + ", \"");
 		}
@@ -309,6 +309,7 @@ public class CalculatedValue{
 				return data;
 			}
 		}
+		
 		return calculated;
 	}
 

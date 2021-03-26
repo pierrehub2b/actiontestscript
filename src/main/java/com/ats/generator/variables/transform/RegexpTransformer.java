@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
+ */
 
 package com.ats.generator.variables.transform;
 
@@ -24,6 +24,7 @@ import org.apache.commons.text.StringEscapeUtils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public class RegexpTransformer extends Transformer {
 
@@ -38,13 +39,13 @@ public class RegexpTransformer extends Transformer {
 	}
 
 	public RegexpTransformer(String data) {
-		
+
 		int lastComa = data.lastIndexOf(",");
-		
+
 		try {
 			setGroup(getInt(data.substring(lastComa + 1).trim()));
 		}catch (IndexOutOfBoundsException e) {}
-		
+
 		try {
 			setPattern(data.substring(0, lastComa).trim());
 		}catch (IndexOutOfBoundsException e) {}
@@ -60,13 +61,16 @@ public class RegexpTransformer extends Transformer {
 
 		String result = "";
 		if(data.length() > 0) {
-			Pattern patternComp = Pattern.compile(pattern);
-			Matcher m = patternComp.matcher(data);
 
-			if(m.find()) {
-				try {
+			try {
+				final Pattern patternComp = Pattern.compile(pattern);
+				final Matcher m = patternComp.matcher(data);
+
+				if(m.find()) {
 					result = m.group(group);
-				}catch(IndexOutOfBoundsException e) {}
+				}
+			}catch(IndexOutOfBoundsException | PatternSyntaxException e) {
+				result = "#REGEXP_ERROR# " + e.getMessage();
 			}
 		}
 		return result;

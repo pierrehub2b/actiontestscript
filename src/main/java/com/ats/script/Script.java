@@ -268,7 +268,8 @@ public class Script {
 	}
 
 	public String getVariableValue(String variableName) {
-		return getVariable(variableName, false).getValue().getCalculated();
+		//return getVariable(variableName, false).getValue().getCalculated();
+		return getVariable(variableName, false).getCalculatedValue();
 	}
 
 	//-------------------------------------------------------------------------------------------------

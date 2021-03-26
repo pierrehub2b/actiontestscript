@@ -30,7 +30,7 @@ public class ChromiumBasedDriverEngine extends WebDriverEngine {
 		super(channel, browser, driverProcess, desktopDriver, props);
 	}
 
-	protected ChromeOptions initOptions(ApplicationProperties props, String ... browserOptions) {
+	protected ChromeOptions initOptions(ApplicationProperties props) {
 
 		final ChromeOptions options = new ChromeOptions();
 		if(props.getOptions() != null && props.getOptions().length > 0) {
@@ -48,12 +48,6 @@ public class ChromiumBasedDriverEngine extends WebDriverEngine {
 			options.addArguments("--allow-cross-origin-auth-prompt");
 			options.addArguments("--allow-file-access");
 			options.addArguments("--ignore-certificate-errors");
-		}
-		
-		for (String s: browserOptions) {
-			if(s.length() > 0) {
-				options.addArguments(s);
-			}
 		}
 			
 		if(props.getDebugPort() > 0) {

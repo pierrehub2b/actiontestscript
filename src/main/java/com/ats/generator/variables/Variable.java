@@ -64,11 +64,10 @@ public class Variable implements Comparable<Variable>{
 			result = value.getCalculated();
 		}
 
-		if(transformation == null) {
-			return result;
-		}else {
-			return transformation.format(result);
+		if(transformation != null) {
+			result = transformation.format(result);
 		}
+		return result;
 	}	
 
 	public void setData(String value) {

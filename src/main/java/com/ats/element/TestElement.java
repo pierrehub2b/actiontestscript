@@ -133,6 +133,12 @@ public class TestElement{
 		setEngine(channel.getDriverEngine());
 		startSearch(false, searchedElement);
 	}
+	
+	public String getNotFoundDescription() {
+		final StringBuilder builder = new StringBuilder("element not found ");
+		builder.append(searchedTag).append("[").append(criterias).append("]");
+		return builder.toString();
+	}
 
 	protected void setEngine(IDriverEngine engine) {
 		this.engine = engine;

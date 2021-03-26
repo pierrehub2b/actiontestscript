@@ -228,14 +228,13 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 		if(testElement.isValidated()) {
 			status.setPassed(true);
 		}else {
-			status.setError(ActionStatus.OBJECT_NOT_FOUND, "element not found");
+			status.setError(ActionStatus.OBJECT_NOT_FOUND, testElement.getNotFoundDescription());
 			error = ActionStatus.OBJECT_NOT_FOUND;
 		}
 
 		status.endDuration();
 		testElement.terminateExecution(status, ts, error, status.getDuration());
 	}
-
 
 
 	@Override
