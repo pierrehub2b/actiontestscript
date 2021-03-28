@@ -478,4 +478,8 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	public Rectangle getBoundRect(TestElement testElement) {
 		return null;
 	}
+	
+	@Override
+	public void mouseMoveToElement(ActionStatus status, FoundElement element) {
+	}
 }

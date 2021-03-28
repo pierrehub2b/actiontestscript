@@ -762,6 +762,13 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
+	public void mouseMoveToElement(ActionStatus status, FoundElement element) {
+		try {
+			move(element, 0, 0);
+		}catch (Exception e) {}
+	}
+	
+	@Override
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean withDesktop, int offsetX, int offsetY) {
 
 		channel.waitBeforeMouseMoveToElement(this);

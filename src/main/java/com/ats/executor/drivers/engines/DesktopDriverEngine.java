@@ -256,6 +256,11 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	public void rightClick() {
 		getDesktopDriver().mouseRightClick();
 	}
+	
+	@Override
+	public void mouseMoveToElement(ActionStatus status, FoundElement element) {
+		getDesktopDriver().elementFocus(element);
+	}
 
 	@Override
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {

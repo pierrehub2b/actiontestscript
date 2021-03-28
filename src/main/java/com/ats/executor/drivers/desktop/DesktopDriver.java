@@ -381,7 +381,8 @@ public class DesktopDriver extends RemoteWebDriver {
 		LoadTree(8),
 		ListItems(9), 
 		DialogBox(10),
-		SetValue(11);
+		SetValue(11),
+		Focus(12);
 
 		private final int type;
 		ElementType(int value){
@@ -662,6 +663,10 @@ public class DesktopDriver extends RemoteWebDriver {
 
 	public List<DesktopData> executeScript(ActionStatus status, String script, FoundElement element) {
 		return sendRequestCommand(CommandType.Element, ElementType.Script, element.getId(), script).getData();
+	}
+	
+	public void elementFocus(FoundElement element) {
+		sendRequestCommand(CommandType.Element, ElementType.Focus, element.getId());
 	}
 
 	public List<FoundElement> findElements(Channel channel, TestElement testElement, String tag, String[] attributes, Predicate<AtsBaseElement> predicate) {
@@ -950,4 +955,5 @@ public class DesktopDriver extends RemoteWebDriver {
 		final Gson gson = new Gson();
 		return gson.toJson(elementMapLocation);
 	}
+
 }

@@ -691,6 +691,11 @@ public class Channel {
 	public void scroll(FoundElement foundElement, int delta) {
 		engine.scroll(foundElement, delta*scrollUnit);
 	}
+	
+	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement) {
+		engine.mouseMoveToElement(status, foundElement);
+		actionTerminated(status);
+	}
 
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position) {
 		engine.mouseMoveToElement(status, foundElement, position, false, 0, 0);

@@ -92,6 +92,7 @@ public interface IDriverEngine{
 	public String setWindowBound(BoundData x, BoundData y, BoundData width, BoundData height);
 	
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY);
+	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement);
 	public void mouseClick(ActionStatus status, FoundElement element, MouseDirection position, int offsetX, int offsetY);
 	public void doubleClick();
 	public void rightClick();

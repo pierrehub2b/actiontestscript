@@ -136,7 +136,7 @@ public class TestElement{
 	
 	public String getNotFoundDescription() {
 		final StringBuilder builder = new StringBuilder("element not found ");
-		builder.append(searchedTag).append("[").append(criterias).append("]");
+		builder.append("[").append(criterias).append("]");
 		return builder.toString();
 	}
 
