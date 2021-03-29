@@ -58,22 +58,21 @@ public class RegexpTransformer extends Transformer {
 
 	@Override
 	public String format(String data) {
-
-		String result = "";
 		if(data.length() > 0) {
-
 			try {
 				final Pattern patternComp = Pattern.compile(pattern);
 				final Matcher m = patternComp.matcher(data);
 
 				if(m.find()) {
-					result = m.group(group);
+					return m.group(group);
 				}
-			}catch(IndexOutOfBoundsException | PatternSyntaxException e) {
-				result = "#REGEXP_ERROR# " + e.getMessage();
+			}catch(PatternSyntaxException e) {
+				return "#REGEXP_ERROR# (Pattern syntax error) " + pattern;
+			}catch(IndexOutOfBoundsException e) {
+				return "#REGEXP_ERROR# (Group index out of bound) " + pattern;
 			}
 		}
-		return result;
+		return "";
 	}
 
 	//--------------------------------------------------------
