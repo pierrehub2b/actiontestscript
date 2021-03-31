@@ -151,7 +151,13 @@ public class ActionApi extends Action {
 	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
 		data.addProperty("type", type);
 		data.addProperty("method", method.getCalculated());
-		data.addProperty(status.getMessage(), status.getData().toString());
+		
+		final Object statusData = status.getData();
+		if(statusData == null) {
+			data.addProperty(status.getMessage(), "");
+		}else {
+			data.addProperty(status.getMessage(), statusData.toString());
+		}
 		return super.getActionLogs(scriptName, scriptLine, data);
 	}
 

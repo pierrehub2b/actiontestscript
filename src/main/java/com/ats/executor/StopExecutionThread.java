@@ -25,21 +25,23 @@ import java.util.Scanner;
 
 public class StopExecutionThread extends Thread{
 
-	private InputStream inputStream;
+	private ActionTestScript actionTestScript;
+	private Scanner scanner;
 
-	public StopExecutionThread(InputStream in) {
+	public StopExecutionThread(ActionTestScript script, InputStream in) {
 		super("ats-stop-execution");
+		this.actionTestScript = script;
 		this.setDaemon(true);
-		this.inputStream = in;
+		this.scanner = new Scanner(in);
 	}
 
 	@Override
 	public void run() {
-		Scanner scanner = new Scanner(inputStream);
 		while (true) {
 			try {
 				String input = scanner.nextLine();
 				if ("q".equals(input)) {
+					actionTestScript.cleanup();
 					break;
 				}
 			}catch(NoSuchElementException e) {

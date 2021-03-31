@@ -50,7 +50,7 @@ public class ExecutionListener implements IExecutionListener {
 		}
 
 		System.out.println("[ATS-SCRIPT] -------------------------------------");
-		System.out.println("[ATS-SCRIPT]   ATS " + ATS.VERSION + " execution start");
+		System.out.println("[ATS-SCRIPT]      ATS " + ATS.VERSION + " execution start");
 		System.out.println("[ATS-SCRIPT] -------------------------------------");
 	}
 
@@ -59,7 +59,7 @@ public class ExecutionListener implements IExecutionListener {
 		IExecutionListener.super.onExecutionFinish();
 
 		System.out.println("[ATS-SCRIPT] ----------------------------------");
-		System.out.println("[ATS-SCRIPT]   ATS execution complete");
+		System.out.println("[ATS-SCRIPT]       ATS execution complete");
 		System.out.println("[ATS-SCRIPT] ----------------------------------");
 
 		final String atsReport = System.getProperty(CampaignReportGenerator.ATS_REPORT);

@@ -97,6 +97,7 @@ import okhttp3.OkHttpClient;
 public class ActionTestScript extends Script implements ITest{
 
 	public static final String MAIN_TEST_FUNCTION = "testMain";
+	public static final String TEST_STOPPABLE = "com.ats.test.stoppable";
 
 	protected ActionTestScript topScript;
 
@@ -312,7 +313,10 @@ public class ActionTestScript extends Script implements ITest{
 				}
 			});
 
-			new StopExecutionThread(System.in).start();
+			if("true".equals(System.getProperty(TEST_STOPPABLE))) {
+				sendScriptInfo("This script can be stopped if 'q' is sent to 'System.in' stream");
+				new StopExecutionThread(this, System.in).start();
+			}
 		}
 	}
 
