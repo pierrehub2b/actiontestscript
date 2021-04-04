@@ -706,8 +706,11 @@ public class DesktopDriver extends RemoteWebDriver {
 		return sendRequestCommand(CommandType.Element, ElementType.Childs, new Object[] {comboId, tag}).getFoundElements(dimension);
 	}
 
-	public void selectItem(String elementId, String type, String value, boolean regexp) {
-		sendRequestCommand(CommandType.Element, ElementType.Select, elementId, type, value, regexp);
+	public void selectItem(ActionStatus status, String elementId, String type, String value, boolean regexp) {
+		final DesktopResponse resp = sendRequestCommand(CommandType.Element, ElementType.Select, elementId, type, value, regexp);
+		if(resp.errorMessage != null) {
+			status.setError(ActionStatus.OBJECT_NOT_FOUND, resp.errorMessage);
+		}
 	}
 
 	public String getElementAttribute(String elementId, String attribute) {

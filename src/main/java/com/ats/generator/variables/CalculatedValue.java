@@ -141,13 +141,13 @@ public class CalculatedValue{
 		while (mv.find()) {
 			final String replace = mv.group(0);
 			final String variableName = mv.group(1);
+			
 			dataValue = dataValue.replace(replace, script.getVariableValue(variableName));
 			rawJavaCode = rawJavaCode.replace(replace, "\", " + variableName + ", \"");
 		}
 
 		mv = GLOBAL_VARIABLE_PATTERN.matcher(dataValue);
 		while (mv.find()) {
-
 			final String replace = mv.group(0);
 			final String variableName = mv.group(1);
 
@@ -159,6 +159,7 @@ public class CalculatedValue{
 		while (mv.find()) {
 			final String replace = mv.group(0);
 			final String value = StringEscapeUtils.escapeJava(mv.group(1).trim());
+			
 			dataValue = dataValue.replace(replace, script.getSystemValue(value));
 			rawJavaCode = rawJavaCode.replace(replace, "\"," + ActionTestScript.JAVA_SYSTEM_FUNCTION_NAME + "(\"" + value + "\"), \"");
 		}
@@ -166,6 +167,7 @@ public class CalculatedValue{
 		mv = PARAMETER_PATTERN.matcher(dataValue);
 		while (mv.find()) {
 			final ParameterValue sp = new ParameterValue(mv);
+			
 			dataValue = dataValue.replace(sp.getReplace(), script.getParameterValue(sp.getValue(), sp.getDefaultValue()));
 			rawJavaCode = rawJavaCode.replace(sp.getReplace(), "\", " + ActionTestScript.JAVA_PARAM_FUNCTION_NAME + sp.getCode() + ", \"");
 		}
@@ -173,6 +175,7 @@ public class CalculatedValue{
 		mv = ENV_PATTERN.matcher(dataValue);
 		while (mv.find()) {
 			final EnvironmentValue sp = new EnvironmentValue(mv);
+			
 			dataValue = dataValue.replace(sp.getReplace(), script.getEnvironmentValue(sp.getValue(), sp.getDefaultValue()));
 			rawJavaCode = rawJavaCode.replace(sp.getReplace(), "\", " + ActionTestScript.JAVA_ENV_FUNCTION_NAME + sp.getCode() + ", \"");
 		}
@@ -180,6 +183,7 @@ public class CalculatedValue{
 		mv = TODAY_PATTERN.matcher(dataValue);
 		while (mv.find()) {
 			final String replace = mv.group(0);
+			
 			dataValue = dataValue.replace(replace, DateTransformer.getTodayValue());
 			rawJavaCode = rawJavaCode.replace(replace, "\", " + ActionTestScript.JAVA_TODAY_FUNCTION_NAME + "(), \"");
 		}
@@ -187,6 +191,7 @@ public class CalculatedValue{
 		mv = NOW_PATTERN.matcher(dataValue);
 		while (mv.find()) {
 			final String replace = mv.group(0);
+			
 			dataValue = dataValue.replace(replace, TimeTransformer.getNowValue());
 			rawJavaCode = rawJavaCode.replace(replace, "\", " + ActionTestScript.JAVA_NOW_FUNCTION_NAME + "(), \"");
 		}
@@ -194,6 +199,7 @@ public class CalculatedValue{
 		mv = UUID_PATTERN.matcher(dataValue);
 		while (mv.find()) {
 			final String replace = mv.group(0);
+			
 			dataValue = dataValue.replace(replace, UUID.randomUUID().toString());
 			rawJavaCode = rawJavaCode.replace(replace, "\", " + ActionTestScript.JAVA_UUID_FUNCTION_NAME + "(), \"");
 		}
@@ -201,6 +207,7 @@ public class CalculatedValue{
 		mv = RND_PATTERN.matcher(dataValue);
 		while (mv.find()) {
 			final RandomStringValue rds = new RandomStringValue(mv);
+			
 			dataValue = dataValue.replace(rds.getReplace(), rds.exec());
 			rawJavaCode = rawJavaCode.replace(rds.getReplace(), "\", " + ActionTestScript.JAVA_RNDSTRING_FUNCTION_NAME + rds.getCode() + ", \"");
 		}

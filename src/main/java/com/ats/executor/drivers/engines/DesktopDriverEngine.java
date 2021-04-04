@@ -161,7 +161,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void selectOptionsItem(ActionStatus status, TestElement element, CalculatedProperty selectProperty) {
-		getDesktopDriver().selectItem(element.getFoundElement().getId(), selectProperty.getName(), selectProperty.getValue().getCalculated(), selectProperty.isRegexp());
+		getDesktopDriver().selectItem(status, element.getFoundElement().getId(), selectProperty.getName(), selectProperty.getValue().getCalculated(), selectProperty.isRegexp());
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------
