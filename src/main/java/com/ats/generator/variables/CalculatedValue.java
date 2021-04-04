@@ -48,7 +48,7 @@ public class CalculatedValue{
 	public static final Pattern IMAGE_PATTERN = Pattern.compile("\\$image\\s*?\\(([^\\)]*)\\)", Pattern.CASE_INSENSITIVE);
 
 	private static final Pattern PASSWORD_DATA = Pattern.compile("\\$pass\\s*?\\(([^\\)]*)\\)", Pattern.CASE_INSENSITIVE);
-	
+
 	private static final Pattern SYS_PATTERN = Pattern.compile("\\$sys\\s*?\\(([^\\)]*)\\)", Pattern.CASE_INSENSITIVE);
 	public static final Pattern PARAMETER_PATTERN = Pattern.compile("\\$param\\s*?\\((\\w+),?(\\s*?[^\\)]*)?\\)", Pattern.CASE_INSENSITIVE);
 	public static final Pattern ENV_PATTERN = Pattern.compile("\\$env\\s*?\\(([\\w.]+),?(\\s*?[^\\)]*)?\\)", Pattern.CASE_INSENSITIVE);
@@ -56,7 +56,7 @@ public class CalculatedValue{
 
 	private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\$var\\s*?\\(([^\\)\\.]*)\\)", Pattern.CASE_INSENSITIVE);
 	private static final Pattern GLOBAL_VARIABLE_PATTERN = Pattern.compile("\\$var\\s*?\\(([^\\)]*)\\)", Pattern.CASE_INSENSITIVE);
-	
+
 	//-----------------------------------------------------------------------------------------------------
 	// variable and parameter management
 	//-----------------------------------------------------------------------------------------------------
@@ -96,9 +96,10 @@ public class CalculatedValue{
 		setScript(script);
 		setCalculated("");
 	}
-	
+
 	public CalculatedValue(Script script, String dataValue) {
 		setScript(script);
+
 		if(dataValue.length() > 0){
 			dataValue = Utils.unescapeAts(dataValue);
 			setData(dataValue);
@@ -110,23 +111,47 @@ public class CalculatedValue{
 
 		rawJavaCode = StringEscapeUtils.escapeJava(dataValue);
 
-		Matcher mv = VARIABLE_PATTERN.matcher(dataValue);
+		Matcher mv = PGAV_PATTERN.matcher(dataValue);
 		while (mv.find()) {
-			
+			rawJavaCode = rawJavaCode.replace(mv.group(0), "\", " + ActionTestScript.JAVA_GAV_FUNCTION_NAME + "(), \"");
+		}
+
+		mv = ITERATION_PATTERN.matcher(dataValue);
+		while (mv.find()) {
+			rawJavaCode = rawJavaCode.replace(mv.group(0), "\", " + ActionTestScript.JAVA_ITERATION_FUNCTION_NAME + "(), \"");
+		}
+
+		mv = IMAGE_PATTERN.matcher(dataValue);
+		while (mv.find()) {
+			rawJavaCode = rawJavaCode.replace(mv.group(0), Project.getAssetsImageJavaCode(mv.group(1)));
+		}
+
+		mv = ASSET_PATTERN.matcher(dataValue);
+		while (mv.find()) {
+			rawJavaCode = rawJavaCode.replace(mv.group(0), Project.getAssetsJavaCode(mv.group(1)));
+		}
+
+		mv = PASSWORD_DATA.matcher(dataValue);
+		while (mv.find()) {
+			crypted = true;
+			rawJavaCode = rawJavaCode.replace(mv.group(0), "\", new " + Password.class.getCanonicalName() + "(this, \"" + mv.group(1) + "\"), \"");
+		}
+
+		mv = VARIABLE_PATTERN.matcher(dataValue);
+		while (mv.find()) {
 			final String replace = mv.group(0);
 			final String variableName = mv.group(1);
-
 			dataValue = dataValue.replace(replace, script.getVariableValue(variableName));
 			rawJavaCode = rawJavaCode.replace(replace, "\", " + variableName + ", \"");
 		}
-		
+
 		mv = GLOBAL_VARIABLE_PATTERN.matcher(dataValue);
 		while (mv.find()) {
-			
+
 			final String replace = mv.group(0);
 			final String variableName = mv.group(1);
-			
-			dataValue = script.getGlobalVariableValue(variableName);
+
+			dataValue = dataValue.replace(replace, script.getGlobalVariableValue(variableName));
 			rawJavaCode = rawJavaCode.replace(replace, "\", " + ActionTestScript.JAVA_GLOBAL_VAR_FUNCTION_NAME + "(\"" + variableName + "\"), \"");
 		}
 
@@ -180,32 +205,6 @@ public class CalculatedValue{
 			rawJavaCode = rawJavaCode.replace(rds.getReplace(), "\", " + ActionTestScript.JAVA_RNDSTRING_FUNCTION_NAME + rds.getCode() + ", \"");
 		}
 
-		mv = PGAV_PATTERN.matcher(dataValue);
-		while (mv.find()) {
-			rawJavaCode = rawJavaCode.replace(mv.group(0), "\", " + ActionTestScript.JAVA_GAV_FUNCTION_NAME + "(), \"");
-		}
-
-		mv = ITERATION_PATTERN.matcher(dataValue);
-		while (mv.find()) {
-			rawJavaCode = rawJavaCode.replace(mv.group(0), "\", " + ActionTestScript.JAVA_ITERATION_FUNCTION_NAME + "(), \"");
-		}
-
-		mv = IMAGE_PATTERN.matcher(dataValue);
-		while (mv.find()) {
-			rawJavaCode = rawJavaCode.replace(mv.group(0), Project.getAssetsImageJavaCode(mv.group(1)));
-		}
-
-		mv = ASSET_PATTERN.matcher(dataValue);
-		while (mv.find()) {
-			rawJavaCode = rawJavaCode.replace(mv.group(0), Project.getAssetsJavaCode(mv.group(1)));
-		}
-
-		mv = PASSWORD_DATA.matcher(dataValue);
-		while (mv.find()) {
-			crypted = true;
-			rawJavaCode = rawJavaCode.replace(mv.group(0), "\", new " + Password.class.getCanonicalName() + "(this, \"" + mv.group(1) + "\"), \"");
-		}
-
 		return dataValue;
 	}
 
@@ -256,9 +255,9 @@ public class CalculatedValue{
 	public ArrayList<SendKeyData> getCalculatedText(ActionTestScript script){
 
 		final ArrayList<SendKeyData> chainKeys = new ArrayList<SendKeyData>();
-		
+
 		final String calc = getCalculated();
-		
+
 		int start = 0;		
 
 		final Matcher match = KEY_REGEXP.matcher(calc);
@@ -281,7 +280,7 @@ public class CalculatedValue{
 
 		return chainKeys;
 	}
-	
+
 	public String getDataListItem() {
 		if(dataList != null && dataList.length > 0) {
 			return dataList[0].toString();
@@ -309,7 +308,7 @@ public class CalculatedValue{
 				return data;
 			}
 		}
-		
+
 		return calculated;
 	}
 

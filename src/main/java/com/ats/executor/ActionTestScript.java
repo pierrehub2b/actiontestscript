@@ -439,8 +439,8 @@ public class ActionTestScript extends Script implements ITest{
 		return createVariable(name, value, transformer);
 	}
 
-	public static final String JAVA_GLOBAL_VAR_FUNCTION_NAME = "globalVariable";
-	public String globalVariable(String varPath){
+	public static final String JAVA_GLOBAL_VAR_FUNCTION_NAME = "gvar";
+	public String gvar(String varPath){
 		return topScript.getGlobalVariableValue(varPath);
 	}
 

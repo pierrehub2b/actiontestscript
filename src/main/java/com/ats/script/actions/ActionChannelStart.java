@@ -39,11 +39,15 @@ public class ActionChannelStart extends ActionChannel {
 	
 	public static final int PERF = 1;
 	public static final int NEOLOAD = 2;
+	
+	public static final String ATTACH = "attach";
 
 	private CalculatedValue application;
 	private ArrayList<CalculatedValue> arguments = new ArrayList<CalculatedValue>();
 
 	private int performance = 0;
+	
+	private boolean attach = false;
 
 	private String authentication = "";
 	private String authenticationValue = "";
@@ -65,6 +69,8 @@ public class ActionChannelStart extends ActionChannel {
 	private void parseOptions(Script script, String value){
 		if(ActionNeoload.SCRIPT_NEOLOAD_LABEL.equalsIgnoreCase(value)) {
 			setPerformance(NEOLOAD);
+		}else if(ATTACH.equalsIgnoreCase(value)) {
+			setAttach(true);
 		}else if(ActionPerformance.SCRIPT_PERFORMANCE_LABEL.equalsIgnoreCase(value)) {
 			setPerformance(PERF);
 		}else if(BASIC_AUTHENTICATION.equalsIgnoreCase(value)){
@@ -76,13 +82,15 @@ public class ActionChannelStart extends ActionChannel {
 		}
 	}
 
-	public ActionChannelStart(Script script, String name, CalculatedValue value, String[] options) {
+	public ActionChannelStart(Script script, boolean attach, String name, CalculatedValue value, String[] options) {
 		this(script, name, Arrays.asList(options), value, null);
+		this.setAttach(attach);
 	}
 
-	public ActionChannelStart(Script script, String name, CalculatedValue value, String[] options, CalculatedValue ...calculatedValues) {
+	public ActionChannelStart(Script script, boolean attach, String name, CalculatedValue value, String[] options, CalculatedValue ...calculatedValues) {
 		this(script, name, Arrays.asList(options), value, null);
 		this.setArguments(new ArrayList<CalculatedValue>(Arrays.asList(calculatedValues)));
+		this.setAttach(attach);
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -116,6 +124,7 @@ public class ActionChannelStart extends ActionChannel {
 
 		final StringBuilder codeBuilder = 
 				super.getJavaCode()
+				.append(isAttach()).append(", ")
 				.append("\"").append(getName()).append("\", ")
 				.append(application.getJavaCode())
 				.append(", new String[]{");
@@ -189,5 +198,13 @@ public class ActionChannelStart extends ActionChannel {
 
 	public void setArguments(ArrayList<CalculatedValue> arguments) {
 		this.arguments = arguments;
+	}
+
+	public boolean isAttach() {
+		return attach;
+	}
+
+	public void setAttach(boolean attach) {
+		this.attach = attach;
 	}
 }

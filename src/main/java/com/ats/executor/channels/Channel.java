@@ -457,6 +457,13 @@ public class Channel {
 	public String getApplicationVersion() {
 		return systemValues.getApplicationVersion();
 	}
+	
+	public boolean attachToExistingProcess() {
+		if(actionStart != null) {
+			return actionStart.isAttach();
+		}
+		return false;
+	}
 
 	//----------------------------------------------------------------------------------------------------------------------
 	// logs

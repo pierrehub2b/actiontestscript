@@ -520,7 +520,16 @@ public class DesktopDriver extends RemoteWebDriver {
 	}
 
 	public void setElementMapLocation(List<FoundElement> list) {
+		final FoundElement parent = new FoundElement();
+		list.parallelStream().forEach(e -> recalculateSize(parent, e));
 		this.elementMapLocation = list;
+	}
+	
+	private void recalculateSize(FoundElement parent, FoundElement elem) {
+		if(elem.isVisible() && elem.getWidth() > 0 && elem.getHeight() > 0) {
+			parent.updateSize(elem.getBoundX() + elem.getWidth(), elem.getBoundY() + elem.getHeight());
+		}
+		elem.getChildren().parallelStream().forEach(e -> recalculateSize(elem, e));
 	}
 
 	public FoundElement getElementFromPoint(final Double x, final Double y) {
@@ -578,8 +587,8 @@ public class DesktopDriver extends RemoteWebDriver {
 		return new FoundElement(sendRequestCommand(CommandType.Window, WindowType.Handle, handle).getWindow());
 	}
 	
-	public DesktopResponse startApplication(ArrayList<String> args) {
-		return sendRequestCommand(CommandType.Driver, DriverType.Application, String.join("\n", args));
+	public DesktopResponse startApplication(boolean attach, ArrayList<String> args) {
+		return sendRequestCommand(CommandType.Driver, DriverType.Application, attach, String.join("\n", args));
 	}
 
 	public List<DesktopWindow> getWindowsByPid(Long pid) {

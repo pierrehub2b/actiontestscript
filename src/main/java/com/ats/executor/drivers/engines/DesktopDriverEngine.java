@@ -82,7 +82,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 			final ArrayList<String> args = new ArrayList<String>(Arrays.asList(application));
 			channel.getArguments().forEach(c -> args.add(c.getCalculated()));
 						
-			final DesktopResponse resp = getDesktopDriver().startApplication(args);
+			final DesktopResponse resp = getDesktopDriver().startApplication(channel.attachToExistingProcess(), args);
 			if(resp.errorCode == 0) {
 				window = resp.getWindow();
 				if(window != null) {

@@ -70,7 +70,6 @@ public class DriverManager {
 	private ArrayList<MobileDriverEngine> mobileDrivers = new ArrayList<MobileDriverEngine>();
 
 	private DriverProcess desktopDriver;
-	// private MobileDriverEngine mobileDriverEngine;
 
 	//--------------------------------------------------------------------------------------------------------------
 

@@ -293,6 +293,15 @@ public class FoundElement{
 	// end of contructors
 	//------------------------------------------------------------------------------------------------------------------------------
 	
+	public void updateSize(double w, double h) {
+		if(width < w) {
+			width = w;
+		}
+		if(height < h) {
+			height = h;
+		}
+	}
+	
 	public String[] getItemAttribute() {
 		if(attributes != null && attributes.size() == 2) {
 			return new String[] {attributes.get("value"), attributes.get("text")};
