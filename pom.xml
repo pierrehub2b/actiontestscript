@@ -79,7 +79,7 @@
 		<lib.opencsv.version>5.4</lib.opencsv.version>
 		<lib.naturalness.version>1.1</lib.naturalness.version>
 		<lib.bcprov.version>1.68</lib.bcprov.version>
-		<lib.netty.version>4.1.60.Final</lib.netty.version>
+		<lib.netty.version>4.1.63.Final</lib.netty.version>
 		<lib.browserup.version>2.1.2</lib.browserup.version>
 		<lib.browserup.mitm.version>2.1.2</lib.browserup.mitm.version>
 		<lib.jackson.databind>2.12.2</lib.jackson.databind>
