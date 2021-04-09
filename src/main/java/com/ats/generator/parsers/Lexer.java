@@ -407,7 +407,10 @@ public class Lexer {
 					}
 
 					if (dataArray.size() > 0) {
-						csvFilePath = dataArray.remove(0).trim();
+						final String firstValue = dataArray.get(0).trim();
+						if(firstValue.startsWith(ActionCallscript.ASSETS_PROTOCOLE) || firstValue.startsWith(ActionCallscript.FILE_PROTOCOLE) || firstValue.startsWith(ActionCallscript.HTTP_PROTOCOLE) || firstValue.startsWith(ActionCallscript.HTTPS_PROTOCOLE)) {
+							csvFilePath = dataArray.remove(0).trim();
+						}
 					} else {
 
 						matcher = ACTION_PATTERN.matcher(dataOne);

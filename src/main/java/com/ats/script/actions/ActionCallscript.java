@@ -19,6 +19,21 @@ under the License.
 
 package com.ats.script.actions;
 
+import static org.testng.Assert.fail;
+
+import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.StringJoiner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import com.ats.element.SearchedElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
@@ -36,21 +51,6 @@ import com.ats.tools.logger.MessageCode;
 import com.ats.tools.logger.levels.AtsFailError;
 import com.google.gson.JsonObject;
 
-import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.StringJoiner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static org.testng.Assert.fail;
-
 public class ActionCallscript extends ActionReturnVariableArray {
 
 	public static final String SCRIPT_LABEL = "subscript";
@@ -59,13 +59,15 @@ public class ActionCallscript extends ActionReturnVariableArray {
 
 	private static final String SCRIPT_LOOP = "loop";
 	public static final Pattern LOOP_REGEXP = Pattern.compile(SCRIPT_LOOP + " ?\\((\\d+)\\)", Pattern.CASE_INSENSITIVE);
-	private static final String ASSETS_PROTOCOLE = "assets:///";
-	private static final String FILE_PROTOCOLE = "file:///";
-	private static final String HTTP_PROTOCOLE = "http://";
-	private static final String HTTPS_PROTOCOLE = "https://";
+	public static final String ASSETS_PROTOCOLE = "assets:///";
+	public static final String FILE_PROTOCOLE = "file:///";
+	public static final String HTTP_PROTOCOLE = "http://";
+	public static final String HTTPS_PROTOCOLE = "https://";
 
 	private CalculatedValue name;
 	private int type = -1;
+	
+	private SearchedElement element;
 
 	private ArrayList<Variable> scriptVariables;
 
@@ -83,20 +85,25 @@ public class ActionCallscript extends ActionReturnVariableArray {
 
 	public ActionCallscript() {}
 
-	public ActionCallscript(ScriptLoader script, ArrayList<String> options, String name, String[] parameters, String[] returnValue, String csvFilePath, List<String> dataArray) {
+	public ActionCallscript(ScriptLoader script, ArrayList<String> options, String name, String[] parameters, String[] returnValue, String csvFilePath, ArrayList<String> dataArray) {
 
 		super(script);
-		this.setName(new CalculatedValue(script, name));
+		setName(new CalculatedValue(script, name));
 
-		if(setParameterFilePathData(csvFilePath)) {
+		if(csvFilePath != null) {
+			setParameterFilePath(new CalculatedValue(script, csvFilePath));
 			if(dataArray != null && dataArray.size() > 0) {
 				final String l = dataArray.remove(0);
 				if(l.contains("rnd") || l.contains("random")) {
-					this.parameterFileIndex = RND_INDEX_VALUE;
+					parameterFileIndex = RND_INDEX_VALUE;
 				}else {
-					this.parameterFileIndex = Utils.string2Int(l, NO_INDEX_VALUE);
+					parameterFileIndex = Utils.string2Int(l, NO_INDEX_VALUE);
 				}
 			}
+		}else if(dataArray != null && dataArray.size() > 0) {
+			
+			element = new SearchedElement(script, dataArray);
+						
 		}else {
 			if(parameters.length > 0) {
 				final String firstParam = parameters[0].trim();
@@ -108,7 +115,7 @@ public class ActionCallscript extends ActionReturnVariableArray {
 
 						final Matcher match = LOOP_REGEXP.matcher(param);
 						if(match.find()){
-							this.loop = Utils.string2Int(match.group(1), 1);
+							loop = Utils.string2Int(match.group(1), 1);
 						}else {
 							paramsValues.add(new CalculatedValue(script, param.trim()));
 						}
@@ -118,12 +125,12 @@ public class ActionCallscript extends ActionReturnVariableArray {
 			}
 		}
 
-		if(returnValue.length > 0 && this.loop == 1){
+		if(returnValue.length > 0 && loop == 1){
 			final ArrayList<Variable> variableValues = new ArrayList<Variable>();
 			for (String varName : returnValue ){
 				variableValues.add(script.getVariable(varName.trim(), true));
 			}
-			this.setVariables(variableValues);
+			setVariables(variableValues);
 		}
 
 		if(options.size() > 0) {
@@ -143,6 +150,11 @@ public class ActionCallscript extends ActionReturnVariableArray {
 	public ActionCallscript(Script script, CalculatedValue name) {
 		super(script);
 		this.setName(name);
+	}
+	
+	public ActionCallscript(Script script, CalculatedValue name, SearchedElement element) {
+		this(script, name);
+		this.setElement(element);
 	}
 
 	public ActionCallscript(Script script, CalculatedValue name, CalculatedValue[] parameters) {
@@ -197,7 +209,7 @@ public class ActionCallscript extends ActionReturnVariableArray {
 	private boolean setParameterFilePathData(String value) {
 		if(value != null) {
 			if(value.startsWith(ASSETS_PROTOCOLE) || value.startsWith(FILE_PROTOCOLE) || value.startsWith(HTTP_PROTOCOLE) || value.startsWith(HTTPS_PROTOCOLE)) {
-				this.setParameterFilePath(new CalculatedValue(script, value));
+				setParameterFilePath(new CalculatedValue(script, value));
 				return true;
 			}
 		}
@@ -220,6 +232,9 @@ public class ActionCallscript extends ActionReturnVariableArray {
 			.append(parameterFilePath.getJavaCode())
 			.append(", ")
 			.append(parameterFileIndex);
+		}else if(element != null) {
+			codeBuilder.append(", ")
+			.append(element.getJavaCode());
 		}else {
 			if(parameters != null){
 				parameters.getJavaCode(codeBuilder);
@@ -440,6 +455,14 @@ public class ActionCallscript extends ActionReturnVariableArray {
 			setVariables(null);
 		}
 		this.loop = loop;
+	}
+	
+	public SearchedElement getElement() {
+		return element;
+	}
+
+	public void setElement(SearchedElement value) {
+		this.element = value;
 	}
 
 	public int getParameterFileIndex() {

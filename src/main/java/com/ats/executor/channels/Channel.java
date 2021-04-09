@@ -639,6 +639,7 @@ public class Channel {
 	}
 
 	public void switchWindow(ActionStatus status, int index, int tries){
+		sleep(2000);
 		engine.switchWindow(status, index, tries);
 		if(status.isPassed()) {
 			engine.updateDimensions();
