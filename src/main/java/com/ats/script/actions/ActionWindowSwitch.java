@@ -30,8 +30,9 @@ public class ActionWindowSwitch extends ActionWindow {
 
 	public static final String SCRIPT_SWITCH_LABEL = SCRIPT_LABEL + "switch";
 	
+	private int num = 0;
 	private int tries = 0;
-	private int num;
+	private int delay = 0;
 	
 	public ActionWindowSwitch() {}
 
@@ -42,22 +43,24 @@ public class ActionWindowSwitch extends ActionWindow {
 		
 		setNum(num);
 		setTries(data[0]);
+		setDelay(data[1]);
 	}
 	
-	public ActionWindowSwitch(Script script, int tries, int num) {
+	public ActionWindowSwitch(Script script, int tries, int num, int delay) {
 		super(script);
 		setNum(num);
 		setTries(tries);
+		setDelay(delay);
 	}
 	
 	@Override
 	public StringBuilder getJavaCode() {
-		return super.getJavaCode().append(tries).append(", ").append(num).append(")");
+		return super.getJavaCode().append(tries).append(", ").append(num).append(", ").append(delay).append(")");
 	}
 	
 	@Override
 	public String exec(Channel channel) {
-		channel.switchWindow(status, num, tries);
+		channel.switchWindow(status, num, tries, delay);
 		return num + "";
 	}
 	
@@ -72,6 +75,14 @@ public class ActionWindowSwitch extends ActionWindow {
 	// getters and setters for serialization
 	//--------------------------------------------------------
 
+	public int getDelay() {
+		return delay;
+	}
+
+	public void setDelay(int delay) {
+		this.delay = delay;
+	}
+	
 	public int getNum() {
 		return num;
 	}

@@ -638,8 +638,10 @@ public class Channel {
 		return engine.getRootElement(this);
 	}
 
-	public void switchWindow(ActionStatus status, int index, int tries){
-		sleep(2000);
+	public void switchWindow(ActionStatus status, int index, int tries, int delay){
+		if(delay > 0 && delay < 10) {
+			sleep(delay*1000);
+		}
 		engine.switchWindow(status, index, tries);
 		if(status.isPassed()) {
 			engine.updateDimensions();

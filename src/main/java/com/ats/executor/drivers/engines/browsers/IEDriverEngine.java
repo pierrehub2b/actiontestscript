@@ -30,6 +30,8 @@ import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.WebDriverEngine;
 import com.ats.generator.objects.MouseDirection;
+
+import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.ie.InternetExplorerOptions;
 import org.testng.collections.Sets;
@@ -49,7 +51,11 @@ public class IEDriverEngine extends WebDriverEngine {
 
 		final InternetExplorerOptions ieOptions = new InternetExplorerOptions();
 		ieOptions.introduceFlakinessByIgnoringSecurityDomains();
-		ieOptions.enablePersistentHovering();
+		//ieOptions.enablePersistentHovering();
+		ieOptions.ignoreZoomSettings();
+		//ieOptions.setPageLoadStrategy(PageLoadStrategy.NONE);
+		//ieOptions.requireWindowFocus();
+		
 
 		launchDriver(status, ieOptions, null);
 
