@@ -54,9 +54,7 @@ public class ActionAssertProperty extends ActionExecuteElement {
 
 	@Override
 	public StringBuilder getJavaCode() {
-		StringBuilder codeBuilder = super.getJavaCode();
-		codeBuilder.append(", ").append(value.getJavaCode()).append(")");
-		return codeBuilder;
+		return super.getJavaCode().append(", ").append(value.getJavaCode()).append(")");
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

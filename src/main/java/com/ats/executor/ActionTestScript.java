@@ -563,8 +563,8 @@ public class ActionTestScript extends Script implements ITest{
 	//---------------------------------------------------------------------------------------------
 
 	public static final String JAVA_PROPERTY_FUNCTION_NAME = "prp";
-	public CalculatedProperty prp(boolean isRegexp, String name, CalculatedValue value){
-		return new CalculatedProperty(isRegexp, name, value);
+	public CalculatedProperty prp(String type, String name, CalculatedValue value){
+		return new CalculatedProperty(type, name, value);
 	}
 
 	//---------------------------------------------------------------------------------------------

@@ -38,6 +38,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -198,8 +199,20 @@ public class AtsManager {
 
 		final Path atsFolderPath = Paths.get(atsHome);
 		if(atsFolderPath.toFile().exists()) {
-			properties = loadProperties(atsFolderPath.resolve(ATS_PROPERTIES_FILE));
+			
+			final Path userHomePath = Paths.get(System.getProperty("user.home"));
+			Path atsPropertiesFilePath = userHomePath.resolve(ATS_PROPERTIES_FILE);
+			
+			if(!Files.exists(atsPropertiesFilePath)) {
+				atsPropertiesFilePath = userHomePath.resolve(ATS_FOLDER).resolve(ATS_PROPERTIES_FILE);
+				if(!Files.exists(atsPropertiesFilePath)) {
+					atsPropertiesFilePath = atsFolderPath.resolve(ATS_PROPERTIES_FILE);
+				}
+			}
+			
+			properties = loadProperties(atsPropertiesFilePath);
 			driversFolderPath = atsFolderPath.resolve(DRIVERS_FOLDER);
+			
 		}else {
 			driversFolderPath = Paths.get("");
 			ATS.logWarn("ATS driver folder not found -> " + atsHome);
@@ -575,6 +588,7 @@ public class AtsManager {
 										String name = null;
 										String waitAction = null;
 										String path = null;
+										String[] options = null;
 
 										if (applications.item(j) instanceof Element) {
 											final Element application = (Element) applications.item(j);
@@ -592,13 +606,26 @@ public class AtsManager {
 															break;
 														case "path":
 															path = getElementText(applicationElement);
+															if(!path.startsWith("file:///")) {
+																path = "file:///" + path;
+															}
+															break;
+														case "options":
+															final NodeList optionsList = application.getElementsByTagName("option");
+															final int optionsLen = optionsList.getLength();
+															if(optionsLen > 0) {
+																options = new String[optionsLen];
+																for( int l = 0; l < optionsLen; l++ ){
+																	options[l] = optionsList.item(l).getTextContent();
+																}
+															}
 															break;
 													}
 												}
 											}
 
 											if(name != null && path != null) {
-												addApplicationProperties(ApplicationProperties.DESKTOP_TYPE, name, path, waitAction, "", null, null, null);
+												addApplicationProperties(ApplicationProperties.DESKTOP_TYPE, name, path, waitAction, "", null, null, null, options);
 											}
 										}
 									}
@@ -639,7 +666,7 @@ public class AtsManager {
 											}
 
 											if(name != null && endpoint != null && packageName != null) {
-												addApplicationProperties(ApplicationProperties.MOBILE_TYPE, name, endpoint + "/" + packageName, waitAction, "", null, null, null);
+												addApplicationProperties(ApplicationProperties.MOBILE_TYPE, name, endpoint + "/" + packageName, waitAction, "", null, null, null, null);
 											}
 										}
 									}
@@ -674,7 +701,7 @@ public class AtsManager {
 											}
 
 											if(name != null && url != null) {
-												addApplicationProperties(ApplicationProperties.API_TYPE, name, url, waitAction, "", null, null, null);
+												addApplicationProperties(ApplicationProperties.API_TYPE, name, url, waitAction, "", null, null, null, null);
 											}
 										}
 									}
@@ -697,8 +724,8 @@ public class AtsManager {
 		return new Properties();
 	}
 
-	private void addApplicationProperties(int type, String name, String path, String wait, String check, String lang, String userDataDir, String title) {
-		addApplicationProperties(type, name, null, path, wait, check, lang, userDataDir, title, null, null);
+	private void addApplicationProperties(int type, String name, String path, String wait, String check, String lang, String userDataDir, String title, String[] options) {
+		addApplicationProperties(type, name, null, path, wait, check, lang, userDataDir, title, options, null);
 	}
 
 	private void addApplicationProperties(int type, String name, String driver, String path, String wait, String check, String lang, String userDataDir, String title, String[] options, String debugPort) {

@@ -19,44 +19,33 @@ under the License.
 
 package com.ats.generator.variables;
 
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
 import com.ats.element.AtsBaseElement;
 import com.ats.executor.ActionTestScript;
 import com.ats.script.Script;
 import com.ats.tools.Operators;
 import com.ats.tools.Utils;
 
-import java.util.function.Predicate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
-
 public class CalculatedProperty implements Comparable<CalculatedProperty>{
 
 	private CalculatedValue value;
 	private String name = "id";
-	private boolean regexp = false;
-
 	private Pattern regexpPattern;
+
+	private String operator = Operators.EQUAL;
 
 	public CalculatedProperty() {}
 
 	public CalculatedProperty(Script script, String data) {
 
-		Matcher objectMatcher = Operators.REGEXP_PATTERN.matcher(data);
-		boolean dataFound = objectMatcher.find();
-
-		if (dataFound) {
-			setRegexp(true);
-		}else {
-			objectMatcher = Operators.EQUAL_PATTERN.matcher(data);
-			dataFound = objectMatcher.find();
-		}
-
-		if(dataFound && objectMatcher.groupCount() >= 2){
-
-			setName(objectMatcher.group(1).trim());
-			setValue(new CalculatedValue(script, objectMatcher.group(2).trim()));
-
+		final String[] operatorData = Operators.getData(data);
+		if(operatorData != null){
+			setOperator(operatorData[0]);
+			setName(operatorData[1]);
+			setValue(new CalculatedValue(script, operatorData[2]));
 		}else{
 			setValue(new CalculatedValue(script, "true"));
 		}
@@ -67,10 +56,15 @@ public class CalculatedProperty implements Comparable<CalculatedProperty>{
 		setValue(new CalculatedValue(data));
 	}
 
-	public CalculatedProperty(boolean isRegexp, String name, CalculatedValue value) {
-		setRegexp(isRegexp);
+	public CalculatedProperty(String operator, String name, CalculatedValue value) {
+		setOperator(operator);
 		setName(name);
 		setValue(value);
+	}
+
+	public CalculatedProperty(String name, CalculatedValue calc) {
+		setName(name);
+		setValue(calc);
 	}
 
 	public void dispose() {
@@ -79,11 +73,11 @@ public class CalculatedProperty implements Comparable<CalculatedProperty>{
 	}
 
 	public String getJavaCode(){
-		return ActionTestScript.JAVA_PROPERTY_FUNCTION_NAME + "(" + isRegexp() + ", \"" + name + "\", " + value.getJavaCode() + ")";
+		return ActionTestScript.JAVA_PROPERTY_FUNCTION_NAME + "(" + Operators.getJavaCode(operator) + ", \"" + name + "\", " + value.getJavaCode() + ")";
 	}
 
 	public Predicate<AtsBaseElement> getPredicate(Predicate<AtsBaseElement> predicate){
-		if(isRegexp()) {
+		if(Operators.REGEXP.equals(operator)){
 			return predicate.and(p -> regexpMatch(p.getAttribute(name)));
 		}else {
 			return predicate.and(p -> textEquals(p.getAttribute(name)));
@@ -93,9 +87,44 @@ public class CalculatedProperty implements Comparable<CalculatedProperty>{
 	private String actualValue;
 	public boolean checkProperty(String data) {
 		this.actualValue = data;
-		if(regexp){
+
+		switch (operator) {
+
+		case Operators.REGEXP :
 			return regexpMatch(data);
-		}else{
+			
+		case Operators.DIFFERENT :
+			return !textEquals(data);
+			
+		case Operators.GREATER :
+			
+			try {
+				return Double.parseDouble(data) > Double.parseDouble(value.getCalculated());
+			}catch (NumberFormatException e) {}
+			return false;
+			
+		case Operators.LOWER :
+			
+			try {
+				return Double.parseDouble(data) < Double.parseDouble(value.getCalculated());
+			}catch (NumberFormatException e) {}
+			return false;
+			
+		case Operators.GREATER_EQUAL :
+			
+			try {
+				return Double.parseDouble(data) >= Double.parseDouble(value.getCalculated());
+			}catch (NumberFormatException e) {}
+			return false;
+
+		case Operators.LOWER_EQUAL :
+			
+			try {
+				return Double.parseDouble(data) <= Double.parseDouble(value.getCalculated());
+			}catch (NumberFormatException e) {}
+			return false;
+			
+		default :
 			return textEquals(data);
 		}
 	}
@@ -113,45 +142,50 @@ public class CalculatedProperty implements Comparable<CalculatedProperty>{
 		}
 		return regexpPattern.matcher(data).matches();
 	}
-	
+
 	public String getExpectedResultLogs() {
-		
+
 		final StringBuilder builder = new StringBuilder("property '");
 		builder.append(name).append("' with actual value '").append(actualValue);
-		
-		if(regexp) {
+
+		if(operator.equals(Operators.REGEXP)) {
 			builder.append("' do not match '");
 		}else {
 			builder.append("' is not equals to '");
 		}
-		
+
 		builder.append(value.getCalculated()).append("'");
 
 		return builder.toString();
 	}
-	
+
 	public String getShortActualValue() {
 		return Utils.truncateString(actualValue, 200);
 	}
-	
+
 	public String getExpectedResult() {
 		final String result = getName();
-		if(regexp) {
+		if(isRegexp()) {
 			return result + " match " + getValue().getCalculated();
 		}else {
 			return result + " == " + getValue().getCalculated();
 		}
 	}
+
+	public boolean isRegexp() {
+		return Operators.REGEXP.equals(operator);
+	}
+
 	//--------------------------------------------------------
 	// getters and setters for serialization
 	//--------------------------------------------------------
 
-	public boolean isRegexp(){
-		return regexp;
+	public String getOperator() {
+		return operator;
 	}
 
-	public void setRegexp(boolean value){
-		this.regexp = value;
+	public void setOperator(String operator) {
+		this.operator = operator;
 	}
 
 	public String getName() {
@@ -168,7 +202,7 @@ public class CalculatedProperty implements Comparable<CalculatedProperty>{
 
 	public void setValue(CalculatedValue value) {
 		this.value = value;
-		
+
 		try {
 			regexpPattern = Pattern.compile(value.getCalculated());
 		}catch(PatternSyntaxException e) {

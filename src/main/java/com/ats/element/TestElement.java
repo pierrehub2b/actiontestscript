@@ -550,7 +550,7 @@ public class TestElement{
 	//-------------------------------------------------------------------------------------------------------------------
 
 	protected CalculatedProperty getAtsProperty(String name) {
-		return new CalculatedProperty(false, name, new CalculatedValue(getAtsAttribute(name)));
+		return new CalculatedProperty(name, new CalculatedValue(getAtsAttribute(name)));
 	}
 
 	protected String getAtsAttribute(String name) {

@@ -29,6 +29,7 @@ import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 import org.apache.commons.text.StringEscapeUtils;
+import org.openqa.selenium.Keys;
 import org.testng.annotations.Test;
 
 import com.ats.executor.ActionTestScript;
@@ -179,6 +180,7 @@ public class ScriptHeader {
 			, "import " + Variable.class.getName() + ";"
 			, "import " + ConditionalValue.class.getName() + ";"
 			, "import " + Operators.class.getName() + ";"
+			, "import " + Keys.class.getName() + ";"
 			, ""
 			, "public class #CLASS_NAME# extends " + ActionTestScript.class.getSimpleName() + "{"
 			, ""

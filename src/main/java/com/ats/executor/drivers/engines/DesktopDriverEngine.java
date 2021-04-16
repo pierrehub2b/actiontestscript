@@ -78,10 +78,19 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 			channel.setDimensions(desktop.getTestScreenBound(), desktop.getTestScreenBound());
 		
 		}else {
-						
-			final ArrayList<String> args = new ArrayList<String>(Arrays.asList(application));
-			channel.getArguments().forEach(c -> args.add(c.getCalculated()));
-						
+				
+			ArrayList<String> args;
+			if(props.getUri() != null) {
+				application = props.getUri();
+				args = new ArrayList<String>(Arrays.asList(application));
+				if(props.getOptions() != null) {
+					Arrays.asList(props.getOptions()).forEach(o -> args.add(o));
+				}
+			}else {
+				args = new ArrayList<String>(Arrays.asList(application));
+				channel.getArguments().forEach(c -> args.add(c.getCalculated()));
+			}
+		
 			final DesktopResponse resp = getDesktopDriver().startApplication(channel.attachToExistingProcess(), args);
 			if(resp.errorCode == 0) {
 				window = resp.getWindow();
