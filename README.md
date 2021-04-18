@@ -212,7 +212,7 @@ Here is an example of global ATS configuration file (*.atsProperties* file in AT
 	</apis>
 </execute>
 ```
-* You can browsers with screen max size (for the full screen mode use F11 key)
+* You can start browsers with screen max size (for the full screen mode use F11 key)
 ```
 <appBounding>max</appBounding>
 ```
