@@ -269,6 +269,43 @@ You can find all chromium driver versions here : https://sites.google.com/a/chro
 	<profileDir>C:/atsProfiles/chrome/automatic_joe</profileDir>
 </browser>
 ```
+* You can add options to use with the web driver (exemple for Chromium browsers) :
+```
+<browser>
+	<name>chrome</name>
+	<options>
+		<option>--disable-web-security</option>
+		<option>--incognito</option>
+		<option>--start-maximized</option>
+	<options>
+</browser>
+```
+* You can add specifics options to use with Internet Explorer :
+```
+<browser>
+	<name>ie</name>
+	<options>
+		<option>useShellWindowsApiToAttachToIe</option>
+		<option>enablePersistentHovering</option>
+		<option>destructivelyEnsureCleanSession</option>
+		<option>disableNativeEvents</option>
+		<option>ignoreZoomSettings</option>
+		<option>useCreateProcessApiToLaunchIe</option>
+		<option>requireWindowFocus</option>
+		<option>usePerProcessProxy</option>
+	<options>
+</browser>
+```
+* You can add launch arguments to Windows applications :
+```
+<application>
+    <name>notepad++</name>
+    <path>C:\Program Files (x86)\Notepad++\notepad++.exe</path>
+    <options>
+		<option>C:\myFolder\myFileToOpenWhenNotepadStart.txt</option>
+	<options>
+</application>
+```
 * You can define a Neoload configuration to record and design load testing project with Neoload. ATS Neoload actions will enable Neoload UserPath recording and send commands to execute some design actions in a Neoload project. In order to enable Neoload recording you have to define Neoload proxy and service parameters :
 ```
 <neoload>
@@ -322,7 +359,7 @@ Download the latest release of the app available at [this link](https://github.c
 After, you have two options:
 * you can deploy the application directly on your own WebApp or server
 * for local use, you can run the "player.bar" file. Your default browser will launch automatically
-	
+
 ### How to use
 Simply open a ATSV file using the browse file component in the application page 
 

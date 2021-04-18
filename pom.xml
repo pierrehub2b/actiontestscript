@@ -84,6 +84,7 @@
 		<lib.browserup.mitm.version>2.1.2</lib.browserup.mitm.version>
 		<lib.jackson.databind>2.12.2</lib.jackson.databind>
 		<jacoco.plugin.version>0.8.5</jacoco.plugin.version>
+		<lib.ahocorasick.version>0.6.3</lib.ahocorasick.version>
 	</properties>
 
 	<dependencies>
@@ -157,7 +158,7 @@
 			<artifactId>bcprov-jdk15on</artifactId>
 			<version>${lib.bcprov.version}</version>
 		</dependency>
- 		<dependency>
+		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-all</artifactId>
 			<version>${lib.netty.version}</version>
@@ -176,6 +177,11 @@
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 			<version>${lib.jackson.databind}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ahocorasick</groupId>
+			<artifactId>ahocorasick</artifactId>
+			<version>${lib.ahocorasick.version}</version>
 		</dependency>
 	</dependencies>
 

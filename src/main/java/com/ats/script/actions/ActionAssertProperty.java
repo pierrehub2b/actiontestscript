@@ -98,17 +98,7 @@ public class ActionAssertProperty extends ActionExecuteElement {
 			status.setError(ActionStatus.ATTRIBUTE_NOT_SET, "attribute '" + name + "' not found", value.getName());
 			return ActionStatus.ATTRIBUTE_NOT_SET;
 		}else {
-							
-			final boolean passed = value.checkProperty(attributeValue);
-			final String shortAttribute = value.getShortActualValue();
-			
-			if(passed) {
-				status.setNoError(shortAttribute);
-				return 0;
-			}else {
-				status.setError(ActionStatus.ATTRIBUTE_CHECK_FAIL, value.getExpectedResultLogs(), new String[]{shortAttribute, value.getValue().getCalculated()});
-				return ActionStatus.ATTRIBUTE_CHECK_FAIL;
-			}
+			return value.checkProperty(status, attributeValue);
 		}
 	}
 	

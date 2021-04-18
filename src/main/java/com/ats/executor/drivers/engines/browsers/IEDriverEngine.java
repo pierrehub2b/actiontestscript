@@ -50,13 +50,7 @@ public class IEDriverEngine extends WebDriverEngine {
 
 		final InternetExplorerOptions ieOptions = new InternetExplorerOptions();
 		if(props.getOptions() != null && props.getOptions().length > 0) {
-			//ieOptions.addCommandSwitches(props.getOptions());
-			//ieOptions.useShellWindowsApiToAttachToIe();
-			ieOptions.enablePersistentHovering();
-			ieOptions.destructivelyEnsureCleanSession();
-			ieOptions.disableNativeEvents();
-			ieOptions.ignoreZoomSettings();
-			//ieOptions.useCreateProcessApiToLaunchIe();
+			addOptions(props.getOptions(), ieOptions);
 		}else {
 			ieOptions.introduceFlakinessByIgnoringSecurityDomains();
 			ieOptions.ignoreZoomSettings();
@@ -166,5 +160,35 @@ public class IEDriverEngine extends WebDriverEngine {
 			status.setException(ActionStatus.JAVASCRIPT_ERROR, e1);
 		}
 		return null;
+	}
+		
+	private void addOptions(String[] options, InternetExplorerOptions ieOptions) {
+		
+		final ArrayList<String> extra = new ArrayList<String>();
+		for (String o : options) {
+			if("useShellWindowsApiToAttachToIe".equalsIgnoreCase(o)) {
+				ieOptions.useShellWindowsApiToAttachToIe();
+			}else if("enablePersistentHovering".equalsIgnoreCase(o)) {
+				ieOptions.enablePersistentHovering();
+			}else if("destructivelyEnsureCleanSession".equalsIgnoreCase(o)) {
+				ieOptions.destructivelyEnsureCleanSession();
+			}else if("disableNativeEvents".equalsIgnoreCase(o)) {
+				ieOptions.disableNativeEvents();
+			}else if("ignoreZoomSettings".equalsIgnoreCase(o)) {
+				ieOptions.ignoreZoomSettings();
+			}else if("useCreateProcessApiToLaunchIe".equalsIgnoreCase(o)) {
+				ieOptions.useCreateProcessApiToLaunchIe();
+			}else if("requireWindowFocus".equalsIgnoreCase(o)) {
+				ieOptions.requireWindowFocus();
+			}else if("usePerProcessProxy".equalsIgnoreCase(o)) {
+				ieOptions.usePerProcessProxy();
+			}else {
+				extra.add(o);
+			}
+		}
+
+		if(extra.size() > 0) {
+			ieOptions.addCommandSwitches(extra.toArray(new String[extra.size()]));
+		}
 	}
 }

@@ -27,9 +27,6 @@ import com.ats.script.ScriptLoader;
 import com.ats.tools.Operators;
 import com.google.gson.JsonObject;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 public class ActionAssertValue extends ActionExecute {
 
 	public static final String SCRIPT_LABEL = "check-value";
@@ -37,33 +34,23 @@ public class ActionAssertValue extends ActionExecute {
 	private CalculatedValue value1;
 	private CalculatedValue value2;
 
-	private boolean regexp = false;
+	private Operators operatorExec = new Operators();
 
 	public ActionAssertValue() {}
 
 	public ActionAssertValue(ScriptLoader script, boolean stop, String compairData) {
 		super(script, stop);
 
-		if(!splitData(script, Operators.REGEXP_PATTERN.matcher(compairData), true)) {
-			splitData(script, Operators.EQUAL_PATTERN.matcher(compairData), false);
-		}
+		final String[] operatorData = operatorExec.initData(compairData);
+		setValue1(new CalculatedValue(script, operatorData[0]));
+		setValue2(new CalculatedValue(script, operatorData[1]));
 	}
 
-	public ActionAssertValue(Script script, boolean stop, boolean regexp, CalculatedValue value1, CalculatedValue value2) {
+	public ActionAssertValue(Script script, boolean stop, String operator, CalculatedValue value1, CalculatedValue value2) {
 		super(script, stop);
-		setRegexp(regexp);
+		setOperator(operator);
 		setValue1(value1);
 		setValue2(value2);
-	}
-
-	private boolean splitData(ScriptLoader script, Matcher m, boolean regexp) {
-		if(m.find()) {
-			setRegexp(regexp);
-			setValue1(new CalculatedValue(script, m.group(1).trim()));
-			setValue2(new CalculatedValue(script, m.group(2).trim()));
-			return true;
-		}
-		return false;
 	}
 	
 	@Override
@@ -80,7 +67,7 @@ public class ActionAssertValue extends ActionExecute {
 	@Override
 	public StringBuilder getJavaCode() {
 		StringBuilder codeBuilder = super.getJavaCode();
-		codeBuilder.append(regexp)
+		codeBuilder.append(operatorExec.getJavaCode())
 		.append(", ")
 		.append(value1.getJavaCode())
 		.append(", ")
@@ -97,27 +84,28 @@ public class ActionAssertValue extends ActionExecute {
 		
 		super.execute(ts, testName, testLine);
 		
-		final String value1Calculated = value1.getCalculated();
-		final String value2Calculated = value2.getCalculated();
+		final String calculated1 = value1.getCalculated();
+		final String calculated2 = value2.getCalculated();
 		
-		String regexpLabel = "";
+		final String errorDescription = operatorExec.check(calculated1, calculated2);
 		
-		if(isRegexp()) {
-			regexpLabel = "regexp -> ";
-			status.setPassed(Pattern.compile(value2Calculated).matcher(value1Calculated).matches());
+		if(errorDescription == null) {
+			status.setNoError(calculated1);
 		}else {
-			status.setPassed(value1Calculated.equals(value2Calculated));
-		}
 
-		int error = 0;
-		if(!status.isPassed()) {
-			status.setCode(ActionStatus.VALUES_COMPARE_FAIL);
-			status.setMessage("'" + value1Calculated + "' does not match '" + regexpLabel + value2Calculated + "'");
-			error = ActionStatus.VALUES_COMPARE_FAIL;
+			final StringBuilder builder = new StringBuilder("Value1 '");
+			builder.append(calculated1)
+			.append("' ")
+			.append(errorDescription)
+			.append(" value2 '")
+			.append(calculated2)
+			.append("'");
+
+			status.setError(ActionStatus.VALUES_COMPARE_FAIL, builder.toString(), new String[]{calculated1, calculated2});
 		}
 		
 		status.endDuration();
-		ts.getRecorder().update(error, status.getDuration(), value1Calculated, regexpLabel + value2Calculated);
+		ts.getRecorder().update(status.getCode(), status.getDuration(), calculated1, calculated2);
 		
 		return true;
 	}
@@ -140,13 +128,14 @@ public class ActionAssertValue extends ActionExecute {
 
 	public void setValue2(CalculatedValue value2) {
 		this.value2 = value2;
+		this.operatorExec.updatePattern(value2.getCalculated());
 	}
 
-	public boolean isRegexp() {
-		return regexp;
+	public String getOperator() {
+		return operatorExec.getType();
 	}
 
-	public void setRegexp(boolean regexp) {
-		this.regexp = regexp;
+	public void setOperator(String operator) {
+		this.operatorExec.setType(operator);
 	}
 }
