@@ -220,13 +220,6 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		driver.manage().timeouts().setScriptTimeout(scriptTimeout, TimeUnit.SECONDS);
 		driver.manage().timeouts().pageLoadTimeout(pageLoadTimeout, TimeUnit.SECONDS);
 
-		try{
-			driver.manage().window().setSize(channel.getDimension().getSize());
-			driver.manage().window().setPosition(channel.getDimension().getPoint());
-		}catch(Exception ex){
-			System.err.println(ex.getMessage());
-		}
-
 		String applicationVersion = null;
 		String driverVersion = null;
 
@@ -307,6 +300,21 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		try {
 			driverSession = new URI(driverProcess.getDriverServerUrl() + "/session/" + driver.getSessionId().toString());
 		} catch (URISyntaxException e) {}
+		
+		
+		final Dimension channelSize = channel.getDimension().getSize();
+		try{
+			if(channelSize.getWidth() == -1 && channelSize.getWidth() == -1) {
+				final ArrayList<Object> screen = (ArrayList<Object>)runJavaScript("var result=[screen.width, screen.height]");
+				channel.setFullScreenSize((Long) screen.get(0), (Long) screen.get(1));
+			}else {
+
+			}
+			driver.manage().window().setSize(channel.getDimension().getSize());
+			driver.manage().window().setPosition(channel.getDimension().getPoint());
+		}catch(Exception ex){
+			System.err.println(ex.getMessage());
+		}
 	}
 
 	@Override
@@ -961,6 +969,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		final String[] wins = getWindowsHandle(0, 0);
 		if(wins.length> currentWindow) {
 			driver.switchTo().window(wins[currentWindow]);
+			driver.manage().window().setSize(channel.getDimension().getSize());
 		}
 	}
 

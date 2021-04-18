@@ -212,6 +212,10 @@ Here is an example of global ATS configuration file (*.atsProperties* file in AT
 	</apis>
 </execute>
 ```
+* You can browsers with screen max size (for the full screen mode use F11 key)
+```
+<appBounding>max</appBounding>
+```
 * You can define the proxy used by browsers during execution of the test.
 Proxy types available are *'system'*, *'auto'*, *'direct'* and *'manual'*, if *'manual'* type is selected you have to define host and port of the proxy :
 ```
@@ -359,7 +363,7 @@ Download the latest release of the app available at [this link](https://github.c
 After, you have two options:
 * you can deploy the application directly on your own WebApp or server
 * for local use, you can run the "player.bar" file. Your default browser will launch automatically
-
+	
 ### How to use
 Simply open a ATSV file using the browse file component in the application page 
 

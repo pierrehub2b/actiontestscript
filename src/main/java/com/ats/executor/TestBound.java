@@ -89,7 +89,7 @@ public class TestBound {
 	}
 
 	public void setWidth(Double width) {
-		if(width > 0) {
+		if(width > 0 || width == -1) {
 			this.width = width;
 		}
 	}
@@ -99,7 +99,7 @@ public class TestBound {
 	}
 
 	public void setHeight(Double height) {
-		if(height > 0) {
+		if(height > 0 || height == -1) {
 			this.height = height;
 		}
 	}

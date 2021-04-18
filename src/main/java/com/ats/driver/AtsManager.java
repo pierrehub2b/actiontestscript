@@ -51,12 +51,12 @@ public class AtsManager {
 
 	private static final String DRIVERS_FOLDER = "drivers";
 	private static final String ATS_PROPERTIES_FILE = ".atsProperties";
+	
+	private static final Double APPLICATION_WIDTH = 1280D;
+	private static final Double APPLICATION_HEIGHT = 960D;
 
-	private static final Double APPLICATION_WIDTH = 1280.00;
-	private static final Double APPLICATION_HEIGHT = 960.00;
-
-	private static final Double APPLICATION_X = 10.00;
-	private static final Double APPLICATION_Y = 10.00;
+	private static final Double APPLICATION_X = 10D;
+	private static final Double APPLICATION_Y = 10D;
 
 	private static final int SCRIPT_TIMEOUT = 60;
 	private static final int PAGELOAD_TIMEOUT = 120;
@@ -433,6 +433,14 @@ public class AtsManager {
 												case "height":
 													applicationHeight = getElementDouble(boundingElement);
 													break;
+											}
+										}else {
+											final String content = boundingChildren.item(j).getTextContent();
+											if("fullscreen".equalsIgnoreCase(content) || "max".equalsIgnoreCase(content) || "maxscreen".equalsIgnoreCase(content) || "maxsize".equalsIgnoreCase(content)) {
+												applicationX = 0;
+												applicationY = 0;
+												applicationWidth = -1;
+												applicationHeight = -1;
 											}
 										}
 									}

@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebElement;
 
@@ -572,6 +573,10 @@ public class Channel {
 
 	public TestBound getDimension() {
 		return dimension;
+	}
+	
+	public void setFullScreenSize(Long w, Long h) {
+		this.dimension = new TestBound(0D, 0D, w.doubleValue(), h.doubleValue());
 	}
 
 	public void setDimension(TestBound dimension) {

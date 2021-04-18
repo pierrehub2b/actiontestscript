@@ -209,7 +209,7 @@ public class VisualRecorder implements IVisualRecorder {
 
 	@Override
 	public void updateScreen(TestElement element) {
-		channel.mouseMoveToElement(channel.newActionStatus(), element.getFoundElement(), new MouseDirection());
+		//channel.mouseMoveToElement(channel.newActionStatus(), element.getFoundElement(), new MouseDirection());
 		channel.updateVisualAction(element);
 	}
 	
