@@ -204,7 +204,7 @@ public class Generator implements ScriptProcessedEvent{
 		}
 
 		final Stream<File> stream = filesList.parallelStream();
-		stream.forEach(f -> loadScript(f));
+		stream.forEach(f -> generateJava(f));
 		stream.close();
 
 		genReport.endGenerator();
@@ -215,7 +215,7 @@ public class Generator implements ScriptProcessedEvent{
 		return genReport;
 	}
 
-	private void loadScript(File f){
+	private void generateJava(File f){
 		final ScriptLoader sc = lexer.loadScript(f, new ScriptProcessedNotifier(this));
 		sc.generateJavaFile(project);
 	}
