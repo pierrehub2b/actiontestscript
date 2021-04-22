@@ -83,7 +83,7 @@
 		<lib.browserup.version>2.1.2</lib.browserup.version>
 		<lib.browserup.mitm.version>2.1.2</lib.browserup.mitm.version>
 		<lib.jackson.databind>2.12.3</lib.jackson.databind>
-		<jacoco.plugin.version>0.8.5</jacoco.plugin.version>
+		<jacoco.plugin.version>0.8.6</jacoco.plugin.version>
 		<lib.ahocorasick.version>0.6.3</lib.ahocorasick.version>
 	</properties>
 
