@@ -41,6 +41,8 @@ import com.ats.executor.drivers.engines.IDriverEngine;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
+import com.ats.generator.variables.parameter.Parameter;
+import com.ats.generator.variables.parameter.ParameterList;
 import com.ats.recorder.IVisualRecorder;
 import com.ats.tools.logger.MessageCode;
 
@@ -133,7 +135,7 @@ public class TestElement{
 		setEngine(channel.getDriverEngine());
 		startSearch(false, searchedElement);
 	}
-	
+
 	public String getNotFoundDescription() {
 		final StringBuilder builder = new StringBuilder("element not found ");
 		builder.append("[").append(criterias).append("]");
@@ -601,6 +603,55 @@ public class TestElement{
 	public CalculatedProperty[] getCssAttributes() {
 		return engine.getCssAttributes(getFoundElement());
 	}
+
+	public List<ParameterList> getTextData(){
+		final ArrayList<ParameterList> result = new ArrayList<ParameterList>();
+		if("select".equalsIgnoreCase(getFoundElement().getTag())) {
+			final List<String[]> options = engine.loadSelectOptions(this);
+			if(options.size() > 0) {
+				for(String[] option : options) {
+					if(option.length > 0) {
+						final ParameterList plist = new ParameterList(option.length);
+						for(int i=0; i< option.length; i++) {
+							plist.addParameter(new Parameter(i, option[i]));
+						}
+						result.add(plist);
+					}else {
+						result.add(new ParameterList(0, Arrays.asList(new Parameter(0, ""))));
+					}
+				}
+			}else {
+				result.add(new ParameterList(0, Arrays.asList(new Parameter(0, ""))));
+			}
+		}else {
+			final String data = getFoundElement().getValue().getAttribute("innerText");
+			if(data != null && data.length() > 0) {
+				final String[] lines = data.split("\n");
+				if(lines.length > 0) {
+					for(String l : lines) {
+						final String[] cols = l.split("\t");
+						if(cols.length > 0) {
+							final ParameterList plist = new ParameterList(cols.length);
+							for (int i=0; i<cols.length; i++) {
+								plist.addParameter(new Parameter(i, cols[i]));
+							}
+							result.add(plist);
+						}else {
+							result.add(new ParameterList(0, Arrays.asList(new Parameter(0, ""))));
+						}
+					}
+				}else {
+					result.add(new ParameterList(0, Arrays.asList(new Parameter(0, ""))));
+				}
+			}else {
+				result.add(new ParameterList(0, Arrays.asList(new Parameter(0, ""))));
+			}
+		}
+		return result;
+	}
+
+	//----------------------------------------------------------------------------------------------
+
 
 	public Object executeScript(ActionStatus status, String script, boolean returnValue) {
 		if(isValidated()){

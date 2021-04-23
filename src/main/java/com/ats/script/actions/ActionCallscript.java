@@ -29,11 +29,13 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.ats.element.SearchedElement;
+import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
@@ -103,7 +105,7 @@ public class ActionCallscript extends ActionReturnVariableArray {
 		}else if(dataArray != null && dataArray.size() > 0) {
 			
 			element = new SearchedElement(script, dataArray);
-						
+	
 		}else {
 			if(parameters.length > 0) {
 				final String firstParam = parameters[0].trim();
@@ -346,9 +348,32 @@ public class ActionCallscript extends ActionReturnVariableArray {
 
 					final Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
 
-					for (int iteration=0; iteration<loop; iteration++) {
-						ats.initCalledScript(ts, testName, line, parameters, getVariables(), iteration, loop, scriptName, SCRIPT_LOOP, null);
-						testMain.invoke(ats);
+					if(element != null) {
+						
+						final Channel channel = ts.getCurrentChannel();
+						int max = 10;
+
+						TestElement foundElement = new TestElement(channel, 10, p -> p > 0, element);
+						while(max > 0 && foundElement.getCount() == 0) {
+							channel.sleep(500);
+							foundElement = new TestElement(channel, 10, p -> p > 0, element);
+							max--;
+						}
+
+						if(foundElement.getCount() > 0) {
+							final List<ParameterList> data = foundElement.getTextData();
+							final int iterationMax = data.size();
+							for (int iteration=0; iteration<iterationMax; iteration++) {
+								ats.initCalledScript(ts, testName, line, data.get(iteration), getVariables(), iteration, iterationMax, scriptName, SCRIPT_LOOP, null);
+								testMain.invoke(ats);
+							}
+						}
+						
+					}else {
+						for (int iteration=0; iteration<loop; iteration++) {
+							ats.initCalledScript(ts, testName, line, parameters, getVariables(), iteration, loop, scriptName, SCRIPT_LOOP, null);
+							testMain.invoke(ats);
+						}
 					}
 
 					status.setData(ats.getReturnValues());
