@@ -23,6 +23,8 @@ import com.ats.executor.ActionTestScript;
 import com.ats.script.Script;
 import com.google.gson.JsonObject;
 
+import java.util.ArrayList;
+
 public abstract class ActionChannel extends Action {
 
 	public static final String SCRIPT_LABEL = "channel-";
@@ -51,7 +53,14 @@ public abstract class ActionChannel extends Action {
 		data.addProperty("name", name);
 		return data;
 	}
-
+	
+	@Override
+	public ArrayList<String> getKeywords() {
+		ArrayList<String> keywords = super.getKeywords();
+		keywords.add(name);
+		return keywords;
+	}
+	
 	//--------------------------------------------------------
 	// getters and setters for serialization
 	//--------------------------------------------------------

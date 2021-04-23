@@ -114,7 +114,14 @@ public class ActionChannelStart extends ActionChannel {
 
 		return data;
 	}
-
+	
+	@Override
+	public ArrayList<String> getKeywords() {
+		ArrayList<String> keywords = super.getKeywords();
+		keywords.add(application.getCalculated());
+		return keywords;
+	}
+	
 	//---------------------------------------------------------------------------------------------------------------------------------
 	// Code Generator
 	//---------------------------------------------------------------------------------------------------------------------------------

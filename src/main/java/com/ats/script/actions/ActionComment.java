@@ -25,6 +25,7 @@ import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
 import com.google.gson.JsonObject;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class ActionComment extends Action {
@@ -97,7 +98,14 @@ public class ActionComment extends Action {
 	public boolean isScriptComment() {
 		return SCRIPT_TYPE.equals(type);
 	}
-
+	
+	@Override
+	public ArrayList<String> getKeywords() {
+		ArrayList<String> keywords = super.getKeywords();
+		keywords.add(comment.getCalculated());
+		return keywords;
+	}
+	
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
 

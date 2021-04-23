@@ -25,6 +25,9 @@ import com.ats.executor.channels.Channel;
 import com.ats.script.Script;
 import com.google.gson.JsonObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class Action {
 
 	protected Script script;
@@ -63,6 +66,8 @@ public abstract class Action {
 	public boolean isScriptComment() {
 		return false;
 	}
+	
+	public ArrayList<String> getKeywords() { return new ArrayList<>(); }
 
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------

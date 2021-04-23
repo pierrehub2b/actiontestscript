@@ -43,6 +43,23 @@ public class ScriptInfo {
 		modifiedAt = new Date(f.lastModified());
 		nativePath = f.getAbsolutePath();
 	}
+	
+	public ScriptInfo(ScriptLoader sc, File f) {
+		Arrays.asList(sc.getActions()).parallelStream().forEach(this::count);
+		
+		author = sc.getHeader().getAuthor();
+		description = sc.getHeader().getDescription();
+		id = sc.getHeader().getId();
+		groups = sc.getHeader().getGroups();
+		prerequisite = sc.getHeader().getPrerequisite();
+		createdAt = sc.getHeader().getCreatedAt();
+		packageName = sc.getHeader().getPackageName();
+		name = sc.getHeader().getName();
+		
+		size = f.length();
+		modifiedAt = new Date(f.lastModified());
+		nativePath = f.getAbsolutePath();
+	}
 
 	private void count(Action a) {
 		actions++;
