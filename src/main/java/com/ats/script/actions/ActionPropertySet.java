@@ -5,6 +5,8 @@ import com.ats.executor.channels.Channel;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
 
+import java.util.ArrayList;
+
 public class ActionPropertySet extends Action {
 
     public static final String SCRIPT_LABEL = "property-set";
@@ -68,5 +70,13 @@ public class ActionPropertySet extends Action {
                 .append(value.getJavaCode())
                 .append(")");
         return builder;
+    }
+    
+    @Override
+    public ArrayList<String> getKeywords() {
+        ArrayList<String> keywords = super.getKeywords();
+        keywords.add(name);
+        keywords.add(value.getCalculated());
+        return keywords;
     }
 }

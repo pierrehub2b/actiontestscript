@@ -63,6 +63,13 @@ public class ActionScripting extends ActionReturnVariable {
 		codeBuilder.append(", ").append(jsCode.getJavaCode()).append(", ").append(variableCode).append(")");
 		return codeBuilder;
 	}
+	
+	@Override
+	public ArrayList<String> getKeywords() {
+		ArrayList<String> keywords = super.getKeywords();
+		keywords.add(jsCode.getCalculated());
+		return keywords;
+	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------

@@ -24,6 +24,8 @@ import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
 import com.google.gson.JsonObject;
 
+import java.util.ArrayList;
+
 public class ActionGotoUrl extends ActionExecute {
 
 	public static final String SCRIPT_LABEL = "goto-url";
@@ -53,7 +55,14 @@ public class ActionGotoUrl extends ActionExecute {
 		codeBuilder.append(url.getJavaCode()).append(")");
 		return codeBuilder;
 	}
-
+	
+	@Override
+	public ArrayList<String> getKeywords() {
+		ArrayList<String> keywords = super.getKeywords();
+		keywords.add(url.getCalculated());
+		return keywords;
+	}
+	
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
 

@@ -56,6 +56,14 @@ public class ActionAssertProperty extends ActionExecuteElement {
 	public StringBuilder getJavaCode() {
 		return super.getJavaCode().append(", ").append(value.getJavaCode()).append(")");
 	}
+	
+	@Override
+	public ArrayList<String> getKeywords() {
+		ArrayList<String> keywords = super.getKeywords();
+		keywords.add(value.getName());
+		keywords.add(attributeValue);
+		return keywords;
+	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------

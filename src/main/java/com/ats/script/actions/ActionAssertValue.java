@@ -27,6 +27,8 @@ import com.ats.script.ScriptLoader;
 import com.ats.tools.Operators;
 import com.google.gson.JsonObject;
 
+import java.util.ArrayList;
+
 public class ActionAssertValue extends ActionExecute {
 
 	public static final String SCRIPT_LABEL = "check-value";
@@ -74,6 +76,14 @@ public class ActionAssertValue extends ActionExecute {
 		.append(value2.getJavaCode())
 		.append(")");
 		return codeBuilder;
+	}
+	
+	@Override
+	public ArrayList<String> getKeywords() {
+		ArrayList<String> keywords = super.getKeywords();
+		keywords.add(value1.getCalculated());
+		keywords.add(value2.getCalculated());
+		return keywords;
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

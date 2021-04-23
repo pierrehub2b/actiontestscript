@@ -263,6 +263,13 @@ public class ActionCallscript extends ActionReturnVariableArray {
 
 		return codeBuilder;
 	}
+	
+	@Override
+	public ArrayList<String> getKeywords() {
+		ArrayList<String> keywords = super.getKeywords();
+		keywords.add(name.getCalculated());
+		return keywords;
+	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------

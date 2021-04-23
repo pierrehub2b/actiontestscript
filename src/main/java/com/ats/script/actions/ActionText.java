@@ -71,6 +71,13 @@ public class ActionText extends ActionExecuteElement {
 	public StringBuilder getJavaCode() {
 		return super.getJavaCode().append(", ").append(text.getJavaCode()).append(")");
 	}
+	
+	@Override
+	public ArrayList<String> getKeywords() {
+		ArrayList<String> keywords = super.getKeywords();
+		keywords.add(text.getCalculated());
+		return keywords;
+	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------

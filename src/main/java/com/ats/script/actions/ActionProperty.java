@@ -61,6 +61,13 @@ public class ActionProperty extends ActionReturnVariable {
 		return codeBuilder;
 	}
 	
+	@Override
+	public ArrayList<String> getKeywords() {
+		ArrayList<String> keywords = super.getKeywords();
+		keywords.add(name);
+		return keywords;
+	}
+	
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
 	
