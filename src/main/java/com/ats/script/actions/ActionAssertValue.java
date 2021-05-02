@@ -19,6 +19,8 @@ under the License.
 
 package com.ats.script.actions;
 
+import java.util.ArrayList;
+
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.CalculatedValue;
@@ -26,8 +28,6 @@ import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
 import com.ats.tools.Operators;
 import com.google.gson.JsonObject;
-
-import java.util.ArrayList;
 
 public class ActionAssertValue extends ActionExecute {
 
@@ -80,9 +80,9 @@ public class ActionAssertValue extends ActionExecute {
 	
 	@Override
 	public ArrayList<String> getKeywords() {
-		ArrayList<String> keywords = super.getKeywords();
-		keywords.add(value1.getCalculated());
-		keywords.add(value2.getCalculated());
+		final ArrayList<String> keywords = super.getKeywords();
+		keywords.add(value1.getKeywords());
+		keywords.add(value2.getKeywords());
 		return keywords;
 	}
 

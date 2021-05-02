@@ -67,7 +67,7 @@ public class ActionScripting extends ActionReturnVariable {
 	@Override
 	public ArrayList<String> getKeywords() {
 		ArrayList<String> keywords = super.getKeywords();
-		keywords.add(jsCode.getCalculated());
+		keywords.add(jsCode.getKeywords());
 		return keywords;
 	}
 

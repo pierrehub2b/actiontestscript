@@ -19,30 +19,31 @@ under the License.
 
 package com.ats.script;
 
-import com.ats.executor.ActionTestScript;
-import com.ats.generator.GeneratorReport;
-import com.ats.generator.parsers.Lexer;
-import com.ats.generator.parsers.ScriptParser;
-import com.ats.script.actions.Action;
-import com.ats.tools.Utils;
-import org.ahocorasick.trie.Emit;
-import org.ahocorasick.trie.Trie;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
+
+import com.ats.executor.ActionTestScript;
+import com.ats.generator.GeneratorReport;
+import com.ats.generator.parsers.Lexer;
+import com.ats.generator.parsers.ScriptParser;
+import com.ats.tools.Utils;
 
 public class Project {
 
@@ -280,6 +281,12 @@ public class Project {
 	public ArrayList<File> getAtsScripts() {
 		return getAtsScripts(getAtsSourceFolder().toFile());
 	}
+	
+	public List<ScriptLoader> getAtsScripts(Lexer lexer) {
+		final ArrayList<ScriptLoader> scripts = new ArrayList<ScriptLoader>();
+		getAtsScripts().parallelStream().forEach(f -> scripts.add(lexer.loadScript(f)));
+		return scripts;
+	}
 
 	public ArrayList<File> getAtsScripts(File startFolder) {
 
@@ -382,90 +389,7 @@ public class Project {
 			return o1.compareTo(o2);
 		}
 	}
-	
-	//-------------------------------------------------------------------------------------------------
-	//  search in ATS scripts
-	//-------------------------------------------------------------------------------------------------
-	
-	private static final String ACTIONS_FILTER = "actions";
-	private static final String DESCRIPTION_FILTER = "description";
-	private static final String AUTHOR_FILTER = "author";
-	private static final String PREREQUISITE_FILTER = "prerequisite";
-	private static final String GROUPS_FILTER = "groups";
-	private static final String CREATED_FILTER = "created";
-	private static final String ID_FILTER = "id";
-	private static final String SQUASH_ID_FILTER = "squashId";
-	private static final String JIRA_ID_FILTER = "jiraId";
-	
-	public List<ScriptInfo> findScripts(String[] keywords, String[] filters) {
-		final Lexer lexer = new Lexer(this, new GeneratorReport(), StandardCharsets.UTF_8);
-		
-		ArrayList<ScriptInfo> results = new ArrayList<>();
-		
-		Trie trie = Trie.builder().ignoreCase().addKeywords(keywords).build();
-		
-		final ArrayList<File> filesList = this.getAtsScripts();
-		final Stream<File> stream = filesList.parallelStream();
-		stream.forEach(f -> searchInFile(f, trie, lexer, results, filters) );
-		stream.close();
-		
-		return results;
-	}
-	
-	private static void searchInFile(File file, Trie trie, Lexer lexer, ArrayList<ScriptInfo> results, String[] filters) {
-		ScriptLoader script = lexer.loadScript(file);
-		
-		ArrayList<String> values = new ArrayList<>();
-		for (String filter:filters) {
-			switch (filter) {
-				case ACTIONS_FILTER:
-					values.addAll(getActionsKeywords(script.getActions()));
-					break;
-				case DESCRIPTION_FILTER:
-					values.add(script.getHeader().getDescription());
-					break;
-				case AUTHOR_FILTER:
-					values.add(script.getHeader().getAuthor());
-					break;
-				case PREREQUISITE_FILTER:
-					values.add(script.getHeader().getPrerequisite());
-					break;
-				case GROUPS_FILTER:
-					List<String> groups = script.getHeader().getGroups();
-					if (groups != null) {
-						values.addAll(groups);
-					}
-					break;
-				case CREATED_FILTER:
-					values.add(script.getHeader().getCreatedAt().toString());
-					break;
-				case ID_FILTER:
-					values.add(script.getHeader().getId());
-					break;
-				case SQUASH_ID_FILTER:
-					values.add(script.getHeader().getSquashId());
-					break;
-				case JIRA_ID_FILTER:
-					values.add(script.getHeader().getJiraId());
-					break;
-			}
-		}
-		
-		if (trie.containsMatch(String.join(" ", values).toLowerCase())) {
-			results.add(new ScriptInfo(script, file));
-		}
-	}
-	
-	private static ArrayList<String> getActionsKeywords(Action[] actions) {
-		ArrayList<String> values = new ArrayList<>();
-		for (Action action:actions) {
-			values.addAll(action.getKeywords());
-		}
-		
-		return values;
-	}
-	
-	
+			
 	//-------------------------------------------------------------------------------------------------
 	//  getters and setters for serialization
 	//-------------------------------------------------------------------------------------------------

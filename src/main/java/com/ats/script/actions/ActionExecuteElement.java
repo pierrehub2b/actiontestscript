@@ -236,13 +236,21 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 		testElement.terminateExecution(status, ts, error, status.getDuration());
 	}
 
-
 	@Override
 	public StringBuilder getActionLogs(String scriptName, int scriptLine, JsonObject data) {
 		data.addProperty("searchDuration", status.getSearchDuration());
 		data.addProperty("delay", getDelay());
 		data.addProperty("occurrences", status.getElement().getCount());
 		return super.getActionLogs(scriptName, scriptLine, data);
+	}
+	
+	@Override
+	public ArrayList<String> getKeywords() {
+		final ArrayList<String> keywords = super.getKeywords();
+		if(searchElement != null) {
+			keywords.addAll(searchElement.getKeywords());
+		}
+		return keywords;
 	}
 
 	//--------------------------------------------------------

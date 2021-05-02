@@ -19,6 +19,7 @@ under the License.
 
 package com.ats.generator.variables;
 
+import java.util.ArrayList;
 import java.util.function.Predicate;
 
 import com.ats.element.AtsBaseElement;
@@ -111,6 +112,13 @@ public class CalculatedProperty implements Comparable<CalculatedProperty>{
 
 	public boolean isRegexp() {
 		return operatorExec.isRegexp();
+	}
+		
+	public ArrayList<String> getKeywords() {
+		final ArrayList<String> keywords = new ArrayList<String>();
+		keywords.add(name);
+		keywords.add(value.getKeywords());
+		return keywords;
 	}
 
 	//--------------------------------------------------------

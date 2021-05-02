@@ -66,7 +66,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<java.version>10</java.version>
+		<java.version>11</java.version>
 		<!-- libraries versions -->
 		<apache.felix.version>2.3.7</apache.felix.version>
 		<lib.slf4j.version>1.7.30</lib.slf4j.version>

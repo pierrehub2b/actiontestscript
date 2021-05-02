@@ -59,7 +59,7 @@ public class ActionGotoUrl extends ActionExecute {
 	@Override
 	public ArrayList<String> getKeywords() {
 		ArrayList<String> keywords = super.getKeywords();
-		keywords.add(url.getCalculated());
+		keywords.add(url.getKeywords());
 		return keywords;
 	}
 	

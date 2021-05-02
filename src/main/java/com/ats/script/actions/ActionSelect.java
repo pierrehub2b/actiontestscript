@@ -83,6 +83,13 @@ public class ActionSelect extends ActionExecuteElement {
 		data.addProperty("name", selectValue.getName());
 		return super.getActionLogs(scriptName, scriptLine, data);
 	}
+	
+	@Override
+	public ArrayList<String> getKeywords() {
+		ArrayList<String> keywords = super.getKeywords();
+		keywords.addAll(selectValue.getKeywords());
+		return keywords;
+	}
 
 	//--------------------------------------------------------
 	// getters and setters for serialization

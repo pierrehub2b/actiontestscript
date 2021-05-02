@@ -19,14 +19,13 @@ under the License.
 
 package com.ats.script.actions;
 
+import java.util.ArrayList;
+
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
 import com.ats.script.Script;
 import com.google.gson.JsonObject;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class Action {
 
@@ -67,7 +66,7 @@ public abstract class Action {
 		return false;
 	}
 	
-	public ArrayList<String> getKeywords() { return new ArrayList<>(); }
+	public ArrayList<String> getKeywords() { return new ArrayList<String>(); }
 
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------

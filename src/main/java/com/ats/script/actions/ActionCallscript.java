@@ -29,6 +29,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.StringJoiner;
 import java.util.regex.Matcher;
@@ -266,8 +267,14 @@ public class ActionCallscript extends ActionReturnVariableArray {
 	
 	@Override
 	public ArrayList<String> getKeywords() {
-		ArrayList<String> keywords = super.getKeywords();
-		keywords.add(name.getCalculated());
+		final ArrayList<String> keywords = super.getKeywords();
+		keywords.add(name.getData());
+		if(parameterFilePath != null) {
+			keywords.add(parameterFilePath.getKeywords());
+		}
+		if(element != null) {
+			keywords.addAll(element.getKeywords());
+		}
 		return keywords;
 	}
 
@@ -357,23 +364,12 @@ public class ActionCallscript extends ActionReturnVariableArray {
 
 					if(element != null) {
 						
-						final Channel channel = ts.getCurrentChannel();
-						int max = 10;
-
-						TestElement foundElement = new TestElement(channel, 10, p -> p > 0, element);
-						while(max > 0 && foundElement.getCount() == 0) {
-							channel.sleep(500);
-							foundElement = new TestElement(channel, 10, p -> p > 0, element);
-							max--;
-						}
-
-						if(foundElement.getCount() > 0) {
-							final List<ParameterList> data = foundElement.getTextData();
-							final int iterationMax = data.size();
-							for (int iteration=0; iteration<iterationMax; iteration++) {
-								ats.initCalledScript(ts, testName, line, data.get(iteration), getVariables(), iteration, iterationMax, scriptName, SCRIPT_LOOP, null);
-								testMain.invoke(ats);
-							}
+						final List<ParameterList> data = getElementTextData(ts.getCurrentChannel(), element);
+						final int iterationMax = data.size();
+						
+						for (int iteration=0; iteration<iterationMax; iteration++) {
+							ats.initCalledScript(ts, testName, line, data.get(iteration), getVariables(), iteration, iterationMax, scriptName, SCRIPT_LOOP, null);
+							testMain.invoke(ats);
 						}
 						
 					}else {
@@ -405,6 +401,24 @@ public class ActionCallscript extends ActionReturnVariableArray {
 		status.endDuration();
 
 		return true;
+	}
+	
+	public static List<ParameterList> getElementTextData(Channel channel, SearchedElement element) {
+
+		int max = 10;
+
+		TestElement foundElement = new TestElement(channel, 10, p -> p > 0, element);
+		while(max > 0 && foundElement.getCount() == 0) {
+			channel.sleep(500);
+			foundElement = new TestElement(channel, 10, p -> p > 0, element);
+			max--;
+		}
+
+		if(foundElement.getCount() > 0) {
+			return foundElement.getTextData();
+		}
+		
+		return Collections.emptyList();
 	}
 
 	private void callScriptWithParametersFile(
