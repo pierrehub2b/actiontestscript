@@ -1,13 +1,13 @@
 package com.ats.script;
 
-import com.ats.generator.parsers.Lexer;
-import com.ats.script.actions.Action;
-import com.ats.script.actions.ActionCallscript;
-
 import java.io.File;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+
+import com.ats.generator.parsers.Lexer;
+import com.ats.script.actions.Action;
+import com.ats.script.actions.ActionCallscript;
 
 public class ScriptInfo {
 	
@@ -25,40 +25,32 @@ public class ScriptInfo {
 	private String nativePath;
 	private long size;
 	
-	public ScriptInfo(Lexer lexer, File f) {
-		final ScriptLoader sc = lexer.loadScript(f);
+	public ScriptInfo(ScriptHeader header, File f) {
+		author = header.getAuthor();
+		description = header.getDescription();
+		id = header.getId();
+		groups = header.getGroups();
+		prerequisite = header.getPrerequisite();
+		createdAt = header.getCreatedAt();
+		packageName = header.getPackageName();
+		name = header.getName();
 		
-		Arrays.asList(sc.getActions()).parallelStream().forEach(a -> count(a));
-
-		author = sc.getHeader().getAuthor();
-		description = sc.getHeader().getDescription();
-		id = sc.getHeader().getId();
-		groups = sc.getHeader().getGroups();
-		prerequisite = sc.getHeader().getPrerequisite();
-		createdAt = sc.getHeader().getCreatedAt();
-		packageName = sc.getHeader().getPackageName();
-		name = sc.getHeader().getName();
-
 		size = f.length();
 		modifiedAt = new Date(f.lastModified());
 		nativePath = f.getAbsolutePath();
 	}
 	
+	public ScriptInfo(ScriptHeader header) {
+		this(header, new File(header.getPath()));
+	}
+	
+	public ScriptInfo(Lexer lexer, File f) {
+		this(lexer.loadScript(f), f);
+	}
+	
 	public ScriptInfo(ScriptLoader sc, File f) {
+		this(sc.getHeader(), f);
 		Arrays.asList(sc.getActions()).parallelStream().forEach(this::count);
-		
-		author = sc.getHeader().getAuthor();
-		description = sc.getHeader().getDescription();
-		id = sc.getHeader().getId();
-		groups = sc.getHeader().getGroups();
-		prerequisite = sc.getHeader().getPrerequisite();
-		createdAt = sc.getHeader().getCreatedAt();
-		packageName = sc.getHeader().getPackageName();
-		name = sc.getHeader().getName();
-		
-		size = f.length();
-		modifiedAt = new Date(f.lastModified());
-		nativePath = f.getAbsolutePath();
 	}
 
 	private void count(Action a) {

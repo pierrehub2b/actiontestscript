@@ -58,7 +58,7 @@ public class ScriptHeader {
 	private String squashId = "";
 	private String jiraId = "";
 
-	private List<String> groups = null;
+	private List<String> groups = List.of();
 	private String description = "";
 	private String author = "";
 	private String prerequisite = "";
@@ -321,9 +321,9 @@ public class ScriptHeader {
 	public void setCreatedAt(Date createdAt) {
 		this.createdAt = createdAt;
 	}
-	
+
 	public void setSystemProperties(String value) {}
-	
+
 	public String getSystemProperties() {
 		return String.join(",", SystemValues.VALUES_NAME);
 	}

@@ -76,7 +76,7 @@ public class ActionPropertySet extends Action {
     public ArrayList<String> getKeywords() {
         ArrayList<String> keywords = super.getKeywords();
         keywords.add(name);
-        keywords.add(value.getCalculated());
+        keywords.add(value.getKeywords());
         return keywords;
     }
 }

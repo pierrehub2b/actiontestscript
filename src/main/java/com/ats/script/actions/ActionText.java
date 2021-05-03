@@ -75,7 +75,7 @@ public class ActionText extends ActionExecuteElement {
 	@Override
 	public ArrayList<String> getKeywords() {
 		ArrayList<String> keywords = super.getKeywords();
-		keywords.add(text.getCalculated());
+		keywords.add(text.getKeywords());
 		return keywords;
 	}
 

@@ -118,7 +118,7 @@ public class ActionChannelStart extends ActionChannel {
 	@Override
 	public ArrayList<String> getKeywords() {
 		ArrayList<String> keywords = super.getKeywords();
-		keywords.add(application.getCalculated());
+		keywords.add(application.getKeywords());
 		return keywords;
 	}
 	

@@ -208,6 +208,21 @@ public class SearchedElement {
 
 		return codeBuilder.toString();
 	}
+	
+	public ArrayList<String> getKeywords() {
+		final ArrayList<String> keywords = new ArrayList<String>();
+		keywords.add(tag);
+		
+		for (CalculatedProperty crit : criterias) {
+			keywords.addAll(crit.getKeywords());
+		}
+		
+		if(parent != null) {
+			keywords.addAll(parent.getKeywords());
+		}
+		
+		return keywords;
+	}
 
 	//----------------------------------------------------------------------------------------------------------------------
 	// Getter and setter for serialization

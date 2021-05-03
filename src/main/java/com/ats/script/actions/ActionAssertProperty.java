@@ -59,9 +59,11 @@ public class ActionAssertProperty extends ActionExecuteElement {
 	
 	@Override
 	public ArrayList<String> getKeywords() {
-		ArrayList<String> keywords = super.getKeywords();
-		keywords.add(value.getName());
-		keywords.add(attributeValue);
+		final ArrayList<String> keywords = super.getKeywords();
+		keywords.addAll(value.getKeywords());
+		if(attributeValue != null) {
+			keywords.add(attributeValue);
+		}
 		return keywords;
 	}
 

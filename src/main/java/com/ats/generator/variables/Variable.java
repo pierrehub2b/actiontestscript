@@ -19,6 +19,8 @@ under the License.
 
 package com.ats.generator.variables;
 
+import java.util.ArrayList;
+
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.transform.Transformer;
 
@@ -72,6 +74,13 @@ public class Variable implements Comparable<Variable>{
 
 	public void setData(String value) {
 		data = value;
+	}
+	
+	public ArrayList<String> getKeywords() {
+		final ArrayList<String> keywords = new ArrayList<String>();
+		keywords.add(name);
+		keywords.add(value.getKeywords());
+		return keywords;
 	}
 	
 	//----------------------------------------------------------------------------------------------------------------------------

@@ -294,6 +294,10 @@ public class CalculatedValue{
 		}
 		return calculated;
 	}
+	
+	public String getKeywords() {
+		return data;
+	}
 
 	//--------------------------------------------------------
 	// getters and setters for serialization

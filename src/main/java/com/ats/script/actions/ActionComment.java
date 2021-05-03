@@ -19,14 +19,13 @@ under the License.
 
 package com.ats.script.actions;
 
+import java.util.ArrayList;
+
 import com.ats.executor.ActionTestScript;
 import com.ats.generator.variables.CalculatedValue;
 import com.ats.script.Script;
 import com.ats.script.ScriptLoader;
 import com.google.gson.JsonObject;
-
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 
 public class ActionComment extends Action {
 
@@ -102,7 +101,7 @@ public class ActionComment extends Action {
 	@Override
 	public ArrayList<String> getKeywords() {
 		ArrayList<String> keywords = super.getKeywords();
-		keywords.add(comment.getCalculated());
+		keywords.add(comment.getKeywords());
 		return keywords;
 	}
 	

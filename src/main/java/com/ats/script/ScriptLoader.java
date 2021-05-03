@@ -38,20 +38,22 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
+import org.ahocorasick.trie.Trie;
+
 public class ScriptLoader extends Script {
 
 	private ScriptParser parser;
 	private ScriptHeader header;
 	private String javaCode = null;
-	
+
 	private Charset charset;
-	
+
 	private ArrayList<Action> actions;
-	
+
 	private String projectGav = "";
 
 	public ScriptLoader(){}
-	
+
 	public ScriptLoader(Lexer lexer){
 		this.actions = new ArrayList<Action>();
 		this.parser = new ScriptParser(lexer);
@@ -65,7 +67,7 @@ public class ScriptLoader extends Script {
 	public ScriptLoader(String type, Lexer lexer, File file, Project prj, Charset charset){
 
 		final ScriptHeader header = new ScriptHeader(prj, file);
-		
+
 		this.setHeader(header);
 		this.setCharset(charset);
 		this.projectGav = prj.getGav();
@@ -107,11 +109,23 @@ public class ScriptLoader extends Script {
 		data.setLine(actions.size());
 		actions.add(data);
 	}
-	
+
 	public boolean isSubscriptCalled(String scriptName) {
 		for (Action action : actions) {
 			if(action instanceof ActionCallscript) {
 				if(((ActionCallscript)action).isSubscriptCalled(scriptName)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	public boolean getActionsKeywords(Trie trie) {
+		for (Action action : actions) {
+			final List<String> actionKeywords = action.getKeywords();
+			for(String keywords : actionKeywords) {
+				if(trie.containsMatch(keywords)) {
 					return true;
 				}
 			}
@@ -136,9 +150,9 @@ public class ScriptLoader extends Script {
 			//-------------------------------------------------------------------------------------------------
 			// variables 
 			//-------------------------------------------------------------------------------------------------
-			
+
 			code.append("\r\n\r\n\t\t//   ---< Variables >---   //\r\n");
-			
+
 			final List<Variable> variables = getVariables();
 			Collections.sort(variables);
 
@@ -159,14 +173,14 @@ public class ScriptLoader extends Script {
 					code.append("\r\n\t\t").append(action.getJavaCode()).append(");");
 				}
 			}
-			
+
 			//-------------------------------------------------------------------------------------------------
 			// returns 
 			//-------------------------------------------------------------------------------------------------
-			
+
 			final CalculatedValue[] returnValues = getReturns();
 			if(returnValues != null) {
-				
+
 				code.append("\r\n\r\n\t\t//   ---< Return >---   //\r\n\r\n\t\t")
 				.append(ActionTestScript.JAVA_RETURNS_FUNCTION_NAME)
 				.append("(");
@@ -178,7 +192,7 @@ public class ScriptLoader extends Script {
 
 				code.append(String.join(", ", returnValuesCode)).append(");");
 			}
-			
+
 			code.append("\r\n\t}\r\n}");
 
 			return code.toString();
@@ -220,7 +234,7 @@ public class ScriptLoader extends Script {
 	public void setActions(Action[] data) {
 		this.actions = new ArrayList<Action>(Arrays.asList(data));
 	}	
-	
+
 	public String getProjectGav() {
 		return projectGav;
 	}
