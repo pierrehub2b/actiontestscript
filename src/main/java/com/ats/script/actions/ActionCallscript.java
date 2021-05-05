@@ -70,7 +70,7 @@ public class ActionCallscript extends ActionReturnVariableArray {
 	private CalculatedValue name;
 	private int type = -1;
 	
-	private SearchedElement element;
+	private SearchedElement searchElement;
 
 	private ArrayList<Variable> scriptVariables;
 
@@ -105,7 +105,7 @@ public class ActionCallscript extends ActionReturnVariableArray {
 			}
 		}else if(dataArray != null && dataArray.size() > 0) {
 			
-			element = new SearchedElement(script, dataArray);
+			searchElement = new SearchedElement(script, dataArray);
 	
 		}else {
 			if(parameters.length > 0) {
@@ -157,7 +157,7 @@ public class ActionCallscript extends ActionReturnVariableArray {
 	
 	public ActionCallscript(Script script, CalculatedValue name, SearchedElement element) {
 		this(script, name);
-		this.setElement(element);
+		this.setSearchElement(element);
 	}
 
 	public ActionCallscript(Script script, CalculatedValue name, CalculatedValue[] parameters) {
@@ -235,9 +235,9 @@ public class ActionCallscript extends ActionReturnVariableArray {
 			.append(parameterFilePath.getJavaCode())
 			.append(", ")
 			.append(parameterFileIndex);
-		}else if(element != null) {
+		}else if(searchElement != null) {
 			codeBuilder.append(", ")
-			.append(element.getJavaCode());
+			.append(searchElement.getJavaCode());
 		}else {
 			if(parameters != null){
 				parameters.getJavaCode(codeBuilder);
@@ -272,8 +272,8 @@ public class ActionCallscript extends ActionReturnVariableArray {
 		if(parameterFilePath != null) {
 			keywords.add(parameterFilePath.getKeywords());
 		}
-		if(element != null) {
-			keywords.addAll(element.getKeywords());
+		if(searchElement != null) {
+			keywords.addAll(searchElement.getKeywords());
 		}
 		return keywords;
 	}
@@ -362,9 +362,9 @@ public class ActionCallscript extends ActionReturnVariableArray {
 
 					final Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
 
-					if(element != null) {
+					if(searchElement != null) {
 						
-						final List<ParameterList> data = getElementTextData(ts.getCurrentChannel(), element);
+						final List<ParameterList> data = getElementTextData(ts.getCurrentChannel(), searchElement);
 						final int iterationMax = data.size();
 						
 						for (int iteration=0; iteration<iterationMax; iteration++) {
@@ -503,12 +503,12 @@ public class ActionCallscript extends ActionReturnVariableArray {
 		this.loop = loop;
 	}
 	
-	public SearchedElement getElement() {
-		return element;
+	public SearchedElement getSearchElement() {
+		return searchElement;
 	}
 
-	public void setElement(SearchedElement value) {
-		this.element = value;
+	public void setSearchElement(SearchedElement value) {
+		this.searchElement = value;
 	}
 
 	public int getParameterFileIndex() {
