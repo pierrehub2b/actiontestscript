@@ -770,7 +770,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 
 	@Override
-	public void mouseMoveToElement(ActionStatus status, FoundElement element) {
+	public void mouseMoveToElement(FoundElement element) {
 		try {
 			move(element, 0, 0);
 		}catch (Exception e) {}

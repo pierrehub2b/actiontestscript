@@ -44,6 +44,11 @@ public class TestElementImage extends TestElement {
 
 	@Override
 	protected List<FoundElement> loadElements(SearchedElement searchedElement) {
+		
+		if(parent != null) {
+			engine.mouseMoveToElement(parent.getFoundElement());
+		}		
+		
 		final ImageTemplateMatchingSimple template = new ImageTemplateMatchingSimple(searchedElement.getImage());
 
 		for (CalculatedProperty property : searchedElement.getCriterias()){
@@ -67,13 +72,32 @@ public class TestElementImage extends TestElement {
 	@Override
 	public void over(ActionStatus status, MouseDirection position, boolean desktopDragDrop, int offsetX, int offsetY) {
 		final FoundElement fe = getFoundElement();
-		super.over(status, position, desktopDragDrop, fe.getInnerX(), fe.getInnerY());
+
+		if(parent != null) {
+			final FoundElement parentElement = parent.getFoundElement();
+			final Double innerX = fe.getScreenX() - parentElement.getScreenX() + (getFoundElement().getWidth()/2) - (parentElement.getWidth()/2);
+			final Double innerY = fe.getScreenY() - parentElement.getScreenY() + (getFoundElement().getHeight()/2) - (parentElement.getHeight()/2);
+			
+			parent.over(status, position, false, innerX.intValue(), innerY.intValue());
+		}else {
+			super.over(status, position, desktopDragDrop, fe.getInnerX(), fe.getInnerY());
+		}
 	}
 
 	@Override
 	protected void mouseClick(ActionStatus status, MouseDirection position, int offsetX, int offsetY) {
 		final FoundElement fe = getFoundElement();
-		super.mouseClick(status, position, fe.getInnerX(), fe.getInnerY());
+		
+		if(parent != null) {
+			final FoundElement parentElement = parent.getFoundElement();
+			final Double innerX = fe.getScreenX() - parentElement.getScreenX() + (getFoundElement().getWidth()/2) - (parentElement.getWidth()/2);
+			final Double innerY = fe.getScreenY() - parentElement.getScreenY() + (getFoundElement().getHeight()/2) - (parentElement.getHeight()/2);
+				
+			engine.mouseClick(status, parent.getFoundElement(), position, innerX.intValue(), innerY.intValue());
+			channel.actionTerminated(status);
+		}else {
+			super.mouseClick(status, position, fe.getInnerX(), fe.getInnerY());
+		}
 	}
 
 	@Override

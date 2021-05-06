@@ -707,7 +707,7 @@ public class Channel {
 	}
 	
 	public void mouseMoveToElement(ActionStatus status, FoundElement foundElement) {
-		engine.mouseMoveToElement(status, foundElement);
+		engine.mouseMoveToElement(foundElement);
 		actionTerminated(status);
 	}
 

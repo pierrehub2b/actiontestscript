@@ -267,7 +267,7 @@ public class DesktopDriverEngine extends DriverEngine implements IDriverEngine {
 	}
 	
 	@Override
-	public void mouseMoveToElement(ActionStatus status, FoundElement element) {
+	public void mouseMoveToElement(FoundElement element) {
 		getDesktopDriver().elementFocus(element);
 	}
 

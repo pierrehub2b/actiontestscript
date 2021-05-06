@@ -596,7 +596,7 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 	public void middleClick(ActionStatus status, MouseDirection position, TestElement element) {}
 
 	@Override
-	public void mouseMoveToElement(ActionStatus status, FoundElement element) {
+	public void mouseMoveToElement(FoundElement element) {
 	}
 	
 	@Override

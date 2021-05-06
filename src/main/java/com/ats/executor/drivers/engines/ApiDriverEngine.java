@@ -480,6 +480,6 @@ public class ApiDriverEngine extends DriverEngine implements IDriverEngine{
 	}
 	
 	@Override
-	public void mouseMoveToElement(ActionStatus status, FoundElement element) {
+	public void mouseMoveToElement(FoundElement element) {
 	}
 }
