@@ -19,6 +19,10 @@ under the License.
 
 package com.ats.driver;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import com.ats.executor.drivers.DriverManager;
 
 public class ApplicationProperties {
@@ -57,6 +61,25 @@ public class ApplicationProperties {
 		this.title = title;
 		this.options = options;
 		this.debugPort = debugPort;
+	}
+	
+	public String getUserDataDirPath(String browserName) {
+		if(userDataDir != null) {
+			final Path p = Paths.get(userDataDir);
+			if(p.isAbsolute()) {
+				if((Files.exists(p) && Files.isDirectory(p)) || !Files.exists(p)) {
+					return p.toFile().getAbsolutePath();
+				}
+			}else{
+				final Path userDir = Paths.get(System.getProperty("user.home")).
+						resolve("ats").
+						resolve("profiles").
+						resolve(browserName).
+						resolve(userDataDir);
+				return userDir.toFile().getAbsolutePath();
+			}
+		}
+		return null;
 	}
 	
 	public boolean isWeb() {

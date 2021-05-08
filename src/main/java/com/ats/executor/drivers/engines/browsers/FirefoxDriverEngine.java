@@ -19,15 +19,12 @@ under the License.
 
 package com.ats.executor.drivers.engines.browsers;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxProfile;
-import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.firefox.FirefoxOptions;
 
 import com.ats.driver.ApplicationProperties;
 import com.ats.element.FoundElement;
@@ -35,6 +32,7 @@ import com.ats.element.TestElement;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.SendKeyData;
 import com.ats.executor.channels.Channel;
+import com.ats.executor.drivers.DriverManager;
 import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.WebDriverEngine;
@@ -55,30 +53,42 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 
 	private OkHttpClient client;
 
-	private static final String BINARY = "firefox_binary";
-
 	public FirefoxDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
 		super(channel, driverProcess, windowsDriver, props, DEFAULT_WAIT, DEFAULT_PROPERTY_WAIT);
 
-		final DesiredCapabilities capabilities = DesiredCapabilities.firefox();
+
+		FirefoxOptions options = new FirefoxOptions();
+
+		/*final DesiredCapabilities capabilities = DesiredCapabilities.firefox();
 		capabilities.setCapability("acceptSslCerts ", true);
 		capabilities.setCapability("acceptInsecureCerts ", true);
 		capabilities.setCapability("security.fileuri.strict_origin_policy", false);
-		capabilities.setCapability("app.update.disabledForTesting", true);
+		capabilities.setCapability("app.update.disabledForTesting", true);*/
 		//options.setCapability("marionnette ", true);
 		//options.setCapability("nativeEvents", false);
 
 		if(applicationPath != null) {
-			capabilities.setCapability(BINARY, applicationPath);
+			options.setBinary(applicationPath);
 		}
 
-		if(props.getUserDataDir() != null) {
-			final FirefoxProfile profile = new FirefoxProfile(new File(props.getUserDataDir()));
-			capabilities.setCapability(FirefoxDriver.PROFILE, profile);
+		final String userDataPath = props.getUserDataDirPath(DriverManager.FIREFOX_BROWSER);
+		if(userDataPath != null) {
+			options.addArguments("-profile", userDataPath);
 		}
-		
+
 		if(props.getOptions() != null) {
-			//TODO
+			for (String s: props.getOptions()) {
+				if(s.length() > 0) {
+					if(INCOGNITO_OPTION.equals(s) || PRIVATE_OPTION.equals(s)) {
+						options.addArguments("-private");
+					}else if(s.contains(HEADLESS_OPTION)) {
+						this.headless = true;
+						options.setHeadless(true);
+					}else {
+						options.addArguments(s);
+					}
+				}
+			}
 		}
 
 		final Builder builder = new Builder()
@@ -89,9 +99,9 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 
 		client = builder.build();
 
-		launchDriver(status, capabilities, props.getUserDataDir());
+		launchDriver(status, options, userDataPath);
 	}
-	
+
 	@Override
 	protected CharSequence getSequenceData(SendKeyData seq) {
 		return seq.getSequenceWeb(false);

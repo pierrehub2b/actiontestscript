@@ -28,6 +28,8 @@ import com.ats.executor.drivers.desktop.DesktopDriver;
 public class ChromiumDriverEngine extends ChromiumBasedDriverEngine {
 	public ChromiumDriverEngine(Channel channel, ActionStatus status, String name, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
 		super(channel, status, name, driverProcess, windowsDriver, props);
-		launchDriver(status, initOptions(props), profileFolder);
+		
+		final String userDataPath = props.getUserDataDirPath(name);
+		launchDriver(status, initOptions(props, userDataPath), userDataPath);
 	}
 }

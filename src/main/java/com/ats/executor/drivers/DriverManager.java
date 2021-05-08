@@ -99,7 +99,7 @@ public class DriverManager {
 
 	public DriverProcess getDesktopDriver(ActionStatus status) {
 		if(desktopDriver == null) {
-			desktopDriver = getDriverProcess(status, DESKTOP, null, DESKTOP_DRIVER_FILE_NAME);
+			desktopDriver = getDriverProcess(status, DESKTOP, null, DESKTOP_DRIVER_FILE_NAME, null);
 		}
 		return desktopDriver;
 	}
@@ -119,7 +119,7 @@ public class DriverManager {
 		DriverProcess driverProcess = null;
 
 		if(CHROME_BROWSER.equals(appName)) {
-			driverProcess = getDriverProcess(status, appName, driverName, CHROME_DRIVER_FILE_NAME);
+			driverProcess = getDriverProcess(status, appName, driverName, CHROME_DRIVER_FILE_NAME, null);
 			if(status.isPassed()) {
 				return new ChromeDriverEngine(
 						channel, 
@@ -131,7 +131,7 @@ public class DriverManager {
 				return null;
 			}
 		}else if(MSEDGE_BROWSER.equals(appName)) {
-			driverProcess = getDriverProcess(status, appName, driverName, MSEDGE_DRIVER_FILE_NAME);
+			driverProcess = getDriverProcess(status, appName, driverName, MSEDGE_DRIVER_FILE_NAME, null);
 			if(status.isPassed()) {
 				return new MsEdgeDriverEngine(
 						channel, 
@@ -143,7 +143,7 @@ public class DriverManager {
 				return null;
 			}
 		}else if(EDGE_BROWSER.equals(appName)) {
-			driverProcess = getDriverProcess(status, appName, driverName, props.getDriver());
+			driverProcess = getDriverProcess(status, appName, driverName, props.getDriver(), null);
 			if(status.isPassed()) {
 				return new EdgeDriverEngine(
 						channel, 
@@ -155,7 +155,7 @@ public class DriverManager {
 				return null;
 			}
 		}else if(OPERA_BROWSER.equals(appName)) {
-			driverProcess = getDriverProcess(status, appName, driverName, OPERA_DRIVER_FILE_NAME);
+			driverProcess = getDriverProcess(status, appName, driverName, OPERA_DRIVER_FILE_NAME, null);
 			if(status.isPassed()) {
 				return new OperaDriverEngine(
 						channel, 
@@ -167,7 +167,7 @@ public class DriverManager {
 				return null;
 			}
 		}else if(FIREFOX_BROWSER.equals(appName)) {
-			driverProcess = getDriverProcess(status, appName, driverName, FIREFOX_DRIVER_FILE_NAME);
+			driverProcess = getDriverProcess(status, appName, driverName, FIREFOX_DRIVER_FILE_NAME, new String[] {"--marionette-port", "2828"});
 			if(status.isPassed()) {
 				return new FirefoxDriverEngine(
 						channel, 
@@ -179,7 +179,7 @@ public class DriverManager {
 				return null;
 			}
 		}else if(IE_BROWSER.equals(appName)) {
-			driverProcess = getDriverProcess(status, appName, driverName, IE_DRIVER_FILE_NAME);
+			driverProcess = getDriverProcess(status, appName, driverName, IE_DRIVER_FILE_NAME, null);
 			if(status.isPassed()) {
 				return new IEDriverEngine(
 						channel, 
@@ -192,7 +192,7 @@ public class DriverManager {
 			}
 		}else if(CHROMIUM_BROWSER.equals(appName)) {
 			if(driverName != null && props.getUri() != null) {
-				driverProcess = getDriverProcess(status, appName, driverName, null);
+				driverProcess = getDriverProcess(status, appName, driverName, null, null);
 				if(status.isPassed()) {
 					return new ChromiumDriverEngine(
 							channel, 
@@ -265,7 +265,7 @@ public class DriverManager {
 		return driverName + ".exe";
 	}
 
-	public DriverProcess getDriverProcess(ActionStatus status, String name, String driverName, String defaultDriverName) {
+	public DriverProcess getDriverProcess(ActionStatus status, String name, String driverName, String defaultDriverName, String[] args) {
 
 		driverName = getDriverName(driverName, defaultDriverName);
 
@@ -275,7 +275,7 @@ public class DriverManager {
 			}
 		}
 
-		final DriverProcess proc = new DriverProcess(status, name, this, AtsManager.getInstance().getDriversFolderPath(), driverName, null);
+		final DriverProcess proc = new DriverProcess(status, name, this, AtsManager.getInstance().getDriversFolderPath(), driverName, args);
 		if(status.isPassed()) {
 			driversProcess.add(proc);
 			return proc;

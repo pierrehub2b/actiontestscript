@@ -567,23 +567,7 @@ public class AtsManager {
 											}
 
 											if(name != null) {
-												String userDataDir = null;
-												if(dataDir != null && dataDir.length() > 0) {
-													final Path userDataPath = Paths.get(dataDir);
-													if(userDataPath.isAbsolute()) {
-														final File f = userDataPath.toFile();
-														userDataDir = f.getAbsolutePath();
-
-														if(f.exists()) {
-															if(!f.isDirectory()) {
-																userDataDir = null;
-															}
-														}else {
-															f.mkdirs();
-														}
-													}
-												}
-												addApplicationProperties(ApplicationProperties.BROWSER_TYPE, name, driver, path, waitAction, check, lang, userDataDir, title, options, debugPort);
+												addApplicationProperties(ApplicationProperties.BROWSER_TYPE, name, driver, path, waitAction, check, lang, dataDir, title, options, debugPort);
 											}
 										}
 									}

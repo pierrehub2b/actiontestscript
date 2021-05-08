@@ -24,19 +24,24 @@ import com.google.gson.JsonParser;
 
 public class ChromiumBasedDriverEngine extends WebDriverEngine {
 
-	protected String profileFolder = null;
-
 	public ChromiumBasedDriverEngine(Channel channel, ActionStatus status, String browser, DriverProcess driverProcess, DesktopDriver desktopDriver, ApplicationProperties props) {
 		super(channel, browser, driverProcess, desktopDriver, props);
 	}
 
-	protected ChromeOptions initOptions(ApplicationProperties props) {
+	protected ChromeOptions initOptions(ApplicationProperties props, String userDataPath) {
 
 		final ChromeOptions options = new ChromeOptions();
 		if(props.getOptions() != null && props.getOptions().length > 0) {
 			for (String s: props.getOptions()) {
 				if(s.length() > 0) {
-					options.addArguments(s);
+					if(INCOGNITO_OPTION.equals(s) || PRIVATE_OPTION.equals(s)) {
+						options.addArguments("--incognito");
+					}else if(s.contains(HEADLESS_OPTION)) {
+						this.headless = true;
+						options.setHeadless(true);
+					}else {
+						options.addArguments(s);
+					}
 				}
 			}
 		}else {
@@ -54,10 +59,9 @@ public class ChromiumBasedDriverEngine extends WebDriverEngine {
 			options.addArguments("--remote-debugging-port=" + props.getDebugPort());
 		}
 
-		profileFolder = props.getUserDataDir();
-		if(profileFolder != null) {
-			removeMetricsData();
-			options.addArguments("--user-data-dir=" + profileFolder);
+		if(userDataPath != null) {
+			removeMetricsData(userDataPath);
+			options.addArguments("--user-data-dir=" + userDataPath);
 		}
 
 		if(lang != null) {
@@ -81,7 +85,7 @@ public class ChromiumBasedDriverEngine extends WebDriverEngine {
 		return options;
 	}
 
-	private void removeMetricsData() {
+	private void removeMetricsData(String profileFolder) {
 
 		final Path atsProfilePath = Paths.get(profileFolder);
 		if(atsProfilePath.toFile().exists()) {

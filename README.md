@@ -272,6 +272,12 @@ You can find all chromium driver versions here : https://sites.google.com/a/chro
 	<name>chrome</name>
 	<profileDir>C:/atsProfiles/chrome/automatic_joe</profileDir>
 </browser>
+
+Relative path can be used here, the folder containing profile data will be created in : %userprofile%/ats/profiles/[BROWSER_NAME]/simpleUserProfile
+<browser>
+	<name>chrome</name>
+	<profileDir>simpleUserProfile</profileDir>
+</browser>
 ```
 * You can add options to use with the web driver (exemple for Chromium browsers) :
 ```
