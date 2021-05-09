@@ -266,20 +266,23 @@ You can find all chromium driver versions here : https://sites.google.com/a/chro
 	<driver>chromedriver_73</driver>
 </browser>
 ```
-* You can change user profile default path with Chromium based browsers (Chrome, MsEdge, Chromium), if the folder does not exists it will be created before to launch the browser :
+* You can change user profile default path with Chromium based browsers (Chrome, MsEdge, Chromium), Firefox and Opera, if the folder does not exists it will be created before to launch the browser :
 ```
 <browser>
 	<name>chrome</name>
 	<profileDir>C:/atsProfiles/chrome/automatic_joe</profileDir>
 </browser>
 ```
-*Relative path can be used here, the folder containing the profile data will be created in : %userprofile%/ats/profiles/[BROWSER_NAME]/simpleUserProfile*
+NB: Relative path can be used
 ```
 <browser>
 	<name>chrome</name>
-	<profileDir>simpleUserProfile</profileDir>
+	<profileDir>reusableUserProfile</profileDir>
 </browser>
 ```
+the folder containing the user profile data will be created here : 
+*%userprofile%/ats/profiles/[BROWSER_NAME]/reusableUserProfile*
+
 * You can add options to use with the web driver (exemple for Chromium browsers) :
 ```
 <browser>
