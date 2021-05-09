@@ -56,7 +56,7 @@ public class IEDriverEngine extends WebDriverEngine {
 			ieOptions.ignoreZoomSettings();
 		}
 		
-		launchDriver(status, ieOptions, null);
+		launchDriver(status, ieOptions);
 
 		if(status.isPassed() && !"11".equals(channel.getApplicationVersion())) {
 			status.setError(ActionStatus.CHANNEL_START_ERROR, "cannot start channel with IE" + channel.getApplicationVersion() + " (Only IE11 is supported by ATS)");

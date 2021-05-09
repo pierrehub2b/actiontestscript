@@ -63,7 +63,7 @@ public class ApplicationProperties {
 		this.debugPort = debugPort;
 	}
 	
-	public String getUserDataDirPath(String browserName) {
+	public static String getUserDataPath(String userDataDir, String browserName) {
 		if(userDataDir != null) {
 			final Path p = Paths.get(userDataDir);
 			if(p.isAbsolute()) {
@@ -80,6 +80,10 @@ public class ApplicationProperties {
 			}
 		}
 		return null;
+	}
+	
+	public String getUserDataDirPath(String browserName) {
+		return getUserDataPath(userDataDir, browserName);
 	}
 	
 	public boolean isWeb() {

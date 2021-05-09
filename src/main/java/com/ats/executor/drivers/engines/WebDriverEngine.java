@@ -40,7 +40,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.JavascriptException;
@@ -58,7 +57,6 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.support.ui.Select;
-
 import com.ats.driver.ApplicationProperties;
 import com.ats.driver.AtsManager;
 import com.ats.element.AtsBaseElement;
@@ -73,6 +71,7 @@ import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.desktop.DesktopWindow;
+import com.ats.executor.drivers.engines.browsers.BrowserArgumentsParser;
 import com.ats.generator.objects.Cartesian;
 import com.ats.generator.objects.MouseDirection;
 import com.ats.generator.objects.MouseDirectionData;
@@ -95,10 +94,6 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	private final static String OPTION = "option";
 	private final static String ANGULAR_OPTION = "mat-option";
-
-	public final static String INCOGNITO_OPTION = "incognito";
-	public final static String PRIVATE_OPTION = "private";
-	public final static String HEADLESS_OPTION = "headless";
 
 	//-----------------------------------------------------------------------------------------------------------------------------
 	// Javascript static code
@@ -127,7 +122,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	//-----------------------------------------------------------------------------------------------------------------------------
 
-	protected boolean headless = false;
+	protected BrowserArgumentsParser browserArguments;
 
 	protected Double initElementX = 0.0;
 	protected Double initElementY = 0.0;
@@ -167,6 +162,10 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	public WebDriverEngine(Channel channel, DesktopDriver desktopDriver, String application, ApplicationProperties props, int defaultWait, int defaultCheck) {
 		super(channel, desktopDriver, props, defaultWait, defaultCheck);
 	}
+	
+	protected boolean isHeadless() {
+		return browserArguments.isHeadless();
+	}
 
 	protected DriverProcess getDriverProcess() {
 		return driverProcess;
@@ -176,7 +175,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		this.driverProcess = driverProcess;
 	}
 
-	protected void launchDriver(ActionStatus status, MutableCapabilities cap, String profilePath) {
+	protected void launchDriver(ActionStatus status, MutableCapabilities cap) {
 
 		final int maxTrySearch = AtsManager.getInstance().getMaxTrySearch();
 		final int maxTryProperty = AtsManager.getInstance().getMaxTryProperty();
@@ -229,22 +228,19 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		String applicationVersion = null;
 		String driverVersion = null;
 
-		Map<String, ?> infos = driver.getCapabilities().asMap();
+		final Map<String, ?> infos = driver.getCapabilities().asMap();
 		for (Map.Entry<String, ?> entry : infos.entrySet()){
 			if("browserVersion".equals(entry.getKey()) || "version".equals(entry.getKey())){
 				applicationVersion = entry.getValue().toString();
 			}else if("chrome".equals(entry.getKey())) {
 				Map<String, String> chromeData = (Map<String, String>) entry.getValue();
-				driverVersion = chromeData.get("chromedriverVersion");
-				if(driverVersion != null) {
-					driverVersion = driverVersion.replaceFirst("\\(.*\\)", "").trim();
-				}
+				driverVersion = getDriverVersion(chromeData.get("chromedriverVersion"));
+			}else if("opera".equals(entry.getKey())) {
+				Map<String, String> operaData = (Map<String, String>) entry.getValue();
+				driverVersion = getDriverVersion(operaData.get("operadriverVersion"));
 			}else if("msedge".equals(entry.getKey())) {
 				Map<String, String> msedgeData = (Map<String, String>) entry.getValue();
-				driverVersion = msedgeData.get("msedgedriverVersion");
-				if(driverVersion != null) {
-					driverVersion = driverVersion.replaceFirst("\\(.*\\)", "").trim();
-				}
+				driverVersion = getDriverVersion(msedgeData.get("msedgedriverVersion"));
 			}else if("moz:geckodriverVersion".equals(entry.getKey())) {
 				driverVersion = entry.getValue().toString();
 			}
@@ -273,7 +269,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 							pageLoadTimeout, 
 							watchdog,
 							getDesktopDriver(), 
-							profilePath),
+							browserArguments.getUserDataPath()),
 					StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 
 			driver.get(startAtsPage.toURI().toString());
@@ -286,10 +282,7 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 		final String osVersion = getDesktopDriver().getOsName() + " (" + getDesktopDriver().getOsVersion() +")";
 
-		if(headless) {
-
-
-		}else {
+		if(!isHeadless()) {
 			int maxTry = 10;
 			while(maxTry > 0) {
 				final DesktopWindow window = desktopDriver.getWindowByTitle(titleUid, browserName);
@@ -325,6 +318,13 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		}catch(Exception ex){
 			System.err.println(ex.getMessage());
 		}
+	}
+	
+	private String getDriverVersion(String value) {
+		if(value != null) {
+			return value.replaceFirst("\\(.*\\)", "").trim();
+		}
+		return null;
 	}
 
 	@Override
@@ -975,11 +975,13 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public void setWindowToFront() {
-		channel.toFront();
-		final String[] wins = getWindowsHandle(0, 0);
-		if(wins.length> currentWindow) {
-			driver.switchTo().window(wins[currentWindow]);
-			driver.manage().window().setSize(channel.getDimension().getSize());
+		if(!isHeadless()) {
+			channel.toFront();
+			final String[] wins = getWindowsHandle(0, 0);
+			if(wins.length> currentWindow) {
+				driver.switchTo().window(wins[currentWindow]);
+				driver.manage().window().setSize(channel.getDimension().getSize());
+			}
 		}
 	}
 

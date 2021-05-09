@@ -57,7 +57,7 @@ public class EdgeDriverEngine extends WebDriverEngine {
 		options.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
 		options.setCapability(CapabilityType.ACCEPT_INSECURE_CERTS, true);
 
-		launchDriver(status, options, null);
+		launchDriver(status, options);
 	}
 
 	@Override

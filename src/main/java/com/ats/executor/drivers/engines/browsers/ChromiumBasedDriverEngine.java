@@ -1,10 +1,10 @@
 package com.ats.executor.drivers.engines.browsers;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +17,7 @@ import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.DriverProcess;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.WebDriverEngine;
+import com.ats.generator.variables.CalculatedValue;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -28,21 +29,15 @@ public class ChromiumBasedDriverEngine extends WebDriverEngine {
 		super(channel, browser, driverProcess, desktopDriver, props);
 	}
 
-	protected ChromeOptions initOptions(ApplicationProperties props, String userDataPath) {
+	protected ChromeOptions initOptions(ApplicationProperties props, String browserName, ArrayList<CalculatedValue> arguments) {
 
+		browserArguments = new BrowserArgumentsParser(channel.getArguments(), props, browserName, applicationPath);
+		
 		final ChromeOptions options = new ChromeOptions();
-		if(props.getOptions() != null && props.getOptions().length > 0) {
-			for (String s: props.getOptions()) {
-				if(s.length() > 0) {
-					if(INCOGNITO_OPTION.equals(s) || PRIVATE_OPTION.equals(s)) {
-						options.addArguments("--incognito");
-					}else if(s.contains(HEADLESS_OPTION)) {
-						this.headless = true;
-						options.setHeadless(true);
-					}else {
-						options.addArguments(s);
-					}
-				}
+
+		if(browserArguments.getMoreOptions().length > 0) {
+			for (String s: browserArguments.getMoreOptions()) {
+				options.addArguments(s);
 			}
 		}else {
 			options.addArguments("--no-default-browser-check");
@@ -54,25 +49,28 @@ public class ChromiumBasedDriverEngine extends WebDriverEngine {
 			options.addArguments("--allow-file-access");
 			options.addArguments("--ignore-certificate-errors");
 		}
-			
+		
+		options.setHeadless(browserArguments.isHeadless());
+		
+		if(browserArguments.isIncognito()) {
+			options.addArguments("--incognito");
+		}
+					
 		if(props.getDebugPort() > 0) {
 			options.addArguments("--remote-debugging-port=" + props.getDebugPort());
 		}
 
-		if(userDataPath != null) {
-			removeMetricsData(userDataPath);
-			options.addArguments("--user-data-dir=" + userDataPath);
+		if(browserArguments.getUserDataPath() != null) {
+			removeMetricsData(browserArguments.getUserDataPath());
+			options.addArguments("--user-data-dir=" + browserArguments.getUserDataPath());
 		}
 
 		if(lang != null) {
 			options.addArguments("--lang=" + lang);
 		}
-
-		if(applicationPath != null) {
-			final File browserBinaryFile = new File(applicationPath);
-			if(browserBinaryFile.exists()) {
-				options.setBinary(browserBinaryFile.getAbsolutePath());
-			}
+		
+		if(browserArguments.getBinaryPath() != null) {
+			options.setBinary(browserArguments.getBinaryPath());
 		}
 
 		options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));

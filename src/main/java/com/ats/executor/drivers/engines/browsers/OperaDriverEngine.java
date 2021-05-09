@@ -19,6 +19,10 @@ under the License.
 
 package com.ats.executor.drivers.engines.browsers;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.openqa.selenium.opera.OperaOptions;
 
 import com.ats.driver.ApplicationProperties;
@@ -38,29 +42,52 @@ public class OperaDriverEngine extends WebDriverEngine {
 				
 		initElementX = 20.0;
 		
-		OperaOptions options = new OperaOptions();
-		options.setCapability("opera.log.level", "SEVERE");
-		options.addArguments("test-type");
-		options.addArguments("--disable-infobars");
-		options.addArguments("--disable-notifications");
-		options.addArguments("--no-default-browser-check");
-		options.addArguments("--allow-file-access-from-files");
-		options.addArguments("--disable-web-security");
-		options.addArguments("--allow-running-insecure-content");
-			
-		if(props.getUserDataDir() != null) {
-			options.addArguments("--user-data-dir=" + props.getUserDataDir());
+		browserArguments = new BrowserArgumentsParser(channel.getArguments(), props, DriverManager.OPERA_BROWSER, applicationPath);
+		
+		final OperaOptions options = new OperaOptions();
+
+		if(browserArguments.getMoreOptions().length > 0) {
+			for (String s: browserArguments.getMoreOptions()) {
+				options.addArguments(s);
+			}
+		}else {
+			options.setCapability("opera.log.level", "SEVERE");
+			options.addArguments("test-type");
+			options.addArguments("--disable-infobars");
+			options.addArguments("--disable-notifications");
+			options.addArguments("--no-default-browser-check");
+			options.addArguments("--allow-file-access-from-files");
+			options.addArguments("--allow-running-insecure-content");
 		}
-								
+		
+		if(browserArguments.isIncognito()) {
+			options.addArguments("--incognito");
+		}
+					
+		if(props.getDebugPort() > 0) {
+			options.addArguments("--remote-debugging-port=" + props.getDebugPort());
+		}
+
+		if(browserArguments.getUserDataPath() != null) {
+			options.addArguments("--user-data-dir=" + browserArguments.getUserDataPath());
+		}
+
 		if(lang != null) {
 			options.addArguments("--lang=" + lang);
 		}
 		
-		if(applicationPath != null) {
-			options.setBinary(applicationPath);
+		if(browserArguments.getBinaryPath() != null) {
+			options.setBinary(browserArguments.getBinaryPath());
 		}
+
+		options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
+
+		final Map<String, Object> prefs = new HashMap<String, Object>();
+		prefs.put("credentials_enable_service", false);
+		prefs.put("profile.password_manager_enabled", false);
+		options.setExperimentalOption("prefs", prefs);
 		
-		launchDriver(status, options, props.getUserDataDir());
+		launchDriver(status, options);
 	}
 
 	@Override

@@ -34,18 +34,14 @@ public class MsEdgeDriverEngine extends ChromiumBasedDriverEngine {
 
 	public MsEdgeDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver desktopDriver, ApplicationProperties props) {
 		super(channel, status, DriverManager.MSEDGE_BROWSER, driverProcess, desktopDriver, props);
-		
-		final String userDataPath = props.getUserDataDirPath(DriverManager.MSEDGE_BROWSER);
-		
-		final MsEdgeOptions options = new MsEdgeOptions(props, userDataPath);
-		this.headless = options.isHeadless();
-		
-		launchDriver(status, options, userDataPath);
+
+		browserArguments = new BrowserArgumentsParser(channel.getArguments(), props, DriverManager.MSEDGE_BROWSER, applicationPath);
+		launchDriver(status, new MsEdgeOptions(browserArguments));
 	}
 
 	@Override
 	public void started(ActionStatus status) {
-		if(!headless && channel.getDesktopDriver() != null) {
+		if(!isHeadless() && channel.getDesktopDriver() != null) {
 			final TestElementSystem closInfobarButton = new TestElementSystem(channel, 1, p -> p == 1, new SearchedElement(new SearchedElement(new SearchedElement(0, "syscomp", new CalculatedProperty[] {}), 0, "Group", new CalculatedProperty[] {new CalculatedProperty("ClassName", "InfoBarContainerView")}), 0, "Button", new CalculatedProperty[] {}));
 			if(closInfobarButton.getCount() == 1) {
 				closInfobarButton.executeScript(status, "Invoke()", false);

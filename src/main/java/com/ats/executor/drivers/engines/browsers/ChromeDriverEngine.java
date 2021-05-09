@@ -30,7 +30,6 @@ public class ChromeDriverEngine extends ChromiumBasedDriverEngine {
 	public ChromeDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
 		super(channel, status, DriverManager.CHROME_BROWSER, driverProcess, windowsDriver, props);
 		
-		final String userDataPath = props.getUserDataDirPath(DriverManager.CHROME_BROWSER);
-		launchDriver(status, initOptions(props, userDataPath), userDataPath);
+		launchDriver(status, initOptions(props, DriverManager.CHROME_BROWSER, channel.getArguments()));
 	}
 }

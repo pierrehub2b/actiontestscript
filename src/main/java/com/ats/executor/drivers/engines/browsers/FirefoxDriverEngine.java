@@ -56,40 +56,27 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 	public FirefoxDriverEngine(Channel channel, ActionStatus status, DriverProcess driverProcess, DesktopDriver windowsDriver, ApplicationProperties props) {
 		super(channel, driverProcess, windowsDriver, props, DEFAULT_WAIT, DEFAULT_PROPERTY_WAIT);
 
+		final FirefoxOptions options = new FirefoxOptions();
 
-		FirefoxOptions options = new FirefoxOptions();
-
-		/*final DesiredCapabilities capabilities = DesiredCapabilities.firefox();
-		capabilities.setCapability("acceptSslCerts ", true);
-		capabilities.setCapability("acceptInsecureCerts ", true);
-		capabilities.setCapability("security.fileuri.strict_origin_policy", false);
-		capabilities.setCapability("app.update.disabledForTesting", true);*/
-		//options.setCapability("marionnette ", true);
-		//options.setCapability("nativeEvents", false);
-
-		if(applicationPath != null) {
-			options.setBinary(applicationPath);
+		browserArguments = new BrowserArgumentsParser(channel.getArguments(), props, DriverManager.FIREFOX_BROWSER, applicationPath);
+		
+		if(browserArguments.getBinaryPath() != null) {
+			options.setBinary(browserArguments.getBinaryPath());
 		}
+		
+		options.setHeadless(browserArguments.isHeadless());
 
-		final String userDataPath = props.getUserDataDirPath(DriverManager.FIREFOX_BROWSER);
-		if(userDataPath != null) {
-			options.addArguments("-profile", userDataPath);
+		if(browserArguments.isIncognito()) {
+			options.addArguments("-private");
 		}
-
-		if(props.getOptions() != null) {
-			for (String s: props.getOptions()) {
-				if(s.length() > 0) {
-					if(INCOGNITO_OPTION.equals(s) || PRIVATE_OPTION.equals(s)) {
-						options.addArguments("-private");
-					}else if(s.contains(HEADLESS_OPTION)) {
-						this.headless = true;
-						options.setHeadless(true);
-					}else {
-						options.addArguments(s);
-					}
-				}
+		
+		if(browserArguments.getUserDataPath() != null) {
+			options.addArguments("-profile", browserArguments.getUserDataPath());
+		}
+		
+			for(String opt : browserArguments.getMoreOptions()) {
+				options.addArguments(opt);
 			}
-		}
 
 		final Builder builder = new Builder()
 				.connectTimeout(20, TimeUnit.SECONDS)
@@ -99,7 +86,7 @@ public class FirefoxDriverEngine extends WebDriverEngine {
 
 		client = builder.build();
 
-		launchDriver(status, options, userDataPath);
+		launchDriver(status, options);
 	}
 
 	@Override
