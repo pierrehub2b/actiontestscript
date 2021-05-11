@@ -39,6 +39,9 @@ public class BrowserArgumentsParser {
 	private String[] moreOptions = null;
 
 	public BrowserArgumentsParser(ArrayList<CalculatedValue> arguments, ApplicationProperties props, String browserName, String binary) {
+		
+		final ArrayList<String> args = new ArrayList<String>();
+		
 		for (CalculatedValue calcv : arguments) {
 			final String arg = calcv.getCalculated();
 			if(arg.startsWith("profile=") || arg.startsWith("profile:") || arg.startsWith("profile ")) {
@@ -47,6 +50,8 @@ public class BrowserArgumentsParser {
 				headless = true;
 			}else if(arg.contains(INCOGNITO_OPTION) || arg.contains(PRIVATE_OPTION)) {
 				incognito = true;
+			}else {
+				args.add(arg);
 			}
 		}
 
@@ -62,7 +67,7 @@ public class BrowserArgumentsParser {
 		}
 
 		if(props.getOptions() != null) {
-			final ArrayList<String> args = new ArrayList<String>();
+			
 			for (String s: props.getOptions()) {
 				if(s.length() > 0) {
 					if(INCOGNITO_OPTION.equals(s) || PRIVATE_OPTION.equals(s)) {
@@ -74,10 +79,10 @@ public class BrowserArgumentsParser {
 					}
 				}
 			}
-
-			if(args.size() > 0) {
-				moreOptions = args.toArray(new String[args.size()]);
-			}
+		}
+		
+		if(args.size() > 0) {
+			moreOptions = args.toArray(new String[args.size()]);
 		}
 	}
 

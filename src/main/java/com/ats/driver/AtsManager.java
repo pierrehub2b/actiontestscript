@@ -68,6 +68,7 @@ public class AtsManager {
 	private static final int MAX_TRY_PROPERTY = 10;
 	private static final int MAX_TRY_WEBSERVICE = 1;
 	private static final int MAX_TRY_IMAGE_RECOGNITION = 20;
+	private static final int MAX_TRY_SCROLL_SEARCH = 30;
 
 	private static final int MAX_TRY_MOBILE = 5;
 
@@ -100,6 +101,7 @@ public class AtsManager {
 	private int maxTryWebservice = MAX_TRY_WEBSERVICE;
 	private int maxTryMobile = MAX_TRY_MOBILE;
 	private int maxTryImageRecognition = MAX_TRY_IMAGE_RECOGNITION;
+	private int maxTryScrollSearch = MAX_TRY_SCROLL_SEARCH;
 
 	private AtsProxy proxy;
 	private AtsProxy neoloadProxy;
@@ -468,6 +470,9 @@ public class AtsManager {
 												case "searchimage":
 													maxTryImageRecognition = getElementInt(maxtryElement);
 													break;
+												case "scrollsearch":
+													maxTryScrollSearch = getElementInt(maxtryElement);
+													break;
 											}
 										}
 									}
@@ -778,7 +783,13 @@ public class AtsManager {
 		return maxTryInteractable;
 	}
 
-	public int getMaxTryImageRecognition() { return maxTryImageRecognition; }
+	public int getMaxTryImageRecognition() { 
+		return maxTryImageRecognition; 
+	}
+
+	public int getMaxTryScrollSearch() {
+		return maxTryScrollSearch;
+	}
 
 	public int getMaxTryProperty() {
 		return maxTryProperty;
