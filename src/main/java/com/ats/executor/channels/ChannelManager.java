@@ -55,6 +55,10 @@ public class ChannelManager {
 	public int getMaxTry() {
 		return AtsManager.getInstance().getMaxTrySearch();
 	}
+	
+	public int getMaxTryScroll() {
+		return AtsManager.getInstance().getMaxTryScrollSearch();
+	}
 
 	public Channel getCurrentChannel(){
 		return currentChannel;

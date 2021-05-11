@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
+import com.ats.generator.objects.mouse.Mouse;
 import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -177,7 +178,7 @@ public class TestElement{
 	public boolean isSysComp() {
 		return sysComp;
 	}
-
+	
 	protected int getMaxTry() {
 		return maxTry;
 	}
@@ -208,7 +209,7 @@ public class TestElement{
 	}
 
 	protected List<FoundElement> loadElements(SearchedElement searchedElement) {
-
+		
 		final int criteriasCount = searchedElement.getCriterias().size();
 		final String[] attributes = new String[criteriasCount];
 		final String[] attributesValues = new String[criteriasCount];
@@ -521,6 +522,11 @@ public class TestElement{
 		drag(status, position, 0, 0);
 		engine.moveByOffset(direction.getHorizontalDirection(), direction.getVerticalDirection());
 		drop(status, null, false);
+	}
+	
+	public void swipe(int direction) {
+		drag(null, new MouseDirection(), 0, 0);
+		engine.moveByOffset(0, direction);
 	}
 
 	public void mouseWheel(int delta) {

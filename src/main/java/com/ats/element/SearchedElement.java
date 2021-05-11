@@ -165,6 +165,14 @@ public class SearchedElement {
 		return DIALOG.equals(tag.toUpperCase());
 	}
 	
+	public boolean isScrollable() {
+		if (tag.equals("RecyclerView")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	public boolean isSysComp() {
 		if(parent != null) {
 			return parent.isSysComp();

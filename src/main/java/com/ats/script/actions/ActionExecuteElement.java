@@ -22,6 +22,7 @@ package com.ats.script.actions;
 import java.util.ArrayList;
 import java.util.function.Predicate;
 
+import com.ats.generator.objects.MouseDirection;
 import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriverException;
@@ -173,12 +174,37 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 									setTestElement(new TestElement(channel, actionMaxTry, predicate, searchElement));
 								}
 
-								if(testElement.isValidated()) {
+								if (testElement.isValidated()) {
 									trySearch = actionMaxTry;
-								}else {
+								} else {
 									trySearch++;
 									channel.sendLog(MessageCode.OBJECT_TRY_SEARCH, ELEMENT_NOT_FOUND_MESSAGE, actionMaxTry - trySearch);
 									channel.progressiveWait(trySearch);
+								}
+							}
+							
+							if (!testElement.isValidated()) {
+								
+								SearchedElement parent = searchElement.getParent();
+								
+								if (parent != null && parent.isScrollable()) {
+									
+									TestElement parentElement = new TestElement(channel, actionMaxTry, predicate, parent);
+									int tryScrollSearch = 0;
+									int tryScrollSearchMax = ts.getChannelManager().getMaxTryScroll();
+									
+									while (tryScrollSearch < tryScrollSearchMax) {
+										
+										parentElement.swipe(-parentElement.getFoundElement().getHeight().intValue());
+										setTestElement(new TestElement(channel, 1, predicate, searchElement));
+										
+										if (testElement.isValidated()) {
+											tryScrollSearch = tryScrollSearchMax;
+										} else {
+											tryScrollSearch++;
+											channel.progressiveWait(tryScrollSearch);
+										}
+									}
 								}
 							}
 						}

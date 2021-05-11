@@ -41,6 +41,7 @@ import java.util.stream.Stream;
 import javax.imageio.ImageIO;
 
 import com.ats.executor.drivers.engines.mobiles.MobileAlert;
+import org.apache.tools.ant.taskdefs.Concat;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
@@ -416,14 +417,15 @@ public class MobileDriverEngine extends DriverEngine implements IDriverEngine {
 
 	@Override
 	public List<FoundElement> findElements(boolean sysComp, TestElement testObject, String tagName, String[] attributes, String[] attributesValues, Predicate<AtsBaseElement> searchPredicate, WebElement startElement) {
-
+		
 		final List<AtsMobileElement> list = new ArrayList<AtsMobileElement>();
-
-		if(testObject.getParent() == null) {
+		final TestElement parent = testObject.getParent();
+		
+		if (parent == null) {
 			refreshElementMapLocation();
 			loadElementsByTag(rootElement.getValue(), tagName, list);
-		}else {
-			loadElementsByTag(getElementById(testObject.getParent().getWebElementId()), tagName, list);
+		} else {
+			loadElementsByTag(getElementById(parent.getWebElementId()), tagName, list);
 		}
 
 		return list.parallelStream().filter(searchPredicate).map(FoundElement::new).collect(Collectors.toCollection(ArrayList::new));
