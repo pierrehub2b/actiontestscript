@@ -240,7 +240,7 @@ public class ActionTestScript extends Script implements ITest{
 		final String suiteName = ctx.getSuite().getName();
 		
 		final SuitesReportItem currentSuite = new SuitesReportItem((TestRunner) ctx);
-		setLogger(new ExecutionLogger(System.out, currentSuite.logLevel));		
+		setLogger(new ExecutionLogger(System.out, currentSuite.logLevel));	
 		
 		final String outputFolder = System.getProperty("output-folder");
 		if(outputFolder != null) {
@@ -384,9 +384,9 @@ public class ActionTestScript extends Script implements ITest{
 			if(parameters.getList().size() > 0) {
 				final JsonArray parametersArray = new JsonArray();
 				for (Parameter p : parameters.getList()) {
-					final JsonObject jo = new JsonObject();
-					jo.addProperty(p.getName(), p.getCalculated());
-					parametersArray.add(jo);
+					final JsonObject jso = new JsonObject();
+					jso.addProperty(p.getName(), p.getCalculated());
+					parametersArray.add(jso);
 				}
 				log.add("parameters", parametersArray);
 			}

@@ -40,8 +40,6 @@ import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
 
-import com.ats.executor.drivers.engines.mobiles.MobileAlert;
-import org.apache.tools.ant.taskdefs.Concat;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
@@ -61,6 +59,7 @@ import com.ats.executor.channels.Channel;
 import com.ats.executor.drivers.desktop.DesktopDriver;
 import com.ats.executor.drivers.engines.mobiles.AndroidRootElement;
 import com.ats.executor.drivers.engines.mobiles.IosRootElement;
+import com.ats.executor.drivers.engines.mobiles.MobileAlert;
 import com.ats.executor.drivers.engines.mobiles.RootElement;
 import com.ats.generator.ATS;
 import com.ats.generator.objects.BoundData;

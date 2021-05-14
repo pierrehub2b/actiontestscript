@@ -22,7 +22,6 @@ package com.ats.script.actions;
 import java.util.ArrayList;
 import java.util.function.Predicate;
 
-import com.ats.generator.objects.MouseDirection;
 import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriverException;

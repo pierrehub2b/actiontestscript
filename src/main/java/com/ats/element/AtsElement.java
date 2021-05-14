@@ -50,14 +50,12 @@ public class AtsElement extends AtsBaseElement {
 	private boolean clickable = true;
 
 	public static boolean checkIframe(String value) {
-		value = value.toUpperCase();
-		return IFRAME.equals(value) || FRAME.equals(value);
+		return IFRAME.equalsIgnoreCase(value) || FRAME.equalsIgnoreCase(value);
 	}
 
 	public AtsElement() {}
 
 	public AtsElement(List<Object> data) {
-
 		this.element = (RemoteWebElement) data.get(0);
 		this.tag = data.get(1).toString();
 		this.numeric = (boolean) data.get(2);

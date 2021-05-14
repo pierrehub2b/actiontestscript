@@ -20,6 +20,7 @@ under the License.
 package com.ats.generator.variables.parameter;
 
 import com.ats.executor.ActionTestScript;
+import com.ats.generator.variables.CalculatedProperty;
 import com.ats.generator.variables.CalculatedValue;
 
 public class Parameter {
@@ -35,6 +36,10 @@ public class Parameter {
 		this.index = index;
 		this.name = name;
 		this.data = data;
+	}
+	
+	public Parameter(int index, CalculatedProperty prop) {
+		this(index, prop.getName(), prop.getValue());
 	}
 	
 	public Parameter(int index, String name, CalculatedValue value) {
