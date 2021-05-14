@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-import com.ats.generator.objects.mouse.Mouse;
 import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -46,6 +45,8 @@ import com.ats.generator.variables.parameter.Parameter;
 import com.ats.generator.variables.parameter.ParameterList;
 import com.ats.recorder.IVisualRecorder;
 import com.ats.tools.logger.MessageCode;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 public class TestElement{
 
@@ -54,6 +55,7 @@ public class TestElement{
 
 	public final static String ATS_OCCURRENCES = "-ats-occurences";
 	public final static String ATS_OCCURRENCES_INDEX = "-ats-occurences-index";
+	public final static String ATS_TABLE_DATA = "-ats-table-data";
 	public final static String ATS_MAX_TRY = "-ats-max-try";
 	public final static String ATS_SEARCH_DURATION = "-ats-search-duration";
 	public final static String ATS_SEARCH_TAG = "-ats-search-tag";
@@ -566,6 +568,8 @@ public class TestElement{
 			return String.valueOf(count);
 		}else if(ATS_OCCURRENCES_INDEX.equals(name)) {
 			return String.valueOf(index);
+		}else if(ATS_TABLE_DATA.equals(name)) {
+			return getTableData();
 		}else if(ATS_MAX_TRY.equals(name)) {
 			return String.valueOf(maxTry);
 		}else if(ATS_SEARCH_DURATION.equals(name)) {
@@ -574,6 +578,18 @@ public class TestElement{
 			return searchedTag;
 		}
 		return null;
+	}
+
+	protected String getTableData() {
+		final JsonArray dataArray = new JsonArray();
+		getTextData().parallelStream().forEach(l -> addJsonData(dataArray, l.getList()));
+		return dataArray.toString();
+	}
+	
+	private void addJsonData(JsonArray array, List<Parameter> pl) {
+		final JsonObject jso = new JsonObject();
+		pl.parallelStream().forEach(p -> jso.addProperty(p.getName(), p.getCalculated()));
+		array.add(jso);
 	}
 
 	public String getAttribute(ActionStatus status, String name){
@@ -593,9 +609,10 @@ public class TestElement{
 		final CalculatedProperty[] result = new CalculatedProperty[props.length + 5];
 		result[0] = getAtsProperty(ATS_OCCURRENCES);
 		result[1] = getAtsProperty(ATS_OCCURRENCES_INDEX);
-		result[2] = getAtsProperty(ATS_MAX_TRY);
-		result[3] = getAtsProperty(ATS_SEARCH_DURATION);
-		result[4] = getAtsProperty(ATS_SEARCH_TAG);
+		result[2] = getAtsProperty(ATS_TABLE_DATA);
+		result[3] = getAtsProperty(ATS_MAX_TRY);
+		result[4] = getAtsProperty(ATS_SEARCH_DURATION);
+		result[5] = getAtsProperty(ATS_SEARCH_TAG);
 
 		int pos = 5;
 		for (CalculatedProperty prop : props) {
@@ -611,35 +628,23 @@ public class TestElement{
 	}
 
 	public List<ParameterList> getTextData(){
+
 		final ArrayList<ParameterList> result = new ArrayList<ParameterList>();
-		if("select".equalsIgnoreCase(getFoundElement().getTag())) {
-			final List<String[]> options = engine.loadSelectOptions(this);
-			if(options.size() > 0) {
-				for(String[] option : options) {
-					if(option.length > 0) {
-						final ParameterList plist = new ParameterList(option.length);
-						for(int i=0; i< option.length; i++) {
-							plist.addParameter(new Parameter(i, option[i]));
-						}
-						result.add(plist);
-					}else {
-						result.add(new ParameterList(0, Arrays.asList(new Parameter(0, ""))));
-					}
-				}
-			}else {
-				result.add(new ParameterList(0, Arrays.asList(new Parameter(0, ""))));
-			}
+
+		if(getFoundElements().size() > 1 && index == 0) {
+			
+			getFoundElements().parallelStream().forEach(e -> addParameters(result, engine.getAttributes(e, true)));
+		
 		}else {
-			final String data = getFoundElement().getValue().getAttribute("innerText");
-			if(data != null && data.length() > 0) {
-				final String[] lines = data.split("\n");
-				if(lines.length > 0) {
-					for(String l : lines) {
-						final String[] cols = l.split("\t");
-						if(cols.length > 0) {
-							final ParameterList plist = new ParameterList(cols.length);
-							for (int i=0; i<cols.length; i++) {
-								plist.addParameter(new Parameter(i, cols[i]));
+
+			if("select".equalsIgnoreCase(getFoundElement().getTag())) {
+				final List<String[]> options = engine.loadSelectOptions(this);
+				if(options.size() > 0) {
+					for(String[] option : options) {
+						if(option.length > 0) {
+							final ParameterList plist = new ParameterList(option.length);
+							for(int i=0; i< option.length; i++) {
+								plist.addParameter(new Parameter(i, option[i]));
 							}
 							result.add(plist);
 						}else {
@@ -650,10 +655,41 @@ public class TestElement{
 					result.add(new ParameterList(0, Arrays.asList(new Parameter(0, ""))));
 				}
 			}else {
-				result.add(new ParameterList(0, Arrays.asList(new Parameter(0, ""))));
+				final String data = getFoundElement().getValue().getAttribute("innerText");
+				if(data != null && data.length() > 0) {
+					final String[] lines = data.split("\n");
+					if(lines.length > 0) {
+						for(String l : lines) {
+							final String[] cols = l.split("\t");
+							if(cols.length > 0) {
+								final ParameterList plist = new ParameterList(cols.length);
+								for (int i=0; i<cols.length; i++) {
+									plist.addParameter(new Parameter(i, cols[i]));
+								}
+								result.add(plist);
+							}else {
+								result.add(new ParameterList(0, Arrays.asList(new Parameter(0, ""))));
+							}
+						}
+					}else {
+						result.add(new ParameterList(0, Arrays.asList(new Parameter(0, ""))));
+					}
+				}else {
+					result.add(new ParameterList(0, Arrays.asList(new Parameter(0, ""))));
+				}
 			}
 		}
-		return result;
+		
+		return Collections.unmodifiableList(result);
+	}
+
+	private static void addParameters(ArrayList<ParameterList> result, CalculatedProperty[] properties) {
+		final ParameterList plist = new ParameterList(properties.length);
+		
+		for (int i=0; i<properties.length; i++) {
+			plist.addParameter(new Parameter(i, properties[i]));
+		}
+		result.add(plist);
 	}
 
 	//----------------------------------------------------------------------------------------------
