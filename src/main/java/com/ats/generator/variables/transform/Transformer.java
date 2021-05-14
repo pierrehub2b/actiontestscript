@@ -29,8 +29,9 @@ public abstract class Transformer {
 	public static final String DATE = "date";
 	public static final String TIME = "time";
 	public static final String NUMERIC = "numeric";
+	public static final String TABLE = "table";
 
-	public static final Pattern TRANSFORM_PATTERN = Pattern.compile("(" + REGEXP + "|" + DATE + "|" + TIME + "|" + NUMERIC + ") ?\\[(.*)\\]");
+	public static final Pattern TRANSFORM_PATTERN = Pattern.compile("(" + REGEXP + "|" + DATE + "|" + TIME + "|" + NUMERIC + "|" + TABLE + ") ?\\[(.*)\\]");
 
 	protected int getInt(String value){
 		return Utils.string2Int(value);
@@ -46,6 +47,8 @@ public abstract class Transformer {
 				return new TimeTransformer(data.split(","));
 			case NUMERIC:
 				return new NumericTransformer(data);
+			case TABLE:
+				return new TableTransformer(data.split(","));
 			default:
 				return null;
 		}
