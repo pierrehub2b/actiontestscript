@@ -73,7 +73,7 @@ public class SearchedElement {
 				setTag(objectMatcher.group(1).trim());
 
 				if(objectMatcher.groupCount() >= 2){
-					Arrays.stream(objectMatcher.group(2).split(",")).parallel().map(String::trim).forEach(s -> addCriteria(script, s));
+					Arrays.stream(objectMatcher.group(2).split(",")).map(String::trim).forEach(s -> addCriteria(script, s));
 				}
 
 			}else{
