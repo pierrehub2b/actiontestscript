@@ -40,6 +40,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -62,6 +63,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.ats.executor.ActionTestScript;
 import com.ats.tools.ResourceContent;
 import com.ats.tools.Utils;
 import com.google.gson.Gson;
@@ -72,8 +74,8 @@ public class CampaignReportGenerator {
 	public static String ATS_JSON_SUITES = "ats-suites.json";
 	public static final String ATS_REPORT = "ats-report";
 
-	private final static String xmlSourceName = ATS_REPORT + ".xml";
-	private final static String xmlSourceRoot = "ats-report";
+	private final static String XML_SOURCE_NAME = ATS_REPORT + ".xml";
+	private final static String XML_SOURCE_ROOT = "ats-report";
 
 	public static void main(String[] args) {
 
@@ -168,7 +170,7 @@ public class CampaignReportGenerator {
 			DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			Document writeXmlDocument = builder.newDocument();
 
-			final Element report = writeXmlDocument.createElement("ats-report");
+			final Element report = writeXmlDocument.createElement(XML_SOURCE_ROOT);
 			report.setAttribute("details", String.valueOf(detailsValue));
 			report.setAttribute("projectId", suiteReport.projectId);
 			report.setAttribute("projectDescription", suiteReport.projectDescription);
@@ -202,6 +204,8 @@ public class CampaignReportGenerator {
 
 			for (SuitesReportItem info : suiteReport.suites) {
 
+				final Path suitePath = outputFolderPath.resolve(info.name);
+
 				boolean suitePassed = true;
 				final Element suite = writeXmlDocument.createElement("suite");
 
@@ -211,11 +215,18 @@ public class CampaignReportGenerator {
 				final Element parameters = writeXmlDocument.createElement("parameters");
 				suite.appendChild(parameters);
 
+				final Properties properties = new Properties();
+				final Path suiteParamPath = suitePath.resolve(ActionTestScript.SUITE_PARAMETERS);
+				
+				if(Files.exists(suiteParamPath)) {
+					properties.load(Files.newBufferedReader(suiteParamPath));
+				}
+				
 				for (Map.Entry<String, String> entry : info.parameters.entrySet()) {
 					final Element parameter = writeXmlDocument.createElement("parameter");
 					parameter.setAttribute("name", entry.getKey());
-					parameter.setAttribute("value", entry.getValue());
-
+					parameter.setAttribute("value", properties.getProperty(entry.getKey(), entry.getValue()));
+					parameter.setAttribute("defaultValue", entry.getValue());
 					parameters.appendChild(parameter);
 				}
 
@@ -230,7 +241,7 @@ public class CampaignReportGenerator {
 
 				for (String className : info.tests) {
 
-					final File xmlDataFile = outputFolderPath.resolve(info.name).resolve(className + "_xml").resolve(XmlReport.REPORT_FILE).toFile();
+					final File xmlDataFile = suitePath.resolve(className + "_xml").resolve(XmlReport.REPORT_FILE).toFile();
 
 					if (xmlDataFile.exists()) {
 
@@ -294,7 +305,7 @@ public class CampaignReportGenerator {
 			Transformer transformer = TransformerFactory.newInstance().newTransformer();
 			transformer.transform(new DOMSource(writeXmlDocument),
 					new StreamResult(new OutputStreamWriter(
-							new FileOutputStream(outputFolderPath.resolve(xmlSourceName).toFile()),
+							new FileOutputStream(outputFolderPath.resolve(XML_SOURCE_NAME).toFile()),
 							StandardCharsets.UTF_8)));
 
 
@@ -302,7 +313,7 @@ public class CampaignReportGenerator {
 
 			// HTML reports
 
-			final Path atsXmlDataPath = outputFolderPath.resolve(xmlSourceName);
+			final Path atsXmlDataPath = outputFolderPath.resolve(XML_SOURCE_NAME);
 			final MinifyWriter filteredWriter = new MinifyWriter(
 					Files.newBufferedWriter(outputFolderPath.resolve(ATS_REPORT + ".html"), StandardCharsets.UTF_8));
 			final Transformer htmlTransformer = TransformerFactory.newInstance().newTransformer(new StreamSource(htmlTemplateFile));
@@ -508,8 +519,8 @@ public class CampaignReportGenerator {
 
 		final Map<String, Object> parameters = new HashMap<String, Object>();
 		parameters.put("workingDir", outputPath);
-		parameters.put("xmlSource", xmlSourceName);
-		parameters.put("xmlSourceRoot", xmlSourceRoot);
+		parameters.put("xmlSource", XML_SOURCE_NAME);
+		parameters.put("xmlSourceRoot", XML_SOURCE_ROOT);
 
 		Method method = clazz.getMethod("fillReportToFile", String.class, Map.class);
 

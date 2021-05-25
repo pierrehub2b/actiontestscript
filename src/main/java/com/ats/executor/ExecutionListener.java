@@ -81,7 +81,7 @@ public class ExecutionListener implements IExecutionListener {
 				if(jasperHome == null) {
 					jasperHome = System.getenv(JASPER_HOME_ENVIRONMENT);
 				}
-								
+	
 				try {
 					new CampaignReportGenerator(getOutputFolderPath(), jsonSuiteFile, atsReport, jasperHome);
 				} catch (IOException | TransformerException | ParserConfigurationException | SAXException e) {

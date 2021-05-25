@@ -22,6 +22,7 @@ package com.ats.executor;
 import static org.testng.Assert.fail;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -32,6 +33,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.logging.Level;
 
 import org.openqa.selenium.Keys;
@@ -98,6 +100,7 @@ public class ActionTestScript extends Script implements ITest{
 
 	public static final String MAIN_TEST_FUNCTION = "testMain";
 	public static final String TEST_STOPPABLE = "com.ats.test.stoppable";
+	public static final String SUITE_PARAMETERS = "parameters.txt";
 
 	protected ActionTestScript topScript;
 
@@ -293,13 +296,24 @@ public class ActionTestScript extends Script implements ITest{
 			logs.addProperty("xmlReport", xml);
 			logs.addProperty("visualQuality", visualQuality);
 
-			final JsonArray parameters = new JsonArray();
+			final Properties parametersProperties = new Properties();
+			final JsonArray parametersArray = new JsonArray();
 			for(Entry<String, String>param : params.entrySet()) {
+				
+				final String k = param.getKey();
+				final String v = getEnvironmentValue(k, param.getValue());
+				
+				parametersProperties.put(k, v);
+								
 				final JsonObject elem = new JsonObject();
-				elem.addProperty(param.getKey(), param.getValue());
-				parameters.add(elem);
+				elem.addProperty(k, v);
+				parametersArray.add(elem);
 			}
-			logs.add("parameters", parameters);
+			logs.add("parameters", parametersArray);
+							
+			try {
+				parametersProperties.store(new FileOutputStream(Paths.get(runner.getOutputDirectory(), SUITE_PARAMETERS).toFile()), null);
+			} catch (IOException e) {}
 
 			sendScriptInfo("Starting script (" + testName + ") -> " + logs.toString());
 
