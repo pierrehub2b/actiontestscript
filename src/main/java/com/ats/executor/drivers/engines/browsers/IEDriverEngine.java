@@ -56,6 +56,8 @@ public class IEDriverEngine extends WebDriverEngine {
 			ieOptions.ignoreZoomSettings();
 		}
 		
+		browserArguments = new BrowserArgumentsParser(channel.getArguments(), props, DriverManager.IE_BROWSER, applicationPath);
+		
 		launchDriver(status, ieOptions);
 
 		if(status.isPassed() && !"11".equals(channel.getApplicationVersion())) {
