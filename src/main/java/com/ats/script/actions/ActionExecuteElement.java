@@ -19,20 +19,8 @@ under the License.
 
 package com.ats.script.actions;
 
-import java.util.ArrayList;
-import java.util.function.Predicate;
-
-import org.openqa.selenium.JavascriptException;
-import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.WebDriverException;
-
 import com.ats.driver.AtsManager;
-import com.ats.element.SearchedElement;
-import com.ats.element.TestElement;
-import com.ats.element.TestElementDialog;
-import com.ats.element.TestElementImage;
-import com.ats.element.TestElementRoot;
-import com.ats.element.TestElementSystem;
+import com.ats.element.*;
 import com.ats.executor.ActionStatus;
 import com.ats.executor.ActionTestScript;
 import com.ats.executor.channels.Channel;
@@ -40,6 +28,12 @@ import com.ats.script.Script;
 import com.ats.tools.Operators;
 import com.ats.tools.logger.MessageCode;
 import com.google.gson.JsonObject;
+import org.openqa.selenium.JavascriptException;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebDriverException;
+
+import java.util.ArrayList;
+import java.util.function.Predicate;
 
 public class ActionExecuteElement extends ActionExecuteElementAbstract {
 
@@ -111,7 +105,7 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 
 		super.execute(ts, testName, testLine);
 		
-		if(status.isPassed()) {
+		if (status.isPassed()) {
 
 			final Channel channel = getCurrentChannel();
 			
@@ -136,6 +130,7 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 
 					final Predicate<Integer> predicate = getPredicate(operator, value);
 
+					// TODO : à refacto
 					if(searchElement.isDialog()) {
 						while (trySearch < actionMaxTry) {
 
@@ -185,7 +180,6 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 							if (!testElement.isValidated()) {
 								
 								SearchedElement parent = searchElement.getParent();
-								
 								if (parent != null && parent.isScrollable()) {
 									
 									TestElement parentElement = new TestElement(channel, actionMaxTry, predicate, parent);
@@ -193,15 +187,15 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 									int tryScrollSearchMax = ts.getChannelManager().getMaxTryScroll();
 									
 									while (tryScrollSearch < tryScrollSearchMax) {
-										
-										parentElement.swipe(-parentElement.getFoundElement().getHeight().intValue());
+										parentElement.swipe(-500);
+										channel.progressiveWait(36); // 2 seconds
 										setTestElement(new TestElement(channel, 1, predicate, searchElement));
 										
 										if (testElement.isValidated()) {
 											tryScrollSearch = tryScrollSearchMax;
 										} else {
+											parentElement = new TestElement(channel, actionMaxTry, predicate, parent);
 											tryScrollSearch++;
-											channel.progressiveWait(tryScrollSearch);
 										}
 									}
 								}
