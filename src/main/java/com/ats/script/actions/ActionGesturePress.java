@@ -64,15 +64,15 @@ public class ActionGesturePress extends ActionExecuteElement {
 	
 	public ActionGesturePress() {}
 	
-	public ActionGesturePress(Script script, boolean stop, ArrayList<String> options, ArrayList<String> paths, ArrayList<String> elements) {
-		super(script, stop, options, elements);
+	public ActionGesturePress(Script script, int stopPolicy, ArrayList<String> options, ArrayList<String> paths, ArrayList<String> elements) {
+		super(script, stopPolicy, options, elements);
 		// parsePaths(parameters);
 		setPaths(paths);
 		parseOptions(options);
 	}
 	
-	public ActionGesturePress(Script script, boolean stop, int maxTry, int delay, SearchedElement element, int duration, String[] paths) {
-		super(script, stop, maxTry, delay, element);
+	public ActionGesturePress(Script script, int stopPolicy, int maxTry, int delay, SearchedElement element, int duration, String[] paths) {
+		super(script, stopPolicy, maxTry, delay, element);
 		setDuration(duration);
 		setPaths(new ArrayList<>(Arrays.asList(paths)));
 	}

@@ -40,6 +40,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.JavascriptException;
@@ -57,6 +59,7 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.support.ui.Select;
+
 import com.ats.driver.ApplicationProperties;
 import com.ats.driver.AtsManager;
 import com.ats.element.AtsBaseElement;
@@ -174,6 +177,25 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 	public void setDriverProcess(DriverProcess driverProcess) {
 		this.driverProcess = driverProcess;
 	}
+	
+	private RemoteWebDriver getRemoteDriver(Capabilities cap) {
+		int maxTry = 20;
+		
+		while(maxTry > 0) {
+			try{
+				return new RemoteWebDriver(driverProcess.getDriverServerUrl(), cap);
+			}catch(Exception ex){
+				channel.sleep(100);
+			}
+			maxTry--;
+		}
+				
+		try{ // last chance to start remote driver
+			return new RemoteWebDriver(driverProcess.getDriverLoopback(), cap);
+		}catch(Exception ex){}
+
+		return null;
+	}
 
 	protected void launchDriver(ActionStatus status, MutableCapabilities cap) {
 
@@ -200,22 +222,13 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 		cap.setCapability(CapabilityType.HAS_NATIVE_EVENTS, true);
 		cap.setCapability(CapabilityType.PAGE_LOAD_STRATEGY, PageLoadStrategy.NONE);
 
-		try{
-			driver = new RemoteWebDriver(driverProcess.getDriverServerUrl(), cap);
-		}catch(Exception ex){
-			status.setTechnicalError(ActionStatus.CHANNEL_START_ERROR, ex.getMessage());
+		driver = getRemoteDriver(cap);
+		if(driver == null){
+			status.setTechnicalError(ActionStatus.CHANNEL_START_ERROR, "Unable to start remote driver");
 			driverProcess.close(false);
 			driver = null;
-		}
-
-		if(driver == null) {
-			try{
-				driver = new RemoteWebDriver(driverProcess.getDriverLoopback(), cap);
-			}catch(Exception ex){
-				driverProcess.close(false);
-				driver = null;
-				return;
-			}
+			
+			return;
 		}
 
 		status.setPassed(true);
@@ -980,7 +993,9 @@ public class WebDriverEngine extends DriverEngine implements IDriverEngine {
 			final String[] wins = getWindowsHandle(0, 0);
 			if(wins.length> currentWindow) {
 				driver.switchTo().window(wins[currentWindow]);
-				driver.manage().window().setSize(channel.getDimension().getSize());
+				try {
+					driver.manage().window().setSize(channel.getDimension().getSize());
+				}catch(Exception e) {}
 			}
 		}
 	}

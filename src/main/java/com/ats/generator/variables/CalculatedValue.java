@@ -120,6 +120,14 @@ public class CalculatedValue{
 		while (mv.find()) {
 			rawJavaCode = rawJavaCode.replace(mv.group(0), "\", " + ActionTestScript.JAVA_ITERATION_FUNCTION_NAME + "(), \"");
 		}
+		
+		mv = PARAMETER_PATTERN.matcher(dataValue);
+		while (mv.find()) {
+			final ParameterValue sp = new ParameterValue(mv);
+			
+			dataValue = dataValue.replace(sp.getReplace(), script.getParameterValue(sp.getValue(), sp.getDefaultValue()));
+			rawJavaCode = rawJavaCode.replace(sp.getReplace(), "\", " + ActionTestScript.JAVA_PARAM_FUNCTION_NAME + sp.getCode() + ", \"");
+		}
 
 		mv = IMAGE_PATTERN.matcher(dataValue);
 		while (mv.find()) {
@@ -162,14 +170,6 @@ public class CalculatedValue{
 			
 			dataValue = dataValue.replace(replace, script.getSystemValue(value));
 			rawJavaCode = rawJavaCode.replace(replace, "\"," + ActionTestScript.JAVA_SYSTEM_FUNCTION_NAME + "(\"" + value + "\"), \"");
-		}
-
-		mv = PARAMETER_PATTERN.matcher(dataValue);
-		while (mv.find()) {
-			final ParameterValue sp = new ParameterValue(mv);
-			
-			dataValue = dataValue.replace(sp.getReplace(), script.getParameterValue(sp.getValue(), sp.getDefaultValue()));
-			rawJavaCode = rawJavaCode.replace(sp.getReplace(), "\", " + ActionTestScript.JAVA_PARAM_FUNCTION_NAME + sp.getCode() + ", \"");
 		}
 
 		mv = ENV_PATTERN.matcher(dataValue);

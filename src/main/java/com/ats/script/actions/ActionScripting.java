@@ -38,13 +38,13 @@ public class ActionScripting extends ActionReturnVariable {
 
 	public ActionScripting() {}
 
-	public ActionScripting(ScriptLoader script, boolean stop, ArrayList<String> options, String code, Variable variable, ArrayList<String> objectArray) {
-		super(script, stop, options, objectArray, variable);
+	public ActionScripting(ScriptLoader script, int stopPolicy, ArrayList<String> options, String code, Variable variable, ArrayList<String> objectArray) {
+		super(script, stopPolicy, options, objectArray, variable);
 		setJsCode(new CalculatedValue(script, code));
 	}
 
-	public ActionScripting(Script script, boolean stop, int maxTry, int delay, SearchedElement element, CalculatedValue jsCode, Variable variable) {
-		super(script, stop, maxTry, delay, element, variable);
+	public ActionScripting(Script script, int stopPolicy, int maxTry, int delay, SearchedElement element, CalculatedValue jsCode, Variable variable) {
+		super(script, stopPolicy, maxTry, delay, element, variable);
 		setJsCode(jsCode);
 	}
 	

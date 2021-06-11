@@ -38,13 +38,13 @@ public class ActionAssertProperty extends ActionExecuteElement {
 
 	public ActionAssertProperty() {}
 
-	public ActionAssertProperty(ScriptLoader script, boolean stop, ArrayList<String> options, String data, ArrayList<String> objectArray) {
-		super(script, stop, options, objectArray);
+	public ActionAssertProperty(ScriptLoader script, int stopPolicy, ArrayList<String> options, String data, ArrayList<String> objectArray) {
+		super(script, stopPolicy, options, objectArray);
 		setValue(new CalculatedProperty(script, data));
 	}
 
-	public ActionAssertProperty(Script script, boolean stop, int maxTry, int delay, SearchedElement element, CalculatedProperty property) {
-		super(script, stop, maxTry, delay, element);
+	public ActionAssertProperty(Script script, int stopPolicy, int maxTry, int delay, SearchedElement element, CalculatedProperty property) {
+		super(script, stopPolicy, maxTry, delay, element);
 		setValue(property);
 	}
 

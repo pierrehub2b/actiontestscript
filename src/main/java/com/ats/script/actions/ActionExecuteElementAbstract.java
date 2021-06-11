@@ -30,13 +30,13 @@ public abstract class ActionExecuteElementAbstract extends ActionExecute {
 	
 	public ActionExecuteElementAbstract() {}
 	
-	public ActionExecuteElementAbstract(Script script, boolean stop, ArrayList<String> options) {
-		super(script, stop);
+	public ActionExecuteElementAbstract(Script script, int stopPolicy, ArrayList<String> options) {
+		super(script, stopPolicy);
 		setTryAndDelay(new TryAndDelay(options));
 	}
 	
-	public ActionExecuteElementAbstract(Script script, boolean stop, int maxTry, int delay) {
-		super(script, stop);
+	public ActionExecuteElementAbstract(Script script, int stopPolicy, int maxTry, int delay) {
+		super(script, stopPolicy);
 		setTryAndDelay(new TryAndDelay(maxTry, delay));
 	}
 	

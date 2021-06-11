@@ -73,7 +73,7 @@ public class Script {
 
 	protected List<ActionTestScript> scriptCallTree;
 
-	protected File csvFile;
+	protected String csvAbsoluteFilePath;
 	protected int iteration = 0;
 
 	protected ChannelManager channelManager;
@@ -375,14 +375,11 @@ public class Script {
 	}
 
 	public String getCsvFilePath() {
-		if(csvFile == null) {
-			return "";
-		}
-		return csvFile.getAbsolutePath();
+		return csvAbsoluteFilePath;
 	}
 
 	public File getCsvFile() {
-		return csvFile;
+		return new File(csvAbsoluteFilePath);
 	}
 
 	public File getAssetsFile(String relativePath) {

@@ -147,7 +147,7 @@ public class Lexer {
 			String actionType = dataArray.remove(0).trim();
 			String optionsFlat = "";
 			ArrayList<String> options = new ArrayList<String>();
-			boolean stopExec = true;;
+			int stopPolicy = 0;
 
 			Matcher matcher = ACTION_PATTERN.matcher(actionType);
 			if (matcher.find()) {
@@ -155,7 +155,13 @@ public class Lexer {
 				optionsFlat = matcher.group(2).trim();
 				Collections.addAll(options, optionsFlat.split(","));
 
-				stopExec = !options.removeIf(s -> s.equalsIgnoreCase(ActionExecute.NO_FAIL_LABEL));
+				if(options.removeIf(s -> s.equalsIgnoreCase(ActionExecute.NO_FAIL_LABEL))) {
+					stopPolicy++;
+				}
+				
+				if(options.removeIf(s -> s.equalsIgnoreCase(ActionExecute.TEST_FAIL_LABEL))) {
+					stopPolicy++;
+				}
 			}
 
 			//-------------------------------------------------------------------------------------------
@@ -170,7 +176,7 @@ public class Lexer {
 
 				String elementInfo = dataArray.remove(dataArray.size() - 1).trim();
 				ArrayList<String> elements = new ArrayList<String>(Arrays.asList(elementInfo));
-				script.addAction(new ActionGesturePress(script, stopExec, options, dataArray, elements), disabled);
+				script.addAction(new ActionGesturePress(script, stopPolicy, options, dataArray, elements), disabled);
 
 			} else if (Mouse.OVER.equals(actionType)) {
 
@@ -178,7 +184,7 @@ public class Lexer {
 				// Mouse over action
 				//-----------------------
 
-				script.addAction(new ActionMouse(script, Mouse.OVER, stopExec, options, dataArray), disabled);
+				script.addAction(new ActionMouse(script, Mouse.OVER, stopPolicy, options, dataArray), disabled);
 
 			} else if (Mouse.DRAG.equals(actionType) || Mouse.DROP.equals(actionType)) {
 
@@ -186,7 +192,7 @@ public class Lexer {
 				// Drag drop action
 				//-----------------------
 
-				script.addAction(new ActionMouseDragDrop(script, actionType, stopExec, options, dataArray), disabled);
+				script.addAction(new ActionMouseDragDrop(script, actionType, stopPolicy, options, dataArray), disabled);
 
 			} else if (actionType.startsWith(Mouse.CLICK)) {
 
@@ -194,7 +200,7 @@ public class Lexer {
 				// Mouse button action
 				//-----------------------
 
-				script.addAction(new ActionMouseKey(script, actionType, stopExec, options, dataArray), disabled);
+				script.addAction(new ActionMouseKey(script, actionType, stopPolicy, options, dataArray), disabled);
 
 			} else if (ActionChannelClose.SCRIPT_CLOSE_LABEL.equals(actionType)) {
 
@@ -265,7 +271,7 @@ public class Lexer {
 				if(dataArray.size() > 0) {
 					dataText = dataArray.remove(0).trim();
 				}
-				script.addAction(new ActionText(script, stopExec, options, dataText, dataArray), disabled);
+				script.addAction(new ActionText(script, stopPolicy, options, dataText, dataArray), disabled);
 				
 			} else if(dataArray.size() > 0) {
 
@@ -289,7 +295,7 @@ public class Lexer {
 					// Gesture tap action
 					//-----------------------
 
-					script.addAction(new ActionGestureTap(script, dataOne, stopExec, options, dataArray), disabled);
+					script.addAction(new ActionGestureTap(script, dataOne, stopPolicy, options, dataArray), disabled);
 
 				} else if(ActionChannelSwitch.SCRIPT_SWITCH_LABEL.equals(actionType)) {
 
@@ -365,7 +371,7 @@ public class Lexer {
 							variable = script.getVariable(jsDataArray[1].trim(), true);
 						}
 
-						script.addAction(new ActionScripting(script, stopExec, options, jsCode, variable, dataArray), disabled);
+						script.addAction(new ActionScripting(script, stopPolicy, options, jsCode, variable, dataArray), disabled);
 					}
 
 				} else if(actionType.startsWith(ActionProperty.SCRIPT_LABEL)){
@@ -379,7 +385,7 @@ public class Lexer {
 					if (propertyArray.length > 1) {
 						final String propertyName = propertyArray[0].trim();
 						final Variable variable = script.getVariable(propertyArray[1].trim(), true);
-						script.addAction(new ActionProperty(script, stopExec, options, propertyName, variable, dataArray), disabled);
+						script.addAction(new ActionProperty(script, stopPolicy, options, propertyName, variable, dataArray), disabled);
 					}
 
 				} else if(actionType.contains(ActionSelect.SCRIPT_LABEL_SELECT)){
@@ -388,7 +394,7 @@ public class Lexer {
 					// Select action
 					//-----------------------
 
-					script.addAction(new ActionSelect(script, dataOne, stopExec, options, dataArray), disabled);
+					script.addAction(new ActionSelect(script, dataOne, stopPolicy, options, dataArray), disabled);
 
 				}else if(ActionCallscript.SCRIPT_LABEL.equals(actionType)){
 
@@ -442,7 +448,7 @@ public class Lexer {
 					// Goto url action
 					//-----------------------
 
-					script.addAction(new ActionGotoUrl(script, stopExec, new CalculatedValue(script, dataOne)), disabled);
+					script.addAction(new ActionGotoUrl(script, stopPolicy, new CalculatedValue(script, dataOne)), disabled);
 
 				}else if(ActionMouseScroll.SCRIPT_LABEL.equals(actionType)){
 
@@ -450,11 +456,11 @@ public class Lexer {
 					// Mouse scroll action
 					//-----------------------
 
-					script.addAction(new ActionMouseScroll(script, dataOne, stopExec, options, dataArray), disabled);
+					script.addAction(new ActionMouseScroll(script, dataOne, stopPolicy, options, dataArray), disabled);
 
 				}else if(ActionMouseSwipe.SCRIPT_LABEL.equals(actionType)){
 
-					script.addAction(new ActionMouseSwipe(script, actionType, dataOne, stopExec, options, dataArray), disabled);
+					script.addAction(new ActionMouseSwipe(script, actionType, dataOne, stopPolicy, options, dataArray), disabled);
 
 				}else if(ActionAssertCount.SCRIPT_LABEL.equals(actionType)){
 
@@ -462,7 +468,7 @@ public class Lexer {
 					// Assert count action
 					//-----------------------
 
-					script.addAction(new ActionAssertCount(script, stopExec, options, dataOne, dataArray), disabled);
+					script.addAction(new ActionAssertCount(script, stopPolicy, options, dataOne, dataArray), disabled);
 
 				}else if(ActionAssertProperty.SCRIPT_LABEL.equals(actionType)){
 
@@ -470,7 +476,7 @@ public class Lexer {
 					// Assert property action
 					//-----------------------
 
-					script.addAction(new ActionAssertProperty(script, stopExec, options, dataOne, dataArray), disabled);
+					script.addAction(new ActionAssertProperty(script, stopPolicy, options, dataOne, dataArray), disabled);
 
 				}else if(ActionAssertValue.SCRIPT_LABEL.equals(actionType)){
 
@@ -478,7 +484,7 @@ public class Lexer {
 					// Assert value action
 					//-----------------------
 
-					script.addAction(new ActionAssertValue(script, stopExec, dataOne), disabled);
+					script.addAction(new ActionAssertValue(script, stopPolicy, dataOne), disabled);
 
 				}else if(ActionNeoloadContainer.SCRIPT_LABEL.equals(actionType)){
 

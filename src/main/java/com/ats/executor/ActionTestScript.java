@@ -377,20 +377,20 @@ public class ActionTestScript extends Script implements ITest{
 		return topScript;
 	}
 
-	public void initCalledScript(ActionTestScript testScript, String testName, int line, ParameterList parameters, List<Variable> variables, int iteration, int iterationMax, String scriptName, String type, File csvFile) {
+	public void initCalledScript(ActionTestScript atsCaller, String testName, int line, ParameterList parameters, List<Variable> variables, int iteration, int iterationMax, String scriptName, String type, String filePath) {
 
 		this.iteration = iteration;
-		this.csvFile = csvFile;
+		this.csvAbsoluteFilePath = filePath;
 		this.testName = getClass().getName();
 
-		final JsonObject log = testScript.getConditionLogs();
-
+		final JsonObject log = atsCaller.getConditionLogs();
+				
 		log.addProperty("called", scriptName);
 		log.addProperty("iteration", iteration+1 + "/" + iterationMax);
 		log.addProperty("type", type);
 
-		if(csvFile != null) {
-			log.addProperty("url", csvFile.getAbsolutePath());
+		if(filePath != null) {
+			log.addProperty("url", filePath);
 		}
 
 		if(parameters != null) {
@@ -740,23 +740,23 @@ public class ActionTestScript extends Script implements ITest{
 
 	public void exec(int line, Action action){
 		action.execute(this, getTestName(), line);
-		getTopScript().actionFinished(getTestName(), line, action, true);
+		getTopScript().actionFinished(getTestName(), line, action);
 	}
 
 	public void exec(int line, ActionComment action){
 		if(action.execute(this, getTestName(), line)) {
-			getTopScript().actionFinished(getTestName(), line, action, true);
+			getTopScript().actionFinished(getTestName(), line, action);
 		}
 	}
 
 	public void exec(int line, ActionCallscript action){
 		action.execute(this, getTestName(), line);
-		getTopScript().actionFinished(getTestName(), line, action, true);
+		getTopScript().actionFinished(getTestName(), line, action);
 	}
 
 	public void exec(int line, ActionExecute action){
 		action.execute(this, getTestName(), line);
-		getTopScript().actionFinished(getTestName(), line, action, action.isStop());
+		getTopScript().actionFinished(getTestName(), line, action, action.getStopPolicy());
 	}
 
 	//---------------------------------------------------------------------------------------------
@@ -787,8 +787,12 @@ public class ActionTestScript extends Script implements ITest{
 			throw new AtsFailError(errorScript, errorInfo);
 		}
 	}
+	
+	public void actionFinished(String testName, int line, Action action) {
+		actionFinished(testName, line, action, 0);
+	}
 
-	public void actionFinished(String testName, int line, Action action, boolean stop) {
+	public void actionFinished(String testName, int line, Action action, int stopPolicy) {
 		status.addAction();
 
 		final ActionStatus actionStatus = action.getStatus();
@@ -796,10 +800,15 @@ public class ActionTestScript extends Script implements ITest{
 		if(actionStatus.isPassed()) {
 			sendActionLog(action, testName, line);
 		}else {
-			if(stop) {
-				getTopScript().failedAt(action.getClass().getSimpleName(), testName, line, actionStatus.getChannelApplication(), actionStatus.getCode(), actionStatus.getFailMessage());
-			}else {
+			if(stopPolicy > 0) {
 				sendActionLog(action, testName, line);
+				
+				if(stopPolicy > 1) {
+					
+				}
+					
+			}else {
+				getTopScript().failedAt(action.getClass().getSimpleName(), testName, line, actionStatus.getChannelApplication(), actionStatus.getCode(), actionStatus.getFailMessage());
 			}
 		}
 	}

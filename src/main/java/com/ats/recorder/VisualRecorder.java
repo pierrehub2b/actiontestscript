@@ -158,7 +158,7 @@ public class VisualRecorder implements IVisualRecorder {
 		setChannel(action.getStatus().getChannel());
 		
 		channel.createVisualAction(
-				(action instanceof  ActionExecute) && ((ActionExecute)action).isStop(), 
+				(action instanceof  ActionExecute) && ((ActionExecute)action).getStopPolicy() == 0, 
 				action.getClass().getName(), 
 				scriptLine, 
 				scriptName, 
@@ -209,7 +209,6 @@ public class VisualRecorder implements IVisualRecorder {
 
 	@Override
 	public void updateScreen(TestElement element) {
-		//channel.mouseMoveToElement(channel.newActionStatus(), element.getFoundElement(), new MouseDirection());
 		channel.updateVisualAction(element);
 	}
 	
@@ -219,26 +218,22 @@ public class VisualRecorder implements IVisualRecorder {
 	@Override
 	public void updateScreen(int error, long duration) {
 		update(error, duration);
-		//updateScreen(false);
 	}
 	
 	@Override
 	public void updateScreen(int error, long duration, String value) {
 		update(error, duration, value);
-		//updateScreen(false);
 	}
 	
 	@Override
 	public void updateTextScreen(int error, long duration, String value, String data) {
 		update(error, duration, value, data);
-		//updateScreen(false);
 	}
 	
 	@Override
 	public void updateScreen(int error, long duration, String type, MouseDirection position) {
 		update(error, duration);
 		update(type, position);
-		//updateScreen(false);
 	}
 	
 	//-----------------------------------------------------------------------------------------------------------------------------------

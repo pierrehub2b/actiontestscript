@@ -32,12 +32,12 @@ public class ActionMouseDragDrop extends ActionMouse {
 
 	public ActionMouseDragDrop() {}
 
-	public ActionMouseDragDrop(ScriptLoader script, String type, boolean stop, ArrayList<String> options, ArrayList<String> objectArray) {
-		super(script, type, stop, options, objectArray);
+	public ActionMouseDragDrop(ScriptLoader script, String type, int stopPolicy, ArrayList<String> options, ArrayList<String> objectArray) {
+		super(script, type, stopPolicy, options, objectArray);
 	}
 
-	public ActionMouseDragDrop(Script script, boolean stop, int maxTry, int delay, SearchedElement element, Mouse mouse) {
-		super(script, stop, maxTry, delay, element, mouse);
+	public ActionMouseDragDrop(Script script, int stopPolicy, int maxTry, int delay, SearchedElement element, Mouse mouse) {
+		super(script, stopPolicy, maxTry, delay, element, mouse);
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------

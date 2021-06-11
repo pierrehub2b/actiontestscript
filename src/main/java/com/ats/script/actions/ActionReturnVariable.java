@@ -31,13 +31,13 @@ public class ActionReturnVariable extends ActionExecuteElement {
 	
 	public ActionReturnVariable() {}
 	
-	public ActionReturnVariable(Script script, boolean stop, ArrayList<String> options, ArrayList<String> objectArray, Variable variable) {
-		super(script, stop, options, objectArray);
+	public ActionReturnVariable(Script script, int stopPolicy, ArrayList<String> options, ArrayList<String> objectArray, Variable variable) {
+		super(script, stopPolicy, options, objectArray);
 		setVariable(variable);
 	}
 
-	public ActionReturnVariable(Script script, boolean stop, int maxTry, int delay, SearchedElement element, Variable variable) {
-		super(script, stop, maxTry, delay, element);
+	public ActionReturnVariable(Script script, int stopPolicy, int maxTry, int delay, SearchedElement element, Variable variable) {
+		super(script, stopPolicy, maxTry, delay, element);
 		setVariable(variable);
 	}
 	

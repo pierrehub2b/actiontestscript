@@ -42,8 +42,8 @@ public class ActionAssertCount extends ActionExecuteElement {
 
 	public ActionAssertCount() {}
 
-	public ActionAssertCount(ScriptLoader script, boolean stop, ArrayList<String> options, String data, ArrayList<String> objectArray) {
-		super(script, stop, options, objectArray);
+	public ActionAssertCount(ScriptLoader script, int stopPolicy, ArrayList<String> options, String data, ArrayList<String> objectArray) {
+		super(script, stopPolicy, options, objectArray);
 		
 		final Matcher m = COUNT_PATTERN.matcher(data);
 		if(m.matches()) {
@@ -66,8 +66,8 @@ public class ActionAssertCount extends ActionExecuteElement {
 		}
 	}
 
-	public ActionAssertCount(Script script, boolean stop, int maxTry, int delay, SearchedElement element, String operator, int value) {
-		super(script, stop, maxTry, delay, element);
+	public ActionAssertCount(Script script, int stopPolicy, int maxTry, int delay, SearchedElement element, String operator, int value) {
+		super(script, stopPolicy, maxTry, delay, element);
 		setOperator(operator);
 		setValue(value);
 	}

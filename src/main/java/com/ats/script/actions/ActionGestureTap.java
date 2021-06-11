@@ -35,13 +35,13 @@ public class ActionGestureTap extends ActionExecuteElement {
 	// Constructors
 	//---------------------------------------------------------------------------------------------------------------------------------
 	
-	public ActionGestureTap(Script script, String count, boolean stop, ArrayList<String> options, ArrayList<String> element) {
-		super(script, stop, options, element);
+	public ActionGestureTap(Script script, String count, int stopPolicy, ArrayList<String> options, ArrayList<String> element) {
+		super(script, stopPolicy, options, element);
 		setCount(Integer.parseInt(count));
 	}
 	
-	public ActionGestureTap(Script script, boolean stop, int maxTry, int delay, SearchedElement element, int count) {
-		super(script, stop, maxTry, delay, element);
+	public ActionGestureTap(Script script, int stopPolicy, int maxTry, int delay, SearchedElement element, int count) {
+		super(script, stopPolicy, maxTry, delay, element);
 		setCount(count);
 	}
 	

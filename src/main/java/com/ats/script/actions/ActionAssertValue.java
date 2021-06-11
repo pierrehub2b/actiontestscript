@@ -40,16 +40,16 @@ public class ActionAssertValue extends ActionExecute {
 
 	public ActionAssertValue() {}
 
-	public ActionAssertValue(ScriptLoader script, boolean stop, String compairData) {
-		super(script, stop);
+	public ActionAssertValue(ScriptLoader script, int stopPolicy, String compairData) {
+		super(script, stopPolicy);
 
 		final String[] operatorData = operatorExec.initData(compairData);
 		setValue1(new CalculatedValue(script, operatorData[0]));
 		setValue2(new CalculatedValue(script, operatorData[1]));
 	}
 
-	public ActionAssertValue(Script script, boolean stop, String operator, CalculatedValue value1, CalculatedValue value2) {
-		super(script, stop);
+	public ActionAssertValue(Script script, int stopPolicy, String operator, CalculatedValue value1, CalculatedValue value2) {
+		super(script, stopPolicy);
 		setOperator(operator);
 		setValue1(value1);
 		setValue2(value2);

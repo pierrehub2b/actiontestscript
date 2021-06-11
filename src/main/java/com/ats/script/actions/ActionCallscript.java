@@ -281,6 +281,12 @@ public class ActionCallscript extends ActionReturnVariableArray {
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
 
+	private ActionTestScript newAtsInstance(Class<ActionTestScript> clazz, ActionTestScript topScript, String scriptName) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+		final ActionTestScript ats = clazz.getDeclaredConstructor().newInstance();
+		ats.setTopScript(topScript, scriptName);
+		return ats;
+	}
+	
 	@Override
 	public boolean execute(ActionTestScript ts, String testName, int line) {
 
@@ -294,10 +300,9 @@ public class ActionCallscript extends ActionReturnVariableArray {
 			status.setError(MessageCode.SCRIPT_NOT_FOUND, "ATS script not found : '" + scriptName + "' (maybe a letter case issue ?)\n");
 		}else {
 
+			final ActionTestScript topScript = ts.getTopScript();
+			
 			try {
-
-				final ActionTestScript ats = clazz.getDeclaredConstructor().newInstance();
-				ats.setTopScript(ts.getTopScript(), scriptName);
 
 				if(parameterFilePath != null) {
 
@@ -327,15 +332,19 @@ public class ActionCallscript extends ActionReturnVariableArray {
 
 					if(data.noError() && data.getSize() > 0) {
 
-						File csvFile = null;
+						String csvAbsoluteFilePath = null;
 						try {
-							csvFile = new File(csvUrl.toURI());
+							if(csvPath.startsWith(HTTP_PROTOCOLE) || csvPath.startsWith(HTTPS_PROTOCOLE)) {
+								csvAbsoluteFilePath = csvUrl.toString();
+							}else {
+								csvAbsoluteFilePath = new File(csvUrl.toURI()).getAbsolutePath();
+							}
 						} catch (URISyntaxException e) {}
 
 						final Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
 						final int iterationMax = data.getSize();
 						int iteration = 0;
-
+						
 						if(parameterFileIndex > NO_INDEX_VALUE ) {
 
 							int selectedIndex = parameterFileIndex;
@@ -345,11 +354,12 @@ public class ActionCallscript extends ActionReturnVariableArray {
 
 							final ParameterList row = data.getData(selectedIndex);
 							if(row != null) {
-								callScriptWithParametersFile(testMain, ats, ts, testName, line, row, 0, 1, scriptName, csvFile);
+								callScriptWithParametersFile(testMain, newAtsInstance(clazz, topScript, scriptName), ts, testName, line, row, 0, 1, scriptName, csvAbsoluteFilePath);
 							}
+							
 						}else {
 							for (ParameterList row : data.getData()) {
-								callScriptWithParametersFile(testMain, ats, ts, testName, line, row, iteration, iterationMax, scriptName, csvFile);
+								callScriptWithParametersFile(testMain, newAtsInstance(clazz, topScript, scriptName), ts, testName, line, row, iteration, iterationMax, scriptName, csvAbsoluteFilePath);
 								iteration++;
 							}
 						}
@@ -360,8 +370,9 @@ public class ActionCallscript extends ActionReturnVariableArray {
 
 				}else {
 
+					final ActionTestScript ats = newAtsInstance(clazz, topScript, scriptName);
 					final Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
-
+					
 					if(searchElement != null) {
 						
 						final List<ParameterList> data = getElementTextData(ts.getCurrentChannel(), searchElement);
@@ -422,21 +433,23 @@ public class ActionCallscript extends ActionReturnVariableArray {
 	}
 
 	private void callScriptWithParametersFile(
-			Method testMain, 
-			ActionTestScript ats, 
-			ActionTestScript ts, 
-			String testName, 
-			int line, 
-			ParameterList row, 
-			int iteration, 
-			int iterationMax, 
-			String scriptName, 
-			File csvFile) 
+			Method testMain,
+			ActionTestScript ats,
+			ActionTestScript atsCaller,
+			String testName,
+			int line,
+			ParameterList row,
+			int iteration,
+			int iterationMax,
+			String scriptName,
+			String csvAbsoluteFilePath)
 
-					throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		
+		row.updateCalculated(atsCaller);
 
-		row.updateCalculated(ts);
-		ats.initCalledScript(ts, testName, line, row, null, iteration, iterationMax, scriptName, "dataFile", csvFile);
+		ats.initCalledScript(atsCaller, testName, line, row, null, iteration, iterationMax, scriptName, "dataFile", csvAbsoluteFilePath);
+		
 		testMain.invoke(ats);
 	}
 

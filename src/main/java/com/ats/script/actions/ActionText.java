@@ -43,8 +43,8 @@ public class ActionText extends ActionExecuteElement {
 
 	public ActionText() {}
 
-	public ActionText(ScriptLoader script, boolean stop, ArrayList<String> options, String text, ArrayList<String> objectArray) {
-		super(script, stop, options, objectArray);
+	public ActionText(ScriptLoader script, int stopPolicy, ArrayList<String> options, String text, ArrayList<String> objectArray) {
+		super(script, stopPolicy, options, objectArray);
 		setText(new CalculatedValue(script, text));
 
 		Iterator<String> itr = options.iterator();
@@ -58,8 +58,8 @@ public class ActionText extends ActionExecuteElement {
 		}
 	}
 
-	public ActionText(Script script, boolean stop, int maxTry, int delay, SearchedElement element, CalculatedValue text) {
-		super(script, stop, maxTry, delay, element);
+	public ActionText(Script script, int stopPolicy, int maxTry, int delay, SearchedElement element, CalculatedValue text) {
+		super(script, stopPolicy, maxTry, delay, element);
 		setText(text);
 	}
 

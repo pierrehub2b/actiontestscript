@@ -25,14 +25,15 @@ import com.google.gson.JsonObject;
 public abstract class ActionExecute extends Action {
 
 	public static final String NO_FAIL_LABEL = "nofail";
+	public static final String TEST_FAIL_LABEL = "testfail";
 
-	protected boolean stop = true;
+	protected int stopPolicy = 0;
 
 	public ActionExecute() {}
 
-	public ActionExecute(Script script, boolean stop) {
+	public ActionExecute(Script script, int stop) {
 		super(script);
-		setStop(stop);
+		setStopPolicy(stop);
 	}
 	
 	@Override
@@ -48,7 +49,7 @@ public abstract class ActionExecute extends Action {
 	@Override
 	public StringBuilder getJavaCode() {
 		StringBuilder codeBuilder = super.getJavaCode();
-		codeBuilder.append(stop).append(", ");
+		codeBuilder.append(stopPolicy).append(", ");
 		return codeBuilder;
 	}
 
@@ -56,11 +57,11 @@ public abstract class ActionExecute extends Action {
 	// getters and setters for serialization
 	//--------------------------------------------------------
 
-	public boolean isStop() {
-		return stop;
+	public int getStopPolicy() {
+		return stopPolicy;
 	}
 
-	public void setStop(boolean stop) {
-		this.stop = stop;
+	public void setStopPolicy(int value) {
+		this.stopPolicy = value;
 	}
 }

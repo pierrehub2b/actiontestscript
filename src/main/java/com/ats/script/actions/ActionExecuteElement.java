@@ -47,15 +47,15 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 
 	public ActionExecuteElement() {}
 
-	public ActionExecuteElement(Script script, boolean stop, ArrayList<String> options, ArrayList<String> element) {
-		super(script, stop, options);
+	public ActionExecuteElement(Script script, int stopPolicy, ArrayList<String> options, ArrayList<String> element) {
+		super(script, stopPolicy, options);
 		if(element != null && element.size() > 0){
 			setSearchElement(new SearchedElement(script, element));
 		}
 	}
 
-	public ActionExecuteElement(Script script, boolean stop, int maxTry, int delay, SearchedElement element) {
-		super(script, stop, maxTry, delay);
+	public ActionExecuteElement(Script script, int stopPolicy, int maxTry, int delay, SearchedElement element) {
+		super(script, stopPolicy, maxTry, delay);
 		setSearchElement(element);
 	}
 

@@ -40,8 +40,8 @@ public class ActionGotoUrl extends ActionExecute {
 
 	public ActionGotoUrl() {}
 
-	public ActionGotoUrl(Script script, boolean stop, CalculatedValue url) {
-		super(script, stop);
+	public ActionGotoUrl(Script script, int stopPolicy, CalculatedValue url) {
+		super(script, stopPolicy);
 		setUrl(url);
 	}
 

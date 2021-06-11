@@ -36,13 +36,13 @@ public class ActionProperty extends ActionReturnVariable {
 	
 	public ActionProperty() {}
 	
-	public ActionProperty(Script script, boolean stop, ArrayList<String> options, String name, Variable variable, ArrayList<String> objectArray) {
-		super(script, stop, options, objectArray, variable);
+	public ActionProperty(Script script, int stopPolicy, ArrayList<String> options, String name, Variable variable, ArrayList<String> objectArray) {
+		super(script, stopPolicy, options, objectArray, variable);
 		setName(name);
 	}
 	
-	public ActionProperty(Script script, boolean stop, int maxTry, int delay, SearchedElement element, String name, Variable variable) {
-		super(script, stop, maxTry, delay, element, variable);
+	public ActionProperty(Script script, int stopPolicy, int maxTry, int delay, SearchedElement element, String name, Variable variable) {
+		super(script, stopPolicy, maxTry, delay, element, variable);
 		setName(name);
 	}
 	

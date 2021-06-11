@@ -58,6 +58,8 @@ public class JxDriverEngine extends WebDriverEngine {
 	public JxDriverEngine(DriverManager driverManager, Path driversPath, String driverName, Channel channel, ActionStatus status, DesktopDriver desktopDriver, ApplicationProperties props) {
 		super(channel, desktopDriver, props.getUri(), props, DEFAULT_WAIT, DEFAULT_PROPERTY_WAIT);
 
+		browserArguments = new BrowserArgumentsParser(channel.getArguments(), props, DriverManager.JX_BROWSER, applicationPath);
+		
 		final ProcessBuilder builder = new ProcessBuilder(getApplicationPath());
 		
 		try {

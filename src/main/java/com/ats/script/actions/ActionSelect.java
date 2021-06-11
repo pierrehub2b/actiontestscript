@@ -40,13 +40,13 @@ public class ActionSelect extends ActionExecuteElement {
 
 	public ActionSelect() {}
 
-	public ActionSelect(ScriptLoader script, String data, boolean stop, ArrayList<String> options, ArrayList<String> objectArray) {
-		super(script, stop, options, objectArray);
+	public ActionSelect(ScriptLoader script, String data, int stopPolicy, ArrayList<String> options, ArrayList<String> objectArray) {
+		super(script, stopPolicy, options, objectArray);
 		setSelectValue(new CalculatedProperty(script, data));
 	}
 
-	public ActionSelect(Script script, boolean stop, int maxTry, int delay, SearchedElement element, CalculatedProperty selectValue) {
-		super(script, stop, maxTry, delay, element);
+	public ActionSelect(Script script, int stopPolicy, int maxTry, int delay, SearchedElement element, CalculatedProperty selectValue) {
+		super(script, stopPolicy, maxTry, delay, element);
 		setSelectValue(selectValue);
 	}
 	

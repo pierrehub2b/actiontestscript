@@ -37,20 +37,20 @@ public class ActionMouse extends ActionExecuteElement {
 
 	public ActionMouse(){}
 
-	public ActionMouse(ScriptLoader script, boolean stop, ArrayList<String> options, ArrayList<String> objectArray) {
-		super(script, stop, options, objectArray);
+	public ActionMouse(ScriptLoader script, int stopPolicy, ArrayList<String> options, ArrayList<String> objectArray) {
+		super(script, stopPolicy, options, objectArray);
 		setPosition(new MouseDirection(script, options, true));
 		setType("undefined");
 	}
 
-	public ActionMouse(Script script, boolean stop, int maxTry, int delay, SearchedElement element, Mouse mouse) {
-		super(script, stop, maxTry, delay, element);
+	public ActionMouse(Script script, int stopPolicy, int maxTry, int delay, SearchedElement element, Mouse mouse) {
+		super(script, stopPolicy, maxTry, delay, element);
 		setPosition(mouse.getPosition());
 		setType(mouse.getType());
 	}
 
-	public ActionMouse(ScriptLoader script, String type, boolean stop, ArrayList<String> options, ArrayList<String> objectArray) {
-		this(script, stop, options, objectArray);
+	public ActionMouse(ScriptLoader script, String type, int stopPolicy, ArrayList<String> options, ArrayList<String> objectArray) {
+		this(script, stopPolicy, options, objectArray);
 		setType(type);
 	}
 

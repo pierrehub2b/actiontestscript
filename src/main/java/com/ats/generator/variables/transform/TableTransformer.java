@@ -10,9 +10,7 @@ public class TableTransformer extends Transformer {
 	public TableTransformer() {} // Needed for serialization
 
 	public TableTransformer(String ... data) {
-		for(String item : data){
-			
-		}
+
 	}
 	
 	@Override
