@@ -43,6 +43,9 @@ public class ScriptStatus {
 
 	private String testName = "";
 	private String suiteName = "";
+	
+	private String errorScript = "";
+	private String errorInfo = "";
 
 	private ArrayList<String> errorStack = new ArrayList<String>();
 
@@ -66,10 +69,6 @@ public class ScriptStatus {
 		actions++;
 	}
 
-	public void failed() {
-		passed = false;
-	}
-
 	public boolean isPassed() {
 		return passed;
 	}
@@ -84,6 +83,14 @@ public class ScriptStatus {
 
 	public int getActions() {
 		return actions;
+	}
+	
+	public String getErrorScript() {
+		return errorScript;
+	}
+
+	public String getErrorInfo() {
+		return errorInfo;
 	}
 
 	public void endLogs(ActionTestScript ts, TestRunner runner) {
@@ -121,10 +128,6 @@ public class ScriptStatus {
 		}
 	}
 
-	public void saveStatus() {
-
-	}
-
 	public boolean isSuiteExecution() {
 		return testName != null && suiteName != null && testName.length() != 0 && suiteName.length() != 0;
 	}
@@ -138,5 +141,26 @@ public class ScriptStatus {
 			return errorStack.stream().collect(Collectors.joining(" <- "));
 		}
 		return null;
+	}
+	
+	public void failedAt(String actionClass, String script, int line, String app, int errorCode, String errorMessage) {
+		
+		passed = false;
+
+		final JsonObject logs = new JsonObject();
+		logs.addProperty("app", app);
+		logs.addProperty("errorCode", errorCode);
+		logs.addProperty("errorMessage", errorMessage);
+
+		final StringBuilder sb = 
+				new StringBuilder(actionClass)
+				.append(" (")
+				.append(script)
+				.append(":")
+				.append(line)
+				.append(")");
+
+		errorScript = sb.toString();
+		errorInfo = logs.toString();
 	}
 }

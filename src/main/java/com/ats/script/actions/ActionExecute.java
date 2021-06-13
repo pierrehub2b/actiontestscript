@@ -26,6 +26,10 @@ public abstract class ActionExecute extends Action {
 
 	public static final String NO_FAIL_LABEL = "nofail";
 	public static final String TEST_FAIL_LABEL = "testfail";
+	
+	public static final int TEST_STOP_FAIL = 0;
+	public static final int TEST_CONTINUE_PASS = 1;
+	public static final int TEST_CONTINUE_FAIL = 2;
 
 	protected int stopPolicy = 0;
 

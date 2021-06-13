@@ -147,7 +147,7 @@ public class Lexer {
 			String actionType = dataArray.remove(0).trim();
 			String optionsFlat = "";
 			ArrayList<String> options = new ArrayList<String>();
-			int stopPolicy = 0;
+			int stopPolicy = ActionExecute.TEST_STOP_FAIL;
 
 			Matcher matcher = ACTION_PATTERN.matcher(actionType);
 			if (matcher.find()) {
@@ -156,11 +156,11 @@ public class Lexer {
 				Collections.addAll(options, optionsFlat.split(","));
 
 				if(options.removeIf(s -> s.equalsIgnoreCase(ActionExecute.NO_FAIL_LABEL))) {
-					stopPolicy++;
+					stopPolicy = ActionExecute.TEST_CONTINUE_PASS;
 				}
 				
 				if(options.removeIf(s -> s.equalsIgnoreCase(ActionExecute.TEST_FAIL_LABEL))) {
-					stopPolicy++;
+					stopPolicy = ActionExecute.TEST_CONTINUE_FAIL;
 				}
 			}
 

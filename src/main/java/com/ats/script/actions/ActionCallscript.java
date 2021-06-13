@@ -281,7 +281,7 @@ public class ActionCallscript extends ActionReturnVariableArray {
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//---------------------------------------------------------------------------------------------------------------------------------
 
-	private ActionTestScript newAtsInstance(Class<ActionTestScript> clazz, ActionTestScript topScript, String scriptName) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+	private ActionTestScript getNewAtsInstance(Class<ActionTestScript> clazz, ActionTestScript topScript, String scriptName) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		final ActionTestScript ats = clazz.getDeclaredConstructor().newInstance();
 		ats.setTopScript(topScript, scriptName);
 		return ats;
@@ -354,12 +354,12 @@ public class ActionCallscript extends ActionReturnVariableArray {
 
 							final ParameterList row = data.getData(selectedIndex);
 							if(row != null) {
-								callScriptWithParametersFile(testMain, newAtsInstance(clazz, topScript, scriptName), ts, testName, line, row, 0, 1, scriptName, csvAbsoluteFilePath);
+								callScriptWithParametersFile(testMain, getNewAtsInstance(clazz, topScript, scriptName), ts, testName, line, row, 0, 1, scriptName, csvAbsoluteFilePath);
 							}
 							
 						}else {
 							for (ParameterList row : data.getData()) {
-								callScriptWithParametersFile(testMain, newAtsInstance(clazz, topScript, scriptName), ts, testName, line, row, iteration, iterationMax, scriptName, csvAbsoluteFilePath);
+								callScriptWithParametersFile(testMain, getNewAtsInstance(clazz, topScript, scriptName), ts, testName, line, row, iteration, iterationMax, scriptName, csvAbsoluteFilePath);
 								iteration++;
 							}
 						}
@@ -370,7 +370,7 @@ public class ActionCallscript extends ActionReturnVariableArray {
 
 				}else {
 
-					final ActionTestScript ats = newAtsInstance(clazz, topScript, scriptName);
+					final ActionTestScript ats = getNewAtsInstance(clazz, topScript, scriptName);
 					final Method testMain = clazz.getDeclaredMethod(ActionTestScript.MAIN_TEST_FUNCTION, new Class[]{});
 					
 					if(searchElement != null) {

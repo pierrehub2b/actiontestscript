@@ -178,7 +178,7 @@ public class CampaignReportGenerator {
 
 			final Element picsList = writeXmlDocument.createElement("pics");
 
-			final String[] defaultImages = new String[] { "logo.png", "true.png", "false.png", "warning.png", "noStop.png", "pdf.png" };
+			final String[] defaultImages = new String[] { "logo.png", "true.png", "false.png", "warning.png", "noStop.png", "pdf.png"};
 			for (String img : defaultImages) {
 				final Element pic = writeXmlDocument.createElement("pic");
 				pic.setAttribute("name", img.replace(".png", ""));

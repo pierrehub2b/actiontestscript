@@ -186,13 +186,13 @@ public class ActionTestScript extends Script implements ITest{
 
 	@BeforeSuite(alwaysRun=true)
 	public void beforeSuite(ITestContext ctx) {
-		
+
 		final SuitesReportItem currentSuite = new SuitesReportItem((TestRunner) ctx);
-		
+
 		setLogger(new ExecutionLogger(System.out, currentSuite.logLevel));
-		
+
 		sendScriptInfo("Start suite -> " + ctx.getSuite().getName());
-		
+
 		Path outputPath = null;
 		final String outputFolder = System.getProperty("output-folder");
 		if(outputFolder != null) {
@@ -201,31 +201,31 @@ public class ActionTestScript extends Script implements ITest{
 			outputPath = Paths.get(ctx.getOutputDirectory()).getParent();
 		}
 		outputPath.toFile().mkdirs();
-		
+
 		final File jsonSuiteFile = outputPath.resolve(CampaignReportGenerator.ATS_JSON_SUITES).toFile();
-		
+
 		final Gson gson = new Gson();
 		SuitesReport suiteReport = null;
-		
+
 		try{
 			if(jsonSuiteFile.exists()) {
 				final JsonReader reader = new JsonReader(new FileReader(jsonSuiteFile));
 				suiteReport = gson.fromJson(reader, SuitesReport.class);
 				reader.close();
-				
+
 				suiteReport.add(currentSuite);	
-				
+
 			}else {
 				suiteReport = new SuitesReport(gav(), currentSuite);
 			}
-			
+
 			final FileWriter writer = new FileWriter(jsonSuiteFile);
 			gson.toJson(
 					suiteReport, 
 					writer);
 
 			writer.close();
-			
+
 		}catch (IOException e) {
 			System.out.println(e.getMessage());
 		}
@@ -241,15 +241,15 @@ public class ActionTestScript extends Script implements ITest{
 
 		final TestRunner runner = (TestRunner) ctx;
 		final String suiteName = ctx.getSuite().getName();
-		
+
 		final SuitesReportItem currentSuite = new SuitesReportItem((TestRunner) ctx);
 		setLogger(new ExecutionLogger(System.out, currentSuite.logLevel));	
-		
+
 		final String outputFolder = System.getProperty("output-folder");
 		if(outputFolder != null) {
 			runner.setOutputDirectory(outputFolder + File.separator + suiteName);
 		}
-		
+
 		testName = this.getClass().getName();
 		scriptCallTree = new ArrayList<ActionTestScript>(Arrays.asList(this));
 
@@ -299,18 +299,18 @@ public class ActionTestScript extends Script implements ITest{
 			final Properties parametersProperties = new Properties();
 			final JsonArray parametersArray = new JsonArray();
 			for(Entry<String, String>param : params.entrySet()) {
-				
+
 				final String k = param.getKey();
 				final String v = getEnvironmentValue(k, param.getValue());
-				
+
 				parametersProperties.put(k, v);
-								
+
 				final JsonObject elem = new JsonObject();
 				elem.addProperty(k, v);
 				parametersArray.add(elem);
 			}
 			logs.add("parameters", parametersArray);
-							
+
 			try {
 				parametersProperties.store(new FileOutputStream(Paths.get(runner.getOutputDirectory(), SUITE_PARAMETERS).toFile()), null);
 			} catch (IOException e) {}
@@ -384,7 +384,7 @@ public class ActionTestScript extends Script implements ITest{
 		this.testName = getClass().getName();
 
 		final JsonObject log = atsCaller.getConditionLogs();
-				
+
 		log.addProperty("called", scriptName);
 		log.addProperty("iteration", iteration+1 + "/" + iterationMax);
 		log.addProperty("type", type);
@@ -762,32 +762,10 @@ public class ActionTestScript extends Script implements ITest{
 	//---------------------------------------------------------------------------------------------
 
 	private void failedAt(String actionClass, String script, int line, String app, int errorCode, String errorMessage) {
-		status.failed();
-
-		final JsonObject logs = new JsonObject();
-		logs.addProperty("app", app);
-		logs.addProperty("errorCode", errorCode);
-		logs.addProperty("errorMessage", errorMessage);
-
-		final StringBuilder sb = 
-				new StringBuilder(actionClass)
-				.append(" (")
-				.append(script)
-				.append(":")
-				.append(line)
-				.append(")");
-
-		final String errorScript = sb.toString();
-		final String errorInfo = logs.toString();
-
-		sendErrorLog(errorScript, errorInfo);
-
-		if(status.isSuiteExecution()) {
-			getRecorder().updateSummaryFail(script, line, app, errorMessage);
-			throw new AtsFailError(errorScript, errorInfo);
-		}
+		status.failedAt(actionClass, script, line, app, errorCode, errorMessage);
+		sendErrorLog(status.getErrorScript(), status.getErrorInfo());
 	}
-	
+
 	public void actionFinished(String testName, int line, Action action) {
 		actionFinished(testName, line, action, 0);
 	}
@@ -800,17 +778,31 @@ public class ActionTestScript extends Script implements ITest{
 		if(actionStatus.isPassed()) {
 			sendActionLog(action, testName, line);
 		}else {
-			if(stopPolicy > 0) {
-				sendActionLog(action, testName, line);
-				
-				if(stopPolicy > 1) {
-					
+			if(stopPolicy == ActionExecute.TEST_STOP_FAIL) {
+				if(actionFinishedFail(actionStatus, action, line)) {
+					throw new AtsFailError(status.getErrorScript(), status.getErrorInfo());
 				}
-					
 			}else {
-				getTopScript().failedAt(action.getClass().getSimpleName(), testName, line, actionStatus.getChannelApplication(), actionStatus.getCode(), actionStatus.getFailMessage());
+				sendActionLog(action, testName, line);
+				if(stopPolicy == ActionExecute.TEST_CONTINUE_FAIL) {
+					actionFinishedFail(actionStatus, action, line);
+				}
 			}
 		}
+	}
+
+	private boolean actionFinishedFail(ActionStatus actionStatus, Action action, int line) {
+		if(status.isSuiteExecution()) {
+			final String app = actionStatus.getChannelApplication();
+			final String errorMessage = actionStatus.getFailMessage();
+
+			getTopScript().failedAt(action.getClass().getSimpleName(), testName, line, app, actionStatus.getCode(), errorMessage);
+
+			this.getRecorder().updateSummaryFail(testName, line, app, errorMessage);
+			return true;
+		}
+
+		return false;
 	}
 
 	public void la (String message) {

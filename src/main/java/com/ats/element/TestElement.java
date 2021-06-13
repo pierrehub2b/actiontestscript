@@ -384,8 +384,19 @@ public class TestElement{
 		if(isValidated()) {
 			status.setNoError();
 		}else {
-			status.setError(ActionStatus.OCCURRENCES_ERROR, "[" + expected + "] expected occurence(s) but [" + count + "] occurence(s) found", count);
+			
 			error = ActionStatus.OCCURRENCES_ERROR;
+			
+			final StringBuilder sb = new StringBuilder();
+			sb.append("[").
+			append(expected).
+			append("] expected occurrence(s) but [").
+			append(count).
+			append("] occurrence(s) found using criterias [").
+			append(criterias).
+			append("]");
+			
+			status.setError(ActionStatus.OCCURRENCES_ERROR, sb.toString(), count);
 		}
 
 		status.endDuration();
