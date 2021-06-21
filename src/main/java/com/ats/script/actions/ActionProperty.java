@@ -88,6 +88,13 @@ public class ActionProperty extends ActionReturnVariable {
 				updateVariableValue(attributeValue);
 				ts.getRecorder().update(0, status.getDuration(), name, attributeValue);
 			}
+		}else {
+			final String attributeValue = getTestElement().getAttributeNotFound(status, name);
+			status.endDuration();
+			
+			status.setMessage(attributeValue);
+			updateVariableValue(attributeValue);
+			ts.getRecorder().update(0, status.getDuration(), name, attributeValue);
 		}
 	}
 	

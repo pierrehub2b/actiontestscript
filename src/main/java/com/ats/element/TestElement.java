@@ -590,6 +590,23 @@ public class TestElement{
 		}
 		return null;
 	}
+	
+	protected String getAtsAttributeNotFound(String name) {
+		if(ATS_OCCURRENCES.equals(name)) {
+			return "0";
+		}else if(ATS_OCCURRENCES_INDEX.equals(name)) {
+			return "-1";
+		}else if(ATS_TABLE_DATA.equals(name)) {
+			return "";
+		}else if(ATS_MAX_TRY.equals(name)) {
+			return String.valueOf(maxTry);
+		}else if(ATS_SEARCH_DURATION.equals(name)) {
+			return String.valueOf(totalSearchDuration);
+		}else if(ATS_SEARCH_TAG.equals(name)) {
+			return searchedTag;
+		}
+		return "";
+	}
 
 	protected String getTableData() {
 		final JsonArray dataArray = new JsonArray();
@@ -611,6 +628,10 @@ public class TestElement{
 			return engine.getAttribute(status, getFoundElement(), name, maxTry);
 		}
 		return null;
+	}
+	
+	public String getAttributeNotFound(ActionStatus status, String name){
+		return getAtsAttributeNotFound(name);
 	}
 
 	public CalculatedProperty[] getAttributes(boolean reload) {

@@ -31,7 +31,7 @@ public abstract class ActionExecute extends Action {
 	public static final int TEST_CONTINUE_PASS = 1;
 	public static final int TEST_CONTINUE_FAIL = 2;
 
-	protected int stopPolicy = 0;
+	protected int stopPolicy = TEST_STOP_FAIL;
 
 	public ActionExecute() {}
 
