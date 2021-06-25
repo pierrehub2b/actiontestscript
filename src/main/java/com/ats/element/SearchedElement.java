@@ -166,7 +166,7 @@ public class SearchedElement {
 	}
 	
 	public boolean isScrollable() {
-		return tag.equals("RecyclerView") || tag.equals("Table");
+		return tag.equals("RecyclerView") || tag.equals("Table") || tag.equals("CollectionView");
 	}
 	
 	public boolean isSysComp() {

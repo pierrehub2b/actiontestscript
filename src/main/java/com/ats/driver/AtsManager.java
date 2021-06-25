@@ -68,7 +68,7 @@ public class AtsManager {
 	private static final int MAX_TRY_PROPERTY = 10;
 	private static final int MAX_TRY_WEBSERVICE = 1;
 	private static final int MAX_TRY_IMAGE_RECOGNITION = 20;
-	private static final int MAX_TRY_SCROLL_SEARCH = 10;
+	private static final int MAX_TRY_SCROLL_SEARCH = 15;
 
 	private static final int MAX_TRY_MOBILE = 5;
 
