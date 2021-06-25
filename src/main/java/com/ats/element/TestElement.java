@@ -180,7 +180,7 @@ public class TestElement{
 	public boolean isSysComp() {
 		return sysComp;
 	}
-	
+
 	protected int getMaxTry() {
 		return maxTry;
 	}
@@ -211,7 +211,7 @@ public class TestElement{
 	}
 
 	protected List<FoundElement> loadElements(SearchedElement searchedElement) {
-		
+
 		final int criteriasCount = searchedElement.getCriterias().size();
 		final String[] attributes = new String[criteriasCount];
 		final String[] attributesValues = new String[criteriasCount];
@@ -384,9 +384,9 @@ public class TestElement{
 		if(isValidated()) {
 			status.setNoError();
 		}else {
-			
+
 			error = ActionStatus.OCCURRENCES_ERROR;
-			
+
 			final StringBuilder sb = new StringBuilder();
 			sb.append("[").
 			append(expected).
@@ -395,7 +395,7 @@ public class TestElement{
 			append("] occurrence(s) found using criterias [").
 			append(criterias).
 			append("]");
-			
+
 			status.setError(ActionStatus.OCCURRENCES_ERROR, sb.toString(), count);
 		}
 
@@ -536,7 +536,7 @@ public class TestElement{
 		engine.moveByOffset(direction.getHorizontalDirection(), direction.getVerticalDirection());
 		drop(status, null, false);
 	}
-	
+
 	public void swipe(int direction) {
 		drag(null, new MouseDirection(), 0, 0);
 		engine.moveByOffset(0, direction);
@@ -590,7 +590,7 @@ public class TestElement{
 		}
 		return null;
 	}
-	
+
 	protected String getAtsAttributeNotFound(String name) {
 		if(ATS_OCCURRENCES.equals(name)) {
 			return "0";
@@ -613,7 +613,7 @@ public class TestElement{
 		getTextData().parallelStream().forEach(l -> addJsonData(dataArray, l.getList()));
 		return dataArray.toString();
 	}
-	
+
 	private void addJsonData(JsonArray array, List<Parameter> pl) {
 		final JsonObject jso = new JsonObject();
 		pl.parallelStream().forEach(p -> jso.addProperty(p.getName(), p.getCalculated()));
@@ -629,7 +629,7 @@ public class TestElement{
 		}
 		return null;
 	}
-	
+
 	public String getAttributeNotFound(ActionStatus status, String name){
 		return getAtsAttributeNotFound(name);
 	}
@@ -664,9 +664,9 @@ public class TestElement{
 		final ArrayList<ParameterList> result = new ArrayList<ParameterList>();
 
 		if(getFoundElements().size() > 1 && index == 0) {
-			
+
 			getFoundElements().parallelStream().forEach(e -> addParameters(result, engine.getAttributes(e, true)));
-		
+
 		}else {
 
 			if("select".equalsIgnoreCase(getFoundElement().getTag())) {
@@ -687,37 +687,40 @@ public class TestElement{
 					result.add(new ParameterList(0, Arrays.asList(new Parameter(0, ""))));
 				}
 			}else {
-				final String data = getFoundElement().getValue().getAttribute("innerText");
-				if(data != null && data.length() > 0) {
-					final String[] lines = data.split("\n");
-					if(lines.length > 0) {
-						for(String l : lines) {
-							final String[] cols = l.split("\t");
-							if(cols.length > 0) {
-								final ParameterList plist = new ParameterList(cols.length);
-								for (int i=0; i<cols.length; i++) {
-									plist.addParameter(new Parameter(i, cols[i]));
+
+				if(getFoundElement().getValue() != null) {
+					final String data = getFoundElement().getValue().getAttribute("innerText");
+					if(data != null && data.length() > 0) {
+						final String[] lines = data.split("\n");
+						if(lines.length > 0) {
+							for(String l : lines) {
+								final String[] cols = l.split("\t");
+								if(cols.length > 0) {
+									final ParameterList plist = new ParameterList(cols.length);
+									for (int i=0; i<cols.length; i++) {
+										plist.addParameter(new Parameter(i, cols[i]));
+									}
+									result.add(plist);
+								}else {
+									result.add(new ParameterList(0, Arrays.asList(new Parameter(0, ""))));
 								}
-								result.add(plist);
-							}else {
-								result.add(new ParameterList(0, Arrays.asList(new Parameter(0, ""))));
 							}
+						}else {
+							result.add(new ParameterList(0, Arrays.asList(new Parameter(0, ""))));
 						}
 					}else {
 						result.add(new ParameterList(0, Arrays.asList(new Parameter(0, ""))));
 					}
-				}else {
-					result.add(new ParameterList(0, Arrays.asList(new Parameter(0, ""))));
 				}
 			}
 		}
-		
+
 		return Collections.unmodifiableList(result);
 	}
 
 	private static void addParameters(ArrayList<ParameterList> result, CalculatedProperty[] properties) {
 		final ParameterList plist = new ParameterList(properties.length);
-		
+
 		for (int i=0; i<properties.length; i++) {
 			plist.addParameter(new Parameter(i, properties[i]));
 		}
