@@ -687,30 +687,27 @@ public class TestElement{
 					result.add(new ParameterList(0, Arrays.asList(new Parameter(0, ""))));
 				}
 			}else {
-
-				if(getFoundElement().getValue() != null) {
-					final String data = getFoundElement().getValue().getAttribute("innerText");
-					if(data != null && data.length() > 0) {
-						final String[] lines = data.split("\n");
-						if(lines.length > 0) {
-							for(String l : lines) {
-								final String[] cols = l.split("\t");
-								if(cols.length > 0) {
-									final ParameterList plist = new ParameterList(cols.length);
-									for (int i=0; i<cols.length; i++) {
-										plist.addParameter(new Parameter(i, cols[i]));
-									}
-									result.add(plist);
-								}else {
-									result.add(new ParameterList(0, Arrays.asList(new Parameter(0, ""))));
+				final String data = getFoundElement().getInnerText();
+				if(data != null && data.length() > 0) {
+					final String[] lines = data.split("\n");
+					if(lines.length > 0) {
+						for(String l : lines) {
+							final String[] cols = l.split("\t");
+							if(cols.length > 0) {
+								final ParameterList plist = new ParameterList(cols.length);
+								for (int i=0; i<cols.length; i++) {
+									plist.addParameter(new Parameter(i, cols[i]));
 								}
+								result.add(plist);
+							}else {
+								result.add(new ParameterList(0, Arrays.asList(new Parameter(0, ""))));
 							}
-						}else {
-							result.add(new ParameterList(0, Arrays.asList(new Parameter(0, ""))));
 						}
 					}else {
 						result.add(new ParameterList(0, Arrays.asList(new Parameter(0, ""))));
 					}
+				}else {
+					result.add(new ParameterList(0, Arrays.asList(new Parameter(0, ""))));
 				}
 			}
 		}

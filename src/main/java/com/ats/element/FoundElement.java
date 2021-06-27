@@ -288,6 +288,14 @@ public class FoundElement{
 		this.innerX = this.boundX - (channel.getSubDimension().getWidth()/2);
 		this.innerY = this.boundY - (channel.getSubDimension().getHeight()/2);
 	}
+	
+
+	public String getInnerText() {
+		if(value == null) {
+			return null;
+		}
+		return value.getAttribute("innerText");
+	}
 
 	//------------------------------------------------------------------------------------------------------------------------------
 	// end of contructors
