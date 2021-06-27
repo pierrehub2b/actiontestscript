@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
+import com.ats.executor.TestBound;
+import com.ats.executor.drivers.engines.MobileDriverEngine;
 import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -226,9 +228,9 @@ public class TestElement{
 			fullPredicate = property.getPredicate(fullPredicate);
 			attributes[i] = property.getName();
 
-			if(property.isRegexp()) {
+			if (property.isRegexp()) {
 				attributesValues[i] = property.getName();
-			}else {
+			} else {
 				attributesValues[i] = property.getName() + "\t" + property.getValue().getCalculated();
 			}
 		}
@@ -238,7 +240,6 @@ public class TestElement{
 		}catch (StaleElementReferenceException e) {
 			return Collections.<FoundElement>emptyList();
 		}
-
 	}
 
 	private int getElementsCount() {
@@ -293,6 +294,20 @@ public class TestElement{
 		if(foundElements.size() > getStartOneIndex()){
 			return getFoundElement().isIframe();
 		}else{
+			return false;
+		}
+	}
+	
+	public boolean isVisible() {
+		FoundElement element = getFoundElement();
+		if (element != null) {
+			if (element.getType().equals(FoundElement.MOBILE)) {
+				TestBound channelBound = getChannel().getSubDimension();
+				return element.getRectangle().y >= channelBound.getY() && element.getRectangle().y <= channelBound.getHeight();
+			} else {
+				return true;
+			}
+		} else {
 			return false;
 		}
 	}

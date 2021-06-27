@@ -168,7 +168,7 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 									setTestElement(new TestElement(channel, actionMaxTry, predicate, searchElement));
 								}
 
-								if (testElement.isValidated()) {
+								if (testElement.isValidated() && testElement.isVisible()) {
 									trySearch = actionMaxTry;
 								} else {
 									trySearch++;
@@ -177,8 +177,7 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 								}
 							}
 							
-							if (!testElement.isValidated()) {
-								
+							if (!testElement.isValidated() || (testElement.isValidated() && !testElement.isVisible())) {
 								SearchedElement parent = searchElement.getParent();
 								if (parent != null && parent.isScrollable()) {
 									
@@ -188,10 +187,10 @@ public class ActionExecuteElement extends ActionExecuteElementAbstract {
 									
 									while (tryScrollSearch < tryScrollSearchMax) {
 										parentElement.swipe(-500);
-										channel.progressiveWait(36); // 2 seconds
+										channel.progressiveWait(16); // 2 seconds
 										setTestElement(new TestElement(channel, 1, predicate, searchElement));
 										
-										if (testElement.isValidated()) {
+										if (testElement.isValidated() && testElement.isVisible()) {
 											tryScrollSearch = tryScrollSearchMax;
 										} else {
 											parentElement = new TestElement(channel, actionMaxTry, predicate, parent);
