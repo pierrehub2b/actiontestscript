@@ -259,7 +259,11 @@ public class TestElement{
 	}
 
 	public FoundElement getFoundElement() {
-		return foundElements.get(getStartOneIndex()); 
+		try {
+			return foundElements.get(getStartOneIndex());
+		}catch(IndexOutOfBoundsException e) {
+			return null;
+		}
 	}
 
 	public boolean isPassword() {
