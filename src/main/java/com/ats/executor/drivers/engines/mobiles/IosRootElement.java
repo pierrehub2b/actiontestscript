@@ -96,8 +96,8 @@ public class IosRootElement extends RootElement {
 				if (trimmedLine.startsWith("Window (Main)")) {
 					String regexBracesAndSpaces = "[\\s{},]+";
 					final String[] arraySize = trimmedLine.split(regexBracesAndSpaces);
-					width = Double.parseDouble(arraySize[arraySize.length - 2]);
-					height = Double.parseDouble(arraySize[arraySize.length - 1]);
+					width = Double.parseDouble(arraySize[5]);
+					height = Double.parseDouble(arraySize[6]);
 				}
 				elementInfoArray.add(new StructDebugDescription((level / 2) - 1, trimmedLine));
 			}
